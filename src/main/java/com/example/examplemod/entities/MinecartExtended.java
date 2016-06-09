@@ -18,6 +18,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public String name;
     public boolean isLocked = false; //mostly used to lock other players from using/accessing parts of the cart/train
     public boolean brake = false; //bool for the train/rollingstock's break.
+    public boolean lamp = false; //controls the headlight/lamp
     //
 
 
@@ -60,8 +61,11 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     /*/
     @Override
     public String getDestination() {
-        if (destination == null) return "";
-        return destination;
+        if (destination == null) {
+            return "";
+        } else {
+            return destination;
+        }
     }
     @Override
     public boolean doesCartMatchFilter(ItemStack stack, EntityMinecart cart) {

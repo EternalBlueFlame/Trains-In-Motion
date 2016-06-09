@@ -1,20 +1,12 @@
 package com.example.examplemod.entities;
 
-
-import com.mojang.authlib.GameProfile;
-import mods.railcraft.api.carts.IMinecart;
-import mods.railcraft.api.carts.IRoutableCart;
-import net.minecraft.block.Block;
-import net.minecraft.client.model.ModelBiped;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
+
+import java.util.UUID;
 
 public class EntityTrainCore extends MinecartExtended implements IInventory {
 
@@ -26,7 +18,6 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     public float[] acceleration; //the first 3 values are a point curve, representing 0-35%, 35-70% and >70% to modify how acceleration is handled at each point. //the 4th value defines how much the weight hauled effects acceleration.
     public int trainType=0;//list of train types 0 is null, 1 is steam, 2 is diesel, 3 is electric
     public boolean isRunning = false;// if the train is running/using fuel
-    public boolean lamp = false; //controls the headlight/lamp
 
 
 
@@ -34,7 +25,7 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     //railcraft variables
     public String destination = "";  //railcraft destination
     public boolean isLoco = false;  //if this can accept destination tickets, aka is a locomotive
-    public GameProfile owner = null;  //universal, get train owner
+    public UUID owner = null;  //universal, get train owner
 
     public EntityTrainCore(World world, double xPos, double yPos, double zPos, float maxSpeed, float[] acceleration, int inventorySlots, int type /*1-steam, 2-diesel, 3-electric*/) {
         super(world, xPos, yPos, zPos);
@@ -44,28 +35,17 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
         this.trainType = type;
         this.inventory = new ItemStack[inventorySlots];
     }
-
-
-
-
-
-
+    //function to run every tick
     @Override
     public void onUpdate(){
-        System.out.println("i exist");
-        this.worldObj.setLightValue(EnumSkyBlock.Block, (int)this.posX, (int)this.posY, (int)this.posZ, 15);
-        this.worldObj.scheduleBlockUpdateWithPriority((int)this.posX, (int)this.posY, (int)this.posZ, this.worldObj.getBlock((int)this.posX, (int)this.posY, (int)this.posZ), 10, 5);
+        if (lamp) {
+            worldObj.addTileEntity(new EntityMovingLight());
+        }
     }
-
-
-
-
-
 
     /*/
     Inventory stuff
     /*/
-
     @Override
     public String getInventoryName() {
         return name;
@@ -81,8 +61,7 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
         if (!worldObj.isRemote) {
             this.slotsFilled = 0;
             for (int i = 0; i < getSizeInventory(); i++) {
-                ItemStack itemstack = getStackInSlot(i);
-                if (itemstack != null) {
+                if (getStackInSlot(i) != null) {
                     slotsFilled++;
                 }
             }
@@ -96,40 +75,35 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int par1) {
-        if (this.inventory[par1] != null) {
-            ItemStack var2 = this.inventory[par1];
-            this.inventory[par1] = null;
-            return var2;
+    public ItemStack getStackInSlotOnClosing(int slot) {
+        if (this.inventory[slot] != null) {
+            this.inventory[slot] = null;
+            return this.inventory[slot];
+        } else {
+            return null;
+        }
+    }
+    @Override
+    public ItemStack decrStackSize(int slot, int amount) {
+        if (inventory[slot] != null) {
+            if (inventory[slot].stackSize <= amount ^ inventory[slot].stackSize <= 0) {
+                inventory[slot] = null;
+                return inventory[slot];
+            } else {
+                return inventory[slot].splitStack(amount);
+            }
         }
         else {
             return null;
         }
     }
     @Override
-    public ItemStack decrStackSize(int i, int j) {
-        if (inventory[i] != null) {
-            if (inventory[i].stackSize <= j) {
-                ItemStack itemstack = inventory[i];
-                inventory[i] = null;
-                return itemstack;
+    public void setInventorySlotContents(int slot, ItemStack itemstack) {
+        if (itemstack != null) {
+            inventory[slot] = itemstack;
+            if (itemstack.stackSize >= getInventoryStackLimit()) {
+                itemstack.stackSize = getInventoryStackLimit();
             }
-            ItemStack itemstack1 = inventory[i].splitStack(j);
-            if (inventory[i].stackSize == 0) {
-                inventory[i] = null;
-            }
-            return itemstack1;
-
-        }
-        else {
-            return null;
-        }
-    }
-    @Override
-    public void setInventorySlotContents(int i, ItemStack itemstack) {
-        inventory[i] = itemstack;
-        if (itemstack != null && itemstack.stackSize > getInventoryStackLimit()) {
-            itemstack.stackSize = getInventoryStackLimit();
         }
     }
 
@@ -151,7 +125,7 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     @Override
     public boolean isUseableByPlayer(EntityPlayer player){
         if (this.isLocked){
-            if(owner.getId().equals(player.getUniqueID())){
+            if(owner.equals(player.getUniqueID())){
                 return true;
             } else {
                 return false;
