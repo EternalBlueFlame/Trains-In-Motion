@@ -1,7 +1,7 @@
-package com.example.examplemod.items;
+package trains.items;
 
-import com.example.examplemod.TrainsInMotion;
-import com.example.examplemod.entities.EntityTrainCore;
+import trains.TrainsInMotion;
+import trains.entities.EntityTrainCore;
 import com.mojang.authlib.GameProfile;
 import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.core.items.IMinecartItem;

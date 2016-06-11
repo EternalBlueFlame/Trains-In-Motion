@@ -1,4 +1,4 @@
-package com.example.examplemod.entities;
+package trains.entities;
 
 import net.minecraft.block.Block;
 import net.minecraft.server.gui.IUpdatePlayerListBox;

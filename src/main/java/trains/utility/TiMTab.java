@@ -1,4 +1,4 @@
-package com.example.examplemod.utility;
+package trains.utility;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;

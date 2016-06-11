@@ -1,10 +1,13 @@
-package com.example.examplemod.entities;
+package trains.entities;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
+import org.lwjgl.input.Keyboard;
+import trains.TrainsInMotion;
 
 import java.util.UUID;
 
@@ -18,6 +21,7 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     public float[] acceleration; //the first 3 values are a point curve, representing 0-35%, 35-70% and >70% to modify how acceleration is handled at each point. //the 4th value defines how much the weight hauled effects acceleration.
     public int trainType=0;//list of train types 0 is null, 1 is steam, 2 is diesel, 3 is electric
     public boolean isRunning = false;// if the train is running/using fuel
+    public TileEntity lampChild = null;
 
 
 
@@ -38,11 +42,21 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     //function to run every tick
     @Override
     public void onUpdate(){
-        if (lamp) {
-            worldObj.addTileEntity(new EntityMovingLight());
+        super.onUpdate();
+        if (lamp && lampChild ==null) {
+            lampChild = new EntityMovingLight();
+            worldObj.addTileEntity(lampChild);
+        } else if (!lamp && lampChild != null){
+            lampChild=null;
+        }
+
+        if(worldObj.isRemote && riddenByEntity != null && riddenByEntity.ridingEntity != null && riddenByEntity.ridingEntity == this) {
+            if (Keyboard.isKeyDown(Keyboard.KEY_L)) {
+                System.out.println("lamp");
+                lamp = !lamp;
+            }
         }
     }
-
     /*/
     Inventory stuff
     /*/

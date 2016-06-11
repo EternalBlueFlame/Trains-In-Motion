@@ -1,15 +1,15 @@
-package com.example.examplemod.entities;
+package trains.entities;
 
 
 import com.mojang.authlib.GameProfile;
 import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.carts.IRoutableCart;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.FluidTank;
+
+import java.util.UUID;
 
 public class MinecartExtended extends EntityMinecart implements IMinecart, IRoutableCart {
 
@@ -35,7 +35,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     //railcraft variables
     public String destination = "";  //railcraft destination
     public boolean isLoco = false;  //if this can accept destination tickets, aka is a locomotive
-    public GameProfile owner = null;  //universal, get train owner
+    public UUID owner = null;  //universal, get train owner
 
     public MinecartExtended(World world, double xPos, double yPos, double zPos) {
         super(world, xPos, yPos, zPos);
@@ -54,18 +54,38 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public int getMinecartType() {
         return 0;
     }
+    //cart management stuff
+    @Override
+    public boolean isPoweredCart() {
+        return true;
+    }
+    @Override
+    public boolean canBeRidden() {
+        return true;
+    }
+    @Override
+    public boolean canBePushed() {
+        return true;
+    }
+    @Override
+    public void onUpdate() {
+        super.onUpdate();
+    }
 
+
+
+    public void applyEntityCollision(Entity p_70108_1_){
+        if (!this.worldObj.isRemote && p_70108_1_ != this.riddenByEntity){
+            p_70108_1_.mountEntity(this);
+        }
+    }
 
     /*/
     Railcraft support
     /*/
     @Override
     public String getDestination() {
-        if (destination == null) {
-            return "";
-        } else {
-            return destination;
-        }
+        return destination;
     }
     @Override
     public boolean doesCartMatchFilter(ItemStack stack, EntityMinecart cart) {
@@ -79,9 +99,12 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         return isLoco;
     }
 
-    //get/set owner is used for far more than just railcraft since it can be used like a normal function to get the game profile even without railcraft.
+    //used by railcraft, we'll obsolete this with our own methods
     @Override
-    public GameProfile getOwner(){return this.owner;}
-    public void setOwner(GameProfile player){this.owner = player;}
+    public GameProfile getOwner(){return null;}
+
+    //methods for getting/setting owner
+    public void setOwner(UUID player){this.owner = player;}
+    public UUID getOwnerUUID(){return this.owner;}
 
 }
