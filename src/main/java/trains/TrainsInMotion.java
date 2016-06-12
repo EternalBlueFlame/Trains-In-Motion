@@ -1,19 +1,17 @@
 package trains;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
 import trains.items.ItemCore;
+import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 import trains.utility.CommonProxy;
+import trains.utility.TiMEventHandler;
 import trains.utility.TiMTab;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -24,13 +22,21 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import net.minecraft.item.Item;
 
-import static trains.utility.CommonProxy.keyBindings;
-
 @Mod(modid = TrainsInMotion.MODID, version = TrainsInMotion.VERSION)
 public class TrainsInMotion
 {
-    public static final String MODID = "TrainsinMotion";
-    public static final String VERSION = "1.0";
+    public static final String MODID = "trainsinmotion";
+    public static final String VERSION = "1.0pre-alpha";
+
+    //resource directories
+    public enum enumResources{RESOURCES("tim"), GUI_PREFIX("textures/gui/"),
+        MODEL_TRAIN("models/train/"), MODEL_TRAIN_TEXTURE("models/train/texture/"),
+        MODEL_ROLLINGSTOCK("models/rollingstock/"), MODEL_ROLLINGSTOCK_TEXTURE("models/rollingstock/texture/"),
+        MODEL_RAIL("models/rail"), MODEL_RAIL_TEXTURES("models/rail/texture");
+        private String value;
+        enumResources(String value) {this.value = value;}
+        public String getValue(){return value;}
+    };
 
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
@@ -45,17 +51,21 @@ public class TrainsInMotion
 
     //create the networking channel
     public static SimpleNetworkWrapper keyChannel;
+
     @EventHandler
     public void init(FMLInitializationEvent event) {
         //this should be a loop for all the items in the itemSet class
         GameRegistry.registerItem(itemSets, itemSets.getUnlocalizedName().substring(5));
         //setup the keybinds for the proxy
-        proxy.setKeyBinding("Lamp", Keyboard.KEY_L);;
+        proxy.setKeyBinding("Lamp", Keyboard.KEY_L);
+        //register GUI handler
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 
         //register the networking instances and channels
         TrainsInMotion.keyChannel = NetworkRegistry.INSTANCE.newSimpleChannel("TiM.key");
         TrainsInMotion.keyChannel.registerMessage(PacketKeyPress.Handler.class, PacketKeyPress.class, 1, Side.SERVER);
+        TrainsInMotion.keyChannel.registerMessage(PacketGUI.Handler.class, PacketGUI.class, 2, Side.SERVER);
 
+        MinecraftForge.EVENT_BUS.register(new TiMEventHandler());
     }
 }

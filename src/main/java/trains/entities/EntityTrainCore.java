@@ -2,16 +2,20 @@ package trains.entities;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockTorch;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
 import org.lwjgl.input.Keyboard;
 import trains.TrainsInMotion;
+import trains.gui.GUITest;
+import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 import trains.utility.BlockLight;
 
@@ -29,6 +33,7 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     public boolean isRunning = false;// if the train is running/using fuel
     public int[] previousLampPosition = new int[]{0,0,0}; //this is the position of the light previously, only two lights per train wille ver exist at one time.
     private int ticks = 0; //tick count.
+    public int GUIID = 0; // id for the GUI
 
 
 
@@ -38,32 +43,26 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     public boolean isLoco = false;  //if this can accept destination tickets, aka is a locomotive
     public UUID owner = null;  //universal, get train owner
 
-    public EntityTrainCore(World world, double xPos, double yPos, double zPos, float maxSpeed, float[] acceleration, int inventorySlots, int type /*1-steam, 2-diesel, 3-electric*/) {
+    public EntityTrainCore(World world, double xPos, double yPos, double zPos, float maxSpeed, float[] acceleration, int inventorySlots, int type /*1-steam, 2-diesel, 3-electric*/, int GUIid) {
         super(world,xPos, yPos, zPos);
         super.isLoco = true;
         this.maxSpeed = maxSpeed;
         this.acceleration = acceleration;
         this.trainType = type;
         this.inventory = new ItemStack[inventorySlots];
+        this.GUIID = GUIid;
     }
     //function to run every tick
     @Override
     public void onUpdate(){
         super.onUpdate();
         ticks++;
-        //if a key was pressed, send its value to server, only check every 20 ticks.
-        if (ticks % 10 ==0 && worldObj.isRemote) {
-            if (Keyboard.isKeyDown(Keyboard.KEY_L)) {
-                System.out.println("key pressed");
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(Keyboard.KEY_L));
-            }
-        }
 
-        if(ticks %5 ==0 && previousLampPosition != new int[]{(int)Math.round(this.posX), (int)Math.round(this.posY), (int)Math.round(this.posZ+2)}){
+        if(ticks %5 ==0 && previousLampPosition != new int[]{MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ+2)}){
             if(previousLampPosition != new int[]{0,0,0}) {
                 worldObj.setBlockToAir(previousLampPosition[0], previousLampPosition[1], previousLampPosition[2]);
             }
-            previousLampPosition=new int[]{(int)Math.round(this.posX), (int)Math.round(this.posY), (int)Math.round(this.posZ+2)};
+            previousLampPosition=new int[]{MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ+2)};
 
             if (lamp && worldObj.isAirBlock(previousLampPosition[0], previousLampPosition[1], previousLampPosition[2])) {
                 worldObj.setBlock(previousLampPosition[0], previousLampPosition[1], previousLampPosition[2], new BlockLight());
@@ -78,11 +77,9 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     //server sends the key that was pressed back here.
     public void keyFromPacket(int i) {
         //handle lamp
-        if (i == Keyboard.KEY_L){
+        if (i == Keyboard.KEY_L) {
             this.lamp = !lamp;
         }
-        //handle GUI
-
     }
     /*/
     Inventory stuff
@@ -112,7 +109,12 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
 
     @Override
     public ItemStack getStackInSlot(int i) {
-        return inventory[i];
+        if (i>=0 && i< inventory.length) {
+            return inventory[i];
+        } else {
+            System.out.println("inventory slot " + i + " is not a thing");
+            return null;
+        }
     }
 
     @Override
