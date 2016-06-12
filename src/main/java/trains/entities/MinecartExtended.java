@@ -22,16 +22,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     //
 
 
-    //position values
-    public World worldObj;
-    public double xPosition;
-    public double yPosition;
-    public double zPosition;
-    public double rollPosition;
-    public double yawPosition;
-
-
-
     //railcraft variables
     public String destination = "";  //railcraft destination
     public boolean isLoco = false;  //if this can accept destination tickets, aka is a locomotive
@@ -39,10 +29,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
 
     public MinecartExtended(World world, double xPos, double yPos, double zPos) {
         super(world, xPos, yPos, zPos);
-        this.worldObj = world;
-        this.xPosition = xPos;
-        this.yawPosition = yPos;
-        this.zPosition = zPos;
     }
 
 

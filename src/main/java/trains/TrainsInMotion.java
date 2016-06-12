@@ -5,12 +5,14 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
 import trains.items.ItemCore;
+import trains.networking.PacketKeyPress;
 import trains.utility.CommonProxy;
 import trains.utility.TiMTab;
 import cpw.mods.fml.common.SidedProxy;
@@ -41,6 +43,8 @@ public class TrainsInMotion
     @SidedProxy(clientSide = "trains.utility.CommonProxy", serverSide = "trains.utility.CommonProxy")
     public static CommonProxy proxy;
 
+    //create the networking channel
+    public static SimpleNetworkWrapper keyChannel;
     @EventHandler
     public void init(FMLInitializationEvent event) {
         //this should be a loop for all the items in the itemSet class
@@ -48,6 +52,10 @@ public class TrainsInMotion
         //setup the keybinds for the proxy
         proxy.setKeyBinding("Lamp", Keyboard.KEY_L);;
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
+
+        //register the networking instances and channels
+        TrainsInMotion.keyChannel = NetworkRegistry.INSTANCE.newSimpleChannel("TiM.key");
+        TrainsInMotion.keyChannel.registerMessage(PacketKeyPress.Handler.class, PacketKeyPress.class, 1, Side.SERVER);
 
     }
 }
