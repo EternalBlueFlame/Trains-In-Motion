@@ -13,12 +13,12 @@ public class InventoryHandler extends Container{
     public InventoryHandler(InventoryPlayer iinventory, EntityTrainCore entityminecart) {
         trainEntity = entityminecart;
     }
-
+    /*/
     @Override
     public ItemStack transferStackInSlot(EntityPlayer player, int i) {
-
+        return
     }
-
+    /*/
     @Override
     public boolean canInteractWith(EntityPlayer var1) {
         if (trainEntity.isDead) {

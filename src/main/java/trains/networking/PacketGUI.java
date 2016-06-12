@@ -5,7 +5,6 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
@@ -36,11 +35,11 @@ public class PacketGUI  implements IMessage {
         @Override
         public IMessage onMessage(PacketGUI message, MessageContext context) {
             System.out.println("key recieved");
-            EntityPlayer ridingEntity = context.getServerHandler().playerEntity;
-            if (ridingEntity != null && ridingEntity.ridingEntity instanceof EntityTrainCore) {
+            EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
+            if (entityPlayer  != null && entityPlayer .ridingEntity instanceof EntityTrainCore) {
                 System.out.println("key processed");
-                ridingEntity.openGui(TrainsInMotion.instance, GUITest.GUI_ID, ridingEntity.ridingEntity.worldObj,
-                        MathHelper.floor_double(ridingEntity.ridingEntity.posX), MathHelper.floor_double(ridingEntity.ridingEntity.posY), MathHelper.floor_double(ridingEntity.ridingEntity.posZ));
+                entityPlayer .openGui(TrainsInMotion.instance, GUITest.GUI_ID, entityPlayer .ridingEntity.worldObj,
+                        MathHelper.floor_double(entityPlayer.ridingEntity.posX), MathHelper.floor_double(entityPlayer.ridingEntity.posY), MathHelper.floor_double(entityPlayer.ridingEntity.posZ));
             }
 
 

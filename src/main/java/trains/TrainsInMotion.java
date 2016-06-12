@@ -1,5 +1,6 @@
 package trains;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -46,8 +47,9 @@ public class TrainsInMotion
     public static Item itemSets = new ItemCore().setUnlocalizedName("itemTest").setTextureName(TrainsInMotion.MODID+ ":" + "itemTests");
 
     //setup the proxy
-    @SidedProxy(clientSide = "trains.utility.CommonProxy", serverSide = "trains.utility.CommonProxy")
+    @SidedProxy(clientSide = "trains.utility.ClientProxy", serverSide = "trains.utility.CommonProxy")
     public static CommonProxy proxy;
+
 
     //create the networking channel
     public static SimpleNetworkWrapper keyChannel;
@@ -67,5 +69,6 @@ public class TrainsInMotion
         TrainsInMotion.keyChannel.registerMessage(PacketGUI.Handler.class, PacketGUI.class, 2, Side.SERVER);
 
         MinecraftForge.EVENT_BUS.register(new TiMEventHandler());
+        FMLCommonHandler.instance().bus().register(new TiMEventHandler());
     }
 }

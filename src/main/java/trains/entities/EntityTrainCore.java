@@ -74,7 +74,7 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     /*/
     networking and key press
     /*/
-    //server sends the key that was pressed back here.
+    //server sends the key that was pressed back here. this should be done in the packet
     public void keyFromPacket(int i) {
         //handle lamp
         if (i == Keyboard.KEY_L) {

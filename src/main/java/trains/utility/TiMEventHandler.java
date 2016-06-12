@@ -17,14 +17,15 @@ public class TiMEventHandler {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onClientKeyPress(InputEvent.KeyInputEvent event){
-        if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntityTrainCore) {
+        //client doesn't know what its riding?
+        //if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntityTrainCore) {
             if (Keyboard.isKeyDown(Keyboard.KEY_L)) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(Keyboard.KEY_L));
             }
             if (Keyboard.isKeyDown(Keyboard.KEY_I)) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketGUI(GUITest.GUI_ID));
             }
-        }
+        //}
     }
 
 
