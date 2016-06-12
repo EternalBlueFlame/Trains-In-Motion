@@ -19,9 +19,6 @@ public class ItemCore extends ItemMinecart implements IMinecart, IMinecartItem {
         this.setCreativeTab(TrainsInMotion.creativeTab);
     }
 
-    public EntityMinecart placeCart(EntityPlayer player, ItemStack itemstack, World world, int posX, int posY, int posZ) {
-        return new EntityTrainCore(world, posX + 0.5F, posY + 0.5F,posZ + 0.5F, 100f, new float[]{1, 5, 2}, 20, 1, GUITest.GUI_ID);
-    }
 
 
     @Override
@@ -30,8 +27,8 @@ public class ItemCore extends ItemMinecart implements IMinecart, IMinecartItem {
     }
 
     @Override
-    public EntityMinecart placeCart(GameProfile owner, ItemStack cart, World world, int posX, int posY, int posZ) {
-        return placeCart((EntityPlayer) null, cart, world, posX, posY, posZ);
+    public EntityTrainCore placeCart(GameProfile owner, ItemStack cart, World world, int posX, int posY, int posZ) {
+        return new EntityTrainCore(owner.getId(), world, posX + 0.5F, posY + 0.5F,posZ + 0.5F, 100f, new float[]{1, 5, 2}, 20, 1, GUITest.GUI_ID);
     }
 
     @Override
@@ -45,7 +42,7 @@ public class ItemCore extends ItemMinecart implements IMinecart, IMinecartItem {
             return false;//returns wether or not to do animation placement.
         } else{
             // public EntityTrainCore(World world, double xPos, double yPos, double zPos, float maxSpeed, float[] acceleration, int inventorySlots, int type /*1-steam, 2-diesel, 3-electric*/)
-            worldObj.spawnEntityInWorld(new EntityTrainCore(worldObj, posX,posY,posZ, 120, new float[]{1,3,1},2,1,GUITest.GUI_ID));
+            worldObj.spawnEntityInWorld(new EntityTrainCore(playerEntity.getGameProfile().getId(), worldObj, posX,posY,posZ, 120, new float[]{1,3,1},2,1,GUITest.GUI_ID));
           return true;
         }
     }

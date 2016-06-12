@@ -1,8 +1,6 @@
 package trains.utility;
 
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import trains.entities.EntityTrainCore;
@@ -14,11 +12,12 @@ public class ClientProxy extends CommonProxy {
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         switch (ID) {
             case GUITest.GUI_ID: {
-                if (player.ridingEntity instanceof EntityTrainCore) {
+                //if (player != null && player.ridingEntity instanceof EntityTrainCore) {
+                    System.out.println("client got packet");
                     return new GUITest(player.inventory, (EntityTrainCore) player.ridingEntity);
-                } else {
-                    return null;
-                }
+               // } else {
+                //    return null;
+                //}
             }
 
             default:{

@@ -38,7 +38,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     //technically this is a normal minecart, so return the value for that.
     @Override
     public int getMinecartType() {
-        return 0;
+        return 1000;
     }
     //cart management stuff
     @Override

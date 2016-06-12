@@ -1,22 +1,12 @@
 package trains.entities;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockTorch;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
 import org.lwjgl.input.Keyboard;
-import trains.TrainsInMotion;
-import trains.gui.GUITest;
-import trains.networking.PacketGUI;
-import trains.networking.PacketKeyPress;
 import trains.utility.BlockLight;
 
 import java.util.UUID;
@@ -43,7 +33,7 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     public boolean isLoco = false;  //if this can accept destination tickets, aka is a locomotive
     public UUID owner = null;  //universal, get train owner
 
-    public EntityTrainCore(World world, double xPos, double yPos, double zPos, float maxSpeed, float[] acceleration, int inventorySlots, int type /*1-steam, 2-diesel, 3-electric*/, int GUIid) {
+    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, float maxSpeed, float[] acceleration, int inventorySlots, int type /*1-steam, 2-diesel, 3-electric*/, int GUIid) {
         super(world,xPos, yPos, zPos);
         super.isLoco = true;
         this.maxSpeed = maxSpeed;
@@ -51,6 +41,7 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
         this.trainType = type;
         this.inventory = new ItemStack[inventorySlots];
         this.GUIID = GUIid;
+        this.owner = owner;
     }
     //function to run every tick
     @Override
@@ -71,6 +62,10 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
         }
     }
 
+    @Override
+    public int getMinecartType() {
+        return 1001;
+    }
     /*/
     networking and key press
     /*/
