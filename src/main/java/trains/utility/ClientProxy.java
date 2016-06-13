@@ -12,12 +12,12 @@ public class ClientProxy extends CommonProxy {
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         switch (ID) {
             case GUITest.GUI_ID: {
-                //if (player != null && player.ridingEntity instanceof EntityTrainCore) {
-                    System.out.println("client got packet");
+                //TODO client thinks the train is an instance of net.minecraft.entity.item.EntityMinecartEmpty, not EntityTrainCore
+                if (player != null && player.ridingEntity instanceof EntityTrainCore) {
                     return new GUITest(player.inventory, (EntityTrainCore) player.ridingEntity);
-               // } else {
-                //    return null;
-                //}
+                } else {
+                    return null;
+                }
             }
 
             default:{

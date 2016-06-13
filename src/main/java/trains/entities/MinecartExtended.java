@@ -58,12 +58,10 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         super.onUpdate();
     }
 
-
-
-    public void applyEntityCollision(Entity p_70108_1_){
-        if (!this.worldObj.isRemote && p_70108_1_ != this.riddenByEntity){
-            p_70108_1_.mountEntity(this);
-        }
+    @Override
+    public boolean canRiderInteract()
+    {
+        return true;
     }
 
     /*/

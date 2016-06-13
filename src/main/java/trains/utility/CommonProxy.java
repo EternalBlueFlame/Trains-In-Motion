@@ -20,7 +20,6 @@ public class CommonProxy implements IGuiHandler {
 
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        //TODO client thinks the train is an instance of net.minecraft.entity.item.EntityMinecartEmpty, not EntityTrainCore
         if(player !=null && player.ridingEntity instanceof EntityTrainCore){
             return new InventoryHandler(player.inventory, (EntityTrainCore) player.ridingEntity);
         }

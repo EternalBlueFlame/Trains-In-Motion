@@ -5,6 +5,7 @@ import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
+import org.lwjgl.input.Keyboard;
 import trains.entities.EntityTrainCore;
 
 /**
@@ -35,21 +36,25 @@ public class PacketKeyPress implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf bbuf) {
-        this.key = bbuf.readInt();
+        key = bbuf.readInt();
     }
 
     @Override
     public void toBytes(ByteBuf bbuf) {
-        bbuf.writeInt(this.key);
+        bbuf.writeInt(key);
     }
 
     public static class Handler implements IMessageHandler<PacketKeyPress, IMessage> {
         @Override
         public IMessage onMessage(PacketKeyPress message, MessageContext context) {
             Entity ridingEntity = context.getServerHandler().playerEntity.ridingEntity;
-                if (ridingEntity instanceof EntityTrainCore) {
-                    ((EntityTrainCore) ridingEntity).keyFromPacket(message.key);
+            if (ridingEntity instanceof EntityTrainCore) {
+                switch (message.key){
+                    case Keyboard.KEY_L:{
+                        ((EntityTrainCore) ridingEntity).lamp = !((EntityTrainCore) ridingEntity).lamp;
+                    }
                 }
+            }
 
 
 

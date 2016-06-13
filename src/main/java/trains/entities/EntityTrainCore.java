@@ -1,10 +1,14 @@
 package trains.entities;
 
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
+import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.fluids.FluidTank;
 import org.lwjgl.input.Keyboard;
 import trains.utility.BlockLight;
@@ -48,7 +52,7 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     public void onUpdate(){
         super.onUpdate();
         ticks++;
-
+        /*/ for managing the lamp, will need to implement it better later. Maybe do a client side only to change lighting of individual blocks?
         if(ticks %5 ==0 && previousLampPosition != new int[]{MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ+2)}){
             if(previousLampPosition != new int[]{0,0,0}) {
                 worldObj.setBlockToAir(previousLampPosition[0], previousLampPosition[1], previousLampPosition[2]);
@@ -60,21 +64,12 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
                 System.out.println("created lamp child");
             }
         }
+        /*/
     }
 
     @Override
     public int getMinecartType() {
         return 1001;
-    }
-    /*/
-    networking and key press
-    /*/
-    //server sends the key that was pressed back here. this should be done in the packet
-    public void keyFromPacket(int i) {
-        //handle lamp
-        if (i == Keyboard.KEY_L) {
-            this.lamp = !lamp;
-        }
     }
     /*/
     Inventory stuff
