@@ -9,46 +9,45 @@ import org.lwjgl.input.Keyboard;
 import trains.entities.EntityTrainCore;
 
 /**
- * Sent to the server when a key is pressed on the client.<p>
+ * Sent to the server when a key is pressed on the client.
  *
- * Values and their meanings as adapted from old source code:<br>
- * 		7 = R<br>
- * 		4 = W<br>
- * 		5 = S<br>
- * 		8 = H<br>
- * 		9 = F<br>
- * 		0 = Y<br>
- * 		1 = A<br>
- * 		2 = X<br>
- * 		3 = D<br>
- * 		6 = C<br>
+ * 		7 = R
+ * 		4 = W
+ * 		5 = S
+ * 		8 = H
+ * 		9 = F
+ * 		0 = Y
+ * 		1 = A
+ * 		2 = X
+ * 		3 = D
+ * 		6 = C
  */
 public class PacketKeyPress implements IMessage {
 
-    // The key that was pressed.
+    //The key that was pressed.
     int key;
-
-    public PacketKeyPress() {}
-
+    //constructor
     public PacketKeyPress(int key) {
         this.key = key;
     }
-
+    //read packet
     @Override
     public void fromBytes(ByteBuf bbuf) {
         key = bbuf.readInt();
     }
-
+    //write packet
     @Override
     public void toBytes(ByteBuf bbuf) {
         bbuf.writeInt(key);
     }
-
+    //handle packet
     public static class Handler implements IMessageHandler<PacketKeyPress, IMessage> {
         @Override
         public IMessage onMessage(PacketKeyPress message, MessageContext context) {
+            //be sure the entities are correct
             Entity ridingEntity = context.getServerHandler().playerEntity.ridingEntity;
             if (ridingEntity instanceof EntityTrainCore) {
+                //depending on the key, do a different function on the train
                 switch (message.key){
                     case Keyboard.KEY_L:{
                         ((EntityTrainCore) ridingEntity).lamp = !((EntityTrainCore) ridingEntity).lamp;

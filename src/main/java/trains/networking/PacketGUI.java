@@ -14,36 +14,31 @@ import trains.gui.GUITest;
 public class PacketGUI  implements IMessage {
     // The gui that was pressed.
     int gui;
-
-    public PacketGUI() {}
-
+    //constructor
     public PacketGUI(int gui) {
         this.gui = gui;
     }
-
+    //read packet
     @Override
     public void fromBytes(ByteBuf bbuf) {
         gui = bbuf.readInt();
     }
-
+    //write packet
     @Override
     public void toBytes(ByteBuf bbuf) {
         bbuf.writeInt(gui);
     }
-
+    //handle packet
     public static class Handler implements IMessageHandler<PacketGUI, IMessage> {
         @Override
         public IMessage onMessage(PacketGUI message, MessageContext context) {
-            System.out.println("key recieved");
+            //be sure the entities are correct
             EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
             if (entityPlayer  != null && entityPlayer .ridingEntity instanceof EntityTrainCore) {
-                System.out.println("key processed");
+                //open the gui for the player
                 entityPlayer .openGui(TrainsInMotion.instance, GUITest.GUI_ID, entityPlayer .ridingEntity.worldObj,
                         MathHelper.floor_double(entityPlayer.ridingEntity.posX), MathHelper.floor_double(entityPlayer.ridingEntity.posY), MathHelper.floor_double(entityPlayer.ridingEntity.posZ));
             }
-
-
-
             return null;
         }
     }

@@ -14,23 +14,24 @@ import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 
 public class TiMEventHandler {
-
+    //manage on key press, not for while a key is held, only for features that take a single key press
+    //TODO move these to something that can be changed in a config file
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onClientKeyPress(InputEvent.KeyInputEvent event){
-        //on key pressed manager
-        //TODO client thinks the train is an instance of net.minecraft.entity.item.EntityMinecartEmpty, not EntityTrainCore
         if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntityTrainCore) {
+            //key for lamp
             if (Keyboard.isKeyDown(Keyboard.KEY_L)) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(Keyboard.KEY_L));
             }
+            //key for inventory
             if (Keyboard.isKeyDown(Keyboard.KEY_I)) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketGUI(GUITest.GUI_ID));
             }
         }
     }
 
-    //mount rideable cart
+    //make trains rideable
     @SubscribeEvent
     public void entityInteractEvent(EntityInteractEvent event) {
         if (event.target instanceof EntityTrainCore && !event.entity.worldObj.isRemote && (event.target.riddenByEntity == null || event.target.riddenByEntity == event.entityPlayer)) {

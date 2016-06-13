@@ -11,13 +11,11 @@ import net.minecraft.world.World;
 
 
 public class CommonProxy implements IGuiHandler {
-
-    public static KeyBinding[] keyBindings;
-
+    //setup the key bindings
     public void setKeyBinding(String name, int value) {
         ClientRegistry.registerKeyBinding(new KeyBinding(name, value, TrainsInMotion.MODID));
     }
-
+    //manage the server-side GUI stuff
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         if(player !=null && player.ridingEntity instanceof EntityTrainCore){
@@ -25,6 +23,7 @@ public class CommonProxy implements IGuiHandler {
         }
         return null;
     }
+    //do this in ClientProxy
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {return null;}
 }

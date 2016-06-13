@@ -4,13 +4,14 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 
 public class TiMTab extends CreativeTabs {
+    //init
     public TiMTab(int modID, String name) {
         super(modID, name);
     }
-
+    //set tab name
     @Override
     public String getTranslatedTabLabel() {
-        return super.getTabLabel();
+        return getTabLabel();
     }
     //get the item that defines the tab icon
     @Override

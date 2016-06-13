@@ -1,10 +1,13 @@
 package trains;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
+import trains.entities.EntityTrainCore;
 import trains.items.ItemCore;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
@@ -39,9 +42,9 @@ public class TrainsInMotion
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
     //define the creative tab, then the items
-    public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");;
+    public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
     //items should be promoted to their own class that contains all the individual items, so we don't clutter the main class.
-    public static Item itemSets = new ItemCore().setUnlocalizedName("itemTest").setTextureName(TrainsInMotion.MODID+ ":" + "itemTests");
+    public static Item itemSets = new ItemCore().setUnlocalizedName("itemTest").setTextureName(MODID + ":itemTests");
 
     //setup the proxy
     @SidedProxy(clientSide = "trains.utility.ClientProxy", serverSide = "trains.utility.CommonProxy")
@@ -50,6 +53,15 @@ public class TrainsInMotion
 
     //create the networking channel
     public static SimpleNetworkWrapper keyChannel;
+
+    @EventHandler
+    public void preInit(FMLPreInitializationEvent event) {
+        //register the entity
+        int id = EntityRegistry.findGlobalUniqueEntityId();
+        EntityRegistry.registerGlobalEntityID(EntityTrainCore.class, "entitytraincore", id);
+        EntityRegistry.registerModEntity(EntityTrainCore.class, "entitytraincore", id, instance, 64, 1, true);
+
+    }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {

@@ -1,14 +1,11 @@
 package trains.utility;
 
-
-
 import net.minecraft.block.BlockTorch;
 import net.minecraft.world.World;
 
 public class BlockLight extends BlockTorch {
 
     public BlockLight() {
-        super();
         this.setCreativeTab(null);
     }
 

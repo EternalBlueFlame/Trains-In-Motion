@@ -1,17 +1,10 @@
 package trains.entities;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
-import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.fluids.FluidTank;
-import org.lwjgl.input.Keyboard;
-import trains.utility.BlockLight;
 
 import java.util.UUID;
 
@@ -37,6 +30,11 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     public boolean isLoco = false;  //if this can accept destination tickets, aka is a locomotive
     public UUID owner = null;  //universal, get train owner
 
+    //default constructor for registering entity
+    public EntityTrainCore(World world){
+        super(world);
+    }
+    //default constructor that we actually use.
     public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, float maxSpeed, float[] acceleration, int inventorySlots, int type /*1-steam, 2-diesel, 3-electric*/, int GUIid) {
         super(world,xPos, yPos, zPos);
         super.isLoco = true;
@@ -66,13 +64,13 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
         }
         /*/
     }
-
+    //technically this is a normal minecart, so return the value for that, which isn't in the base game or another mod.
     @Override
     public int getMinecartType() {
         return 1001;
     }
     /*/
-    Inventory stuff
+    Inventory stuff, most of this is self-explanatory.
     /*/
     @Override
     public String getInventoryName() {
@@ -80,14 +78,14 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     }
     @Override
     public void openInventory() {}
-
     @Override
     public void closeInventory() {}
 
+    //re calculate stored variables when the entity needs refreshing
     @Override
     public void markDirty() {
         if (!worldObj.isRemote) {
-            this.slotsFilled = 0;
+            slotsFilled = 0;
             for (int i = 0; i < getSizeInventory(); i++) {
                 if (getStackInSlot(i) != null) {
                     slotsFilled++;
@@ -98,40 +96,40 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     }
 
     @Override
-    public ItemStack getStackInSlot(int i) {
-        if (i>=0 && i< inventory.length) {
-            return inventory[i];
+    public ItemStack getStackInSlot(int slot) {
+        //be sure the slot exists before trying to return anything,
+        if (slot>=0 && slot< inventory.length) {
+            return inventory[slot];
         } else {
-            System.out.println("inventory slot " + i + " is not a thing");
             return null;
         }
     }
-
     @Override
     public ItemStack getStackInSlotOnClosing(int slot) {
-        if (this.inventory[slot] != null) {
-            this.inventory[slot] = null;
-            return this.inventory[slot];
-        } else {
-            return null;
+        //we return null no matter what, but we want to make sure the slot is properly set as well.
+        if (slot>=0 && slot< inventory.length) {
+            inventory[slot] = null;
         }
+        return null;
     }
     @Override
     public ItemStack decrStackSize(int slot, int amount) {
-        if (inventory[slot] != null) {
+        //be sure the slot exists before trying to return anything,
+        if (slot>=0 && slot< inventory.length) {
+            //if subtraction makes slot empty/null then set it to null and return null, otherwise return the stack.
             if (inventory[slot].stackSize <= amount ^ inventory[slot].stackSize <= 0) {
                 inventory[slot] = null;
-                return inventory[slot];
+                return null;
             } else {
                 return inventory[slot].splitStack(amount);
             }
-        }
-        else {
+        } else {
             return null;
         }
     }
     @Override
     public void setInventorySlotContents(int slot, ItemStack itemstack) {
+        //be sure item stack isn't null, then add the itemstack, and be sure the slot doesn't go over the limit.
         if (itemstack != null) {
             inventory[slot] = itemstack;
             if (itemstack.stackSize >= getInventoryStackLimit()) {
@@ -144,8 +142,11 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
     public int getInventoryStackLimit() {
         return 64;
     }
+
+    //return if the item can be placed in the slot, for this slot it's just a check if the slot exists, but other things may have slots for specific items, this filters that.
     @Override
-    public boolean isItemValidForSlot(int slot, ItemStack item){return true;}
+    public boolean isItemValidForSlot(int slot, ItemStack item){return (slot>=0 && slot< inventory.length);}
+
     //return the number of inventory slots
     @Override
     public int getSizeInventory(){
@@ -155,9 +156,11 @@ public class EntityTrainCore extends MinecartExtended implements IInventory {
             return 0;
         }
     }
+
+    //return if the train can be used by the player, if it's locked, only the owner can use it.
     @Override
     public boolean isUseableByPlayer(EntityPlayer player){
-        if (this.isLocked){
+        if (isLocked){
             if(owner.equals(player.getUniqueID())){
                 return true;
             } else {

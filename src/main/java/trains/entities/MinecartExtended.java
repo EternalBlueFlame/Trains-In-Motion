@@ -27,6 +27,11 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public boolean isLoco = false;  //if this can accept destination tickets, aka is a locomotive
     public UUID owner = null;  //universal, get train owner
 
+    //default constructor for registering entity
+    public MinecartExtended(World world) {
+        super(world);
+    }
+    //default constructor we actually use
     public MinecartExtended(World world, double xPos, double yPos, double zPos) {
         super(world, xPos, yPos, zPos);
     }
@@ -35,7 +40,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     /*/
     Core Game Overrides
     /*/
-    //technically this is a normal minecart, so return the value for that.
+    //technically this is a normal minecart, so return the value for that, which isn't in the base game or another mod.
     @Override
     public int getMinecartType() {
         return 1000;
@@ -52,12 +57,11 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     @Override
     public boolean canBePushed() {
         return true;
-    }
+    }//TODO this should be false later when it can move on its own.
     @Override
     public void onUpdate() {
         super.onUpdate();
     }
-
     @Override
     public boolean canRiderInteract()
     {
@@ -83,12 +87,12 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         return isLoco;
     }
 
-    //used by railcraft, we'll obsolete this with our own methods
+    //used by railcraft, this is needed but we'll obsolete this with our own methods because this is just poor.
     @Override
     public GameProfile getOwner(){return null;}
 
-    //methods for getting/setting owner
-    public void setOwner(UUID player){this.owner = player;}
-    public UUID getOwnerUUID(){return this.owner;}
+    //methods for getting/setting actual owner
+    public void setOwner(UUID player){owner = player;}
+    public UUID getOwnerUUID(){return owner;}
 
 }
