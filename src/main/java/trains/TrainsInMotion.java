@@ -7,7 +7,7 @@ import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
-import trains.entities.EntityTrainCore;
+import trains.entities.MinecartExtended;
 import trains.items.ItemCore;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
@@ -58,8 +58,8 @@ public class TrainsInMotion
     public void preInit(FMLPreInitializationEvent event) {
         //register the entity
         int id = EntityRegistry.findGlobalUniqueEntityId();
-        EntityRegistry.registerGlobalEntityID(EntityTrainCore.class, "entitytraincore", id);
-        EntityRegistry.registerModEntity(EntityTrainCore.class, "entitytraincore", id, instance, 64, 1, true);
+        EntityRegistry.registerGlobalEntityID(MinecartExtended.class, "entitytraincore", id);
+        EntityRegistry.registerModEntity(MinecartExtended.class, "entitytraincore", id, instance, 64, 1, true);
 
     }
 

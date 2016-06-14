@@ -8,7 +8,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
-import trains.entities.EntityTrainCore;
+import trains.entities.MinecartExtended;
 import trains.gui.GUITest;
 
 public class PacketGUI  implements IMessage {
@@ -34,7 +34,7 @@ public class PacketGUI  implements IMessage {
         public IMessage onMessage(PacketGUI message, MessageContext context) {
             //be sure the entities are correct
             EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
-            if (entityPlayer  != null && entityPlayer .ridingEntity instanceof EntityTrainCore) {
+            if (entityPlayer  != null && entityPlayer .ridingEntity instanceof MinecartExtended) {
                 //open the gui for the player
                 entityPlayer .openGui(TrainsInMotion.instance, GUITest.GUI_ID, entityPlayer .ridingEntity.worldObj,
                         MathHelper.floor_double(entityPlayer.ridingEntity.posX), MathHelper.floor_double(entityPlayer.ridingEntity.posY), MathHelper.floor_double(entityPlayer.ridingEntity.posZ));

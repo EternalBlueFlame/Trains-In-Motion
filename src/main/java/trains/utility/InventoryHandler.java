@@ -3,16 +3,16 @@ package trains.utility;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
-import trains.entities.EntityTrainCore;
+import trains.entities.MinecartExtended;
 
 public class InventoryHandler extends Container{
-    private EntityTrainCore trainEntity;
+    private MinecartExtended trainEntity;
     private int inventorySize;
 
-    public InventoryHandler(InventoryPlayer iinventory, EntityTrainCore entityminecart) {
+    public InventoryHandler(InventoryPlayer iinventory, MinecartExtended entityminecart) {
         trainEntity = entityminecart;
     }
-    /*/TODO
+    /*/TODO Inventory management
     @Override
     public ItemStack transferStackInSlot(EntityPlayer player, int i) {
         return

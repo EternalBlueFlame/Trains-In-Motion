@@ -6,14 +6,14 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
 import trains.TrainsInMotion;
-import trains.entities.EntityTrainCore;
+import trains.entities.MinecartExtended;
 import trains.utility.InventoryHandler;
 
 public class GUITest extends GuiContainer {
     //id reference for this GUI
     public static final int GUI_ID = 20;
     //gui default construstor
-    public GUITest (InventoryPlayer inventoryPlayer, EntityTrainCore tileEntity) {
+    public GUITest (InventoryPlayer inventoryPlayer, MinecartExtended tileEntity) {
         //the container is instanciated and passed to the superclass for handling
         super(new InventoryHandler(inventoryPlayer, tileEntity));
     }

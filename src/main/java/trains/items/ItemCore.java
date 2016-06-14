@@ -1,7 +1,9 @@
 package trains.items;
 
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
 import trains.TrainsInMotion;
-import trains.entities.EntityTrainCore;
 import com.mojang.authlib.GameProfile;
 import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.core.items.IMinecartItem;
@@ -10,6 +12,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemMinecart;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import trains.entities.MinecartExtended;
 import trains.gui.GUITest;
 
 public class ItemCore extends ItemMinecart implements IMinecart, IMinecartItem {
@@ -25,8 +28,10 @@ public class ItemCore extends ItemMinecart implements IMinecart, IMinecartItem {
     }
     //placing the cart
     @Override
-    public EntityTrainCore placeCart(GameProfile owner, ItemStack cart, World world, int posX, int posY, int posZ) {
-        return new EntityTrainCore(owner.getId(), world, posX + 0.5F, posY + 0.5F,posZ + 0.5F, 100f, new float[]{1, 5, 2}, 20, 1, GUITest.GUI_ID);
+    public MinecartExtended placeCart(GameProfile owner, ItemStack cart, World world, int posX, int posY, int posZ) {
+        return new MinecartExtended(owner.getId(), world, posX,posY,posZ, 120, new float[]{1,3,1}, null, null, 1,
+                new FluidTank[]{new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)},
+                2,GUITest.GUI_ID, 1001, true);
     }
     //trains shouldn't match a cart filter.
     @Override
@@ -39,8 +44,22 @@ public class ItemCore extends ItemMinecart implements IMinecart, IMinecartItem {
         if (worldObj.isRemote) {
             return false;//returns whether or not to do animation placement.
         } else{
-            // public EntityTrainCore(World world, double xPos, double yPos, double zPos, float maxSpeed, float[] acceleration, int inventorySlots, int type /*1-steam, 2-diesel, 3-electric*/)
-            worldObj.spawnEntityInWorld(new EntityTrainCore(playerEntity.getGameProfile().getId(), worldObj, posX,posY,posZ, 120, new float[]{1,3,1},2,1,GUITest.GUI_ID));
+
+            //UUID owner,
+            //World world, double xPos, double yPos, double zPos,
+            //float maxSpeed,
+            //float[] acceleration, //speed curve for acceleration
+            //Item[] storageItemFilter /*/ null for no filter /*/ ,
+            //Material[] storageMaterialFilter /*/ null for no filter /*/ ,
+            //int type /*1-steam, 2-diesel, 3-electric, 4-hydrogen, 5-nuclear, 0-RollingStock*/,
+            //FluidTank[] tank /*/ empty array for no tanks, - steam and nuclear take two tanks. - all other trains take one tank - all tanks besides diesel should use FluidRegistry.WATER /*/,
+            //int inventorySlots,
+            //int GUIid,
+            //int minecartNumber,
+            //boolean canBeRidden
+            worldObj.spawnEntityInWorld(new MinecartExtended(playerEntity.getGameProfile().getId(), worldObj, posX,posY,posZ, 120, new float[]{1,3,1}, null, null, 1,
+                    new FluidTank[]{new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)},
+                    2,GUITest.GUI_ID, 1001, true));
           return true;
         }
     }

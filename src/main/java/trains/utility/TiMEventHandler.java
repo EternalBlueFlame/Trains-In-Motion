@@ -8,7 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import org.lwjgl.input.Keyboard;
 import trains.TrainsInMotion;
-import trains.entities.EntityTrainCore;
+import trains.entities.MinecartExtended;
 import trains.gui.GUITest;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
@@ -19,7 +19,7 @@ public class TiMEventHandler {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onClientKeyPress(InputEvent.KeyInputEvent event){
-        if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntityTrainCore) {
+        if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof MinecartExtended) {
             //key for lamp
             if (Keyboard.isKeyDown(Keyboard.KEY_L)) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(Keyboard.KEY_L));
@@ -34,7 +34,7 @@ public class TiMEventHandler {
     //make trains rideable
     @SubscribeEvent
     public void entityInteractEvent(EntityInteractEvent event) {
-        if (event.target instanceof EntityTrainCore && !event.entity.worldObj.isRemote && (event.target.riddenByEntity == null || event.target.riddenByEntity == event.entityPlayer)) {
+        if (event.target instanceof MinecartExtended && !event.entity.worldObj.isRemote && (event.target.riddenByEntity == null || event.target.riddenByEntity == event.entityPlayer)) {
             event.entityPlayer.mountEntity(event.target);
         }
     }
