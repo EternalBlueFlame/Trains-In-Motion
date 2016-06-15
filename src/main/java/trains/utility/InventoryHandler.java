@@ -26,9 +26,18 @@ public class InventoryHandler extends Container{
 
 
         //add the train inventory
-        for (int i = 0; i < 9; ++i) {
-            addSlotToContainer(new Slot(entityminecart, i, 8 + i * 18, 18));
+        /*/
+        for (int i = 0; i < entityminecart.columns; ++i) {
+            for (int ii = 0; ii < entityminecart.rows; ++ii) {
+                addSlotToContainer(new Slot(entityminecart, (i + ii), (8 + ii) * 18, (i + 18) * 18));
+            }
+        }/*/
+        for (int i = 0; i < entityminecart.columns; ++i) {
+            for (int j = 0; j < entityminecart.rows; ++j) {
+                addSlotToContainer(new Slot(entityminecart, (j * entityminecart.columns) + i, 8 + (j * 18), 18 + (i* 18)));
+            }
         }
+
         //add player inventory slots
         for (int i = 0; i < 3; ++i) {//create a loop for columns
             for (int j = 0; j < 9; ++j) {//now do a loop for rows

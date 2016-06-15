@@ -31,7 +31,7 @@ public class ItemCore extends ItemMinecart implements IMinecart, IMinecartItem {
     public MinecartExtended placeCart(GameProfile owner, ItemStack cart, World world, int posX, int posY, int posZ) {
         return new MinecartExtended(owner.getId(), world, posX,posY,posZ, 120, new float[]{1,3,1}, null, null, 1,
                 new FluidTank[]{new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)},
-                9,GUITest.GUI_ID, 1001, true);
+                3,3,GUITest.GUI_ID, 1001, true);
     }
     //trains shouldn't match a cart filter.
     @Override
@@ -59,7 +59,7 @@ public class ItemCore extends ItemMinecart implements IMinecart, IMinecartItem {
             //boolean canBeRidden
             worldObj.spawnEntityInWorld(new MinecartExtended(playerEntity.getGameProfile().getId(), worldObj, posX,posY,posZ, 120, new float[]{1,3,1}, null, null, 1,
                     new FluidTank[]{new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)},
-                    9,GUITest.GUI_ID, 1001, true));
+                    3,3,GUITest.GUI_ID, 1001, true));
           return true;
         }
     }

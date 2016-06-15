@@ -7,11 +7,15 @@ import mods.railcraft.api.carts.IRoutableCart;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
 
@@ -35,6 +39,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     private int slotsFilled = 0; //used to manage
     public ItemStack[] inventory = new ItemStack[]{};//Inventory, every train will have this to some extent or another,
     public FluidTank[] tank = new FluidTank[]{};//depending on the train this is either used for diesel, steam, or redstone flux
+    public int rows =0; //defines the inventory width
+    public int columns =0;//defines inventory height
 
     //train values
     public float[] acceleration; //the first 3 values are a point curve, representing 0-35%, 35-70% and >70% to modify how acceleration is handled at each point. //the 4th value defines how much the weight hauled effects acceleration.
@@ -65,7 +71,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
                             Item[] storageItemFilter /*/ empty array for no filter /*/ , Material[] storageMaterialFilter /*/ empty array for no filter /*/ ,
                             int type /*1-steam, 2-diesel, 3-electric, 4-hydrogen, 5-nuclear, 0-RollingStock*/,
                             FluidTank[] tank /*/ empty array for no tanks, - steam and nuclear take two tanks. - all other trains take one tank - all tanks besides diesel should use FluidRegistry.WATER /*/,
-                            int inventorySlots, int GUIid, int minecartNumber, boolean canBeRidden) {
+                            int inventoryrows, int inventoryColumns /*/ the inventory is rows(x) * columns(y)/*/,
+                            int GUIid, int minecartNumber, boolean canBeRidden) {
         super(world,xPos, yPos, zPos);
         isLoco = true;
         this.maxSpeed = maxSpeed;
@@ -76,14 +83,11 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         this.canBeRidden = canBeRidden;
         this.tank = tank;
         trainType = type;
-        inventory = new ItemStack[inventorySlots];
-        inventory[0] = new ItemStack(Items.diamond, 2);
-        inventory[1] = new ItemStack(Items.diamond, 2);
-        inventory[2] = new ItemStack(Items.diamond, 2);
-        inventory[3] = new ItemStack(Items.diamond, 2);
-        inventory[4] = new ItemStack(Items.diamond, 2);
+        inventory = new ItemStack[inventoryrows * inventoryColumns];
         GUIID = GUIid;
         storageFilter = storageItemFilter;
+        rows = inventoryrows;
+        columns = inventoryColumns;
 
     }
 
@@ -308,6 +312,13 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         isRunning = tag.getBoolean("extended.isRunning");
         ticks = tag.getInteger("extended.ticks");
         destination = tag.getString("extended.destination");
+        //read through the itemstacks, if one item is an air block, then it's to be considered null.
+        for (int i=0; i<inventory.length; i++){
+            inventory[i].readFromNBT(tag);
+            if (inventory[i].equals(new ItemStack(Blocks.air, 1))){
+                inventory[i] = null;
+            }
+        }
         for (ItemStack is : inventory){
             is.readFromNBT(tag);
         }
@@ -329,12 +340,15 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         tag.setBoolean("extended.isRunning",isRunning);
         tag.setInteger("extended.ticks", ticks);
         tag.setString("extended.destination",destination);
+        //we can't write null items to nbt, so instead we write stacks of air blocks, and read them as null.
         for (ItemStack is : inventory){
-            is.writeToNBT(tag);
+            if (is!=null) {
+                is.writeToNBT(tag);
+            } else{
+                new ItemStack(Blocks.air, 1).writeToNBT(tag);
+            }
         }
     }
-
-
 
 
 
