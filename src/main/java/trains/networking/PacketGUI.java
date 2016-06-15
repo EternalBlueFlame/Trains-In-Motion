@@ -14,6 +14,8 @@ import trains.gui.GUITest;
 public class PacketGUI  implements IMessage {
     // The gui that was pressed.
     int gui;
+    //necessary, but unused constructor
+    public PacketGUI() {}
     //constructor
     public PacketGUI(int gui) {
         this.gui = gui;
@@ -34,9 +36,10 @@ public class PacketGUI  implements IMessage {
         public IMessage onMessage(PacketGUI message, MessageContext context) {
             //be sure the entities are correct
             EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
-            if (entityPlayer  != null && entityPlayer .ridingEntity instanceof MinecartExtended) {
+            if (entityPlayer  != null && entityPlayer.ridingEntity instanceof MinecartExtended) {
+                System.out.println("process");
                 //open the gui for the player
-                entityPlayer .openGui(TrainsInMotion.instance, GUITest.GUI_ID, entityPlayer .ridingEntity.worldObj,
+                entityPlayer .openGui(TrainsInMotion.instance, GUITest.GUI_ID, entityPlayer.ridingEntity.worldObj,
                         MathHelper.floor_double(entityPlayer.ridingEntity.posX), MathHelper.floor_double(entityPlayer.ridingEntity.posY), MathHelper.floor_double(entityPlayer.ridingEntity.posZ));
             }
             return null;

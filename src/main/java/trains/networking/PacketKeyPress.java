@@ -26,6 +26,8 @@ public class PacketKeyPress implements IMessage {
 
     //The key that was pressed.
     int key;
+    //necessary, but unused constructor
+    public PacketKeyPress() {}
     //constructor
     public PacketKeyPress(int key) {
         this.key = key;

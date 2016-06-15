@@ -7,6 +7,7 @@ import mods.railcraft.api.carts.IRoutableCart;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -32,7 +33,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
 
     //inventory
     private int slotsFilled = 0; //used to manage
-    public ItemStack[] inventory;//Inventory, every train will have this to some extent or another,
+    public ItemStack[] inventory = new ItemStack[]{};//Inventory, every train will have this to some extent or another,
     public FluidTank[] tank = new FluidTank[]{};//depending on the train this is either used for diesel, steam, or redstone flux
 
     //train values
@@ -76,6 +77,11 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         this.tank = tank;
         trainType = type;
         inventory = new ItemStack[inventorySlots];
+        inventory[0] = new ItemStack(Items.diamond, 2);
+        inventory[1] = new ItemStack(Items.diamond, 2);
+        inventory[2] = new ItemStack(Items.diamond, 2);
+        inventory[3] = new ItemStack(Items.diamond, 2);
+        inventory[4] = new ItemStack(Items.diamond, 2);
         GUIID = GUIid;
         storageFilter = storageItemFilter;
 
@@ -143,7 +149,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     @Override
     public void setInventorySlotContents(int slot, ItemStack itemstack) {
         //be sure item stack isn't null, then add the itemstack, and be sure the slot doesn't go over the limit.
-        if (itemstack != null) {
+        if (itemstack != null && slot >=0 && slot<inventory.length) {
             inventory[slot] = itemstack;
             if (itemstack.stackSize >= getInventoryStackLimit()) {
                 itemstack.stackSize = getInventoryStackLimit();
@@ -293,15 +299,18 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
-        colors = tag.getIntArray("extended.colors");
+        //colors = tag.getIntArray("extended.colors");
         isLocked = tag.getBoolean("extended.isLocked");
         brake = tag.getBoolean("extended.brake");
         lamp = tag.getBoolean("extended.lamp");
-        previousLampPosition = tag.getIntArray("extended.previousLamp");
+        //previousLampPosition = tag.getIntArray("extended.previousLamp");
         owner = new UUID(tag.getLong("extended.ownerM"),tag.getLong("extended.ownerL"));
         isRunning = tag.getBoolean("extended.isRunning");
         ticks = tag.getInteger("extended.ticks");
         destination = tag.getString("extended.destination");
+        for (ItemStack is : inventory){
+            is.readFromNBT(tag);
+        }
 
 
         //items with static-esk values that shouldn't need NBT,
@@ -310,17 +319,19 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
-        tag.setIntArray("extended.colors", colors);
+        //tag.setIntArray("extended.colors", colors);
         tag.setBoolean("extended.isLocked", isLocked);
         tag.setBoolean("extended.brake", brake);
         tag.setBoolean("extended.lamp", lamp);
-        tag.setIntArray("extended.previousLamp", previousLampPosition);
+        //tag.setIntArray("extended.previousLamp", previousLampPosition);
         tag.setLong("extended.ownerM", owner.getMostSignificantBits());
         tag.setLong("extended.ownerL", owner.getLeastSignificantBits());
         tag.setBoolean("extended.isRunning",isRunning);
         tag.setInteger("extended.ticks", ticks);
         tag.setString("extended.destination",destination);
-
+        for (ItemStack is : inventory){
+            is.writeToNBT(tag);
+        }
     }
 
 
