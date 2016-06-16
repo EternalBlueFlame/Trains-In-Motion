@@ -10,7 +10,6 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import trains.entities.MinecartExtended;
 
-import java.util.Iterator;
 
 
 public class InventoryHandler extends Container{
@@ -20,35 +19,29 @@ public class InventoryHandler extends Container{
     public InventoryHandler(InventoryPlayer iinventory, MinecartExtended entityminecart) {
         trainEntity = entityminecart;
         playerInv = iinventory;
+        //add player inventory slots
+        for (int ic = 0; ic < 9; ic++) {//create a loop for columns
+            for (int ir = 0; ir < 3; ir++) {//now do a loop for rows
+                addSlotToContainer(new Slot(playerInv, (((ir * 9) + ic) + 9), 8 + (ic * 18), 84 + (ir * 18)));
+            }
+        }
+
+
+        //add player toolbar
+        for (int iT = 0; iT < 9; iT++) {
+            addSlotToContainer(new Slot(playerInv, iT, 8 + iT * 18, 142));
+        }
+
+        //add the train's inventory
+        for (int ia = 0; ia < entityminecart.columns; ia++) {
+            for (int ib = 0; ib < entityminecart.rows; ib++) {
+                addSlotToContainer(new Slot(entityminecart, ((ib * entityminecart.columns) + ia), (8 + (ib * 18)), (8 + (ia * 18))));
+            }
+        }
+
+
 
         //switch train type add crafter slots
-        //for train slots this.addSlotToContainer
-
-
-        //add the train inventory
-        /*/
-        for (int i = 0; i < entityminecart.columns; ++i) {
-            for (int ii = 0; ii < entityminecart.rows; ++ii) {
-                addSlotToContainer(new Slot(entityminecart, (i + ii), (8 + ii) * 18, (i + 18) * 18));
-            }
-        }/*/
-        for (int i = 0; i < entityminecart.columns; ++i) {
-            for (int j = 0; j < entityminecart.rows; ++j) {
-                addSlotToContainer(new Slot(entityminecart, (j * entityminecart.columns) + i, 8 + (j * 18), 18 + (i* 18)));
-            }
-        }
-
-        //add player inventory slots
-        for (int i = 0; i < 3; ++i) {//create a loop for columns
-            for (int j = 0; j < 9; ++j) {//now do a loop for rows
-                addSlotToContainer(new Slot(playerInv, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
-            }
-        }
-        //add player toolbar
-        for (int i = 0; i < 9; ++i) {
-            addSlotToContainer(new Slot(playerInv, i, 8 + i * 18, 142));//142
-        }
-
     }
 
     //for sorting items from inventory to the train inventory, or the reverse way.
@@ -67,13 +60,22 @@ public class InventoryHandler extends Container{
     @Override
     public void updateProgressBar(int slotIndex, int updatedValue) {}
 
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void putStacksInSlots(ItemStack[] stack) {
+        for (int i = 0; i < stack.length; ++i) {
+            if (i < inventorySlots.size())
+            getSlot(i).putStack(stack[i]);
+        }
+    }
+
     //detects changes to slots
     @Override
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
 
         //used to keep track of if the crafter slot needs updating. also works for fluid tanks.
-       /*/ Iterator<?> itera;
+        /*/Iterator<?> itera;
         for (int i = 0; i < lastData.length; ++i) {
             if (lastData[i] != trainEntity.inventory[i]) {
                 lastData[i] = trainEntity.inventory[i];
