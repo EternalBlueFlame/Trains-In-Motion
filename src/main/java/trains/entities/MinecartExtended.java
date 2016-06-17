@@ -7,15 +7,11 @@ import mods.railcraft.api.carts.IRoutableCart;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
 
@@ -36,8 +32,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     private int minecartNumber = 0; //used to identify the minecart number so it doesn't interfere with other mods or the base game minecarts,
 
     //inventory
-    private int slotsFilled = 0; //used to manage
     public ItemStack[] inventory = new ItemStack[]{};//Inventory, every train will have this to some extent or another,
+    public ItemStack[] slots = new ItemStack[]{};//Inventory, every train will have this to some extent or another,
     public FluidTank[] tank = new FluidTank[]{};//depending on the train this is either used for diesel, steam, or redstone flux
     public int rows =0; //defines the inventory width
     public int columns =0;//defines inventory height
@@ -103,26 +99,18 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public void openInventory() {}
     @Override
     public void closeInventory() {}
-
-    //re-calculate stored variables when the entity needs refreshing
     @Override
-    public void markDirty() {
-        if (!worldObj.isRemote) {
-            slotsFilled = 0;
-            for (int i = 0; i < getSizeInventory(); i++) {
-                if (getStackInSlot(i) != null) {
-                    slotsFilled++;
-                }
-            }
-            //send the update packet
-        }
-    }
+    public void markDirty() {}
 
     @Override
     public ItemStack getStackInSlot(int slot) {
         //be sure the slot exists before trying to return anything,
         if (slot>=0 && slot< inventory.length) {
             return inventory[slot];
+        } else if(slot == -1){
+            return slots[0];
+        } else if (slot == -2) {
+            return slots[1];
         } else {
             return null;
         }
@@ -146,6 +134,28 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
             } else {
                 return inventory[slot].splitStack(amount);
             }
+        } else if (slot <0) {
+        //manage crafter slots for trains
+            switch (slot){
+                case -1:{
+                    if (slots[0].stackSize <= amount ^ slots[0].stackSize <= 0) {
+                        slots[0] = null;
+                        return null;
+                    } else {
+                        return inventory[slot].splitStack(amount);
+                    }
+                }
+                case -2:{
+                    if (slots[1].stackSize <= amount ^ slots[1].stackSize <= 0) {
+                        slots[1] = null;
+                        return null;
+                    } else {
+                        return slots[1].splitStack(amount);
+                    }
+                }
+                default:{return null;}
+            }
+
         } else {
             return null;
         }
@@ -154,11 +164,21 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public void setInventorySlotContents(int slot, ItemStack itemstack) {
         //be sure item stack isn't null, then add the itemstack, and be sure the slot doesn't go over the limit.
         if (itemstack != null && slot >=0 && slot<inventory.length) {
-            inventory[slot] = itemstack;
+            if (itemstack.stackSize >= getInventoryStackLimit()) {
+                itemstack.stackSize = getInventoryStackLimit();
+            }
+        } else if (itemstack != null && slot == -1){
+            slots[0] = itemstack;
+            if (itemstack.stackSize >= getInventoryStackLimit()) {
+                itemstack.stackSize = getInventoryStackLimit();
+            }
+        } else if (itemstack != null && slot == -2){
+            slots[1] = itemstack;
             if (itemstack.stackSize >= getInventoryStackLimit()) {
                 itemstack.stackSize = getInventoryStackLimit();
             }
         }
+        inventory[slot] = itemstack;
     }
 
     @Override
@@ -168,7 +188,9 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
 
     //return if the item can be placed in the slot, for this slot it's just a check if the slot exists, but other things may have slots for specific items, this filters that.
     @Override
-    public boolean isItemValidForSlot(int slot, ItemStack item){return (slot>=0 && slot< inventory.length);}
+    public boolean isItemValidForSlot(int slot, ItemStack item){
+        return (slot>=0 && slot< inventory.length);
+    }
 
     //return the number of inventory slots
     @Override
@@ -299,7 +321,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     /*/
     NBT
     /*/
-    //TODO doesn't manage inventory or tanks
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
@@ -312,18 +333,20 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         isRunning = tag.getBoolean("extended.isRunning");
         ticks = tag.getInteger("extended.ticks");
         destination = tag.getString("extended.destination");
-        //read through the itemstacks, if one item is an air block, then it's to be considered null.
-        for (int i=0; i<inventory.length; i++){
-            inventory[i].readFromNBT(tag);
-            if (inventory[i].equals(new ItemStack(Blocks.air, 1))){
-                inventory[i] = null;
+        //read through the itemstacks
+        NBTTagList taglist = tag.getTagList("Items", 10);
+        for (int i = 0; i < taglist.tagCount(); i++) {
+            NBTTagCompound nbttagcompound1 = taglist.getCompoundTagAt(i);
+            byte b0 = nbttagcompound1.getByte("Slot");
+
+            if (b0 >= 0 && b0 < inventory.length) {
+                inventory[b0] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
             }
         }
-        for (ItemStack is : inventory){
-            is.readFromNBT(tag);
+
+        for (int t=0; t<tank.length; t++){
+            tank[t].readFromNBT(tag);
         }
-
-
         //items with static-esk values that shouldn't need NBT,
         //name, maxSpeed, GUIID, minecartNumber, trainType, acceleration, filters, canBeRidden, isLoco.
     }
@@ -340,14 +363,22 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         tag.setBoolean("extended.isRunning",isRunning);
         tag.setInteger("extended.ticks", ticks);
         tag.setString("extended.destination",destination);
-        //we can't write null items to nbt, so instead we write stacks of air blocks, and read them as null.
-        for (ItemStack is : inventory){
-            if (is!=null) {
-                is.writeToNBT(tag);
-            } else{
-                new ItemStack(Blocks.air, 1).writeToNBT(tag);
+        //write the itemset to a tag list before adding it
+        NBTTagList nbttaglist = new NBTTagList();
+        for (int i = 0; i < inventory.length; ++i) {
+            if (inventory[i] != null) {
+                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+                nbttagcompound1.setByte("Slot", (byte)i);
+                inventory[i].writeToNBT(nbttagcompound1);
+                nbttaglist.appendTag(nbttagcompound1);
             }
         }
+        tag.setTag("Items", nbttaglist);
+
+        for (int t=0; t<tank.length; t++){
+            tank[t].writeToNBT(tag);
+        }
+
     }
 
 

@@ -39,9 +39,16 @@ public class InventoryHandler extends Container{
             }
         }
 
+        //1-steam, 2-diesel, 3-electric, 4-hydrogen, 5-nuclear, 0-RollingStock
+        //create the slots for the train's crafters, -1 is the main fuel slot, -2 is the second slot used for fluids.
+        if (entityminecart.trainType !=0){
+            addSlotToContainer(new Slot(entityminecart, -1, 26, 80));
+        }
+        if (entityminecart.trainType == 1 || entityminecart.trainType == 5){
+            addSlotToContainer(new Slot(entityminecart, -2, 42, 80));
+        }
+        //rollingstock switch for crafters here
 
-
-        //switch train type add crafter slots
     }
 
     //for sorting items from inventory to the train inventory, or the reverse way.
