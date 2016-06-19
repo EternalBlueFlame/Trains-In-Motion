@@ -23,7 +23,24 @@ public class FuelHandler {
             case 1: {
                 //if there is a burnable item in the fuel slot, and it can store more burnable fuel
                 if (steamFuel.contains(cart.inventory[0].getItem()) && cart.furnaceFuel + value[steamFuel.indexOf(cart.inventory[0].getItem())+1] < cart.maxFuel){
-                        cart.furnaceFuel += value[steamFuel.indexOf(cart.inventory[0].getItem()) + 1];
+                    //add the burnable fuel
+                    cart.furnaceFuel += value[steamFuel.indexOf(cart.inventory[0].getItem()) + 1];
+                    //decrease the stack size, or set slot to null if there will be none left.
+                    if (cart.inventory[0].stackSize >1) {
+                        cart.inventory[0].stackSize = cart.inventory[0].stackSize - 1;
+                    } else{
+                        cart.inventory[0] = null;
+                    }
+                }
+                //consume water bucket from second slot
+                if (cart.inventory[1].getItem() == Items.water_bucket && cart.tank[0].getFluidAmount() <= cart.tank[0].getCapacity()-1000){
+                    cart.tank[0].fill(new FluidStack(cart.tank[1].getFluid().getFluid(), cart.tank[1].getFluidAmount() + 1000), true);
+                    //decrease the stack size, or set slot to null if there will be none left.
+                    if (cart.inventory[1].stackSize >1) {
+                        cart.inventory[1].stackSize = cart.inventory[1].stackSize - 1;
+                    } else{
+                        cart.inventory[1] = null;
+                    }
                 }
 
                 //if the cart has fuel, process the fuel
