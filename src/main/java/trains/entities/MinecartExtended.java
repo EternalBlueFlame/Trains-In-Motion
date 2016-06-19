@@ -14,6 +14,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
+import trains.utility.FuelHandler;
 
 import java.util.UUID;
 
@@ -32,8 +33,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     private int minecartNumber = 0; //used to identify the minecart number so it doesn't interfere with other mods or the base game minecarts,
 
     //inventory
-    public ItemStack[] inventory = new ItemStack[]{};//Inventory, every train will have this to some extent or another,
-    public ItemStack[] slots = new ItemStack[]{};//Inventory, every train will have this to some extent or another,
+    public ItemStack[] inventory = new ItemStack[]{};//Inventory, every train will have this to some extent or another, //the first two slots are for crafting
     public FluidTank[] tank = new FluidTank[]{};//depending on the train this is either used for diesel, steam, or redstone flux
     public int rows =0; //defines the inventory width
     public int columns =0;//defines inventory height
@@ -43,6 +43,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public int trainType=0;//list of train types 0 is null, 1 is steam, 2 is diesel, 3 is electric
     public boolean isRunning = false;// if the train is running/using fuel
     private int ticks = 0; //tick count.
+    public int furnaceFuel = 0; //the amount of fuel in the furnace, only used for steam and nuclear trains
+    public int maxFuel =0; //the max fuel in the train's furnace.
 
     //rollingstock values
     public Item[] storageFilter = new Item[]{};//item set to use for filters, storage only accepts items in the filter
@@ -79,7 +81,13 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         this.canBeRidden = canBeRidden;
         this.tank = tank;
         trainType = type;
-        inventory = new ItemStack[inventoryrows * inventoryColumns];
+        int slots = inventoryColumns * inventoryrows;
+        if (type == 1 || type ==5){
+            slots = slots+2;
+        } else if (type != 0){
+            slots = slots+1;
+        }
+        inventory = new ItemStack[slots];
         GUIID = GUIid;
         storageFilter = storageItemFilter;
         rows = inventoryrows;
@@ -107,10 +115,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         //be sure the slot exists before trying to return anything,
         if (slot>=0 && slot< inventory.length) {
             return inventory[slot];
-        } else if(slot == -1){
-            return slots[0];
-        } else if (slot == -2) {
-            return slots[1];
         } else {
             return null;
         }
@@ -134,28 +138,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
             } else {
                 return inventory[slot].splitStack(amount);
             }
-        } else if (slot <0) {
-        //manage crafter slots for trains
-            switch (slot){
-                case -1:{
-                    if (slots[0].stackSize <= amount ^ slots[0].stackSize <= 0) {
-                        slots[0] = null;
-                        return null;
-                    } else {
-                        return inventory[slot].splitStack(amount);
-                    }
-                }
-                case -2:{
-                    if (slots[1].stackSize <= amount ^ slots[1].stackSize <= 0) {
-                        slots[1] = null;
-                        return null;
-                    } else {
-                        return slots[1].splitStack(amount);
-                    }
-                }
-                default:{return null;}
-            }
-
         } else {
             return null;
         }
@@ -164,16 +146,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public void setInventorySlotContents(int slot, ItemStack itemstack) {
         //be sure item stack isn't null, then add the itemstack, and be sure the slot doesn't go over the limit.
         if (itemstack != null && slot >=0 && slot<inventory.length) {
-            if (itemstack.stackSize >= getInventoryStackLimit()) {
-                itemstack.stackSize = getInventoryStackLimit();
-            }
-        } else if (itemstack != null && slot == -1){
-            slots[0] = itemstack;
-            if (itemstack.stackSize >= getInventoryStackLimit()) {
-                itemstack.stackSize = getInventoryStackLimit();
-            }
-        } else if (itemstack != null && slot == -2){
-            slots[1] = itemstack;
             if (itemstack.stackSize >= getInventoryStackLimit()) {
                 itemstack.stackSize = getInventoryStackLimit();
             }
@@ -254,37 +226,17 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         //create a manager for the ticks, that way we can do something different each tick to lessen the performance hit.
         switch (ticks){
             case 5:{
-                //manage fuels, no point in doing a check if this should be run or not, due to the overall efficiency of switch statements.
-                switch (trainType) {
-                    //steam
-                    case 1: {
-
-                        break;
-                    }
-                    //diesel
-                    case 2: {
-
-                        break;
-                    }
-                    //electric
-                    case 3: {
-
-                        break;
-                    }
-                    //hydrogen
-                    case 4: {
-
-                        break;
-                    }
-                    //nuclear
-                    case 5: {
-
-                        break;
-                    }
-                    //case for it not being a train
-                    default:{break;}
+                //call the class for managing the fuel
+                if (isRunning) {
+                    new FuelHandler(this);
                 }
                 break;
+            }
+            case 6: {
+                if (isRunning) {
+                    //manage speed
+                }
+                //manage movement
             }
             case 10:{
                 /*/ for managing the lamp, will need to implement it better later. Maybe do a client side only to change lighting of individual blocks?

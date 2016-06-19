@@ -35,17 +35,17 @@ public class InventoryHandler extends Container{
         //add the train's inventory
         for (int ia = 0; ia < entityminecart.columns; ia++) {
             for (int ib = 0; ib < entityminecart.rows; ib++) {
-                addSlotToContainer(new Slot(entityminecart, ((ib * entityminecart.columns) + ia), (8 + (ib * 18)), (8 + (ia * 18))));
+                addSlotToContainer(new Slot(entityminecart, ((ib * entityminecart.columns) + ia) +2, (8 + (ib * 18)), (8 + (ia * 18))));
             }
         }
 
         //1-steam, 2-diesel, 3-electric, 4-hydrogen, 5-nuclear, 0-RollingStock
         //create the slots for the train's crafters, -1 is the main fuel slot, -2 is the second slot used for fluids.
         if (entityminecart.trainType !=0){
-            addSlotToContainer(new Slot(entityminecart, -1, 26, 80));
+            addSlotToContainer(new Slot(entityminecart, 0, 26, 80));
         }
         if (entityminecart.trainType == 1 || entityminecart.trainType == 5){
-            addSlotToContainer(new Slot(entityminecart, -2, 42, 80));
+            addSlotToContainer(new Slot(entityminecart, 1, 42, 80));
         }
         //rollingstock switch for crafters here
 
