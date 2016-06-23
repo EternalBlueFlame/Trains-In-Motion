@@ -2,20 +2,33 @@ package trains.entities;
 
 
 import com.mojang.authlib.GameProfile;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.carts.IRoutableCart;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
 import net.minecraftforge.fluids.FluidTank;
 import trains.utility.FuelHandler;
 
+import java.util.List;
 import java.util.UUID;
 
 public class MinecartExtended extends EntityMinecart implements IMinecart, IRoutableCart, IInventory {
@@ -31,6 +44,19 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public int GUIID = 0; //id for the GUI
     public UUID owner = null;  //universal, get train owner
     private int minecartNumber = 0; //used to identify the minecart number so it doesn't interfere with other mods or the base game minecarts,
+
+    //due to limitations of rotation/position for the minecart, we have to implement them ourselves to a certain degree.
+    public boolean isServerInReverse = false;
+    protected int cartTurnProgress;
+    protected double cartX;
+    protected double cartY;
+    protected double cartZ;
+    protected float cartYaw;
+    protected float cartPitch;
+    protected double cartVelocityX;
+    protected double cartVelocityY;
+    protected double cartVelocityZ;
+
 
     //inventory
     public ItemStack[] inventory = new ItemStack[]{};//Inventory, every train will have this to some extent or another, //the first two slots are for crafting
@@ -97,7 +123,9 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
 
 
     /*/
-    Inventory stuff, most of this is self-explanatory.
+    *
+    * Inventory stuff, most of this is self-explanatory.
+    *
     /*/
     @Override
     public String getInventoryName() {
@@ -189,8 +217,11 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     }
 
     /*/
-    Core Minecart Overrides
+    *
+    * Core Minecart Overrides
+    *
     /*/
+
     //technically this is a normal minecart, so return the value for that, which isn't in the base game or another mod.
     @Override
     public int getMinecartType() {
@@ -215,13 +246,21 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         return true;
     }
 
+    //methods for getting/setting actual owner, not the railcraft one.
+    public void setOwner(UUID player){owner = player;}
+    public UUID getOwnerUUID(){return owner;}
 
     /*/
-    Function that runs every tick.
+    *
+    * Function that runs every tick.
+    *
     /*/
     @Override
     public void onUpdate() {
-        super.onUpdate();
+        //handle the core movement for minecarts, skip the first couple ticks so it's less laggy on spawn (tick 0), and in general by skipping 10% of the ticks.
+        if (ticks > 1) {
+            minecartMove();
+        }
         ticks++;
         //create a manager for the ticks, that way we can do something different each tick to lessen the performance hit.
         switch (ticks){
@@ -236,7 +275,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
                 if (isRunning) {
                     //manage speed
                 }
-                //manage movement
             }
             case 10:{
                 /*/ for managing the lamp, will need to implement it better later. Maybe do a client side only to change lighting of individual blocks?
@@ -258,20 +296,173 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
             default:{
                 //if the tick count is higher than the values used, reset it so it can count up again.
                 if (ticks>10){
-                ticks = 0;
+                ticks = 1;
                 }
                 break;
             }
 
         }
-
-
-
-
     }
 
+
     /*/
-    NBT
+    *
+    * Minecart movement functionality
+    *
+    /*/
+
+    //revamped core minecart movement functionality
+    private void minecartMove(){
+        if (getRollingAmplitude() > 0) {
+            setRollingAmplitude(getRollingAmplitude() - 1);
+        }
+
+        if (getDamage() > 0.0F) {
+            setDamage(getDamage() - 1.0F);
+        }
+        //if the cart has fallen out of the may, destroy it.
+        if (posY < -64.0D){
+            kill();
+        }
+        //this is just randomly recycled.
+        int i;
+        //manage transportation through portals
+        if (!worldObj.isRemote && worldObj instanceof WorldServer) {
+            worldObj.theProfiler.startSection("portal");
+            MinecraftServer minecraftserver = ((WorldServer)worldObj).func_73046_m();
+            i = getMaxInPortalTime();
+
+            if (inPortal) {
+                if (minecraftserver.getAllowNether()) {
+                    if (ridingEntity == null && portalCounter++ >= i) {
+                        portalCounter = i;
+                        timeUntilPortal = getPortalCooldown();
+
+                        if (worldObj.provider.dimensionId == -1) {
+                            travelToDimension(0);
+                        } else {
+                            travelToDimension(-1);
+                        }
+                    }
+
+                    inPortal = false;
+                }
+            } else {
+                if (portalCounter - 4 < 0) {
+                    portalCounter = 0;
+                } else{
+                    portalCounter -= 4;
+                }
+            }
+
+            if (timeUntilPortal > 0) {
+                --timeUntilPortal;
+            }
+
+            worldObj.theProfiler.endSection();
+        }
+        //manage position and rotation
+        if (worldObj.isRemote) {
+            if (cartTurnProgress > 0) {
+                double d6 = posX + (cartX - posX) / cartTurnProgress;
+                double d7 = posY + (cartY - posY) / cartTurnProgress;
+                double d1 = posZ + (cartZ - posZ) / cartTurnProgress;
+                rotationYaw = (float)(rotationYaw + MathHelper.wrapAngleTo180_double(cartYaw - rotationYaw) / cartTurnProgress);
+                rotationPitch = (rotationPitch + (cartPitch - rotationPitch) / cartTurnProgress);
+                --cartTurnProgress;
+                setPosition(d6, d7, d1);
+                setRotation(rotationYaw, rotationPitch);
+            } else {
+                setPosition(posX, posY, posZ);
+                setRotation(rotationYaw, rotationPitch);
+            }
+        } else {
+            prevPosX = posX;
+            prevPosY = posY;
+            prevPosZ = posZ;
+            motionY -= 0.03999999910593033D;
+            int l = MathHelper.floor_double(posX);
+            i = MathHelper.floor_double(posY);
+            int i1 = MathHelper.floor_double(posZ);
+
+            //deal with special rails
+            if (BlockRailBase.func_150049_b_(worldObj, l, i - 1, i1)) {
+                --i;
+            }
+            Block block = worldObj.getBlock(l, i, i1);
+            if (canUseRail() && BlockRailBase.func_150051_a(block)) {
+                float railMaxSpeed = ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, l, i, i1);
+                double maxSpeed = Math.min(railMaxSpeed, getCurrentCartSpeedCapOnRail());
+                func_145821_a(l, i, i1, maxSpeed, getSlopeAdjustment(), block, ((BlockRailBase)block).getBasicRailMetadata(worldObj, this, l, i, i1));
+
+                if (block == Blocks.activator_rail) {
+                    onActivatorRailPass(l, i, i1, (worldObj.getBlockMetadata(l, i, i1) & 8) != 0);
+                }
+            } else {
+                func_94088_b(onGround ? 0.4D : getMaxSpeedAirLateral());
+            }
+            //deal with the bounding box and collisions
+            func_145775_I();
+            AxisAlignedBB box;
+            if (getCollisionHandler() != null) {
+                box = getCollisionHandler().getMinecartCollisionBox(this);
+            } else {
+                box = boundingBox.expand(0.2D, 0.0D, 0.2D);
+            }
+
+            List list = worldObj.getEntitiesWithinAABBExcludingEntity(this, box);
+
+            if (list != null && !list.isEmpty()) {
+                for (int k = 0; k < list.size(); ++k) {
+                    Entity entity = (Entity)list.get(k);
+
+                    if (entity != riddenByEntity && entity.canBePushed() && entity instanceof EntityMinecart) {
+                        entity.applyEntityCollision(this);
+                    }
+                }
+            }
+
+            if (riddenByEntity != null && riddenByEntity.isDead) {
+                if (riddenByEntity.ridingEntity == this) {
+                    riddenByEntity.ridingEntity = null;
+                }
+
+                riddenByEntity = null;
+            }
+            //finally post a minecart update
+            MinecraftForge.EVENT_BUS.post(new MinecartUpdateEvent(this, l, i, i1));
+        }
+    }
+
+    //management for position and rotation via local variables since EntityMinecart's variables are private
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void setPositionAndRotation2(double x, double y, double z, float yaw, float pitch, int turnProgress) {
+        cartX = x;
+        cartY = y;
+        cartZ = z;
+        cartYaw = yaw;
+        cartPitch = pitch;
+        cartTurnProgress = turnProgress + 2;
+        motionX = cartVelocityX;
+        motionY = cartVelocityY;
+        motionZ = cartVelocityZ;
+    }
+    //more of the above
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void setVelocity(double x, double y, double z) {
+        cartVelocityX = motionX = x;
+        cartVelocityY = motionY = y;
+        cartVelocityZ = motionZ = z;
+    }
+
+
+
+    /*/
+    *
+    * NBT
+    *
     /*/
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
@@ -336,7 +527,9 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
 
 
     /*/
-    Railcraft support
+    *
+    * Railcraft support
+    *
     /*/
     @Override
     public String getDestination() {
@@ -357,9 +550,5 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     //used by railcraft, this is needed but we'll obsolete this with our own methods because this is just poor.
     @Override
     public GameProfile getOwner(){return null;}
-
-    //methods for getting/setting actual owner
-    public void setOwner(UUID player){owner = player;}
-    public UUID getOwnerUUID(){return owner;}
 
 }
