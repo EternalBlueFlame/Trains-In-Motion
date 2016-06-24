@@ -1,7 +1,12 @@
 package trains.entities;
 
 
+import java.util.List;
+import java.util.UUID;
+
 import com.mojang.authlib.GameProfile;
+
+import Movement.Accelerate;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mods.railcraft.api.carts.IMinecart;
@@ -28,9 +33,6 @@ import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
 import net.minecraftforge.fluids.FluidTank;
 import trains.utility.FuelHandler;
 
-import java.util.List;
-import java.util.UUID;
-
 public class MinecartExtended extends EntityMinecart implements IMinecart, IRoutableCart, IInventory {
 
     //Main Values
@@ -45,6 +47,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public UUID owner = null;  //universal, get train owner
     private int minecartNumber = 0; //used to identify the minecart number so it doesn't interfere with other mods or the base game minecarts,
 
+    //Movement entities
+    
     //due to limitations of rotation/position for the minecart, we have to implement them ourselves to a certain degree.
     public boolean isServerInReverse = false;
     protected int cartTurnProgress;
@@ -118,7 +122,11 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         storageFilter = storageItemFilter;
         rows = inventoryrows;
         columns = inventoryColumns;
-
+        
+        
+        //Movement test
+        if(!worldObj.isRemote)
+        	locomote();
     }
 
 
@@ -260,6 +268,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         //handle the core movement for minecarts, skip the first couple ticks so it's less laggy on spawn (tick 0), and in general by skipping 10% of the ticks.
         if (ticks > 1) {
             minecartMove();
+            locomote();
         }
         ticks++;
         //create a manager for the ticks, that way we can do something different each tick to lessen the performance hit.
@@ -310,9 +319,15 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     * Minecart movement functionality
     *
     /*/
-
+    //regular motion
+    public void locomote(){
+    	Accelerate minecart = new Accelerate(this, worldObj);
+    	minecart.moveMinecartOnRail(2000.0);
+    }
+    
+    
     //revamped core minecart movement functionality
-    private void minecartMove(){
+    public void minecartMove(){
         if (getRollingAmplitude() > 0) {
             setRollingAmplitude(getRollingAmplitude() - 1);
         }
