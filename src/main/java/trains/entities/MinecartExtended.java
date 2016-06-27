@@ -26,7 +26,10 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
 import net.minecraftforge.fluids.FluidTank;
+import trains.TrainsInMotion;
 import trains.utility.FuelHandler;
+import trains.blocks.LampBlock;
+import trains.utility.LampHandler;
 
 import java.util.List;
 import java.util.UUID;
@@ -38,8 +41,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public String name;
     public boolean isLocked = false; //mostly used to lock other players from using/accessing parts of the cart/train
     public boolean brake = false; //bool for the train/rollingstock's break.
-    public boolean lamp = false; //controls the headlight/lamp
-    public int[] previousLampPosition = new int[]{0,0,0}; //this is the position of the light previously, only two lights per train will ever exist at one time.
+    public LampHandler lamp; //manages the lamp, or lack there of.
     public float maxSpeed; // the max speed
     public int GUIID = 0; //id for the GUI
     public UUID owner = null;  //universal, get train owner
@@ -118,6 +120,9 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         storageFilter = storageItemFilter;
         rows = inventoryrows;
         columns = inventoryColumns;
+
+        //add train to main class handler when created, so the main thread can deal with lamps.
+        TrainsInMotion.carts.add(this);
 
     }
 
@@ -260,7 +265,9 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         //handle the core movement for minecarts, skip the first couple ticks so it's less laggy on spawn (tick 0), and in general by skipping 10% of the ticks.
         if (ticks > 1) {
             minecartMove();
+            lamp.ShouldUpdate(worldObj, posX, posY, posZ);
         }
+
         ticks++;
         //create a manager for the ticks, that way we can do something different each tick to lessen the performance hit.
         switch (ticks){
@@ -272,25 +279,9 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
                 break;
             }
             case 6: {
-                if (isRunning) {
-                    //manage speed
+                if (isRunning && furnaceFuel >0) {
+                    //manage acceleration
                 }
-            }
-            case 10:{
-                /*/ for managing the lamp, will need to implement it better later. Maybe do a client side only to change lighting of individual blocks?
-                if(previousLampPosition != new int[]{MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ+2)}){
-                    if(previousLampPosition != new int[]{0,0,0}) {
-                        worldObj.setBlockToAir(previousLampPosition[0], previousLampPosition[1], previousLampPosition[2]);
-                    }
-                    previousLampPosition=new int[]{MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ+2)};
-
-                    if (lamp && worldObj.isAirBlock(previousLampPosition[0], previousLampPosition[1], previousLampPosition[2])) {
-                        worldObj.setBlock(previousLampPosition[0], previousLampPosition[1], previousLampPosition[2], new BlockLight());
-                        System.out.println("created lamp child");
-                    }
-                }
-                /*/
-                break;
             }
             //other cases
             default:{
@@ -470,7 +461,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         //colors = tag.getIntArray("extended.colors");
         isLocked = tag.getBoolean("extended.isLocked");
         brake = tag.getBoolean("extended.brake");
-        lamp = tag.getBoolean("extended.lamp");
+        lamp.isOn = tag.getBoolean("extended.lamp");
         //previousLampPosition = tag.getIntArray("extended.previousLamp");
         owner = new UUID(tag.getLong("extended.ownerM"),tag.getLong("extended.ownerL"));
         isRunning = tag.getBoolean("extended.isRunning");
@@ -499,7 +490,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         //tag.setIntArray("extended.colors", colors);
         tag.setBoolean("extended.isLocked", isLocked);
         tag.setBoolean("extended.brake", brake);
-        tag.setBoolean("extended.lamp", lamp);
+        tag.setBoolean("extended.lamp", lamp.isOn);
         //tag.setIntArray("extended.previousLamp", previousLampPosition);
         tag.setLong("extended.ownerM", owner.getMostSignificantBits());
         tag.setLong("extended.ownerL", owner.getLeastSignificantBits());
@@ -523,8 +514,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         }
 
     }
-
-
 
     /*/
     *

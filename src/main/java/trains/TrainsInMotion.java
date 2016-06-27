@@ -1,14 +1,19 @@
 package trains;
 
+import net.minecraft.block.Block;
+import trains.registry.ItemRegistry;
+import trains.blocks.LampBlock;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.relauncher.Side;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraftforge.common.MinecraftForge;
-import org.lwjgl.input.Keyboard;
 import trains.entities.MinecartExtended;
-import trains.items.ItemCore;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 import trains.utility.CommonProxy;
@@ -21,13 +26,18 @@ import net.minecraft.creativetab.CreativeTabs;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
-import net.minecraft.item.Item;
+
+import java.util.List;
+
 
 @Mod(modid = TrainsInMotion.MODID, version = TrainsInMotion.VERSION)
 public class TrainsInMotion
 {
     public static final String MODID = "trainsinmotion";
     public static final String VERSION = "1.0pre-alpha";
+
+    private Minecraft ClientInstance;
+    public static List<MinecartExtended> carts;
 
     //resource directories
     public enum enumResources{RESOURCES("tim"), GUI_PREFIX("textures/gui/"),
@@ -43,8 +53,10 @@ public class TrainsInMotion
     public static TrainsInMotion instance;
     //define the creative tab, then the items
     public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
-    //items should be promoted to their own class that contains all the individual items, so we don't clutter the main class.
-    public static Item itemSets = new ItemCore().setUnlocalizedName("itemTest").setTextureName(MODID + ":itemTests");
+    //create the item registry
+    public  ItemRegistry itemSets = new ItemRegistry();
+    //initialize the lamp block
+    public static Block lampBlock = new LampBlock();
 
     //setup the proxy
     @SidedProxy(clientSide = "trains.utility.ClientProxy", serverSide = "trains.utility.CommonProxy")
@@ -54,6 +66,9 @@ public class TrainsInMotion
     //create the networking channel
     public static SimpleNetworkWrapper keyChannel;
 
+
+
+
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         //register the entity
@@ -61,14 +76,15 @@ public class TrainsInMotion
         EntityRegistry.registerGlobalEntityID(MinecartExtended.class, "entitytraincore", id);
         EntityRegistry.registerModEntity(MinecartExtended.class, "entitytraincore", id, instance, 64, 1, true);
 
+        //register the lamp block
+        GameRegistry.registerBlock(lampBlock, "lampblock");
+
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        //this should be a loop for all the items in the itemSet class
-        GameRegistry.registerItem(itemSets, itemSets.getUnlocalizedName().substring(5));
-        //setup the keybinds for the proxy
-        proxy.setKeyBinding("Lamp", Keyboard.KEY_L);
+        //register the items
+        itemSets.RegisterItems();
         //register GUI handler
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 
@@ -80,4 +96,17 @@ public class TrainsInMotion
         MinecraftForge.EVENT_BUS.register(new TiMEventHandler());
         FMLCommonHandler.instance().bus().register(new TiMEventHandler());
     }
+
+
+    @SubscribeEvent
+    public void onTick(TickEvent.ClientTickEvent tick) {
+        if (tick.phase == TickEvent.Phase.END && ClientInstance.theWorld != null && carts.size()>0) {
+            for (MinecartExtended cart : carts){
+                if (cart != null && cart.lamp.X !=0 && cart.lamp.Y != 0 && cart.lamp.Z !=0 && ClientInstance.theWorld.getBlock(cart.lamp.X, cart.lamp.Y, cart.lamp.Z) instanceof LampBlock) {
+                    ClientInstance.theWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
+                }
+            }
+        }
+    }
+
 }
