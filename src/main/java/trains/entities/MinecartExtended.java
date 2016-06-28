@@ -41,7 +41,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public String name;
     public boolean isLocked = false; //mostly used to lock other players from using/accessing parts of the cart/train
     public boolean brake = false; //bool for the train/rollingstock's break.
-    public LampHandler lamp; //manages the lamp, or lack there of.
+    public LampHandler lamp = new LampHandler(); //manages the lamp, or lack there of.
     public float maxSpeed; // the max speed
     public int GUIID = 0; //id for the GUI
     public UUID owner = null;  //universal, get train owner
@@ -122,7 +122,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         columns = inventoryColumns;
 
         //add train to main class handler when created, so the main thread can deal with lamps.
-        TrainsInMotion.carts.add(this);
+        TrainsInMotion.cartLamps.add(this.lamp);
 
     }
 

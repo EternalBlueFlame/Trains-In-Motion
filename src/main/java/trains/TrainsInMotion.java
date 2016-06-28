@@ -18,6 +18,7 @@ import trains.entities.MinecartExtended;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 import trains.utility.CommonProxy;
+import trains.utility.LampHandler;
 import trains.utility.TiMEventHandler;
 import trains.utility.TiMTab;
 import cpw.mods.fml.common.SidedProxy;
@@ -37,8 +38,8 @@ public class TrainsInMotion
     public static final String MODID = "trainsinmotion";
     public static final String VERSION = "1.0pre-alpha";
 
-    private Minecraft ClientInstance;
-    public static List<MinecartExtended> carts;
+    public Minecraft ClientInstance;
+    public static List<LampHandler> cartLamps;
 
     //resource directories
     public enum enumResources{RESOURCES("tim"), GUI_PREFIX("textures/gui/"),
@@ -84,6 +85,7 @@ public class TrainsInMotion
         //register the lamp block
         GameRegistry.registerBlock(lampBlock, "lampblock");
 
+        //handle the config file
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
 
         config.load();
@@ -95,7 +97,6 @@ public class TrainsInMotion
         KeyLamp = config.getString("LampKeybind","Keybinds", "l","").charAt(0);
 
         config.save();
-
     }
 
     @EventHandler
@@ -117,10 +118,13 @@ public class TrainsInMotion
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent tick) {
-        if (EnableLights && tick.phase == TickEvent.Phase.END && ClientInstance.theWorld != null && carts.size()>0) {
-            for (MinecartExtended cart : carts){
-                if (cart != null && cart.lamp.X !=0 && cart.lamp.Y != 0 && cart.lamp.Z !=0 && ClientInstance.theWorld.getBlock(cart.lamp.X, cart.lamp.Y, cart.lamp.Z) instanceof LampBlock) {
-                    ClientInstance.theWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
+        //handle processing lamps on the mod's main thread to be sure they update, doing this from any other thread is unreliable.
+        if (EnableLights && tick.phase == TickEvent.Phase.END && ClientInstance.theWorld != null && cartLamps.size()>0) {
+            //instance the lamp here because it's more efficient than instancing it every loop.
+            LampHandler tempLamp = new LampHandler();
+            for (LampHandler lamp : cartLamps){
+                if (lamp != tempLamp && ClientInstance.theWorld.getBlock(lamp.X, lamp.Y, lamp.Z) instanceof LampBlock) {
+                    ClientInstance.theWorld.updateLightByType(EnumSkyBlock.Block, lamp.X, lamp.Y, lamp.Z);
                 }
             }
         }
