@@ -1,6 +1,7 @@
 package trains;
 
 import net.minecraft.block.Block;
+import net.minecraftforge.common.config.Configuration;
 import trains.registry.ItemRegistry;
 import trains.blocks.LampBlock;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -67,6 +68,10 @@ public class TrainsInMotion
     public static SimpleNetworkWrapper keyChannel;
 
 
+    //setup the config values
+    private boolean EnableLights = true;
+    public char KeyLamp = 'l';
+    public char KeyInventory = 'i';
 
 
     @EventHandler
@@ -78,6 +83,18 @@ public class TrainsInMotion
 
         //register the lamp block
         GameRegistry.registerBlock(lampBlock, "lampblock");
+
+        Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+
+        config.load();
+
+        EnableLights = config.get(Configuration.CATEGORY_GENERAL, "EnableLamp", true).getBoolean(true);
+
+        config.addCustomCategoryComment("Keybinds", "accepted values are Lowercase a-z, along with the special characters:  ,.;'[]\\`-=");
+        KeyInventory = config.getString("InventoryKeybind","Keybinds", "i","").charAt(0);
+        KeyLamp = config.getString("LampKeybind","Keybinds", "l","").charAt(0);
+
+        config.save();
 
     }
 
@@ -100,12 +117,56 @@ public class TrainsInMotion
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent tick) {
-        if (tick.phase == TickEvent.Phase.END && ClientInstance.theWorld != null && carts.size()>0) {
+        if (EnableLights && tick.phase == TickEvent.Phase.END && ClientInstance.theWorld != null && carts.size()>0) {
             for (MinecartExtended cart : carts){
                 if (cart != null && cart.lamp.X !=0 && cart.lamp.Y != 0 && cart.lamp.Z !=0 && ClientInstance.theWorld.getBlock(cart.lamp.X, cart.lamp.Y, cart.lamp.Z) instanceof LampBlock) {
                     ClientInstance.theWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
                 }
             }
+        }
+    }
+
+
+    public static int parseKey(char key){
+        switch (key){
+            case 'a' :{return 30;}
+            case 'b' :{return 48;}
+            case 'c' :{return 46;}
+            case 'd' :{return 32;}
+            case 'e' :{return 18;}
+            case 'f' :{return 33;}
+            case 'g' :{return 34;}
+            case 'h' :{return 35;}
+            case 'i' :{return 23;}
+            case 'j' :{return 36;}
+            case 'k' :{return 37;}
+            case 'l' :{return 38;}
+            case 'm' :{return 50;}
+            case 'n' :{return 49;}
+            case 'o' :{return 24;}
+            case 'p' :{return 25;}
+            case 'q' :{return 16;}
+            case 'r' :{return 19;}
+            case 's' :{return 31;}
+            case 't' :{return 20;}
+            case 'u' :{return 22;}
+            case 'v' :{return 47;}
+            case 'w' :{return 17;}
+            case 'x' :{return 45;}
+            case 'y' :{return 21;}
+            case 'z' :{return 44;}
+            case ',' :{return 51;}
+            case '.' :{return 52;}
+            case '/' :{return 53;}
+            case ';' :{return 39;}
+            case '[' :{return 26;}
+            case ']' :{return 27;}
+            case '\\':{return 43;}
+            case '\'':{return 40;}
+            case '-' :{return 12;}
+            case '=' :{return 13;}
+            case '`' :{return 41;}
+            default: {return 0;}
         }
     }
 

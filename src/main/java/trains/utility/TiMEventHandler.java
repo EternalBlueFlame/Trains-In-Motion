@@ -21,11 +21,11 @@ public class TiMEventHandler {
     public void onClientKeyPress(InputEvent.KeyInputEvent event){
         if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof MinecartExtended) {
             //key for lamp
-            if (Keyboard.isKeyDown(Keyboard.KEY_L)) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(Keyboard.KEY_L));
+            if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyLamp))) {
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyLamp)));
             }
             //key for inventory
-            if (Keyboard.isKeyDown(Keyboard.KEY_I)) {
+            if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyInventory))) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketGUI(GUITest.GUI_ID));
             }
         }
@@ -38,41 +38,5 @@ public class TiMEventHandler {
             event.entityPlayer.mountEntity(event.target);
         }
     }
-
-
-
-    public int parseKey(char key){
-        switch (key){
-            case 'a' :{return 30;}
-            case 'b' :{return 48;}
-            case 'c' :{return 46;}
-            case 'd' :{return 32;}
-            case 'e' :{return 18;}
-            case 'f' :{return 33;}
-            case 'g' :{return 34;}
-            case 'h' :{return 35;}
-            case 'i' :{return 23;}
-            case 'j' :{return 36;}
-            case 'k' :{return 37;}
-            case 'l' :{return 38;}
-            case 'm' :{return 50;}
-            case 'n' :{return 49;}
-            case 'o' :{return 24;}
-            case 'p' :{return 25;}
-            case 'q' :{return 16;}
-            case 'r' :{return 19;}
-            case 's' :{return 31;}
-            case 't' :{return 20;}
-            case 'u' :{return 22;}
-            case 'v' :{return 47;}
-            case 'w' :{return 17;}
-            case 'x' :{return 45;}
-            case 'y' :{return 21;}
-            case 'z' :{return 44;}
-            //finish special characters later.
-            default: {return 0;}
-        }
-    }
-
 
 }
