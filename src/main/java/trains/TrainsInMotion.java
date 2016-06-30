@@ -14,9 +14,9 @@ import cpw.mods.fml.relauncher.Side;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraftforge.common.MinecraftForge;
-import trains.entities.MinecartExtended;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
+import trains.registry.TiMEntityRegistry;
 import trains.utility.CommonProxy;
 import trains.utility.LampHandler;
 import trains.utility.TiMEventHandler;
@@ -53,10 +53,12 @@ public class TrainsInMotion
 
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
-    //define the creative tab, then the items
+    //define the creative tab
     public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
-    //create the item registry
+    //create the registries
     public  ItemRegistry itemSets = new ItemRegistry();
+    public TiMEntityRegistry entities = new TiMEntityRegistry();
+
     //initialize the lamp block
     public static Block lampBlock = new LampBlock();
 
@@ -77,10 +79,8 @@ public class TrainsInMotion
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        //register the entity
-        int id = EntityRegistry.findGlobalUniqueEntityId();
-        EntityRegistry.registerGlobalEntityID(MinecartExtended.class, "entitytraincore", id);
-        EntityRegistry.registerModEntity(MinecartExtended.class, "entitytraincore", id, instance, 64, 1, true);
+        //register the entities
+        entities.registerEntities();
 
         //register the lamp block
         GameRegistry.registerBlock(lampBlock, "lampblock");

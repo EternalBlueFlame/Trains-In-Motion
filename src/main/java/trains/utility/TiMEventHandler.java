@@ -15,7 +15,6 @@ import trains.networking.PacketKeyPress;
 
 public class TiMEventHandler {
     //manage on key press, not for while a key is held, only for features that take a single key press
-    //TODO move these to something that can be changed in a config file
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onClientKeyPress(InputEvent.KeyInputEvent event){

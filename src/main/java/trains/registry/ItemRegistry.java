@@ -9,15 +9,14 @@ import static trains.TrainsInMotion.MODID;
 
 public class ItemRegistry {
 
-
+    //initialize the item
     public static Item testCart = new ItemCore().setUnlocalizedName("itemTest").setTextureName(MODID + ":itemTests");
 
     public ItemRegistry(){}
 
 
-
     public void RegisterItems(){
-
+        //register the item we initialized
         GameRegistry.registerItem(testCart, testCart.getUnlocalizedName().substring(5));
     }
 }

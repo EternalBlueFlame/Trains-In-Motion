@@ -24,4 +24,11 @@ public class ClientProxy extends CommonProxy {
             }
         }
     }
+
+    @Override
+    public void registerRenderers() {
+        //simple render .java model, for entity TODO need model
+        //RenderingRegistry.registerEntityRenderingHandler(FirstTrain.class, new Render(new MODEL.JAVA(), 0.5F));
+
+    }
 }

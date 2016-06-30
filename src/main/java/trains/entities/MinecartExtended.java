@@ -28,7 +28,6 @@ import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
 import net.minecraftforge.fluids.FluidTank;
 import trains.TrainsInMotion;
 import trains.utility.FuelHandler;
-import trains.blocks.LampBlock;
 import trains.utility.LampHandler;
 
 import java.util.List;
