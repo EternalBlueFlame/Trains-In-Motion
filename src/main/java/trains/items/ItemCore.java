@@ -57,8 +57,9 @@ public class ItemCore extends ItemMinecart implements IMinecart, IMinecartItem {
             //int GUIid,
             //int minecartNumber,
             //boolean canBeRidden
-            worldObj.spawnEntityInWorld(new MinecartExtended(playerEntity.getGameProfile().getId(), worldObj, posX,posY,posZ, 120, new float[]{1,3,1}, null, null, 1,
-                    new FluidTank[]{new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)},
+            worldObj.spawnEntityInWorld(new MinecartExtended(playerEntity.getGameProfile().getId(), worldObj, posX,posY,posZ, 120, new float[]{1,3,1},
+            		null, null, 1,
+            		new FluidTank[]{new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)},
                     3,3,GUITest.GUI_ID, 1001, true));
           return true;
         }

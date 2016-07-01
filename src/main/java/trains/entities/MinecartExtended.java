@@ -47,7 +47,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public UUID owner = null;  //universal, get train owner
     private int minecartNumber = 0; //used to identify the minecart number so it doesn't interfere with other mods or the base game minecarts,
 
-    //Movement entities
     
     //due to limitations of rotation/position for the minecart, we have to implement them ourselves to a certain degree.
     public boolean isServerInReverse = false;
@@ -73,9 +72,9 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public int trainType=0;//list of train types 0 is null, 1 is steam, 2 is diesel, 3 is electric
     public boolean isRunning = false;// if the train is running/using fuel
     private int ticks = 0; //tick count.
-    public int furnaceFuel = 0; //the amount of fuel in the furnace, only used for steam and nuclear trains
-    public int maxFuel =0; //the max fuel in the train's furnace.
-
+    public static float furnaceFuel = 2000f; //the amount of fuel in the furnace, only used for steam and nuclear trains
+    public int maxFuel = 0; //the max fuel in the train's furnace.
+    public int speed = 0;
     //rollingstock values
     public Item[] storageFilter = new Item[]{};//item set to use for filters, storage only accepts items in the filter
     public Material[] storageMaterialFilter = new Material[]{};//same as item filter but works for materials
@@ -124,9 +123,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         columns = inventoryColumns;
         
         
-        //Movement test
-        if(!worldObj.isRemote)
-        	locomote();
+
     }
 
 
@@ -246,7 +243,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     }
     @Override
     public boolean canBePushed() {
-        return true;
+        return false;
     }//TODO this should be false later when it can move on its own.
     @Override
     public boolean canRiderInteract()
@@ -266,9 +263,12 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     @Override
     public void onUpdate() {
         //handle the core movement for minecarts, skip the first couple ticks so it's less laggy on spawn (tick 0), and in general by skipping 10% of the ticks.
-        if (ticks > 1) {
-            minecartMove();
-            locomote();
+       if (ticks > 1) {
+            minecartMove(); 
+            //testing
+            if(furnaceFuel > 0){
+            	locomote();
+            }
         }
         ticks++;
         //create a manager for the ticks, that way we can do something different each tick to lessen the performance hit.
@@ -321,10 +321,20 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     /*/
     //regular motion
     public void locomote(){
-    	Accelerate minecart = new Accelerate(this, worldObj);
-    	minecart.moveMinecartOnRail(2000.0);
+        int l = MathHelper.floor_double(posX);
+        int i = MathHelper.floor_double(posY);
+        int i1 = MathHelper.floor_double(posZ);
+
+    	boolean isRailUnder = BlockRailBase.func_150049_b_(worldObj, l, i - 1, i1);
+    	if(isRailUnder){
+    		Accelerate minecart = new Accelerate(this, worldObj, posX, posY, posZ);
+    		minecart.moveMinecartOnRail(speed);
+    	} else{
+    		
+    		speed -= 10;
+    		
+    	}
     }
-    
     
     //revamped core minecart movement functionality
     public void minecartMove(){
@@ -565,5 +575,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     //used by railcraft, this is needed but we'll obsolete this with our own methods because this is just poor.
     @Override
     public GameProfile getOwner(){return null;}
+    //to apply drag in minecraft
+    
 
 }
