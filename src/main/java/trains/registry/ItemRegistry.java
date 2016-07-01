@@ -3,14 +3,14 @@ package trains.registry;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.item.Item;
-import trains.items.ItemCore;
+import trains.items.ItemFirstTrain;
 
 import static trains.TrainsInMotion.MODID;
 
 public class ItemRegistry {
 
     //initialize the item
-    public static Item testCart = new ItemCore().setUnlocalizedName("itemTest").setTextureName(MODID + ":itemTests");
+    public static Item testCart = new ItemFirstTrain().setUnlocalizedName("itemTest").setTextureName(MODID + ":itemTests");
 
     public ItemRegistry(){}
 

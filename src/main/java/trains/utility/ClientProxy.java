@@ -4,27 +4,38 @@ package trains.utility;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import trains.entities.MinecartExtended;
-import trains.gui.GUITest;
+import trains.gui.GUITrain;
 
 public class ClientProxy extends CommonProxy {
-    //Register the client side of the gui
+    /**
+     * defines the GUI element to display based on the ID
+     * returns null if the player, cart or ID is invalid
+     *
+     * the inventory manager that server uses for this menu is defined in
+     * @see CommonProxy#getServerGuiElement(int, EntityPlayer, World, int, int, int)
+     */
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        switch (ID) {
-            case GUITest.GUI_ID: {
-                if (player != null && player.ridingEntity instanceof MinecartExtended) {
-                    return new GUITest(player.inventory, (MinecartExtended) player.ridingEntity);
-                } else {
+        if (player != null && player.ridingEntity instanceof MinecartExtended) {
+            switch (ID) {
+                case GUITrain.GUI_ID: {
+                    return new GUITrain(player.inventory, (MinecartExtended) player.ridingEntity);
+                }
+
+                default: {
                     return null;
                 }
             }
+        } else{
 
-            default:{
-                return null;
-            }
+            return null;
         }
     }
 
+    /**
+     * registers the model for the trains/rolling stock
+     * @see trains.entities.render.Render
+     */
     @Override
     public void registerRenderers() {
         //simple render .java model, for entity TODO need model

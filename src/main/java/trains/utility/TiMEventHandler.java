@@ -9,28 +9,35 @@ import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import org.lwjgl.input.Keyboard;
 import trains.TrainsInMotion;
 import trains.entities.MinecartExtended;
-import trains.gui.GUITest;
+import trains.gui.GUITrain;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 
 public class TiMEventHandler {
-    //manage on key press, not for while a key is held, only for features that take a single key press
+    /**
+     * manages the key press event, doesn't work for when a key is held, that would need to be in the onUpdate event.
+     *
+     * @param event the event of a key being pressed on client.
+     */
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onClientKeyPress(InputEvent.KeyInputEvent event){
         if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof MinecartExtended) {
-            //key for lamp
+            //for lamp
             if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyLamp))) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyLamp)));
             }
-            //key for inventory
+            //for inventory
             if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyInventory))) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketGUI(GUITest.GUI_ID));
+                TrainsInMotion.keyChannel.sendToServer(new PacketGUI(GUITrain.GUI_ID));
             }
         }
     }
 
-    //make trains rideable
+    /**
+     * this event manages when the player tries to interact with the train/rollingstock to ride it.
+     * IDE reports that the function is never used, which is lies.
+     */
     @SubscribeEvent
     public void entityInteractEvent(EntityInteractEvent event) {
         if (event.target instanceof MinecartExtended && !event.entity.worldObj.isRemote && (event.target.riddenByEntity == null || event.target.riddenByEntity == event.entityPlayer)) {

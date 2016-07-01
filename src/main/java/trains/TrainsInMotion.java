@@ -9,7 +9,6 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.EnumSkyBlock;
@@ -38,8 +37,6 @@ public class TrainsInMotion
     public static final String MODID = "trainsinmotion";
     public static final String VERSION = "1.0pre-alpha";
 
-    public Minecraft ClientInstance;
-    public static List<LampHandler> cartLamps;
 
     //resource directories
     public enum enumResources{RESOURCES("tim"), GUI_PREFIX("textures/gui/"),
@@ -51,25 +48,32 @@ public class TrainsInMotion
         public String getValue(){return value;}
     };
 
+    /**
+     * initialize all the instances, creative tabs, the lamp handler, and the block/item/entity registries.
+     * most of these we will have to actually setup later, in other parts of the mod.
+     *
+     * setup the proxy
+     * @see CommonProxy
+     * @see trains.utility.ClientProxy
+     *
+     * setup the networking channels'
+     *
+     * lastly setup the config values.
+     */
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
-    //define the creative tab
+    public Minecraft ClientInstance;
     public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
-    //create the registries
+    public static List<LampHandler> cartLamps;
     public  ItemRegistry itemSets = new ItemRegistry();
     public TiMEntityRegistry entities = new TiMEntityRegistry();
-
-    //initialize the lamp block
     public static Block lampBlock = new LampBlock();
 
-    //setup the proxy
     @SidedProxy(clientSide = "trains.utility.ClientProxy", serverSide = "trains.utility.CommonProxy")
     public static CommonProxy proxy;
 
-
     //create the networking channel
     public static SimpleNetworkWrapper keyChannel;
-
 
     //setup the config values
     private boolean EnableLights = true;
@@ -77,13 +81,14 @@ public class TrainsInMotion
     public char KeyInventory = 'i';
 
 
+    /**
+     * register the entities and load/create the config file.
+     * @param event pre-load event.
+     */
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         //register the entities
         entities.registerEntities();
-
-        //register the lamp block
-        GameRegistry.registerBlock(lampBlock, "lampblock");
 
         //handle the config file
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
@@ -99,10 +104,23 @@ public class TrainsInMotion
         config.save();
     }
 
+    /**
+     * register the items and blocks here, do not register them in pre-int, it creates incompatibilities with other mods.
+     *
+     * register the GUI handler
+     *
+     * register the channels for networking
+     *
+     * lastly register the event handler.
+     *
+     * @param event actual load event
+     */
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        //register the items
+        //item/block registry
+        GameRegistry.registerBlock(lampBlock, "lampblock");
         itemSets.RegisterItems();
+
         //register GUI handler
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 
@@ -116,9 +134,17 @@ public class TrainsInMotion
     }
 
 
+    /**
+     * this is used to force events from the main thread of the mod, it can create a lot of lag sometimes.
+     *
+     * Currently it's used to force lighting updates (if enabled in config).
+     * This is the best way I have found to do it other than making a fully new lighting system.
+     * It also only updates if it's actually needed, to help preserve performance.
+     *
+     * @param tick the client tick event from the main thread
+     */
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent tick) {
-        //handle processing lamps on the mod's main thread to be sure they update, doing this from any other thread is unreliable.
         if (EnableLights && tick.phase == TickEvent.Phase.END && ClientInstance.theWorld != null && cartLamps.size()>0) {
             //instance the lamp here because it's more efficient than instancing it every loop.
             LampHandler tempLamp = new LampHandler();
@@ -131,6 +157,11 @@ public class TrainsInMotion
     }
 
 
+    /**
+     *
+     * @param key the key trying to be parsed
+     * @return the key's value to return, wether or not it was valid.
+     */
     public static int parseKey(char key){
         switch (key){
             case 'a' :{return 30;}
@@ -170,7 +201,10 @@ public class TrainsInMotion
             case '-' :{return 12;}
             case '=' :{return 13;}
             case '`' :{return 41;}
-            default: {return 0;}
+            default: {
+                System.out.println("Invalid key: " + key);
+                return 0;
+            }
         }
     }
 

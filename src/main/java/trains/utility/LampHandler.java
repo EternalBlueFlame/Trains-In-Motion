@@ -11,7 +11,17 @@ public class LampHandler {
     public int Z;
     public boolean isOn;
 
-    //functions for quick checking if the lamp should update
+    /**
+     * used to check if the lamp needs a position update.
+     * We extend this into its own class so we can better manage the variables.
+     * this us used by
+     * @see trains.entities.MinecartExtended
+     *
+     * @param worldObj the world to place the lamp.
+     * @param x the X position to place the lamp at.
+     * @param y the Y position to place the lamp at.
+     * @param z the Z position to place the lamp at.
+     */
     public void ShouldUpdate(World worldObj, double x, double y, double z){
         if(isOn && (X !=MathHelper.floor_double(x) ^ Y != MathHelper.floor_double(y) ^ Z != MathHelper.floor_double(z))){
             //if there was a block placed previously, remove it.
