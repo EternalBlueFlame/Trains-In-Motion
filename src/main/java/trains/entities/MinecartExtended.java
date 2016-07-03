@@ -326,14 +326,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         int i1 = MathHelper.floor_double(posZ);
 
     	boolean isRailUnder = BlockRailBase.func_150049_b_(worldObj, l, i - 1, i1);
-    	if(isRailUnder){
-    		Accelerate minecart = new Accelerate(this, worldObj, posX, posY, posZ);
-    		minecart.moveMinecartOnRail(speed);
-    	} else{
-    		
-    		speed -= 10;
-    		
-    	}
+    	Accelerate minecart = new Accelerate(this, worldObj, posX, posY, posZ);
+    	minecart.moveMinecartOnRail(2000);
     }
     
     //revamped core minecart movement functionality
