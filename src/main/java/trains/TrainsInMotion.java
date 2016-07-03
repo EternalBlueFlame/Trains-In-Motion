@@ -1,7 +1,9 @@
 package trains;
 
+import cpw.mods.fml.client.registry.ClientRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
 import trains.entities.MinecartExtended;
 import trains.registry.ItemRegistry;
@@ -36,19 +38,22 @@ import java.util.List;
 @Mod(modid = TrainsInMotion.MODID, version = TrainsInMotion.VERSION)
 public class TrainsInMotion
 {
-    public static final String MODID = "trainsinmotion";
+    public static final String MODID = "tim";
     public static final String VERSION = "1.0pre-alpha";
     public static List<MinecartExtended> carts;
 
 
     //resource directories
-    public enum enumResources{RESOURCES("tim"), GUI_PREFIX("textures/gui/"),
+    public enum Resources{GUI_PREFIX("textures/gui/"),
         MODEL_TRAIN("models/train/"), MODEL_TRAIN_TEXTURE("models/train/texture/"),
         MODEL_ROLLINGSTOCK("models/rollingstock/"), MODEL_ROLLINGSTOCK_TEXTURE("models/rollingstock/texture/"),
-        MODEL_RAIL("models/rail"), MODEL_RAIL_TEXTURES("models/rail/texture");
+        MODEL_RAIL("models/rail/"), MODEL_RAIL_TEXTURES("models/rail/texture/"),
+        TEXTURE("texture/");
         private String value;
-        enumResources(String value) {this.value = value;}
+        Resources(String value) {this.value = value;}
         public String getValue(){return value;}
+
+        public ResourceLocation getResourceLocation(String fileName){return new ResourceLocation(MODID, value + fileName);}
     };
 
     /**
@@ -133,6 +138,8 @@ public class TrainsInMotion
 
         MinecraftForge.EVENT_BUS.register(new TiMEventHandler());
         FMLCommonHandler.instance().bus().register(new TiMEventHandler());
+
+        proxy.registerRenderers();
     }
 
 

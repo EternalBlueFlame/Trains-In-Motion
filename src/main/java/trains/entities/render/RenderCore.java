@@ -8,7 +8,7 @@ import trains.TrainsInMotion;
 import trains.entities.MinecartExtended;
 import trains.utility.ClientProxy;
 
-public class Render extends RenderBiped {
+public class RenderCore extends RenderBiped {
 
     /**
      * this class defines basic .java rendering,
@@ -18,7 +18,7 @@ public class Render extends RenderBiped {
      * @param model defines the model to be used
      * @param shadowSize defines the size of the shadow that the model should have
      */
-    public Render(ModelBiped model, float shadowSize) {
+    public RenderCore(ModelBiped model, float shadowSize) {
         super(model, shadowSize);
     }
 
@@ -36,16 +36,16 @@ public class Render extends RenderBiped {
             switch (((MinecartExtended) entity).getMinecartType()) {
                 //this is for FirstTrain
                 case 1001: {
-                    return new ResourceLocation(TrainsInMotion.enumResources.MODEL_TRAIN + "entity.png");
+                    return new ResourceLocation(TrainsInMotion.Resources.MODEL_TRAIN + "entity.png");
                 }
                 //all else fails, return a null texture, because pink and black is always in style.
                 default: {
-                    return new ResourceLocation(TrainsInMotion.enumResources.MODEL_TRAIN + "null.png");
+                    return new ResourceLocation(TrainsInMotion.Resources.MODEL_TRAIN + "null.png");
                 }
             }
         } else {
             //all else fails, return a null texture, because pink and black is always in style.
-            return new ResourceLocation(TrainsInMotion.enumResources.MODEL_TRAIN + "null.png");
+            return new ResourceLocation(TrainsInMotion.Resources.MODEL_TRAIN + "null.png");
         }
     }
 }

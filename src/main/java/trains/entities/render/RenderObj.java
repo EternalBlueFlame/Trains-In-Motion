@@ -1,20 +1,26 @@
 package trains.entities.render;
 
 
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.IModelCustom;
 import net.minecraftforge.client.model.obj.ObjModelLoader;
 import org.lwjgl.opengl.GL11;
+import trains.TrainsInMotion;
 
-public class RenderObj extends TileEntitySpecialRenderer{
+import java.io.File;
+
+public class RenderObj extends Render {
 
     private IModelCustom model;
     private ResourceLocation texture;
 
-    public void renderTileEntityAt(TileEntity tileEntity, double x, double y, double z, float f)
-    {
+    public ResourceLocation getEntityTexture(Entity entity){
+        return texture;
+    }
+
+    public void doRender(Entity entity, double x, double y, double z, float p_76986_8_, float p_76986_9_){
         //OpenGL stuff
         GL11.glPushMatrix();
         GL11.glTranslated(x, y, z);
@@ -25,12 +31,16 @@ public class RenderObj extends TileEntitySpecialRenderer{
 
         //OpenGL stuff to put everything back
         GL11.glPopMatrix();
-    }
 
+    }
 
 
     public RenderObj(ResourceLocation modelLoad, ResourceLocation textureLoad) {
         model = new ObjModelLoader().loadInstance(modelLoad);
-        texture = textureLoad;
+        if (new File(textureLoad.getResourcePath()).exists()) {
+            texture = textureLoad;
+        } else{
+            texture = TrainsInMotion.Resources.TEXTURE.getResourceLocation("null.png");
+        }
     }
 }

@@ -55,12 +55,12 @@ public class GUITrain extends GuiContainer {
         //draw the gui background color
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         //set the texture.
-        mc.renderEngine.bindTexture(new ResourceLocation(TrainsInMotion.enumResources.RESOURCES.getValue(), TrainsInMotion.enumResources.GUI_PREFIX.getValue() + "gui_example.png"));
+        mc.renderEngine.bindTexture(new ResourceLocation(TrainsInMotion.MODID, TrainsInMotion.Resources.GUI_PREFIX.getValue() + "gui_example.png"));
         //draw the texture
         drawTexturedModalRect((width - xSize) / 2, (height - ySize) / 2, 0, 0, xSize, ySize);
 
 
-        mc.renderEngine.bindTexture(new ResourceLocation(TrainsInMotion.enumResources.RESOURCES.getValue(), TrainsInMotion.enumResources.GUI_PREFIX.getValue() + "gui_player_slot.png"));
+        mc.renderEngine.bindTexture(new ResourceLocation(TrainsInMotion.MODID, TrainsInMotion.Resources.GUI_PREFIX.getValue() + "gui_player_slot.png"));
         for (int ic = 0; ic < 9; ic++) {
             for (int ir = 0; ir < 3; ir++) {
                 drawTexturedModalRect( 8 + (ic * 18),  84 + (ir * 18), 0, 0, xSize, ySize);

@@ -26,6 +26,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
 import net.minecraftforge.fluids.FluidTank;
 import trains.TrainsInMotion;
+import trains.entities.render.RenderCore;
 import trains.utility.LampHandler;
 
 import java.util.List;
@@ -97,7 +98,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
      * @param inventoryColumns defines the columns of the inventory.
      * @param GUIid the ID used to define what GUI the entity uses (0 for no GUI).
      * @param minecartNumber used to define the unique ID of the minecart, this prevents issues with base game and modded minecarts, This also defines the texture
-     *                       @see trains.entities.render.Render
+     *                       @see RenderCore
      * @param canBeRidden used to toggle if the player can ride the entity.
      */
     public MinecartExtended(UUID owner, World world, double xPos, double yPos, double zPos, int type, FluidTank[] tank, int inventoryrows,
@@ -229,7 +230,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     *
      * technically this is a normal minecart, which is why it works on normal tracks.
      * aside from that we also use getMinecartType to define the texture for the entity, an odd way to do it, but its simple and works.
-     * @see trains.entities.render.Render
+     * @see RenderCore
      *
      * TODO canBePushed should be false later when it can move on its own.
      *
