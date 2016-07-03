@@ -11,11 +11,14 @@ import trains.entities.MinecartExtended;
 
 
 public class CommonProxy implements IGuiHandler {
-    //setup the key bindings
-    public void setKeyBinding(String name, int value) {
-        ClientRegistry.registerKeyBinding(new KeyBinding(name, value, TrainsInMotion.MODID));
-    }
-    //manage the server-side GUI stuff
+
+    /**
+     * defines the GUI element for the server, this is actually just the inventory manager
+     * @see InventoryHandler
+     *
+     * we have to define the stuff for client here too, but we don't actually use them because server never rendered anything
+     * @see ClientProxy
+     */
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         if(player !=null && player.ridingEntity instanceof MinecartExtended){
@@ -23,7 +26,8 @@ public class CommonProxy implements IGuiHandler {
         }
         return null;
     }
-    //do this in ClientProxy
+
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {return null;}
+    public void registerRenderers() {}
 }

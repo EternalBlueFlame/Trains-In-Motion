@@ -5,21 +5,23 @@ import java.util.List;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
+<<<<<<< HEAD
 
 import Movement.Accelerate;
+=======
+import cpw.mods.fml.common.gameevent.TickEvent;
+>>>>>>> refs/remotes/EternalBlueFlame/master
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.carts.IRoutableCart;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -31,7 +33,9 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
 import net.minecraftforge.fluids.FluidTank;
-import trains.utility.FuelHandler;
+import trains.TrainsInMotion;
+import trains.entities.render.RenderCore;
+import trains.utility.LampHandler;
 
 public class MinecartExtended extends EntityMinecart implements IMinecart, IRoutableCart, IInventory {
 
@@ -40,16 +44,15 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public String name;
     public boolean isLocked = false; //mostly used to lock other players from using/accessing parts of the cart/train
     public boolean brake = false; //bool for the train/rollingstock's break.
-    public boolean lamp = false; //controls the headlight/lamp
-    public int[] previousLampPosition = new int[]{0,0,0}; //this is the position of the light previously, only two lights per train will ever exist at one time.
-    public float maxSpeed; // the max speed
+    public LampHandler lamp = new LampHandler(); //manages the lamp, or lack there of.
     public int GUIID = 0; //id for the GUI
     public UUID owner = null;  //universal, get train owner
     private int minecartNumber = 0; //used to identify the minecart number so it doesn't interfere with other mods or the base game minecarts,
+    public boolean canBeRidden;
+    private int ticks = 0; //tick count.
 
     
     //due to limitations of rotation/position for the minecart, we have to implement them ourselves to a certain degree.
-    public boolean isServerInReverse = false;
     protected int cartTurnProgress;
     protected double cartX;
     protected double cartY;
@@ -67,6 +70,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public int rows =0; //defines the inventory width
     public int columns =0;//defines inventory height
 
+<<<<<<< HEAD
     //train values
     public float[] acceleration; //the first 3 values are a point curve, representing 0-35%, 35-70% and >70% to modify how acceleration is handled at each point. //the 4th value defines how much the weight hauled effects acceleration.
     public int trainType=0;//list of train types 0 is null, 1 is steam, 2 is diesel, 3 is electric
@@ -83,55 +87,81 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     //railcraft variables
     public String destination = "";  //railcraft destination
     public boolean isLoco = false;  //if this can accept destination tickets, aka is a locomotive
+=======
+>>>>>>> refs/remotes/EternalBlueFlame/master
 
-
-    /*/
-    Functions
-    /*/
-
-    //default constructor for registering entity
+    /**
+     * we have to have the constructor for the initial spawn that puts the train in the world, minecraft does this, we don't have to mess with it other than just having it.
+     *
+     * @param world the world to spawn it in.
+     */
     public MinecartExtended(World world) {
         super(world);
     }
-    //default constructor we actually use
-    public MinecartExtended(UUID owner, World world, double xPos, double yPos, double zPos, float maxSpeed, float[] acceleration,
-                            Item[] storageItemFilter /*/ empty array for no filter /*/ , Material[] storageMaterialFilter /*/ empty array for no filter /*/ ,
-                            int type /*1-steam, 2-diesel, 3-electric, 4-hydrogen, 5-nuclear, 0-RollingStock*/,
-                            FluidTank[] tank /*/ empty array for no tanks, - steam and nuclear take two tanks. - all other trains take one tank - all tanks besides diesel should use FluidRegistry.WATER /*/,
-                            int inventoryrows, int inventoryColumns /*/ the inventory is rows(x) * columns(y)/*/,
-                            int GUIid, int minecartNumber, boolean canBeRidden) {
+
+    /**
+     * this class defines the core of all trains and rollingstock, most of the large and messy code is here to make sure it's clean elsewhere.
+     *
+     * for things generic to rolling stock:
+     * @see EntityRollingStockCore
+     *
+     * for things generic to  trains:
+     * @see EntityTrainCore
+     *
+     * for things generic to both these classes:
+     * @see MinecartExtended
+     *
+     * default constructor for setting up variables after this is created
+     * @param owner the owner profile, used to define owner of the entity,
+     * @param world the world to spawn the entity in, used in super.
+     * @param xPos the x position to spawn entity at, used in super.
+     * @param yPos the y position to spawn entity at, used in super.
+     * @param zPos the z position to spawn entity at, used in  super.
+     * @param type what kind of rolling stock or train it is.
+     * @param tank used to define the fluid tank(s) if there are any
+     * @param inventoryrows defines the rows of inventory, inventory size is defined by rows * columns. More are added manually by code if there are crafting slots.
+     * @param inventoryColumns defines the columns of the inventory.
+     * @param GUIid the ID used to define what GUI the entity uses (0 for no GUI).
+     * @param minecartNumber used to define the unique ID of the minecart, this prevents issues with base game and modded minecarts, This also defines the texture
+     *                       @see RenderCore
+     * @param canBeRidden used to toggle if the player can ride the entity.
+     */
+    public MinecartExtended(UUID owner, World world, double xPos, double yPos, double zPos, int type, FluidTank[] tank, int inventoryrows,
+                            int inventoryColumns, int GUIid, int minecartNumber, boolean canBeRidden) {
         super(world,xPos, yPos, zPos);
-        isLoco = true;
-        this.maxSpeed = maxSpeed;
-        this.acceleration = acceleration;
         this.owner = owner;
         this.minecartNumber = minecartNumber;
-        this.storageMaterialFilter = storageMaterialFilter;
         this.canBeRidden = canBeRidden;
         this.tank = tank;
-        trainType = type;
         int slots = inventoryColumns * inventoryrows;
         if (type == 1 || type ==5){
             slots = slots+2;
-        } else if (type != 0){
+        } else if (type == 2 || type == 3 || type ==4){
             slots = slots+1;
         }
         inventory = new ItemStack[slots];
         GUIID = GUIid;
-        storageFilter = storageItemFilter;
         rows = inventoryrows;
         columns = inventoryColumns;
         
         
 
+
+        if(worldObj.isRemote ){
+            /**
+             * add lamp to main class handler when created, so the main thread can deal with updating the lighting, or not.
+             * @see TrainsInMotion#onTick(TickEvent.ClientTickEvent)
+             */
+            TrainsInMotion.carts.add(this);
+        }
     }
 
 
-    /*/
-    *
-    * Inventory stuff, most of this is self-explanatory.
-    *
-    /*/
+     /**
+     * Inventory stuff, most of this is self-explanatory.
+     * Occasionally some parts are re-defined so that filters may be applied
+     * @see EntityRollingStockCore
+     */
     @Override
     public String getInventoryName() {
         return name;
@@ -221,18 +251,22 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         }
     }
 
-    /*/
-    *
+    /**
     * Core Minecart Overrides
+     * @see EntityMinecart
     *
-    /*/
-
-    //technically this is a normal minecart, so return the value for that, which isn't in the base game or another mod.
+     * technically this is a normal minecart, which is why it works on normal tracks.
+     * aside from that we also use getMinecartType to define the texture for the entity, an odd way to do it, but its simple and works.
+     * @see RenderCore
+     *
+     * TODO canBePushed should be false later when it can move on its own.
+     *
+     * The UUID methods are for getting and setting the, non-railcraft, owner of the entity,
+    */
     @Override
     public int getMinecartType() {
         return minecartNumber;
     }
-    //cart management stuff
     @Override
     public boolean isPoweredCart() {
         return true;
@@ -243,77 +277,57 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     }
     @Override
     public boolean canBePushed() {
+<<<<<<< HEAD
         return false;
     }//TODO this should be false later when it can move on its own.
+=======
+        return true;
+    }
+>>>>>>> refs/remotes/EternalBlueFlame/master
     @Override
     public boolean canRiderInteract()
     {
         return true;
     }
 
-    //methods for getting/setting actual owner, not the railcraft one.
     public void setOwner(UUID player){owner = player;}
     public UUID getOwnerUUID(){return owner;}
 
-    /*/
-    *
-    * Function that runs every tick.
-    *
-    /*/
+    /**
+     * this runs every tick
+     * we don't actually use the super call here
+     *
+     * every tick it will count up the ticks variable, and if it is above 1, the position and lamp get updates.
+     * this allows for the entity to spawn without creating as much lag.
+     *
+     */
     @Override
     public void onUpdate() {
         //handle the core movement for minecarts, skip the first couple ticks so it's less laggy on spawn (tick 0), and in general by skipping 10% of the ticks.
+<<<<<<< HEAD
        if (ticks > 1) {
             minecartMove(); 
             //testing
             if(furnaceFuel > 0){
             	locomote();
             }
+=======
+        if (ticks > 1) {
+            minecartMove();
+            lamp.ShouldUpdate(worldObj, posX, posY, posZ);
+>>>>>>> refs/remotes/EternalBlueFlame/master
         }
+        //add to ticks _after_ we initially define important things
         ticks++;
-        //create a manager for the ticks, that way we can do something different each tick to lessen the performance hit.
-        switch (ticks){
-            case 5:{
-                //call the class for managing the fuel
-                if (isRunning) {
-                    new FuelHandler(this);
-                }
-                break;
-            }
-            case 6: {
-                if (isRunning) {
-                    //manage speed
-                }
-            }
-            case 10:{
-                /*/ for managing the lamp, will need to implement it better later. Maybe do a client side only to change lighting of individual blocks?
-                if(previousLampPosition != new int[]{MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ+2)}){
-                    if(previousLampPosition != new int[]{0,0,0}) {
-                        worldObj.setBlockToAir(previousLampPosition[0], previousLampPosition[1], previousLampPosition[2]);
-                    }
-                    previousLampPosition=new int[]{MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ+2)};
 
-                    if (lamp && worldObj.isAirBlock(previousLampPosition[0], previousLampPosition[1], previousLampPosition[2])) {
-                        worldObj.setBlock(previousLampPosition[0], previousLampPosition[1], previousLampPosition[2], new BlockLight());
-                        System.out.println("created lamp child");
-                    }
-                }
-                /*/
-                break;
-            }
-            //other cases
-            default:{
-                //if the tick count is higher than the values used, reset it so it can count up again.
-                if (ticks>10){
-                ticks = 1;
-                }
-                break;
-            }
-
+        //if the tick count is higher than the values used, reset it so it can count up again.
+        if (ticks>10){
+        ticks = 1;
         }
+
     }
 
-
+<<<<<<< HEAD
     /*/
     *
     * Minecart movement functionality
@@ -332,6 +346,14 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     
     //revamped core minecart movement functionality
     public void minecartMove(){
+=======
+
+    /**
+     * this is modified movement from the super class, should be more efficient, and reliable, but generally does the same thing
+     * @see EntityMinecart#onUpdate()
+     */
+    private void minecartMove(){
+>>>>>>> refs/remotes/EternalBlueFlame/master
         if (getRollingAmplitude() > 0) {
             setRollingAmplitude(getRollingAmplitude() - 1);
         }
@@ -453,7 +475,18 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         }
     }
 
-    //management for position and rotation via local variables since EntityMinecart's variables are private
+    /**
+     * manage the position and rotation values, this also sets the motion, which is the only value the super class actually gets from these calls
+     *
+     * the following paramaters are actually supposed to go to the super class, but instead we pull them in and put them in this class,
+     * because we don't have the super processing this stuff anymore due to inefficient code, and other reasons.
+     * @param x
+     * @param y
+     * @param z
+     * @param yaw
+     * @param pitch
+     * @param turnProgress
+     */
     @Override
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotation2(double x, double y, double z, float yaw, float pitch, int turnProgress) {
@@ -467,7 +500,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         motionY = cartVelocityY;
         motionZ = cartVelocityZ;
     }
-    //more of the above
     @Override
     @SideOnly(Side.CLIENT)
     public void setVelocity(double x, double y, double z) {
@@ -477,24 +509,26 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     }
 
 
-
-    /*/
-    *
-    * NBT
-    *
-    /*/
+    /**
+     * this is used to save/load/update information between server/client(s)
+     * @param tag the NBT tag provided by the game itself
+     *
+     * the super class handles most of the variables, Most of the rest is handled either in classes that extend this
+     * @see EntityTrainCore#readFromNBT(NBTTagCompound)
+     * @see EntityRollingStockCore#readFromNBT(NBTTagCompound)
+     * and the super class
+     * @see EntityMinecart#readFromNBT(NBTTagCompound)
+     */
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
         //colors = tag.getIntArray("extended.colors");
         isLocked = tag.getBoolean("extended.isLocked");
         brake = tag.getBoolean("extended.brake");
-        lamp = tag.getBoolean("extended.lamp");
+        lamp.isOn = tag.getBoolean("extended.lamp");
         //previousLampPosition = tag.getIntArray("extended.previousLamp");
         owner = new UUID(tag.getLong("extended.ownerM"),tag.getLong("extended.ownerL"));
-        isRunning = tag.getBoolean("extended.isRunning");
         ticks = tag.getInteger("extended.ticks");
-        destination = tag.getString("extended.destination");
         //read through the itemstacks
         NBTTagList taglist = tag.getTagList("Items", 10);
         for (int i = 0; i < taglist.tagCount(); i++) {
@@ -518,13 +552,11 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         //tag.setIntArray("extended.colors", colors);
         tag.setBoolean("extended.isLocked", isLocked);
         tag.setBoolean("extended.brake", brake);
-        tag.setBoolean("extended.lamp", lamp);
+        tag.setBoolean("extended.lamp", lamp.isOn);
         //tag.setIntArray("extended.previousLamp", previousLampPosition);
         tag.setLong("extended.ownerM", owner.getMostSignificantBits());
         tag.setLong("extended.ownerL", owner.getLeastSignificantBits());
-        tag.setBoolean("extended.isRunning",isRunning);
         tag.setInteger("extended.ticks", ticks);
-        tag.setString("extended.destination",destination);
         //write the itemset to a tag list before adding it
         NBTTagList nbttaglist = new NBTTagList();
         for (int i = 0; i < inventory.length; ++i) {
@@ -543,30 +575,31 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
 
     }
 
-
-
-    /*/
-    *
-    * Railcraft support
-    *
-    /*/
+    /**
+     * default settings for railcraft support
+     * @see IRoutableCart
+     *
+     * destination is handled in locomotive, here we just return null as default.
+     * filter however we will have to handle here because it is very generic.
+     *
+     * the owner for railcraft we don't handle at all, because we have our own system for that.
+     * @see MinecartExtended#getOwnerUUID()
+     */
     @Override
     public String getDestination() {
-        return destination;
+        return null;
+    }
+    @Override
+    public boolean setDestination(ItemStack ticket) {
+        return false;
     }
     @Override
     public boolean doesCartMatchFilter(ItemStack stack, EntityMinecart cart) {
+        //get the type from the given minecart, and if it matches the itemstack return true.
         if (stack == null || cart == null) { return false; }
         ItemStack cartItem = cart.getCartItem();
         return cartItem != null && stack.isItemEqual(cartItem);
     }
-    //Only locomotives can receive a destination from a track.
-    @Override
-    public boolean setDestination(ItemStack ticket) {
-        return isLoco;
-    }
-
-    //used by railcraft, this is needed but we'll obsolete this with our own methods because this is just poor.
     @Override
     public GameProfile getOwner(){return null;}
     //to apply drag in minecraft

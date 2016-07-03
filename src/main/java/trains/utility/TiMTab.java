@@ -4,16 +4,24 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 
 public class TiMTab extends CreativeTabs {
-    //init
+
+    /**
+     * simple creation of a creative tab
+     * first function instances the tab by handling it through the super.
+     * @see CreativeTabs
+     *
+     * second show's the lable of the tab, this is defined in the language files, I think.
+     *
+     * Third part sets the icon for the tab.
+     * TODO we don't actually have an icon for the mod yet.
+     */
     public TiMTab(int modID, String name) {
         super(modID, name);
     }
-    //set tab name
     @Override
     public String getTranslatedTabLabel() {
         return getTabLabel();
     }
-    //get the item that defines the tab icon
     @Override
     public Item getTabIconItem(){return new Item();}
 

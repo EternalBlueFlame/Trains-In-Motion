@@ -9,10 +9,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
 import trains.entities.MinecartExtended;
-import trains.gui.GUITest;
+import trains.gui.GUITrain;
 
 public class PacketGUI  implements IMessage {
-    // The gui that was pressed.
     int gui;
     //necessary, but unused constructor
     public PacketGUI() {}
@@ -30,16 +29,19 @@ public class PacketGUI  implements IMessage {
     public void toBytes(ByteBuf bbuf) {
         bbuf.writeInt(gui);
     }
-    //handle packet
+
+    /**
+     * handles the packet when received by client.
+     * First it has to check if it was actually received by the proper entity, because if not, it crashes.
+     * then it opens the GUI
+     * @see GUITrain
+     */
     public static class Handler implements IMessageHandler<PacketGUI, IMessage> {
         @Override
         public IMessage onMessage(PacketGUI message, MessageContext context) {
-            //be sure the entities are correct
             EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
             if (entityPlayer  != null && entityPlayer.ridingEntity instanceof MinecartExtended) {
-                System.out.println("process");
-                //open the gui for the player
-                entityPlayer .openGui(TrainsInMotion.instance, GUITest.GUI_ID, entityPlayer.ridingEntity.worldObj,
+                entityPlayer.openGui(TrainsInMotion.instance, GUITrain.GUI_ID, entityPlayer.ridingEntity.worldObj,
                         MathHelper.floor_double(entityPlayer.ridingEntity.posX), MathHelper.floor_double(entityPlayer.ridingEntity.posY), MathHelper.floor_double(entityPlayer.ridingEntity.posZ));
             }
             return null;
