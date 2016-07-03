@@ -52,6 +52,15 @@ public class EntityTrainCore extends MinecartExtended {
         this.maxSpeed = maxSpeed;
     }
 
+    /**
+     * we have to have the constructor for the initial spawn that puts the train in the world, minecraft does this, we don't have to mess with it other than just having it.
+     *
+     * @param world the world to spawn it in.
+     */
+    public EntityTrainCore(World world){
+        super(world);
+    }
+
 
     /**
      * defines what should be done this tick to separate processing and improve overall performance.

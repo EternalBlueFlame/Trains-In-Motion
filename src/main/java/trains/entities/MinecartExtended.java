@@ -2,6 +2,7 @@ package trains.entities;
 
 
 import com.mojang.authlib.GameProfile;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mods.railcraft.api.carts.IMinecart;
@@ -63,7 +64,11 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public int columns =0;//defines inventory height
 
 
-    //default constructor for registering entity
+    /**
+     * we have to have the constructor for the initial spawn that puts the train in the world, minecraft does this, we don't have to mess with it other than just having it.
+     *
+     * @param world the world to spawn it in.
+     */
     public MinecartExtended(World world) {
         super(world);
     }
@@ -114,12 +119,13 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         columns = inventoryColumns;
 
 
-        /**
-         * add lamp to main class handler when created, so the main thread can deal with updating the lighting, or not.
-         * @see TrainsInMotion
-         */
-        TrainsInMotion.cartLamps.add(lamp);
-
+        if(worldObj.isRemote ){
+            /**
+             * add lamp to main class handler when created, so the main thread can deal with updating the lighting, or not.
+             * @see TrainsInMotion#onTick(TickEvent.ClientTickEvent)
+             */
+            TrainsInMotion.carts.add(this);
+        }
     }
 
 

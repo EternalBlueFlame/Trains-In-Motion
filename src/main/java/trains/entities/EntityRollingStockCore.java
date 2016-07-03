@@ -42,4 +42,13 @@ public class EntityRollingStockCore extends MinecartExtended {
         this. storageMaterialFilter = storageMaterialFilter;
         this.type = type;
     }
+
+    /**
+     * we have to have the constructor for the initial spawn that puts the train in the world, minecraft does this, we don't have to mess with it other than just having it.
+     *
+     * @param world the world to spawn it in.
+     */
+    public EntityRollingStockCore(World world){
+        super(world);
+    }
 }

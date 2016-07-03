@@ -1,7 +1,9 @@
 package trains;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraftforge.common.config.Configuration;
+import trains.entities.MinecartExtended;
 import trains.registry.ItemRegistry;
 import trains.blocks.LampBlock;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -36,6 +38,7 @@ public class TrainsInMotion
 {
     public static final String MODID = "trainsinmotion";
     public static final String VERSION = "1.0pre-alpha";
+    public static List<MinecartExtended> carts;
 
 
     //resource directories
@@ -64,7 +67,6 @@ public class TrainsInMotion
     public static TrainsInMotion instance;
     public Minecraft ClientInstance;
     public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
-    public static List<LampHandler> cartLamps;
     public  ItemRegistry itemSets = new ItemRegistry();
     public TiMEntityRegistry entities = new TiMEntityRegistry();
     public static Block lampBlock = new LampBlock();
@@ -145,12 +147,11 @@ public class TrainsInMotion
      */
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent tick) {
-        if (EnableLights && tick.phase == TickEvent.Phase.END && ClientInstance.theWorld != null && cartLamps.size()>0) {
+        if (EnableLights && tick.phase == TickEvent.Phase.END && ClientInstance.theWorld != null && carts.size()>0) {
             //instance the lamp here because it's more efficient than instancing it every loop.
-            LampHandler tempLamp = new LampHandler();
-            for (LampHandler lamp : cartLamps){
-                if (lamp != tempLamp && ClientInstance.theWorld.getBlock(lamp.X, lamp.Y, lamp.Z) instanceof LampBlock) {
-                    ClientInstance.theWorld.updateLightByType(EnumSkyBlock.Block, lamp.X, lamp.Y, lamp.Z);
+            for (MinecartExtended cart : carts){
+                if (cart != null && ClientInstance.theWorld.getBlock(cart.lamp.X, cart.lamp.Y, cart.lamp.Z) instanceof LampBlock) {
+                    ClientInstance.theWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
                 }
             }
         }

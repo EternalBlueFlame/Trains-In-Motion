@@ -15,8 +15,6 @@ public class Render extends RenderBiped {
      * the model is defined in
      * @see ClientProxy#registerRenderers()
      *
-     * TODO we still need support for .obj, even if it is inefficient in 1.9, the feature should be present
-     *
      * @param model defines the model to be used
      * @param shadowSize defines the size of the shadow that the model should have
      */
