@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
-import Movement.Accelerate;
+import trains.utility.Accelerate;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -67,22 +67,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public FluidTank[] tank = new FluidTank[]{};//depending on the train this is either used for diesel, steam, or redstone flux
     public int rows =0; //defines the inventory width
     public int columns =0;//defines inventory height
-
-    //train values
-    public float[] acceleration; //the first 3 values are a point curve, representing 0-35%, 35-70% and >70% to modify how acceleration is handled at each point. //the 4th value defines how much the weight hauled effects acceleration.
-    public int trainType=0;//list of train types 0 is null, 1 is steam, 2 is diesel, 3 is electric
-    public boolean isRunning = false;// if the train is running/using fuel
-    public static float furnaceFuel = 2000f; //the amount of fuel in the furnace, only used for steam and nuclear trains
-    public int maxFuel = 0; //the max fuel in the train's furnace.
-    public int speed = 0;
-    //rollingstock values
-    public Item[] storageFilter = new Item[]{};//item set to use for filters, storage only accepts items in the filter
-    public Material[] storageMaterialFilter = new Material[]{};//same as item filter but works for materials
-
-    //railcraft variables
-    public String destination = "";  //railcraft destination
-    public boolean isLoco = false;  //if this can accept destination tickets, aka is a locomotive
-
     /**
      * we have to have the constructor for the initial spawn that puts the train in the world, minecraft does this, we don't have to mess with it other than just having it.
      *
@@ -293,11 +277,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public void onUpdate() {
         //handle the core movement for minecarts, skip the first couple ticks so it's less laggy on spawn (tick 0), and in general by skipping 10% of the ticks.
        if (ticks > 1) {
-            minecartMove(); 
-            //testing
-            if(furnaceFuel > 0){
-            	locomote();
-            }
+            minecartMove();
         }
         //add to ticks _after_ we initially define important things
         ticks++;
@@ -308,29 +288,11 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         }
 
     }
-    /*/
-    *
-    * Minecart movement functionality
-    *
-    /*/
-    //regular motion
-    public void locomote(){
-        int l = MathHelper.floor_double(posX);
-        int i = MathHelper.floor_double(posY);
-        int i1 = MathHelper.floor_double(posZ);
-
-    	boolean isRailUnder = BlockRailBase.func_150049_b_(worldObj, l, i - 1, i1);
-    	Accelerate minecart = new Accelerate(this, worldObj, posX, posY, posZ);
-    	minecart.moveMinecartOnRail(2000);
-    }
-    
-    //revamped core minecart movement functionality
-    public void minecartMove(){
-
     /**
      * this is modified movement from the super class, should be more efficient, and reliable, but generally does the same thing
      * @see EntityMinecart#onUpdate()
      */
+    public void minecartMove(){
         if (getRollingAmplitude() > 0) {
             setRollingAmplitude(getRollingAmplitude() - 1);
         }
@@ -579,7 +541,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     }
     @Override
     public GameProfile getOwner(){return null;}
-    //to apply drag in minecraft
     
 
 }
