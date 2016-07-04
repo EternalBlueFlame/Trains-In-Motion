@@ -5,23 +5,21 @@ import java.util.List;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
-<<<<<<< HEAD
-
 import Movement.Accelerate;
-=======
 import cpw.mods.fml.common.gameevent.TickEvent;
->>>>>>> refs/remotes/EternalBlueFlame/master
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.carts.IRoutableCart;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -70,25 +68,20 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public int rows =0; //defines the inventory width
     public int columns =0;//defines inventory height
 
-<<<<<<< HEAD
     //train values
     public float[] acceleration; //the first 3 values are a point curve, representing 0-35%, 35-70% and >70% to modify how acceleration is handled at each point. //the 4th value defines how much the weight hauled effects acceleration.
     public int trainType=0;//list of train types 0 is null, 1 is steam, 2 is diesel, 3 is electric
     public boolean isRunning = false;// if the train is running/using fuel
-    private int ticks = 0; //tick count.
     public static float furnaceFuel = 2000f; //the amount of fuel in the furnace, only used for steam and nuclear trains
     public int maxFuel = 0; //the max fuel in the train's furnace.
     public int speed = 0;
     //rollingstock values
     public Item[] storageFilter = new Item[]{};//item set to use for filters, storage only accepts items in the filter
     public Material[] storageMaterialFilter = new Material[]{};//same as item filter but works for materials
-    public boolean canBeRidden;
 
     //railcraft variables
     public String destination = "";  //railcraft destination
     public boolean isLoco = false;  //if this can accept destination tickets, aka is a locomotive
-=======
->>>>>>> refs/remotes/EternalBlueFlame/master
 
     /**
      * we have to have the constructor for the initial spawn that puts the train in the world, minecraft does this, we don't have to mess with it other than just having it.
@@ -277,13 +270,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     }
     @Override
     public boolean canBePushed() {
-<<<<<<< HEAD
         return false;
-    }//TODO this should be false later when it can move on its own.
-=======
-        return true;
     }
->>>>>>> refs/remotes/EternalBlueFlame/master
     @Override
     public boolean canRiderInteract()
     {
@@ -304,18 +292,12 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     @Override
     public void onUpdate() {
         //handle the core movement for minecarts, skip the first couple ticks so it's less laggy on spawn (tick 0), and in general by skipping 10% of the ticks.
-<<<<<<< HEAD
        if (ticks > 1) {
             minecartMove(); 
             //testing
             if(furnaceFuel > 0){
             	locomote();
             }
-=======
-        if (ticks > 1) {
-            minecartMove();
-            lamp.ShouldUpdate(worldObj, posX, posY, posZ);
->>>>>>> refs/remotes/EternalBlueFlame/master
         }
         //add to ticks _after_ we initially define important things
         ticks++;
@@ -326,8 +308,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         }
 
     }
-
-<<<<<<< HEAD
     /*/
     *
     * Minecart movement functionality
@@ -346,14 +326,11 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     
     //revamped core minecart movement functionality
     public void minecartMove(){
-=======
 
     /**
      * this is modified movement from the super class, should be more efficient, and reliable, but generally does the same thing
      * @see EntityMinecart#onUpdate()
      */
-    private void minecartMove(){
->>>>>>> refs/remotes/EternalBlueFlame/master
         if (getRollingAmplitude() > 0) {
             setRollingAmplitude(getRollingAmplitude() - 1);
         }

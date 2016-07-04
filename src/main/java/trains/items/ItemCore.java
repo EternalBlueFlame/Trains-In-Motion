@@ -13,7 +13,7 @@ import net.minecraft.item.ItemMinecart;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import trains.entities.MinecartExtended;
-import trains.gui.GUITest;
+import trains.gui.GUITrain;
 
 public class ItemCore extends ItemMinecart implements IMinecart, IMinecartItem {
     //constructor
@@ -29,9 +29,8 @@ public class ItemCore extends ItemMinecart implements IMinecart, IMinecartItem {
     //placing the cart
     @Override
     public MinecartExtended placeCart(GameProfile owner, ItemStack cart, World world, int posX, int posY, int posZ) {
-        return new MinecartExtended(owner.getId(), world, posX,posY,posZ, 120, new float[]{1,3,1}, null, null, 1,
-                new FluidTank[]{new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)},
-                3,3,GUITest.GUI_ID, 1001, true);
+        return new MinecartExtended(owner.getId(), world, posX,posY,posZ, 120, null, 1,
+                3,3, 1001, true);
     }
     //trains shouldn't match a cart filter.
     @Override
@@ -57,10 +56,8 @@ public class ItemCore extends ItemMinecart implements IMinecart, IMinecartItem {
             //int GUIid,
             //int minecartNumber,
             //boolean canBeRidden
-            worldObj.spawnEntityInWorld(new MinecartExtended(playerEntity.getGameProfile().getId(), worldObj, posX,posY,posZ, 120, new float[]{1,3,1},
-            		null, null, 1,
-            		new FluidTank[]{new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)},
-                    3,3,GUITest.GUI_ID, 1001, true));
+            worldObj.spawnEntityInWorld(new MinecartExtended(playerEntity.getGameProfile().getId(), worldObj, posX,posY,posZ, 120, null, 1,
+            		3,3,GUITrain.GUI_ID, true));
           return true;
         }
     }
