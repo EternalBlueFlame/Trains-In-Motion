@@ -1,9 +1,12 @@
 package trains.entities;
 
+import net.minecraft.block.BlockRailBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
+import trains.utility.Accelerate;
 import trains.utility.FuelHandler;
 
 import java.util.UUID;
@@ -81,6 +84,12 @@ public class EntityTrainCore extends MinecartExtended {
     public void onUpdate(){
         super.onUpdate();
         trainTicks ++;
+
+        if (trainTicks >1 && furnaceFuel > 0){
+            Accelerate minecart = new Accelerate(this, worldObj, posX, posY, posZ);
+            minecart.moveMinecartOnRail(2000);
+        }
+
         switch (trainTicks) {
             case 5: {
                 if (isRunning) {
