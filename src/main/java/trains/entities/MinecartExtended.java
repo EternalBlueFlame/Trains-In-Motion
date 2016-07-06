@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
-import trains.utility.Accelerate;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -13,13 +12,11 @@ import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.carts.IRoutableCart;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -189,8 +186,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
             if (itemstack.stackSize >= getInventoryStackLimit()) {
                 itemstack.stackSize = getInventoryStackLimit();
             }
+            inventory[slot] = itemstack;
         }
-        inventory[slot] = itemstack;
     }
 
     @Override

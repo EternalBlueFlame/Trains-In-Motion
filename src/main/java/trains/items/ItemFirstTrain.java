@@ -40,8 +40,9 @@ public class ItemFirstTrain extends ItemMinecart implements IMinecart, IMinecart
         /**
          * this will return anything that derrives MinecartExtended, in this case we use
          * @see FirstTrain#FirstTrain(UUID, World, double, double, double, float, float[], int, FluidTank[], int, int, int, int, boolean)
+         * speed is actually for the German 0-8-0 Brigadelok (calculation is (1/72)*70.8111, 70.8111 being the train's max speed in km/h)
          */
-        return new FirstTrain(owner.getId(), world, posX,posY,posZ, 120, new float[]{1,3,1}, 1,
+        return new FirstTrain(owner.getId(), world, posX,posY,posZ, 0.9834875f , new float[]{1.5f,2f,1.5f}, 1,
                         new FluidTank[]{new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)},
                         3,3, GUITrain.GUI_ID, 1001, true);
     }
