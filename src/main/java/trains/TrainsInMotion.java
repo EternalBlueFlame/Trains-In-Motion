@@ -3,8 +3,11 @@ package trains;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 import trains.entities.MinecartExtended;
 import trains.registry.ItemRegistry;
 import trains.blocks.LampBlock;
@@ -33,6 +36,8 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 
 import java.util.List;
+
+import WorldGen.GenerateOil;
 
 
 @Mod(modid = TrainsInMotion.MODID, version = TrainsInMotion.VERSION)
@@ -127,7 +132,7 @@ public class TrainsInMotion
         //item/block registry
         GameRegistry.registerBlock(lampBlock, "lampblock");
         itemSets.RegisterItems();
-
+        GameRegistry.registerWorldGenerator(new GenerateOil(), 0);
         //register GUI handler
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 

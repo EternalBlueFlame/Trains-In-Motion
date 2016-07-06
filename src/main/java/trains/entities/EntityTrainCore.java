@@ -84,8 +84,7 @@ public class EntityTrainCore extends MinecartExtended {
     public void onUpdate(){
         super.onUpdate();
         trainTicks ++;
-
-        if (trainTicks >1 && furnaceFuel > 0){
+        if (trainTicks >1 && 1 > 0){
             Accelerate minecart = new Accelerate(this, worldObj, posX, posY, posZ);
             minecart.moveMinecartOnRail(2000);
         }
