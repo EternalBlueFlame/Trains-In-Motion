@@ -15,7 +15,12 @@ import trains.networking.PacketKeyPress;
 
 public class TiMEventHandler {
     /**
-     * manages the key press event, doesn't work for when a key is held, that would need to be in the onUpdate event.
+     * Manages the key press event, doesn't work for when a key is held, that would need to be in the onUpdate event.
+     *
+     * Most cases just send a packet to manage things
+     * @see PacketKeyPress
+     * @see PacketGUI
+     *
      *
      * @param event the event of a key being pressed on client.
      */
@@ -30,6 +35,13 @@ public class TiMEventHandler {
             //for inventory
             if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyInventory))) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketGUI(GUITrain.GUI_ID));
+            }
+            //for speed change
+            if(Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyAccelerate))){
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyAccelerate)));
+            }
+            if(Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyReverse))){
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyReverse)));
             }
         }
     }

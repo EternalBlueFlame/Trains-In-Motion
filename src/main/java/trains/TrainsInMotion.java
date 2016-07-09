@@ -91,7 +91,8 @@ public class TrainsInMotion
     private boolean EnableLights = true;
     public char KeyLamp = 'l';
     public char KeyInventory = 'i';
-
+    public char KeyAccelerate = 'w';
+    public char KeyReverse = 's';
 
     /**
      * register the entities and load/create the config file.
@@ -112,6 +113,8 @@ public class TrainsInMotion
         config.addCustomCategoryComment("Keybinds", "accepted values are Lowercase a-z, along with the special characters:  ,.;'[]\\`-=");
         KeyInventory = config.getString("InventoryKeybind","Keybinds", "i","").charAt(0);
         KeyLamp = config.getString("LampKeybind","Keybinds", "l","").charAt(0);
+        KeyAccelerate = config.getString("AccelerateKeybind","Keybinds", "w","").charAt(0);
+        KeyReverse = config.getString("ReverseKeybind","Keybinds", "s","").charAt(0);
 
         config.save();
     }

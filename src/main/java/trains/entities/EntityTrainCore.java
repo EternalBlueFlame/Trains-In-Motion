@@ -94,7 +94,7 @@ public class EntityTrainCore extends MinecartExtended {
              * based on the motion (x speed + z speed) compared to max speed, figure out which stage of acceleration the train is in.
              * from there, if the x and or z motions are not 0, we create a new x and or z value, then apply the drag (0.96 currently)
              * after we handle the acceleration in
-             * @see EntityTrainCore#isReverse(int)
+             * @see EntityTrainCore#accelerate(int)
              */
             double x = 0;
             double z = 0;
@@ -102,24 +102,24 @@ public class EntityTrainCore extends MinecartExtended {
             if (motion <= maxSpeed * 0.3) {
                 if (accelerator >= 0) {
                     if (motionX != 0) {
-                        x = (motionX * 0.96) * isReverse(0);
+                        x = (motionX * 0.96) * accelerate(0);
                     }
                     if (motionZ != 0) {
-                        z = (motionZ * 0.96) * isReverse(0);
+                        z = (motionZ * 0.96) * accelerate(0);
                     }
                 } else if (motion >= maxSpeed * 0.6) {
                     if (motionX != 0) {
-                        x = (motionX * 0.96) * isReverse(2);
+                        x = (motionX * 0.96) * accelerate(2);
                     }
                     if (motionZ != 0) {
-                        z = (motionZ * 0.96) * isReverse(2);
+                        z = (motionZ * 0.96) * accelerate(2);
                     }
                 } else if (motion > maxSpeed * 0.3 && motion < maxSpeed * 0.6) {
                     if (motionX != 0) {
-                        x = (motionX * 0.96) * isReverse(1);
+                        x = (motionX * 0.96) * accelerate(1);
                     }
                     if (motionZ != 0) {
-                        z = (motionZ * 0.96) * isReverse(1);
+                        z = (motionZ * 0.96) * accelerate(1);
                     }
                 }
 
@@ -152,13 +152,13 @@ public class EntityTrainCore extends MinecartExtended {
      *
      * if the train is already at max speed, then return just enough to negate the drag value.
      */
-    private double isReverse(int accelerationIndex){
+    private double accelerate(int accelerationIndex){
         if (furnaceFuel>0) {
             if (motionX + motionZ < maxSpeed && motionX < maxSpeed && motionZ < maxSpeed) {
                 if (accelerator >= 0) {
-                    return 1 + (acceleration[accelerationIndex] * accelerator);
+                    return 1 + (acceleration[accelerationIndex] * (accelerator *0.1f));
                 } else {
-                    return -1 + (acceleration[accelerationIndex] * accelerator);
+                    return -1 + (acceleration[accelerationIndex] * (accelerator *0.1f));
                 }
             } else {
                 return 1.04;
@@ -202,5 +202,16 @@ public class EntityTrainCore extends MinecartExtended {
         return true;
     }
 
+
+    /**
+     * simple function for setting the train's speed
+     */
+    public void setAcceleration(boolean increase){
+        if (increase && accelerator <6){
+            accelerator++;
+        } else if (!increase && accelerator >-6){
+            accelerator--;
+        }
+    }
 
 }
