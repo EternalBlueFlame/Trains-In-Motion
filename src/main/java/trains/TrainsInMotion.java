@@ -1,12 +1,17 @@
 package trains;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
 import net.minecraft.block.Block;
-import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.material.MapColor;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialLiquid;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import trains.entities.MinecartExtended;
 import trains.registry.ItemRegistry;
@@ -24,7 +29,6 @@ import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 import trains.registry.TiMEntityRegistry;
 import trains.utility.CommonProxy;
-import trains.utility.LampHandler;
 import trains.utility.TiMEventHandler;
 import trains.utility.TiMTab;
 import cpw.mods.fml.common.SidedProxy;
@@ -34,6 +38,8 @@ import net.minecraft.creativetab.CreativeTabs;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import trains.blocks.Oil;
+import trains.items.Bucket;
 
 import java.util.List;
 
@@ -45,8 +51,11 @@ public class TrainsInMotion
 {
     public static final String MODID = "tim";
     public static final String VERSION = "1.0pre-alpha";
-    public static List<MinecartExtended> carts;
+    public static final Material Mat_Oil = new MaterialLiquid(MapColor.blackColor);
 
+    public static List<MinecartExtended> carts;
+    public static BlockFluidClassic fluid;
+    public Fluid oil = new Oil("Oil").setUnlocalizedName("Oil");
 
     //resource directories
     public enum Resources{GUI_PREFIX("textures/gui/"),
@@ -133,12 +142,18 @@ public class TrainsInMotion
     @EventHandler
     public void init(FMLInitializationEvent event) {
         //item/block registry
+        FluidRegistry.registerFluid(oil);
+        Item Bucket = new Bucket(fluid);
+        Bucket.setUnlocalizedName("Bucket").setContainerItem(Items.bucket);
+        GameRegistry.registerItem(Bucket, "Bucket");
+        FluidContainerRegistry.registerFluidContainer(oil, new ItemStack(Bucket), new ItemStack(Items.bucket));
         GameRegistry.registerBlock(lampBlock, "lampblock");
+        fluid = new BlockFluidClassic(oil, Mat_Oil);
         itemSets.RegisterItems();
+        GameRegistry.registerBlock(fluid, "OilBlock");
         GameRegistry.registerWorldGenerator(new GenerateOil(), 0);
         //register GUI handler
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
-
         //register the networking instances and channels
         TrainsInMotion.keyChannel = NetworkRegistry.INSTANCE.newSimpleChannel("TiM.key");
         TrainsInMotion.keyChannel.registerMessage(PacketKeyPress.Handler.class, PacketKeyPress.class, 1, Side.SERVER);
