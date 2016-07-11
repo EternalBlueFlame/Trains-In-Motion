@@ -2,16 +2,13 @@ package WorldGen;
 
 import java.util.Random;
 
-import cpw.mods.fml.common.IFuelHandler;
 import cpw.mods.fml.common.IWorldGenerator;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.feature.WorldGenMinable;
-import trains.blocks.Oil;
-import trains.items.OilBucket;
+import trains.TrainsInMotion;
 
 public class GenerateOil implements IWorldGenerator{
 
@@ -32,7 +29,7 @@ public class GenerateOil implements IWorldGenerator{
 	
 	public void generateOverworld(World world, Random random, int x, int z){
 		
-		generateOres(OilBucket.fluid, world, random, x, z, 4, 30, 3, 3, 30, Blocks.stone);
+		generateOres(TrainsInMotion.fluid, world, random, x, z, 4, 30, 3, 3, 30, Blocks.stone);
 		
 	}
 	
