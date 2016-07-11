@@ -40,15 +40,16 @@ public class EntityTrainCore extends MinecartExtended {
      * @param tank used to define the fluid tank(s) if there are any
      *             empty array for no tanks, - steam and nuclear take two tanks. - all other trains take one tank
      *             all tanks besides diesel should use FluidRegistry.WATER
-     * @param inventoryrows defines the rows of inventory, inventory size is defined by rows * columns. More are added manually by code if there are crafting slots.
+     * @param inventoryrows defines the rows of inventory, inventory size is defined by rows * columns.
      * @param inventoryColumns defines the columns of the inventory.
+     * @param craftingSlots defines the number of crafting slots, 1 is for fuel, 2 is for boiler.
      * @param GUIid the ID used to define what GUI the entity uses (0 for no GUI).
      * @param minecartNumber used to define the unique ID of the minecart, this prevents issues with base game and modded minecarts.
      * @param canBeRidden used to toggle if the player can ride the entity.
      */
     public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, float maxSpeed, float[] acceleration,
-                           int type,FluidTank[] tank,int inventoryrows, int inventoryColumns,int GUIid, int minecartNumber, boolean canBeRidden){
-        super(owner, world, xPos, yPos, zPos, type, tank, inventoryrows, inventoryColumns, GUIid, minecartNumber,  canBeRidden);
+                           int type,FluidTank[] tank,int inventoryrows, int inventoryColumns, int craftingSlots, int GUIid, int minecartNumber, boolean canBeRidden){
+        super(owner, world, xPos, yPos, zPos, type, tank, inventoryrows, inventoryColumns, craftingSlots, GUIid, minecartNumber,  canBeRidden);
 
         this.acceleration = acceleration;
         trainType = type;

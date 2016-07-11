@@ -39,12 +39,12 @@ public class ItemFirstTrain extends ItemMinecart implements IMinecart, IMinecart
     public MinecartExtended placeCart(GameProfile owner, ItemStack cart, World world, int posX, int posY, int posZ) {
         /**
          * this will return anything that derrives MinecartExtended, in this case we use
-         * @see FirstTrain#FirstTrain(UUID, World, double, double, double, float, float[], int, FluidTank[], int, int, int, int, boolean)
+         * @see FirstTrain#FirstTrain(UUID, World, double, double, double, float, float[], int, FluidTank[], int, int, int, int, int, boolean)
          * speed is actually for the German 0-8-0 Brigadelok (calculation is (1/72)*70.8111, 70.8111 being the train's max speed in km/h)
          */
         return new FirstTrain(owner.getId(), world, posX,posY,posZ, 0.9834875f , new float[]{1.5f,2f,1.5f}, 1,
                         new FluidTank[]{new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)},
-                        3,3, GUITrain.GUI_ID, 1001, true);
+                        3,3,2, GUITrain.GUI_ID, 1001, true);
     }
 
     /**
@@ -54,7 +54,7 @@ public class ItemFirstTrain extends ItemMinecart implements IMinecart, IMinecart
      * @see World#spawnEntityInWorld(Entity)
      *
      * for information on that the variables used in the spawn functions are doing
-     * @see FirstTrain#FirstTrain(UUID, World, double, double, double, float, float[], int, FluidTank[], int, int, int, int, boolean)
+     * @see FirstTrain#FirstTrain(UUID, World, double, double, double, float, float[], int, FluidTank[], int, int, int, int, int, boolean)
      *
      * @param itemStack the itemstack that the cart comes from.
      * @param playerEntity the player entity using the item stack.
@@ -77,7 +77,7 @@ public class ItemFirstTrain extends ItemMinecart implements IMinecart, IMinecart
             worldObj.spawnEntityInWorld(
                     new FirstTrain(playerEntity.getGameProfile().getId(), worldObj, posX,posY,posZ, 120, new float[]{1,3,1}, 1,
                             new FluidTank[]{new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)},
-                            3,3, GUITrain.GUI_ID, 1001, true));
+                            3,3,2, GUITrain.GUI_ID, 1001, true));
           return true;
         }
     }

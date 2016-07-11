@@ -27,17 +27,16 @@ public class EntityRollingStockCore extends MinecartExtended {
      * @param xPos the x position to spawn entity at, used in super's super.
      * @param yPos the y position to spawn entity at, used in super's super.
      * @param zPos the z position to spawn entity at, used in super's super.
+     * @param inventoryrows defines the rows of inventory, inventory size is defined by rows * columns.
+     * @param inventoryColumns defines the columns of the inventory.
+     * @param craftingSlots defines the number of crafting slots, used for things like furnaces, workbenches, or item slots.
      * @param storageItemFilter used to filter the items that storage accepts, if there is storage. not in super.
      * @param storageMaterialFilter used to filter materials storage accepst, if there is storage. not in super
      * @param type what kind of rolling stock it is.
      */
-    public EntityRollingStockCore(UUID owner, World world, double xPos, double yPos, double zPos,
-                           Item[] storageItemFilter /*/ empty array for no filter /*/ , Material[] storageMaterialFilter /*/ empty array for no filter /*/ ,
-                           int type /*1-steam, 2-diesel, 3-electric, 4-hydrogen, 5-nuclear, 0-RollingStock*/,
-                           FluidTank[] tank /*/ empty array for no tanks, - steam and nuclear take two tanks. - all other trains take one tank - all tanks besides diesel should use FluidRegistry.WATER /*/,
-                           int inventoryrows, int inventoryColumns /*/ the inventory is rows(x) * columns(y)/*/,
-                           int GUIid, int minecartNumber, boolean canBeRidden) {
-        super(owner, world, xPos, yPos, zPos, type, tank, inventoryrows, inventoryColumns, GUIid, minecartNumber, canBeRidden);
+    public EntityRollingStockCore(UUID owner, World world, double xPos, double yPos, double zPos, Item[] storageItemFilter, Material[] storageMaterialFilter,
+                           int type, FluidTank[] tank , int inventoryrows, int inventoryColumns, int craftingSlots, int GUIid, int minecartNumber, boolean canBeRidden) {
+        super(owner, world, xPos, yPos, zPos, type, tank, inventoryrows, inventoryColumns, craftingSlots, GUIid, minecartNumber, canBeRidden);
         storageFilter = storageItemFilter;
         this. storageMaterialFilter = storageMaterialFilter;
         this.type = type;

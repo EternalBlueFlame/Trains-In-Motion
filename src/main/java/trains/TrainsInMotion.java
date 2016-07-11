@@ -40,7 +40,7 @@ import java.util.List;
 import WorldGen.GenerateOil;
 
 
-@Mod(modid = TrainsInMotion.MODID, version = TrainsInMotion.VERSION)
+@Mod(modid = TrainsInMotion.MODID, version = TrainsInMotion.VERSION, name = "Trains in Motion")
 public class TrainsInMotion
 {
     public static final String MODID = "tim";
@@ -50,10 +50,10 @@ public class TrainsInMotion
 
     //resource directories
     public enum Resources{GUI_PREFIX("textures/gui/"),
-        MODEL_TRAIN("models/train/"), MODEL_TRAIN_TEXTURE("models/train/texture/"),
-        MODEL_ROLLINGSTOCK("models/rollingstock/"), MODEL_ROLLINGSTOCK_TEXTURE("models/rollingstock/texture/"),
-        MODEL_RAIL("models/rail/"), MODEL_RAIL_TEXTURES("models/rail/texture/"),
-        TEXTURE("texture/");
+        MODEL_TRAIN("models/train/"), MODEL_TRAIN_TEXTURE("models/train/textures/"),
+        MODEL_ROLLINGSTOCK("models/rollingstock/"), MODEL_ROLLINGSTOCK_TEXTURE("models/rollingstock/textures/"),
+        MODEL_RAIL("models/rail/"), MODEL_RAIL_TEXTURES("models/rail/textures/"),
+        TEXTURE("textures/");
         private String value;
         Resources(String value) {this.value = value;}
         public String getValue(){return value;}

@@ -58,7 +58,7 @@ public class ClientProxy extends CommonProxy {
          */
         //RenderingRegistry.registerEntityRenderingHandler(FirstTrain.class, new RenderCore(new MODEL.JAVA(), 0.5F));
         RenderingRegistry.registerEntityRenderingHandler(FirstTrain.class, new RenderObj(
-                TrainsInMotion.Resources.MODEL_TRAIN.getResourceLocation("060e2.obj"),
+                TrainsInMotion.Resources.MODEL_TRAIN.getResourceLocation("untitled.obj"),
                 TrainsInMotion.Resources.MODEL_TRAIN_TEXTURE.getResourceLocation("060e2.png")
                 ));
 

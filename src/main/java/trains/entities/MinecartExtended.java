@@ -48,12 +48,12 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
 
     
     //due to limitations of rotation/position for the minecart, we have to implement them ourselves to a certain degree.
-    protected int cartTurnProgress;
-    protected double cartX;
-    protected double cartY;
-    protected double cartZ;
-    protected float cartYaw;
-    protected float cartPitch;
+    public int cartTurnProgress;
+    public double cartX;
+    public double cartY;
+    public double cartZ;
+    public float cartYaw;
+    public float cartPitch;
     protected double cartVelocityX;
     protected double cartVelocityY;
     protected double cartVelocityZ;
@@ -93,35 +93,28 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
      * @param zPos the z position to spawn entity at, used in  super.
      * @param type what kind of rolling stock or train it is.
      * @param tank used to define the fluid tank(s) if there are any
-     * @param inventoryrows defines the rows of inventory, inventory size is defined by rows * columns. More are added manually by code if there are crafting slots.
+     * @param inventoryrows defines the rows of inventory, inventory size is defined by rows * columns.
      * @param inventoryColumns defines the columns of the inventory.
+     * @param craftingSlots defines the number of crafting slots, 1 is for fuel, 2 is for boiler.
      * @param GUIid the ID used to define what GUI the entity uses (0 for no GUI).
      * @param minecartNumber used to define the unique ID of the minecart, this prevents issues with base game and modded minecarts, This also defines the texture
      *                       @see RenderCore
      * @param canBeRidden used to toggle if the player can ride the entity.
      */
     public MinecartExtended(UUID owner, World world, double xPos, double yPos, double zPos, int type, FluidTank[] tank, int inventoryrows,
-                            int inventoryColumns, int GUIid, int minecartNumber, boolean canBeRidden) {
+                            int inventoryColumns, int craftingSlots, int GUIid, int minecartNumber, boolean canBeRidden) {
         super(world,xPos, yPos, zPos);
         this.owner = owner;
         this.minecartNumber = minecartNumber;
         this.canBeRidden = canBeRidden;
         this.tank = tank;
-        int slots = inventoryColumns * inventoryrows;
-        if (type == 1 || type ==5){
-            slots = slots+2;
-        } else if (type == 2 || type == 3 || type ==4){
-            slots = slots+1;
-        }
+        int slots = craftingSlots + inventoryColumns * inventoryrows;
         inventory = new ItemStack[slots];
         GUIID = GUIid;
         rows = inventoryrows;
         columns = inventoryColumns;
-        
-        
 
-
-        if(worldObj.isRemote ){
+        if(worldObj.isRemote){
             /**
              * add lamp to main class handler when created, so the main thread can deal with updating the lighting, or not.
              * @see TrainsInMotion#onTick(TickEvent.ClientTickEvent)
@@ -306,11 +299,10 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         //manage transportation through portals
         if (!worldObj.isRemote && worldObj instanceof WorldServer) {
             worldObj.theProfiler.startSection("portal");
-            MinecraftServer minecraftserver = ((WorldServer)worldObj).func_73046_m();
             i = getMaxInPortalTime();
 
             if (inPortal) {
-                if (minecraftserver.getAllowNether()) {
+                if (((WorldServer)worldObj).func_73046_m().getAllowNether()) {
                     if (ridingEntity == null && portalCounter++ >= i) {
                         portalCounter = i;
                         timeUntilPortal = getPortalCooldown();
@@ -341,14 +333,16 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         //manage position and rotation
         if (worldObj.isRemote) {
             if (cartTurnProgress > 0) {
-                double d6 = posX + (cartX - posX) / cartTurnProgress;
-                double d7 = posY + (cartY - posY) / cartTurnProgress;
-                double d1 = posZ + (cartZ - posZ) / cartTurnProgress;
-                rotationYaw = (float)(rotationYaw + MathHelper.wrapAngleTo180_double(cartYaw - rotationYaw) / cartTurnProgress);
-                rotationPitch = (rotationPitch + (cartPitch - rotationPitch) / cartTurnProgress);
-                --cartTurnProgress;
-                setPosition(d6, d7, d1);
+                //TODO Yaw and pitch are ALWAYS 0. always. this is creating rotation issues
+                //rotationYaw = (float)(rotationYaw + MathHelper.wrapAngleTo180_double(cartYaw - rotationYaw) / cartTurnProgress);
+                //rotationPitch = (rotationPitch + (cartPitch - rotationPitch) / cartTurnProgress);
+                setPosition(
+                        posX + (cartX - posX) / cartTurnProgress,
+                        posY + (cartY - posY) / cartTurnProgress,
+                        posZ + (cartZ - posZ) / cartTurnProgress
+                );
                 setRotation(rotationYaw, rotationPitch);
+                --cartTurnProgress;
             } else {
                 setPosition(posX, posY, posZ);
                 setRotation(rotationYaw, rotationPitch);
