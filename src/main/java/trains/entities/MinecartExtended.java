@@ -6,8 +6,10 @@ import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.carts.IRoutableCart;
 import net.minecraft.block.Block;
@@ -20,7 +22,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -32,7 +33,13 @@ import trains.TrainsInMotion;
 import trains.entities.render.RenderCore;
 import trains.utility.LampHandler;
 
-public class MinecartExtended extends EntityMinecart implements IMinecart, IRoutableCart, IInventory {
+import static java.lang.Math.*;
+
+public class MinecartExtended extends EntityMinecart implements IMinecart, IRoutableCart, IInventory, IEntityAdditionalSpawnData {
+
+    //define these ahead of time to improve performance.
+    private static final double almostNotMoving= 0.00138888888D;
+    private static final double rotationPi = 180 / Math.PI;
 
     //Main Values
     public int[] colors; //allows certain parts of certain trains to be recolored
@@ -48,15 +55,18 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
 
     
     //due to limitations of rotation/position for the minecart, we have to implement them ourselves to a certain degree.
-    public int cartTurnProgress;
-    public double cartX;
-    public double cartY;
-    public double cartZ;
-    public float cartYaw;
-    public float cartPitch;
-    protected double cartVelocityX;
-    protected double cartVelocityY;
-    protected double cartVelocityZ;
+    public boolean isReverse =false;
+    public float spawnDirection =0;
+    public int cartTurnProgress =0;
+    public double cartX =0;
+    public double cartY =0;
+    public double cartZ =0;
+    public float cartYaw =0;
+    public float cartPitch =0;
+    protected double cartVelocityX =0;
+    protected double cartVelocityY =0;
+    protected double cartVelocityZ =0;
+    public double lastY=0;
 
 
     //inventory
@@ -123,8 +133,19 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         }
     }
 
+    /**
+     * this is basically NBT for entity spawn, to keep data between client and server in sync because some data is not automatically shared.
+     */
+    @Override
+    public void readSpawnData(ByteBuf additionalData) {
+        spawnDirection = additionalData.readFloat();
+    }
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        buffer.writeFloat(spawnDirection);
+    }
 
-     /**
+    /**
      * Inventory stuff, most of this is self-explanatory.
      * Occasionally some parts are re-defined so that filters may be applied
      * @see EntityRollingStockCore
@@ -254,6 +275,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
 
     public void setOwner(UUID player){owner = player;}
     public UUID getOwnerUUID(){return owner;}
+    public void setDirection(float direction){
+        spawnDirection = direction;}
 
     /**
      * this runs every tick
@@ -330,23 +353,26 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
 
             worldObj.theProfiler.endSection();
         }
-        //manage position and rotation
+
+        //manage position, pitch, and rotation
         if (worldObj.isRemote) {
             if (cartTurnProgress > 0) {
-                //TODO Yaw and pitch are ALWAYS 0. always. this is creating rotation issues
-                //rotationYaw = (float)(rotationYaw + MathHelper.wrapAngleTo180_double(cartYaw - rotationYaw) / cartTurnProgress);
-                //rotationPitch = (rotationPitch + (cartPitch - rotationPitch) / cartTurnProgress);
                 setPosition(
                         posX + (cartX - posX) / cartTurnProgress,
                         posY + (cartY - posY) / cartTurnProgress,
                         posZ + (cartZ - posZ) / cartTurnProgress
                 );
-                setRotation(rotationYaw, rotationPitch);
                 --cartTurnProgress;
+                //NOTE: for pitch and rotation, they must NOT be handled by the default things, only the entity and the render
+                rotationYaw = (float) (atan2((lastTickPosX - cartX), (lastTickPosZ - cartZ)) * rotationPi)+90F;
+                if ((motionX > almostNotMoving || motionX < -almostNotMoving) ^ (motionZ > almostNotMoving || motionZ < -almostNotMoving)) {
+                    cartPitch = MathHelper.floor_double(Math.toDegrees(acos(lastTickPosY - cartY)) + 90D);
+                }
+
             } else {
                 setPosition(posX, posY, posZ);
-                setRotation(rotationYaw, rotationPitch);
             }
+
         } else {
             prevPosX = posX;
             prevPosY = posY;
@@ -423,8 +449,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         cartX = x;
         cartY = y;
         cartZ = z;
-        cartYaw = yaw;
-        cartPitch = pitch;
+        rotationYaw = yaw;
+        rotationPitch = pitch;
         cartTurnProgress = turnProgress + 2;
         motionX = cartVelocityX;
         motionY = cartVelocityY;
@@ -456,7 +482,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         isLocked = tag.getBoolean("extended.isLocked");
         brake = tag.getBoolean("extended.brake");
         lamp.isOn = tag.getBoolean("extended.lamp");
-        //previousLampPosition = tag.getIntArray("extended.previousLamp");
+        isReverse = tag.getBoolean("extended.isreverse");
+        spawnDirection = tag.getFloat("extended.directon");
         owner = new UUID(tag.getLong("extended.ownerM"),tag.getLong("extended.ownerL"));
         ticks = tag.getInteger("extended.ticks");
         //read through the itemstacks
@@ -483,7 +510,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         tag.setBoolean("extended.isLocked", isLocked);
         tag.setBoolean("extended.brake", brake);
         tag.setBoolean("extended.lamp", lamp.isOn);
-        //tag.setIntArray("extended.previousLamp", previousLampPosition);
+        tag.setBoolean("extended.isreverse", isReverse);
+        tag.setFloat("extended.direction", spawnDirection);
         tag.setLong("extended.ownerM", owner.getMostSignificantBits());
         tag.setLong("extended.ownerL", owner.getLeastSignificantBits());
         tag.setInteger("extended.ticks", ticks);

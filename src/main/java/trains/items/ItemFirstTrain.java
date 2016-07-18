@@ -1,6 +1,11 @@
 package trains.items;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockRail;
+import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.MathHelper;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
@@ -18,6 +23,8 @@ import trains.entities.trains.FirstTrain;
 import trains.gui.GUITrain;
 
 import java.util.UUID;
+
+import static net.minecraft.util.MathHelper.floor_float;
 
 public class ItemFirstTrain extends ItemMinecart implements IMinecart, IMinecartItem {
     //constructor
@@ -69,11 +76,39 @@ public class ItemFirstTrain extends ItemMinecart implements IMinecart, IMinecart
      */
     @Override
     public boolean onItemUse(ItemStack itemStack, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ, int blockSide, float pointToRayX, float pointToRayY, float pointToRayZ) {
-        if (worldObj.isRemote) {
-            return false;
+        if (!worldObj.isRemote) {
+            MinecartExtended entity = new FirstTrain(playerEntity.getGameProfile().getId(), worldObj, posX,posY,posZ);
+            Block block = worldObj.getBlock(posX,posY,posZ);
+
+            if (BlockRailBase.func_150051_a(block)){
+                if (((BlockRailBase)block).getBasicRailMetadata(worldObj, entity,posX,posY,posZ) == 0x0){
+
+                    if (playerEntity.posZ > posZ){
+                        entity.setDirection(0);
+                    } else {
+                        entity.setDirection(180);
+                    }
+                    worldObj.spawnEntityInWorld(entity);
+
+                } else if (((BlockRailBase)block).getBasicRailMetadata(worldObj, entity,posX,posY,posZ) == 0x1){
+
+                    if (playerEntity.posX >posX){
+                        entity.setDirection(90);
+                    } else {
+                        entity.setDirection(270);
+                    }
+                    worldObj.spawnEntityInWorld(entity);
+
+                } else {
+                    playerEntity.addChatMessage(new ChatComponentText("You need to place on a straight piece of track."));
+                    return false;
+                }
+            } else {
+                return false;
+            }
+            return true;
         } else{
-            worldObj.spawnEntityInWorld(new FirstTrain(playerEntity.getGameProfile().getId(), worldObj, posX,posY,posZ));
-          return true;
+            return false;
         }
     }
 
