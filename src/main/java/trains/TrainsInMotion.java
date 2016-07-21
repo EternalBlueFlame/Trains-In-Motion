@@ -4,14 +4,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialLiquid;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import trains.entities.MinecartExtended;
 import trains.registry.ItemRegistry;
@@ -39,11 +35,10 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import trains.blocks.Oil;
-import trains.items.Bucket;
 
 import java.util.List;
 
-import WorldGen.GenerateOil;
+import trains.utility.GenerateOil;
 
 
 @Mod(modid = TrainsInMotion.MODID, version = TrainsInMotion.VERSION, name = "Trains in Motion")
@@ -54,8 +49,8 @@ public class TrainsInMotion
     public static final Material Mat_Oil = new MaterialLiquid(MapColor.blackColor);
 
     public static List<MinecartExtended> carts;
-    public static BlockFluidClassic fluid;
-    public Fluid oil = new Oil("Oil").setUnlocalizedName("Oil");
+    public static final Fluid fluidOil = new Oil("Oil").setUnlocalizedName("Oil");
+    public static final BlockFluidClassic blockFluidOil = new BlockFluidClassic(fluidOil, Mat_Oil);
 
     //resource directories
     public enum Resources{GUI_PREFIX("textures/gui/"),
@@ -129,39 +124,33 @@ public class TrainsInMotion
     }
 
     /**
-     * register the items and blocks here, do not register them in pre-int, it creates incompatibilities with other mods.
-     *
-     * register the GUI handler
-     *
-     * register the channels for networking
-     *
-     * lastly register the event handler.
-     *
+     * register everything here.
      * @param event actual load event
      */
     @EventHandler
     public void init(FMLInitializationEvent event) {
         //item/block registry
-        FluidRegistry.registerFluid(oil);
-        Item Bucket = new Bucket(fluid);
-        Bucket.setUnlocalizedName("Bucket").setContainerItem(Items.bucket);
-        GameRegistry.registerItem(Bucket, "Bucket");
-        FluidContainerRegistry.registerFluidContainer(oil, new ItemStack(Bucket), new ItemStack(Items.bucket));
+        FluidRegistry.registerFluid(fluidOil);
+        GameRegistry.registerBlock(blockFluidOil, "OilBlock");
         GameRegistry.registerBlock(lampBlock, "lampblock");
-        fluid = new BlockFluidClassic(oil, Mat_Oil);
         itemSets.RegisterItems();
-        GameRegistry.registerBlock(fluid, "OilBlock");
-        GameRegistry.registerWorldGenerator(new GenerateOil(), 0);
+
         //register GUI handler
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
+
         //register the networking instances and channels
         TrainsInMotion.keyChannel = NetworkRegistry.INSTANCE.newSimpleChannel("TiM.key");
         TrainsInMotion.keyChannel.registerMessage(PacketKeyPress.Handler.class, PacketKeyPress.class, 1, Side.SERVER);
         TrainsInMotion.keyChannel.registerMessage(PacketGUI.Handler.class, PacketGUI.class, 2, Side.SERVER);
 
+        //register the worldgen
+        GameRegistry.registerWorldGenerator(new GenerateOil(), 0);
+
+        //register the event handler.
         MinecraftForge.EVENT_BUS.register(new TiMEventHandler());
         FMLCommonHandler.instance().bus().register(new TiMEventHandler());
 
+        //register the renders
         proxy.registerRenderers();
     }
 
