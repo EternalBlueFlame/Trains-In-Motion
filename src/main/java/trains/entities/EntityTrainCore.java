@@ -101,7 +101,7 @@ public class EntityTrainCore extends MinecartExtended {
             double z = 0;
             double motion = motionX + motionZ;
             if (motion <= maxSpeed * 0.3) {
-                if (accelerator >= 0) {
+                if (accelerator != 0) {
                     if (motionX != 0) {
                         x = (motionX * 0.96) * accelerate(0);
                     }
@@ -124,6 +124,7 @@ public class EntityTrainCore extends MinecartExtended {
                     }
                 }
 
+                System.out.println(x + "\n" + z);
                 this.setVelocity(x, motionY, z);
             }
 

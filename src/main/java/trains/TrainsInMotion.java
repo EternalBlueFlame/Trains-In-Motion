@@ -50,7 +50,6 @@ public class TrainsInMotion
 
     public static List<MinecartExtended> carts;
     public static final Fluid fluidOil = new Oil("Oil").setUnlocalizedName("Oil");
-    public static final BlockFluidClassic blockFluidOil = new BlockFluidClassic(fluidOil, Mat_Oil);
 
     //resource directories
     public enum Resources{GUI_PREFIX("textures/gui/"),
@@ -84,6 +83,7 @@ public class TrainsInMotion
     public  ItemRegistry itemSets = new ItemRegistry();
     public TiMEntityRegistry entities = new TiMEntityRegistry();
     public static Block lampBlock = new LampBlock();
+    public static BlockFluidClassic blockFluidOil = new BlockFluidClassic(fluidOil, Mat_Oil);
 
     @SidedProxy(clientSide = "trains.utility.ClientProxy", serverSide = "trains.utility.CommonProxy")
     public static CommonProxy proxy;

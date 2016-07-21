@@ -17,7 +17,7 @@ public class GenerateOil implements IWorldGenerator{
 			IChunkProvider chunkProvider) {
 		switch(world.provider.dimensionId){
 			case 0: {
-				WorldGenMinable minable = new WorldGenMinable(TrainsInMotion.fluid, 4 + random.nextInt(30 - 4), Blocks.stone);
+				WorldGenMinable minable = new WorldGenMinable(TrainsInMotion.blockFluidOil, 4 + random.nextInt(30 - 4), Blocks.stone);
 				for(int i = 0; i < 3; i++) {
 					minable.generate(world, random, chunkX * 16 + random.nextInt(16), random.nextInt(27) + 3, chunkZ * 16 + random.nextInt(16));
 				}

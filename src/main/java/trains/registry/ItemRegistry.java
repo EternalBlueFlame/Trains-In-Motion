@@ -18,7 +18,7 @@ public class ItemRegistry {
     //initialize the item
     public static Item testCart = new ItemFirstTrain().setUnlocalizedName("itemTest").setTextureName(MODID + ":itemTests");
 
-    public static final Item bucketOil = new Bucket(TrainsInMotion.instance.blockFluidOil).setUnlocalizedName("OilBucket").setContainerItem(Items.bucket);
+    public static final Item bucketOil = new Bucket(TrainsInMotion.blockFluidOil).setUnlocalizedName("OilBucket").setContainerItem(Items.bucket);
 
     public ItemRegistry(){}
 
@@ -28,6 +28,6 @@ public class ItemRegistry {
 
 
         GameRegistry.registerItem(bucketOil, "OilBucket");
-        FluidContainerRegistry.registerFluidContainer(TrainsInMotion.instance.fluidOil, new ItemStack(bucketOil), new ItemStack(Items.bucket));
+        FluidContainerRegistry.registerFluidContainer(TrainsInMotion.fluidOil, new ItemStack(bucketOil), new ItemStack(Items.bucket));
     }
 }
