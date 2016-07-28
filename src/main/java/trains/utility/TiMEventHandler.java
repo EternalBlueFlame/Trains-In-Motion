@@ -60,13 +60,4 @@ public class TiMEventHandler {
         }
     }
 
-
-    @SideOnly(Side.CLIENT)
-    @SubscribeEvent
-    public void eventHandler(RenderGameOverlayEvent event){
-        if (Minecraft.getMinecraft().currentScreen==null && Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntityTrainCore){
-            TrainsInMotion.keyChannel.sendToServer(new PacketGUI(HUDTrain.GUI_ID));
-        }
-    }
-
 }

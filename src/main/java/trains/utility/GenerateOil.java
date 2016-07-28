@@ -3,12 +3,11 @@ package trains.utility;
 import java.util.Random;
 
 import cpw.mods.fml.common.IWorldGenerator;
-import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.feature.WorldGenMinable;
-import trains.TrainsInMotion;
+import trains.registry.BlockRegistry;
 
 public class GenerateOil implements IWorldGenerator{
 
@@ -17,7 +16,7 @@ public class GenerateOil implements IWorldGenerator{
 			IChunkProvider chunkProvider) {
 		switch(world.provider.dimensionId){
 			case 0: {
-				WorldGenMinable minable = new WorldGenMinable(TrainsInMotion.blockFluidOil, 4 + random.nextInt(30 - 4), Blocks.stone);
+				WorldGenMinable minable = new WorldGenMinable(BlockRegistry.blockFluidOil, 4 + random.nextInt(30 - 4), Blocks.stone);
 				for(int i = 0; i < 3; i++) {
 					minable.generate(world, random, chunkX * 16 + random.nextInt(16), random.nextInt(27) + 3, chunkZ * 16 + random.nextInt(16));
 				}

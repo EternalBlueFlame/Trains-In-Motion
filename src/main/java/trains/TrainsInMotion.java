@@ -1,19 +1,10 @@
 package trains;
 
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.eventhandler.EventPriority;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.MapColor;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialLiquid;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fluids.BlockFluidClassic;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
 import trains.entities.MinecartExtended;
 import trains.gui.HUDTrain;
+import trains.registry.BlockRegistry;
 import trains.registry.ItemRegistry;
 import trains.blocks.LampBlock;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -22,12 +13,11 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraftforge.common.MinecraftForge;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
-import trains.registry.TiMEntityRegistry;
+import trains.registry.EntityRegistry;
 import trains.utility.CommonProxy;
 import trains.utility.TiMEventHandler;
 import trains.utility.TiMTab;
@@ -38,80 +28,58 @@ import net.minecraft.creativetab.CreativeTabs;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
-import trains.blocks.Oil;
-
-import java.util.List;
 
 import trains.utility.GenerateOil;
 
+import java.util.List;
 
-@Mod(modid = TrainsInMotion.MODID, version = TrainsInMotion.VERSION, name = "Trains in Motion")
-public class TrainsInMotion
-{
-    public static final String MODID = "tim";
-    public static final String VERSION = "1.0pre-alpha";
-    public static final Material Mat_Oil = new MaterialLiquid(MapColor.blackColor);
 
-    public static List<MinecartExtended> carts;
-    public static final Fluid fluidOil = new Oil("Oil").setUnlocalizedName("Oil");
-
-    //resource directories
-    public enum Resources{GUI_PREFIX("textures/gui/"),
-        MODEL_TRAIN("models/train/"), MODEL_TRAIN_TEXTURE("models/train/textures/"),
-        MODEL_ROLLINGSTOCK("models/rollingstock/"), MODEL_ROLLINGSTOCK_TEXTURE("models/rollingstock/textures/"),
-        MODEL_RAIL("models/rail/"), MODEL_RAIL_TEXTURES("models/rail/textures/"),
-        TEXTURE("textures/");
-        private String value;
-        Resources(String value) {this.value = value;}
-        public String getValue(){return value;}
-
-        public ResourceLocation getResourceLocation(String fileName){return new ResourceLocation(MODID, value + fileName);}
-    };
+//build number is according to feature set.
+// First number denotes entire rebuild of feature set, for instance in the case of when we move to pure 1.9 development or finish the core stuff for 1.7/1.9.
+// Second is minor, for rebuilds of individual feature sets not intended to effect the whole, like if we were to rebuild the entire GUI system.
+// Third is for bugfix and/or minor optimization releases, where as we didn't change any features, but it works better.
+// fourth is new minor content, like new trains or rollingstock that use existing features.
+@Mod(modid = TrainsInMotion.MODID, version = "0.4.0.0pre-alpha", name = "Trains in Motion")
+public class TrainsInMotion {
 
     /**
-     * initialize all the instances, creative tabs, the lamp handler, and the block/item/entity registries.
-     * most of these we will have to actually setup later, in other parts of the mod.
-     *
-     * setup the proxy
-     * @see CommonProxy
-     * @see trains.utility.ClientProxy
-     *
-     * setup the networking channels'
-     *
-     * lastly setup the config values.
+     * Setup the variables.
+     * We want these to be public, and static if possible, because many features of the mod will need to reference this information later.
      */
+    //Create the MODID and the instances of the mod itself along with the client running it.
+    public static final String MODID = "tim";
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
     public Minecraft ClientInstance;
+    //Instance the registries that maintain the blocks, items, entities, etc.
+    public static BlockRegistry blockRegistry = new BlockRegistry();
+    public static ItemRegistry itemRegistry = new ItemRegistry();
+    public static EntityRegistry entityRegistry = new EntityRegistry();
+    //Instance the creative tab
     public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
-    public  ItemRegistry itemSets = new ItemRegistry();
-    public TiMEntityRegistry entities = new TiMEntityRegistry();
-    public static Block lampBlock = new LampBlock();
-    public static BlockFluidClassic blockFluidOil;
-
+    //Setup the proxy, this is used for managing how each part of the mod acts on it's respective side.
     @SidedProxy(clientSide = "trains.utility.ClientProxy", serverSide = "trains.utility.CommonProxy")
     public static CommonProxy proxy;
-
-    //create the networking channel
+    //instance the network wrapper for each channel.
     public static SimpleNetworkWrapper keyChannel;
 
-    //setup the config values
-    private boolean EnableLights = true;
-    public char KeyLamp = 'l';
-    public char KeyInventory = 'i';
-    public char KeyAccelerate = 'w';
-    public char KeyReverse = 's';
+    //Instance the list of trains/rollingstock that are in the game, this is later used to manage the dynamic lighting.
+    //This is ONLY used on client side.
+    public static List<MinecartExtended> carts;
+
+    //Instance the event handler, This is used for event based functionality, things like when you right-click an entity.
+    public static TiMEventHandler eventHandler = new TiMEventHandler();
 
     /**
-     * register the entities and load/create the config file.
-     * @param event pre-load event.
+     * Initialize the values for the config file, then load or create the config file.
      */
+    private static boolean EnableLights = true;
+    public static char KeyLamp = 'l';
+    public static char KeyInventory = 'i';
+    public static char KeyAccelerate = 'w';
+    public static char KeyReverse = 's';
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        //register the entities
-        entities.registerEntities();
-
-        //handle the config file
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
 
         config.load();
@@ -119,29 +87,25 @@ public class TrainsInMotion
         EnableLights = config.get(Configuration.CATEGORY_GENERAL, "EnableLamp", true).getBoolean(true);
 
         config.addCustomCategoryComment("Keybinds", "accepted values are Lowercase a-z, along with the special characters:  ,.;'[]\\`-=");
+
         KeyInventory = config.getString("InventoryKeybind","Keybinds", "i","").charAt(0);
         KeyLamp = config.getString("LampKeybind","Keybinds", "l","").charAt(0);
         KeyAccelerate = config.getString("AccelerateKeybind","Keybinds", "w","").charAt(0);
         KeyReverse = config.getString("ReverseKeybind","Keybinds", "s","").charAt(0);
 
         config.save();
-
-        HUDTrain hud = new HUDTrain();
-        FMLCommonHandler.instance().bus().register(hud);
-        MinecraftForge.EVENT_BUS.register(hud);
     }
+
     /**
      * register everything here.
      * @param event actual load event
      */
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        //item/block registry
-        FluidRegistry.registerFluid(fluidOil);
-        blockFluidOil = new BlockFluidClassic(fluidOil, Mat_Oil);
-        GameRegistry.registerBlock(blockFluidOil, "OilBlock");
-        GameRegistry.registerBlock(lampBlock, "lampblock");
-        itemSets.RegisterItems();
+        //item/block/entity registry
+        entityRegistry.registerEntities();
+        blockRegistry.RegisterBlocks();
+        itemRegistry.RegisterItems();
 
         //register GUI handler
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
@@ -154,9 +118,14 @@ public class TrainsInMotion
         //register the worldgen
         GameRegistry.registerWorldGenerator(new GenerateOil(), 0);
 
-        //register the event handler.
-        MinecraftForge.EVENT_BUS.register(new TiMEventHandler());
-        FMLCommonHandler.instance().bus().register(new TiMEventHandler());
+        //register the event handler and the HUD.
+        MinecraftForge.EVENT_BUS.register(eventHandler);
+        FMLCommonHandler.instance().bus().register(eventHandler);
+
+        //Initialize the HUD
+        HUDTrain hud = new HUDTrain();
+        FMLCommonHandler.instance().bus().register(hud);
+        MinecraftForge.EVENT_BUS.register(hud);
 
         //register the renders
         proxy.registerRenderers();

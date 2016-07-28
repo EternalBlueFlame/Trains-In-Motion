@@ -2,11 +2,10 @@ package trains.gui;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
-import trains.TrainsInMotion;
 import trains.entities.MinecartExtended;
+import trains.registry.URIRegistry;
 import trains.utility.InventoryHandler;
 
 public class GUITrain extends GuiContainer {
@@ -54,19 +53,19 @@ public class GUITrain extends GuiContainer {
     protected void drawGuiContainerBackgroundLayer(float par1, int par2, int par3) {
         //draw the gui background color
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        //set the texture.
-        mc.renderEngine.bindTexture(new ResourceLocation(TrainsInMotion.MODID, TrainsInMotion.Resources.GUI_PREFIX.getValue() + "gui_example.png"));
+        //set the texture for the background.
+        mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("guilocobackground.png"));
         //draw the texture
         drawTexturedModalRect((width - xSize) / 2, (height - ySize) / 2, 0, 0, xSize, ySize);
 
-
-        mc.renderEngine.bindTexture(new ResourceLocation(TrainsInMotion.MODID, TrainsInMotion.Resources.GUI_PREFIX.getValue() + "gui_player_slot.png"));
+        //repeat for the inventory slots of the train.
+        mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("itemslot.png"));
         for (int ic = 0; ic < 9; ic++) {
             for (int ir = 0; ir < 3; ir++) {
                 drawTexturedModalRect( 8 + (ic * 18),  84 + (ir * 18), 0, 0, xSize, ySize);
             }
         }
-
+        //since slots maintain the same texture we won't have to bind a new one to draw the slots for the toolbar.
         for (int iT = 0; iT < 9; iT++) {
             drawTexturedModalRect( 8 + (iT * 18), 142, 0, 0, xSize, ySize);
         }

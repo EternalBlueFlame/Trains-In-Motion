@@ -47,10 +47,6 @@ public class PacketGUI  implements IMessage {
                         entityPlayer.openGui(TrainsInMotion.instance, GUITrain.GUI_ID, entityPlayer.ridingEntity.worldObj,
                                 MathHelper.floor_double(entityPlayer.ridingEntity.posX), MathHelper.floor_double(entityPlayer.ridingEntity.posY), MathHelper.floor_double(entityPlayer.ridingEntity.posZ));
                     }
-                    case HUDTrain.GUI_ID: {
-                        entityPlayer.openGui(TrainsInMotion.instance, HUDTrain.GUI_ID, entityPlayer.ridingEntity.worldObj,
-                                MathHelper.floor_double(entityPlayer.ridingEntity.posX), MathHelper.floor_double(entityPlayer.ridingEntity.posY), MathHelper.floor_double(entityPlayer.ridingEntity.posZ));
-                    }
                     default: {
                         return null;
                     }

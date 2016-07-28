@@ -4,12 +4,12 @@ package trains.utility;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
-import trains.TrainsInMotion;
 import trains.entities.MinecartExtended;
 import trains.entities.render.RenderCore;
 import trains.entities.render.RenderObj;
 import trains.entities.trains.FirstTrain;
 import trains.gui.GUITrain;
+import trains.registry.URIRegistry;
 
 public class ClientProxy extends CommonProxy {
 
@@ -55,8 +55,8 @@ public class ClientProxy extends CommonProxy {
          */
         //RenderingRegistry.registerEntityRenderingHandler(FirstTrain.class, new RenderCore(new MODEL.JAVA(), 0.5F));
         RenderingRegistry.registerEntityRenderingHandler(FirstTrain.class, new RenderObj(
-                TrainsInMotion.Resources.MODEL_TRAIN.getResourceLocation("untitled.obj"),
-                TrainsInMotion.Resources.MODEL_TRAIN_TEXTURE.getResourceLocation("060e2.png")
+                URIRegistry.MODEL_TRAIN.getResource("060e2.obj"),
+                URIRegistry.TEXTURE_GENERIC.getResource("null.png")
                 ));
 
     }

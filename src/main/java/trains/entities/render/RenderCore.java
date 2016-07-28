@@ -4,8 +4,8 @@ import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.renderer.entity.RenderBiped;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
-import trains.TrainsInMotion;
 import trains.entities.MinecartExtended;
+import trains.registry.URIRegistry;
 import trains.utility.ClientProxy;
 
 public class RenderCore extends RenderBiped {
@@ -36,16 +36,16 @@ public class RenderCore extends RenderBiped {
             switch (((MinecartExtended) entity).getMinecartType()) {
                 //this is for FirstTrain
                 case 1001: {
-                    return new ResourceLocation(TrainsInMotion.Resources.MODEL_TRAIN + "entity.png");
+                    return URIRegistry.MODEL_TRAIN_TEXTURE.getResource("untitled.png");
                 }
                 //all else fails, return a null texture, because pink and black is always in style.
                 default: {
-                    return new ResourceLocation(TrainsInMotion.Resources.MODEL_TRAIN + "null.png");
+                    return URIRegistry.TEXTURE_GENERIC.getResource("null.png");
                 }
             }
         } else {
             //all else fails, return a null texture, because pink and black is always in style.
-            return new ResourceLocation(TrainsInMotion.Resources.MODEL_TRAIN + "null.png");
+            return URIRegistry.TEXTURE_GENERIC.getResource("null.png");
         }
     }
 }
