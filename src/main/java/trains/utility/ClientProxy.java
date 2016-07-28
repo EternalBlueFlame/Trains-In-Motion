@@ -3,10 +3,7 @@ package trains.utility;
 
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.AdvancedModelLoader;
-import net.minecraftforge.client.model.IModelCustom;
 import trains.TrainsInMotion;
 import trains.entities.MinecartExtended;
 import trains.entities.render.RenderCore;

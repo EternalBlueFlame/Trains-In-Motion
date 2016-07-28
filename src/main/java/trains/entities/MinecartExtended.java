@@ -139,10 +139,12 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         spawnDirection = additionalData.readFloat();
+        isReverse = additionalData.readBoolean();
     }
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         buffer.writeFloat(spawnDirection);
+        buffer.writeBoolean(isReverse);
     }
 
     /**

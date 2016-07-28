@@ -38,7 +38,6 @@ public class FirstTrain extends EntityTrainCore {
      */
     public FirstTrain(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos, initMaxSpeed, acceleration, type,tank,inventoryRows, inventoryColumns,craftingSlots,GUITrain.GUI_ID,minecartID,canBeRidden);
-
     }
 
     /**

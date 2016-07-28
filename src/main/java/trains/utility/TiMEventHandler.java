@@ -5,11 +5,14 @@ import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import org.lwjgl.input.Keyboard;
 import trains.TrainsInMotion;
+import trains.entities.EntityTrainCore;
 import trains.entities.MinecartExtended;
 import trains.gui.GUITrain;
+import trains.gui.HUDTrain;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 
@@ -54,6 +57,15 @@ public class TiMEventHandler {
     public void entityInteractEvent(EntityInteractEvent event) {
         if (event.target instanceof MinecartExtended && !event.entity.worldObj.isRemote && (event.target.riddenByEntity == null || event.target.riddenByEntity == event.entityPlayer)) {
             event.entityPlayer.mountEntity(event.target);
+        }
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    @SubscribeEvent
+    public void eventHandler(RenderGameOverlayEvent event){
+        if (Minecraft.getMinecraft().currentScreen==null && Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntityTrainCore){
+            TrainsInMotion.keyChannel.sendToServer(new PacketGUI(HUDTrain.GUI_ID));
         }
     }
 

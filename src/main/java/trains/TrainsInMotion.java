@@ -1,15 +1,19 @@
 package trains;
 
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.eventhandler.EventPriority;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialLiquid;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import trains.entities.MinecartExtended;
+import trains.gui.HUDTrain;
 import trains.registry.ItemRegistry;
 import trains.blocks.LampBlock;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -83,7 +87,7 @@ public class TrainsInMotion
     public  ItemRegistry itemSets = new ItemRegistry();
     public TiMEntityRegistry entities = new TiMEntityRegistry();
     public static Block lampBlock = new LampBlock();
-    public static BlockFluidClassic blockFluidOil = new BlockFluidClassic(fluidOil, Mat_Oil);
+    public static BlockFluidClassic blockFluidOil;
 
     @SidedProxy(clientSide = "trains.utility.ClientProxy", serverSide = "trains.utility.CommonProxy")
     public static CommonProxy proxy;
@@ -121,8 +125,11 @@ public class TrainsInMotion
         KeyReverse = config.getString("ReverseKeybind","Keybinds", "s","").charAt(0);
 
         config.save();
-    }
 
+        HUDTrain hud = new HUDTrain();
+        FMLCommonHandler.instance().bus().register(hud);
+        MinecraftForge.EVENT_BUS.register(hud);
+    }
     /**
      * register everything here.
      * @param event actual load event
@@ -131,6 +138,7 @@ public class TrainsInMotion
     public void init(FMLInitializationEvent event) {
         //item/block registry
         FluidRegistry.registerFluid(fluidOil);
+        blockFluidOil = new BlockFluidClassic(fluidOil, Mat_Oil);
         GameRegistry.registerBlock(blockFluidOil, "OilBlock");
         GameRegistry.registerBlock(lampBlock, "lampblock");
         itemSets.RegisterItems();
@@ -154,7 +162,6 @@ public class TrainsInMotion
         proxy.registerRenderers();
     }
 
-
     /**
      * this is used to force events from the main thread of the mod, it can create a lot of lag sometimes.
      *
@@ -166,9 +173,9 @@ public class TrainsInMotion
      */
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent tick) {
-        if (EnableLights && tick.phase == TickEvent.Phase.END && ClientInstance.theWorld != null && carts.size()>0) {
+        if (EnableLights && tick.phase == TickEvent.Phase.END && ClientInstance.theWorld != null && carts.size() > 0){
             //instance the lamp here because it's more efficient than instancing it every loop.
-            for (MinecartExtended cart : carts){
+            for (MinecartExtended cart : carts) {
                 if (cart != null && ClientInstance.theWorld.getBlock(cart.lamp.X, cart.lamp.Y, cart.lamp.Z) instanceof LampBlock) {
                     ClientInstance.theWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
                 }

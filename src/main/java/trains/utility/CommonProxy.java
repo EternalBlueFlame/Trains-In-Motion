@@ -1,9 +1,6 @@
 package trains.utility;
 
 
-import cpw.mods.fml.client.registry.ClientRegistry;
-import net.minecraft.client.settings.KeyBinding;
-import trains.TrainsInMotion;
 import cpw.mods.fml.common.network.IGuiHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;

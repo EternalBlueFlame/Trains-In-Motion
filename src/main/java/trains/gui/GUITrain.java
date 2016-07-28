@@ -11,7 +11,7 @@ import trains.utility.InventoryHandler;
 
 public class GUITrain extends GuiContainer {
     //id reference for this GUI
-    public static final int GUI_ID = 20;
+    public static final int GUI_ID = 200;
 
     /**
      * instances the container for the inventory and passes it to the super

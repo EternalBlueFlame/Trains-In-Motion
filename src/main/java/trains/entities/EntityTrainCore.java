@@ -206,13 +206,18 @@ public class EntityTrainCore extends MinecartExtended {
 
 
     /**
-     * simple function for setting the train's speed
+     * simple function for setting the train's speed and whether or not it is reverse.
      */
     public void setAcceleration(boolean increase){
         if (increase && accelerator <6){
             accelerator++;
         } else if (!increase && accelerator >-6){
             accelerator--;
+        }
+        if (accelerator>0 && !isReverse){
+            isReverse = false;
+        } else if (accelerator <0 && isReverse){
+            isReverse = true;
         }
     }
 
