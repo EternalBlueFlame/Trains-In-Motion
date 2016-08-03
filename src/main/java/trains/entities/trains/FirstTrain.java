@@ -18,20 +18,22 @@ public class FirstTrain extends EntityTrainCore {
      * in this case we are going to go with static, it would be more reliable and probably significantly more efficient at the cost of organization.
      *
      *
+     * acceleration is applied every tick, defined as a percentage of the max speed, multiplied by the position of the accelerator, the variable MUST be 3 parts
+     * the fluid tank has 2 values, one for water/RF/fuel/uranium and another for steam/.
      * speed is actually for the German 0-8-0 Brigadelok (calculation is (1/72)*70.8111, 70.8111 being the train's max speed in km/h)
      */
-    private static float initMaxSpeed = 0.9834875f;
-    private static float[] acceleration = new float[]{1,3,1};
-    private static int type = 1;
+    private static final float initMaxSpeed = 0.9834875f;
+    private static final float[] acceleration = new float[]{0.0005F,0.00075F,0.0005F};
+    private static final int type = 1;
     private static FluidTank[] tank = new FluidTank[]{
             new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),
             new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)
     };
-    private static int inventoryRows = 3;
-    private static int inventoryColumns = 3;
-    private static int craftingSlots = 2;
-    private static int minecartID = 1001;
-    private static boolean canBeRidden = true;
+    private static final int inventoryRows = 3;
+    private static final int inventoryColumns = 3;
+    private static final int craftingSlots = 2;
+    private static final int minecartID = 1001;
+    private static final boolean canBeRidden = true;
 
     /**
      * @see EntityTrainCore#EntityTrainCore(UUID, World, double, double, double, float, float[], int, FluidTank[], int, int, int, int, int, boolean)

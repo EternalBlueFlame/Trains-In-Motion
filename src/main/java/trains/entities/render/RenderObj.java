@@ -12,9 +12,6 @@ import net.minecraftforge.client.model.IModelCustom;
 import net.minecraftforge.client.model.obj.ObjModelLoader;
 import org.lwjgl.opengl.GL11;
 import trains.entities.MinecartExtended;
-import trains.registry.URIRegistry;
-
-import java.io.File;
 
 public class RenderObj extends Render {
 

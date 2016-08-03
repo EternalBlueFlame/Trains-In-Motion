@@ -1,5 +1,6 @@
 package trains.entities;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 public class EntityTrainCore extends MinecartExtended {
 
-    public float[] acceleration = new float[]{0,0,0}; //the first 3 values are a point curve, representing <35%, 35-70% and >70% to modify how acceleration is handled at each point. //the 4th value defines how much the weight hauled effects acceleration.
+    public float[] acceleration = new float[]{0.0005F,0.0006F,0.0005F}; //the first 3 values are a point curve, representing <35%, 35-70% and >70% to modify how acceleration is handled at each point. //the 4th value defines how much the weight hauled effects acceleration.
     public int trainType=0;//list of train types 0 is null, 1 is steam, 2 is diesel, 3 is electric, 4 is hydrogen, 5 is nuclear steam, 6 is nuclear electric
     public boolean isRunning = false;// if the train is running/using fuel
     public int furnaceFuel = 0; //the amount of fuel in the furnace, only used for steam and nuclear trains
@@ -65,6 +66,19 @@ public class EntityTrainCore extends MinecartExtended {
         super(world);
     }
 
+    /**
+     * this is basically NBT for entity spawn, to keep data between client and server in sync because some data is not automatically shared.
+     */
+    @Override
+    public void readSpawnData(ByteBuf additionalData) {
+        super.readSpawnData(additionalData);
+        maxSpeed = additionalData.readFloat();
+    }
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        super.writeSpawnData(buffer);
+        buffer.writeFloat(maxSpeed);
+    }
 
     /**
      * defines what should be done this tick to separate processing and improve overall performance.
@@ -85,9 +99,9 @@ public class EntityTrainCore extends MinecartExtended {
      */
     @Override
     public void onUpdate() {
-        super.onUpdate();
 
-        if (!worldObj.isRemote && trainTicks > 1) {
+        if (!worldObj.isRemote /*&& furnaceFuel*/) {
+
             /**
              * the 0.96 is the drag, this subtracts 0.04 from the speed to calculate for the drag.
              * TODO after we can link carts, this needs to be changed to 1-(0.04*ConnectedCars) && braking should be added to the drag
@@ -97,35 +111,38 @@ public class EntityTrainCore extends MinecartExtended {
              * after we handle the acceleration in
              * @see EntityTrainCore#accelerate(int)
              */
-            double x = 0;
-            double z = 0;
-            double motion = motionX + motionZ;
-            if (motion <= maxSpeed * 0.3) {
-                if (accelerator != 0) {
-                    if (motionX != 0) {
-                        x = (motionX * 0.96) * accelerate(0);
-                    }
-                    if (motionZ != 0) {
-                        z = (motionZ * 0.96) * accelerate(0);
-                    }
-                } else if (motion >= maxSpeed * 0.6) {
-                    if (motionX != 0) {
-                        x = (motionX * 0.96) * accelerate(2);
-                    }
-                    if (motionZ != 0) {
-                        z = (motionZ * 0.96) * accelerate(2);
-                    }
-                } else if (motion > maxSpeed * 0.3 && motion < maxSpeed * 0.6) {
-                    if (motionX != 0) {
-                        x = (motionX * 0.96) * accelerate(1);
-                    }
-                    if (motionZ != 0) {
-                        z = (motionZ * 0.96) * accelerate(1);
-                    }
-                }
+            if (accelerator != 0) {
+                double x = 0;
+                double z = 0;
+                double motion = Math.sqrt(motionX * motionX + motionZ * motionZ);
+                int accelIndex = 0;
+                if (motion > maxSpeed || motion < -maxSpeed) {accelIndex = -1;}
+                else if (motion > maxSpeed * 0.6d || motion < -(maxSpeed * 0.6d)) {accelIndex = 2;}
+                else if (motion > maxSpeed * 0.3d || motion < -(maxSpeed * 0.3d)) {accelIndex = 1;}
 
-                System.out.println(x + "\n" + z);
-                this.setVelocity(x, motionY, z);
+                if (accelerator !=0 && accelIndex !=-1) {
+                    if (motionX > 0) {
+                        x = (acceleration[accelIndex] * accelerator);
+                    } else {
+                        x = -(acceleration[accelIndex] * accelerator);
+                    }
+                    if (motionZ > 0) {
+                        z = (acceleration[accelIndex] * accelerator);
+                    } else {
+                        z = -(acceleration[accelIndex] * accelerator);
+                    }
+
+                    //compensate for stopping the train to 0, this is needed for brake and switching from forward to reverse.
+                    /*if (motionX != 0.0D && ((x < 0.0D && motionX > 0.0D) || (x > 0.0D && motionX < 0.0D))){
+                        x=0.0D;
+                    }
+                    if ( motionZ != 0.0D && ((z < 0.0D && motionZ > 0.0D) || (z > 0.0D && motionZ < 0.0D))){
+                        z=0.0D;
+                    }*/
+
+                    System.out.println("motion: "+ motion + " : accelIndex : " + accelIndex + " : accelerator : " + accelerator + ": XMotion :" + x + " : ZMotion :" + z);
+                }
+                this.addVelocity(x, motionY, z);
             }
 
             trainTicks++;
@@ -133,7 +150,7 @@ public class EntityTrainCore extends MinecartExtended {
             switch (trainTicks) {
                 case 5: {
                     if (isRunning) {
-                        new FuelHandler(this);
+                        FuelHandler.FuelHandler(this);
                     }
                     break;
                 }
@@ -145,29 +162,13 @@ public class EntityTrainCore extends MinecartExtended {
                 }
             }
         }
+        super.onUpdate();
     }
 
-    /**
-     * if the train has fuel, process acceleration, otherwise return 1.
-     * if the train is not already at the max speed, figure out if the train is going reverse or not based on whether or not the acceleration is a negative value.
-     * then on top of the base value from direction, apply the amount of speed increase from the train's acceleration based on the current state of the accelerator.
-     *
-     * if the train is already at max speed, then return just enough to negate the drag value.
-     */
-    private double accelerate(int accelerationIndex){
-        if (furnaceFuel>0) {
-            if (motionX + motionZ < maxSpeed && motionX < maxSpeed && motionZ < maxSpeed) {
-                if (accelerator >= 0) {
-                    return 1 + (acceleration[accelerationIndex] * (accelerator *0.1f));
-                } else {
-                    return -1 + (acceleration[accelerationIndex] * (accelerator *0.1f));
-                }
-            } else {
-                return 1.04;
-            }
-        } else {
-            return 1;
-        }
+
+    @Override
+    public float getMaxCartSpeedOnRail() {
+        return 5F;
     }
 
 

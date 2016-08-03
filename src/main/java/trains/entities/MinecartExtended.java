@@ -38,7 +38,7 @@ import static java.lang.Math.*;
 public class MinecartExtended extends EntityMinecart implements IMinecart, IRoutableCart, IInventory, IEntityAdditionalSpawnData {
 
     //define these ahead of time to improve performance.
-    private static final double almostNotMoving= 0.00138888888D;
+    private static final double almostNotMoving= 0.0138888888D;
     private static final double rotationPi = 180 / Math.PI;
 
     //Main Values
@@ -61,12 +61,10 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public double cartX =0;
     public double cartY =0;
     public double cartZ =0;
-    public float cartYaw =0;
     public float cartPitch =0;
     protected double cartVelocityX =0;
     protected double cartVelocityY =0;
     protected double cartVelocityZ =0;
-    public double lastY=0;
 
 
     //inventory
@@ -249,7 +247,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
      * aside from that we also use getMinecartType to define the texture for the entity, an odd way to do it, but its simple and works.
      * @see RenderCore
      *
-     * TODO canBePushed should be false later when it can move on its own.
      *
      * The UUID methods are for getting and setting the, non-railcraft, owner of the entity,
     */
@@ -357,6 +354,11 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         }
 
         //manage position, pitch, and rotation
+        //NOTE: Pitch must not be the default, for no apparent reason it gets overwritten and it breaks the render.
+        rotationYaw = (float) (atan2((lastTickPosX - cartX), (lastTickPosZ - cartZ)) * rotationPi)+90F;
+        if ((motionX > almostNotMoving || motionX < -almostNotMoving) ^ (motionZ > almostNotMoving || motionZ < -almostNotMoving)) {
+            cartPitch = MathHelper.floor_double(Math.toDegrees(acos(lastTickPosY - cartY)) + 90D);
+        }
         if (worldObj.isRemote) {
             if (cartTurnProgress > 0) {
                 setPosition(
@@ -365,11 +367,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
                         posZ + (cartZ - posZ) / cartTurnProgress
                 );
                 --cartTurnProgress;
-                //NOTE: for pitch and rotation, they must NOT be handled by the default things, only the entity and the render
-                rotationYaw = (float) (atan2((lastTickPosX - cartX), (lastTickPosZ - cartZ)) * rotationPi)+90F;
-                if ((motionX > almostNotMoving || motionX < -almostNotMoving) ^ (motionZ > almostNotMoving || motionZ < -almostNotMoving)) {
-                    cartPitch = MathHelper.floor_double(Math.toDegrees(acos(lastTickPosY - cartY)) + 90D);
-                }
 
             } else {
                 setPosition(posX, posY, posZ);
@@ -562,6 +559,4 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     }
     @Override
     public GameProfile getOwner(){return null;}
-    
-
 }

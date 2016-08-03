@@ -13,8 +13,8 @@ import java.util.List;
 
 
 public class FuelHandler {
-    private static int[] value = new int[]{20, 3, 50, 100, 500, 3};
-    private static List<Item> steamFuel = Arrays.asList(Item.getItemFromBlock(Blocks.planks), Items.stick, Items.coal, Items.blaze_rod, Item.getItemFromBlock(Blocks.coal_block), Item.getItemFromBlock(Blocks.sapling));
+    private static final int[] value = new int[]{20, 3, 50, 100, 500, 3};
+    private static final List<Item> steamFuel = Arrays.asList(Item.getItemFromBlock(Blocks.planks), Items.stick, Items.coal, Items.blaze_rod, Item.getItemFromBlock(Blocks.coal_block), Item.getItemFromBlock(Blocks.sapling));
 
     /**
      * defines the fuel handler used by trains
@@ -23,7 +23,7 @@ public class FuelHandler {
      *
      * @param cart the EntityTrainCore calling the fuel handler.
      */
-    public FuelHandler(EntityTrainCore cart){
+    public static void FuelHandler(EntityTrainCore cart){
 
         switch (cart.trainType) {
             case 1: {
@@ -70,8 +70,9 @@ public class FuelHandler {
                         break;
                     }
 
+                    //TODO need proper drain value determined by the train's stats.
                     if(cart.tank[1].getFluidAmount() >= (cart.tank[1].getCapacity()*0.5f)){
-                        cart.tank[1].drain(Math.round(cart.maxSpeed), true);
+                        cart.tank[1].drain(1, true);
                     }
 
                     if (cart.tank[1].getFluidAmount() >=5){

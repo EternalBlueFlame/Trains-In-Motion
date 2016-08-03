@@ -52,9 +52,9 @@ public class TrainsInMotion {
     public static TrainsInMotion instance;
     public Minecraft ClientInstance;
     //Instance the registries that maintain the blocks, items, entities, etc.
-    public static BlockRegistry blockRegistry = new BlockRegistry();
-    public static ItemRegistry itemRegistry = new ItemRegistry();
-    public static EntityRegistry entityRegistry = new EntityRegistry();
+    public BlockRegistry blockRegistry = new BlockRegistry();
+    public ItemRegistry itemRegistry = new ItemRegistry();
+    public EntityRegistry entityRegistry = new EntityRegistry();
     //Instance the creative tab
     public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
     //Setup the proxy, this is used for managing how each part of the mod acts on it's respective side.

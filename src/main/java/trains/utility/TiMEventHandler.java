@@ -32,19 +32,19 @@ public class TiMEventHandler {
     public void onClientKeyPress(InputEvent.KeyInputEvent event){
         if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof MinecartExtended) {
             //for lamp
-            if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyLamp))) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyLamp)));
+            if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyLamp))) {
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.KeyLamp)));
             }
             //for inventory
-            if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyInventory))) {
+            if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyInventory))) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketGUI(GUITrain.GUI_ID));
             }
             //for speed change
-            if(Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyAccelerate))){
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyAccelerate)));
+            if(Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyAccelerate))){
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.KeyAccelerate)));
             }
-            if(Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyReverse))){
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.instance.KeyReverse)));
+            if(Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyReverse))){
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.KeyReverse)));
             }
         }
     }
