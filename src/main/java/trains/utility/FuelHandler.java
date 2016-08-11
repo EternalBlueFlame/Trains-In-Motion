@@ -99,6 +99,9 @@ public class FuelHandler {
             case 6: {
                 break;
             }
+            case 7: {
+                break;
+            }
             default:{break;}
         }
 

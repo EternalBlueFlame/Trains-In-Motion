@@ -5,7 +5,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import trains.entities.EntityTrainCore;
-import trains.gui.GUITrain;
+import trains.gui.train.GUISteam;
 
 import java.util.UUID;
 
@@ -39,7 +39,7 @@ public class FirstTrain extends EntityTrainCore {
      * @see EntityTrainCore#EntityTrainCore(UUID, World, double, double, double, float, float[], int, FluidTank[], int, int, int, int, int, boolean)
      */
     public FirstTrain(UUID owner, World world, double xPos, double yPos, double zPos) {
-        super(owner, world, xPos, yPos, zPos, initMaxSpeed, acceleration, type,tank,inventoryRows, inventoryColumns,craftingSlots,GUITrain.GUI_ID,minecartID,canBeRidden);
+        super(owner, world, xPos, yPos, zPos, initMaxSpeed, acceleration, type,tank,inventoryRows, inventoryColumns,craftingSlots, GUISteam.GUI_ID,minecartID,canBeRidden);
     }
 
     /**

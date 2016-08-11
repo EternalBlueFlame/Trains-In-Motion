@@ -1,4 +1,4 @@
-package trains.utility;
+package trains.gui.trainhandler;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -13,8 +13,8 @@ import trains.entities.MinecartExtended;
 
 
 
-public class InventoryHandler extends Container{
-    private MinecartExtended trainEntity;
+public class SteamInventoryHandler extends Container{
+    private EntityTrainCore trainEntity;
     private InventoryPlayer playerInv;
 
     /**
@@ -29,34 +29,34 @@ public class InventoryHandler extends Container{
      * and the final part creates the crafting slots for trains.
      *
      */
-    public InventoryHandler(InventoryPlayer iinventory, MinecartExtended entityminecart) {
-        trainEntity = entityminecart;
+    public SteamInventoryHandler(InventoryPlayer iinventory, EntityTrainCore entityTrain) {
+        trainEntity = entityTrain;
         playerInv = iinventory;
 
+        //player inventory
         for (int ic = 0; ic < 9; ic++) {
             for (int ir = 0; ir < 3; ir++) {
                 addSlotToContainer(new Slot(playerInv, (((ir * 9) + ic) + 9), 8 + (ic * 18), 84 + (ir * 18)));
             }
         }
-
+        //player toolbar
         for (int iT = 0; iT < 9; iT++) {
             addSlotToContainer(new Slot(playerInv, iT, 8 + iT * 18, 142));
         }
 
-        for (int ia = 0; ia < entityminecart.columns; ia++) {
-            for (int ib = 0; ib < entityminecart.rows; ib++) {
-                addSlotToContainer(new Slot(entityminecart, ((ib * entityminecart.columns) + ia) +2, (8 + (ib * 18)), (8 + (ia * 18))));
+        //train inventory
+        for (int ia = 0; ia < 3; ia++) {
+            for (int ib = 0; ib < 3; ib++) {
+                addSlotToContainer(new Slot(entityTrain, ((ib * entityTrain.columns) + ia) +2, 98 + (ib * 18), 8 + (ia * 18)));
             }
         }
 
-        if (entityminecart instanceof EntityTrainCore){
-            EntityTrainCore cart = (EntityTrainCore) entityminecart;
-            addSlotToContainer(new Slot(cart, 0, 26, 80));
-            if (cart.trainType == 1 || cart.trainType == 5){
-                addSlotToContainer(new Slot(cart, 1, 42, 80));
-            }
-        }
-        //rollingstock switch for crafters here
+        //trainc rafting slots
+        //fuel slot
+        addSlotToContainer(new Slot(entityTrain, 0, 8, 53));
+
+        //water slot
+        addSlotToContainer(new Slot(entityTrain, 1, 35, 53));
 
     }
 

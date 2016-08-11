@@ -5,14 +5,11 @@ import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import org.lwjgl.input.Keyboard;
 import trains.TrainsInMotion;
-import trains.entities.EntityTrainCore;
 import trains.entities.MinecartExtended;
-import trains.gui.GUITrain;
-import trains.gui.HUDTrain;
+import trains.gui.train.GUISteam;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 
@@ -37,7 +34,7 @@ public class TiMEventHandler {
             }
             //for inventory
             if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyInventory))) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketGUI(GUITrain.GUI_ID));
+                TrainsInMotion.keyChannel.sendToServer(new PacketGUI(GUISteam.GUI_ID));
             }
             //for speed change
             if(Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyAccelerate))){

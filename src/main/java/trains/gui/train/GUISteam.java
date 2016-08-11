@@ -1,26 +1,28 @@
-package trains.gui;
+package trains.gui.train;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
-import trains.entities.MinecartExtended;
+import trains.entities.EntityTrainCore;
 import trains.registry.URIRegistry;
-import trains.utility.InventoryHandler;
+import trains.gui.trainhandler.SteamInventoryHandler;
 
-public class GUITrain extends GuiContainer {
+public class GUISteam extends GuiContainer {
     //id reference for this GUI
     public static final int GUI_ID = 200;
+    private static EntityTrainCore train;
 
     /**
      * instances the container for the inventory and passes it to the super
-     * @see InventoryHandler
+     * @see SteamInventoryHandler
      *
      * @param inventoryPlayer
-     * @param tileEntity
+     * @param entity
      */
-    public GUITrain(InventoryPlayer inventoryPlayer, MinecartExtended tileEntity) {
-        super(new InventoryHandler(inventoryPlayer, tileEntity));
+    public GUISteam(InventoryPlayer inventoryPlayer, EntityTrainCore entity) {
+        super(new SteamInventoryHandler(inventoryPlayer, entity));
+        train = entity;
     }
 
     /**
@@ -54,21 +56,44 @@ public class GUITrain extends GuiContainer {
         //draw the gui background color
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         //set the texture for the background.
-        mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("guilocobackground.png"));
+        //mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("guilocobackground.png"));
         //draw the texture
-        drawTexturedModalRect((width - xSize) / 2, (height - ySize) / 2, 0, 0, xSize, ySize);
+        //drawTexturedModalRect((width - xSize) / 2, (height - ySize) / 2, 0, 0, xSize, ySize);
 
-        //repeat for the inventory slots of the train.
+        //icon for fuel
+        mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("steam_fuelbackground.png"));
+        drawTexturedModalRect(((width - xSize) / 2) + 7, ((height - ySize) / 2) + 25, 0, 0, 18, 18);
+        //icon for furnace
+        mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("steam_fuelicon.png"));
+        drawTexturedModalRect(((width - xSize) / 2) + 7, ((height - ySize) / 2) + 25, 0, 0, 18, 18);
+
+        //set the generic slot icon, which will get re-used for every slot.
         mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("itemslot.png"));
+        //slot for fuel
+        drawTexturedModalRect(((width - xSize) / 2) + 7, ((height - ySize) / 2) + 52, 0, 0, 18, 18);
+
+        //slot for water
+        drawTexturedModalRect(((width - xSize) / 2) + 34, ((height - ySize) / 2) + 52, 0, 0, 18, 18);
+
+        //player inventory slots
         for (int ic = 0; ic < 9; ic++) {
             for (int ir = 0; ir < 3; ir++) {
-                drawTexturedModalRect( 8 + (ic * 18),  84 + (ir * 18), 0, 0, xSize, ySize);
+                drawTexturedModalRect( ((width - xSize) / 2) + 7 + (ic * 18), ((height - ySize) / 2) + 83 + (ir * 18), 0, 0, 18, 18);
             }
         }
-        //since slots maintain the same texture we won't have to bind a new one to draw the slots for the toolbar.
+        //player toolbar slots
         for (int iT = 0; iT < 9; iT++) {
-            drawTexturedModalRect( 8 + (iT * 18), 142, 0, 0, xSize, ySize);
+            drawTexturedModalRect(((width - xSize) / 2) + 7 + (iT * 18), ((height - ySize) / 2) + 141, 0, 0, 18, 18);
         }
+
+
+        //train's inventory
+        for (int ic = 0; ic < 3; ic++) {
+            for (int ir = 0; ir < 3; ir++) {
+                drawTexturedModalRect( ((width - xSize) / 2) + 97 + (ic * 18), ((height - ySize) / 2) + 7 + (ir * 18), 0, 0, 18, 18);
+            }
+        }
+
     }
 
 }

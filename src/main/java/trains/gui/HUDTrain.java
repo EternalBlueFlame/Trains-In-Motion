@@ -7,7 +7,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import trains.entities.EntityTrainCore;
 import trains.registry.URIRegistry;
-import trains.utility.InventoryHandler;
+import trains.gui.trainhandler.SteamInventoryHandler;
 
 public class HUDTrain extends GuiScreen {
     //id reference for this GUI
@@ -16,7 +16,7 @@ public class HUDTrain extends GuiScreen {
 
     /**
      * instances the container for the inventory and passes it to the super
-     * @see InventoryHandler
+     * @see SteamInventoryHandler
      *
      */
 

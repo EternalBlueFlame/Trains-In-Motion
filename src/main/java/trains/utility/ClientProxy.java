@@ -4,11 +4,12 @@ package trains.utility;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+import trains.entities.EntityTrainCore;
 import trains.entities.MinecartExtended;
 import trains.entities.render.RenderCore;
 import trains.entities.render.RenderObj;
 import trains.entities.trains.FirstTrain;
-import trains.gui.GUITrain;
+import trains.gui.train.GUISteam;
 import trains.registry.URIRegistry;
 
 public class ClientProxy extends CommonProxy {
@@ -22,10 +23,11 @@ public class ClientProxy extends CommonProxy {
      */
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        if (player != null && player.ridingEntity instanceof MinecartExtended) {
+        //handle GUI direction for trains
+        if (player != null && player.ridingEntity instanceof EntityTrainCore) {
             switch (ID) {
-                case GUITrain.GUI_ID: {
-                    return new GUITrain(player.inventory, (MinecartExtended) player.ridingEntity);
+                case GUISteam.GUI_ID: {
+                    return new GUISteam(player.inventory, (EntityTrainCore) player.ridingEntity);
                 }
 
                 default: {
@@ -33,7 +35,7 @@ public class ClientProxy extends CommonProxy {
                 }
             }
         } else{
-
+            //handle GUI direction for rollingstock
             return null;
         }
     }

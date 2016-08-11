@@ -1,14 +1,9 @@
 package trains.items;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockRail;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.MathHelper;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTank;
 import trains.TrainsInMotion;
 import com.mojang.authlib.GameProfile;
 import mods.railcraft.api.carts.IMinecart;
@@ -20,11 +15,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import trains.entities.MinecartExtended;
 import trains.entities.trains.FirstTrain;
-import trains.gui.GUITrain;
 
 import java.util.UUID;
-
-import static net.minecraft.util.MathHelper.floor_float;
 
 public class ItemFirstTrain extends ItemMinecart implements IMinecart, IMinecartItem {
     //constructor

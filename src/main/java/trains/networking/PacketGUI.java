@@ -9,8 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
 import trains.entities.MinecartExtended;
-import trains.gui.GUITrain;
-import trains.gui.HUDTrain;
+import trains.gui.train.GUISteam;
 
 public class PacketGUI  implements IMessage {
     int gui;
@@ -35,7 +34,7 @@ public class PacketGUI  implements IMessage {
      * handles the packet when received by client.
      * First it has to check if it was actually received by the proper entity, because if not, it crashes.
      * then it opens the GUI based on the ID number that was sent in the packet
-     * @see GUITrain
+     * @see GUISteam
      */
     public static class Handler implements IMessageHandler<PacketGUI, IMessage> {
         @Override
@@ -43,8 +42,8 @@ public class PacketGUI  implements IMessage {
             EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
             if (entityPlayer != null && entityPlayer.ridingEntity instanceof MinecartExtended) {
                 switch (message.gui) {
-                    case GUITrain.GUI_ID: {
-                        entityPlayer.openGui(TrainsInMotion.instance, GUITrain.GUI_ID, entityPlayer.ridingEntity.worldObj,
+                    case GUISteam.GUI_ID: {
+                        entityPlayer.openGui(TrainsInMotion.instance, GUISteam.GUI_ID, entityPlayer.ridingEntity.worldObj,
                                 MathHelper.floor_double(entityPlayer.ridingEntity.posX), MathHelper.floor_double(entityPlayer.ridingEntity.posY), MathHelper.floor_double(entityPlayer.ridingEntity.posZ));
                     }
                     default: {

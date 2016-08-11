@@ -138,11 +138,14 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     public void readSpawnData(ByteBuf additionalData) {
         spawnDirection = additionalData.readFloat();
         isReverse = additionalData.readBoolean();
+        owner = new UUID(additionalData.readLong(), additionalData.readLong());
     }
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         buffer.writeFloat(spawnDirection);
         buffer.writeBoolean(isReverse);
+        buffer.writeLong(owner.getMostSignificantBits());
+        buffer.writeLong(owner.getLeastSignificantBits());
     }
 
     /**
@@ -485,6 +488,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         spawnDirection = tag.getFloat("extended.directon");
         owner = new UUID(tag.getLong("extended.ownerM"),tag.getLong("extended.ownerL"));
         ticks = tag.getInteger("extended.ticks");
+        rows = tag.getInteger("extended.rows");
+        columns = tag.getInteger("extended.columns");
         //read through the itemstacks
         NBTTagList taglist = tag.getTagList("Items", 10);
         for (int i = 0; i < taglist.tagCount(); i++) {
@@ -514,6 +519,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         tag.setLong("extended.ownerM", owner.getMostSignificantBits());
         tag.setLong("extended.ownerL", owner.getLeastSignificantBits());
         tag.setInteger("extended.ticks", ticks);
+        tag.setInteger("extended.rows", rows);
+        tag.setInteger("extended.columns", columns);
         //write the itemset to a tag list before adding it
         NBTTagList nbttaglist = new NBTTagList();
         for (int i = 0; i < inventory.length; ++i) {
@@ -559,4 +566,19 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     }
     @Override
     public GameProfile getOwner(){return null;}
+
+
+
+
+
+    @Override
+    protected void func_145821_a(int p_145821_1_, int p_145821_2_, int p_145821_3_, double p_145821_4_, double p_145821_6_, Block p_145821_8_, int p_145821_9_) {
+
+        Entity entity = this.riddenByEntity;
+        this.riddenByEntity = null;
+        super.func_145821_a(p_145821_1_, p_145821_2_, p_145821_3_, p_145821_4_, p_145821_6_, p_145821_8_, p_145821_9_);
+        this.riddenByEntity = entity;
+    }
+
+
 }

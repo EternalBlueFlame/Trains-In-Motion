@@ -38,6 +38,14 @@ public class EntityTrainCore extends MinecartExtended {
      * @param zPos the z position to spawn entity at, used in super's super.
      * @param maxSpeed the max speed a train can go, 1.0 is equal to 72kmph or 72000 blocks/h.
      * @param type what kind of rolling stock it is.
+     *             typelist:
+     *             1: steam
+     *             2: diesel
+     *             3: hydrogen diesel
+     *             4: electric
+     *             5: nuclear steam
+     *             6: nuclear electric
+     *             7: maglev
      * @param tank used to define the fluid tank(s) if there are any
      *             empty array for no tanks, - steam and nuclear take two tanks. - all other trains take one tank
      *             all tanks besides diesel should use FluidRegistry.WATER
@@ -178,16 +186,18 @@ public class EntityTrainCore extends MinecartExtended {
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
-        isRunning = tag.getBoolean("extended.isRunning");
-        trainTicks = tag.getInteger("extended.trainTicks");
-        destination = tag.getString("extended.destination");
+        isRunning = tag.getBoolean("train.isRunning");
+        trainTicks = tag.getInteger("train.trainTicks");
+        destination = tag.getString("train.destination");
+        trainType = tag.getInteger("train.type");
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
-        tag.setBoolean("extended.isRunning",isRunning);
-        tag.setInteger("extended.ticks", trainTicks);
-        destination = tag.getString("extended.destination");
+        tag.setBoolean("train.isRunning",isRunning);
+        tag.setInteger("train.ticks", trainTicks);
+        tag.setString("train.destination", destination);
+        tag.setInteger("train.typr", trainType);
     }
 
 
