@@ -11,6 +11,7 @@ import net.minecraft.util.Vec3;
 import net.minecraftforge.client.model.IModelCustom;
 import net.minecraftforge.client.model.obj.ObjModelLoader;
 import org.lwjgl.opengl.GL11;
+import trains.entities.EntityTrainCore;
 import trains.entities.MinecartExtended;
 
 public class RenderObj extends Render {
@@ -35,8 +36,8 @@ public class RenderObj extends Render {
          */
 
         //first initialize the variables
-        if (entity instanceof MinecartExtended) {
-            MinecartExtended cart = (MinecartExtended) entity;
+        if (entity instanceof EntityTrainCore) {
+            EntityTrainCore cart = (EntityTrainCore) entity;
 
             /**
              * now we actually set the values we just finished defining.

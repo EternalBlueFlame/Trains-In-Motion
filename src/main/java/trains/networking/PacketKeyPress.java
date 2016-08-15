@@ -39,13 +39,13 @@ public class PacketKeyPress implements IMessage {
         @Override
         public IMessage onMessage(PacketKeyPress message, MessageContext context) {
             Entity ridingEntity = context.getServerHandler().playerEntity.ridingEntity;
-            if (message.key == TrainsInMotion.parseKey(TrainsInMotion.instance.KeyLamp) && ridingEntity instanceof MinecartExtended){
-                ((MinecartExtended) ridingEntity).lamp.isOn = !((MinecartExtended) ridingEntity).lamp.isOn;
+            if (message.key == TrainsInMotion.parseKey(TrainsInMotion.KeyLamp) && ridingEntity instanceof EntityTrainCore){
+                ((EntityTrainCore) ridingEntity).lamp.isOn = !((EntityTrainCore) ridingEntity).lamp.isOn;
             }
-            if (message.key == TrainsInMotion.parseKey(TrainsInMotion.instance.KeyAccelerate) && ridingEntity instanceof EntityTrainCore){
+            if (message.key == TrainsInMotion.parseKey(TrainsInMotion.KeyAccelerate) && ridingEntity instanceof EntityTrainCore){
                 ((EntityTrainCore) ridingEntity).setAcceleration(true);
             }
-            if (message.key == TrainsInMotion.parseKey(TrainsInMotion.instance.KeyReverse) && ridingEntity instanceof EntityTrainCore){
+            if (message.key == TrainsInMotion.parseKey(TrainsInMotion.KeyReverse) && ridingEntity instanceof EntityTrainCore){
                 ((EntityTrainCore) ridingEntity).setAcceleration(false);
             }
 

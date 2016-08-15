@@ -25,6 +25,7 @@ public class ClientProxy extends CommonProxy {
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         //handle GUI direction for trains
         if (player != null && player.ridingEntity instanceof EntityTrainCore) {
+			//TODO this should probably be handled by some sort of array based loader in the main class to make it more API friendly
             switch (ID) {
                 case GUISteam.GUI_ID: {
                     return new GUISteam(player.inventory, (EntityTrainCore) player.ridingEntity);
@@ -54,6 +55,7 @@ public class ClientProxy extends CommonProxy {
          *
          * Note, the texture can not be null or lead to an invalid file.
          * TODO need java model
+		 * TODO this should probably be handled by some sort of array based loader in the main class to make it more API friendly
          */
         //RenderingRegistry.registerEntityRenderingHandler(FirstTrain.class, new RenderCore(new MODEL.JAVA(), 0.5F));
         RenderingRegistry.registerEntityRenderingHandler(FirstTrain.class, new RenderObj(

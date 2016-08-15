@@ -2,76 +2,48 @@ package trains.entities;
 
 
 import java.util.List;
-import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.carts.IRoutableCart;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
-import net.minecraftforge.fluids.FluidTank;
 import trains.TrainsInMotion;
 import trains.entities.render.RenderCore;
-import trains.utility.LampHandler;
 
-import static java.lang.Math.*;
-
-public class MinecartExtended extends EntityMinecart implements IMinecart, IRoutableCart, IInventory, IEntityAdditionalSpawnData {
+public class MinecartExtended extends EntityMinecart implements IMinecart, IRoutableCart {
 
     //define these ahead of time to improve performance.
     private static final double almostNotMoving= 0.0138888888D;
     private static final double rotationPi = 180 / Math.PI;
 
-    //Main Values
-    public int[] colors; //allows certain parts of certain trains to be recolored
-    public String name;
-    public boolean isLocked = false; //mostly used to lock other players from using/accessing parts of the cart/train
-    public boolean brake = false; //bool for the train/rollingstock's break.
-    public LampHandler lamp = new LampHandler(); //manages the lamp, or lack there of.
-    public int GUIID = 0; //id for the GUI
-    public UUID owner = null;  //universal, get train owner
-    private int minecartNumber = 0; //used to identify the minecart number so it doesn't interfere with other mods or the base game minecarts,
-    public boolean canBeRidden;
-    private int ticks = 0; //tick count.
 
     
     //due to limitations of rotation/position for the minecart, we have to implement them ourselves to a certain degree.
-    public boolean isReverse =false;
-    public float spawnDirection =0;
-    public int cartTurnProgress =0;
     public double cartX =0;
     public double cartY =0;
     public double cartZ =0;
-    public float cartPitch =0;
     protected double cartVelocityX =0;
     protected double cartVelocityY =0;
     protected double cartVelocityZ =0;
+    private int ticks = 0; //tick count.
+    public String destination = "";  //railcraft destination
 
 
-    //inventory
-    public ItemStack[] inventory = new ItemStack[]{};//Inventory, every train will have this to some extent or another, //the first two slots are for crafting
-    public FluidTank[] tank = new FluidTank[]{};//depending on the train this is either used for diesel, steam, or redstone flux
-    public int rows =0; //defines the inventory width
-    public int columns =0;//defines inventory height
     /**
      * we have to have the constructor for the initial spawn that puts the train in the world, minecraft does this, we don't have to mess with it other than just having it.
      *
@@ -85,7 +57,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
      * this class defines the core of all trains and rollingstock, most of the large and messy code is here to make sure it's clean elsewhere.
      *
      * for things generic to rolling stock:
-     * @see EntityRollingStockCore
      *
      * for things generic to  trains:
      * @see EntityTrainCore
@@ -94,152 +65,13 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
      * @see MinecartExtended
      *
      * default constructor for setting up variables after this is created
-     * @param owner the owner profile, used to define owner of the entity,
      * @param world the world to spawn the entity in, used in super.
      * @param xPos the x position to spawn entity at, used in super.
      * @param yPos the y position to spawn entity at, used in super.
      * @param zPos the z position to spawn entity at, used in  super.
-     * @param type what kind of rolling stock or train it is.
-     * @param tank used to define the fluid tank(s) if there are any
-     * @param inventoryrows defines the rows of inventory, inventory size is defined by rows * columns.
-     * @param inventoryColumns defines the columns of the inventory.
-     * @param craftingSlots defines the number of crafting slots, 1 is for fuel, 2 is for boiler.
-     * @param GUIid the ID used to define what GUI the entity uses (0 for no GUI).
-     * @param minecartNumber used to define the unique ID of the minecart, this prevents issues with base game and modded minecarts, This also defines the texture
-     *                       @see RenderCore
-     * @param canBeRidden used to toggle if the player can ride the entity.
      */
-    public MinecartExtended(UUID owner, World world, double xPos, double yPos, double zPos, int type, FluidTank[] tank, int inventoryrows,
-                            int inventoryColumns, int craftingSlots, int GUIid, int minecartNumber, boolean canBeRidden) {
+    public MinecartExtended(World world, double xPos, double yPos, double zPos) {
         super(world,xPos, yPos, zPos);
-        this.owner = owner;
-        this.minecartNumber = minecartNumber;
-        this.canBeRidden = canBeRidden;
-        this.tank = tank;
-        int slots = craftingSlots + inventoryColumns * inventoryrows;
-        inventory = new ItemStack[slots];
-        GUIID = GUIid;
-        rows = inventoryrows;
-        columns = inventoryColumns;
-
-        if(worldObj.isRemote){
-            /**
-             * add lamp to main class handler when created, so the main thread can deal with updating the lighting, or not.
-             * @see TrainsInMotion#onTick(TickEvent.ClientTickEvent)
-             */
-            TrainsInMotion.carts.add(this);
-        }
-    }
-
-    /**
-     * this is basically NBT for entity spawn, to keep data between client and server in sync because some data is not automatically shared.
-     */
-    @Override
-    public void readSpawnData(ByteBuf additionalData) {
-        spawnDirection = additionalData.readFloat();
-        isReverse = additionalData.readBoolean();
-        owner = new UUID(additionalData.readLong(), additionalData.readLong());
-    }
-    @Override
-    public void writeSpawnData(ByteBuf buffer) {
-        buffer.writeFloat(spawnDirection);
-        buffer.writeBoolean(isReverse);
-        buffer.writeLong(owner.getMostSignificantBits());
-        buffer.writeLong(owner.getLeastSignificantBits());
-    }
-
-    /**
-     * Inventory stuff, most of this is self-explanatory.
-     * Occasionally some parts are re-defined so that filters may be applied
-     * @see EntityRollingStockCore
-     */
-    @Override
-    public String getInventoryName() {
-        return name;
-    }
-    @Override
-    public void openInventory() {}
-    @Override
-    public void closeInventory() {}
-    @Override
-    public void markDirty() {}
-
-    @Override
-    public ItemStack getStackInSlot(int slot) {
-        //be sure the slot exists before trying to return anything,
-        if (slot>=0 && slot< inventory.length) {
-            return inventory[slot];
-        } else {
-            return null;
-        }
-    }
-    @Override
-    public ItemStack getStackInSlotOnClosing(int slot) {
-        //we return null no matter what, but we want to make sure the slot is properly set as well.
-        if (slot>=0 && slot< inventory.length) {
-            inventory[slot] = null;
-        }
-        return null;
-    }
-    @Override
-    public ItemStack decrStackSize(int slot, int amount) {
-        //be sure the slot exists before trying to return anything,
-        if (slot>=0 && slot< inventory.length) {
-            //if subtraction makes slot empty/null then set it to null and return null, otherwise return the stack.
-            if (inventory[slot].stackSize <= amount ^ inventory[slot].stackSize <= 0) {
-                inventory[slot] = null;
-                return null;
-            } else {
-                return inventory[slot].splitStack(amount);
-            }
-        } else {
-            return null;
-        }
-    }
-    @Override
-    public void setInventorySlotContents(int slot, ItemStack itemstack) {
-        //be sure item stack isn't null, then add the itemstack, and be sure the slot doesn't go over the limit.
-        if (itemstack != null && slot >=0 && slot<inventory.length) {
-            if (itemstack.stackSize >= getInventoryStackLimit()) {
-                itemstack.stackSize = getInventoryStackLimit();
-            }
-            inventory[slot] = itemstack;
-        }
-    }
-
-    @Override
-    public int getInventoryStackLimit() {
-        return 64;
-    }
-
-    //return if the item can be placed in the slot, for this slot it's just a check if the slot exists, but other things may have slots for specific items, this filters that.
-    @Override
-    public boolean isItemValidForSlot(int slot, ItemStack item){
-        return (slot>=0 && slot< inventory.length);
-    }
-
-    //return the number of inventory slots
-    @Override
-    public int getSizeInventory(){
-        if(inventory != null){
-            return inventory.length;
-        } else{
-            return 0;
-        }
-    }
-
-    //return if the train can be used by the player, if it's locked, only the owner can use it.
-    @Override
-    public boolean isUseableByPlayer(EntityPlayer player){
-        if (isLocked){
-            if(owner.equals(player.getUniqueID())){
-                return true;
-            } else {
-                return false;
-            }
-        } else{
-            return true;
-        }
     }
 
     /**
@@ -255,7 +87,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     */
     @Override
     public int getMinecartType() {
-        return minecartNumber;
+        return 10001;
     }
     @Override
     public boolean isPoweredCart() {
@@ -263,7 +95,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     }
     @Override
     public boolean canBeRidden() {
-        return canBeRidden;
+        return false;
     }
     @Override
     public boolean canBePushed() {
@@ -274,11 +106,10 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     {
         return true;
     }
-
-    public void setOwner(UUID player){owner = player;}
-    public UUID getOwnerUUID(){return owner;}
-    public void setDirection(float direction){
-        spawnDirection = direction;}
+    @Override
+    public float getMaxCartSpeedOnRail() {
+        return 5F;
+    }
 
     /**
      * this runs every tick
@@ -355,25 +186,8 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
 
             worldObj.theProfiler.endSection();
         }
-
-        //manage position, pitch, and rotation
-        //NOTE: Pitch must not be the default, for no apparent reason it gets overwritten and it breaks the render.
-        rotationYaw = (float) (atan2((lastTickPosX - cartX), (lastTickPosZ - cartZ)) * rotationPi)+90F;
-        if ((motionX > almostNotMoving || motionX < -almostNotMoving) ^ (motionZ > almostNotMoving || motionZ < -almostNotMoving)) {
-            cartPitch = MathHelper.floor_double(Math.toDegrees(acos(lastTickPosY - cartY)) + 90D);
-        }
         if (worldObj.isRemote) {
-            if (cartTurnProgress > 0) {
-                setPosition(
-                        posX + (cartX - posX) / cartTurnProgress,
-                        posY + (cartY - posY) / cartTurnProgress,
-                        posZ + (cartZ - posZ) / cartTurnProgress
-                );
-                --cartTurnProgress;
-
-            } else {
-                setPosition(posX, posY, posZ);
-            }
+            setPosition(posX, posY, posZ);
 
         } else {
             prevPosX = posX;
@@ -451,9 +265,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         cartX = x;
         cartY = y;
         cartZ = z;
-        rotationYaw = yaw;
-        rotationPitch = pitch;
-        cartTurnProgress = turnProgress + 2;
         motionX = cartVelocityX;
         motionY = cartVelocityY;
         motionZ = cartVelocityZ;
@@ -473,7 +284,6 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
      *
      * the super class handles most of the variables, Most of the rest is handled either in classes that extend this
      * @see EntityTrainCore#readFromNBT(NBTTagCompound)
-     * @see EntityRollingStockCore#readFromNBT(NBTTagCompound)
      * and the super class
      * @see EntityMinecart#readFromNBT(NBTTagCompound)
      */
@@ -481,61 +291,15 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
         //colors = tag.getIntArray("extended.colors");
-        isLocked = tag.getBoolean("extended.isLocked");
-        brake = tag.getBoolean("extended.brake");
-        lamp.isOn = tag.getBoolean("extended.lamp");
-        isReverse = tag.getBoolean("extended.isreverse");
-        spawnDirection = tag.getFloat("extended.directon");
-        owner = new UUID(tag.getLong("extended.ownerM"),tag.getLong("extended.ownerL"));
         ticks = tag.getInteger("extended.ticks");
-        rows = tag.getInteger("extended.rows");
-        columns = tag.getInteger("extended.columns");
-        //read through the itemstacks
-        NBTTagList taglist = tag.getTagList("Items", 10);
-        for (int i = 0; i < taglist.tagCount(); i++) {
-            NBTTagCompound nbttagcompound1 = taglist.getCompoundTagAt(i);
-            byte b0 = nbttagcompound1.getByte("Slot");
-
-            if (b0 >= 0 && b0 < inventory.length) {
-                inventory[b0] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
-            }
-        }
-
-        for (int t=0; t<tank.length; t++){
-            tank[t].readFromNBT(tag);
-        }
-        //items with static-esk values that shouldn't need NBT,
-        //name, maxSpeed, GUIID, minecartNumber, trainType, acceleration, filters, canBeRidden, isLoco.
+        destination = tag.getString("train.destination");
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
         //tag.setIntArray("extended.colors", colors);
-        tag.setBoolean("extended.isLocked", isLocked);
-        tag.setBoolean("extended.brake", brake);
-        tag.setBoolean("extended.lamp", lamp.isOn);
-        tag.setBoolean("extended.isreverse", isReverse);
-        tag.setFloat("extended.direction", spawnDirection);
-        tag.setLong("extended.ownerM", owner.getMostSignificantBits());
-        tag.setLong("extended.ownerL", owner.getLeastSignificantBits());
         tag.setInteger("extended.ticks", ticks);
-        tag.setInteger("extended.rows", rows);
-        tag.setInteger("extended.columns", columns);
-        //write the itemset to a tag list before adding it
-        NBTTagList nbttaglist = new NBTTagList();
-        for (int i = 0; i < inventory.length; ++i) {
-            if (inventory[i] != null) {
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                nbttagcompound1.setByte("Slot", (byte)i);
-                inventory[i].writeToNBT(nbttagcompound1);
-                nbttaglist.appendTag(nbttagcompound1);
-            }
-        }
-        tag.setTag("Items", nbttaglist);
-
-        for (int t=0; t<tank.length; t++){
-            tank[t].writeToNBT(tag);
-        }
+        tag.setString("train.destination", destination);
 
     }
 
@@ -547,16 +311,7 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
      * filter however we will have to handle here because it is very generic.
      *
      * the owner for railcraft we don't handle at all, because we have our own system for that.
-     * @see MinecartExtended#getOwnerUUID()
      */
-    @Override
-    public String getDestination() {
-        return null;
-    }
-    @Override
-    public boolean setDestination(ItemStack ticket) {
-        return false;
-    }
     @Override
     public boolean doesCartMatchFilter(ItemStack stack, EntityMinecart cart) {
         //get the type from the given minecart, and if it matches the itemstack return true.
@@ -580,5 +335,20 @@ public class MinecartExtended extends EntityMinecart implements IMinecart, IRout
         this.riddenByEntity = entity;
     }
 
+
+
+    /**
+     * this function, and the following one define railcraft support for trains by adding in destination and if you can set one.
+     * @see mods.railcraft.api.carts.IRoutableCart
+     */
+    @Override
+    public String getDestination() {
+        return destination;
+    }
+    //Only locomotives can receive a destination from a track.
+    @Override
+    public boolean setDestination(ItemStack ticket) {
+        return true;
+    }
 
 }

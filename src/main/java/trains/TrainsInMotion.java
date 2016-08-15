@@ -2,6 +2,7 @@ package trains;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.config.Configuration;
+import trains.entities.EntityTrainCore;
 import trains.entities.MinecartExtended;
 import trains.gui.HUDTrain;
 import trains.registry.BlockRegistry;
@@ -39,7 +40,7 @@ import java.util.List;
 // Second is minor, for rebuilds of individual feature sets not intended to effect the whole, like if we were to rebuild the entire GUI system.
 // Third is for bugfix and/or minor optimization releases, where as we didn't change any features, but it works better.
 // fourth is new minor content, like new trains or rollingstock that use existing features.
-@Mod(modid = TrainsInMotion.MODID, version = "0.4.0.0pre-alpha", name = "Trains in Motion")
+@Mod(modid = TrainsInMotion.MODID, version = "0.5.0.0pre-alpha", name = "Trains in Motion")
 public class TrainsInMotion {
 
     /**
@@ -65,7 +66,7 @@ public class TrainsInMotion {
 
     //Instance the list of trains/rollingstock that are in the game, this is later used to manage the dynamic lighting.
     //This is ONLY used on client side.
-    public static List<MinecartExtended> carts;
+    public static List<EntityTrainCore> carts;
 
     //Instance the event handler, This is used for event based functionality, things like when you right-click an entity.
     public static TiMEventHandler eventHandler = new TiMEventHandler();
@@ -144,7 +145,7 @@ public class TrainsInMotion {
     public void onTick(TickEvent.ClientTickEvent tick) {
         if (EnableLights && tick.phase == TickEvent.Phase.END && ClientInstance.theWorld != null && carts.size() > 0){
             //instance the lamp here because it's more efficient than instancing it every loop.
-            for (MinecartExtended cart : carts) {
+            for (EntityTrainCore cart : carts) {
                 if (cart != null && ClientInstance.theWorld.getBlock(cart.lamp.X, cart.lamp.Y, cart.lamp.Z) instanceof LampBlock) {
                     ClientInstance.theWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
                 }

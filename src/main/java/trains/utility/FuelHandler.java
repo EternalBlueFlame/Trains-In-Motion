@@ -4,6 +4,7 @@ package trains.utility;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 import trains.entities.EntityTrainCore;
 import trains.entities.MinecartExtended;
@@ -32,7 +33,8 @@ public class FuelHandler {
                  * stack becomes null if size would reduce it to <1
                  *
                  * Next consume a water bucket, similar to the burnable fuel.
-                 * TODO water bucket needs to add an empty bucket to inventory
+                 *
+                 * finally consume a water bucket. if there is room for the bucket in the inventory add it to a stack or an empty slot.
                  *
                  */
                 if (steamFuel.contains(cart.inventory[0].getItem()) && cart.furnaceFuel + value[steamFuel.indexOf(cart.inventory[0].getItem())+1] < cart.maxFuel){
@@ -49,6 +51,18 @@ public class FuelHandler {
                         cart.inventory[1].stackSize = cart.inventory[1].stackSize - 1;
                     } else{
                         cart.inventory[1] = null;
+                    }
+
+                    for (int i=2; i<cart.inventory.length;) {
+                        if (cart.inventory[i].getItem() == null){
+                            cart.inventory[i] = new ItemStack(Items.water_bucket);
+                            break;
+                        } else if (cart.inventory[i].getMaxStackSize() <= cart.inventory[i].stackSize){
+                            cart.inventory[i].stackSize+=1;
+                            break;
+                        } else {
+                            i++;
+                        }
                     }
                 }
 
