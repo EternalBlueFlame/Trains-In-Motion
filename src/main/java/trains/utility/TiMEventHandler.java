@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import org.lwjgl.input.Keyboard;
 import trains.TrainsInMotion;
+import trains.entities.EntityTrainCore;
 import trains.entities.MinecartExtended;
 import trains.gui.train.GUISteam;
 import trains.networking.PacketGUI;
@@ -52,7 +53,10 @@ public class TiMEventHandler {
      */
     @SubscribeEvent
     public void entityInteractEvent(EntityInteractEvent event) {
-        if (event.target instanceof MinecartExtended && !event.entity.worldObj.isRemote && (event.target.riddenByEntity == null || event.target.riddenByEntity == event.entityPlayer)) {
+        if (event.target instanceof EntityTrainCore /* || event.target instanceof EntityRollingStockCore */
+                && !event.entity.worldObj.isRemote
+                && event.target.riddenByEntity == null) {
+            System.out.println("Player tried to mount");
             event.entityPlayer.mountEntity(event.target);
         }
     }

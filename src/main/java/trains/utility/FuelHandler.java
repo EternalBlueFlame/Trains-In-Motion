@@ -37,28 +37,28 @@ public class FuelHandler {
                  * finally consume a water bucket. if there is room for the bucket in the inventory add it to a stack or an empty slot.
                  *
                  */
-                if (steamFuel.contains(cart.inventory[0].getItem()) && cart.furnaceFuel + value[steamFuel.indexOf(cart.inventory[0].getItem())+1] < cart.maxFuel){
-                    cart.furnaceFuel += value[steamFuel.indexOf(cart.inventory[0].getItem()) + 1];
-                    if (cart.inventory[0].stackSize >1) {
-                        cart.inventory[0].stackSize = cart.inventory[0].stackSize - 1;
+                if (steamFuel.contains(cart.inventory.get(0).getItem()) && cart.furnaceFuel + value[steamFuel.indexOf(cart.inventory.get(0).getItem())+1] < cart.maxFuel){
+                    cart.furnaceFuel += value[steamFuel.indexOf(cart.inventory.get(0).getItem()) + 1];
+                    if (cart.inventory.get(0).stackSize >1) {
+                        cart.inventory.get(0).stackSize = cart.inventory.get(0).stackSize - 1;
                     } else{
-                        cart.inventory[0] = null;
+                        cart.inventory.set(0, null);
                     }
                 }
-                if (cart.inventory[1].getItem() == Items.water_bucket && cart.tank[0].getFluidAmount() <= cart.tank[0].getCapacity()-1000){
+                if (cart.inventory.get(1).getItem() == Items.water_bucket && cart.tank[0].getFluidAmount() <= cart.tank[0].getCapacity()-1000){
                     cart.tank[0].fill(new FluidStack(cart.tank[1].getFluid().getFluid(), cart.tank[1].getFluidAmount() + 1000), true);
-                    if (cart.inventory[1].stackSize >1) {
-                        cart.inventory[1].stackSize = cart.inventory[1].stackSize - 1;
+                    if (cart.inventory.get(1).stackSize >1) {
+                        cart.inventory.get(1).stackSize = cart.inventory.get(1).stackSize - 1;
                     } else{
-                        cart.inventory[1] = null;
+                        cart.inventory.set(1, null);
                     }
 
-                    for (int i=2; i<cart.inventory.length;) {
-                        if (cart.inventory[i].getItem() == null){
-                            cart.inventory[i] = new ItemStack(Items.water_bucket);
+                    for (int i=2; i<cart.inventory.size();) {
+                        if (cart.inventory.get(i).getItem() == null){
+                            cart.inventory.set(i, new ItemStack(Items.water_bucket));
                             break;
-                        } else if (cart.inventory[i].getMaxStackSize() <= cart.inventory[i].stackSize){
-                            cart.inventory[i].stackSize+=1;
+                        } else if (cart.inventory.get(i).getMaxStackSize() <= cart.inventory.get(i).stackSize){
+                            cart.inventory.get(i).stackSize+=1;
                             break;
                         } else {
                             i++;

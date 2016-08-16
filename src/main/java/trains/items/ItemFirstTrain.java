@@ -7,12 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
-import com.mojang.authlib.GameProfile;
-import mods.railcraft.api.carts.IMinecart;
-import mods.railcraft.api.core.items.IMinecartItem;
-import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemMinecart;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import trains.entities.EntityTrainCore;
@@ -74,12 +69,12 @@ public class ItemFirstTrain extends Item {
                         
 						if (!BlockRailBase.func_150051_a(block) || ((BlockRailBase) block).getBasicRailMetadata(worldObj, null, posX + i, posY, posZ) != 1) {
 							
-							playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track" + "X+"+i));
+							playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track"));
                             return false;
                         }
                     }
-                                
-					bogie2 = new MinecartExtended(worldObj, posX + i + 0.5D, posY, posZ + 0.5D);
+
+					bogie2 = new MinecartExtended(worldObj, posX + length + 0.5D, posY, posZ + 0.5D);
                 }
 				else if (playerMeta == 2) {
                     
@@ -89,12 +84,12 @@ public class ItemFirstTrain extends Item {
                         
 						if (!BlockRailBase.func_150051_a(block) || ((BlockRailBase) block).getBasicRailMetadata(worldObj, null, posX - i, posY, posZ) != 1) {
 							
-							playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track" + "X-"+i));
+							playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track"));
                             return false;
                         }
                     }
                                 
-					bogie2 = new MinecartExtended(worldObj, posX - i + 0.5D, posY, posZ + 0.5D);
+					bogie2 = new MinecartExtended(worldObj, posX - length + 0.5D, posY, posZ + 0.5D);
                 }
             }
 			else if (((BlockRailBase)worldObj.getBlock(posX,posY,posZ)).getBasicRailMetadata(worldObj, null,posX,posY,posZ) == 0){
@@ -107,12 +102,12 @@ public class ItemFirstTrain extends Item {
                         
 						if (!BlockRailBase.func_150051_a(block) || ((BlockRailBase) block).getBasicRailMetadata(worldObj, null, posX, posY, posZ + i) != 0) {
 							
-							playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track" + "Z+"+i));
+							playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track"));
                             return false;
                         }
                     }
                                 
-					bogie2 = new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + i + 0.5D);
+					bogie2 = new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + length + 0.5D);
                 }
 				else if (playerMeta == 1) {
                     
@@ -122,20 +117,20 @@ public class ItemFirstTrain extends Item {
                         
 						if (!BlockRailBase.func_150051_a(block) || ((BlockRailBase) block).getBasicRailMetadata(worldObj, null, posX, posY, posZ - i) != 0) {
 							
-							playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track" + "Z-"+i));
+							playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track"));
                             return false;
                         }
                     }
                                 
-					bogie2 = new MinecartExtended(worldObj, posX + 0.5D, posY, posZ - i + 0.5D);
+					bogie2 = new MinecartExtended(worldObj, posX + 0.5D, posY, posZ - length + 0.5D);
                 }
             }
 			
 			if (bogie2 != null) {
 				
 				EntityTrainCore entity = new FirstTrain(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D);
-				entity.boogie.add(new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D));
-				entity.boogie.add(bogie2);
+				entity.bogie.add(new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D));
+				entity.bogie.add(bogie2);
                 worldObj.spawnEntityInWorld(entity);
                 return true;
 			}

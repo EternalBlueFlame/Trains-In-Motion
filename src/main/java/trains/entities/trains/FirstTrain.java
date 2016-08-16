@@ -29,17 +29,13 @@ public class FirstTrain extends EntityTrainCore {
             new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),
             new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)
     };
-    private static final int inventoryRows = 3;
-    private static final int inventoryColumns = 3;
-    private static final int craftingSlots = 2;
-    private static final int minecartID = 1001;
-    private static final boolean canBeRidden = true;
+    private static final int inventorySize= 3;
 
     /**
-     * @see EntityTrainCore#EntityTrainCore(UUID, World, double, double, double, float, float[], int, FluidTank[], int, int, int, int, int, boolean)
+     * @see EntityTrainCore#EntityTrainCore(UUID, World, double, double, double, float, float[], int, FluidTank[], int, int)
      */
     public FirstTrain(UUID owner, World world, double xPos, double yPos, double zPos) {
-        super(owner, world, xPos, yPos, zPos, initMaxSpeed, acceleration, type,tank,inventoryRows, inventoryColumns,craftingSlots, GUISteam.GUI_ID,minecartID,canBeRidden);
+        super(owner, world, xPos, yPos, zPos, initMaxSpeed, acceleration, type,tank,inventorySize, GUISteam.GUI_ID);
     }
 
     /**

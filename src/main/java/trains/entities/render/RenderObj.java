@@ -44,11 +44,11 @@ public class RenderObj extends Render {
              * because rotation is set on (amount, xaxis, yaxis, xaxis) we have to rotate each axis individually, then push
              */
             if (cart.isReverse){
-                GL11.glRotatef(cart.rotationYaw + 180F, 0.0F, 1.0F, 0.0F);
+                GL11.glRotatef(cart.cartYaw + 180F, 0.0F, 1.0F, 0.0F);
             } else {
-                GL11.glRotatef(cart.rotationYaw, 0.0F, 1.0F, 0.0F);
+                GL11.glRotatef(cart.cartYaw, 0.0F, 1.0F, 0.0F);
             }
-            GL11.glRotatef(cart.cartPitch + 180F, 0.0F, 0.0F, 1.0F);
+            GL11.glRotatef(cart.cartPitch, 0.0F, 0.0F, 1.0F);
             GL11.glPushMatrix();
         }
 
@@ -59,7 +59,7 @@ public class RenderObj extends Render {
         //clear the cache, one pop for every push.
         GL11.glPopMatrix();
         GL11.glPopMatrix();
-        if (entity instanceof MinecartExtended) {
+        if (entity instanceof EntityTrainCore) {
             GL11.glPopMatrix();
         }
 

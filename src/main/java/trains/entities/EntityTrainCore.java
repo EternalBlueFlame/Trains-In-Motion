@@ -9,6 +9,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
 import trains.TrainsInMotion;
@@ -18,6 +20,8 @@ import trains.utility.LampHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static java.lang.Math.sqrt;
 
 public class EntityTrainCore extends Entity implements IInventory, IEntityAdditionalSpawnData {
 
@@ -39,23 +43,20 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public LampHandler lamp = new LampHandler(); //manages the lamp, or lack there of.
     public int GUIID = 0; //id for the GUI
     public UUID owner = null;  //universal, get train owner
-    public boolean canBeRidden;
 
     //list of boogies
-    public List<MinecartExtended> boogie = new ArrayList<MinecartExtended>();
+    public List<MinecartExtended> bogie = new ArrayList<MinecartExtended>();
 
 
     public boolean isReverse =false;
     public float spawnDirection =0;
-    public int cartTurnProgress =0;
+    public int cartYaw =0;
     public float cartPitch=0F;
 
 
     //inventory
-    public ItemStack[] inventory = new ItemStack[]{};//Inventory, every train will have this to some extent or another, //the first two slots are for crafting
+    public List<ItemStack> inventory = new ArrayList<ItemStack>(){};//Inventory, every train will have this to some extent or another, //the first two slots are for crafting
     public FluidTank[] tank = new FluidTank[]{};//depending on the train this is either used for diesel, steam, or redstone flux
-    public int rows =0; //defines the inventory width
-    public int columns =0;//defines inventory height
 
 
     /**
@@ -85,15 +86,10 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
      * @param tank used to define the fluid tank(s) if there are any
      *             empty array for no tanks, - steam and nuclear take two tanks. - all other trains take one tank
      *             all tanks besides diesel should use FluidRegistry.WATER
-     * @param inventoryrows defines the rows of inventory, inventory size is defined by rows * columns.
-     * @param inventoryColumns defines the columns of the inventory.
-     * @param craftingSlots defines the number of crafting slots, 1 is for fuel, 2 is for boiler.
      * @param GUIid the ID used to define what GUI the entity uses (0 for no GUI).
-     * @param minecartNumber used to define the unique ID of the minecart, this prevents issues with base game and modded minecarts.
-     * @param canBeRidden used to toggle if the player can ride the entity.
      */
     public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, float maxSpeed, float[] acceleration,
-                           int type,FluidTank[] tank,int inventoryrows, int inventoryColumns, int craftingSlots, int GUIid, int minecartNumber, boolean canBeRidden){
+                           int type,FluidTank[] tank,int inventorySize, int GUIid){
         super(world);
         this.posY = yPos;
         this.posX = xPos;
@@ -103,22 +99,27 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         trainType = type;
         this.maxSpeed = maxSpeed;
         this.owner = owner;
-        this.canBeRidden = canBeRidden;
         this.tank = tank;
-        int slots = craftingSlots + inventoryColumns * inventoryrows;
-        inventory = new ItemStack[slots];
-        GUIID = GUIid;
-        rows = inventoryrows;
-        columns = inventoryColumns;
 
-
-        if(worldObj.isRemote){
-            /**
-             * add lamp to main class handlertrain when created, so the main thread can deal with updating the lighting, or not.
-             * @see TrainsInMotion#onTick(TickEvent.ClientTickEvent)
-             */
-            TrainsInMotion.carts.add(this);
+        //define the number of inventory slots to add to the train based on type for crafting slots and inventory scale
+        int craftingSlots =0;
+        switch (type){
+            case 1:case 5: {craftingSlots =2;break;}
+            case 2:case 3: case 4:case 6:{craftingSlots =1;break;}
         }
+        switch (inventorySize){
+            case 1:{craftingSlots+=4;break;}//2x2
+            case 2:{craftingSlots+=6;break;}//2x3
+            case 3:{craftingSlots+=9;break;}//3x3
+            case 4:{craftingSlots+=12;break;}//4x3
+            case 5:{craftingSlots+=16;break;}//4x4
+        }
+        for (int i=0; i<=craftingSlots;i++){
+            inventory.add(null);
+        }
+
+        GUIID = GUIid;
+
     }
 
     /**
@@ -128,6 +129,8 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
      */
     public EntityTrainCore(World world){
         super(world);
+        //set the size of the collision box
+        this.setSize(2.5F,2.5F);
     }
 
     /**
@@ -155,6 +158,20 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         buffer.writeLong(owner.getLeastSignificantBits());
     }
 
+
+
+    @Override
+    public boolean interactFirst(EntityPlayer player){
+        System.out.println("player tried to use");
+        if (this.riddenByEntity == null){
+            player.mountEntity(this);
+        }
+
+
+        return true;
+    }
+
+
     /**
      * defines what should be done this tick to separate processing and improve overall performance.
      * begins with call to super class to handle the core movement processing and some other small things.
@@ -175,6 +192,20 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     @Override
     public void onUpdate() {
 
+        if(worldObj.isRemote && trainTicks>0){
+            if (!TrainsInMotion.carts.contains(this)) {
+                /**
+                 * add lamp to main class handlertrain when created, so the main thread can deal with updating the lighting, or not.
+                 * @see TrainsInMotion#onTick(TickEvent.ClientTickEvent)
+                 */
+                TrainsInMotion.carts.add(this);
+            }
+
+            cartPitch = MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogie.size()).posY));
+            cartYaw = MathHelper.floor_double(sqrt(MathHelper.floor_double(bogie.get(0).cartX*bogie.get(0).cartX) + MathHelper.floor_double(bogie.get(0).cartZ*bogie.get(0).cartZ))/MathHelper.floor_double(bogie.get(0).cartY));
+
+        }
+
         if (!worldObj.isRemote /*&& furnaceFuel*/) {
 
             /**
@@ -189,7 +220,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             if (accelerator != 0) {
                 double x = 0;
                 double z = 0;
-                double motion = Math.sqrt(motionX * motionX + motionZ * motionZ);
+                double motion = sqrt(motionX * motionX + motionZ * motionZ);
                 int accelIndex = 0;
                 if (motion > maxSpeed || motion < -maxSpeed) {accelIndex = -1;}
                 else if (motion > maxSpeed * 0.6d || motion < -(maxSpeed * 0.6d)) {accelIndex = 2;}
@@ -217,7 +248,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
                     System.out.println("motion: "+ motion + " : accelIndex : " + accelIndex + " : accelerator : " + accelerator + ": XMotion :" + x + " : ZMotion :" + z);
                 }
-                this.addVelocity(x, motionY, z);
+                this.bogie.get(0).addVelocity(x, motionY, z);
             }
 
             trainTicks++;
@@ -240,8 +271,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         super.onUpdate();
     }
 
-
-
     /**
      * @see MinecartExtended#readFromNBT(NBTTagCompound)
      */
@@ -250,8 +279,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         isRunning = tag.getBoolean("train.isRunning");
         trainTicks = tag.getInteger("train.trainTicks");
         trainType = tag.getInteger("train.type");
-        rows = tag.getInteger("extended.rows");
-        columns = tag.getInteger("extended.columns");
         isLocked = tag.getBoolean("extended.isLocked");
         brake = tag.getBoolean("extended.brake");
         lamp.isOn = tag.getBoolean("extended.lamp");
@@ -264,8 +291,8 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             NBTTagCompound nbttagcompound1 = taglist.getCompoundTagAt(i);
             byte b0 = nbttagcompound1.getByte("Slot");
 
-            if (b0 >= 0 && b0 < inventory.length) {
-                inventory[b0] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
+            if (b0 >= 0 && b0 < inventory.size()) {
+                inventory.add(ItemStack.loadItemStackFromNBT(nbttagcompound1));
             }
         }
 
@@ -273,7 +300,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             tank[t].readFromNBT(tag);
         }
         //items with static-esk values that shouldn't need NBT,
-        //name, maxSpeed, GUIID, minecartNumber, trainType, acceleration, filters, canBeRidden, isLoco.
+        //name, maxSpeed, GUIID, trainType, acceleration, filters, isLoco.
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
@@ -287,15 +314,13 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         tag.setFloat("extended.direction", spawnDirection);
         tag.setLong("extended.ownerM", owner.getMostSignificantBits());
         tag.setLong("extended.ownerL", owner.getLeastSignificantBits());
-        tag.setInteger("extended.rows", rows);
-        tag.setInteger("extended.columns", columns);
         //write the itemset to a tag list before adding it
         NBTTagList nbttaglist = new NBTTagList();
-        for (int i = 0; i < inventory.length; ++i) {
-            if (inventory[i] != null) {
+        for (int i = 0; i < inventory.size(); ++i) {
+            if (inventory.get(i) != null) {
                 NBTTagCompound nbttagcompound1 = new NBTTagCompound();
                 nbttagcompound1.setByte("Slot", (byte)i);
-                inventory[i].writeToNBT(nbttagcompound1);
+                inventory.get(i).writeToNBT(nbttagcompound1);
                 nbttaglist.appendTag(nbttagcompound1);
             }
         }
@@ -345,8 +370,8 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     @Override
     public ItemStack getStackInSlot(int slot) {
         //be sure the slot exists before trying to return anything,
-        if (slot>=0 && slot< inventory.length) {
-            return inventory[slot];
+        if (slot>=0 && slot< inventory.size()) {
+            return inventory.get(slot);
         } else {
             return null;
         }
@@ -354,21 +379,21 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     @Override
     public ItemStack getStackInSlotOnClosing(int slot) {
         //we return null no matter what, but we want to make sure the slot is properly set as well.
-        if (slot>=0 && slot< inventory.length) {
-            inventory[slot] = null;
+        if (slot>=0 && slot< inventory.size()) {
+            inventory.set(slot, null);
         }
         return null;
     }
     @Override
     public ItemStack decrStackSize(int slot, int amount) {
         //be sure the slot exists before trying to return anything,
-        if (slot>=0 && slot< inventory.length) {
+        if (slot>=0 && slot< inventory.size()) {
             //if subtraction makes slot empty/null then set it to null and return null, otherwise return the stack.
-            if (inventory[slot].stackSize <= amount ^ inventory[slot].stackSize <= 0) {
-                inventory[slot] = null;
+            if (inventory.get(slot).stackSize <= amount ^ inventory.get(slot).stackSize <= 0) {
+                inventory.set(slot, null);
                 return null;
             } else {
-                return inventory[slot].splitStack(amount);
+                return inventory.get(slot).splitStack(amount);
             }
         } else {
             return null;
@@ -377,11 +402,11 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     @Override
     public void setInventorySlotContents(int slot, ItemStack itemstack) {
         //be sure item stack isn't null, then add the itemstack, and be sure the slot doesn't go over the limit.
-        if (itemstack != null && slot >=0 && slot<inventory.length) {
+        if (itemstack != null && slot >=0 && slot<inventory.size()) {
             if (itemstack.stackSize >= getInventoryStackLimit()) {
                 itemstack.stackSize = getInventoryStackLimit();
             }
-            inventory[slot] = itemstack;
+            inventory.set(slot, itemstack);
         }
     }
 
@@ -393,18 +418,29 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     //return if the item can be placed in the slot, for this slot it's just a check if the slot exists, but other things may have slots for specific items, this filters that.
     @Override
     public boolean isItemValidForSlot(int slot, ItemStack item){
-        return (slot>=0 && slot< inventory.length);
+        return (slot>=0 && slot< inventory.size());
     }
 
     //return the number of inventory slots
     @Override
     public int getSizeInventory(){
         if(inventory != null){
-            return inventory.length;
+            return inventory.size();
         } else{
             return 0;
         }
     }
+
+    //modify the player sitting position
+    @Override
+    public void updateRiderPosition() {
+        if (riddenByEntity != null) {
+            riddenByEntity.setPosition(posX, posY+getMountedYOffset() + riddenByEntity.getYOffset(), posZ);
+        }
+    }
+
+
+
 
     //return if the train can be used by the player, if it's locked, only the owner can use it.
     @Override

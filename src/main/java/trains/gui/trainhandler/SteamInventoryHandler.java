@@ -43,10 +43,22 @@ public class SteamInventoryHandler extends Container{
             addSlotToContainer(new Slot(playerInv, iT, 8 + iT * 18, 142));
         }
 
+        //define the train's inventory size
+        int columns=0;
+        int rows=0;
+        switch (entityTrain.inventory.size()){
+            case 2:case 3:case 4:{columns=2;rows=2;break;}
+            case 6:case 7:case 8:{columns=2;rows=3;break;}
+            case 9:case 10:case 11:{columns=3;rows=3;break;}
+            case 12:case 13:case 14:{columns=3;rows=4;break;}
+            case 16:case 17:case 18:{columns=4;rows=4;break;}
+        }
+
+
         //train inventory
-        for (int ia = 0; ia < 3; ia++) {
-            for (int ib = 0; ib < 3; ib++) {
-                addSlotToContainer(new Slot(entityTrain, ((ib * entityTrain.columns) + ia) +2, 98 + (ib * 18), 8 + (ia * 18)));
+        for (int ia = 0; ia < rows; ia++) {
+            for (int ib = 0; ib < columns; ib++) {
+                addSlotToContainer(new Slot(entityTrain, ((ib * columns) + ia) +2, 98 + (ib * 18), 8 + (ia * 18)));
             }
         }
 
