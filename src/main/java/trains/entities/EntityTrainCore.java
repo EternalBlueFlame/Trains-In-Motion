@@ -3,6 +3,7 @@ package trains.entities;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import io.netty.buffer.ByteBuf;
+import javafx.geometry.BoundingBox;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -33,6 +34,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public float maxSpeed = 0; // the max speed
     private int trainTicks =0; //defines the train's tick count.
     public int accelerator =0; //defines the value of how much to speed up, or brake the train.
+    private AxisAlignedBB boundingBox = null;//the bounding box that defines collisions and size of the train
 
 
     //Main Values
@@ -49,9 +51,9 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
 
     public boolean isReverse =false;
-    public float spawnDirection =0;
     public int cartYaw =0;
     public float cartPitch=0F;
+    public double[] frontBogieXYZ = new double[]{0D,0D,0D};
 
 
     //inventory
@@ -130,11 +132,32 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public EntityTrainCore(World world){
         super(world);
         //set the size of the collision box
-        this.setSize(2.5F,2.5F);
+        //this.setSize(2.5F,2.5F);
     }
 
+
+    @Override
+    public AxisAlignedBB getBoundingBox(){
+
+        if (bogie != null && bogie.size()>1) {
+            return AxisAlignedBB.getBoundingBox(
+                    bogie.get(bogie.size()).cartX + 1,
+                    bogie.get(bogie.size()).cartY + 1,
+                    bogie.get(bogie.size()).cartZ + 1,
+                    bogie.get(0).cartX - bogie.get(bogie.size()).cartX,
+                    2.5F,
+                    bogie.get(0).cartZ - bogie.get(bogie.size()).cartZ
+            );
+        } else {
+            System.out.println("BOGIES NO HERE");
+            return null;
+        }
+
+    }
+
+
     /**
-     *
+     * entity initialization, I think this happens between constructor and the first onUpdate, or before the constructor.
      */
     @Override
     public void entityInit(){}
@@ -145,14 +168,12 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         maxSpeed = additionalData.readFloat();
-        spawnDirection = additionalData.readFloat();
         isReverse = additionalData.readBoolean();
         owner = new UUID(additionalData.readLong(), additionalData.readLong());
     }
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         buffer.writeFloat(maxSpeed);
-        buffer.writeFloat(spawnDirection);
         buffer.writeBoolean(isReverse);
         buffer.writeLong(owner.getMostSignificantBits());
         buffer.writeLong(owner.getLeastSignificantBits());
@@ -191,7 +212,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
      */
     @Override
     public void onUpdate() {
-
+        //client
         if(worldObj.isRemote && trainTicks>0){
             if (!TrainsInMotion.carts.contains(this)) {
                 /**
@@ -205,7 +226,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             cartYaw = MathHelper.floor_double(sqrt(MathHelper.floor_double(bogie.get(0).cartX*bogie.get(0).cartX) + MathHelper.floor_double(bogie.get(0).cartZ*bogie.get(0).cartZ))/MathHelper.floor_double(bogie.get(0).cartY));
 
         }
-
+        //server
         if (!worldObj.isRemote /*&& furnaceFuel*/) {
 
             /**
@@ -267,6 +288,14 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                     }
                 }
             }
+
+
+            if (frontBogieXYZ == new double[]{0D,0D,0D}){
+
+            } else {
+                frontBogieXYZ = new double[]{bogie.get(bogie.size()).cartX,bogie.get(bogie.size()).cartY,bogie.get(bogie.size()).cartZ};
+            }
+
         }
         super.onUpdate();
     }
@@ -276,20 +305,19 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
      */
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
-        isRunning = tag.getBoolean("train.isRunning");
-        trainTicks = tag.getInteger("train.trainTicks");
+        isRunning = tag.getBoolean("train.isrunning");
+        trainTicks = tag.getInteger("train.trainticks");
         trainType = tag.getInteger("train.type");
-        isLocked = tag.getBoolean("extended.isLocked");
+        isLocked = tag.getBoolean("extended.islocked");
         brake = tag.getBoolean("extended.brake");
         lamp.isOn = tag.getBoolean("extended.lamp");
         isReverse = tag.getBoolean("extended.isreverse");
-        spawnDirection = tag.getFloat("extended.directon");
-        owner = new UUID(tag.getLong("extended.ownerM"),tag.getLong("extended.ownerL"));
+        owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
         //read through the itemstacks
-        NBTTagList taglist = tag.getTagList("Items", 10);
+        NBTTagList taglist = tag.getTagList("items", 10);
         for (int i = 0; i < taglist.tagCount(); i++) {
             NBTTagCompound nbttagcompound1 = taglist.getCompoundTagAt(i);
-            byte b0 = nbttagcompound1.getByte("Slot");
+            byte b0 = nbttagcompound1.getByte("slot");
 
             if (b0 >= 0 && b0 < inventory.size()) {
                 inventory.add(ItemStack.loadItemStackFromNBT(nbttagcompound1));
@@ -299,32 +327,35 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         for (int t=0; t<tank.length; t++){
             tank[t].readFromNBT(tag);
         }
+
+
+
+
         //items with static-esk values that shouldn't need NBT,
         //name, maxSpeed, GUIID, trainType, acceleration, filters, isLoco.
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
-        tag.setBoolean("train.isRunning",isRunning);
+        tag.setBoolean("train.isrunning",isRunning);
         tag.setInteger("train.ticks", trainTicks);
-        tag.setInteger("train.typr", trainType);
-        tag.setBoolean("extended.isLocked", isLocked);
+        tag.setInteger("train.type", trainType);
+        tag.setBoolean("extended.islocked", isLocked);
         tag.setBoolean("extended.brake", brake);
         tag.setBoolean("extended.lamp", lamp.isOn);
         tag.setBoolean("extended.isreverse", isReverse);
-        tag.setFloat("extended.direction", spawnDirection);
-        tag.setLong("extended.ownerM", owner.getMostSignificantBits());
-        tag.setLong("extended.ownerL", owner.getLeastSignificantBits());
+        tag.setLong("extended.ownerm", owner.getMostSignificantBits());
+        tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
         //write the itemset to a tag list before adding it
         NBTTagList nbttaglist = new NBTTagList();
         for (int i = 0; i < inventory.size(); ++i) {
             if (inventory.get(i) != null) {
                 NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                nbttagcompound1.setByte("Slot", (byte)i);
+                nbttagcompound1.setByte("slot", (byte)i);
                 inventory.get(i).writeToNBT(nbttagcompound1);
                 nbttaglist.appendTag(nbttagcompound1);
             }
         }
-        tag.setTag("Items", nbttaglist);
+        tag.setTag("items", nbttaglist);
 
         for (int t=0; t<tank.length; t++){
             tank[t].writeToNBT(tag);
@@ -459,8 +490,11 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
     public void setOwner(UUID player){owner = player;}
     public UUID getOwnerUUID(){return owner;}
-    public void setDirection(float direction){spawnDirection = direction;}
 
+
+    public void setBogies(List<MinecartExtended> bogies){
+        this.bogie = bogies;
+    };
 
 
 }

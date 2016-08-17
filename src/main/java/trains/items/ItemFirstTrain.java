@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
+import scala.actors.threadpool.Arrays;
 import trains.TrainsInMotion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -14,6 +15,8 @@ import trains.entities.EntityTrainCore;
 import trains.entities.MinecartExtended;
 import trains.entities.trains.FirstTrain;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class ItemFirstTrain extends Item {
@@ -57,11 +60,11 @@ public class ItemFirstTrain extends Item {
             
 			int playerMeta = MathHelper.floor_double((playerEntity.rotationYaw / 90.0F) + 2.5D) & 3;
 			Block block;
-			MinecartExtended bogie2 = null;
+			EntityTrainCore entity = new FirstTrain(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D);
 
             if (((BlockRailBase)worldObj.getBlock(posX,posY,posZ)).getBasicRailMetadata(worldObj, null,posX,posY,posZ) == 1){
 
-                if (playerMeta == 0) {
+                if (playerMeta == 1) {
                     
 					for (int i = 1; i < length; ++i){
 						
@@ -74,9 +77,9 @@ public class ItemFirstTrain extends Item {
                         }
                     }
 
-					bogie2 = new MinecartExtended(worldObj, posX + length + 0.5D, posY, posZ + 0.5D);
+					entity.setBogies(Arrays.asList(new MinecartExtended[]{new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D), new MinecartExtended(worldObj, posX + 0.5D + length, posY, posZ + 0.5D)}));
                 }
-				else if (playerMeta == 2) {
+				else if (playerMeta == 3) {
                     
 					for (int i = 1; i < length; ++i){
 						
@@ -88,13 +91,13 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                                
-					bogie2 = new MinecartExtended(worldObj, posX - length + 0.5D, posY, posZ + 0.5D);
+
+					entity.setBogies(Arrays.asList(new MinecartExtended[]{new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D), new MinecartExtended(worldObj, posX + 0.5D - length, posY, posZ + 0.5D)}));
                 }
             }
 			else if (((BlockRailBase)worldObj.getBlock(posX,posY,posZ)).getBasicRailMetadata(worldObj, null,posX,posY,posZ) == 0){
 
-                if (playerMeta == 3) {
+                if (playerMeta == 2) {
                     
 					for (int i = 1; i < length; ++i){
 						
@@ -106,10 +109,10 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                                
-					bogie2 = new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + length + 0.5D);
+
+					entity.setBogies(Arrays.asList(new MinecartExtended[]{new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D), new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D + length)}));
                 }
-				else if (playerMeta == 1) {
+				else if (playerMeta == 0) {
                     
 					for (int i = 1; i < length; ++i){
 						
@@ -121,16 +124,12 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                                
-					bogie2 = new MinecartExtended(worldObj, posX + 0.5D, posY, posZ - length + 0.5D);
+
+					entity.setBogies(Arrays.asList(new MinecartExtended[]{new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D), new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D - length)}));
                 }
             }
 			
-			if (bogie2 != null) {
-				
-				EntityTrainCore entity = new FirstTrain(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D);
-				entity.bogie.add(new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D));
-				entity.bogie.add(bogie2);
+			if (entity.bogie.size()>0) {
                 worldObj.spawnEntityInWorld(entity);
                 return true;
 			}
