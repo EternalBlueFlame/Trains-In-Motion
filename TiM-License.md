@@ -30,15 +30,13 @@ Redistribution and use in source and binary forms, with or without modification,
 1.4. You may create and publish addons, plugins, and, or expansions for Trains in Motion freely however:<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;1.4.1. Trains in Motion reserves the right to implement similar features, with or without credit to you or your content.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;1.4.2. No addon code will ever be included in Trains in Motion without the creator's permission to do so.<br/>
-1.5. You may earn revenue only from modpack(s), server(s), texturepack(s), and, or addon(s), provided that you do not go against the Minecraft EULA in doing so.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.5.1. You may not earn revenue, donation or otherwise, from the Trains in Motion source, assets, or compiled .jar, modified or otherwise, outside of a modpack(s), server(s), texturepack(s), and, or addon(s).<br/>
-1.6. You may create and publish, both private and public:<br/>
+1.5. You may earn revenue only from server(s), and, or addon(s), which use some or all of Trains in Motion provided that you do not go against the Minecraft EULA in doing so.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.5.1. You may not earn revenue, donation or otherwise, from the Trains in Motion source, assets, or compiled .jar, modified or otherwise, outside of a server(s), and, or addon(s).<br/>
+1.6. You may create and publish, both private and public, without restriction:<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;1.6.1. Texture pack(s) made for Trains in Motion so long as it does not contain any original Trains in Motion code or art assets.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;1.6.2. Videos that display all or part of Trains in Motion.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.6.2.1. Revenue gained from videos that include the Trains in Motion mod are not limited by the Minecraft EULA, or the Trains in Motion EULA.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.6.2.2. You should but are not required to provide a link to the Trains in Motion Website.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.6.3. Maps that require Trains in Motion. You may distribute Trains in Motion with your map if you meet the requirements defined in 1. Usage.<br/>
-1.7. Unless defined otherwise by this EULA, you may not publicly distribute the Trains in Motion source, mod, and, or assets, without Mrbrutal's explicit permission.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.6.2.1. You are advised to, but are not required to, provide a link to the Trains in Motion Website.<br/>
+1.7. Unless defined otherwise by this EULA, you may not publicly distribute the Trains in Motion source, mod, and, or assets, without [Eternal Blue Flame](https://github.com/EternalBlueFlame)'s explicit permission.<br/>
 1.8. To distribute your addon or modified Trains in Motion via the Official website, you are required to get permission from [Eternal Blue Flame](https://github.com/EternalBlueFlame)<br/>
 1.9. All advertising materials mentioning features or use of this software must display a link to the Trains in Motion GitHub.<br/>
 1.10. Neither Eternal Blue Flame, Trains in Motion, nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.<br/>
@@ -46,14 +44,14 @@ Redistribution and use in source and binary forms, with or without modification,
 
 ## 2. Limitation of liability
 2.1. You acknowledge that the Software has not been developed to meet your individual requirements, and that it is therefore your responsibility to ensure that the facilities and functions of the Software meet your requirements.<br/>
-2.2. We only supply the Software and Documents for domestic and private use. You agree not to use the Software and Documents for any commercial or re-sale purposes, and we have no liability to you for any loss of profit, loss of business, business interruption, or loss of business opportunity.<br/>
+2.2. We only supply the Software and Documents for domestic and private use. You agree that we have no liability to you for any loss of profit, loss of business, business interruption, or loss of business opportunity.<br/>
 2.3. You acknowledge that the Software may not be free of bugs or errors, and agree that the existence of any errors shall not constitute a breach of this Licence.<br/>
-2.4. We do not offer any warranty or guarantee in respect of the operation of your Accounts and we shall have no liability to you resulting from the operation of your accounts and the effect that has on the Software.<br/>
+2.4. We do not offer any warranty or guarantee in respect of the operation of your Account(s) and we shall have no liability to you resulting from the operation of your account(s) and the effect that has on the Software.<br/>
 2.5. We shall have no liability under or in connection with this Licence whether in contract, tort (including negligence), breach of statutory duty or otherwise. This does not apply to the types of loss set out in condition 2.6.<br/>
 2.6. Nothing in this Licence shall limit or exclude our liability for:<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;2.6.1. Fraud or fraudulent misrepresentation.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;2.6.2. Any other liability that cannot be excluded or limited by English law.<br/>
-2.7. We shall have no liability for any loss of data due to any errors(s) and, or negligence in, or to, Trains in Motion and, or any related Program(s) and, or Addon(s), and, or Plugins.<br/>
+2.7. We shall have no liability for any loss of data due to any errors(s) and, or negligence in, or to, Trains in Motion and, or any related Program(s) and, or Addon(s), and, or Plugin(s).<br/>
 2.8. This Licence sets out the full extent of our obligations and liabilities in respect of the supply of the Software and Documents. Except as stated in this Licence, there are no conditions, warranties, representations or other terms, expressed or implied, that are binding on us. Any condition, warranty, representation or other term concerning the supply of the Software and Documents which might otherwise be implied into, or incorporated in, this Licence whether by statute, common law or otherwise, is excluded to the fullest extent permitted by law.<br/>
 
 
@@ -77,7 +75,7 @@ Redistribution and use in source and binary forms, with or without modification,
 
 
 ## 5. OTHER IMPORTANT TERMS
-5.1. We may transfer our rights and obligations under this Licence to another organisation, but this will not affect your rights or our obligations under this Licence.<br/>
+5.1. We may transfer our rights and obligations under this Licence to another organisation, and, or group, but this will not affect your rights or our obligations under this Licence.<br/>
 5.2. We may amend this Licence at any time at our sole discretion. You can view the Licence at any time at the official GitHub page(s). If you do not agree to the amendments or any of the terms of this Licence, your only remedy shall be to terminate the Licence. We shall not have any obligation to refund you for any reason.<br/>
 5.3. You may only transfer your rights or your obligations under this Licence to another person if we agree in writing.<br/>
 5.4. If we fail to insist that you perform any of your obligations under this Licence, or if we do not enforce our rights against you, or if we delay in doing so, that will not mean that we have waived our rights against you and will not mean that you do not have to comply with those obligations. If we do waive a default by you, we will only do so in writing, and that will not mean that we will automatically waive any later default by you.<br/>
