@@ -76,8 +76,9 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-
-					entity.setBogies(Arrays.asList(new MinecartExtended[]{new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D), new MinecartExtended(worldObj, posX + 0.5D + length, posY, posZ + 0.5D)}));
+                    entity.frontBogieXYZ = new double[]{posX + 0.5D + length, posY, posZ + 0.5D};
+                    worldObj.spawnEntityInWorld(entity);
+                    return true;
                 }
 				else if (playerMeta == 3) {
                     
@@ -91,8 +92,9 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-
-					entity.setBogies(Arrays.asList(new MinecartExtended[]{new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D), new MinecartExtended(worldObj, posX + 0.5D - length, posY, posZ + 0.5D)}));
+                    entity.frontBogieXYZ = new double[]{posX + 0.5D - length, posY, posZ + 0.5D};
+                    worldObj.spawnEntityInWorld(entity);
+                    return true;
                 }
             }
 			else if (((BlockRailBase)worldObj.getBlock(posX,posY,posZ)).getBasicRailMetadata(worldObj, null,posX,posY,posZ) == 0){
@@ -109,8 +111,9 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-
-					entity.setBogies(Arrays.asList(new MinecartExtended[]{new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D), new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D + length)}));
+                    entity.frontBogieXYZ = new double[]{posX + 0.5D, posY, posZ + 0.5D + length};
+                    worldObj.spawnEntityInWorld(entity);
+                    return true;
                 }
 				else if (playerMeta == 0) {
                     
@@ -124,15 +127,12 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-
-					entity.setBogies(Arrays.asList(new MinecartExtended[]{new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D), new MinecartExtended(worldObj, posX + 0.5D, posY, posZ + 0.5D - length)}));
+                    entity.frontBogieXYZ = new double[]{posX + 0.5D, posY, posZ + 0.5D - length};
+                    worldObj.spawnEntityInWorld(entity);
+                    return true;
                 }
             }
-			
-			if (entity.bogie.size()>0) {
-                worldObj.spawnEntityInWorld(entity);
-                return true;
-			}
+
         }
 		
         return false;

@@ -141,12 +141,10 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
         if (bogie != null && bogie.size()>1) {
             return AxisAlignedBB.getBoundingBox(
-                    bogie.get(bogie.size()).cartX + 1,
-                    bogie.get(bogie.size()).cartY + 1,
-                    bogie.get(bogie.size()).cartZ + 1,
-                    bogie.get(0).cartX - bogie.get(bogie.size()).cartX,
+                    frontBogieXYZ[0], frontBogieXYZ[1], frontBogieXYZ[2],
+                    bogie.get(0).cartX - bogie.get(bogie.size()-1).cartX,
                     2.5F,
-                    bogie.get(0).cartZ - bogie.get(bogie.size()).cartZ
+                    bogie.get(0).cartZ - bogie.get(bogie.size()-1).cartZ
             );
         } else {
             System.out.println("BOGIES NO HERE");
@@ -212,6 +210,12 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
      */
     @Override
     public void onUpdate() {
+
+        if(bogie.size()<1){
+            bogie.add(new MinecartExtended(worldObj, posX, posY, posZ));
+            bogie.add(new MinecartExtended(worldObj, frontBogieXYZ[0], frontBogieXYZ[1], frontBogieXYZ[2]));
+        }
+
         //client
         if(worldObj.isRemote && trainTicks>0){
             if (!TrainsInMotion.carts.contains(this)) {
@@ -290,10 +294,8 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             }
 
 
-            if (frontBogieXYZ == new double[]{0D,0D,0D}){
-
-            } else {
-                frontBogieXYZ = new double[]{bogie.get(bogie.size()).cartX,bogie.get(bogie.size()).cartY,bogie.get(bogie.size()).cartZ};
+            if (!(frontBogieXYZ == new double[]{0D,0D,0D})){
+                frontBogieXYZ = new double[]{bogie.get(bogie.size()-1).cartX,bogie.get(bogie.size()-1).cartY,bogie.get(bogie.size()-1).cartZ};
             }
 
         }
@@ -313,6 +315,9 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         lamp.isOn = tag.getBoolean("extended.lamp");
         isReverse = tag.getBoolean("extended.isreverse");
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
+        frontBogieXYZ[0] = tag.getDouble("extended.frontx");
+        frontBogieXYZ[1] = tag.getDouble("extended.fronty");
+        frontBogieXYZ[2] = tag.getDouble("extended.frontz");
         //read through the itemstacks
         NBTTagList taglist = tag.getTagList("items", 10);
         for (int i = 0; i < taglist.tagCount(); i++) {
@@ -345,6 +350,9 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         tag.setBoolean("extended.isreverse", isReverse);
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
+        tag.setDouble("extended.frontx", frontBogieXYZ[0]);
+        tag.setDouble("extended.fronty", frontBogieXYZ[1]);
+        tag.setDouble("extended.frontz", frontBogieXYZ[2]);
         //write the itemset to a tag list before adding it
         NBTTagList nbttaglist = new NBTTagList();
         for (int i = 0; i < inventory.size(); ++i) {
