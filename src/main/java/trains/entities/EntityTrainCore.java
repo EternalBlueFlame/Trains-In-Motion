@@ -3,7 +3,6 @@ package trains.entities;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import io.netty.buffer.ByteBuf;
-import javafx.geometry.BoundingBox;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -34,7 +33,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public float maxSpeed = 0; // the max speed
     private int trainTicks =0; //defines the train's tick count.
     public int accelerator =0; //defines the value of how much to speed up, or brake the train.
-    private AxisAlignedBB boundingBox = null;//the bounding box that defines collisions and size of the train
 
 
     //Main Values
@@ -132,27 +130,27 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public EntityTrainCore(World world){
         super(world);
         //set the size of the collision box
-        //this.setSize(2.5F,2.5F);
-    }
+        this.setSize(1.5F,2.0F);
+        //this.yOffset = this.height / 2.0F;
+        //this.width = 1.5F;
+        //this.height = 2.5F;
+        //this.myEntitySize = Entity.EnumEntitySize.SIZE_4;
 
+    }
+    @Override
+    public double getMountedYOffset()
+    {
+        return (double)this.height * -0.30000001192092896D;
+    }
 
     @Override
     public AxisAlignedBB getBoundingBox(){
-
-        if (bogie != null && bogie.size()>1) {
-            return AxisAlignedBB.getBoundingBox(
-                    frontBogieXYZ[0], frontBogieXYZ[1], frontBogieXYZ[2],
-                    bogie.get(0).cartX - bogie.get(bogie.size()-1).cartX,
-                    2.5F,
-                    bogie.get(0).cartZ - bogie.get(bogie.size()-1).cartZ
-            );
-        } else {
-            System.out.println("BOGIES NO HERE");
-            return null;
-        }
-
+        return this.boundingBox;
     }
-
+    @Override
+    public AxisAlignedBB getCollisionBox(Entity collidedWith){
+        return this.boundingBox.intersectsWith(collidedWith.boundingBox) ? collidedWith.boundingBox : null;
+    }
 
     /**
      * entity initialization, I think this happens between constructor and the first onUpdate, or before the constructor.
@@ -179,16 +177,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
 
 
-    @Override
-    public boolean interactFirst(EntityPlayer player){
-        System.out.println("player tried to use");
-        if (this.riddenByEntity == null){
-            player.mountEntity(this);
-        }
-
-
-        return true;
-    }
 
 
     /**
