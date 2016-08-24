@@ -43,11 +43,8 @@ public class RenderObj extends Render {
              * now we actually set the values we just finished defining.
              * because rotation is set on (amount, xaxis, yaxis, xaxis) we have to rotate each axis individually, then push
              */
-            if (cart.isReverse){
-                GL11.glRotatef(cart.cartYaw + 180F, 0.0F, 1.0F, 0.0F);
-            } else {
-                GL11.glRotatef(cart.cartYaw, 0.0F, 1.0F, 0.0F);
-            }
+            GL11.glRotatef(cart.cartYaw, 0.0F, 1.0F, 0.0F);
+            GL11.glPushMatrix();
             GL11.glRotatef(cart.cartPitch, 0.0F, 0.0F, 1.0F);
             GL11.glPushMatrix();
         }
@@ -60,6 +57,7 @@ public class RenderObj extends Render {
         GL11.glPopMatrix();
         GL11.glPopMatrix();
         if (entity instanceof EntityTrainCore) {
+            GL11.glPopMatrix();
             GL11.glPopMatrix();
         }
 

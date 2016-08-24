@@ -11,6 +11,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
 import trains.TrainsInMotion;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static java.lang.Math.atan2;
 import static java.lang.Math.sqrt;
 
 public class EntityTrainCore extends Entity implements IInventory, IEntityAdditionalSpawnData {
@@ -51,7 +53,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public boolean isReverse =false;
     public int cartYaw =0;
     public float cartPitch=0F;
-    public double[] frontBogieXYZ = new double[]{0D,0D,0D};
+    public double[] frontBogieXYZ = new double[]{0.0D,0.0D,0.0D};
 
 
     //inventory
@@ -88,7 +90,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
      *             all tanks besides diesel should use FluidRegistry.WATER
      * @param GUIid the ID used to define what GUI the entity uses (0 for no GUI).
      */
-    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, float maxSpeed, float[] acceleration,
+    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, double riderOffsetXZ, float maxSpeed, float[] acceleration,
                            int type,FluidTank[] tank,int inventorySize, int GUIid){
         super(world);
         this.posY = yPos;
@@ -137,11 +139,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         //this.myEntitySize = Entity.EnumEntitySize.SIZE_4;
 
     }
-    @Override
-    public double getMountedYOffset()
-    {
-        return (double)this.height * -0.30000001192092896D;
-    }
 
     @Override
     public AxisAlignedBB getBoundingBox(){
@@ -149,7 +146,9 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     }
     @Override
     public AxisAlignedBB getCollisionBox(Entity collidedWith){
-        return this.boundingBox.intersectsWith(collidedWith.boundingBox) ? collidedWith.boundingBox : null;
+        if (collidedWith != this.riddenByEntity) {
+            return this.boundingBox.intersectsWith(collidedWith.boundingBox) ? collidedWith.boundingBox : null;
+        } else { return null;}
     }
 
     /**
@@ -199,23 +198,31 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     @Override
     public void onUpdate() {
 
-        if(bogie.size()<1){
+        if (bogie.size() < 1) {
             bogie.add(new MinecartExtended(worldObj, posX, posY, posZ));
             bogie.add(new MinecartExtended(worldObj, frontBogieXYZ[0], frontBogieXYZ[1], frontBogieXYZ[2]));
         }
+        frontBogieXYZ = new double[]{bogie.get(bogie.size() - 1).cartX, bogie.get(bogie.size() - 1).cartY, bogie.get(bogie.size() - 1).cartZ};
+
+        //since yaw is needed on both server and client, we define it here.
+        cartYaw = MathHelper.floor_double(
+                atan2(bogie.get(0).cartZ - frontBogieXYZ[2],
+                        bogie.get(0).cartX - frontBogieXYZ[0]));
+
+        //System.out.println(cartYaw + " : " + (bogie.get(0).cartZ - bogie.get(bogie.size() - 1).cartZ) + " : " +(bogie.get(0).cartX - bogie.get(bogie.size() - 1).cartX));
+        System.out.println(frontBogieXYZ[0] + " : " + frontBogieXYZ[1] + " : " + frontBogieXYZ[2]);
 
         //client
-        if(worldObj.isRemote && trainTicks>0){
-            if (!TrainsInMotion.carts.contains(this)) {
+        if(worldObj.isRemote && frontBogieXYZ != new double[]{0.0D,0.0D,0.0D}){
+            ///if (!TrainsInMotion.carts.contains(this)) {
                 /**
-                 * add lamp to main class handlertrain when created, so the main thread can deal with updating the lighting, or not.
+                 * add lamp to main class train handler when created, so the main thread can deal with updating the lighting, or not.
                  * @see TrainsInMotion#onTick(TickEvent.ClientTickEvent)
                  */
-                TrainsInMotion.carts.add(this);
-            }
+               /// TrainsInMotion.carts.add(this);
+           /// }
 
-            cartPitch = MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogie.size()).posY));
-            cartYaw = MathHelper.floor_double(sqrt(MathHelper.floor_double(bogie.get(0).cartX*bogie.get(0).cartX) + MathHelper.floor_double(bogie.get(0).cartZ*bogie.get(0).cartZ))/MathHelper.floor_double(bogie.get(0).cartY));
+            cartPitch = MathHelper.floor_double(Math.acos(bogie.get(0).posY / frontBogieXYZ[1]));
 
         }
         //server
@@ -264,8 +271,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                 this.bogie.get(0).addVelocity(x, motionY, z);
             }
 
-            trainTicks++;
-
             switch (trainTicks) {
                 case 5: {
                     if (isRunning) {
@@ -280,12 +285,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                     }
                 }
             }
-
-
-            if (!(frontBogieXYZ == new double[]{0D,0D,0D})){
-                frontBogieXYZ = new double[]{bogie.get(bogie.size()-1).cartX,bogie.get(bogie.size()-1).cartY,bogie.get(bogie.size()-1).cartZ};
-            }
-
+            trainTicks++;
         }
         super.onUpdate();
     }
@@ -296,7 +296,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         isRunning = tag.getBoolean("train.isrunning");
-        trainTicks = tag.getInteger("train.trainticks");
         trainType = tag.getInteger("train.type");
         isLocked = tag.getBoolean("extended.islocked");
         brake = tag.getBoolean("extended.brake");
@@ -330,7 +329,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         tag.setBoolean("train.isrunning",isRunning);
-        tag.setInteger("train.ticks", trainTicks);
         tag.setInteger("train.type", trainType);
         tag.setBoolean("extended.islocked", isLocked);
         tag.setBoolean("extended.brake", brake);
@@ -462,7 +460,16 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     @Override
     public void updateRiderPosition() {
         if (riddenByEntity != null) {
-            riddenByEntity.setPosition(posX, posY+getMountedYOffset() + riddenByEntity.getYOffset(), posZ);
+            if (bogie.size()>1) {
+                double offset =1;
+
+                Vec3 position = Vec3.createVectorHelper(offset,2D,0);
+                position.rotateAroundX(this.cartYaw);
+
+                riddenByEntity.setPosition(this.posX + position.xCoord, this.posY +position.yCoord, this.posZ + position.zCoord);
+            } else {
+                riddenByEntity.setPosition(this.posX, this.posY + 2D, this.posZ);
+            }
         }
     }
 
@@ -473,11 +480,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     @Override
     public boolean isUseableByPlayer(EntityPlayer player){
         if (isLocked){
-            if(owner.equals(player.getUniqueID())){
-                return true;
-            } else {
-                return false;
-            }
+            return owner.equals(player.getUniqueID());
         } else{
             return true;
         }
@@ -487,10 +490,11 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public void setOwner(UUID player){owner = player;}
     public UUID getOwnerUUID(){return owner;}
 
-
-    public void setBogies(List<MinecartExtended> bogies){
-        this.bogie = bogies;
-    };
-
-
+    @Override
+    public boolean canBeCollidedWith() {
+        return true;
+    }
+    public void setFrontBogieXYZ(double[] xyz){
+        this.frontBogieXYZ = xyz;
+    }
 }

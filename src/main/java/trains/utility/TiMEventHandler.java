@@ -54,18 +54,18 @@ public class TiMEventHandler {
      */
     @SubscribeEvent
     public void entityInteractEvent(EntityInteractEvent event) {
-        System.out.println("Player tried to check");
         if (event.target instanceof EntityTrainCore /* || event.target instanceof EntityRollingStockCore */
                 && !event.entity.worldObj.isRemote
                 && event.target.riddenByEntity == null) {
-            System.out.println("Player tried to mount");
             event.entityPlayer.mountEntity(event.target);
         }
     }
 
     @SubscribeEvent
     public void attackEntityEvent(AttackEntityEvent event){
-        System.out.println("Player tried to attack check");
+        if (event.target instanceof EntityTrainCore && event.entityPlayer.capabilities.isCreativeMode){
+            event.target.worldObj.removeEntity(event.target);
+        }
     }
 
 }

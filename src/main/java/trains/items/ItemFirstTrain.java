@@ -6,27 +6,25 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
-import scala.actors.threadpool.Arrays;
 import trains.TrainsInMotion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import trains.entities.EntityTrainCore;
-import trains.entities.MinecartExtended;
 import trains.entities.trains.FirstTrain;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class ItemFirstTrain extends Item {
+    private static final double length = 2.0D;
+
+
     //constructor
     public ItemFirstTrain() {
         super();
         setCreativeTab(TrainsInMotion.creativeTab);
     }
-	
-	public static int length = 5;
+
+
 
     /**
      * spawns the train when the player/entity tries to use it on a tile.
@@ -60,7 +58,8 @@ public class ItemFirstTrain extends Item {
             
 			int playerMeta = MathHelper.floor_double((playerEntity.rotationYaw / 90.0F) + 2.5D) & 3;
 			Block block;
-			EntityTrainCore entity = new FirstTrain(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D);
+            //IMPORTANT this defines the entity used
+			FirstTrain entity = new FirstTrain(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D);
 
             if (((BlockRailBase)worldObj.getBlock(posX,posY,posZ)).getBasicRailMetadata(worldObj, null,posX,posY,posZ) == 1){
 
@@ -76,7 +75,7 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                    entity.frontBogieXYZ = new double[]{posX + 0.5D + length, posY, posZ + 0.5D};
+                    entity.setFrontBogieXYZ(new double[]{posX + 0.5D + length, posY + 0.0D, posZ + 0.5D});
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }
@@ -92,7 +91,7 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                    entity.frontBogieXYZ = new double[]{posX + 0.5D - length, posY, posZ + 0.5D};
+                    entity.setFrontBogieXYZ(new double[]{posX + 0.5D - length, posY + 0.0D, posZ + 0.5});
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }
@@ -111,7 +110,7 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                    entity.frontBogieXYZ = new double[]{posX + 0.5D, posY, posZ + 0.5D + length};
+                    entity.setFrontBogieXYZ(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D + length});
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }
@@ -127,7 +126,7 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                    entity.frontBogieXYZ = new double[]{posX + 0.5D, posY, posZ + 0.5D - length};
+                    entity.setFrontBogieXYZ(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D - length});
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }

@@ -30,12 +30,13 @@ public class FirstTrain extends EntityTrainCore {
             new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)
     };
     private static final int inventorySize= 3;
+    private static final double offsetXZ =0D;
 
     /**
-     * @see EntityTrainCore#EntityTrainCore(UUID, World, double, double, double, float, float[], int, FluidTank[], int, int)
+     * @see EntityTrainCore#EntityTrainCore(UUID, World, double, double, double, double, float, float[], int, FluidTank[], int, int)
      */
     public FirstTrain(UUID owner, World world, double xPos, double yPos, double zPos) {
-        super(owner, world, xPos, yPos, zPos, initMaxSpeed, acceleration, type,tank,inventorySize, GUISteam.GUI_ID);
+        super(owner, world, xPos, yPos, zPos, offsetXZ, initMaxSpeed, acceleration, type,tank,inventorySize, GUISteam.GUI_ID);
     }
 
     /**
