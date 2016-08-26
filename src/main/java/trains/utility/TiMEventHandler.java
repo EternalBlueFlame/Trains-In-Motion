@@ -29,7 +29,7 @@ public class TiMEventHandler {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onClientKeyPress(InputEvent.KeyInputEvent event){
-        if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof MinecartExtended) {
+        if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntityTrainCore) {
             //for lamp
             if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyLamp))) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.KeyLamp)));

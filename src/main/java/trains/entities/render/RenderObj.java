@@ -28,6 +28,7 @@ public class RenderObj extends Render {
         //begin rendering
         GL11.glPushMatrix();
         //set the position of the graphic and save changes
+        //TODO set the GL Translation to a vector between the front and back bogies of the entity.
         GL11.glTranslated(x, y, z);
         GL11.glPushMatrix();
 
@@ -43,9 +44,8 @@ public class RenderObj extends Render {
              * now we actually set the values we just finished defining.
              * because rotation is set on (amount, xaxis, yaxis, xaxis) we have to rotate each axis individually, then push
              */
-            GL11.glRotatef(cart.cartYaw, 0.0F, 1.0F, 0.0F);
-            GL11.glPushMatrix();
-            GL11.glRotatef(cart.cartPitch, 0.0F, 0.0F, 1.0F);
+            GL11.glRotatef(cart.rotationYaw, 0.0F, 1.0F, 0.0F);
+            GL11.glRotatef(cart.rotationPitch, 0.0F, 0.0F, 1.0F);
             GL11.glPushMatrix();
         }
 
@@ -57,7 +57,6 @@ public class RenderObj extends Render {
         GL11.glPopMatrix();
         GL11.glPopMatrix();
         if (entity instanceof EntityTrainCore) {
-            GL11.glPopMatrix();
             GL11.glPopMatrix();
         }
 

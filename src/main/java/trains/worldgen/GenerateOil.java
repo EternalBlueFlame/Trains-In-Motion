@@ -1,4 +1,4 @@
-package trains.utility;
+package trains.worldgen;
 
 import java.util.Random;
 

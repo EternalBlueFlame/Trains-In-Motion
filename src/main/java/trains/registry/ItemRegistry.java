@@ -7,7 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import trains.items.Bucket;
-import trains.items.ItemFirstTrain;
+import trains.items.trains.ItemFirstTrain;
 
 import static trains.TrainsInMotion.MODID;
 

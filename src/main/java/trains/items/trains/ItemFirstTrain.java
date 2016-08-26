@@ -1,4 +1,4 @@
-package trains.items;
+package trains.items.trains;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
@@ -14,8 +14,10 @@ import trains.entities.trains.FirstTrain;
 
 import java.util.UUID;
 
+//change this to the train class you intend to use.
+import static trains.entities.trains.FirstTrain.length;
+
 public class ItemFirstTrain extends Item {
-    private static final double length = 2.0D;
 
 
     //constructor
@@ -75,7 +77,8 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                    entity.setFrontBogieXYZ(new double[]{posX + 0.5D + length, posY + 0.0D, posZ + 0.5D});
+                    entity.addBogie(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D});
+                    entity.addBogie(new double[]{posX + 0.5D + length, posY + 0.0D, posZ + 0.5D});
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }
@@ -91,7 +94,8 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                    entity.setFrontBogieXYZ(new double[]{posX + 0.5D - length, posY + 0.0D, posZ + 0.5});
+                    entity.addBogie(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D});
+                    entity.addBogie(new double[]{posX + 0.5D - length, posY + 0.0D, posZ + 0.5});
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }
@@ -110,7 +114,8 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                    entity.setFrontBogieXYZ(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D + length});
+                    entity.addBogie(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D});
+                    entity.addBogie(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D + length});
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }
@@ -126,7 +131,8 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                    entity.setFrontBogieXYZ(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D - length});
+                    entity.addBogie(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D});
+                    entity.addBogie(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D - length});
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }

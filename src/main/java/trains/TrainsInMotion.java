@@ -1,27 +1,20 @@
 package trains;
 
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.config.Configuration;
-import trains.entities.EntityTrainCore;
-import trains.entities.MinecartExtended;
 import trains.gui.HUDTrain;
 import trains.registry.BlockRegistry;
 import trains.registry.ItemRegistry;
-import trains.blocks.LampBlock;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraftforge.common.MinecraftForge;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 import trains.registry.EntityRegistry;
 import trains.utility.CommonProxy;
 import trains.utility.TiMEventHandler;
-import trains.utility.TiMTab;
+import trains.items.TiMTab;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -30,9 +23,7 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 
-import trains.utility.GenerateOil;
-
-import java.util.List;
+import trains.worldgen.GenerateOil;
 
 
 //build number is according to feature set.
@@ -51,7 +42,6 @@ public class TrainsInMotion {
     public static final String MODID = "tim";
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
-    public Minecraft ClientInstance;
     //Instance the registries that maintain the blocks, items, entities, etc.
     public BlockRegistry blockRegistry = new BlockRegistry();
     public ItemRegistry itemRegistry = new ItemRegistry();
@@ -64,17 +54,13 @@ public class TrainsInMotion {
     //instance the network wrapper for each channel.
     public static SimpleNetworkWrapper keyChannel;
 
-    //Instance the list of trains/rollingstock that are in the game, this is later used to manage the dynamic lighting.
-    //This is ONLY used on client side.
-    public static List<EntityTrainCore> carts;
-
     //Instance the event handler, This is used for event based functionality, things like when you right-click an entity.
     public static TiMEventHandler eventHandler = new TiMEventHandler();
 
     /**
      * Initialize the values for the config file, then load or create the config file.
      */
-    private static boolean EnableLights = true;
+    public static boolean EnableLights = true;
     public static char KeyLamp = 'l';
     public static char KeyInventory = 'i';
     public static char KeyAccelerate = 'w';
@@ -132,26 +118,7 @@ public class TrainsInMotion {
         proxy.registerRenderers();
     }
 
-    /**
-     * this is used to force events from the main thread of the mod, it can create a lot of lag sometimes.
-     *
-     * Currently it's used to force lighting updates (if enabled in config).
-     * This is the best way I have found to do it other than making a fully new lighting system.
-     * It also only updates if it's actually needed, to help preserve performance.
-     *
-     * @param tick the client tick event from the main thread
-     */
-    @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent tick) {
-        if (EnableLights && tick.phase == TickEvent.Phase.END && ClientInstance.theWorld != null && carts.size() > 0){
-            //instance the lamp here because it's more efficient than instancing it every loop.
-            for (EntityTrainCore cart : carts) {
-                if (cart != null && ClientInstance.theWorld.getBlock(cart.lamp.X, cart.lamp.Y, cart.lamp.Z) instanceof LampBlock) {
-                    ClientInstance.theWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
-                }
-            }
-        }
-    }
+
 
 
     /**
