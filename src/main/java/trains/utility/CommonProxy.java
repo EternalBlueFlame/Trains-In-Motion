@@ -13,10 +13,6 @@ import java.util.List;
 
 
 public class CommonProxy implements IGuiHandler {
-
-    //Instance the list of trains/rollingstock that are in the game, this is used to manage the dynamic lighting ONLY on client side.
-    public static List<EntityTrainCore> carts;
-
     /**
      *
      *

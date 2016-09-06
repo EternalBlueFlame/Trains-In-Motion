@@ -77,8 +77,8 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                    entity.addBogie(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D});
-                    entity.addBogie(new double[]{posX + 0.5D + length, posY + 0.0D, posZ + 0.5D});
+                    entity.bogieXYZ.add(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D});
+                    entity.bogieXYZ.add(new double[]{posX + 0.5D + length, posY + 0.0D, posZ + 0.5D});
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }
@@ -94,8 +94,8 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                    entity.addBogie(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D});
-                    entity.addBogie(new double[]{posX + 0.5D - length, posY + 0.0D, posZ + 0.5});
+                    entity.bogieXYZ.add(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D});
+                    entity.bogieXYZ.add(new double[]{posX + 0.5D - length, posY + 0.0D, posZ + 0.5});
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }
@@ -114,8 +114,8 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                    entity.addBogie(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D});
-                    entity.addBogie(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D + length});
+                    entity.bogieXYZ.add(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D});
+                    entity.bogieXYZ.add(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D + length});
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }
@@ -131,8 +131,8 @@ public class ItemFirstTrain extends Item {
                             return false;
                         }
                     }
-                    entity.addBogie(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D});
-                    entity.addBogie(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D - length});
+                    entity.bogieXYZ.add(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D});
+                    entity.bogieXYZ.add(new double[]{posX + 0.5D, posY + 0.0D, posZ + 0.5D - length});
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }

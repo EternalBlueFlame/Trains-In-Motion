@@ -5,6 +5,7 @@ import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import org.lwjgl.input.Keyboard;
@@ -64,6 +65,10 @@ public class TiMEventHandler {
     @SubscribeEvent
     public void attackEntityEvent(AttackEntityEvent event){
         if (event.target instanceof EntityTrainCore && event.entityPlayer.capabilities.isCreativeMode){
+            for (EntityMinecart cart : ((EntityTrainCore)event.target).bogie){
+                cart.worldObj.removeEntity(cart);
+            }
+
             event.target.worldObj.removeEntity(event.target);
         }
     }

@@ -17,10 +17,13 @@ import trains.entities.trains.FirstTrain;
 import trains.gui.train.GUISteam;
 import trains.registry.URIRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ClientProxy extends CommonProxy {
 
     WorldClient clientWorld = Minecraft.getMinecraft().theWorld;
-
+    public static List<EntityTrainCore> carts = new ArrayList<EntityTrainCore>();
 
     /**
      *
@@ -87,8 +90,7 @@ public class ClientProxy extends CommonProxy {
      * this is used to force events from the main thread of the mod, it can create a lot of lag sometimes.
      *
      * Currently it's used to force lighting updates (if enabled in config).
-     * This is the best way I have found to do it other than making a fully new lighting system.
-     * It also only updates if it's actually needed, to help preserve performance.
+     * It also only updates if it's actually needed, to help preserve what performance we can.
      *
      * @param tick the client tick event from the main thread
      */
@@ -98,7 +100,9 @@ public class ClientProxy extends CommonProxy {
         if (TrainsInMotion.EnableLights && tick.phase == TickEvent.Phase.END && clientWorld != null && carts.size() > 0){
             //instance the cart here because it's more efficient than instancing it every loop.
             for (EntityTrainCore cart : carts) {
-                if (cart != null && clientWorld.getBlock(cart.lamp.X, cart.lamp.Y, cart.lamp.Z) instanceof LampBlock) {
+                if (cart == null){
+                    carts.remove(cart);
+                } else if (clientWorld.getBlock(cart.lamp.X, cart.lamp.Y, cart.lamp.Z) instanceof LampBlock) {
                     clientWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
                 }
             }

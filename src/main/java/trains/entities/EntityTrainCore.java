@@ -6,7 +6,6 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -17,6 +16,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
 import trains.TrainsInMotion;
+import trains.items.trains.ItemFirstTrain;
+import trains.registry.ItemRegistry;
 import trains.utility.ClientProxy;
 import trains.utility.FuelHandler;
 import trains.utility.LampHandler;
@@ -43,17 +44,18 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public float maxSpeed = 0; // the max speed
     private int trainTicks =0; //defines the train's tick count.
     public int accelerator =0; //defines the value of how much to speed up, or brake the train.
-    public double length =0.0D;// defines the length of the train in blocks
+    public double length =0.0D;// defines the length of the train
 
 
     //Main Values
-    public int[] colors; //allows certain parts of certain trains to be recolored
-    public String name;
+    public int[] colors = new int[]{0,0,0}; //allows certain parts of certain trains to be recolored
+    public String name = "";
     public boolean isLocked = false; //mostly used to lock other players from using/accessing parts of the cart/train
     public boolean brake = false; //bool for the train/rollingstock's break.
     public LampHandler lamp = new LampHandler(); //manages the lamp, or lack there of.
     public int GUIID = 0; //id for the GUI
     public UUID owner = null;  //universal, get train owner
+    public int bogies = 0; //number of bogies the train is supposed to maintain
 
     //list of boogies
     public List<EntityMinecart> bogie = new ArrayList<EntityMinecart>();
@@ -80,7 +82,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     * @param zPos the z position to spawn entity at, used in super's super.
     * @param maxSpeed the max speed a train can go, 1.0 is equal to 72kmph or 72000 blocks/h.
     * @param type what kind of rolling stock it is.
-    *             typelist:
+    *             type list:
     *             1: steam
     *             2: diesel
     *             3: hydrogen diesel
@@ -94,7 +96,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     * @param GUIid the ID used to define what GUI the entity uses (0 for no GUI).
     */
 
-    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, double riderOffsetXZ, double length, float maxSpeed, float[] acceleration,
+    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, double riderOffsetXZ, double length, int numberOfBogies, float maxSpeed, float[] acceleration,
                            int type,FluidTank[] tank,int inventorySize, int GUIid){
         super(world);
         this.posY = yPos;
@@ -107,6 +109,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         this.owner = owner;
         this.tank = tank;
         this.length = length;
+        this.bogies = numberOfBogies;
 
         //define the number of inventory slots to add to the train based on type for crafting slots and inventory scale
         int craftingSlots =0;
@@ -169,9 +172,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public boolean canBeCollidedWith() {
         return true;
     }
-    public void addBogie(double[] position){
-        bogieXYZ.add(position);
-    }
 
 
 
@@ -190,6 +190,9 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         maxSpeed = additionalData.readFloat();
         isReverse = additionalData.readBoolean();
         owner = new UUID(additionalData.readLong(), additionalData.readLong());
+        for (int i=0; i<bogies; i++) {
+            bogieXYZ.add(new double[]{additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble()});
+        }
     }
     @Override
     public void writeSpawnData(ByteBuf buffer) {
@@ -197,17 +200,20 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         buffer.writeBoolean(isReverse);
         buffer.writeLong(owner.getMostSignificantBits());
         buffer.writeLong(owner.getLeastSignificantBits());
+        for (int i=0; i<bogies; i++) {
+            buffer.writeDouble(bogieXYZ.get(i)[0]);
+            buffer.writeDouble(bogieXYZ.get(i)[1]);
+            buffer.writeDouble(bogieXYZ.get(i)[2]);
+        }
     }
 
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         isRunning = tag.getBoolean("train.isrunning");
-        trainType = tag.getInteger("train.type");
         isLocked = tag.getBoolean("extended.islocked");
         brake = tag.getBoolean("extended.brake");
         lamp.isOn = tag.getBoolean("extended.lamp");
         isReverse = tag.getBoolean("extended.isreverse");
-        length = tag.getDouble("extended.length");
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
 
         //read through the bogie positions
@@ -216,7 +222,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             NBTTagCompound nbttagcompound1 = bogieTaglList.getCompoundTagAt(i);
             byte b0 = nbttagcompound1.getByte("bogie");
 
-            if (b0 >= 0 && b0 < bogie.size()) {
+            if (b0 >= 0) {
                 bogieXYZ.add(new double[]{nbttagcompound1.getDouble("bogieindex.a." + i),nbttagcompound1.getDouble("bogieindex.b." + i),nbttagcompound1.getDouble("bogieindex.c." + i)});
             }
         }
@@ -227,29 +233,27 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             byte b0 = nbttagcompound1.getByte("slot");
 
             if (b0 >= 0 && b0 < inventory.size()) {
-                inventory.add(ItemStack.loadItemStackFromNBT(nbttagcompound1));
+                inventory.set(b0, ItemStack.loadItemStackFromNBT(nbttagcompound1));
             }
         }
 
-        for (int t=0; t<tank.length; t++){
-            tank[t].readFromNBT(tag);
+        for (FluidTank tempTank : tank){
+            tempTank.readFromNBT(tag);
         }
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         tag.setBoolean("train.isrunning",isRunning);
-        tag.setInteger("train.type", trainType);
         tag.setBoolean("extended.islocked", isLocked);
         tag.setBoolean("extended.brake", brake);
         tag.setBoolean("extended.lamp", lamp.isOn);
         tag.setBoolean("extended.isreverse", isReverse);
-        tag.setDouble("extended.length", length);
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
         //write the list of bogies
         NBTTagList nbtBogieTaglist = new NBTTagList();
-        for (int i = 0; i < inventory.size(); ++i) {
-            if (inventory.get(i) != null) {
+        for (int i = 0; i < bogieXYZ.size(); ++i) {
+            if (bogieXYZ.get(i) != null) {
                 NBTTagCompound nbttagcompound1 = new NBTTagCompound();
                 nbttagcompound1.setByte("bogie", (byte)i);
                 nbttagcompound1.setDouble("bogieindex.a." + i,bogieXYZ.get(i)[0]);
@@ -271,8 +275,8 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         }
         tag.setTag("train.items", nbttaglist);
 
-        for (int t=0; t<tank.length; t++){
-            tank[t].writeToNBT(tag);
+        for (FluidTank tempTank : tank){
+            tempTank.writeToNBT(tag);
         }
     }
 
@@ -396,114 +400,120 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     @Override
     public void onUpdate() {
 
-        //cache the sizes ahead of time, and be sure xyz's size is larger than 0 before bothering to continue.
-        int xyzSize = bogieXYZ.size();
-        if (xyzSize>0) {
-            int bogieSize = bogie.size();
-            //always be sure the bogies exist on client and server.
-            if (bogieSize < 1) {
-                for (double[] pos : bogieXYZ) {//it should never be possible for bogieXYZ to be null unless there is severe server data corruption.
-                    bogie.add(new MinecartExtended(worldObj, pos[0], pos[1], pos[2]));
-                }
-                //be sure bogies are spawned on server.
-                if (!worldObj.isRemote) {//TODO this shouldn't be necessary.
-                    worldObj.spawnEntityInWorld(bogie.get(0));
-                    worldObj.spawnEntityInWorld(bogie.get(1));
-                }
-                bogieSize = bogie.size();
-            }
-            //be sure the list of bogie positions is updated to the current values.
-            for (int i = 0; i < xyzSize && i < bogieSize; i++) {
-                bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
-            }
-            //move the train's position between the bogies.
-            this.setPosition((bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
-                    (bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D,
-                    (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D);
-        }
-
-        //client
-        if(worldObj.isRemote && bogieXYZ.get(0)[0] != 0.0D && bogieXYZ.get(0)[1] != 0.0D && bogieXYZ.get(0)[2] != 0.0D){
-            //TODO temporarily disabled until other parts are working due to a ticking entity error
-            if (!ClientProxy.carts.contains(this)) {
-            /**
-             * add lamp to main class train handler when created, so the main thread can deal with updating the lighting, or not.
-             * @see TrainsInMotion#onTick(TickEvent.ClientTickEvent)
-             */
-            ClientProxy.carts.add(this);
-            }
-        }
-        //server
-        if (!worldObj.isRemote) {
-
-            //we need rotation and pitch on both server and client, so we use the inbuilt pitch and rotation so we only have to process server side and the core entity class will send it to client for us
-            double d6 = bogie.get(0).posX - bogie.get(bogie.size() -1).posX;
-            double d7 = bogie.get(0).posZ - bogie.get(bogie.size() -1).posZ;
-            if (d6 * d6 + d7 * d7 > 0.0001D) {
-                this.setRotation(MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogie.size()-1).posY)),
-                        MathHelper.floor_double(Math.atan2(d7, d6) * (180.0D / Math.PI)));
-                this.setPosition(bogie.get(0).posX, bogie.get(0).posY, bogie.get(0).posZ);
-            }
-
-            /**
-             *
-             * based on the motion compared to max speed, figure out which stage of acceleration the train is in.
-             * from there, if the x and/or z motions are not 0, we create a new x and/or z value,
-             * after we handle the acceleration by multiplying the acceleration incex by the current stage of the accelerator (or brake which is an inverse value.)
-             * TODO after we can link carts, drag needs to be changed to 1-(0.04*ConnectedCars) && braking should be added to the drag
-             */
-            if (accelerator != 0) {
-                double x = 0;
-                double z = 0;
-                double motion = Math.sqrt(motionX * motionX + motionZ * motionZ);
-                int accelIndex = 0;
-                if (motion > maxSpeed || motion < -maxSpeed) {accelIndex = -1;}
-                else if (motion > maxSpeed * 0.6d || motion < -(maxSpeed * 0.6d)) {accelIndex = 2;}
-                else if (motion > maxSpeed * 0.3d || motion < -(maxSpeed * 0.3d)) {accelIndex = 1;}
-
-                if (accelerator !=0 && accelIndex !=-1) {
-                    if (motionX > 0) {
-                        x = (acceleration[accelIndex] * accelerator);
-                    } else {
-                        x = -(acceleration[accelIndex] * accelerator);
+        if (trainTicks >0) {
+            //cache the sizes ahead of time, and be sure xyz's size is larger than 0 before bothering to continue.
+            int xyzSize = bogieXYZ.size();
+            if (xyzSize > 0) {
+                int bogieSize = bogie.size() - 1;
+                //always be sure the bogies exist on client and server.
+                if (bogieSize < 1) {
+                    for (double[] pos : bogieXYZ) {//it should never be possible for bogieXYZ to be null unless there is severe server data corruption.
+                        bogie.add(new MinecartExtended(worldObj, pos[0], pos[1], pos[2]));
                     }
-                    if (motionZ > 0) {
-                        z = (acceleration[accelIndex] * accelerator);
-                    } else {
-                        z = -(acceleration[accelIndex] * accelerator);
+                    //be sure bogies are spawned on server.
+                    if (!worldObj.isRemote) {
+                        worldObj.spawnEntityInWorld(bogie.get(0));
+                        worldObj.spawnEntityInWorld(bogie.get(1));
+                    }
+                    bogieSize = bogie.size()-1;
+                }
+                //be sure the list of bogie positions is updated to the current values.
+                for (int i = 0; i < xyzSize && i < bogieSize; i++) {
+                    bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
+                }
+
+                //move the train's position between the bogies.
+                this.setPositionAndRotation((bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
+                        (bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D,
+                        (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D,
+                        MathHelper.floor_double(Math.atan2(bogie.get(bogieSize).posZ - bogie.get(0).posZ, bogie.get(bogieSize).posX - bogie.get(0).posX) * (180.0D / Math.PI)),
+                        MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
+                        );
+
+                //be sure the bogies are in relative position to the train
+                for (int i=0; i<= bogieSize; i++){
+
+                }
+            }
+
+            //client
+            if (worldObj.isRemote && xyzSize > 0 && bogieXYZ.get(0)[0] + bogieXYZ.get(0)[1] + bogieXYZ.get(0)[2] != 0.0D) {
+
+                if (!ClientProxy.carts.contains(this)) {
+                    /**
+                     * add lamp to main class train handler when created, so the main thread can deal with updating the lighting, or not.
+                     * @see ClientProxy#onTick(TickEvent.ClientTickEvent)
+                     */
+                    ClientProxy.carts.add(this);
+                }
+            }
+            //server
+            if (!worldObj.isRemote && xyzSize > 0 && bogieXYZ.get(0)[0] + bogieXYZ.get(0)[1] + bogieXYZ.get(0)[2] != 0.0D) {
+
+                /**
+                 *
+                 * based on the motion compared to max speed, figure out which stage of acceleration the train is in.
+                 * from there, if the x and/or z motions are not 0, we create a new x and/or z value,
+                 * after we handle the acceleration by multiplying the acceleration incex by the current stage of the accelerator (or brake which is an inverse value.)
+                 * TODO after we can link carts, drag needs to be changed to 1-(0.04*ConnectedCars) && braking should be added to the drag
+                 */
+                if (accelerator != 0) {
+                    double x = 0;
+                    double z = 0;
+                    double motion = Math.sqrt(motionX * motionX + motionZ * motionZ);
+                    int accelIndex = 0;
+                    if (motion > maxSpeed || motion < -maxSpeed) {
+                        accelIndex = -1;
+                    } else if (motion > maxSpeed * 0.6d || motion < -(maxSpeed * 0.6d)) {
+                        accelIndex = 2;
+                    } else if (motion > maxSpeed * 0.3d || motion < -(maxSpeed * 0.3d)) {
+                        accelIndex = 1;
                     }
 
-                    //compensate for stopping the train to 0, this is needed for brake and switching from forward to reverse.
+                    if (accelerator != 0 && accelIndex != -1) {
+                        if (motionX > 0) {
+                            x = (acceleration[accelIndex] * accelerator);
+                        } else {
+                            x = -(acceleration[accelIndex] * accelerator);
+                        }
+                        if (motionZ > 0) {
+                            z = (acceleration[accelIndex] * accelerator);
+                        } else {
+                            z = -(acceleration[accelIndex] * accelerator);
+                        }
+
+                        //compensate for stopping the train to 0, this is needed for brake and switching from forward to reverse.
                     /*if (motionX != 0.0D && ((x < 0.0D && motionX > 0.0D) || (x > 0.0D && motionX < 0.0D))){
                         x=0.0D;
                     }
                     if ( motionZ != 0.0D && ((z < 0.0D && motionZ > 0.0D) || (z > 0.0D && motionZ < 0.0D))){
                         z=0.0D;
                     }*/
+                    }
+                    //now apply the changes to all the bogies.
+                    for (EntityMinecart bogieClone : this.bogie) {
+                        bogieClone.addVelocity(x, bogieClone.motionY, z);
+                    }
                 }
-                //now apply the changes to all the bogies.
-                for (EntityMinecart bogieClone : this.bogie) {
-                    bogieClone.addVelocity(x, bogieClone.motionY, z);
-                }
-            }
 
-            //simple server side tick management so some code does not need to be run every tick.
-            switch (trainTicks) {
-                case 5: {
-                    if (isRunning) {
-                        FuelHandler.ManageFuel(this);
+                //simple server side tick management so some code does not need to be run every tick.
+                switch (trainTicks) {
+                    case 5: {
+                        if (isRunning) {
+                            FuelHandler.ManageFuel(this);
+                        }
+                        break;
                     }
-                    break;
-                }
-                default: {
-                    //if the tick count is higher than the values used, reset it so it can count up again.
-                    if (trainTicks > 10) {
-                        trainTicks = 1;
+                    default: {
+                        //if the tick count is higher than the values used, reset it so it can count up again.
+                        if (trainTicks > 10) {
+                            trainTicks = 1;
+                        }
                     }
                 }
             }
-            trainTicks++;
         }
+        trainTicks++;
     }
 
     //modify the player sitting position

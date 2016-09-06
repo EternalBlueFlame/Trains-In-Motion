@@ -72,49 +72,4 @@ public class RenderObj extends Render {
         texture = textureLoad;
     }
 
-
-    /**
-     * these functions are for calculating the vectors from the metadata in rails, this will long run ell the ernder which direction to rotate the model.
-     */
-    private Vec3 func_70495_a(MinecartExtended cart, double X, double Y, double Z, double p_70495_7_) {
-        int i = MathHelper.floor_double(X);
-        int j = MathHelper.floor_double(Y);
-        int k = MathHelper.floor_double(Z);
-
-        if (BlockRailBase.func_150049_b_(cart.worldObj, i, j - 1, k)) {
-            --j;
-        }
-
-        Block block = cart.worldObj.getBlock(i, j, k);
-
-        if (BlockRailBase.func_150051_a(block)) {
-            int l = ((BlockRailBase)block).getBasicRailMetadata(cart.worldObj, cart, i, j, k);
-
-            Y = (double)j;
-
-            if (l >= 2 && l <= 5) {
-                Y = (double)(j + 1);
-            }
-
-            int[][] aint = matrix[l];
-            double d4 = (aint[1][0] - aint[0][0]);
-            double d5 = (aint[1][2] - aint[0][2]);
-            double d6 = Math.sqrt(d4 * d4 + d5 * d5);
-            d4 /= d6;
-            d5 /= d6;
-            X += d4 * p_70495_7_;
-            Z += d5 * p_70495_7_;
-
-            if (aint[0][1] != 0 && MathHelper.floor_double(X) - i == aint[0][0] && MathHelper.floor_double(Z) - k == aint[0][2]) {
-                Y += aint[0][1];
-            } else if (aint[1][1] != 0 && MathHelper.floor_double(X) - i == aint[1][0] && MathHelper.floor_double(Z) - k == aint[1][2]) {
-                Y += aint[1][1];
-            }
-
-            return Vec3.createVectorHelper(X, Y, Z);
-        } else {
-            return null;
-        }
-    }
-
 }
