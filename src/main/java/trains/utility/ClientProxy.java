@@ -15,6 +15,7 @@ import trains.entities.render.RenderCore;
 import trains.entities.render.RenderObj;
 import trains.entities.trains.FirstTrain;
 import trains.gui.train.GUISteam;
+import trains.registry.TrainRegistry;
 import trains.registry.URIRegistry;
 
 import java.util.ArrayList;
@@ -41,7 +42,6 @@ public class ClientProxy extends CommonProxy {
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         //handle GUI direction for trains
         if (player != null && player.ridingEntity instanceof EntityTrainCore) {
-			//TODO this should probably be handled by some sort of array based loader in the main class to make it more API friendly
             switch (ID) {
                 case GUISteam.GUI_ID: {
                     return new GUISteam(player.inventory, (EntityTrainCore) player.ridingEntity);
@@ -51,7 +51,7 @@ public class ClientProxy extends CommonProxy {
                     return null;
                 }
             }
-        } else{
+        } else {
             //handle GUI direction for rollingstock
             return null;
         }
@@ -72,12 +72,16 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void registerRenderers() {
          //TODO need java model
-		 //TODO this should probably be handled by some sort of array based loader in the main class to make it more API friendly
         //RenderingRegistry.registerEntityRenderingHandler(FirstTrain.class, new RenderCore(new MODEL.JAVA(), 0.5F));
-        RenderingRegistry.registerEntityRenderingHandler(FirstTrain.class, new RenderObj(
-                URIRegistry.MODEL_TRAIN.getResource("060e2.obj"),
-                URIRegistry.TEXTURE_GENERIC.getResource("null.png")
-                ));
+
+        for(TrainRegistry reg : TrainRegistry.listTrains()){
+            RenderingRegistry.registerEntityRenderingHandler(FirstTrain.class, new RenderObj(
+                URIRegistry.MODEL_TRAIN.getResource(reg.model),
+                URIRegistry.TEXTURE_GENERIC.getResource(reg.texture)
+        ));
+        }
+
+
 
     }
 

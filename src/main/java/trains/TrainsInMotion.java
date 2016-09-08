@@ -11,7 +11,7 @@ import cpw.mods.fml.relauncher.Side;
 import net.minecraftforge.common.MinecraftForge;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
-import trains.registry.EntityRegistry;
+import trains.registry.TrainRegistry;
 import trains.utility.CommonProxy;
 import trains.utility.TiMEventHandler;
 import trains.items.TiMTab;
@@ -45,7 +45,6 @@ public class TrainsInMotion {
     //Instance the registries that maintain the blocks, items, entities, etc.
     public BlockRegistry blockRegistry = new BlockRegistry();
     public ItemRegistry itemRegistry = new ItemRegistry();
-    public EntityRegistry entityRegistry = new EntityRegistry();
     //Instance the creative tab
     public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
     //Setup the proxy, this is used for managing how each part of the mod acts on it's respective side.
@@ -90,9 +89,15 @@ public class TrainsInMotion {
     @EventHandler
     public void init(FMLInitializationEvent event) {
         //item/block/entity registry
-        entityRegistry.registerEntities();
         blockRegistry.RegisterBlocks();
         itemRegistry.RegisterItems();
+        //Simple loop for registering the entities.
+        int index =3;
+        for (TrainRegistry train : TrainRegistry.listTrains()) {
+            cpw.mods.fml.common.registry.EntityRegistry.registerGlobalEntityID(train.trainClass, train.entityWorldName, index);
+            cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(train.trainClass, train.entityWorldName, index, TrainsInMotion.instance, 64, 1, true);
+            index++;
+        }
 
         //register GUI handler
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
@@ -125,6 +130,7 @@ public class TrainsInMotion {
      *
      * @param key the key trying to be parsed
      * @return the key's value to return, wether or not it was valid.
+     * //TODO this should probably be replaced by having an options menu config for controls to set and manage the value directly ratherth
      */
     public static int parseKey(char key){
         switch (key){

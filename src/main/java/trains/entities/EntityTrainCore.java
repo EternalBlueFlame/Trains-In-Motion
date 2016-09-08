@@ -15,11 +15,8 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
-import trains.TrainsInMotion;
-import trains.items.trains.ItemFirstTrain;
-import trains.registry.ItemRegistry;
 import trains.utility.ClientProxy;
-import trains.utility.FuelHandler;
+import trains.utility.Util;
 import trains.utility.LampHandler;
 
 import java.util.ArrayList;
@@ -44,7 +41,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public float maxSpeed = 0; // the max speed
     private int trainTicks =0; //defines the train's tick count.
     public int accelerator =0; //defines the value of how much to speed up, or brake the train.
-    public double length =0.0D;// defines the length of the train
 
 
     //Main Values
@@ -55,7 +51,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public LampHandler lamp = new LampHandler(); //manages the lamp, or lack there of.
     public int GUIID = 0; //id for the GUI
     public UUID owner = null;  //universal, get train owner
-    public int bogies = 0; //number of bogies the train is supposed to maintain
+    public double[] bogieOffsets = new double[]{0.0D,1.0D}; //number of bogies the train is supposed to maintain
 
     //list of boogies
     public List<EntityMinecart> bogie = new ArrayList<EntityMinecart>();
@@ -96,7 +92,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     * @param GUIid the ID used to define what GUI the entity uses (0 for no GUI).
     */
 
-    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, double riderOffsetXZ, double length, int numberOfBogies, float maxSpeed, float[] acceleration,
+    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, double riderOffsetXZ, double[] bogiePositions, float maxSpeed, float[] acceleration,
                            int type,FluidTank[] tank,int inventorySize, int GUIid){
         super(world);
         this.posY = yPos;
@@ -108,8 +104,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         this.maxSpeed = maxSpeed;
         this.owner = owner;
         this.tank = tank;
-        this.length = length;
-        this.bogies = numberOfBogies;
+        this.bogieOffsets = bogiePositions;
 
         //define the number of inventory slots to add to the train based on type for crafting slots and inventory scale
         int craftingSlots =0;
@@ -151,11 +146,8 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     //return if the train can be used by the player, if it's locked, only the owner can use it.
     @Override
     public boolean isUseableByPlayer(EntityPlayer player){
-        if (isLocked){
-            return owner.equals(player.getUniqueID());
-        } else{
-            return true;
-        }
+        //if it is locked, return if player is owner, otherwise return false.
+        return isLocked || owner.equals(player.getUniqueID());
     }
     //manage the bounding and collision boxes
     @Override
@@ -190,7 +182,8 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         maxSpeed = additionalData.readFloat();
         isReverse = additionalData.readBoolean();
         owner = new UUID(additionalData.readLong(), additionalData.readLong());
-        for (int i=0; i<bogies; i++) {
+        //we loop using the offset double length because we expect bogieXYZ to be null.
+        for (double offset : bogieOffsets) {
             bogieXYZ.add(new double[]{additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble()});
         }
     }
@@ -200,7 +193,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         buffer.writeBoolean(isReverse);
         buffer.writeLong(owner.getMostSignificantBits());
         buffer.writeLong(owner.getLeastSignificantBits());
-        for (int i=0; i<bogies; i++) {
+        for (int i=0; i<bogieOffsets.length; i++) {
             buffer.writeDouble(bogieXYZ.get(i)[0]);
             buffer.writeDouble(bogieXYZ.get(i)[1]);
             buffer.writeDouble(bogieXYZ.get(i)[2]);
@@ -312,9 +305,8 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         //be sure the slot exists before trying to return anything,
         if (slot>=0 && slot< inventory.size()) {
             return inventory.get(slot);
-        } else {
-            return null;
         }
+        return null;
     }
     @Override
     public ItemStack getStackInSlotOnClosing(int slot) {
@@ -331,13 +323,11 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             //if subtraction makes slot empty/null then set it to null and return null, otherwise return the stack.
             if (inventory.get(slot).stackSize <= amount ^ inventory.get(slot).stackSize <= 0) {
                 inventory.set(slot, null);
-                return null;
             } else {
                 return inventory.get(slot).splitStack(amount);
             }
-        } else {
-            return null;
         }
+        return null;
     }
     @Override
     public void setInventorySlotContents(int slot, ItemStack itemstack) {
@@ -394,7 +384,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     * managing rotationYaw and rotationPitch.
     * managing speed, acceleration. and direction.
     * and calling the fuel handler for fuel consumption.
-    * @see FuelHandler
+    * @see Util
     */
 
     @Override
@@ -423,6 +413,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                 }
 
                 //move the train's position between the bogies.
+                //TODO this really needs a buffer like EntityMinecart has, because it is jumpy.
                 this.setPositionAndRotation((bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
                         (bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D,
                         (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D,
@@ -500,7 +491,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                 switch (trainTicks) {
                     case 5: {
                         if (isRunning) {
-                            FuelHandler.ManageFuel(this);
+                            Util.ManageFuel(this);
                         }
                         break;
                     }

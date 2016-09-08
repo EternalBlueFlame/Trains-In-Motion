@@ -31,14 +31,13 @@ public class FirstTrain extends EntityTrainCore {
     };
     private static final int inventorySize= 3;
     private static final double offsetXZ =0D;
-    public static final double length = 2.0D;
-    public static final int bogies =2;
+    public static final double[] bogieOffset = new double[]{0.0D,2.0D};
 
     /**
      * @see EntityTrainCore#EntityTrainCore(UUID, World, double, double, double, double, double, int, float, float[], int, FluidTank[], int, int)
      */
     public FirstTrain(UUID owner, World world, double xPos, double yPos, double zPos) {
-        super(owner, world, xPos, yPos, zPos, offsetXZ, length, bogies, initMaxSpeed, acceleration, type,tank,inventorySize, GUISteam.GUI_ID);
+        super(owner, world, xPos, yPos, zPos, offsetXZ, bogieOffset, initMaxSpeed, acceleration, type,tank,inventorySize, GUISteam.GUI_ID);
     }
 
     /**

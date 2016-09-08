@@ -1,21 +1,29 @@
 package trains.utility;
 
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockRailBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 import trains.entities.EntityTrainCore;
-import trains.entities.MinecartExtended;
 
 import java.util.Arrays;
 import java.util.List;
 
 
-public class FuelHandler {
+public class Util {
     private static final int[] value = new int[]{20, 3, 50, 100, 500, 3};
     private static final List<Item> steamFuel = Arrays.asList(Item.getItemFromBlock(Blocks.planks), Items.stick, Items.coal, Items.blaze_rod, Item.getItemFromBlock(Blocks.coal_block), Item.getItemFromBlock(Blocks.sapling));
+
+    //TODO need ZND API for ITrackBase
+    public static boolean isRailBlockAt(World world, int x, int y, int z) { // Can later be substituted for BlockPos
+        return (/*world.getTileEntity(x, y, z) instanceof ITrackBase ||*/ world.getBlock(x, y, z) instanceof BlockRailBase);
+    }
+
 
     public static void ManageFuel(EntityTrainCore cart){
 

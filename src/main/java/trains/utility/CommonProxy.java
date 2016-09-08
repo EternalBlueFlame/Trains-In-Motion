@@ -7,9 +7,9 @@ import cpw.mods.fml.common.network.IGuiHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import trains.entities.EntityTrainCore;
+import trains.gui.train.GUISteam;
 import trains.gui.trainhandler.SteamInventoryHandler;
 
-import java.util.List;
 
 
 public class CommonProxy implements IGuiHandler {
@@ -27,10 +27,21 @@ public class CommonProxy implements IGuiHandler {
      */
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        if(player !=null && player.ridingEntity instanceof EntityTrainCore){
-            return new SteamInventoryHandler(player.inventory, (EntityTrainCore) player.ridingEntity);
+        //handle GUI direction for trains
+        if (player != null && player.ridingEntity instanceof EntityTrainCore) {
+            switch (ID) {
+                case GUISteam.GUI_ID: {
+                    return new SteamInventoryHandler(player.inventory, (EntityTrainCore) player.ridingEntity);
+                }
+
+                default: {
+                    return null;
+                }
+            }
+        } else {
+            //handle GUI direction for rollingstock
+            return null;
         }
-        return null;
     }
 
     @Override
