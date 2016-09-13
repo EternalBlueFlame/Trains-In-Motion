@@ -7,6 +7,9 @@ import net.minecraftforge.fluids.FluidTank;
 import trains.entities.EntityTrainCore;
 import trains.gui.train.GUISteam;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public class FirstTrain extends EntityTrainCore {
@@ -31,10 +34,10 @@ public class FirstTrain extends EntityTrainCore {
     };
     private static final int inventorySize= 3;
     private static final double offsetXZ =0D;
-    public static final double[] bogieOffset = new double[]{0.0D,2.0D};
+    public static final List<Double> bogieOffset = Arrays.asList(-1.0D, 1.0D);
 
     /**
-     * @see EntityTrainCore#EntityTrainCore(UUID, World, double, double, double, double, double, int, float, float[], int, FluidTank[], int, int)
+     * @see EntityTrainCore#EntityTrainCore(UUID, World, double, double, double, double, List, float, float[], int, FluidTank[], int, int)
      */
     public FirstTrain(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos, offsetXZ, bogieOffset, initMaxSpeed, acceleration, type,tank,inventorySize, GUISteam.GUI_ID);

@@ -2,6 +2,8 @@ package trains.entities;
 
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
@@ -19,6 +21,7 @@ import trains.utility.ClientProxy;
 import trains.utility.Util;
 import trains.utility.LampHandler;
 
+import javax.vecmath.Vector2d;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +44,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public float maxSpeed = 0; // the max speed
     private int trainTicks =0; //defines the train's tick count.
     public int accelerator =0; //defines the value of how much to speed up, or brake the train.
+    private int movementBuffer =0;
 
 
     //Main Values
@@ -51,12 +55,13 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public LampHandler lamp = new LampHandler(); //manages the lamp, or lack there of.
     public int GUIID = 0; //id for the GUI
     public UUID owner = null;  //universal, get train owner
-    public double[] bogieOffsets = new double[]{0.0D,1.0D}; //number of bogies the train is supposed to maintain
+    public List<Double> bogieOffsets = new ArrayList<Double>(); //number of bogies the train is supposed to maintain
+    private int bogieCount =0;
 
     //list of boogies
     public List<EntityMinecart> bogie = new ArrayList<EntityMinecart>();
 
-    public boolean isReverse =false;
+    private boolean isReverse =false;
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
 
     //inventory
@@ -92,7 +97,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     * @param GUIid the ID used to define what GUI the entity uses (0 for no GUI).
     */
 
-    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, double riderOffsetXZ, double[] bogiePositions, float maxSpeed, float[] acceleration,
+    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, double riderOffsetXZ, List<Double> bogiePositions, float maxSpeed, float[] acceleration,
                            int type,FluidTank[] tank,int inventorySize, int GUIid){
         super(world);
         this.posY = yPos;
@@ -105,6 +110,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         this.owner = owner;
         this.tank = tank;
         this.bogieOffsets = bogiePositions;
+        this.bogieCount = bogiePositions.size();
 
         //define the number of inventory slots to add to the train based on type for crafting slots and inventory scale
         int craftingSlots =0;
@@ -182,10 +188,14 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         maxSpeed = additionalData.readFloat();
         isReverse = additionalData.readBoolean();
         owner = new UUID(additionalData.readLong(), additionalData.readLong());
+        bogieCount = additionalData.readInt();
         //we loop using the offset double length because we expect bogieXYZ to be null.
-        for (double offset : bogieOffsets) {
+        for (int i=0; i<bogieCount; i++){
+            bogieOffsets.add(additionalData.readDouble());
+
             bogieXYZ.add(new double[]{additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble()});
         }
+
     }
     @Override
     public void writeSpawnData(ByteBuf buffer) {
@@ -193,7 +203,10 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         buffer.writeBoolean(isReverse);
         buffer.writeLong(owner.getMostSignificantBits());
         buffer.writeLong(owner.getLeastSignificantBits());
-        for (int i=0; i<bogieOffsets.length; i++) {
+        buffer.writeInt(bogieCount);
+        for (int i=0; i<bogieOffsets.size(); i++) {
+            buffer.writeDouble(bogieOffsets.get(i));
+
             buffer.writeDouble(bogieXYZ.get(i)[0]);
             buffer.writeDouble(bogieXYZ.get(i)[1]);
             buffer.writeDouble(bogieXYZ.get(i)[2]);
@@ -208,7 +221,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         lamp.isOn = tag.getBoolean("extended.lamp");
         isReverse = tag.getBoolean("extended.isreverse");
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
-
+        bogieCount = tag.getInteger("extended.bogiecount");
         //read through the bogie positions
         NBTTagList bogieTaglList = tag.getTagList("extended.bogies", 10);
         for (int i = 0; i < bogieTaglList.tagCount(); i++) {
@@ -216,6 +229,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             byte b0 = nbttagcompound1.getByte("bogie");
 
             if (b0 >= 0) {
+                bogieOffsets.add(nbttagcompound1.getDouble("bogieindex.offset."));
                 bogieXYZ.add(new double[]{nbttagcompound1.getDouble("bogieindex.a." + i),nbttagcompound1.getDouble("bogieindex.b." + i),nbttagcompound1.getDouble("bogieindex.c." + i)});
             }
         }
@@ -243,12 +257,14 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         tag.setBoolean("extended.isreverse", isReverse);
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
+        tag.setInteger("extended.bogiecount", bogieCount);
         //write the list of bogies
         NBTTagList nbtBogieTaglist = new NBTTagList();
         for (int i = 0; i < bogieXYZ.size(); ++i) {
             if (bogieXYZ.get(i) != null) {
                 NBTTagCompound nbttagcompound1 = new NBTTagCompound();
                 nbttagcompound1.setByte("bogie", (byte)i);
+                nbttagcompound1.setDouble("bogieindex.offset." + i,bogieOffsets.get(i));
                 nbttagcompound1.setDouble("bogieindex.a." + i,bogieXYZ.get(i)[0]);
                 nbttagcompound1.setDouble("bogieindex.b." + i,bogieXYZ.get(i)[1]);
                 nbttagcompound1.setDouble("bogieindex.c." + i,bogieXYZ.get(i)[2]);
@@ -407,23 +423,23 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                     }
                     bogieSize = bogie.size()-1;
                 }
+                //move the train's position between the bogies.
+                //TODO this really needs a buffer like EntityMinecart has, because it is jumpy.
+                this.setPositionAndRotation((bogie.get(bogieSize).posX + bogie.get(0).posX) *0.5D,
+                        (bogie.get(bogieSize).posY + bogie.get(0).posY) *0.5D,
+                        (bogie.get(bogieSize).posZ + bogie.get(0).posZ) *0.5D,
+                        MathHelper.floor_double(Math.atan2(bogie.get(bogieSize).posZ - bogie.get(0).posZ, bogie.get(bogieSize).posX - bogie.get(0).posX) * (180.0D / Math.PI)),
+                        MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
+                );
                 //be sure the list of bogie positions is updated to the current values.
                 for (int i = 0; i < xyzSize && i < bogieSize; i++) {
                     bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
                 }
-
-                //move the train's position between the bogies.
-                //TODO this really needs a buffer like EntityMinecart has, because it is jumpy.
-                this.setPositionAndRotation((bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
-                        (bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D,
-                        (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D,
-                        MathHelper.floor_double(Math.atan2(bogie.get(bogieSize).posZ - bogie.get(0).posZ, bogie.get(bogieSize).posX - bogie.get(0).posX) * (180.0D / Math.PI)),
-                        MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
-                        );
-
                 //be sure the bogies are in relative position to the train
-                for (int i=0; i<= bogieSize; i++){
-
+                for (int i=0; i< bogieCount; i++){
+                    bogie.get(i).setPosition( this.posX + (Math.cos(Math.toRadians(rotationYaw) * bogieOffsets.get(i))),
+                            bogie.get(i).posY,
+                            this.posZ + (Math.sin(Math.toRadians(rotationYaw) * bogieOffsets.get(i))));
                 }
             }
 
@@ -523,7 +539,12 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             }
         }
     }
-
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
+        super.setPositionAndRotation2(p_70056_1_,p_70056_3_,p_70056_5_,p_70056_7_,p_70056_8_, p_70056_9_);
+        this.movementBuffer = p_70056_9_ + 2;
+    }
 
     /**
      *
