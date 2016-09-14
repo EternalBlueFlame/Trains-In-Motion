@@ -1,18 +1,15 @@
 package trains.entities.render;
 
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRailBase;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
 import net.minecraftforge.client.model.IModelCustom;
 import net.minecraftforge.client.model.obj.ObjModelLoader;
 import org.lwjgl.opengl.GL11;
+import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
-import trains.entities.MinecartExtended;
 
 public class RenderObj extends Render {
 
@@ -27,8 +24,6 @@ public class RenderObj extends Render {
         GL11.glPushMatrix();
         //set the position of the graphic and save changes
         //TODO set the GL Translation to a vector between the front and back bogies of the entity.
-        GL11.glTranslated(x, y, z);
-        GL11.glPushMatrix();
 
         /**
          * now we have to handle rotation, assuming the entity is an instance of MinecartExtended this is a lot more complicated because we have to define rotation based on it's current and previous positions.
@@ -42,10 +37,45 @@ public class RenderObj extends Render {
              * now we actually set the values we just finished defining.
              * because rotation is set on (amount, xaxis, yaxis, xaxis) we have to rotate each axis individually, then push
              */
-            GL11.glRotatef(cart.rotationYaw, 0.0F, 1.0F, 0.0F);
-            GL11.glRotatef(cart.rotationPitch, 0.0F, 0.0F, 1.0F);
-            GL11.glPushMatrix();
+        //re-calculate position to be rendered at every frame for greater accuracy
+        //get the current minecraft, check if we should render high-end and if the client's FPS is unlimited or below max
+            if (!TrainsInMotion.LowEndRender && cart.bogie.size()>1){
+                //set an int for the number of bogies so we only have to calculate it once
+                int bogieSize = cart.bogie.size()-1;
+                //do basically the same calculation for the position as done in EntityTrainCore, and push the matrix.
+                double x1 = x - (cart.posX - ((cart.bogie.get(bogieSize).posX + cart.bogie.get(0).posX) * 0.5D));
+                double y1 = y - (cart.posY - ((cart.bogie.get(bogieSize).posY + cart.bogie.get(0).posY) * 0.5D));
+                double z1 = z - (cart.posZ - ((cart.bogie.get(bogieSize).posZ + cart.bogie.get(0).posZ) * 0.5D));
+                System.out.println("rendering high" + x1 + " : " + y1 + " : " + z1);
+                System.out.println("rendering" + x + " : " + y + " : " + z);
+                GL11.glTranslated(x1,y1,z1);
+                GL11.glPushMatrix();
+                cart.updateRiderPosition(x1,y1,z1);
+                //now calculate the position and rotations the same way as done in EntityTrainCore, and push the matrix
+                GL11.glRotatef(MathHelper.floor_double(Math.atan2(
+                        cart.bogie.get(0).posZ - cart.bogie.get(0).posZ, cart.bogie.get(bogieSize).posX - cart.bogie.get(bogieSize).posX) *
+                        (180.0D / Math.PI)),
+                        0.0F, 1.0F, 0.0F);
+                GL11.glRotatef(MathHelper.floor_double(Math.acos(cart.bogie.get(0).posY / cart.bogie.get(bogieSize).posY)), 0.0F, 0.0F, 1.0F);
+                GL11.glPushMatrix();
+
+            } else {
+                //if the client is in low end mode, or is lagging with a defined framerate, render the actual server position of the entity.
+                GL11.glTranslated(x, y, z);
+                GL11.glPushMatrix();
+
+                GL11.glRotatef(cart.rotationYaw, 0.0F, 1.0F, 0.0F);
+                GL11.glRotatef(cart.rotationPitch, 0.0F, 0.0F, 1.0F);
+                GL11.glPushMatrix();
+            }
         }
+
+        //(bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
+        //(bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D,
+               // (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D,
+               // MathHelper.floor_double(Math.atan2(bogie.get(0).posZ - bogie.get(0).posZ, bogie.get(bogieSize).posX - bogie.get(bogieSize).posX) * (180.0D / Math.PI)),
+               // MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
+
 
         //Bind the texture and render the model
         bindTexture(texture);

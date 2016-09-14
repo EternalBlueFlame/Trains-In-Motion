@@ -26,7 +26,7 @@ public class FirstTrain extends EntityTrainCore {
      * speed is actually for the German 0-8-0 Brigadelok (calculation is (1/72)*70.8111, 70.8111 being the train's max speed in km/h)
      */
     private static final float initMaxSpeed = 0.9834875f;
-    private static final float[] acceleration = new float[]{0.0005F,0.00075F,0.0005F};
+    private static final float[] acceleration = new float[]{0.001F,0.0015F,0.001F};
     private static final int type = 1;
     private static FluidTank[] tank = new FluidTank[]{
             new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),

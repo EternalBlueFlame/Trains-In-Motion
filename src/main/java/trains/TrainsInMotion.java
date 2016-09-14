@@ -60,6 +60,7 @@ public class TrainsInMotion {
      * Initialize the values for the config file, then load or create the config file.
      */
     public static boolean EnableLights = true;
+    public static boolean LowEndRender = false;
     public static char KeyLamp = 'l';
     public static char KeyInventory = 'i';
     public static char KeyAccelerate = 'w';
@@ -70,7 +71,9 @@ public class TrainsInMotion {
 
         config.load();
 
+        config.addCustomCategoryComment("Quality (Client only)", "Lamps take up a lot of extra processing on client side due to forced chunk reloading, \nLowEndRender turns off some of the extra graphical features that may cause lag.");
         EnableLights = config.get(Configuration.CATEGORY_GENERAL, "EnableLamp", true).getBoolean(true);
+        LowEndRender = config.get(Configuration.CATEGORY_GENERAL, "LowEndRender", false).getBoolean(true);
 
         config.addCustomCategoryComment("Keybinds", "accepted values are Lowercase a-z, along with the special characters:  ,.;'[]\\`-=");
 

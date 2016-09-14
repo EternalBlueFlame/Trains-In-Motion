@@ -21,7 +21,6 @@ import trains.utility.ClientProxy;
 import trains.utility.Util;
 import trains.utility.LampHandler;
 
-import javax.vecmath.Vector2d;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +43,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public float maxSpeed = 0; // the max speed
     private int trainTicks =0; //defines the train's tick count.
     public int accelerator =0; //defines the value of how much to speed up, or brake the train.
-    private int movementBuffer =0;
 
 
     //Main Values
@@ -414,32 +412,33 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                 //always be sure the bogies exist on client and server.
                 if (bogieSize < 1) {
                     for (double[] pos : bogieXYZ) {//it should never be possible for bogieXYZ to be null unless there is severe server data corruption.
-                        bogie.add(new MinecartExtended(worldObj, pos[0], pos[1], pos[2]));
-                    }
-                    //be sure bogies are spawned on server.
-                    if (!worldObj.isRemote) {
-                        worldObj.spawnEntityInWorld(bogie.get(0));
-                        worldObj.spawnEntityInWorld(bogie.get(1));
+                        MinecartExtended spawnBogie = new MinecartExtended(worldObj, pos[0], pos[1], pos[2]);
+                        if (!worldObj.isRemote) {
+                            worldObj.spawnEntityInWorld(spawnBogie);
+                        }
+                        bogie.add(spawnBogie);
                     }
                     bogieSize = bogie.size()-1;
                 }
-                //move the train's position between the bogies.
-                //TODO this really needs a buffer like EntityMinecart has, because it is jumpy.
-                this.setPositionAndRotation((bogie.get(bogieSize).posX + bogie.get(0).posX) *0.5D,
-                        (bogie.get(bogieSize).posY + bogie.get(0).posY) *0.5D,
-                        (bogie.get(bogieSize).posZ + bogie.get(0).posZ) *0.5D,
-                        MathHelper.floor_double(Math.atan2(bogie.get(bogieSize).posZ - bogie.get(0).posZ, bogie.get(bogieSize).posX - bogie.get(0).posX) * (180.0D / Math.PI)),
-                        MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
-                );
-                //be sure the list of bogie positions is updated to the current values.
-                for (int i = 0; i < xyzSize && i < bogieSize; i++) {
-                    bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
+                if (!worldObj.isRemote) {
+                    //move the train's position between the bogies.
+                        this.setPositionAndRotation((bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
+                                (bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D,
+                                (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D,
+                                MathHelper.floor_double(Math.atan2(bogie.get(0).posZ - bogie.get(0).posZ, bogie.get(bogieSize).posX - bogie.get(bogieSize).posX) * (180.0D / Math.PI)),
+                                MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
+                        );
                 }
-                //be sure the bogies are in relative position to the train
-                for (int i=0; i< bogieCount; i++){
-                    bogie.get(i).setPosition( this.posX + (Math.cos(Math.toRadians(rotationYaw) * bogieOffsets.get(i))),
-                            bogie.get(i).posY,
-                            this.posZ + (Math.sin(Math.toRadians(rotationYaw) * bogieOffsets.get(i))));
+                    //be sure the list of bogie positions is updated to the current values.
+                    for (int i = 0; i < xyzSize && i < bogieSize; i++) {
+                        bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
+                    }
+                    //be sure the bogies are in relative position to the train
+                    for (int i=0; i< bogieCount; i++){
+                        //bogie.get(i).setPosition( this.posX + (Math.cos(Math.toRadians(rotationYaw) * bogieOffsets.get(i))),
+                        //        bogie.get(i).posY,
+                        //        this.posZ + (Math.sin(Math.toRadians(rotationYaw) * bogieOffsets.get(i))));
+
                 }
             }
 
@@ -539,11 +538,19 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             }
         }
     }
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
-        super.setPositionAndRotation2(p_70056_1_,p_70056_3_,p_70056_5_,p_70056_7_,p_70056_8_, p_70056_9_);
-        this.movementBuffer = p_70056_9_ + 2;
+    public void updateRiderPosition(double x, double y, double z) {
+        if (riddenByEntity != null) {
+            if (bogie.size()>1) {
+                double offset =1;
+
+                Vec3 position = Vec3.createVectorHelper(offset,2D,0);
+                position.rotateAroundX(this.rotationYaw);
+
+                riddenByEntity.setPosition(x + position.xCoord, y +position.yCoord, z + position.zCoord);
+            } else {
+                riddenByEntity.setPosition(x, y + 2D, z);
+            }
+        }
     }
 
     /**
