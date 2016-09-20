@@ -2,11 +2,8 @@ package trains.entities;
 
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -57,7 +54,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     private int bogieCount =0;
 
     //list of boogies
-    public List<EntityMinecart> bogie = new ArrayList<EntityMinecart>();
+    public List<MinecartExtended> bogie = new ArrayList<MinecartExtended>();
 
     private boolean isReverse =false;
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
@@ -227,7 +224,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             byte b0 = nbttagcompound1.getByte("bogie");
 
             if (b0 >= 0) {
-                bogieOffsets.add(nbttagcompound1.getDouble("bogieindex.offset."));
+                bogieOffsets.add(nbttagcompound1.getDouble("bogieindex.offset." + i));
                 bogieXYZ.add(new double[]{nbttagcompound1.getDouble("bogieindex.a." + i),nbttagcompound1.getDouble("bogieindex.b." + i),nbttagcompound1.getDouble("bogieindex.c." + i)});
             }
         }
@@ -420,25 +417,35 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                     }
                     bogieSize = bogie.size()-1;
                 }
-                if (!worldObj.isRemote) {
-                    //move the train's position between the bogies.
-                        this.setPositionAndRotation((bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
-                                (bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D,
-                                (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D,
-                                MathHelper.floor_double(Math.atan2(bogie.get(0).posZ - bogie.get(0).posZ, bogie.get(bogieSize).posX - bogie.get(bogieSize).posX) * (180.0D / Math.PI)),
-                                MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
-                        );
-                }
-                    //be sure the list of bogie positions is updated to the current values.
-                    for (int i = 0; i < xyzSize && i < bogieSize; i++) {
-                        bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
-                    }
-                    //be sure the bogies are in relative position to the train
-                    for (int i=0; i< bogieCount; i++){
-                        //bogie.get(i).setPosition( this.posX + (Math.cos(Math.toRadians(rotationYaw) * bogieOffsets.get(i))),
-                        //        bogie.get(i).posY,
-                        //        this.posZ + (Math.sin(Math.toRadians(rotationYaw) * bogieOffsets.get(i))));
+                //move the train's position between the bogies.
+                this.setPositionAndRotation((bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
+                        (bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D,
+                        (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D,
+                        MathHelper.floor_double(Math.atan2(bogie.get(0).posZ - bogie.get(bogieSize).posZ, bogie.get(0).posX - bogie.get(bogieSize).posX) * (180.0D / Math.PI)),
+                        MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
+                );
+                for (int i = 0; i < xyzSize && i < bogieSize; i++) {
 
+                    //TODO this still needs work, so its disabled (in a very hacky method) currently
+                    //be sure the bogies are in relative position to the train.
+                    // besides updating positions we don't care about the back bogie, because the positions for other bogies are mostly defined from it, indirectly.
+                    if (trainTicks >1 && i>0 && true == false) {
+                        float rotationCos1 = (float) Math.cos(Math.toRadians(rotationYaw));
+                        float rotationSin1 = (float) Math.sin(Math.toRadians(rotationYaw));
+                        double bogieX1 = (this.posX + (rotationCos1 * Math.abs(bogieOffsets.get(i))));
+                        double bogieZ1 = (this.posZ + (rotationSin1 * Math.abs(bogieOffsets.get(i))));
+                        this.bogie.get(i).setPosition(bogieX1, bogie.get(i).posY, bogieZ1);
+                        bogie.get(i).setPosition(
+                                this.posX + (Math.cos(bogieOffsets.get(i) * Math.toRadians(rotationYaw))),
+                                bogie.get(i).posY,
+                                this.posZ + (Math.sin(bogieOffsets.get(i) * Math.toRadians(rotationYaw))));
+
+                        this.bogie.get(i).motionX = (bogieX1 - this.posX);
+                        this.bogie.get(i).motionZ = (bogieZ1 - this.posZ);
+                    }
+
+                    //be sure the list of bogie positions is updated to the current values.
+                    bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
                 }
             }
 
@@ -497,24 +504,24 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                     }*/
                     }
                     //now apply the changes to all the bogies.
-                    for (EntityMinecart bogieClone : this.bogie) {
+                    for (MinecartExtended bogieClone : this.bogie) {
                         bogieClone.addVelocity(x, bogieClone.motionY, z);
                     }
                 }
+            }
 
-                //simple server side tick management so some code does not need to be run every tick.
-                switch (trainTicks) {
-                    case 5: {
-                        if (isRunning) {
-                            Util.ManageFuel(this);
-                        }
-                        break;
+            //simple tick management so some code does not need to be run every tick.
+            switch (trainTicks) {
+                case 5: {
+                    if (!worldObj.isRemote && isRunning) {
+                        Util.ManageFuel(this);
                     }
-                    default: {
-                        //if the tick count is higher than the values used, reset it so it can count up again.
-                        if (trainTicks > 10) {
-                            trainTicks = 1;
-                        }
+                    break;
+                }
+                default: {
+                    //if the tick count is higher than the values used, reset it so it can count up again.
+                    if (trainTicks > 10) {
+                        trainTicks = 1;
                     }
                 }
             }

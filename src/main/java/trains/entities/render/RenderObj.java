@@ -46,14 +46,12 @@ public class RenderObj extends Render {
                 double x1 = x - (cart.posX - ((cart.bogie.get(bogieSize).posX + cart.bogie.get(0).posX) * 0.5D));
                 double y1 = y - (cart.posY - ((cart.bogie.get(bogieSize).posY + cart.bogie.get(0).posY) * 0.5D));
                 double z1 = z - (cart.posZ - ((cart.bogie.get(bogieSize).posZ + cart.bogie.get(0).posZ) * 0.5D));
-                System.out.println("rendering high" + x1 + " : " + y1 + " : " + z1);
-                System.out.println("rendering" + x + " : " + y + " : " + z);
                 GL11.glTranslated(x1,y1,z1);
                 GL11.glPushMatrix();
                 cart.updateRiderPosition(x1,y1,z1);
                 //now calculate the position and rotations the same way as done in EntityTrainCore, and push the matrix
                 GL11.glRotatef(MathHelper.floor_double(Math.atan2(
-                        cart.bogie.get(0).posZ - cart.bogie.get(0).posZ, cart.bogie.get(bogieSize).posX - cart.bogie.get(bogieSize).posX) *
+                        cart.bogie.get(0).posZ - cart.bogie.get(bogieSize).posZ, cart.bogie.get(0).posX - cart.bogie.get(bogieSize).posX) *
                         (180.0D / Math.PI)),
                         0.0F, 1.0F, 0.0F);
                 GL11.glRotatef(MathHelper.floor_double(Math.acos(cart.bogie.get(0).posY / cart.bogie.get(bogieSize).posY)), 0.0F, 0.0F, 1.0F);
