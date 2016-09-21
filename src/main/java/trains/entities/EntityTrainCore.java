@@ -38,7 +38,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public int furnaceFuel = 0; //the amount of fuel in the furnace, only used for steam and nuclear trains
     public int maxFuel =0; //the max fuel in the train's furnace.
     public float maxSpeed = 0; // the max speed
-    private int trainTicks =0; //defines the train's tick count.
+    public int trainTicks =0; //defines the train's tick count.
     public int accelerator =0; //defines the value of how much to speed up, or brake the train.
 
 
@@ -417,35 +417,41 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                     }
                     bogieSize = bogie.size()-1;
                 }
-                //move the train's position between the bogies.
-                this.setPositionAndRotation((bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
-                        (bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D,
-                        (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D,
-                        MathHelper.floor_double(Math.atan2(bogie.get(0).posZ - bogie.get(bogieSize).posZ, bogie.get(0).posX - bogie.get(bogieSize).posX) * (180.0D / Math.PI)),
-                        MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
-                );
-                for (int i = 0; i < xyzSize && i < bogieSize; i++) {
+                //move the train's position between the bogies, only do this on server, minecraft syncs this for us.
+                if (!worldObj.isRemote) {
+                    setPositionAndRotation(
+                            (bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
+                            (bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D,
+                            (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D,
+                            180-MathHelper.floor_double(Math.toDegrees(Math.atan2(bogie.get(0).posZ - bogie.get(bogieSize).posZ, bogie.get(0).posX - bogie.get(bogieSize).posX))),
+                            MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
+                    );
+                    motionZ = (bogie.get(0).motionZ + bogie.get(bogieSize).motionZ) * 0.5D;
+                    motionX = (bogie.get(0).motionX + bogie.get(bogieSize).motionX) * 0.5D;
 
-                    //TODO this still needs work, so its disabled (in a very hacky method) currently
-                    //be sure the bogies are in relative position to the train.
-                    // besides updating positions we don't care about the back bogie, because the positions for other bogies are mostly defined from it, indirectly.
-                    if (trainTicks >1 && i>0 && true == false) {
-                        float rotationCos1 = (float) Math.cos(Math.toRadians(rotationYaw));
-                        float rotationSin1 = (float) Math.sin(Math.toRadians(rotationYaw));
-                        double bogieX1 = (this.posX + (rotationCos1 * Math.abs(bogieOffsets.get(i))));
-                        double bogieZ1 = (this.posZ + (rotationSin1 * Math.abs(bogieOffsets.get(i))));
-                        this.bogie.get(i).setPosition(bogieX1, bogie.get(i).posY, bogieZ1);
-                        bogie.get(i).setPosition(
-                                this.posX + (Math.cos(bogieOffsets.get(i) * Math.toRadians(rotationYaw))),
-                                bogie.get(i).posY,
-                                this.posZ + (Math.sin(bogieOffsets.get(i) * Math.toRadians(rotationYaw))));
 
-                        this.bogie.get(i).motionX = (bogieX1 - this.posX);
-                        this.bogie.get(i).motionZ = (bogieZ1 - this.posZ);
+
+                    for (int i = 0; i < xyzSize && i < bogieSize; i++) {
+
+                        //TODO this still needs work, so its disabled (in a very hacky method) currently
+                        //be sure the bogies are in relative position to the train.
+                        // besides updating positions we don't care about the back bogie, because the positions for other bogies are mostly defined from it, indirectly.
+                        if (trainTicks >1 && i>0 && true == false) {
+                            double bogieX1 = (posX + (Math.cos(Math.toRadians(rotationYaw)) * Math.abs(bogieOffsets.get(i))));
+                            double bogieZ1 = (posZ + (Math.sin(Math.toRadians(rotationYaw)) * Math.abs(bogieOffsets.get(i))));
+                            bogie.get(i).setPosition(bogieX1, bogie.get(i).posY, bogieZ1);
+                            bogie.get(i).setPosition(
+                                    posX + (Math.cos(bogieOffsets.get(i) * Math.toRadians(rotationYaw))),
+                                    bogie.get(i).posY,
+                                    posZ + (Math.sin(bogieOffsets.get(i) * Math.toRadians(rotationYaw))));
+
+                            bogie.get(i).motionX = (bogieX1 - posX);
+                            bogie.get(i).motionZ = (bogieZ1 - posZ);
+                        }
+
+                        //be sure the list of bogie positions is updated to the current values.
+                        bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
                     }
-
-                    //be sure the list of bogie positions is updated to the current values.
-                    bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
                 }
             }
 
@@ -504,7 +510,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                     }*/
                     }
                     //now apply the changes to all the bogies.
-                    for (MinecartExtended bogieClone : this.bogie) {
+                    for (MinecartExtended bogieClone : bogie) {
                         bogieClone.addVelocity(x, bogieClone.motionY, z);
                     }
                 }
@@ -542,20 +548,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                 riddenByEntity.setPosition(this.posX + position.xCoord, this.posY +position.yCoord, this.posZ + position.zCoord);
             } else {
                 riddenByEntity.setPosition(this.posX, this.posY + 2D, this.posZ);
-            }
-        }
-    }
-    public void updateRiderPosition(double x, double y, double z) {
-        if (riddenByEntity != null) {
-            if (bogie.size()>1) {
-                double offset =1;
-
-                Vec3 position = Vec3.createVectorHelper(offset,2D,0);
-                position.rotateAroundX(this.rotationYaw);
-
-                riddenByEntity.setPosition(x + position.xCoord, y +position.yCoord, z + position.zCoord);
-            } else {
-                riddenByEntity.setPosition(x, y + 2D, z);
             }
         }
     }
