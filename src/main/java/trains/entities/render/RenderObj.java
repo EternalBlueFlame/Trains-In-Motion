@@ -23,6 +23,11 @@ public class RenderObj extends Render {
         //set the position of the graphic and save changes
         GL11.glTranslated(x, y, z);
         GL11.glPushMatrix();
+        /**
+         * TODO
+         * hold a previous copy of the train's X/Y/Z variables. then check if they are different from the current, If they are then take the difference and math it by -
+         * a render tick counter based on the number of render ticks since the last client tick.
+         */
 
         /**
          * now we have to handle rotation, assuming the entity is an instance of MinecartExtended this is a lot more complicated because we have to define rotation based on it's current and previous positions.
@@ -35,7 +40,6 @@ public class RenderObj extends Render {
              * now we actually set the values we just finished defining.
              * because rotation is set on (amount, xaxis, yaxis, xaxis) we have to rotate each axis individually, then push
              */
-
                 GL11.glRotatef(entity.rotationYaw, 0.0F, 1.0F, 0.0F);
                 GL11.glRotatef(entity.rotationPitch, 0.0F, 0.0F, 1.0F);
                 GL11.glPushMatrix();

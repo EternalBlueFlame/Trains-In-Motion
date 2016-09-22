@@ -130,8 +130,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     //this constructor is lower level spawning
     public EntityTrainCore(World world){
         super(world);
-        //set the size of the collision box
-        this.setSize(1.5F,2.0F);
 
     }
     /**
@@ -143,6 +141,11 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     //variable assigners
     public void setOwner(UUID player){owner = player;}
     public UUID getOwnerUUID(){return owner;}
+    @Override
+    public boolean canBePushed()
+    {
+        return true;
+    }
 
     //return if the train can be used by the player, if it's locked, only the owner can use it.
     @Override
@@ -153,12 +156,12 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     //manage the bounding and collision boxes
     @Override
     public AxisAlignedBB getBoundingBox(){
-        return this.boundingBox;
+        return boundingBox;
     }
     @Override
     public AxisAlignedBB getCollisionBox(Entity collidedWith){
-        if (collidedWith != this.riddenByEntity) {
-            return this.boundingBox.intersectsWith(collidedWith.boundingBox) ? collidedWith.boundingBox : null;
+        if (collidedWith != riddenByEntity && collidedWith != null) {
+            return collidedWith.boundingBox;
         } else { return null;}
     }
     @Override
@@ -432,25 +435,56 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
 
                     for (int i = 0; i < xyzSize && i < bogieSize; i++) {
-
-                        //TODO this still needs work, so its disabled (in a very hacky method) currently
-                        //be sure the bogies are in relative position to the train.
-                        // besides updating positions we don't care about the back bogie, because the positions for other bogies are mostly defined from it, indirectly.
-                        if (trainTicks >1 && i>0 && true == false) {
-                            double bogieX1 = (posX + (Math.cos(Math.toRadians(rotationYaw)) * Math.abs(bogieOffsets.get(i))));
-                            double bogieZ1 = (posZ + (Math.sin(Math.toRadians(rotationYaw)) * Math.abs(bogieOffsets.get(i))));
-                            bogie.get(i).setPosition(bogieX1, bogie.get(i).posY, bogieZ1);
-                            bogie.get(i).setPosition(
-                                    posX + (Math.cos(bogieOffsets.get(i) * Math.toRadians(rotationYaw))),
-                                    bogie.get(i).posY,
-                                    posZ + (Math.sin(bogieOffsets.get(i) * Math.toRadians(rotationYaw))));
-
-                            bogie.get(i).motionX = (bogieX1 - posX);
-                            bogie.get(i).motionZ = (bogieZ1 - posZ);
-                        }
-
                         //be sure the list of bogie positions is updated to the current values.
                         bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
+                    }
+
+                    /**
+                     *
+                     * based on the motion compared to max speed, figure out which stage of acceleration the train is in.
+                     * from there, if the x and/or z motions are not 0, we create a new x and/or z value,
+                     * after we handle the acceleration by multiplying the acceleration incex by the current stage of the accelerator (or brake which is an inverse value.)
+                     * TODO after we can link carts, drag needs to be changed to 1-(0.04*ConnectedCars) && braking should be added to the drag
+                     */
+                    double x = 0;
+                    double z = 0;
+                    double motion = Math.sqrt(motionX * motionX + motionZ * motionZ);
+                    int accelIndex = 0;
+                    if (motion > maxSpeed || motion < -maxSpeed) {
+                        accelIndex = -1;
+                    } else if (motion > maxSpeed * 0.6d || motion < -(maxSpeed * 0.6d)) {
+                        accelIndex = 2;
+                    } else if (motion > maxSpeed * 0.3d || motion < -(maxSpeed * 0.3d)) {
+                        accelIndex = 1;
+                    }
+                    for (int i =0; i< bogieSize; i++ ) {
+
+                    if (accelIndex != -1) {
+                        //create doubles to manage bogie distance so we can keep everything positioned properly
+                        //TODO very buggy
+                        double bogieX1 = posX - (bogie.get(i).posX + (Math.cos(Math.toRadians(rotationYaw)) * Math.abs(bogieOffsets.get(i))));
+                        double bogieZ1 = posZ - (bogie.get(i).posZ + (Math.sin(Math.toRadians(rotationYaw)) * Math.abs(bogieOffsets.get(i))));
+                        if (motionX > 0) {
+                            x = ((acceleration[accelIndex] * accelerator) + bogieX1);
+                        } else {
+                            x = -((acceleration[accelIndex] * accelerator) - bogieX1);
+                        }
+                        if (motionZ > 0) {
+                            z = ((acceleration[accelIndex] * accelerator) + bogieZ1);
+                        } else {
+                            z = -((acceleration[accelIndex] * accelerator) - bogieZ1);
+                        }
+
+                        //compensate for stopping the train to 0, this is needed for brake and switching from forward to reverse.
+                        /*if (motionX != 0.0D && ((x < 0.0D && motionX > 0.0D) || (x > 0.0D && motionX < 0.0D))){
+                            x=0.0D;
+                        }
+                        if ( motionZ != 0.0D && ((z < 0.0D && motionZ > 0.0D) || (z > 0.0D && motionZ < 0.0D))){
+                            z=0.0D;
+                        }*/
+                    }
+                    //now apply the changes to all the bogies.
+                        bogie.get(i).addVelocity(x, bogie.get(i).motionY, z);
                     }
                 }
             }
@@ -466,71 +500,23 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                     ClientProxy.carts.add(this);
                 }
             }
-            //server
-            if (!worldObj.isRemote && xyzSize > 0 && bogieXYZ.get(0)[0] + bogieXYZ.get(0)[1] + bogieXYZ.get(0)[2] != 0.0D) {
+        }
 
-                /**
-                 *
-                 * based on the motion compared to max speed, figure out which stage of acceleration the train is in.
-                 * from there, if the x and/or z motions are not 0, we create a new x and/or z value,
-                 * after we handle the acceleration by multiplying the acceleration incex by the current stage of the accelerator (or brake which is an inverse value.)
-                 * TODO after we can link carts, drag needs to be changed to 1-(0.04*ConnectedCars) && braking should be added to the drag
-                 */
-                if (accelerator != 0) {
-                    double x = 0;
-                    double z = 0;
-                    double motion = Math.sqrt(motionX * motionX + motionZ * motionZ);
-                    int accelIndex = 0;
-                    if (motion > maxSpeed || motion < -maxSpeed) {
-                        accelIndex = -1;
-                    } else if (motion > maxSpeed * 0.6d || motion < -(maxSpeed * 0.6d)) {
-                        accelIndex = 2;
-                    } else if (motion > maxSpeed * 0.3d || motion < -(maxSpeed * 0.3d)) {
-                        accelIndex = 1;
-                    }
-
-                    if (accelerator != 0 && accelIndex != -1) {
-                        if (motionX > 0) {
-                            x = (acceleration[accelIndex] * accelerator);
-                        } else {
-                            x = -(acceleration[accelIndex] * accelerator);
-                        }
-                        if (motionZ > 0) {
-                            z = (acceleration[accelIndex] * accelerator);
-                        } else {
-                            z = -(acceleration[accelIndex] * accelerator);
-                        }
-
-                        //compensate for stopping the train to 0, this is needed for brake and switching from forward to reverse.
-                    /*if (motionX != 0.0D && ((x < 0.0D && motionX > 0.0D) || (x > 0.0D && motionX < 0.0D))){
-                        x=0.0D;
-                    }
-                    if ( motionZ != 0.0D && ((z < 0.0D && motionZ > 0.0D) || (z > 0.0D && motionZ < 0.0D))){
-                        z=0.0D;
-                    }*/
-                    }
-                    //now apply the changes to all the bogies.
-                    for (MinecartExtended bogieClone : bogie) {
-                        bogieClone.addVelocity(x, bogieClone.motionY, z);
-                    }
+        //simple tick management so some code does not need to be run every tick.
+        switch (trainTicks) {
+            case 5: {
+                if (!worldObj.isRemote && isRunning) {
+                    Util.ManageFuel(this);
+                }
+                break;
+            }
+            default: {
+                //if the tick count is higher than the values used, reset it so it can count up again.
+                if (trainTicks > 10) {
+                    trainTicks = 1;
                 }
             }
 
-            //simple tick management so some code does not need to be run every tick.
-            switch (trainTicks) {
-                case 5: {
-                    if (!worldObj.isRemote && isRunning) {
-                        Util.ManageFuel(this);
-                    }
-                    break;
-                }
-                default: {
-                    //if the tick count is higher than the values used, reset it so it can count up again.
-                    if (trainTicks > 10) {
-                        trainTicks = 1;
-                    }
-                }
-            }
         }
         trainTicks++;
     }
@@ -543,11 +529,11 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                 double offset =1;
 
                 Vec3 position = Vec3.createVectorHelper(offset,2D,0);
-                position.rotateAroundX(this.rotationYaw);
+                position.rotateAroundX(rotationYaw);
 
-                riddenByEntity.setPosition(this.posX + position.xCoord, this.posY +position.yCoord, this.posZ + position.zCoord);
+                riddenByEntity.setPosition(posX + position.xCoord, posY +position.yCoord, posZ + position.zCoord);
             } else {
-                riddenByEntity.setPosition(this.posX, this.posY + 2D, this.posZ);
+                riddenByEntity.setPosition(posX, posY + 2D, posZ);
             }
         }
     }
