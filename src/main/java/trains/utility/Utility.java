@@ -25,7 +25,7 @@ public class Utility {
     private static final int[] value = new int[]{20, 3, 50, 100, 500, 3};
     private static final List<Item> steamFuel = Arrays.asList(Item.getItemFromBlock(Blocks.planks), Items.stick, Items.coal, Items.blaze_rod, Item.getItemFromBlock(Blocks.coal_block), Item.getItemFromBlock(Blocks.sapling));
 
-    public static final float radian = (float) Math.PI / 180.0F;
+    public static final float radian = (float) Math.PI / 180.0f;
 
 
     /**

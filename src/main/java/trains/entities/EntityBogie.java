@@ -31,18 +31,18 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         super(world);
     }
 
-    public EntityBogie(World world, double xPos, double yPos, double zPos, Entity parent) {
+    public EntityBogie(World world, double xPos, double yPos, double zPos, int parent) {
         super(world,xPos, yPos, zPos);
-            parentId = parent.getEntityId();
+            parentId = parent;
     }
 
     @Override
     public void readSpawnData(ByteBuf additionalData) {
-        EntityTrainCore train = ((EntityTrainCore)worldObj.getEntityByID(additionalData.readInt()));
-        if (train != null) {
-            train.addbogies(this);
+        parentId = additionalData.readInt();
+        if (parentId != 0) {
+            ((EntityTrainCore) worldObj.getEntityByID(parentId)).addbogies(this);
         } else {
-            worldObj.removeEntity(this);
+            worldObj.getEntityByID(getEntityId());
         }
     }
     @Override
@@ -96,7 +96,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * Some features are replaced using our own for compatibility with ZoraNoDensha
      * @see Utility
      *
-     * TODO: Portal stuff needs to be moved into its own function.
+     * TODO: Portal stuff needs to be moved into its own function in util so we can use it in train/rollingstock classes too.
      * TODO: all checks on rails and their features need to be moved to our utility class so we can interface them with ZoraNoDensha
      * TODO: worldObj.getEntitiesWithinAABBExcludingEntity(this, box) needs to be reworked using our own functionality that does proper class casting.
      * @see Utility#isRailBlockAt(World, int, int, int)

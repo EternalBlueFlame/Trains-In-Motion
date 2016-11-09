@@ -390,20 +390,18 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             if (xyzSize > 0) {
                 int bogieSize = bogie.size() - 1;
                 //always be sure the bogies exist on client and server.
-                if (bogieSize < 1) {
-                    if (!worldObj.isRemote) {
+                if (!worldObj.isRemote && bogieSize < 1) {
                     for (double[] pos : bogieXYZ) {
                         //it should never be possible for bogieXYZ to be null unless there is severe server data corruption.
-                            EntityBogie spawnBogie = new EntityBogie(worldObj, pos[0], pos[1], pos[2], this);
+                            EntityBogie spawnBogie = new EntityBogie(worldObj, pos[0], pos[1], pos[2], getEntityId());
                             worldObj.spawnEntityInWorld(spawnBogie);
                             bogie.add(spawnBogie);
                         }
-                    }
                     bogieSize = xyzSize;
                 }
 
-                motion = rotatePoint(new float[]{0.01f, 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                if (bogie.size()>0) {
+                motion = rotatePoint(new float[]{0.025f, 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                if (bogieSize>0) {
                     //move the bogies, unit of motion, blocks per second 1/20
                     for (EntityBogie currentBogie : bogie) {
                         currentBogie.addVelocity(motion[0], currentBogie.motionY, motion[2]);
@@ -467,7 +465,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     /**
      * <h2>Rider offset</h2>
      * this runs every tick to be sure the rider is in the correct position for the train.
-     * TODO: it doesn't seem the train can be ridden...?
      */
     @Override
     public void updateRiderPosition() {
