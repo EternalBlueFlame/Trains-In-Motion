@@ -6,6 +6,7 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.network.IGuiHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.gui.train.GUISteam;
 import trains.gui.trainhandler.SteamInventoryHandler;
@@ -14,45 +15,41 @@ import trains.gui.trainhandler.SteamInventoryHandler;
 
 public class CommonProxy implements IGuiHandler {
     /**
+     * <h2> Server GUI Redirect </h2>
+     * Mostly a redirect between the event handler and the actual Inventory Handler
      *
      *
-     * <h1> Server GUI </h1>
-     *
-     *
-     * setup the GUI element for the server, this is actually just the inventory manager.
-     * @see SteamInventoryHandler
-     *
-     * define the stuff for client here too, however this is overridden in client proxt to define the actual use
+     * define the stuff for client here too, however this is overridden in client proxy so that way it doesn't get run on server.
      * @see ClientProxy#getClientGuiElement(int, EntityPlayer, World, int, int, int)
      */
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        //handle GUI direction for trains
+        //Trains
         if (player != null && player.ridingEntity instanceof EntityTrainCore) {
             switch (ID) {
-                case GUISteam.GUI_ID: {
+                case TrainsInMotion.STEAM_GUI_ID: {
                     return new SteamInventoryHandler(player.inventory, (EntityTrainCore) player.ridingEntity);
                 }
 
-                default: {
-                    return null;
-                }
+                default: {return null;}
             }
         } else {
-            //handle GUI direction for rollingstock
+            //Rollingstock
             return null;
         }
     }
 
+    /**
+     * <h2>render registry</h2>
+     * placeholder code for the render registration.
+     * @see ClientProxy#registerRenderers()
+     */
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {return null;}
     public void registerRenderers() {}
 
     /**
-     *
-     *
-     * <h1> OnTick </h1>
-     *
+     * <h2> OnTick </h2>
      *
      * this is used to force events from the main thread of the mod, it can create a lot of lag sometimes.
      * @see ClientProxy#onTick(TickEvent.ClientTickEvent) for actual use

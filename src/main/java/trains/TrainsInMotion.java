@@ -1,6 +1,7 @@
 package trains;
 
 import net.minecraftforge.common.config.Configuration;
+import trains.entities.EntityBogie;
 import trains.gui.HUDTrain;
 import trains.registry.BlockRegistry;
 import trains.registry.ItemRegistry;
@@ -13,50 +14,51 @@ import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 import trains.registry.TrainRegistry;
 import trains.utility.CommonProxy;
-import trains.utility.TiMEventHandler;
+import trains.utility.EventHandler;
 import trains.items.TiMTab;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.creativetab.CreativeTabs;
 import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 
-import trains.worldgen.GenerateOil;
+import trains.worldgen.OreGen;
 
-
-//build number is according to feature set.
-// First number denotes entire rebuild of feature set, for instance in the case of when we move to pure 1.9 development or finish the core stuff for 1.7/1.9.
-// Second is minor, for rebuilds of individual feature sets not intended to effect the whole, like if we were to rebuild the entire GUI system.
-// Third is for bugfix and/or minor optimization releases, where as we didn't change any features, but it works better.
-// fourth is new minor content, like new trains or rollingstock that use existing features.
-@Mod(modid = TrainsInMotion.MODID, version = "0.5.0.0pre-alpha", name = "Trains in Motion")
+/**
+ * <h1>Main class</h1>
+ * all other classes eventually lead back to this class, which manages the mod as a whole.
+ * Build number is defined via:
+ *      First number denotes entire rebuild of feature set, for instance in the case of when we move to pure 1.9 development or finish the core stuff for 1.7/1.9.
+ *      Second is minor, for rebuilds of individual feature sets not intended to effect the whole, like if we were to rebuild the entire GUI system.
+ *      Third is for bugfix and/or minor optimization releases, where as we didn't change any features, but it works better.
+ *      fourth is new minor content, like new trains or rollingstock that use existing features.
+ *
+ */
+@Mod(modid = TrainsInMotion.MODID, version = "0.6.0.0pre-alpha", name = "Trains in Motion")
 public class TrainsInMotion {
 
-    /**
-     * Setup the variables.
-     * We want these to be public, and static if possible, because many features of the mod will need to reference this information later.
-     */
-    //Create the MODID and the instances of the mod itself along with the client running it.
     public static final String MODID = "tim";
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
-    //Instance the registries that maintain the blocks, items, entities, etc.
-    public BlockRegistry blockRegistry = new BlockRegistry();
-    public ItemRegistry itemRegistry = new ItemRegistry();
-    //Instance the creative tab
     public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
-    //Setup the proxy, this is used for managing how each part of the mod acts on it's respective side.
+    //Setup the proxy, this is used for managing some of the client and server specific features.
     @SidedProxy(clientSide = "trains.utility.ClientProxy", serverSide = "trains.utility.CommonProxy")
     public static CommonProxy proxy;
+
+
     //instance the network wrapper for each channel.
     public static SimpleNetworkWrapper keyChannel;
 
+    //GUI ID's
+    public static final int STEAM_GUI_ID = 200;
+
+
     //Instance the event handler, This is used for event based functionality, things like when you right-click an entity.
-    public static TiMEventHandler eventHandler = new TiMEventHandler();
+    public static EventHandler eventHandler = new EventHandler();
 
     /**
+     * <h3>keybinds</h3>
      * Initialize the values for the config file, then load or create the config file.
      */
     public static boolean EnableLights = true;
@@ -64,7 +66,12 @@ public class TrainsInMotion {
     public static char KeyInventory = 'i';
     public static char KeyAccelerate = 'w';
     public static char KeyReverse = 's';
-    @EventHandler
+
+    /**
+     * <h2>load config</h2>
+     * we use the pre-init to load the config file.
+     */
+    @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
 
@@ -84,24 +91,29 @@ public class TrainsInMotion {
     }
 
     /**
+     * <h2>Registries</h2>
      * register everything here.
-     * @param event actual load event
+     * blocks and items handle themselves in their own class, but entities we have to handle a bit different by doing it here.
+     *
+     * networking we have packets for each major channel type, its more overhead overall but it will help significantly to prevent delays.
+     *
      */
-    @EventHandler
+    @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        //item/block/entity registry
-        blockRegistry.RegisterBlocks();
-        itemRegistry.RegisterItems();
-        //Simple loop for registering the entities.
+        BlockRegistry.RegisterBlocks();
+        ItemRegistry.RegisterItems();
+
+        //loop for registering the entities.
         int index =3;
+        cpw.mods.fml.common.registry.EntityRegistry.registerGlobalEntityID(EntityBogie.class, "Bogie", index);
+        cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", index, TrainsInMotion.instance, 64, 1, true);
+        index++;
         for (TrainRegistry train : TrainRegistry.listTrains()) {
             cpw.mods.fml.common.registry.EntityRegistry.registerGlobalEntityID(train.trainClass, train.entityWorldName, index);
             cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(train.trainClass, train.entityWorldName, index, TrainsInMotion.instance, 64, 1, true);
             index++;
         }
 
-        //register GUI handler
-        NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 
         //register the networking instances and channels
         TrainsInMotion.keyChannel = NetworkRegistry.INSTANCE.newSimpleChannel("TiM.key");
@@ -109,30 +121,29 @@ public class TrainsInMotion {
         TrainsInMotion.keyChannel.registerMessage(PacketGUI.Handler.class, PacketGUI.class, 2, Side.SERVER);
 
         //register the worldgen
-        GameRegistry.registerWorldGenerator(new GenerateOil(), 0);
-
-        //register the event handler and the HUD.
+        GameRegistry.registerWorldGenerator(new OreGen(), 0);
+        //register the event handler
         MinecraftForge.EVENT_BUS.register(eventHandler);
         FMLCommonHandler.instance().bus().register(eventHandler);
 
-        //Initialize the HUD
+        //register GUI, model renders, and HUD
+        NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
+        proxy.registerRenderers();
         HUDTrain hud = new HUDTrain();
         FMLCommonHandler.instance().bus().register(hud);
         MinecraftForge.EVENT_BUS.register(hud);
-
-        //register the renders
-        proxy.registerRenderers();
     }
 
 
 
 
     /**
-     *
+     *<h2>key assignment</h2>
      * @param key the key trying to be parsed
-     * @return the key's value to return, wether or not it was valid.
-     * //TODO this should probably be replaced by having an options menu config for controls to set and manage the value directly ratherth
+     * @return the key's value to return, whether or not it was valid.
+     * //TODO this should be replaced by having an options menu config for controls to set and manage the value directly.
      */
+    @Deprecated
     public static int parseKey(char key){
         switch (key){
             case 'a' :{return 30;}

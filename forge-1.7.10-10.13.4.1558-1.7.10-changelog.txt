@@ -440,7 +440,7 @@ Build 1.7.10-10.13.4.1447-1.7.10:
 	LexManos: Cleanup mod signature data table. Easily seperating those mods with signatures vs those with none.
 
 Build 1.8-11.14.3.1446:
-	LexManos: Copy over parent's modelSet value in variants as well.
+	LexManos: Copy over parentId's modelSet value in variants as well.
 	LexManos: Bump version for new RB
 
 Build 1.7.10-10.13.4.1445-1.7.10:
@@ -1891,7 +1891,7 @@ Build 1.7.10-10.13.1.1217:
 		MinecraftForge/FML@cbe2ccbda461ec0ecf4d776fcd19ab31930cc3f1 Add in ModType to the jar manifest. If it's present, and doesn't have value "FML" it will be skipped from the modloading cycle. This should let liteloader mods have a .jar extension.
 		MinecraftForge/FML@37cf0174fc62a842d132b2c2cc31e477acfba205 OK, lets make that a csv list. It'll let you be liteloader and fml in one jar file!
 		MinecraftForge/FML@0475b15eb1a7c35bf4959f1af40606e6ee8a9d03 Change the mods and modListFile argument handling a bit. Other tweakers will get a chance at looking at them now - they're only removed right before launch.
-		MinecraftForge/FML@abeac06a2e9bf8825b058fa35291165b4d1f1fb3 Two new features. ModLists can have a "parent" mod list. Circularity will result in a crash, so be careful. Mods specified in a child will override ones from a parent (using the maven group:name:classifier triple to identify - ignoring the version component)
+		MinecraftForge/FML@abeac06a2e9bf8825b058fa35291165b4d1f1fb3 Two new features. ModLists can have a "parentId" mod list. Circularity will result in a crash, so be careful. Mods specified in a child will override ones from a parentId (using the maven group:name:classifier triple to identify - ignoring the version component)
 		MinecraftForge/FML@7fcfedcfef9b5fd85cd1c17aa2013fca1bacd871 Canonicalized file paths in modListFile handling with the minecraftDirectory.
 		MinecraftForge/FML@633fce19d4b367aed56d79e916f17296842f675c Make Keyevent also fire for key releases
 		MinecraftForge/FML@57ba2339b630afa22c0fdf060bf28edbf7b34d0f Merge branch 'keyup-event' of github.com:diesieben07/FML
@@ -1936,7 +1936,7 @@ Build 1.7.10-10.13.1.1211-new:
 		MinecraftForge/FML@cbe2ccbda461ec0ecf4d776fcd19ab31930cc3f1 Add in ModType to the jar manifest. If it's present, and doesn't have value "FML" it will be skipped from the modloading cycle. This should let liteloader mods have a .jar extension.
 		MinecraftForge/FML@37cf0174fc62a842d132b2c2cc31e477acfba205 OK, lets make that a csv list. It'll let you be liteloader and fml in one jar file!
 		MinecraftForge/FML@0475b15eb1a7c35bf4959f1af40606e6ee8a9d03 Change the mods and modListFile argument handling a bit. Other tweakers will get a chance at looking at them now - they're only removed right before launch.
-		MinecraftForge/FML@abeac06a2e9bf8825b058fa35291165b4d1f1fb3 Two new features. ModLists can have a "parent" mod list. Circularity will result in a crash, so be careful. Mods specified in a child will override ones from a parent (using the maven group:name:classifier triple to identify - ignoring the version component)
+		MinecraftForge/FML@abeac06a2e9bf8825b058fa35291165b4d1f1fb3 Two new features. ModLists can have a "parentId" mod list. Circularity will result in a crash, so be careful. Mods specified in a child will override ones from a parentId (using the maven group:name:classifier triple to identify - ignoring the version component)
 		MinecraftForge/FML@7fcfedcfef9b5fd85cd1c17aa2013fca1bacd871 Canonicalized file paths in modListFile handling with the minecraftDirectory.
 		MinecraftForge/FML@633fce19d4b367aed56d79e916f17296842f675c Make Keyevent also fire for key releases
 		MinecraftForge/FML@57ba2339b630afa22c0fdf060bf28edbf7b34d0f Merge branch 'keyup-event' of github.com:diesieben07/FML
@@ -2547,7 +2547,7 @@ Build 1.7.2-10.12.1.1082:
 	LexManos: Added accessible instance to RenderBlocks and RenderItem for modders to use who don't wish to create there own instance. Warning: Other modders may influance the transient state of the instance, BE WEARY MODDERS.
 
 Build 1.7.2-10.12.1.1081:
-	Christian: MinecraftForge/FML@43e3ee1af1cab54db238dab4994076fdbe68bc6a Swap Listenerlist constructor around. Should fix parent resizing issue?
+	Christian: MinecraftForge/FML@43e3ee1af1cab54db238dab4994076fdbe68bc6a Swap Listenerlist constructor around. Should fix parentId resizing issue?
 
 Build 1.7.2-10.12.1.1080:
 	Christian: MinecraftForge/FML@70570a863ffa6a3ba7e2dd30b471bb47615b8bf8 Fix up possible CME
@@ -3490,7 +3490,7 @@ Build 1.6.4-9.11.0.898:
 Build 1.6.4-9.11.0.897:
 	Christian:
 		Updated FML:
-		MinecraftForge/FML@bfc25bc5da1ff0f6fd0faf817b32a8f6d35dedc2 Add to both the classloader and the parent
+		MinecraftForge/FML@bfc25bc5da1ff0f6fd0faf817b32a8f6d35dedc2 Add to both the classloader and the parentId
 
 Build 1.6.4-9.11.0.896:
 	Christian:
@@ -3528,7 +3528,7 @@ Build 1.6.4-9.11.0.891:
 Build 1.6.4-9.11.0.886:
 	Christian:
 		Updated FML:
-		MinecraftForge/FML@a4de22c1addf0a6b95d38e467a96f2af417c86d5 And use the parent that's actually going to be valid. *sigh*
+		MinecraftForge/FML@a4de22c1addf0a6b95d38e467a96f2af417c86d5 And use the parentId that's actually going to be valid. *sigh*
 
 Build 1.6.4-9.11.0.885:
 	CovertJaguar:
@@ -5911,9 +5911,9 @@ Build 1.4.6-6.5.0.484:
 
 Build 1.4.6-6.5.0.483:
 	Uristqwerty:
-		Force parent ListenerListInsts to rebuild.
+		Force parentId ListenerListInsts to rebuild.
 		
-		Without this change, it is possible (and, in fact, nearly guaranteed) for lists to rebuild endlessly if a parent list is marked as needing a rebuild but never actually read. This change forces the parent list(s) to rebuild as well, resulting in a significant performance increase and smoother framerate due to greatly reduced GC activity.
+		Without this change, it is possible (and, in fact, nearly guaranteed) for lists to rebuild endlessly if a parentId list is marked as needing a rebuild but never actually read. This change forces the parentId list(s) to rebuild as well, resulting in a significant performance increase and smoother framerate due to greatly reduced GC activity.
 	Christian: Protect deflation with a simple semaphore. Should close #336
 
 Build 1.4.6-6.5.0.482:
@@ -6190,7 +6190,7 @@ Build 1.4.5-6.4.1.414:
 		7a8dae5 Try and make branch non-derpy
 		d3c0e1f Try defaulting branch differently
 		9c77d3f Remove old eclipse workspace and ship/extract as a zip file (use ant set
-		6371e9b Assume Forge is the parent directory when checking for AT configs.
+		6371e9b Assume Forge is the parentId directory when checking for AT configs.
 		516954e Name both zips the same format
 		1151d5c Last part of branch name only please
 		25f1dda Try and get a valid branch name on jenkins
@@ -6653,7 +6653,7 @@ Build 5.0.0.320:
 	LexManos: BlockSnow now pretty much just passes harvestBlock to it's super.
 	LexManos: Entities have a new function to determine explosion strength that they create, and implemented Item frame pickblock.
 	LexManos: Patches removing forge spawn protection, now a vanilla feature.
-	LexManos: BlockCrops is now the parent class of multiple types of crops, Wheat, Potatoes, and Carrots, updated getBlockDropped patch to reflect.
+	LexManos: BlockCrops is now the parentId class of multiple types of crops, Wheat, Potatoes, and Carrots, updated getBlockDropped patch to reflect.
 	LexManos: Removed Forge's TileEntity.getRenderDistance, now a vanilla feature:  TileEntity.func_82115_m
 	LexManos: Teleporting has a new function (func_82448_a), made it so that you can supply your own teleporter to that function, and so it works with dimension movement factors.
 	LexManos: Updated World patch, there are a lot of new things happening int he constructor, xcomp should probably vet this.
@@ -6834,7 +6834,7 @@ Build 4.1.4.285:
 Build 4.1.4.284:
 	Christian:
 		Update FML: dd39ae5
-		dd7502a Fix parent child counts showing properly. Closes #107 thanks scott!
+		dd7502a Fix parentId child counts showing properly. Closes #107 thanks scott!
 		b36d447 It's useMetadata, not usesMetadata. thanks myrathi and psx. closes #110
 		efb1066 Fix random shuffling when manipulating biomes by using a LinkedHashSet to preserve iteration order. Closes #111
 	Christian:

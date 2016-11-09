@@ -6,7 +6,7 @@ import net.minecraft.item.Item;
 public class TiMTab extends CreativeTabs {
 
     /**
-     * simple creation of a creative tab
+     * <h2>Creative tab</h2>
      * first function instances the tab by handling it through the super.
      * @see CreativeTabs
      *

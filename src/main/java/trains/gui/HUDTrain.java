@@ -10,29 +10,20 @@ import trains.registry.URIRegistry;
 import trains.gui.trainhandler.SteamInventoryHandler;
 
 public class HUDTrain extends GuiScreen {
-    //id reference for this GUI
-    public static final int GUI_ID = 201;
     private Minecraft game;
-
-    /**
-     * instances the container for the inventory and passes it to the super
-     * @see SteamInventoryHandler
-     *
-     */
 
     @Override
     public boolean doesGuiPauseGame()
     {
         return false;
     }
+
+
     /**
-     * this draws the topmost layer, closest to screen.
-     * most of the text will be managed here via draw string.
-     * some other things will display here like the boiler box graphic and the fluid tank outlines.
-     *
-     * StatCollector.translateToLocal("container.inventory") is used to return the word for "inventory" defined by the client.
-     *
-     * things later in the function render closer to the screen
+     * <h2>Loco HUD</h2>
+     * similar to the GUI, this will draw a HUD for the train when someone is in it.
+     * @see trains.gui.train.GUISteam
+     * The difference is that we override the experience bar render so that we can render the GUI alongside that, like a HUD.
      * @see GuiScreen
      */
     @SubscribeEvent(priority = EventPriority.NORMAL)
@@ -46,8 +37,8 @@ public class HUDTrain extends GuiScreen {
             //draw the texture
             drawTexturedModalRect(0, 50, 0, 150, 137, 90);
         } else {
-            game = this.mc = Minecraft.getMinecraft();
-            this.fontRendererObj = this.mc.fontRenderer;
+            game = mc = Minecraft.getMinecraft();
+            fontRendererObj = mc.fontRenderer;
         }
     }
 

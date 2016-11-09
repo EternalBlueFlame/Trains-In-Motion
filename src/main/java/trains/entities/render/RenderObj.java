@@ -17,32 +17,21 @@ public class RenderObj extends Render {
         return texture;
     }
 
+    /**
+     * this class is to be removed once we get the .java models in for the trains and rollingstock.
+     */
+    @Deprecated
     public void doRender(Entity entity, double x, double y, double z, float rotation, float partialTick){
         //begin rendering
         GL11.glPushMatrix();
-        //set the position of the graphic and save changes
         GL11.glTranslated(x, y, z);
         GL11.glPushMatrix();
-        /**
-         * TODO
-         * hold a previous copy of the train's X/Y/Z variables. then check if they are different from the current, If they are then take the difference and math it by -
-         * a render tick counter based on the number of render ticks since the last client tick.
-         */
-
-        /**
-         * now we have to handle rotation, assuming the entity is an instance of MinecartExtended this is a lot more complicated because we have to define rotation based on it's current and previous positions.
-         */
-
+        //set the position of the graphic and save changes
         //first initialize the variables
         if (entity != null) {
-
-            /**
-             * now we actually set the values we just finished defining.
-             * because rotation is set on (amount, xaxis, yaxis, xaxis) we have to rotate each axis individually, then push
-             */
-                GL11.glRotatef(entity.rotationYaw, 0.0F, 1.0F, 0.0F);
-                GL11.glRotatef(entity.rotationPitch, 0.0F, 0.0F, 1.0F);
-                GL11.glPushMatrix();
+            GL11.glRotatef(entity.rotationYaw, 0.0F, 1.0F, 0.0F);
+            GL11.glRotatef(entity.rotationPitch, 0.0F, 0.0F, 1.0F);
+            GL11.glPushMatrix();
         }
         //Bind the texture and render the model
         bindTexture(texture);
@@ -51,7 +40,7 @@ public class RenderObj extends Render {
         //clear the cache, one pop for every push.
         GL11.glPopMatrix();
         GL11.glPopMatrix();
-        if (entity instanceof EntityTrainCore) {
+        if (entity != null) {
             GL11.glPopMatrix();
         }
 
@@ -59,9 +48,11 @@ public class RenderObj extends Render {
 
     /**
      * initializer for the render function.
+     * This class is to be removed once we get the .java models in for the trains and rollingstock.
      * @param modelLoad resource location for model
      * @param textureLoad resource location for texture, if invalid defaults to the null texture.
      */
+    @Deprecated
     public RenderObj(ResourceLocation modelLoad, ResourceLocation textureLoad) {
         model = new ObjModelLoader().loadInstance(modelLoad);
         texture = textureLoad;

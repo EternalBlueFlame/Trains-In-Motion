@@ -11,19 +11,18 @@ import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import org.lwjgl.input.Keyboard;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
-import trains.entities.MinecartExtended;
 import trains.gui.train.GUISteam;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 
-public class TiMEventHandler {
+public class EventHandler {
+
     /**
-     * Manages the key press event, doesn't work for when a key is held, that would need to be in the onUpdate event.
-     *
+     * <h2>Keybind management</h2>
+     * called when a client presses a key. this coveres pretty much everything.
      * Most cases just send a packet to manage things
      * @see PacketKeyPress
      * @see PacketGUI
-     *
      *
      * @param event the event of a key being pressed on client.
      */
@@ -37,7 +36,7 @@ public class TiMEventHandler {
             }
             //for inventory
             if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyInventory))) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketGUI(GUISteam.GUI_ID));
+                TrainsInMotion.keyChannel.sendToServer(new PacketGUI(TrainsInMotion.STEAM_GUI_ID));
             }
             //for speed change
             if(Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyAccelerate))){
@@ -50,18 +49,24 @@ public class TiMEventHandler {
     }
 
     /**
-     * this event manages when the player tries to interact with the train/rollingstock to ride it.
-     * IDE reports that the function is never used, which is lies.
+     * <h2>Entity Interaction</h2>
+     * this event manages when the player tries to interact with the train/rollingstock to ride it or use an item on it.
      */
     @SubscribeEvent
     public void entityInteractEvent(EntityInteractEvent event) {
-        if (event.target instanceof EntityTrainCore /* || event.target instanceof EntityRollingStockCore */
+        if (event.target instanceof EntityTrainCore
                 && !event.entity.worldObj.isRemote
                 && event.target.riddenByEntity == null) {
             event.entityPlayer.mountEntity(event.target);
         }
     }
 
+    /**
+     * <h2>Entity destruction</h2>
+     * this event manages when the player tries to break a train or rollingstock
+     * TODO: manage breaking for non-creative mode
+     * TODO: be sure damagesource is not a projectile.
+     */
     @SubscribeEvent
     public void attackEntityEvent(AttackEntityEvent event){
         if (event.target instanceof EntityTrainCore && event.entityPlayer.capabilities.isCreativeMode){

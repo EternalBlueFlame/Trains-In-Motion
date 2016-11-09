@@ -1,8 +1,12 @@
 package trains.utility;
 
+import cpw.mods.fml.common.gameevent.TickEvent;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import trains.blocks.LampBlock;
+import trains.entities.EntityBogie;
+import trains.entities.EntityTrainCore;
 import trains.registry.BlockRegistry;
 
 public class LampHandler {
@@ -12,10 +16,15 @@ public class LampHandler {
     public boolean isOn;
 
     /**
-     * used to check if the lamp needs a position update.
-     * We extend this into its own class so we can better manage the variables.
+     * <h2>Lamp management</h2>
+     * define the variables for the lamp, like position, in this class.
+     * and define the check function for whether or not to update here.
+     *
      * this us used by
-     * @see trains.entities.MinecartExtended
+     * @see EntityTrainCore#onUpdate()
+     * @see ClientProxy#onTick(TickEvent.ClientTickEvent)
+     * The data for this is saved to NBT in the entity
+     * @see EntityTrainCore#writeToNBT(NBTTagCompound)
      *
      * @param worldObj the world to place the lamp.
      * @param x the X position to place the lamp at.

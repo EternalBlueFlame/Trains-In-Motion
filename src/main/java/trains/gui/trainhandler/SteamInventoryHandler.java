@@ -14,33 +14,25 @@ import trains.entities.EntityTrainCore;
 
 public class SteamInventoryHandler extends Container{
     private EntityTrainCore trainEntity;
-    private InventoryPlayer playerInv;
 
     /**
-     * creates the inventories based on the values in entityMinecart
+     * <h2>Server-side inventory GUI</h2>
+     * works as the middleman between the GUI and the entity.
      *
-     * the first set of loops creates the player inventory, using a loop for columns and then rows.
-     *
-     * the second loop creates the player toolbar slots.
-     *
-     * the third creates slots based on the columns and rows
-     *
-     * and the final part creates the crafting slots for trains.
-     *
+     * runs a series of loops for managing the inventory slots.
      */
     public SteamInventoryHandler(InventoryPlayer iinventory, EntityTrainCore entityTrain) {
         trainEntity = entityTrain;
-        playerInv = iinventory;
 
         //player inventory
         for (int ic = 0; ic < 9; ic++) {
             for (int ir = 0; ir < 3; ir++) {
-                addSlotToContainer(new Slot(playerInv, (((ir * 9) + ic) + 9), 8 + (ic * 18), 84 + (ir * 18)));
+                addSlotToContainer(new Slot(iinventory, (((ir * 9) + ic) + 9), 8 + (ic * 18), 84 + (ir * 18)));
             }
         }
         //player toolbar
         for (int iT = 0; iT < 9; iT++) {
-            addSlotToContainer(new Slot(playerInv, iT, 8 + iT * 18, 142));
+            addSlotToContainer(new Slot(iinventory, iT, 8 + iT * 18, 142));
         }
 
         //define the train's inventory size
@@ -62,7 +54,8 @@ public class SteamInventoryHandler extends Container{
             }
         }
 
-        //trainc rafting slots
+        //train crafting slots
+
         //fuel slot
         addSlotToContainer(new Slot(entityTrain, 0, 8, 53));
 
@@ -71,37 +64,15 @@ public class SteamInventoryHandler extends Container{
 
     }
 
-    //for sorting items from inventory to the train inventory, or the reverse way.
-    @Override
-    public ItemStack transferStackInSlot(EntityPlayer player, int slot) {
-        return super.transferStackInSlot(player, slot);
-    }
-
-    //update other viewers
-    @Override
-    public void addCraftingToCrafters(ICrafting crafter){
-        super.addCraftingToCrafters(crafter);
-
-    }
-    @SideOnly(Side.CLIENT)
-    @Override
-    public void updateProgressBar(int slotIndex, int updatedValue) {}
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void putStacksInSlots(ItemStack[] stack) {
-        for (int i = 0; i < stack.length; ++i) {
-            if (i < inventorySlots.size())
-            getSlot(i).putStack(stack[i]);
-        }
-    }
-
-    //detects changes to slots
+    /**
+     * <h2>slot change and crafters</h2>
+     * detects and manages changes in slots.
+     * TODO: can also be used for crafters (incomplete)
+     */
     @Override
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
 
-        //used to keep track of if the crafter slot needs updating. also works for fluid tanks.
         /*/Iterator<?> itera;
         for (int i = 0; i < lastData.length; ++i) {
             if (lastData[i] != trainEntity.inventory[i]) {
@@ -114,6 +85,26 @@ public class SteamInventoryHandler extends Container{
         }/*/
     }
 
+    //for sorting items from inventory to the train inventory, or the reverse way.
+    @Override
+    public ItemStack transferStackInSlot(EntityPlayer player, int slot) {
+        return super.transferStackInSlot(player, slot);
+    }
+    //update other viewers
+    @Override
+    public void addCraftingToCrafters(ICrafting crafter){
+        super.addCraftingToCrafters(crafter);
+    }
+    //shift clicking functionality, i think.
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void putStacksInSlots(ItemStack[] stack) {
+        for (int i = 0; i < stack.length; ++i) {
+            if (i < inventorySlots.size())
+            getSlot(i).putStack(stack[i]);
+        }
+    }
+    //if inventory can be accessed/modified.
     @Override
     public boolean canInteractWith(EntityPlayer player) {
         if (trainEntity.isDead) {

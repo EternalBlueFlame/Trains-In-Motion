@@ -9,16 +9,13 @@ import trains.registry.URIRegistry;
 import trains.gui.trainhandler.SteamInventoryHandler;
 
 public class GUISteam extends GuiContainer {
-    //id reference for this GUI
-    public static final int GUI_ID = 200;
-    private static EntityTrainCore train;
+    private EntityTrainCore train;
 
     /**
-     * instances the container for the inventory and passes it to the super
+     * <h2>GUI initialization</h2>
+     * instances the container for the inventory and passes it to the server side management
+     * also puts the entity to a variable that can be accessed on client.
      * @see SteamInventoryHandler
-     *
-     * @param inventoryPlayer
-     * @param entity
      */
     public GUISteam(InventoryPlayer inventoryPlayer, EntityTrainCore entity) {
         super(new SteamInventoryHandler(inventoryPlayer, entity));
@@ -26,13 +23,11 @@ public class GUISteam extends GuiContainer {
     }
 
     /**
+     * <h2>GUI foreground layer</h2>
      * this draws the topmost layer, closest to screen.
-     * most of the text will be managed here via draw string.
-     * some other things will display here like the boiler box graphic and the fluid tank outlines.
-     *
-     * StatCollector.translateToLocal("container.inventory") is used to return the word for "inventory" defined by the client.
-     *
      * things later in the function render closer to the screen
+     *
+     * StatCollector.translateToLocal is used for translation, this is usually defined in minecraft itself.
      * xSize and ySize are defined in the super
      * @see GuiContainer
      */
@@ -43,10 +38,10 @@ public class GUISteam extends GuiContainer {
     }
 
     /**
-     * this draws the lower layer, good for backgrounds and things to go behind the forground stuff
-     * TODO this image doesn't exist yet
-     *
+     * <h2>GUI Background</h2>
+     * this draws the lower layer, good for backgrounds and things to go behind the foreground stuff
      * things later in the function render closer to the screen
+     * Textures must be bound to the render, then every texture draw after will re-use that same texture, when you want a new texture, bind a new one.
      *
      * xSize, ySize, width, and height are defined in the super
      * @see GuiContainer
@@ -55,9 +50,9 @@ public class GUISteam extends GuiContainer {
     protected void drawGuiContainerBackgroundLayer(float par1, int par2, int par3) {
         //draw the gui background color
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        //set the texture for the background.
+
+        //main background
         //mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("guilocobackground.png"));
-        //draw the texture
         //drawTexturedModalRect((width - xSize) / 2, (height - ySize) / 2, 0, 0, xSize, ySize);
 
         //icon for fuel
@@ -69,6 +64,7 @@ public class GUISteam extends GuiContainer {
 
         //set the generic slot icon, which will get re-used for every slot.
         mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("itemslot.png"));
+
         //slot for fuel
         drawTexturedModalRect(((width - xSize) / 2) + 7, ((height - ySize) / 2) + 52, 0, 0, 18, 18);
 

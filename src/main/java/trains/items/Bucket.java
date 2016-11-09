@@ -5,7 +5,8 @@ import net.minecraft.item.ItemBucket;
 import net.minecraftforge.fluids.Fluid;
 
 /**
- * Created by Justice on 7/10/2016.
+ * <h2>basic bucket item for oil</h2>
+ * Courtesy of Justice
  */
 public class Bucket extends ItemBucket{
     public Bucket(Block fluid) {

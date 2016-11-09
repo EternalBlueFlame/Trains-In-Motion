@@ -9,29 +9,50 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
+import trains.entities.EntityBogie;
 import trains.entities.EntityTrainCore;
 
 import java.util.Arrays;
 import java.util.List;
 
 
-public class Util {
+public class Utility {
+    /**
+     * <h2>Fuel registry</h2>
+     * TODO: see if we can get this information from minecraft itself
+     * TODO: create a new sub-class to hold both the item value and the fuel use value, to keep it more organized.
+     */
     private static final int[] value = new int[]{20, 3, 50, 100, 500, 3};
     private static final List<Item> steamFuel = Arrays.asList(Item.getItemFromBlock(Blocks.planks), Items.stick, Items.coal, Items.blaze_rod, Item.getItemFromBlock(Blocks.coal_block), Item.getItemFromBlock(Blocks.sapling));
 
-    //TODO need ZND API for ITrackBase
+    public static final float radian = (float) Math.PI / 180.0F;
+
+
+    /**
+     * <h2>Vanilla Track Overrrides</h2>
+     * TODO: need ZND API for ITrackBase
+     * TODO: other:
+     * @see EntityBogie#minecartMove()
+     *
+     * we override some vanilla track detection so that way it's more efficient and can support rails from other mods.
+     */
     public static boolean isRailBlockAt(World world, int x, int y, int z) { // Can later be substituted for BlockPos
         return (/*world.getTileEntity(x, y, z) instanceof ITrackBase ||*/ world.getBlock(x, y, z) instanceof BlockRailBase);
     }
+    public static boolean isRailBlockAt(Block block) { // Can later be substituted for BlockPos
+        return (/*world.getTileEntity(x, y, z) instanceof ITrackBase ||*/ block instanceof BlockRailBase);
+    }
 
 
+    /**
+     * <h2>Fuel management</h2>
+     * this class manages the fuel for the train so we can keep it out of the train class to organize code bulk.
+     */
     public static void ManageFuel(EntityTrainCore cart){
 
-        switch (cart.trainType) {
+        switch (cart.getType()) {
             /**
-             *
-             *
-             * <h1> Steam Fuel Management</h1>
+             * <h3> Steam Fuel Management</h3>
              *
              *
              * first manage fuel slots for water buckets and burnables.
@@ -39,7 +60,7 @@ public class Util {
              */
             case 1: {
                 //if the first inventory slot contains a burnable listed in our supported burnables, then remove it and add it's value to our fuel.
-                if (steamFuel.contains(cart.inventory.get(0).getItem()) && cart.furnaceFuel + value[steamFuel.indexOf(cart.inventory.get(0).getItem())+1] < cart.maxFuel){
+                if (steamFuel.contains(cart.inventory.get(0).getItem()) && cart.furnaceFuel + value[steamFuel.indexOf(cart.inventory.get(0).getItem())+1] < cart.getMaxFuel()){
                     cart.furnaceFuel += value[steamFuel.indexOf(cart.inventory.get(0).getItem()) + 1];
                     if (cart.inventory.get(0).stackSize >1) {
                         cart.inventory.get(0).stackSize = cart.inventory.get(0).stackSize - 1;
@@ -80,9 +101,7 @@ public class Util {
                 break;
             }
             /**
-             *
-             *
-             * <h1> Diesel Fuel Management</h1>
+             * <h3> Diesel Fuel Management</h3>
              *
              *
              */
@@ -90,9 +109,7 @@ public class Util {
                 break;
             }
             /**
-             *
-             *
-             * <h1> HydroElectric Fuel Management</h1>
+             * <h3> HydroElectric Fuel Management</h3>
              *
              *
              */
@@ -100,9 +117,7 @@ public class Util {
                 break;
             }
             /**
-             *
-             *
-             * <h1> Electric Fuel Management</h1>
+             * <h3> Electric Fuel Management</h3>
              *
              *
              */
@@ -110,9 +125,7 @@ public class Util {
                 break;
             }
             /**
-             *
-             *
-             * <h1> NuclearSteam Fuel Management</h1>
+             * <h3> NuclearSteam Fuel Management</h3>
              *
              *
              */
@@ -122,7 +135,7 @@ public class Util {
             /**
              *
              *
-             * <h1> Nuclear Electric Fuel Management</h1>
+             * <h3> Nuclear Electric Fuel Management</h3>
              *
              *
              */
@@ -132,7 +145,7 @@ public class Util {
             /**
              *
              *
-             * <h1> Maglev Fuel Management</h1>
+             * <h3> Maglev Fuel Management</h3>
              *
              *
              */
