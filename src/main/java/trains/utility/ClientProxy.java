@@ -14,6 +14,7 @@ import trains.entities.EntityTrainCore;
 import trains.entities.render.RenderObj;
 import trains.gui.train.GUISteam;
 import trains.registry.TrainRegistry;
+import trains.registry.TrainRegistry.TrainRegistryEntry;
 import trains.registry.URIRegistry;
 
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class ClientProxy extends CommonProxy {
      */
     @Override
     public void registerRenderers() {
-        for(TrainRegistry reg : TrainRegistry.listTrains()){
+        for(TrainRegistryEntry reg : TrainRegistry.getList()){
             RenderingRegistry.registerEntityRenderingHandler(reg.trainClass, new RenderObj(
                 URIRegistry.MODEL_TRAIN.getResource(reg.model),
                 URIRegistry.TEXTURE_GENERIC.getResource(reg.texture)
