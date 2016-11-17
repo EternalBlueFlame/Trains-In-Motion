@@ -13,6 +13,7 @@ import net.minecraftforge.common.MinecraftForge;
 import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 import trains.registry.TrainRegistry;
+import trains.registry.TrainRegistry.TrainRegistryEntry;
 import trains.utility.CommonProxy;
 import trains.utility.EventHandler;
 import trains.items.TiMTab;
@@ -108,7 +109,7 @@ public class TrainsInMotion {
         cpw.mods.fml.common.registry.EntityRegistry.registerGlobalEntityID(EntityBogie.class, "Bogie", index);
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", index, TrainsInMotion.instance, 64, 1, true);
         index++;
-        for (TrainRegistry train : TrainRegistry.listTrains()) {
+        for (TrainRegistryEntry train : TrainRegistry.getList()) {
             cpw.mods.fml.common.registry.EntityRegistry.registerGlobalEntityID(train.trainClass, train.entityWorldName, index);
             cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(train.trainClass, train.entityWorldName, index, TrainsInMotion.instance, 64, 1, true);
             index++;
