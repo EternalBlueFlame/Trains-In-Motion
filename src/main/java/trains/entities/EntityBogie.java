@@ -110,11 +110,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         if (posY < -64.0D){
             worldObj.removeEntity(this);
         }
-        //this is just randomly recycled.
+        //this manages the modified Y position.
         int i;
         //manage transportation through portals
         if (!worldObj.isRemote && worldObj instanceof WorldServer) {
-            worldObj.theProfiler.startSection("portal");
             i = getMaxInPortalTime();
 
             if (inPortal) {
@@ -144,7 +143,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 --timeUntilPortal;
             }
 
-            worldObj.theProfiler.endSection();
         }
         if (worldObj.isRemote) {
             setPosition(posX, posY, posZ);

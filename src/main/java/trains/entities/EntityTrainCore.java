@@ -175,7 +175,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         isReverse = additionalData.readBoolean();
         owner = new UUID(additionalData.readLong(), additionalData.readLong());
         //we loop using the offset double length because we expect bogieXYZ to be null.
-        for (int i=0; i<getBogieOffsets().size()-1; i++){
+        for (int i=0; i<getBogieOffsets().size(); i++){
             bogieXYZ.add(new double[]{additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble()});
         }
 
@@ -384,7 +384,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
     @Override
     public void onUpdate() {
-        if (trainTicks >0) {
             //be sure bogies exist
             int xyzSize = bogieXYZ.size()-1;
             if (xyzSize > 0) {
@@ -401,13 +400,12 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                 }
 
                 motion = rotatePoint(new float[]{0.025f, 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                if (bogieSize>0) {
+                if (bogieSize>0){
                     //move the bogies, unit of motion, blocks per second 1/20
                     for (EntityBogie currentBogie : bogie) {
                         currentBogie.addVelocity(motion[0], currentBogie.motionY, motion[2]);
                         currentBogie.minecartMove();
                     }
-
                     //position train
                     setPosition(
                             (bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
@@ -430,7 +428,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                         bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
                         i++;
                     }
-
                 }
 
             }
@@ -441,7 +438,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                     ClientProxy.carts.add(this);
                 }
             }
-        }
 
         //simple tick management so some code does not need to be run every tick.
         switch (trainTicks) {

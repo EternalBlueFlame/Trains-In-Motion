@@ -56,7 +56,7 @@ public class ItemFirstTrain extends Item {
     @Override
     public boolean onItemUse(ItemStack itemStack, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ, int blockSide, float pointToRayX, float pointToRayY, float pointToRayZ) {
         
-		if (Utility.isRailBlockAt(worldObj, posX,posY,posZ)) {
+		if (Utility.isRailBlockAt(worldObj, posX,posY,posZ) && !worldObj.isRemote) {
             
 			int playerMeta = MathHelper.floor_double((playerEntity.rotationYaw / 90.0F) + 2.5D) & 3;
             //IMPORTANT this defines the entity used
