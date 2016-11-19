@@ -66,6 +66,7 @@ public class Utility {
                         cart.inventory.get(0).stackSize = cart.inventory.get(0).stackSize - 1;
                     } else{
                         cart.inventory.set(0, null);
+                        
                     }
                 }
                 //if the second slot contains a water bucket, add the contents of the water bucket to our tank and then place an empty bucket in the inventory
