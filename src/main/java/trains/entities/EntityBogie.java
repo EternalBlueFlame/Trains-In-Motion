@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.carts.IRoutableCart;
@@ -25,7 +27,9 @@ import trains.utility.Utility;
 public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart, IEntityAdditionalSpawnData {
 
     private int parentId = 0;
-
+    protected double cartVelocityX =0;
+    protected double cartVelocityY =0;
+    protected double cartVelocityZ =0;
 
     public EntityBogie(World world) {
         super(world);
@@ -235,6 +239,24 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         return true;
     }
 
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void setPositionAndRotation2(double x, double y, double z, float yaw, float pitch, int turnProgress) {
+        posX = x;
+        posY = y;
+        posZ = z;
+        motionX = cartVelocityX;
+        motionY = cartVelocityY;
+        motionZ = cartVelocityZ;
+    }
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void setVelocity(double x, double y, double z) {
+        cartVelocityX = motionX = x;
+        cartVelocityY = motionY = y;
+        cartVelocityZ = motionZ = z;
+    }
 
     /**
      * this is a fix for the fact there may or may not be a rider entity, this is to serve until we fully replace the functionality of this.
