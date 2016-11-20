@@ -10,7 +10,6 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraftforge.common.MinecraftForge;
-import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 import trains.registry.TrainRegistry;
 import trains.utility.CommonProxy;
@@ -100,7 +99,6 @@ public class TrainsInMotion {
         //register the networking instances and channels
         TrainsInMotion.keyChannel = NetworkRegistry.INSTANCE.newSimpleChannel("TiM.key");
         TrainsInMotion.keyChannel.registerMessage(PacketKeyPress.Handler.class, PacketKeyPress.class, 1, Side.SERVER);
-        TrainsInMotion.keyChannel.registerMessage(PacketGUI.Handler.class, PacketGUI.class, 2, Side.SERVER);
 
         //register the worldgen
         GameRegistry.registerWorldGenerator(new OreGen(), 0);
