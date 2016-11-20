@@ -8,11 +8,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
-import org.lwjgl.input.Keyboard;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
-import trains.gui.train.GUISteam;
-import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 
 public class EventHandler {
@@ -22,7 +19,8 @@ public class EventHandler {
      * called when a client presses a key. this coveres pretty much everything.
      * Most cases just send a packet to manage things
      * @see PacketKeyPress
-     * @see PacketGUI
+     *
+     * Credit to Ferdinand for help with this function.
      *
      * @param event the event of a key being pressed on client.
      */
@@ -31,19 +29,18 @@ public class EventHandler {
     public void onClientKeyPress(InputEvent.KeyInputEvent event){
         if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntityTrainCore) {
             //for lamp
-            if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyLamp))) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.KeyLamp)));
+            if (ClientProxy.KeyLamp.getIsKeyPressed()) {
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0));
             }
             //for inventory
-            if (Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyInventory))) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketGUI(TrainsInMotion.STEAM_GUI_ID));
+            if (ClientProxy.KeyInventory.getIsKeyPressed()) {
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1));
             }
             //for speed change
-            if(Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyAccelerate))){
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.KeyAccelerate)));
-            }
-            if(Keyboard.isKeyDown(TrainsInMotion.parseKey(TrainsInMotion.KeyReverse))){
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(TrainsInMotion.parseKey(TrainsInMotion.KeyReverse)));
+            if(ClientProxy.KeyAccelerate.getIsKeyPressed()){
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2));
+            } else if(ClientProxy.KeyReverse.getIsKeyPressed()){
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3));
             }
         }
     }

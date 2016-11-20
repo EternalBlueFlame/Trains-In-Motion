@@ -17,7 +17,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
 import trains.entities.trains.FirstTrain;
 import trains.utility.ClientProxy;
-import trains.utility.Utility;
+import trains.utility.FuelHandler;
+import trains.utility.RailUtility;
 import trains.utility.LampHandler;
 
 import java.util.ArrayList;
@@ -372,7 +373,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     * managing the list of bogies which are used for defining position and rotation, respawning them if they disappear.* managing speed, acceleration. and direction.
     * managing rotationYaw and rotationPitch.
     * and calling the fuel handler for fuel consumption.
-    * @see Utility#ManageFuel(EntityTrainCore)
+    * @see FuelHandler#ManageFuel(EntityTrainCore)
     * being sure the train is listed in the main class (for lighting management).
     * @see ClientProxy#onTick(TickEvent.ClientTickEvent)
      *
@@ -443,7 +444,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         switch (trainTicks) {
             case 5: {
                 if (!worldObj.isRemote && isRunning) {
-                    Utility.ManageFuel(this);
+                    FuelHandler.ManageFuel(this);
                 }
                 break;
             }
@@ -507,7 +508,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         float z = f[2];
 
         if (pitch != 0.0F) {
-            pitch *=  Utility.radian;
+            pitch *=  RailUtility.radian;
             cos = MathHelper.cos(pitch);
             sin = MathHelper.sin(pitch);
 
@@ -516,7 +517,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         }
 
         if (yaw != 0.0F) {
-            yaw *=  Utility.radian;
+            yaw *=  RailUtility.radian;
             cos = MathHelper.cos(yaw);
             sin = MathHelper.sin(yaw);
 
@@ -525,7 +526,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         }
 
         if (roll != 0.0F) {
-            roll *=  Utility.radian;
+            roll *=  RailUtility.radian;
             cos = MathHelper.cos(roll);
             sin = MathHelper.sin(roll);
 

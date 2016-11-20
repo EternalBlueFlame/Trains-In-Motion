@@ -6,7 +6,10 @@ import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
+import trains.entities.EntityBogie;
 import trains.entities.EntityTrainCore;
 import trains.utility.EventHandler;
 
@@ -37,21 +40,36 @@ public class PacketKeyPress implements IMessage {
      * handles the packet when received by server
      * First it has to check if it was actually received by the proper entity, because if not, it crashes.
      * then check if the entity is correct and the key matches a valid key for a function.
-     * for more information on the key parse
-     * @see TrainsInMotion#parseKey(char)
      */
     public static class Handler implements IMessageHandler<PacketKeyPress, IMessage> {
         @Override
         public IMessage onMessage(PacketKeyPress message, MessageContext context) {
             Entity ridingEntity = context.getServerHandler().playerEntity.ridingEntity;
-            if (message.key == TrainsInMotion.parseKey(TrainsInMotion.KeyLamp) && ridingEntity instanceof EntityTrainCore){
+            //Toggles
+            if (message.key == 0 && ridingEntity instanceof EntityTrainCore){
                 ((EntityTrainCore) ridingEntity).lamp.isOn = !((EntityTrainCore) ridingEntity).lamp.isOn;
             }
-            if (message.key == TrainsInMotion.parseKey(TrainsInMotion.KeyAccelerate) && ridingEntity instanceof EntityTrainCore){
+            //speed
+            else if (message.key == 2 && ridingEntity instanceof EntityTrainCore){
                 ((EntityTrainCore) ridingEntity).setAcceleration(true);
-            }
-            if (message.key == TrainsInMotion.parseKey(TrainsInMotion.KeyReverse) && ridingEntity instanceof EntityTrainCore){
+            }else if (message.key == 3 && ridingEntity instanceof EntityTrainCore){
                 ((EntityTrainCore) ridingEntity).setAcceleration(false);
+            }
+            /**
+             * <h3>Manage the inventory key press</h3>
+             * here we have to figure out what kind of train or rollingstock the player is riding, and activate the related GUI.
+             */
+            else if (message.key == 1){
+                EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
+                if (entityPlayer != null && entityPlayer.ridingEntity instanceof EntityTrainCore) {
+                    switch (((EntityTrainCore) entityPlayer.ridingEntity).getType()) {
+                        case 1: {
+                            entityPlayer.openGui(TrainsInMotion.instance, TrainsInMotion.STEAM_GUI_ID, entityPlayer.ridingEntity.worldObj,
+                                    MathHelper.floor_double(entityPlayer.ridingEntity.posX), MathHelper.floor_double(entityPlayer.ridingEntity.posY),
+                                    MathHelper.floor_double(entityPlayer.ridingEntity.posZ)); break;
+                        }
+                    }
+                }
             }
 
 

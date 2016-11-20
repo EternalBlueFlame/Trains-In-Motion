@@ -22,7 +22,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
-import trains.utility.Utility;
+import trains.utility.RailUtility;
 
 public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart, IEntityAdditionalSpawnData {
 
@@ -60,7 +60,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @see EntityMinecart
      *
      * TODO: getMaxCartSpeedOnRail needs to be reworked in accordance with the max speed the rail block will give, or a fallback for if there is no rail probably something to do in
-     * @see Utility
+     * @see RailUtility
      * onUpdate is intentionally empty because we don't want the super running it's own onUpdate method. we define when to run our movement code in the train/rollingstock
      * @see EntityTrainCore#onUpdate()
      */
@@ -98,12 +98,12 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * this is modified movement from the super class, should be more efficient, and reliable, but generally does the same thing.
      * @see EntityMinecart#onUpdate()
      * Some features are replaced using our own for compatibility with ZoraNoDensha
-     * @see Utility
+     * @see RailUtility
      *
      * TODO: Portal stuff needs to be moved into its own function in util so we can use it in train/rollingstock classes too.
      * TODO: all checks on rails and their features need to be moved to our utility class so we can interface them with ZoraNoDensha
      * TODO: worldObj.getEntitiesWithinAABBExcludingEntity(this, box) needs to be reworked using our own functionality that does proper class casting.
-     * @see Utility#isRailBlockAt(World, int, int, int)
+     * @see RailUtility#isRailBlockAt(World, int, int, int)
      */
     public void minecartMove(){
         //Why do we even have this?
@@ -161,11 +161,11 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             int i1 = MathHelper.floor_double(posZ);
 
             //deal with special rails
-            if (Utility.isRailBlockAt(worldObj, l, i - 1, i1)) {
+            if (RailUtility.isRailBlockAt(worldObj, l, i - 1, i1)) {
                 --i;
             }
             Block block = worldObj.getBlock(l, i, i1);
-            if (canUseRail() && Utility.isRailBlockAt(block)) {
+            if (canUseRail() && RailUtility.isRailBlockAt(block)) {
                 float railMaxSpeed = ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, l, i, i1);
                 double maxSpeed = Math.min(railMaxSpeed, getCurrentCartSpeedCapOnRail());
                 func_145821_a(l, i, i1, maxSpeed, getSlopeAdjustment(), block, ((BlockRailBase)block).getBasicRailMetadata(worldObj, this, l, i, i1));

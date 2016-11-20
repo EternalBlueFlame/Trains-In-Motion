@@ -6,6 +6,7 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.network.IGuiHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.gui.train.GUISteam;
@@ -40,13 +41,24 @@ public class CommonProxy implements IGuiHandler {
     }
 
     /**
-     * <h2>render registry</h2>
-     * placeholder code for the render registration.
-     * @see ClientProxy#registerRenderers()
+     * <h2>Load config</h2>
+     * this loads the config values that will only effect server.
+     */
+    public void loadConfig(Configuration config){
+
+    }
+
+
+    /**
+     * <h2>registry</h2>
+     * placeholder code for the client registration.
+     * can be used if we ever need to register something only on server.
+     * @see ClientProxy#register)
      */
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {return null;}
-    public void registerRenderers() {}
+
+    public void register() {}
 
     /**
      * <h2> OnTick </h2>

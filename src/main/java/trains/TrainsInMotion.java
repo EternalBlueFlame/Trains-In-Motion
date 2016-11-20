@@ -10,7 +10,6 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraftforge.common.MinecraftForge;
-import trains.networking.PacketGUI;
 import trains.networking.PacketKeyPress;
 import trains.registry.TrainRegistry;
 import trains.utility.CommonProxy;
@@ -58,35 +57,17 @@ public class TrainsInMotion {
     public static EventHandler eventHandler = new EventHandler();
 
     /**
-     * <h3>keybinds</h3>
-     * Initialize the values for the config file, then load or create the config file.
-     */
-    public static boolean EnableLights = true;
-    public static char KeyLamp = 'l';
-    public static char KeyInventory = 'i';
-    public static char KeyAccelerate = 'w';
-    public static char KeyReverse = 's';
-
-    /**
      * <h2>load config</h2>
      * we use the pre-init to load the config file.
+     * Most of the configs are decided by the proxy, no need to setup controls on the server.
+     * any generic settings that effect both come after proxy.loadConfig.
      */
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
 
         config.load();
-
-        config.addCustomCategoryComment("Quality (Client only)", "Lamps take up a lot of extra processing on client side due to forced chunk reloading, \nLowEndRender turns off some of the extra graphical features that may cause lag.");
-        EnableLights = config.get(Configuration.CATEGORY_GENERAL, "EnableLamp", true).getBoolean(true);
-
-        config.addCustomCategoryComment("Keybinds", "accepted values are Lowercase a-z, along with the special characters:  ,.;'[]\\`-=");
-
-        KeyInventory = config.getString("InventoryKeybind","Keybinds", "i","").charAt(0);
-        KeyLamp = config.getString("LampKeybind","Keybinds", "l","").charAt(0);
-        KeyAccelerate = config.getString("AccelerateKeybind","Keybinds", "w","").charAt(0);
-        KeyReverse = config.getString("ReverseKeybind","Keybinds", "s","").charAt(0);
-
+        proxy.loadConfig(config);
         config.save();
     }
 
@@ -118,7 +99,6 @@ public class TrainsInMotion {
         //register the networking instances and channels
         TrainsInMotion.keyChannel = NetworkRegistry.INSTANCE.newSimpleChannel("TiM.key");
         TrainsInMotion.keyChannel.registerMessage(PacketKeyPress.Handler.class, PacketKeyPress.class, 1, Side.SERVER);
-        TrainsInMotion.keyChannel.registerMessage(PacketGUI.Handler.class, PacketGUI.class, 2, Side.SERVER);
 
         //register the worldgen
         GameRegistry.registerWorldGenerator(new OreGen(), 0);
@@ -126,68 +106,12 @@ public class TrainsInMotion {
         MinecraftForge.EVENT_BUS.register(eventHandler);
         FMLCommonHandler.instance().bus().register(eventHandler);
 
-        //register GUI, model renders, and HUD
+        //register GUI, model renders, Keybinds, and HUD
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
-        proxy.registerRenderers();
+        proxy.register();
         HUDTrain hud = new HUDTrain();
         FMLCommonHandler.instance().bus().register(hud);
         MinecraftForge.EVENT_BUS.register(hud);
-    }
-
-
-
-
-    /**
-     *<h2>key assignment</h2>
-     * @param key the key trying to be parsed
-     * @return the key's value to return, whether or not it was valid.
-     * //TODO this should be replaced by having an options menu config for controls to set and manage the value directly.
-     */
-    @Deprecated
-    public static int parseKey(char key){
-        switch (key){
-            case 'a' :{return 30;}
-            case 'b' :{return 48;}
-            case 'c' :{return 46;}
-            case 'd' :{return 32;}
-            case 'e' :{return 18;}
-            case 'f' :{return 33;}
-            case 'g' :{return 34;}
-            case 'h' :{return 35;}
-            case 'i' :{return 23;}
-            case 'j' :{return 36;}
-            case 'k' :{return 37;}
-            case 'l' :{return 38;}
-            case 'm' :{return 50;}
-            case 'n' :{return 49;}
-            case 'o' :{return 24;}
-            case 'p' :{return 25;}
-            case 'q' :{return 16;}
-            case 'r' :{return 19;}
-            case 's' :{return 31;}
-            case 't' :{return 20;}
-            case 'u' :{return 22;}
-            case 'v' :{return 47;}
-            case 'w' :{return 17;}
-            case 'x' :{return 45;}
-            case 'y' :{return 21;}
-            case 'z' :{return 44;}
-            case ',' :{return 51;}
-            case '.' :{return 52;}
-            case '/' :{return 53;}
-            case ';' :{return 39;}
-            case '[' :{return 26;}
-            case ']' :{return 27;}
-            case '\\':{return 43;}
-            case '\'':{return 40;}
-            case '-' :{return 12;}
-            case '=' :{return 13;}
-            case '`' :{return 41;}
-            default: {
-                System.out.println("Invalid key: " + key);
-                return 0;
-            }
-        }
     }
 
 }
