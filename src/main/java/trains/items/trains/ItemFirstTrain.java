@@ -10,7 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import trains.entities.trains.FirstTrain;
-import trains.utility.Utility;
+import trains.utility.RailUtility;
 
 import java.util.UUID;
 
@@ -56,7 +56,7 @@ public class ItemFirstTrain extends Item {
     @Override
     public boolean onItemUse(ItemStack itemStack, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ, int blockSide, float pointToRayX, float pointToRayY, float pointToRayZ) {
         
-		if (Utility.isRailBlockAt(worldObj, posX,posY,posZ) && !worldObj.isRemote) {
+		if (RailUtility.isRailBlockAt(worldObj, posX,posY,posZ) && !worldObj.isRemote) {
             
 			int playerMeta = MathHelper.floor_double((playerEntity.rotationYaw / 90.0F) + 2.5D) & 3;
             //IMPORTANT this defines the entity used
@@ -66,8 +66,8 @@ public class ItemFirstTrain extends Item {
 
                 if (playerMeta == 1) {
 
-                    if (!Utility.isRailBlockAt(worldObj, posX + MathHelper.floor_double(FirstTrain.bogieOffset.get(bogieOffset.size()-1)+ 1.0D ), posY, posZ)
-                            && !Utility.isRailBlockAt(worldObj, posX + MathHelper.floor_double(FirstTrain.bogieOffset.get(0)- 1.0D ), posY, posZ)) {
+                    if (!RailUtility.isRailBlockAt(worldObj, posX + MathHelper.floor_double(FirstTrain.bogieOffset.get(bogieOffset.size()-1)+ 1.0D ), posY, posZ)
+                            && !RailUtility.isRailBlockAt(worldObj, posX + MathHelper.floor_double(FirstTrain.bogieOffset.get(0)- 1.0D ), posY, posZ)) {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
@@ -82,8 +82,8 @@ public class ItemFirstTrain extends Item {
                 }
 				else if (playerMeta == 3) {
 
-                    if (!Utility.isRailBlockAt(worldObj, posX - MathHelper.floor_double(FirstTrain.bogieOffset.get(bogieOffset.size()-1)+ 1.0D ), posY, posZ)
-                            && !Utility.isRailBlockAt(worldObj, posX - MathHelper.floor_double(FirstTrain.bogieOffset.get(0)- 1.0D ), posY, posZ)) {
+                    if (!RailUtility.isRailBlockAt(worldObj, posX - MathHelper.floor_double(FirstTrain.bogieOffset.get(bogieOffset.size()-1)+ 1.0D ), posY, posZ)
+                            && !RailUtility.isRailBlockAt(worldObj, posX - MathHelper.floor_double(FirstTrain.bogieOffset.get(0)- 1.0D ), posY, posZ)) {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
@@ -100,8 +100,8 @@ public class ItemFirstTrain extends Item {
 
                 if (playerMeta == 2) {
 
-                    if (!Utility.isRailBlockAt(worldObj, posX, posY, posZ + MathHelper.floor_double(FirstTrain.bogieOffset.get(bogieOffset.size()-1)+ 1.0D ))
-                            && !Utility.isRailBlockAt(worldObj, posX, posY, posZ + MathHelper.floor_double(FirstTrain.bogieOffset.get(0)- 1.0D ))) {
+                    if (!RailUtility.isRailBlockAt(worldObj, posX, posY, posZ + MathHelper.floor_double(FirstTrain.bogieOffset.get(bogieOffset.size()-1)+ 1.0D ))
+                            && !RailUtility.isRailBlockAt(worldObj, posX, posY, posZ + MathHelper.floor_double(FirstTrain.bogieOffset.get(0)- 1.0D ))) {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
@@ -115,8 +115,8 @@ public class ItemFirstTrain extends Item {
                 }
 				else if (playerMeta == 0) {
 
-                    if (!Utility.isRailBlockAt(worldObj, posX, posY, posZ - MathHelper.floor_double(FirstTrain.bogieOffset.get(bogieOffset.size()-1)+ 1.0D ))
-                            && !Utility.isRailBlockAt(worldObj, posX, posY, posZ - MathHelper.floor_double(FirstTrain.bogieOffset.get(0)- 1.0D ))) {
+                    if (!RailUtility.isRailBlockAt(worldObj, posX, posY, posZ - MathHelper.floor_double(FirstTrain.bogieOffset.get(bogieOffset.size()-1)+ 1.0D ))
+                            && !RailUtility.isRailBlockAt(worldObj, posX, posY, posZ - MathHelper.floor_double(FirstTrain.bogieOffset.get(0)- 1.0D ))) {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
