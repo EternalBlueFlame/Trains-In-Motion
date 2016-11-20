@@ -25,7 +25,7 @@ public class Utility {
     private static final int[] value = new int[]{20, 3, 50, 100, 500, 3};
     private static final List<Item> steamFuel = Arrays.asList(Item.getItemFromBlock(Blocks.planks), Items.stick, Items.coal, Items.blaze_rod, Item.getItemFromBlock(Blocks.coal_block), Item.getItemFromBlock(Blocks.sapling));
 
-    public static final float radian = (float) Math.PI / 180.0f;
+    public static final float radian = (float) Math.PI / 180.0F;
 
 
     /**
@@ -66,6 +66,7 @@ public class Utility {
                         cart.inventory.get(0).stackSize = cart.inventory.get(0).stackSize - 1;
                     } else{
                         cart.inventory.set(0, null);
+                        
                     }
                 }
                 //if the second slot contains a water bucket, add the contents of the water bucket to our tank and then place an empty bucket in the inventory
