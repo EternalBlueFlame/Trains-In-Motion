@@ -194,7 +194,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                     }
                 }
             }
-            
+             
 
             if (riddenByEntity != null && riddenByEntity.isDead) {
                 if (riddenByEntity.ridingEntity == this) {

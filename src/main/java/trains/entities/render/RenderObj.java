@@ -26,7 +26,7 @@ public class RenderObj extends Render {
     	        
     	//draw lines between the vertices
         t.startDrawing(GL11.GL_LINE);
-        
+         
         GL11.glVertex3d(x, y, z);
         GL11.glLineWidth(20F);
         GL11.glVertex3d(x, y, z + 1);
