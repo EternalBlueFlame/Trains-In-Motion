@@ -399,7 +399,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                         }
                     bogieSize = xyzSize;
                 }
-
+                
                 motion = rotatePoint(new float[]{0.025f, 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
                 if (bogieSize>0){
                     //move the bogies, unit of motion, blocks per second 1/20
@@ -429,6 +429,8 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                         bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
                         i++;
                     }
+                    
+                    
                 }
 
             }
