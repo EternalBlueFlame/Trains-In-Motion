@@ -176,6 +176,24 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             } else {
                 func_94088_b(onGround ? 0.4D : getMaxSpeedAirLateral());
             }
+                        //deal with the bounding box and collisions
+                        func_145775_I();
+                        AxisAlignedBB box;
+                        if (getCollisionHandler() != null) {
+                            box = getCollisionHandler().getMinecartCollisionBox(this);
+                        } else {
+                            box = boundingBox.expand(0.2D, 0.0D, 0.2D);
+                        }
+            
+                        List list = worldObj.getEntitiesWithinAABBExcludingEntity(this, box);
+            
+                        if (list != null && !list.isEmpty()) {
+                            for (Entity entity: (List<Entity>)list) {
+                                if (entity != riddenByEntity && entity.canBePushed() && entity instanceof EntityMinecart) {
+                                    entity.applyEntityCollision(this);
+                                }
+                            }
+                        }
             
 
             if (riddenByEntity != null && riddenByEntity.isDead) {
