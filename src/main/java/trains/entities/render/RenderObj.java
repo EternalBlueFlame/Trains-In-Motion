@@ -24,18 +24,24 @@ public class RenderObj extends Render {
     public static void DrawCube(Entity entity, double x, double y, double z){
     	Tessellator t = Tessellator.instance;
     	        
+    	//draw lines between the vertices
+        t.startDrawing(GL11.GL_LINE);
+        
+        GL11.glVertex3d(x, y, z);
+        GL11.glLineWidth(20F);
+        GL11.glVertex3d(x, y, z + 1);
+        GL11.glVertex3d(x + 2, y, z + 1);
+        GL11.glVertex3d(x + 2, y, z);
+        GL11.glVertex3d(x + 2, y + 1.5, z);
+        GL11.glVertex3d(x + 2, y + 1.5, z + 1);
+        GL11.glVertex3d(x, y + 1.5, z + 1);
+        GL11.glVertex3d(x, y + 1.5, z);
+
+        GL11.glColor3d(1.0, 0, 0);
+        t.draw();
+        
     	        
-    	        t.startDrawing(GL11.GL_LINE);
-    	        t.addVertex(x, y, z);
-    	        t.addVertex(x + entity.width, y + 1.5, z + 1);
-    	        t.addVertex(x + entity.width, y, z);
-    	        t.addVertex(x, y + 1.5, z);
-    	        t.addVertex(x, y, z + 1);
-    	        t.addVertex(x + entity.width, y, z + 1);
-    	        t.addVertex(x, y + 1.5, z + 1);
-    	        t.addVertex(x + entity.width, y + 1.5, z);
-    	        
-    	        t.draw();
+    	
     	    }
     @Deprecated
     public void doRender(Entity entity, double x, double y, double z, float rotation, float partialTick){
@@ -54,8 +60,11 @@ public class RenderObj extends Render {
         //Bind the texture and render the model
         bindTexture(texture);
         model.renderAll();
+        GL11.glPushMatrix();
         
+        DrawCube(entity, x, y, z); 
         //clear the cache, one pop for every push.
+        GL11.glPopMatrix();
         GL11.glPopMatrix();
         GL11.glPopMatrix();
         
@@ -63,9 +72,8 @@ public class RenderObj extends Render {
             GL11.glPopMatrix();
             
         }
-        GL11.glBegin(GL11.GL_QUADS);
-        DrawCube(entity, x, y, z);
-        GL11.glEnd(); 
+        
+        
 
     }
 
