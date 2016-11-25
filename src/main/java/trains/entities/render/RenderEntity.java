@@ -1,11 +1,22 @@
 package trains.entities.render;
 
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+import sun.java2d.loops.DrawLine;
+
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.*;
 import trains.utility.ClientProxy;
+
+import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 import javax.annotation.Nullable;
 
@@ -23,8 +34,12 @@ public class RenderEntity extends Render {
     private ModelBase bogieModel;
     private ResourceLocation texture;
     private ResourceLocation bogieTexture;
+    /*
+     * hitboxBase is used for the bottom and top, side is used for the two long sides
+     * hitboxFront is used for front and back
+     */
+    
     private char smokeType = 'n';
-
     /**
      * <h3>class constructor</h3>
      * @param modelLoad the model class to render.
@@ -66,23 +81,30 @@ public class RenderEntity extends Render {
      * @param rotation not used.
      * @param partialTick not used.
      */
+    
     public void doRender(Entity entity, double x, double y, double z, float rotation, float partialTick){
-        GL11.glPushMatrix();
+        
+    	
+    	GL11.glPushMatrix();
         //set the render position
         GL11.glTranslated(x, y, z);
         GL11.glPushMatrix();
         //rotate the model.
+        
         GL11.glRotatef(entity.rotationYaw, 0.0F, 1.0F, 0.0F);
         GL11.glRotatef(entity.rotationPitch, 0.0F, 0.0F, 1.0F);
         GL11.glPushMatrix();
         //Bind the texture and render the model
         bindTexture(texture);
         model.render(entity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.06f);
+        //hitbox is special since it is initialized in the draw method, if it isn't it may be too big or too small
+        
+        
+        
         //clear the cache, one pop for every push.
         GL11.glPopMatrix();
         GL11.glPopMatrix();
         GL11.glPopMatrix();
-
         /**
          * <h4> render bogies</h4>
          * in TiM here we render the bogies.
