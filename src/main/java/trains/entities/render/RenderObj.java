@@ -128,29 +128,62 @@ public class RenderObj extends Render {
 
         if (pitch != 0.0F) {
             pitch *=  RailUtility.radian;
-            cos = MathHelper.cos(pitch);
-            sin = MathHelper.sin(pitch);
-
-            x = (f[1] * sin) + (f[0] * cos);
-            y = (f[1] * cos) - (f[0] * sin);
+            //fit sin and cos to their respective natural curve
+            if(pitch % (Math.PI * 2) == 0){
+            	cos = MathHelper.cos(pitch);
+            	sin = MathHelper.sin((pitch) * -1);
+            	x = (f[0] * cos) + (f[2] * sin);
+                y = (f[0] * sin) - (f[2] * cos);
+            } else {
+            	cos = (MathHelper.cos(pitch) * -1);
+            	sin = (MathHelper.sin(pitch));
+            	x = (f[0] * cos) + (f[2] * sin);
+                y = (f[0] * sin) - (f[2] * cos);
+            }
         }
 
         if (yaw != 0.0F) {
             yaw *=  RailUtility.radian;
-            cos = MathHelper.cos(yaw);
-            sin = MathHelper.sin(yaw);
-
-            x = (f[0] * cos) - (f[2] * sin);
-            z = (f[0] * sin) + (f[2] * cos);
+            if(yaw % (Math.PI * 2) == 0){
+            	cos = MathHelper.cos(yaw);
+            	sin = MathHelper.sin((yaw) * -1);
+            	y = (f[0] * cos) + (f[2] * sin);
+                z = (f[0] * sin) - (f[2] * cos);
+            } else {
+            	cos = (MathHelper.cos(yaw) * -1);
+            	sin = (MathHelper.sin(yaw));
+            	y = (f[0] * cos) + (f[2] * sin);
+                z = (f[0] * sin) - (f[2] * cos);
+            }
+            
         }
 
         if (roll != 0.0F) {
             roll *=  RailUtility.radian;
-            cos = MathHelper.cos(roll);
-            sin = MathHelper.sin(roll);
-
-            y = (f[2] * cos) - (f[1] * sin);
-            z = (f[2] * sin) + (f[1] * cos);
+            if(roll % (90) == 0){
+            	cos = 0;
+            	sin = 1;
+            	if(roll % 180 == 0){
+            		sin = 0;
+            		cos = 1;
+            		if(roll % 360 == 0){
+            			sin = 0;
+            			cos = 1;
+            		}
+            		
+            	}
+            	else if (roll % 270 == 0){
+            		sin = -1;
+            		cos = 0;
+            	}
+            	x = (f[0] * cos) + (f[2] * sin);
+                z = (f[0] * sin) - (f[2] * cos);
+            } else {
+            	cos = (MathHelper.cos(roll));
+            	sin = (MathHelper.sin(roll));
+            	x = (f[0] * cos) - (f[2] * sin);
+                z = (f[0] * sin) + (f[2] * cos);
+            }
         }
 
         return new double[] {x, y, z};
