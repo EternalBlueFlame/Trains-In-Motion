@@ -5,7 +5,6 @@ import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import javafx.geometry.Point2D;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.entity.Entity;
@@ -426,7 +425,9 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                                 (bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
                                 (bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) * 0.5D,
                                 (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D);
-
+                        
+                        
+                        
                         setRotation(
                                 (float) Math.toDegrees(Math.atan2(
                                         bogie.get(bogieSize).posZ - bogie.get(0).posZ,
@@ -524,31 +525,90 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
         if (pitch != 0.0F) {
             pitch *=  RailUtility.radian;
-            cos = MathHelper.cos(pitch);
-            sin = MathHelper.sin(pitch);
-
-            x = (f[1] * sin) + (f[0] * cos);
-            y = (f[1] * cos) - (f[0] * sin);
+            //fit sin and cos to their respective natural curve
+            if(pitch % (90) == 0){
+            	cos = 0;
+            	sin = 1;
+            	if(pitch % 180 == 0){
+            		sin = 0;
+            		cos = 1;
+            		if(pitch % 360 == 0){
+            			sin = 0;
+            			cos = 1;
+            		}
+            		
+            	}
+            	else if (pitch % 270 == 0){
+            		sin = -1;
+            		cos = 0;
+            	}
+            	x = (f[0] * cos) + (f[2] * sin);
+                z = (f[0] * sin) - (f[2] * cos);
+            }else {
+            	cos = (MathHelper.cos(pitch) * -1);
+            	sin = (MathHelper.sin(pitch));
+            	x = (f[0] * cos) + (f[2] * sin);
+                y = (f[0] * sin) - (f[2] * cos);
+            }
         }
 
         if (yaw != 0.0F) {
             yaw *=  RailUtility.radian;
-            cos = MathHelper.cos(yaw);
-            sin = MathHelper.sin(yaw);
-
-            x = (f[0] * cos) - (f[2] * sin);
-            z = (f[0] * sin) + (f[2] * cos);
+            if(yaw % (90) == 0){
+            	cos = 0;
+            	sin = 1;
+            	if(yaw % 180 == 0){
+            		sin = 0;
+            		cos = 1;
+            		if(yaw % 360 == 0){
+            			sin = 0;
+            			cos = 1;
+            		}
+            		
+            	}
+            	else if (yaw % 270 == 0){
+            		sin = -1;
+            		cos = 0;
+            	}
+            	x = (f[0] * cos) + (f[2] * sin);
+                z = (f[0] * sin) - (f[2] * cos);
+            } else {
+            	cos = (MathHelper.cos(yaw));
+            	sin = (MathHelper.sin(yaw));
+            	x = (f[0] * cos) - (f[2] * sin);
+                z = (f[0] * sin) + (f[2] * cos);
         }
 
         if (roll != 0.0F) {
             roll *=  RailUtility.radian;
-            cos = MathHelper.cos(roll);
-            sin = MathHelper.sin(roll);
-
-            y = (f[2] * cos) - (f[1] * sin);
-            z = (f[2] * sin) + (f[1] * cos);
+            if(roll % (90) == 0){
+            	cos = 0;
+            	sin = 1;
+            	if(roll % 180 == 0){
+            		sin = 0;
+            		cos = 1;
+            		if(roll % 360 == 0){
+            			sin = 0;
+            			cos = 1;
+            		}
+            		
+            	}
+            	else if (roll % 270 == 0){
+            		sin = -1;
+            		cos = 0;
+            	}
+            	x = (f[0] * cos) + (f[2] * sin);
+                z = (f[0] * sin) - (f[2] * cos);
+            } else {
+            	cos = (MathHelper.cos(roll));
+            	sin = (MathHelper.sin(roll));
+            	x = (f[0] * cos) - (f[2] * sin);
+                z = (f[0] * sin) + (f[2] * cos);
+            }
         }
 
+        
+        }
         return new float[] {x, y, z};
     }
 
