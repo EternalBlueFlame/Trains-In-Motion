@@ -1,22 +1,11 @@
 package trains.entities.render;
 
 import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
-import sun.java2d.loops.DrawLine;
-
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.*;
 import trains.utility.ClientProxy;
-
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 
 import javax.annotation.Nullable;
 
