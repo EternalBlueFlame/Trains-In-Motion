@@ -5,21 +5,23 @@ import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
+import javafx.geometry.Point2D;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockAir;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
 import trains.entities.trains.FirstTrain;
-import trains.utility.ClientProxy;
-import trains.utility.FuelHandler;
-import trains.utility.RailUtility;
-import trains.utility.LampHandler;
+import trains.utility.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +51,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
      */
     public List<EntityBogie> bogie = new ArrayList<EntityBogie>();
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
-    public int accelerator =0; //defines the value of how much to speed up, or brake the train.
+    public int accelerator =0; //defines the value of how much to speed up, or brake the
     protected float[] motion = new float[]{};
     private boolean isReverse =false;
 
@@ -113,7 +115,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         for (int i=0; i<=craftingSlots;i++){
             inventory.add(null);
         }
-
+        setSize(1,2);
     }
     //this constructor is lower level spawning
     public EntityTrainCore(World world){
@@ -144,9 +146,10 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     }
     @Override
     public AxisAlignedBB getCollisionBox(Entity collidedWith){
-        if (collidedWith != riddenByEntity && collidedWith != null) {
-            return collidedWith.boundingBox;
-        } else { return null;}
+        if (!(collidedWith instanceof EntityBogie) && collidedWith != riddenByEntity) {
+            return boundingBox;
+        }
+        return null;
     }
     @Override
     public boolean canBeCollidedWith() {
@@ -195,7 +198,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
-        isRunning = tag.getBoolean("train.isrunning");
+        isRunning = tag.getBoolean("isrunning");
         isLocked = tag.getBoolean("extended.islocked");
         brake = tag.getBoolean("extended.brake");
         lamp.isOn = tag.getBoolean("extended.lamp");
@@ -215,7 +218,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             }
         }
         //read through the itemstacks
-        NBTTagList taglist = tag.getTagList("train.items", 10);
+        NBTTagList taglist = tag.getTagList("items", 10);
         for (int i = 0; i < taglist.tagCount(); i++) {
             NBTTagCompound nbttagcompound1 = taglist.getCompoundTagAt(i);
             byte b0 = nbttagcompound1.getByte("slot");
@@ -231,7 +234,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
-        tag.setBoolean("train.isrunning",isRunning);
+        tag.setBoolean("isrunning",isRunning);
         tag.setBoolean("extended.islocked", isLocked);
         tag.setBoolean("extended.brake", brake);
         tag.setBoolean("extended.lamp", lamp.isOn);
@@ -264,7 +267,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                 nbttaglist.appendTag(nbttagcompound1);
             }
         }
-        tag.setTag("train.items", nbttaglist);
+        tag.setTag("items", nbttaglist);
 
         for (FluidTank tempTank : tank){
             tempTank.writeToNBT(tag);
@@ -379,7 +382,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
      *
      * TODO: we need to put back lamp management
      * TODO: we need to setup proper speed and acceleration
-     * TODO: bogies don't move on client, again.
      * TODO: yaw rotation isn't right.
     */
 
@@ -400,30 +402,42 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                     bogieSize = xyzSize;
                 }
 
-                motion = rotatePoint(new float[]{0.025f, 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                /**
+                 *check if the bogies exist, because they may not yet, and if they do, check if they are actually moving or colliding.
+                 * no point in processing movement if they aren't moving or if the train hit something.
+                 * if it is clear however, then we need to add velocity to the bogies, position the
+                 * but either way we have to position the bogies around the
+                 */
                 if (bogieSize>0){
-                    //move the bogies, unit of motion, blocks per second 1/20
-                    for (EntityBogie currentBogie : bogie) {
-                        currentBogie.addVelocity(motion[0], currentBogie.motionY, motion[2]);
-                        currentBogie.minecartMove();
+
+                    if (getCollision(this) /* get acceleration ==0 && velocities are 0*/){
+                        for (EntityBogie currentBogie : bogie) {
+                            currentBogie.setVelocity(0, 0, 0);
+                        }
+                    } else {
+                        motion = rotatePoint(new float[]{0.025f, 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                        //move the bogies, unit of motion, blocks per second 1/20
+                        for (EntityBogie currentBogie : bogie) {
+                            currentBogie.addVelocity(motion[0], currentBogie.motionY, motion[2]);
+                            currentBogie.minecartMove();
+                        }
+                        //position train
+                        setPosition(
+                                (bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
+                                (bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) * 0.5D,
+                                (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D);
+
+                        setRotation(
+                                (float) Math.toDegrees(Math.atan2(
+                                        bogie.get(bogieSize).posZ - bogie.get(0).posZ,
+                                        bogie.get(bogieSize).posX - bogie.get(0).posX)
+                                ),
+                                MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
+                        );
                     }
-                    //position train
-                    setPosition(
-                            (bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
-                            (bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) * 0.5D,
-                            (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D);
-
-                    setRotation(
-                            (float) Math.toDegrees(Math.atan2(
-                                    bogie.get(bogieSize).posZ - bogie.get(0).posZ,
-                                    bogie.get(bogieSize).posX - bogie.get(0).posX)
-                            ),
-                            MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
-                    );
-
 
                     //align bogies
-                    for (int i = 0; i < bogieSize; ) {
+                    for (int i = 0; i < bogie.size(); ) {
                         float[] var = rotatePoint(new float[]{(float) getBogieOffsets().get(i).doubleValue(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
                         bogie.get(i).setPosition(var[0] + posX, bogie.get(i).posY, var[2] + posZ);
                         bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
@@ -433,7 +447,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
             }
 
-            //client
+            //this is just to be sure the client proxy knows this train exists.
             if (worldObj.isRemote && xyzSize > 0 && bogieXYZ.get(0)[0] + bogieXYZ.get(0)[1] + bogieXYZ.get(0)[2] != 0.0D) {
                 if (!ClientProxy.carts.contains(this)) {
                     ClientProxy.carts.add(this);
@@ -443,6 +457,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         //simple tick management so some code does not need to be run every tick.
         switch (trainTicks) {
             case 5: {
+                //deal with the fuel
                 if (!worldObj.isRemote && isRunning) {
                     FuelHandler.ManageFuel(this);
                 }
@@ -461,7 +476,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
     /**
      * <h2>Rider offset</h2>
-     * this runs every tick to be sure the rider is in the correct position for the train.
+     * this runs every tick to be sure the rider is in the correct position for the
      */
     @Override
     public void updateRiderPosition() {
@@ -499,7 +514,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
      * rotates a given vector based on pitch, yaw, and roll.
      * courtesy of Zora No Densha.
      */
-    private static float[] rotatePoint(float[] f, float pitch, float yaw, float roll) {
+    public static float[] rotatePoint(float[] f, float pitch, float yaw, float roll) {
 
         float cos;
         float sin;
@@ -538,6 +553,99 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     }
 
 
+
+    /**
+     * <h3>Process Entity Collision for train</h3>
+     * this checks an area for blocks and other entities and returns true if there is something in that area besides what is supposed to be, (mounted players and bogies).
+     */
+    private static boolean getCollision(EntityTrainCore train){
+
+        for (int iteration : train.getHitboxPositions()){
+            double[] position = rotatePoint(new double[]{iteration,0,0}, train.rotationPitch, train.rotationYaw, 0);
+            train.boundingBox.setBounds(train.posX + position[0], train.posY+0.5d+position[1], train.posZ+position[2], train.posX+1+position[0], train.posY+2.5d+position[1], train.posZ+1+position[2]);
+
+            int i = MathHelper.floor_double(train.boundingBox.minX + 0.001D);
+            int j = MathHelper.floor_double(train.boundingBox.minY + 0.001D);
+            int k = MathHelper.floor_double(train.boundingBox.minZ + 0.001D);
+            int l = MathHelper.floor_double(train.boundingBox.maxX - 0.001D);
+            int i1 = MathHelper.floor_double(train.boundingBox.maxY - 0.001D);
+            int j1 = MathHelper.floor_double(train.boundingBox.maxZ - 0.001D);
+
+            if (train.worldObj.checkChunksExist(i, j, k, l, i1, j1)) {
+                for (int k1 = i; k1 <= l; ++k1) {
+                    for (int l1 = j; l1 <= i1; ++l1) {
+                        for (int i2 = k; i2 <= j1; ++i2) {
+                            Block block = train.worldObj.getBlock(k1, l1, i2);
+                            if (!(block instanceof BlockAir) && !RailUtility.isRailBlockAt(block)){
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            List list = train.worldObj.getEntitiesWithinAABBExcludingEntity(train, train.boundingBox);
+            if (list != null && !list.isEmpty()) {
+                for (Object entity: list) {
+                    if (entity instanceof Entity) {
+                        if (entity != train.riddenByEntity && !(entity instanceof EntityBogie)) {
+                            if (entity instanceof EntityLiving || entity instanceof EntityPlayer) {
+                                //dependant on velocity, fling it and do damage.
+                                ((Entity) entity).attackEntityFrom(new EntityDamageSource("Train", train), (float)(train.bogie.get(0).motionX + train.bogie.get(0).motionZ)*1000);
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        train.boundingBox.setBounds(train.posX, train.posY+0.5d, train.posZ, train.posX+1, train.posY+2.5d, train.posZ+1);
+        //returning true stops the train, false lets it move.
+        return false;
+    }
+
+
+    public static double[] rotatePoint(double[] f, float pitch, float yaw, float roll) {
+
+        float cos;
+        float sin;
+        double x = f[0];
+        double y = f[1];
+        double z = f[2];
+
+        if (pitch != 0.0F) {
+            pitch *=  RailUtility.radian;
+            cos = MathHelper.cos(pitch);
+            sin = MathHelper.sin(pitch);
+
+            x = (f[1] * sin) + (f[0] * cos);
+            y = (f[1] * cos) - (f[0] * sin);
+        }
+
+        if (yaw != 0.0F) {
+            yaw *=  RailUtility.radian;
+            cos = MathHelper.cos(yaw);
+            sin = MathHelper.sin(yaw);
+
+            x = (f[0] * cos) - (f[2] * sin);
+            z = (f[0] * sin) + (f[2] * cos);
+        }
+
+        if (roll != 0.0F) {
+            roll *=  RailUtility.radian;
+            cos = MathHelper.cos(roll);
+            sin = MathHelper.sin(roll);
+
+            y = (f[2] * cos) - (f[1] * sin);
+            z = (f[2] * sin) + (f[1] * cos);
+        }
+
+        return new double[] {x, y, z};
+    }
+
     /**
      * <h2>reverse inheritance functions</h2>
      * these functions work as the middleman between normal train functionality and the classes that extend this. for an example:
@@ -551,5 +659,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public float getRiderOffset(){return 0;}
     public float[] getAcceleration(){return new float[]{1,1,1};}
     public ItemStack getItem(){return null;}
+    public int[] getHitboxPositions(){return new int[]{-1,0,1};}
 
 }

@@ -5,8 +5,8 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
 import trains.entities.EntityTrainCore;
-import trains.registry.URIRegistry;
 import trains.gui.trainhandler.SteamInventoryHandler;
+import trains.registry.URIRegistry;
 
 public class GUISteam extends GuiContainer {
     private EntityTrainCore train;

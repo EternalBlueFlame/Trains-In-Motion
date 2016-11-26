@@ -1,8 +1,6 @@
 package trains.entities;
 
 
-import java.util.List;
-
 import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
@@ -24,6 +22,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
 import trains.utility.RailUtility;
 
+
 public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart, IEntityAdditionalSpawnData {
 
     private int parentId = 0;
@@ -38,15 +37,21 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     public EntityBogie(World world, double xPos, double yPos, double zPos, int parent) {
         super(world,xPos, yPos, zPos);
             parentId = parent;
+        boundingBox.setBounds(0,0,0,0,0,0);
     }
 
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         parentId = additionalData.readInt();
         if (parentId != 0) {
-            ((EntityTrainCore) worldObj.getEntityByID(parentId)).addbogies(this);
+            EntityTrainCore parent = ((EntityTrainCore) worldObj.getEntityByID(parentId));
+            if (parent != null){
+                parent.addbogies(this);
+            } else {
+                worldObj.removeEntity(this);
+            }
         } else {
-            worldObj.getEntityByID(getEntityId());
+            worldObj.removeEntity(this);
         }
     }
     @Override
@@ -81,8 +86,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         return false;
     }
     @Override
-    public boolean canRiderInteract()
-    {
+    public boolean canRiderInteract() {
         return true;
     }
     @Override
@@ -91,7 +95,14 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     }
     @Override
     public void onUpdate() {}
-
+    @Override
+    public AxisAlignedBB getBoundingBox(){
+        return null;
+    }
+    @Override
+    public AxisAlignedBB getCollisionBox(Entity collidedWith){
+        return null;
+    }
 
     /**
      * <h3> movement management</h3>
@@ -175,24 +186,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 }
             } else {
                 func_94088_b(onGround ? 0.4D : getMaxSpeedAirLateral());
-            }
-            //deal with the bounding box and collisions
-            func_145775_I();
-            AxisAlignedBB box;
-            if (getCollisionHandler() != null) {
-                box = getCollisionHandler().getMinecartCollisionBox(this);
-            } else {
-                box = boundingBox.expand(0.2D, 0.0D, 0.2D);
-            }
-
-            List list = worldObj.getEntitiesWithinAABBExcludingEntity(this, box);
-
-            if (list != null && !list.isEmpty()) {
-                for (Entity entity: (List<Entity>)list) {
-                    if (entity != riddenByEntity && entity.canBePushed() && entity instanceof EntityMinecart) {
-                        entity.applyEntityCollision(this);
-                    }
-                }
             }
 
             if (riddenByEntity != null && riddenByEntity.isDead) {

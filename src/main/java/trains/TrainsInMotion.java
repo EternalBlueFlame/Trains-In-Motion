@@ -1,27 +1,26 @@
 package trains;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.SidedProxy;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import trains.entities.EntityBogie;
 import trains.gui.HUDTrain;
+import trains.items.TiMTab;
+import trains.networking.PacketKeyPress;
 import trains.registry.BlockRegistry;
 import trains.registry.ItemRegistry;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import cpw.mods.fml.relauncher.Side;
-import net.minecraftforge.common.MinecraftForge;
-import trains.networking.PacketKeyPress;
 import trains.registry.TrainRegistry;
 import trains.utility.CommonProxy;
 import trains.utility.EventHandler;
-import trains.items.TiMTab;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.registry.GameRegistry;
-import net.minecraft.creativetab.CreativeTabs;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-
 import trains.worldgen.OreGen;
 
 /**
@@ -109,9 +108,11 @@ public class TrainsInMotion {
         //register GUI, model renders, Keybinds, and HUD
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
         proxy.register();
-        HUDTrain hud = new HUDTrain();
-        FMLCommonHandler.instance().bus().register(hud);
-        MinecraftForge.EVENT_BUS.register(hud);
+        if (event.getSide().isClient()) {
+            HUDTrain hud = new HUDTrain();
+            FMLCommonHandler.instance().bus().register(hud);
+            MinecraftForge.EVENT_BUS.register(hud);
+        }
     }
 
 }

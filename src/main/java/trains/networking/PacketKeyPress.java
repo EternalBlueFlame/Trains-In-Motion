@@ -9,7 +9,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
-import trains.entities.EntityBogie;
 import trains.entities.EntityTrainCore;
 import trains.utility.EventHandler;
 

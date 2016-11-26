@@ -7,7 +7,6 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import trains.entities.EntityTrainCore;
 import trains.registry.URIRegistry;
-import trains.gui.trainhandler.SteamInventoryHandler;
 
 public class HUDTrain extends GuiScreen {
     private Minecraft game;

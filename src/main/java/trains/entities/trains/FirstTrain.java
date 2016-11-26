@@ -6,10 +6,8 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import trains.entities.EntityTrainCore;
-import trains.items.trains.ItemFirstTrain;
 import trains.registry.ItemRegistry;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +39,8 @@ public class FirstTrain extends EntityTrainCore {
     };
     private static final int inventorySize= 3;
     private static final float offsetXZ =0f;
-    public static final List<Double> bogieOffset = Arrays.asList(-1.0D, 1.0D);
+    private static final List<Double> bogieOffset = Arrays.asList(-1.0D, 1.0D);
+    private static final int[] hitboxPositions = new int[]{-2,-1,0,1};
 
     /**
      * @see EntityTrainCore
@@ -85,4 +84,6 @@ public class FirstTrain extends EntityTrainCore {
     public ItemStack getItem(){
         return new ItemStack(ItemRegistry.testCart, 1);
     }
+    @Override
+    public int[] getHitboxPositions(){return hitboxPositions;}
 }

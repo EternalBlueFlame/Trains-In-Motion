@@ -9,7 +9,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
-import trains.gui.train.GUISteam;
 import trains.gui.trainhandler.SteamInventoryHandler;
 
 
