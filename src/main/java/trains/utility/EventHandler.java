@@ -5,7 +5,9 @@ import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import trains.TrainsInMotion;
@@ -27,20 +29,24 @@ public class EventHandler {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onClientKeyPress(InputEvent.KeyInputEvent event){
-        if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntityTrainCore) {
+        EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+        if(player.ridingEntity instanceof EntityTrainCore) {
             //for lamp
-            if (ClientProxy.KeyLamp.getIsKeyPressed()) {
+            if (ClientProxy.KeyLamp.isPressed() ) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0));
+                ((EntityTrainCore) player.ridingEntity).lamp.isOn = ! ((EntityTrainCore) player.ridingEntity).lamp.isOn;
             }
             //for inventory
-            if (ClientProxy.KeyInventory.getIsKeyPressed()) {
+            if (ClientProxy.KeyInventory.isPressed()) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1));
             }
             //for speed change
-            if(ClientProxy.KeyAccelerate.getIsKeyPressed()){
+            if(ClientProxy.KeyAccelerate.isPressed()){
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2));
+                ((EntityTrainCore) player.ridingEntity).setAcceleration(true);
             } else if(ClientProxy.KeyReverse.getIsKeyPressed()){
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3));
+                ((EntityTrainCore) player.ridingEntity).setAcceleration(false);
             }
         }
     }

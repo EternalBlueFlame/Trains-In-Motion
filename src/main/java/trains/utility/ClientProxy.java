@@ -33,7 +33,7 @@ public class ClientProxy extends CommonProxy {
      */
     public static boolean EnableLights = true;
     public static KeyBinding KeyLamp = new KeyBinding("Lamp Toggle", 38, "Trains in Motion");
-    public static KeyBinding KeyInventory = new KeyBinding("Open GUI (only while riding a train/rollingstock)", 23, "Trains in Motion");
+    public static KeyBinding KeyInventory = new KeyBinding("Open Train/rollingstock GUI", 23, "Trains in Motion");
     public static KeyBinding KeyAccelerate = new KeyBinding("Train Acceleration", 17, "Trains in Motion");
     public static KeyBinding KeyReverse = new KeyBinding("Train Deceleration/Reverse", 31, "Trains in Motion");
 

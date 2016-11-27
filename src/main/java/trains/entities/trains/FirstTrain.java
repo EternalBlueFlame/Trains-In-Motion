@@ -30,7 +30,7 @@ public class FirstTrain extends EntityTrainCore {
      *             7: maglev
      */
     private static final float initMaxSpeed = 0.9834875f;
-    private static final float[] acceleration = new float[]{0.001F,0.0015F,0.001F};
+    private static final float acceleration = 0.001F;
     private static final int type = 1;
     private static final int maxFuel = 100;
     private static FluidTank[] tank = new FluidTank[]{
@@ -79,7 +79,7 @@ public class FirstTrain extends EntityTrainCore {
     @Override
     public float getRiderOffset(){return offsetXZ;}
     @Override
-    public float[] getAcceleration(){return acceleration;}
+    public float getAcceleration(){return acceleration;}
     @Override
     public ItemStack getItem(){
         return new ItemStack(ItemRegistry.testCart, 1);

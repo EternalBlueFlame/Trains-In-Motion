@@ -45,13 +45,13 @@ public class PacketKeyPress implements IMessage {
         public IMessage onMessage(PacketKeyPress message, MessageContext context) {
             Entity ridingEntity = context.getServerHandler().playerEntity.ridingEntity;
             //Toggles
-            if (message.key == 0 && ridingEntity instanceof EntityTrainCore){
+            if (message.key == 0){
                 ((EntityTrainCore) ridingEntity).lamp.isOn = !((EntityTrainCore) ridingEntity).lamp.isOn;
             }
             //speed
-            else if (message.key == 2 && ridingEntity instanceof EntityTrainCore){
+            else if (message.key == 2){
                 ((EntityTrainCore) ridingEntity).setAcceleration(true);
-            }else if (message.key == 3 && ridingEntity instanceof EntityTrainCore){
+            }else if (message.key == 3){
                 ((EntityTrainCore) ridingEntity).setAcceleration(false);
             }
             /**

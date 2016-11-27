@@ -5,7 +5,6 @@ import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import javafx.geometry.Point2D;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.entity.Entity;
@@ -26,6 +25,8 @@ import trains.utility.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static trains.utility.RailUtility.rotatePoint;
 
 /**
  * <h2> Train core</h2>
@@ -52,7 +53,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public List<EntityBogie> bogie = new ArrayList<EntityBogie>();
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
     public int accelerator =0; //defines the value of how much to speed up, or brake the
-    protected float[] motion = new float[]{};
+    protected float[] motion = new float[]{0,0,0};
     private boolean isReverse =false;
 
 
@@ -381,7 +382,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     * @see ClientProxy#onTick(TickEvent.ClientTickEvent)
      *
      * TODO: we need to put back lamp management
-     * TODO: we need to setup proper speed and acceleration
      * TODO: yaw rotation isn't right.
     */
 
@@ -410,12 +410,18 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                  */
                 if (bogieSize>0){
 
-                    if (getCollision(this) /* get acceleration ==0 && velocities are 0*/){
+                    if (getCollision(this) & (accelerator==0 && motion[0] + motion[2] == 0)){
                         for (EntityBogie currentBogie : bogie) {
                             currentBogie.setVelocity(0, 0, 0);
                         }
                     } else {
-                        motion = rotatePoint(new float[]{0.025f, 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                        float accel = (getAcceleration() * (accelerator /6)) * (((motion[0] + motion[2]) / getMaxSpeed()) * 100);
+                        if (accel == 0 && accelerator !=0){
+                            accel = 0.0001f;
+                        }
+
+                        System.out.println(accelerator + " : " + accel);
+                        motion = rotatePoint(new float[]{accel, 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
                         //move the bogies, unit of motion, blocks per second 1/20
                         for (EntityBogie currentBogie : bogie) {
                             currentBogie.addVelocity(motion[0], currentBogie.motionY, motion[2]);
@@ -430,8 +436,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                         setRotation(
                                 (float) Math.toDegrees(Math.atan2(
                                         bogie.get(bogieSize).posZ - bogie.get(0).posZ,
-                                        bogie.get(bogieSize).posX - bogie.get(0).posX)
-                                ),
+                                        bogie.get(bogieSize).posX - bogie.get(0).posX)),
                                 MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
                         );
                     }
@@ -509,48 +514,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         }
     }
 
-    /**
-     * <h3>rotate vector</h3>
-     * rotates a given vector based on pitch, yaw, and roll.
-     * courtesy of Zora No Densha.
-     */
-    public static float[] rotatePoint(float[] f, float pitch, float yaw, float roll) {
-
-        float cos;
-        float sin;
-        float x = f[0];
-        float y = f[1];
-        float z = f[2];
-
-        if (pitch != 0.0F) {
-            pitch *=  RailUtility.radian;
-            cos = MathHelper.cos(pitch);
-            sin = MathHelper.sin(pitch);
-
-            x = (f[1] * sin) + (f[0] * cos);
-            y = (f[1] * cos) - (f[0] * sin);
-        }
-
-        if (yaw != 0.0F) {
-            yaw *=  RailUtility.radian;
-            cos = MathHelper.cos(yaw);
-            sin = MathHelper.sin(yaw);
-
-            x = (f[0] * cos) - (f[2] * sin);
-            z = (f[0] * sin) + (f[2] * cos);
-        }
-
-        if (roll != 0.0F) {
-            roll *=  RailUtility.radian;
-            cos = MathHelper.cos(roll);
-            sin = MathHelper.sin(roll);
-
-            y = (f[2] * cos) - (f[1] * sin);
-            z = (f[2] * sin) + (f[1] * cos);
-        }
-
-        return new float[] {x, y, z};
-    }
 
 
 
@@ -607,45 +570,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         return false;
     }
 
-
-    public static double[] rotatePoint(double[] f, float pitch, float yaw, float roll) {
-
-        float cos;
-        float sin;
-        double x = f[0];
-        double y = f[1];
-        double z = f[2];
-
-        if (pitch != 0.0F) {
-            pitch *=  RailUtility.radian;
-            cos = MathHelper.cos(pitch);
-            sin = MathHelper.sin(pitch);
-
-            x = (f[1] * sin) + (f[0] * cos);
-            y = (f[1] * cos) - (f[0] * sin);
-        }
-
-        if (yaw != 0.0F) {
-            yaw *=  RailUtility.radian;
-            cos = MathHelper.cos(yaw);
-            sin = MathHelper.sin(yaw);
-
-            x = (f[0] * cos) - (f[2] * sin);
-            z = (f[0] * sin) + (f[2] * cos);
-        }
-
-        if (roll != 0.0F) {
-            roll *=  RailUtility.radian;
-            cos = MathHelper.cos(roll);
-            sin = MathHelper.sin(roll);
-
-            y = (f[2] * cos) - (f[1] * sin);
-            z = (f[2] * sin) + (f[1] * cos);
-        }
-
-        return new double[] {x, y, z};
-    }
-
     /**
      * <h2>reverse inheritance functions</h2>
      * these functions work as the middleman between normal train functionality and the classes that extend this. for an example:
@@ -657,7 +581,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public int getType(){return 0;}
     public int getMaxFuel(){return 100;}
     public float getRiderOffset(){return 0;}
-    public float[] getAcceleration(){return new float[]{1,1,1};}
+    public float getAcceleration(){return 0.025f;}
     public ItemStack getItem(){return null;}
     public int[] getHitboxPositions(){return new int[]{-1,0,1};}
 

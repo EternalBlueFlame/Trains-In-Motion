@@ -1,17 +1,16 @@
 package trains.entities.render;
 
 
-import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.IModelCustom;
 import net.minecraftforge.client.model.obj.ObjModelLoader;
 import org.lwjgl.opengl.GL11;
 import trains.entities.EntityTrainCore;
-import trains.utility.RailUtility;
+
+import static trains.utility.RailUtility.rotatePoint;
 
 public class RenderObj extends Render {
 
@@ -25,7 +24,9 @@ public class RenderObj extends Render {
      * <h2>Custom hitbox render</h2>
      * because we use custom bounding boxes, we have to custom render them.
      * Credit to Justice/MisterJW for getting most of this function working
+     * we should probably replace this with a cube model so we can texture it.
      */
+    @Deprecated
     private void DrawCube(double x, double y, double z){
             //draw lines between the vertices
             GL11.glPushMatrix();
@@ -72,6 +73,7 @@ public class RenderObj extends Render {
             GL11.glEnd();
             GL11.glPopMatrix();
     }
+
     /**
      * this class is to be removed once we get the .java models in for the trains and rollingstock.
      */
@@ -107,8 +109,9 @@ public class RenderObj extends Render {
 
         //because we use custom bounding boxes, we have to custom render them.
         if (RenderManager.debugBoundingBox && entity instanceof EntityTrainCore) {
+            double[] position;
             for (int i : ((EntityTrainCore) entity).getHitboxPositions()) {
-                double[] position = rotatePoint(new double[]{i,0,0}, entity.rotationPitch, entity.rotationYaw, 0);
+                position = rotatePoint(new double[]{i,0,0}, entity.rotationPitch, entity.rotationYaw, 0);
                 DrawCube(position[0]+x, position[1]+y, position[2]+z);
             }
 
@@ -118,43 +121,8 @@ public class RenderObj extends Render {
         
 
     }
-    public static double[] rotatePoint(double[] f, float pitch, float yaw, float roll) {
 
-        float cos;
-        float sin;
-        double x = f[0];
-        double y = f[1];
-        double z = f[2];
 
-        if (pitch != 0.0F) {
-            pitch *=  RailUtility.radian;
-            cos = MathHelper.cos(pitch);
-            sin = MathHelper.sin(pitch);
-
-            x = (f[1] * sin) + (f[0] * cos);
-            y = (f[1] * cos) - (f[0] * sin);
-        }
-
-        if (yaw != 0.0F) {
-            yaw *=  RailUtility.radian;
-            cos = MathHelper.cos(yaw);
-            sin = MathHelper.sin(yaw);
-
-            x = (f[0] * cos) - (f[2] * sin);
-            z = (f[0] * sin) + (f[2] * cos);
-        }
-
-        if (roll != 0.0F) {
-            roll *=  RailUtility.radian;
-            cos = MathHelper.cos(roll);
-            sin = MathHelper.sin(roll);
-
-            y = (f[2] * cos) - (f[1] * sin);
-            z = (f[2] * sin) + (f[1] * cos);
-        }
-
-        return new double[] {x, y, z};
-    }
     /**
      * initializer for the render function.
      * This class is to be removed once we get the .java models in for the trains and rollingstock.
