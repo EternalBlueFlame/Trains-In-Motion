@@ -22,7 +22,9 @@ public enum URIRegistry {
     MODEL_BLOCK("models/block/"),
     MODEL_BLOCK_TEXTURE("models/block/texture"),
     TEXTURE_GENERIC("textures/generic/"),
-    TEXTURE_BLOCK("textures/block/");
+    TEXTURE_BLOCK("textures/block/"),
+    SOUND_HORN("audio/horns/"),
+    SOUND_RUNNING("audio/running/");
 
         private String value;
         URIRegistry(String value) {this.value = value;}

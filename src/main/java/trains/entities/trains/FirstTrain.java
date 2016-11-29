@@ -1,12 +1,16 @@
 package trains.entities.trains;
 
+import net.minecraft.client.audio.ISound;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import trains.entities.EntityTrainCore;
 import trains.registry.ItemRegistry;
+import trains.registry.TrainRegistry;
+import trains.registry.URIRegistry;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,9 +19,11 @@ import java.util.UUID;
 public class FirstTrain extends EntityTrainCore {
     /**
      * <h2>Basic Train Constructor</h2>
-     * This class defines a basic train class, all other trains basically just copy this class.
+     * This class defines a basic train class, all other trains basically just copy this class and change the values of the variables.
+     * Be sure other trains are also defined in the train registry
+     * @see TrainRegistry#listTrains()
      *
-     * Acceleration is applied every tick, defined as a percentage of the max speed, multiplied by the position of the accelerator, the variable MUST be 3 parts
+     * Acceleration is applied every tick, with similar math to max speed.
      * The fluid tank has 2 values, one for water/RF/fuel/uranium and another for steam.
      * Speed is actually for the German 0-8-0 Brigadelok (calculation is (1/72)*70.8111, 70.8111 being the train's max speed in km/h)
      * Type defines the kind of train, this will effect fuel type, and the GUI used. the types are:
@@ -41,6 +47,9 @@ public class FirstTrain extends EntityTrainCore {
     private static final float offsetXZ =0f;
     private static final List<Double> bogieOffset = Arrays.asList(-1.0D, 1.0D);
     private static final int[] hitboxPositions = new int[]{-2,-1,0,1};
+    private static final ResourceLocation horn = URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");
+    private static final ResourceLocation running = URIRegistry.SOUND_RUNNING.getResource("r080brigadelok.ogg");
+    private static final String trainName = "0-8-0 Brigadelok";
 
     /**
      * @see EntityTrainCore
@@ -67,7 +76,7 @@ public class FirstTrain extends EntityTrainCore {
     @Override
     public float getMaxSpeed(){return initMaxSpeed;}
     @Override
-    public String getInventoryName() {return "Brigadelok";}
+    public String getInventoryName() {return trainName;}
     @Override
     public List<Double> getBogieOffsets(){return bogieOffset;}
     @Override
@@ -86,4 +95,102 @@ public class FirstTrain extends EntityTrainCore {
     }
     @Override
     public int[] getHitboxPositions(){return hitboxPositions;}
+    @Override
+    public ISound getHorn(){
+        return new ISound() {
+            @Override
+            public ResourceLocation getPositionedSoundLocation() {
+                return horn;
+            }
+
+            @Override
+            public boolean canRepeat() {
+                return false;
+            }
+
+            @Override
+            public int getRepeatDelay() {
+                return 0;
+            }
+
+            @Override
+            public float getVolume() {
+                return 100;
+            }
+
+            @Override
+            public float getPitch() {
+                return 0;
+            }
+
+            @Override
+            public float getXPosF() {
+                return (float) posX;
+            }
+
+            @Override
+            public float getYPosF() {
+                return (float) posY;
+            }
+
+            @Override
+            public float getZPosF() {
+                return (float) posZ;
+            }
+
+            @Override
+            public AttenuationType getAttenuationType() {
+                return null;
+            }
+        };
+    }
+    @Override
+    public ISound getRunning(){
+        return new ISound() {
+            @Override
+            public ResourceLocation getPositionedSoundLocation() {
+                return running;
+            }
+
+            @Override
+            public boolean canRepeat() {
+                return true;
+            }
+
+            @Override
+            public int getRepeatDelay() {
+                return 0;
+            }
+
+            @Override
+            public float getVolume() {
+                return 100;
+            }
+
+            @Override
+            public float getPitch() {
+                return 0;
+            }
+
+            @Override
+            public float getXPosF() {
+                return (float) posX;
+            }
+
+            @Override
+            public float getYPosF() {
+                return (float) posY;
+            }
+
+            @Override
+            public float getZPosF() {
+                return (float) posZ;
+            }
+
+            @Override
+            public AttenuationType getAttenuationType() {
+                return null;
+            }
+        };
+    }
 }

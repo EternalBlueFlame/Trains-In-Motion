@@ -15,7 +15,13 @@ import trains.utility.RailUtility;
 import java.util.UUID;
 
 
-//change this to the train class you intend to use.
+/**
+ * <h2> First Train Item</h2>
+ *
+ * When creating a new item for a train, copy this class and change the line marked IMPORTANT, the constructor and the registerIcons function.
+ * Be sure to create a static Item and register it in:
+ * @see trains.registry.ItemRegistry
+ */
 
 public class ItemFirstTrain extends Item {
 
@@ -49,18 +55,17 @@ public class ItemFirstTrain extends Item {
      * @param pointToRayZ the Z value of the ray trace to the exact position on the block it was used on.
      *
      * @return defines whether or not to play the placing animation, we dont want to do this on server.
-	 *
-	 * TODO this will likely have to be made significantly more generic so that we can simply extend it for any train/rollingstock
-	 * TODO after that, make it into an List array loader from the main class to silplify API use.
      */
     @Override
     public boolean onItemUse(ItemStack itemStack, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ, int blockSide, float pointToRayX, float pointToRayY, float pointToRayZ) {
         
 		if (RailUtility.isRailBlockAt(worldObj, posX,posY,posZ) && !worldObj.isRemote) {
-            
-			int playerMeta = MathHelper.floor_double((playerEntity.rotationYaw / 90.0F) + 2.5D) & 3;
+
             //IMPORTANT this defines the entity used
-			FirstTrain entity = new FirstTrain(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D);
+            FirstTrain entity = new FirstTrain(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D);
+
+
+			int playerMeta = MathHelper.floor_double((playerEntity.rotationYaw / 90.0F) + 2.5D) & 3;
 
             if (((BlockRailBase)worldObj.getBlock(posX,posY,posZ)).getBasicRailMetadata(worldObj, null,posX,posY,posZ) == 1){
 

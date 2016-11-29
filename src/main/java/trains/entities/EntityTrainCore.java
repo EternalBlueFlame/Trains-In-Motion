@@ -7,6 +7,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
+import net.minecraft.client.audio.ISound;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
@@ -20,7 +21,10 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
 import trains.entities.trains.FirstTrain;
-import trains.utility.*;
+import trains.utility.ClientProxy;
+import trains.utility.FuelHandler;
+import trains.utility.LampHandler;
+import trains.utility.RailUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -405,8 +409,8 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                 /**
                  *check if the bogies exist, because they may not yet, and if they do, check if they are actually moving or colliding.
                  * no point in processing movement if they aren't moving or if the train hit something.
-                 * if it is clear however, then we need to add velocity to the bogies, position the
-                 * but either way we have to position the bogies around the
+                 * if it is clear however, then we need to add velocity to the bogies based on the current state of the train's speed and fuel, and reposition the train.
+                 * but either way we have to position the bogies around the train, just to be sure they dont accidentally fly off at some point.
                  */
                 if (bogieSize>0){
 
@@ -416,11 +420,26 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                         }
                     } else {
                         float accel = (getAcceleration() * (accelerator /6)) * (((motion[0] + motion[2]) / getMaxSpeed()) * 100);
-                        if (accel == 0 && accelerator !=0){
-                            accel = 0.0001f;
+                        //compensate for if the train is stopped
+                        if (accel == 0 && accelerator >0){
+                            accel = getAcceleration() *0.10f;
+                        } else if (accel ==0 && accelerator <0){
+                            accel = -getAcceleration() * 0.10f;
+                        }
+                        //modify based on fuel
+                        if (furnaceFuel ==0){
+                                accel =0;
+                        }else if (getType() ==1){
+                            if (furnaceFuel <= getMaxFuel()/3){
+                                //no boiler pressure
+                                accel *= 0.1f;
+                            }else if (furnaceFuel <= getMaxFuel()/2){
+                                //low boiler pressure
+                                accel *= 0.5f;
+                            }
+                            //we don't compensate for normal boiler pressure because there would be no change.
                         }
 
-                        System.out.println(accelerator + " : " + accel);
                         motion = rotatePoint(new float[]{accel, 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
                         //move the bogies, unit of motion, blocks per second 1/20
                         for (EntityBogie currentBogie : bogie) {
@@ -584,5 +603,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public float getAcceleration(){return 0.025f;}
     public ItemStack getItem(){return null;}
     public int[] getHitboxPositions(){return new int[]{-1,0,1};}
+    public ISound getHorn(){return null;}
+    public ISound getRunning(){return null;}
 
 }
