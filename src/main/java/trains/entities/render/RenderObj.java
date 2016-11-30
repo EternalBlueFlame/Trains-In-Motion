@@ -24,53 +24,47 @@ public class RenderObj extends Render {
      * <h2>Custom hitbox render</h2>
      * because we use custom bounding boxes, we have to custom render them.
      * Credit to Justice/MisterJW for getting most of this function working
-     * we should probably replace this with a cube model so we can texture it.
      */
-    @Deprecated
     private void DrawCube(double x, double y, double z){
             //draw lines between the vertices
             GL11.glPushMatrix();
-            GL11.glBegin(GL11.GL_QUADS);
             x-=0.5d;
             z-=0.5d;
-            //bottom
-            GL11.glVertex3d(x +1, y, z);
-            GL11.glVertex3d(x +1, y, z + 1);
-            GL11.glVertex3d(x, y, z + 1);
-            GL11.glVertex3d(x, y, z);
-            //top
-            y+=2;
-            GL11.glVertex3d(x, y, z);
-            GL11.glVertex3d(x, y, z + 1);
-            GL11.glVertex3d(x +1, y, z + 1);
-            GL11.glVertex3d(x +1, y, z);
             //front
-            y-=2;
+        GL11.glBegin(GL11.GL_LINE_STRIP);
             GL11.glVertex3d(x, y, z);
             GL11.glVertex3d(x, y+2, z);
             GL11.glVertex3d(x +1, y+2, z);
             GL11.glVertex3d(x +1, y, z);
+        GL11.glColor3d(0, 0, 0);
+        GL11.glEnd();
             //back
             z+=1;
+        GL11.glBegin(GL11.GL_LINE_STRIP);
             GL11.glVertex3d(x +1, y, z);
             GL11.glVertex3d(x +1, y+2, z);
             GL11.glVertex3d(x, y+2, z);
             GL11.glVertex3d(x, y, z);
+        GL11.glColor3d(0, 0, 0);
+        GL11.glEnd();
             //left
             z-=1;
+        GL11.glBegin(GL11.GL_LINE_STRIP);
             GL11.glVertex3d(x, y, z+1);
             GL11.glVertex3d(x, y+2, z+1);
             GL11.glVertex3d(x, y+2, z);
             GL11.glVertex3d(x, y, z);
+        GL11.glColor3d(0, 0, 0);
+        GL11.glEnd();
             //right
             x+=1;
+        GL11.glBegin(GL11.GL_LINE_STRIP);
             GL11.glVertex3d(x, y, z);
             GL11.glVertex3d(x, y+2, z);
             GL11.glVertex3d(x, y+2, z+1);
             GL11.glVertex3d(x, y, z+1);
-
-            GL11.glColor3d(1.0, 0, 0);
-            GL11.glEnd();
+        GL11.glColor3d(0, 0, 0);
+        GL11.glEnd();
             GL11.glPopMatrix();
     }
 
@@ -112,7 +106,7 @@ public class RenderObj extends Render {
             double[] position;
             for (int i : ((EntityTrainCore) entity).getHitboxPositions()) {
                 position = rotatePoint(new double[]{i,0,0}, entity.rotationPitch, entity.rotationYaw, 0);
-                DrawCube(position[0]+x, position[1]+y, position[2]+z);
+               DrawCube(position[0]+x, position[1]+y, position[2]+z);
             }
 
 

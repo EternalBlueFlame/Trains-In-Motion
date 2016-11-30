@@ -21,10 +21,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
 import trains.entities.trains.FirstTrain;
-import trains.utility.ClientProxy;
-import trains.utility.FuelHandler;
-import trains.utility.LampHandler;
-import trains.utility.RailUtility;
+import trains.utility.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -544,14 +541,14 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
         for (int iteration : train.getHitboxPositions()){
             double[] position = rotatePoint(new double[]{iteration,0,0}, train.rotationPitch, train.rotationYaw, 0);
-            train.boundingBox.setBounds(train.posX + position[0], train.posY+0.5d+position[1], train.posZ+position[2], train.posX+1+position[0], train.posY+2.5d+position[1], train.posZ+1+position[2]);
+            AxisAlignedBB box = AxisAlignedBB.getBoundingBox(train.posX-0.5 + position[0], train.posY+0.5d+position[1], train.posZ-0.5+position[2], train.posX+0.5+position[0], train.posY+2.5d+position[1], train.posZ+0.5+position[2]);
 
-            int i = MathHelper.floor_double(train.boundingBox.minX + 0.001D);
-            int j = MathHelper.floor_double(train.boundingBox.minY + 0.001D);
-            int k = MathHelper.floor_double(train.boundingBox.minZ + 0.001D);
-            int l = MathHelper.floor_double(train.boundingBox.maxX - 0.001D);
-            int i1 = MathHelper.floor_double(train.boundingBox.maxY - 0.001D);
-            int j1 = MathHelper.floor_double(train.boundingBox.maxZ - 0.001D);
+            int i = MathHelper.floor_double(box.minX + 0.001D);
+            int j = MathHelper.floor_double(box.minY + 0.001D);
+            int k = MathHelper.floor_double(box.minZ + 0.001D);
+            int l = MathHelper.floor_double(box.maxX - 0.001D);
+            int i1 = MathHelper.floor_double(box.maxY - 0.001D);
+            int j1 = MathHelper.floor_double(box.maxZ - 0.001D);
 
             if (train.worldObj.checkChunksExist(i, j, k, l, i1, j1)) {
                 for (int k1 = i; k1 <= l; ++k1) {
@@ -567,14 +564,17 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
             }
 
 
-            List list = train.worldObj.getEntitiesWithinAABBExcludingEntity(train, train.boundingBox);
+            List list = train.worldObj.getEntitiesWithinAABBExcludingEntity(train, box);
             if (list != null && !list.isEmpty()) {
                 for (Object entity: list) {
                     if (entity instanceof Entity) {
                         if (entity != train.riddenByEntity && !(entity instanceof EntityBogie)) {
                             if (entity instanceof EntityLiving || entity instanceof EntityPlayer) {
                                 //dependant on velocity, fling it and do damage.
-                                ((Entity) entity).attackEntityFrom(new EntityDamageSource("Train", train), (float)(train.bogie.get(0).motionX + train.bogie.get(0).motionZ)*1000);
+                                if (train.motionX + train.motionZ < 0.001) {
+                                    ((Entity) entity).attackEntityFrom(new EntityDamageSource("Train", train), (float) (train.bogie.get(0).motionX + train.bogie.get(0).motionZ) * 1000);
+                                }
+                                ((Entity) entity).applyEntityCollision(train);
                                 return false;
                             } else {
                                 return true;
@@ -584,7 +584,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                 }
             }
         }
-        train.boundingBox.setBounds(train.posX, train.posY+0.5d, train.posZ, train.posX+1, train.posY+2.5d, train.posZ+1);
         //returning true stops the train, false lets it move.
         return false;
     }

@@ -46,7 +46,7 @@ public class FirstTrain extends EntityTrainCore {
     private static final int inventorySize= 3;
     private static final float offsetXZ =0f;
     private static final List<Double> bogieOffset = Arrays.asList(-1.0D, 1.0D);
-    private static final int[] hitboxPositions = new int[]{-2,-1,0,1};
+    private static final int[] hitboxPositions = new int[]{-1,0,1};
     private static final ResourceLocation horn = URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");
     private static final ResourceLocation running = URIRegistry.SOUND_RUNNING.getResource("r080brigadelok.ogg");
     private static final String trainName = "0-8-0 Brigadelok";
