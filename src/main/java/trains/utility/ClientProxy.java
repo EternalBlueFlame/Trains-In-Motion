@@ -6,8 +6,11 @@ import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
@@ -94,7 +97,12 @@ public class ClientProxy extends CommonProxy {
                 URIRegistry.TEXTURE_GENERIC.getResource(reg.texture)
         ));
         }
-
+        RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.multipartHitbox.class, new Render() {
+            @Override
+            public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {}
+            @Override
+            protected ResourceLocation getEntityTexture(Entity p_110775_1_) {return null;}
+        });
 
         ClientRegistry.registerKeyBinding(KeyLamp);
         ClientRegistry.registerKeyBinding(KeyInventory);

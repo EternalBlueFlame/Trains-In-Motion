@@ -106,7 +106,7 @@ public class RenderObj extends Render {
             double[] position;
             for (int i : ((EntityTrainCore) entity).getHitboxPositions()) {
                 position = rotatePoint(new double[]{i,0,0}, entity.rotationPitch, entity.rotationYaw, 0);
-               DrawCube(position[0]+x, position[1]+y, position[2]+z);
+               //DrawCube(position[0]+x, position[1]+y, position[2]+z);
             }
 
 

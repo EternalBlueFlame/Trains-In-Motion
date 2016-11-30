@@ -71,13 +71,7 @@ public class EventHandler {
      */
     @SubscribeEvent
     public void attackEntityEvent(AttackEntityEvent event){
-        if (event.target instanceof EntityTrainCore && event.entityPlayer.capabilities.isCreativeMode){
-            for (EntityMinecart cart : ((EntityTrainCore)event.target).bogie){
-                cart.worldObj.removeEntity(cart);
-            }
 
-            event.target.worldObj.removeEntity(event.target);
-        }
     }
 
 }

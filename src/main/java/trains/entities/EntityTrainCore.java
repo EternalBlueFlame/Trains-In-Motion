@@ -5,18 +5,17 @@ import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockAir;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.IEntityMultiPart;
+import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.EntityDamageSource;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
@@ -33,7 +32,7 @@ import static trains.utility.RailUtility.rotatePoint;
  * <h2> Train core</h2>
  * this is the management core for all train
  */
-public class EntityTrainCore extends Entity implements IInventory, IEntityAdditionalSpawnData {
+public class EntityTrainCore extends Entity implements IInventory, IEntityAdditionalSpawnData, IEntityMultiPart {
 
     /**
      * <h3>use variables</h3>
@@ -56,6 +55,8 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public int accelerator =0; //defines the value of how much to speed up, or brake the
     protected float[] motion = new float[]{0,0,0};
     private boolean isReverse =false;
+    public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
+    private HitboxHandler hitboxHandler = new HitboxHandler();
 
 
     /**
@@ -143,23 +144,17 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         return isLocked || owner.equals(player.getUniqueID());
     }
     @Override
-    public AxisAlignedBB getBoundingBox(){
-        return boundingBox;
-    }
-    @Override
-    public AxisAlignedBB getCollisionBox(Entity collidedWith){
-        if (!(collidedWith instanceof EntityBogie) && collidedWith != riddenByEntity) {
-            return boundingBox;
-        }
-        return null;
-    }
-    @Override
-    public boolean canBeCollidedWith() {
-        return true;
-    }
-    @Override
     public void entityInit(){}
-
+    @Override
+    public World func_82194_d(){return worldObj;}
+    @Override
+    public boolean attackEntityFromPart(EntityDragonPart part, DamageSource damageSource, float damage){
+     return HitboxHandler.AttackEvent(part,damageSource,damage);
+    }
+    @Override
+    public Entity[] getParts(){
+        return hitboxList.toArray(new HitboxHandler.multipartHitbox[hitboxList.size()]);
+    }
 
 
     /**
@@ -411,7 +406,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                  */
                 if (bogieSize>0){
 
-                    if (getCollision(this) & (accelerator==0 && motion[0] + motion[2] == 0)){
+                    if (hitboxHandler.getCollision(this) & (accelerator==0 && motion[0] + motion[2] == 0)){
                         for (EntityBogie currentBogie : bogie) {
                             currentBogie.setVelocity(0, 0, 0);
                         }
@@ -530,63 +525,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         }
     }
 
-
-
-
-    /**
-     * <h3>Process Entity Collision for train</h3>
-     * this checks an area for blocks and other entities and returns true if there is something in that area besides what is supposed to be, (mounted players and bogies).
-     */
-    private static boolean getCollision(EntityTrainCore train){
-
-        for (int iteration : train.getHitboxPositions()){
-            double[] position = rotatePoint(new double[]{iteration,0,0}, train.rotationPitch, train.rotationYaw, 0);
-            AxisAlignedBB box = AxisAlignedBB.getBoundingBox(train.posX-0.5 + position[0], train.posY+0.5d+position[1], train.posZ-0.5+position[2], train.posX+0.5+position[0], train.posY+2.5d+position[1], train.posZ+0.5+position[2]);
-
-            int i = MathHelper.floor_double(box.minX + 0.001D);
-            int j = MathHelper.floor_double(box.minY + 0.001D);
-            int k = MathHelper.floor_double(box.minZ + 0.001D);
-            int l = MathHelper.floor_double(box.maxX - 0.001D);
-            int i1 = MathHelper.floor_double(box.maxY - 0.001D);
-            int j1 = MathHelper.floor_double(box.maxZ - 0.001D);
-
-            if (train.worldObj.checkChunksExist(i, j, k, l, i1, j1)) {
-                for (int k1 = i; k1 <= l; ++k1) {
-                    for (int l1 = j; l1 <= i1; ++l1) {
-                        for (int i2 = k; i2 <= j1; ++i2) {
-                            Block block = train.worldObj.getBlock(k1, l1, i2);
-                            if (!(block instanceof BlockAir) && !RailUtility.isRailBlockAt(block)){
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-
-            List list = train.worldObj.getEntitiesWithinAABBExcludingEntity(train, box);
-            if (list != null && !list.isEmpty()) {
-                for (Object entity: list) {
-                    if (entity instanceof Entity) {
-                        if (entity != train.riddenByEntity && !(entity instanceof EntityBogie)) {
-                            if (entity instanceof EntityLiving || entity instanceof EntityPlayer) {
-                                //dependant on velocity, fling it and do damage.
-                                if (train.motionX + train.motionZ < 0.001) {
-                                    ((Entity) entity).attackEntityFrom(new EntityDamageSource("Train", train), (float) (train.bogie.get(0).motionX + train.bogie.get(0).motionZ) * 1000);
-                                }
-                                ((Entity) entity).applyEntityCollision(train);
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        //returning true stops the train, false lets it move.
-        return false;
-    }
 
     /**
      * <h2>reverse inheritance functions</h2>
