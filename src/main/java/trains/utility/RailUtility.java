@@ -11,6 +11,7 @@ import trains.entities.EntityBogie;
 public class RailUtility {
     public static final float radianF = (float) Math.PI / 180.0f;
     public static final double radianD = Math.PI / 180.0d;
+    public static final float degreesF = (float) (180.0d / Math.PI);
     /**
      * <h2>Vanilla Track Overrrides</h2>
      * TODO: need ZND API for ITrackBase

@@ -48,7 +48,7 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
     /**
      * <h3>movement and bogies</h3>
-     * variables to store bogies, motion, and other moement related things.
+     * variables to store bogies, motion, collision, and other movement related things.
      */
     public List<EntityBogie> bogie = new ArrayList<EntityBogie>();
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
@@ -118,18 +118,26 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         for (int i=0; i<=craftingSlots;i++){
             inventory.add(null);
         }
-        setSize(1,2);
+        setSize(1f,2);
+        this.boundingBox.minX = 0;
+        this.boundingBox.minY = 0;
+        this.boundingBox.minZ = 0;
+        this.boundingBox.maxX = 0;
+        this.boundingBox.maxY = 0;
+        this.boundingBox.maxZ = 0;
     }
     //this constructor is lower level spawning
     public EntityTrainCore(World world){
         super(world);
-
     }
 
     /**
      * <h2>base entity overrides</h2>
      * modify basic entity variables to give different uses/values.
      * entity init runs right before the first tick, but we don't use this.
+     * collision and bounding box stuff just return the in-built stuff.
+     * getParts returns the list of hitboxes so they can be treated as if they are part of this entity.
+     * The positionAndRotation2 override is intended to do the same as the super, except for giving a Y offset on collision, we skip that similar to EntityMinecart.
      */
     public void setOwner(UUID player){owner = player;}
     public UUID getOwnerUUID(){return owner;}
@@ -149,11 +157,22 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     public World func_82194_d(){return worldObj;}
     @Override
     public boolean attackEntityFromPart(EntityDragonPart part, DamageSource damageSource, float damage){
-     return HitboxHandler.AttackEvent(part,damageSource,damage);
+     return HitboxHandler.AttackEvent(this,damageSource,damage);
     }
     @Override
     public Entity[] getParts(){
         return hitboxList.toArray(new HitboxHandler.multipartHitbox[hitboxList.size()]);
+    }
+    @Override
+    public AxisAlignedBB getBoundingBox(){return boundingBox;}
+    @Override
+    public AxisAlignedBB getCollisionBox(Entity collidedWith){return boundingBox;}
+    @Override
+    public boolean canBeCollidedWith() {return true;}
+    @SideOnly(Side.CLIENT)
+    public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
+        this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
+        this.setRotation(p_70056_7_, p_70056_8_);
     }
 
 
@@ -363,8 +382,6 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
 
 
 
-
-
     /**
     * <h2> onUpdate </h2>
     *
@@ -445,9 +462,9 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
                                 (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D);
 
                         setRotation(
-                                (float) Math.toDegrees(Math.atan2(
+                                (float) (Math.atan2(
                                         bogie.get(bogieSize).posZ - bogie.get(0).posZ,
-                                        bogie.get(bogieSize).posX - bogie.get(0).posX)),
+                                        bogie.get(bogieSize).posX - bogie.get(0).posX)) * RailUtility.degreesF,
                                 MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
                         );
                     }

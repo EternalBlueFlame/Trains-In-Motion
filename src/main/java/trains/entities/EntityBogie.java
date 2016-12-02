@@ -37,7 +37,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     public EntityBogie(World world, double xPos, double yPos, double zPos, int parent) {
         super(world,xPos, yPos, zPos);
             parentId = parent;
-        boundingBox.setBounds(0,0,0,0,0,0);
     }
 
     @Override
@@ -102,6 +101,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     @Override
     public AxisAlignedBB getCollisionBox(Entity collidedWith){
         return null;
+    }
+    @Override
+    public boolean canBeCollidedWith() {
+        return false;
     }
 
     /**

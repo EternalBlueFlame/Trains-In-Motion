@@ -83,7 +83,6 @@ public class RenderObj extends Render {
             GL11.glRotatef(entity.rotationYaw, 0.0F, 1.0F, 0.0F);
             GL11.glRotatef(entity.rotationPitch, 0.0F, 0.0F, 1.0F);
             GL11.glPushMatrix();
-            GL11.glLineWidth(5F);
         }
         //Bind the texture and render the model
         bindTexture(texture);

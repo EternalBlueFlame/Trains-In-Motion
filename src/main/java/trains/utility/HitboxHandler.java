@@ -1,5 +1,7 @@
 package trains.utility;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.entity.Entity;
@@ -21,6 +23,13 @@ import static trains.utility.RailUtility.rotatePoint;
 
 public class HitboxHandler {
 
+    /**
+     * <h2> basic hitbox class</h2>
+     * a generic hitbox class used for adding multiple hitboxes to an entity.
+     * requires the entity to override getParts() and extend IEntityMultiPart
+     * The hitboxes also need to be moved every onUpdate, for trains this is handled in
+     * @see HitboxHandler#getCollision(EntityTrainCore)
+     */
     public class multipartHitbox extends EntityDragonPart{
 
         public multipartHitbox(IEntityMultiPart host, double posX, double posY , double posZ){
@@ -29,12 +38,12 @@ public class HitboxHandler {
             this.posY = posY;
             this.posZ = posZ;
             this.setSize(1,2);
-            this.boundingBox.minX = posX-0.5;
+            this.boundingBox.minX = posX-0.45;
             this.boundingBox.minY = posY;
-            this.boundingBox.minZ = posZ-0.5;
-            this.boundingBox.maxX = posX+0.5;
+            this.boundingBox.minZ = posZ-0.45;
+            this.boundingBox.maxX = posX+0.45;
             this.boundingBox.maxY = posY+2;
-            this.boundingBox.maxZ = posZ+0.5;
+            this.boundingBox.maxZ = posZ+0.45;
         }
         @Override
         public AxisAlignedBB getBoundingBox(){
@@ -48,6 +57,12 @@ public class HitboxHandler {
         public boolean canBeCollidedWith() {
             return true;
         }
+        @SideOnly(Side.CLIENT)
+        public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
+            this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
+            this.setRotation(p_70056_7_, p_70056_8_);
+        }
+
     }
 
 
@@ -61,9 +76,7 @@ public class HitboxHandler {
             double[] position = rotatePoint(new double[]{train.getHitboxPositions()[iteration], 0, 0}, train.rotationPitch, train.rotationYaw, 0);
             if (train.hitboxList.size() <= iteration) {
                 train.hitboxList.add(new multipartHitbox(train, position[0] + train.posX, position[1] + train.posY, position[2] + train.posZ));
-                if (train.worldObj.isRemote) {
-                    train.worldObj.spawnEntityInWorld(train.hitboxList.get(iteration));
-                }
+                train.worldObj.spawnEntityInWorld(train.hitboxList.get(iteration));
             }
             train.hitboxList.get(iteration).onUpdate();
             train.hitboxList.get(iteration).setLocationAndAngles(position[0] + train.posX, position[1] + train.posY, position[2] + train.posZ, 0, 0);
@@ -72,7 +85,7 @@ public class HitboxHandler {
 
         for (multipartHitbox box : train.hitboxList){
             int i = MathHelper.floor_double(box.boundingBox.minX + 0.001D);
-            int j = MathHelper.floor_double(box.boundingBox.minY -0.501D);
+            int j = MathHelper.floor_double(box.boundingBox.minY +0.501D);
             int k = MathHelper.floor_double(box.boundingBox.minZ + 0.001D);
             int l = MathHelper.floor_double(box.boundingBox.maxX - 0.001D);
             int i1 = MathHelper.floor_double(box.boundingBox.maxY - 0.001D);
@@ -84,6 +97,7 @@ public class HitboxHandler {
                         for (int i2 = k; i2 <= j1; ++i2) {
                             Block block = train.worldObj.getBlock(k1, l1, i2);
                             if (!(block instanceof BlockAir) && !RailUtility.isRailBlockAt(block)){
+                                System.out.println(block.getClass().toString());
                                 return true;
                             }
                         }
@@ -96,15 +110,19 @@ public class HitboxHandler {
             if (list != null && !list.isEmpty()) {
                 for (Object entity: list) {
                     if (entity instanceof Entity) {
+                        if (entity instanceof multipartHitbox && train.hitboxList.contains(entity)){
+                            return false;
+                        }
                         if (entity != train.riddenByEntity && !(entity instanceof EntityBogie)) {
                             if (entity instanceof EntityLiving || entity instanceof EntityPlayer) {
                                 //dependant on velocity, fling it and do damage.
-                                if (train.motionX + train.motionZ < 0.001) {
+                                if (train.motionX + train.motionZ != 0) {
                                     ((Entity) entity).attackEntityFrom(new EntityDamageSource("Train", train), (float) (train.bogie.get(0).motionX + train.bogie.get(0).motionZ) * 1000);
                                 }
                                 ((Entity) entity).applyEntityCollision(train);
                                 return false;
                             } else {
+                                System.out.println(entity.getClass().toString());
                                 return true;
                             }
                         }
@@ -117,10 +135,17 @@ public class HitboxHandler {
     }
 
 
-
-    public static boolean AttackEvent(EntityDragonPart part, DamageSource damageSource, float damage){
-        if (damageSource.getEntity() instanceof EntityPlayer && ((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode){
-            EntityTrainCore host = ((EntityTrainCore)part.entityDragonObj);
+    /**
+     * <h2>Entity Attacked</h2>
+     * covers when a player, or anything else for that matter, hits the train.
+     * we will need to basically clone this for rollingstock.
+     * @param host the train entity that was attacked
+     * @param damageSource the thing that hit it
+     * @param damage the damage done to it, i think.
+     * @return true or false if it was actually destroyed, or its whether or not to play the player punch animation, either way its kinda trivial.
+     */
+    public static boolean AttackEvent(EntityTrainCore host, DamageSource damageSource, float damage){
+        if (damageSource.getEntity() instanceof EntityPlayer && ((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode && !damageSource.isProjectile()){
             for (EntityMinecart cart : host.bogie){
                 cart.worldObj.removeEntity(cart);
             }
