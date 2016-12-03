@@ -5,7 +5,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.feature.WorldGenMinable;
-import trains.registry.BlockRegistry;
+import trains.registry.GenericRegistry;
 
 import java.util.Random;
 
@@ -15,7 +15,7 @@ public class OreGen implements IWorldGenerator{
 	 * we define the ores here for better performance.
 	 * normally generating this every call would be inefficient but having it defined in a static function changes the variable bindings to be significantly more efficient.
      */
-	private static WorldGenMinable oilMine(Random random){return new WorldGenMinable(BlockRegistry.blockFluidOil, 4 + random.nextInt(30 - 4), Blocks.stone);}
+	private static WorldGenMinable oilMine(Random random){return new WorldGenMinable(GenericRegistry.blockFluidOil, 4 + random.nextInt(30 - 4), Blocks.stone);}
 
 
 	/**

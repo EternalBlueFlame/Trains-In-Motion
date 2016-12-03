@@ -16,6 +16,7 @@ import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 import trains.entities.EntityBogie;
 import trains.entities.EntityTrainCore;
+import trains.entities.GenericRailTransport;
 
 import java.util.List;
 
@@ -144,7 +145,7 @@ public class HitboxHandler {
      * @param damage the damage done to it, i think.
      * @return true or false if it was actually destroyed, or its whether or not to play the player punch animation, either way its kinda trivial.
      */
-    public static boolean AttackEvent(EntityTrainCore host, DamageSource damageSource, float damage){
+    public static boolean AttackEvent(GenericRailTransport host, DamageSource damageSource, float damage){
         if (damageSource.getEntity() instanceof EntityPlayer && ((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode && !damageSource.isProjectile()){
             for (EntityMinecart cart : host.bogie){
                 cart.worldObj.removeEntity(cart);

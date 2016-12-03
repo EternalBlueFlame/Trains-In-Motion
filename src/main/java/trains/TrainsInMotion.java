@@ -16,8 +16,7 @@ import trains.entities.EntityBogie;
 import trains.gui.HUDTrain;
 import trains.items.TiMTab;
 import trains.networking.PacketKeyPress;
-import trains.registry.BlockRegistry;
-import trains.registry.ItemRegistry;
+import trains.registry.GenericRegistry;
 import trains.registry.TrainRegistry;
 import trains.utility.CommonProxy;
 import trains.utility.EventHandler;
@@ -80,8 +79,7 @@ public class TrainsInMotion {
      */
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        BlockRegistry.RegisterBlocks();
-        ItemRegistry.RegisterItems();
+        GenericRegistry.RegisterStuff();
 
         //loop for registering the entities.
         int index =3;
@@ -91,6 +89,7 @@ public class TrainsInMotion {
         for (TrainRegistry train : TrainRegistry.listTrains()) {
             cpw.mods.fml.common.registry.EntityRegistry.registerGlobalEntityID(train.trainClass, train.entityWorldName, index);
             cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(train.trainClass, train.entityWorldName, index, TrainsInMotion.instance, 64, 1, true);
+            GameRegistry.registerItem(train.item, train.item.getUnlocalizedName().substring(5));
             index++;
         }
 

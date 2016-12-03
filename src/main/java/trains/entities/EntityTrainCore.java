@@ -1,70 +1,47 @@
 package trains.entities;
 
-import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.audio.ISound;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.IEntityMultiPart;
-import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTank;
-import trains.entities.trains.FirstTrain;
-import trains.utility.*;
+import trains.utility.FuelHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static trains.utility.RailUtility.rotatePoint;
-
 /**
  * <h2> Train core</h2>
  * this is the management core for all train
  */
-public class EntityTrainCore extends Entity implements IInventory, IEntityAdditionalSpawnData, IEntityMultiPart {
+public class EntityTrainCore extends GenericRailTransport implements IInventory {
 
     /**
      * <h3>use variables</h3>
      * switch variables, mostly used to maintain things.
      */
-    public boolean isLocked = false; //mostly used to lock other players from using/accessing parts of the cart/train
     public boolean brake = false; //bool for the train/rollingstock's break.
     public boolean isRunning = false;// if the train is running/using fuel
     public int furnaceFuel = 0; //the amount of fuel in the furnace, only used for steam and nuclear trains
     public int trainTicks =0; //defines the train's tick count.
-    public LampHandler lamp = new LampHandler(); //manages the lamp, or lack there of.
 
 
     /**
      * <h3>movement and bogies</h3>
      * variables to store bogies, motion, collision, and other movement related things.
      */
-    public List<EntityBogie> bogie = new ArrayList<EntityBogie>();
-    public List<double[]> bogieXYZ = new ArrayList<double[]>();
     public int accelerator =0; //defines the value of how much to speed up, or brake the
-    protected float[] motion = new float[]{0,0,0};
-    private boolean isReverse =false;
-    public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
-    private HitboxHandler hitboxHandler = new HitboxHandler();
 
 
     /**
      * <h3>long-term stored variables</h3>
      * these variables usually don't change often, or maybe even ever.
      */
-    public int[] colors = new int[]{0,0,0}; //allows certain parts of certain trains to be recolored
-    public UUID owner = null;  //universal, get train owner
     public String destination ="";
 
     /**
@@ -131,108 +108,23 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         super(world);
     }
 
-    /**
-     * <h2>base entity overrides</h2>
-     * modify basic entity variables to give different uses/values.
-     * entity init runs right before the first tick, but we don't use this.
-     * collision and bounding box stuff just return the in-built stuff.
-     * getParts returns the list of hitboxes so they can be treated as if they are part of this entity.
-     * The positionAndRotation2 override is intended to do the same as the super, except for giving a Y offset on collision, we skip that similar to EntityMinecart.
-     */
-    public void setOwner(UUID player){owner = player;}
-    public UUID getOwnerUUID(){return owner;}
-    @Override
-    public boolean canBePushed()
-    {
-        return false;
-    }
     @Override
     public boolean isUseableByPlayer(EntityPlayer player){
         //if it is locked, return if player is owner, otherwise return false.
         return isLocked || owner.equals(player.getUniqueID());
     }
-    @Override
-    public void entityInit(){}
-    @Override
-    public World func_82194_d(){return worldObj;}
-    @Override
-    public boolean attackEntityFromPart(EntityDragonPart part, DamageSource damageSource, float damage){
-     return HitboxHandler.AttackEvent(this,damageSource,damage);
-    }
-    @Override
-    public Entity[] getParts(){
-        return hitboxList.toArray(new HitboxHandler.multipartHitbox[hitboxList.size()]);
-    }
-    @Override
-    public AxisAlignedBB getBoundingBox(){return boundingBox;}
-    @Override
-    public AxisAlignedBB getCollisionBox(Entity collidedWith){return boundingBox;}
-    @Override
-    public boolean canBeCollidedWith() {return true;}
-    @SideOnly(Side.CLIENT)
-    public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
-        this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
-        this.setRotation(p_70056_7_, p_70056_8_);
-    }
 
 
     /**
      * <h2> Data Syncing and Saving </h2>
-     *
-     * used for syncing the bogies between client and server, syncing the spawn data with client and server(SpawnData), and saving/loading information from world (NBT)
-     * @see EntityBogie#readSpawnData(ByteBuf)
-     * @see IEntityAdditionalSpawnData
-     * @see NBTTagCompound
-     * the spawn data will make sure that variables that don't uually sync on spawn, like from the item, get synced.
-     * the NBT will make sure that variables save to the world so it will be there next time you load the world up.
+     * this is explained in
+     * @see GenericRailTransport#readSpawnData(ByteBuf)
      */
-    @SideOnly(Side.CLIENT)
-    public void addbogies(EntityBogie cart){
-        bogie.add(cart);
-    }
-    @Override
-    public void readSpawnData(ByteBuf additionalData) {
-        isReverse = additionalData.readBoolean();
-        owner = new UUID(additionalData.readLong(), additionalData.readLong());
-        //we loop using the offset double length because we expect bogieXYZ to be null.
-        for (int i=0; i<getBogieOffsets().size(); i++){
-            bogieXYZ.add(new double[]{additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble()});
-        }
-
-    }
-    @Override
-    public void writeSpawnData(ByteBuf buffer) {
-        buffer.writeBoolean(isReverse);
-        buffer.writeLong(owner.getMostSignificantBits());
-        buffer.writeLong(owner.getLeastSignificantBits());
-        for (double[] xyz : bogieXYZ) {
-            buffer.writeDouble(xyz[0]);
-            buffer.writeDouble(xyz[1]);
-            buffer.writeDouble(xyz[2]);
-        }
-    }
-
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
+        super.readEntityFromNBT(tag);
         isRunning = tag.getBoolean("isrunning");
-        isLocked = tag.getBoolean("extended.islocked");
         brake = tag.getBoolean("extended.brake");
-        lamp.isOn = tag.getBoolean("extended.lamp");
-        lamp.X = tag.getInteger("extended.lamp.x");
-        lamp.Y = tag.getInteger("extended.lamp.y");
-        lamp.Z = tag.getInteger("extended.lamp.z");
-        isReverse = tag.getBoolean("extended.isreverse");
-        owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
-        //read through the bogie positions
-        NBTTagList bogieTaglList = tag.getTagList("extended.bogies", 10);
-        for (int i = 0; i < bogieTaglList.tagCount(); i++) {
-            NBTTagCompound nbttagcompound1 = bogieTaglList.getCompoundTagAt(i);
-            byte b0 = nbttagcompound1.getByte("bogie");
-
-            if (b0 >= 0) {
-                bogieXYZ.add(new double[]{nbttagcompound1.getDouble("bogieindex.a." + i),nbttagcompound1.getDouble("bogieindex.b." + i),nbttagcompound1.getDouble("bogieindex.c." + i)});
-            }
-        }
         //read through the itemstacks
         NBTTagList taglist = tag.getTagList("items", 10);
         for (int i = 0; i < taglist.tagCount(); i++) {
@@ -250,29 +142,9 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
+        super.writeEntityToNBT(tag);
         tag.setBoolean("isrunning",isRunning);
-        tag.setBoolean("extended.islocked", isLocked);
         tag.setBoolean("extended.brake", brake);
-        tag.setBoolean("extended.lamp", lamp.isOn);
-        tag.setInteger("extended.lamp.x", lamp.X);
-        tag.setInteger("extended.lamp.y", lamp.Y);
-        tag.setInteger("extended.lamp.z", lamp.Z);
-        tag.setBoolean("extended.isreverse", isReverse);
-        tag.setLong("extended.ownerm", owner.getMostSignificantBits());
-        tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
-        //write the list of bogies
-        NBTTagList nbtBogieTaglist = new NBTTagList();
-        for (int i = 0; i < bogieXYZ.size(); ++i) {
-            if (bogieXYZ.get(i) != null) {
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                nbttagcompound1.setByte("bogie", (byte)i);
-                nbttagcompound1.setDouble("bogieindex.a." + i,bogieXYZ.get(i)[0]);
-                nbttagcompound1.setDouble("bogieindex.b." + i,bogieXYZ.get(i)[1]);
-                nbttagcompound1.setDouble("bogieindex.c." + i,bogieXYZ.get(i)[2]);
-                nbtBogieTaglist.appendTag(nbttagcompound1);
-            }
-        }
-        tag.setTag("extended.bogies", nbtBogieTaglist);
         //write the itemset to a tag list before adding it
         NBTTagList nbttaglist = new NBTTagList();
         for (int i = 0; i < inventory.size(); ++i) {
@@ -381,111 +253,49 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     }
 
 
+    /**
+     * <h2> process train movement</h2>
+     * called by the super class to figure out the amount of movement to apply every tick
+     * @see GenericRailTransport#onUpdate()
+     */
+    public float processMovement(){
+        if (hitboxHandler.getCollision(this) & (accelerator==0 && motion[0] + motion[2] == 0) & furnaceFuel==0){
+            //if we shouldn't be moving, return 0.
+            return 0;
+        } else {
+            float accel = (getAcceleration() * (accelerator / 6)) * (((motion[0] + motion[2]) / getMaxSpeed()) * 100);
+            //compensate for if the train is stopped
+            if (accel == 0 && accelerator > 0) {
+                accel = getAcceleration() * 0.10f;
+            } else if (accel == 0 && accelerator < 0) {
+                accel = -getAcceleration() * 0.10f;
+            }
+            //modify based on fuel
+            if (getType() == 1) {
+                if (furnaceFuel <= getMaxFuel() / 3) {
+                    //no boiler pressure
+                    accel *= 0.1f;
+                } else if (furnaceFuel <= getMaxFuel() / 2) {
+                    //low boiler pressure
+                    accel *= 0.5f;
+                }
+                //we don't compensate for normal/high boiler pressure because there would be no change.
+                //TODO maybe a compensation for superheated boiler pressure?
+            }
+            return accel;
+        }
+    }
 
     /**
-    * <h2> onUpdate </h2>
-    *
-    * defines what should be done every tick
-    * used for:
-    * managing the list of bogies which are used for defining position and rotation, respawning them if they disappear.* managing speed, acceleration. and direction.
-    * managing rotationYaw and rotationPitch.
-    * and calling the fuel handler for fuel consumption.
-    * @see FuelHandler#ManageFuel(EntityTrainCore)
-    * being sure the train is listed in the main class (for lighting management).
-    * @see ClientProxy#onTick(TickEvent.ClientTickEvent)
-     *
-     * TODO: we need to put back lamp management
-     * TODO: yaw rotation isn't right.
-    */
-
+     * <h2> on entity update</h2>
+     * after the super method is dealt with,
+     * @see GenericRailTransport#onUpdate()
+     * every 5 ticks we also need to deal with the fuel.
+     * @see FuelHandler#ManageFuel(EntityTrainCore)
+     */
     @Override
-    public void onUpdate() {
-            //be sure bogies exist
-            int xyzSize = bogieXYZ.size()-1;
-            if (xyzSize > 0) {
-                int bogieSize = bogie.size() - 1;
-                //always be sure the bogies exist on client and server.
-                if (!worldObj.isRemote && bogieSize < 1) {
-                    for (double[] pos : bogieXYZ) {
-                        //it should never be possible for bogieXYZ to be null unless there is severe server data corruption.
-                            EntityBogie spawnBogie = new EntityBogie(worldObj, pos[0], pos[1], pos[2], getEntityId());
-                            worldObj.spawnEntityInWorld(spawnBogie);
-                            bogie.add(spawnBogie);
-                        }
-                    bogieSize = xyzSize;
-                }
-
-                /**
-                 *check if the bogies exist, because they may not yet, and if they do, check if they are actually moving or colliding.
-                 * no point in processing movement if they aren't moving or if the train hit something.
-                 * if it is clear however, then we need to add velocity to the bogies based on the current state of the train's speed and fuel, and reposition the train.
-                 * but either way we have to position the bogies around the train, just to be sure they dont accidentally fly off at some point.
-                 */
-                if (bogieSize>0){
-
-                    if (hitboxHandler.getCollision(this) & (accelerator==0 && motion[0] + motion[2] == 0)){
-                        for (EntityBogie currentBogie : bogie) {
-                            currentBogie.setVelocity(0, 0, 0);
-                        }
-                    } else {
-                        float accel = (getAcceleration() * (accelerator /6)) * (((motion[0] + motion[2]) / getMaxSpeed()) * 100);
-                        //compensate for if the train is stopped
-                        if (accel == 0 && accelerator >0){
-                            accel = getAcceleration() *0.10f;
-                        } else if (accel ==0 && accelerator <0){
-                            accel = -getAcceleration() * 0.10f;
-                        }
-                        //modify based on fuel
-                        if (furnaceFuel ==0){
-                                accel =0;
-                        }else if (getType() ==1){
-                            if (furnaceFuel <= getMaxFuel()/3){
-                                //no boiler pressure
-                                accel *= 0.1f;
-                            }else if (furnaceFuel <= getMaxFuel()/2){
-                                //low boiler pressure
-                                accel *= 0.5f;
-                            }
-                            //we don't compensate for normal boiler pressure because there would be no change.
-                        }
-
-                        motion = rotatePoint(new float[]{accel, 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                        //move the bogies, unit of motion, blocks per second 1/20
-                        for (EntityBogie currentBogie : bogie) {
-                            currentBogie.addVelocity(motion[0], currentBogie.motionY, motion[2]);
-                            currentBogie.minecartMove();
-                        }
-                        //position train
-                        setPosition(
-                                (bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
-                                (bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) * 0.5D,
-                                (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D);
-
-                        setRotation(
-                                (float) (Math.atan2(
-                                        bogie.get(bogieSize).posZ - bogie.get(0).posZ,
-                                        bogie.get(bogieSize).posX - bogie.get(0).posX)) * RailUtility.degreesF,
-                                MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
-                        );
-                    }
-
-                    //align bogies
-                    for (int i = 0; i < bogie.size(); ) {
-                        float[] var = rotatePoint(new float[]{(float) getBogieOffsets().get(i).doubleValue(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                        bogie.get(i).setPosition(var[0] + posX, bogie.get(i).posY, var[2] + posZ);
-                        bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
-                        i++;
-                    }
-                }
-
-            }
-
-            //this is just to be sure the client proxy knows this train exists.
-            if (worldObj.isRemote && xyzSize > 0 && bogieXYZ.get(0)[0] + bogieXYZ.get(0)[1] + bogieXYZ.get(0)[2] != 0.0D) {
-                if (!ClientProxy.carts.contains(this)) {
-                    ClientProxy.carts.add(this);
-                }
-            }
+    public void onUpdate(){
+        super.onUpdate();
 
         //simple tick management so some code does not need to be run every tick.
         switch (trainTicks) {
@@ -507,27 +317,11 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
         trainTicks++;
     }
 
-    /**
-     * <h2>Rider offset</h2>
-     * this runs every tick to be sure the rider is in the correct position for the
-     */
-    @Override
-    public void updateRiderPosition() {
-        if (riddenByEntity != null) {
-            if (bogie.size()>1) {
 
-                float[] riderOffset = rotatePoint(new float[]{getRiderOffset(),2f,0}, rotationPitch, rotationYaw, 0);
-                riddenByEntity.setPosition(posX + riderOffset[0], posY + riderOffset[1], posZ + riderOffset[2]);
-            } else {
-                riddenByEntity.setPosition(posX, posY + 2D, posZ);
-            }
-        }
-    }
 
     /**
      * <h2> acceleration</h2>
-     *
-     * function for setting the train's speed and whether or not it is reverse.
+     * function called from a packet for setting the train's speed and whether or not it is reverse.
      */
     public void setAcceleration(boolean increase){
         if (increase && accelerator <6){
@@ -543,20 +337,15 @@ public class EntityTrainCore extends Entity implements IInventory, IEntityAdditi
     }
 
 
+
     /**
-     * <h2>reverse inheritance functions</h2>
-     * these functions work as the middleman between normal train functionality and the classes that extend this. for an example:
-     * @see FirstTrain#getMaxSpeed()
+     * <h2>Inherited variables</h2>
+     * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
      */
     public float getMaxSpeed(){return 0;}
-    public List<Double> getBogieOffsets(){return new ArrayList<Double>();}
     public int getInventorySize(){return 3;}
-    public int getType(){return 0;}
     public int getMaxFuel(){return 100;}
-    public float getRiderOffset(){return 0;}
     public float getAcceleration(){return 0.025f;}
-    public ItemStack getItem(){return null;}
-    public int[] getHitboxPositions(){return new int[]{-1,0,1};}
     public ISound getHorn(){return null;}
     public ISound getRunning(){return null;}
 

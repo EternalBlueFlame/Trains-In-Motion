@@ -1,14 +1,14 @@
 package trains.entities.trains;
 
 import net.minecraft.client.audio.ISound;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import trains.entities.EntityTrainCore;
-import trains.registry.ItemRegistry;
+import trains.items.trains.ItemFirstTrain;
 import trains.registry.TrainRegistry;
 import trains.registry.URIRegistry;
 
@@ -16,16 +16,20 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static trains.TrainsInMotion.MODID;
+
 public class FirstTrain extends EntityTrainCore {
     /**
      * <h2>Basic Train Constructor</h2>
-     * This class defines a basic train class, all other trains basically just copy this class and change the values of the variables.
-     * Be sure other trains are also defined in the train registry
+     * To make your own custom train, create a new class that is a copy of this class, in that copy, you only need to change the values of private static final variables defined here.
+     * You also have to make your own item class, for that
+     * @see ItemFirstTrain
+     * lastly you have to register them in
      * @see TrainRegistry#listTrains()
      *
+     * initMaxSpeed is actually for the German 0-8-0 Brigadelok (calculation is (1/72)*70.8111, 70.8111 being the train's max speed in km/h)
      * Acceleration is applied every tick, with similar math to max speed.
      * The fluid tank has 2 values, one for water/RF/fuel/uranium and another for steam.
-     * Speed is actually for the German 0-8-0 Brigadelok (calculation is (1/72)*70.8111, 70.8111 being the train's max speed in km/h)
      * Type defines the kind of train, this will effect fuel type, and the GUI used. the types are:
      *             1: steam
      *             2: diesel
@@ -34,6 +38,19 @@ public class FirstTrain extends EntityTrainCore {
      *             5: nuclear steam
      *             6: nuclear electric
      *             7: maglev
+     * inventorySize is pre-defined number of spaces in the train's inventory. Not counting crafting slots (bucket/fuel slots)
+     *              1: 2x2
+     *              2: 2x2
+     *              3: 3x3
+     *              4: 4x3
+     *              5: 4x4
+     * offsetXZ is the size in blocks to offset the player sitting position on X and/or Z dependant on rotation
+     * bogieOffset is the list of bogie positions in blocks with 0 being the center of the train.
+     * hirboxPositions is the list of positions in blocks for hitboxes of the train, they are automatically rotated with the train and are always 2 blocks tall.
+     * horn and running are refrences to the sound files for the train horn and running sounds.
+     * trainName is the name of the train that displays in the GUI and on mods like WAILA.
+     * thisItem is the item for this train that will get registered.
+     * TODO: we will need a list of items for the crafting recipe. we also need items to fill that list.....
      */
     private static final float initMaxSpeed = 0.9834875f;
     private static final float acceleration = 0.001F;
@@ -50,28 +67,26 @@ public class FirstTrain extends EntityTrainCore {
     private static final ResourceLocation horn = URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");
     private static final ResourceLocation running = URIRegistry.SOUND_RUNNING.getResource("r080brigadelok.ogg");
     private static final String trainName = "0-8-0 Brigadelok";
+    public static final Item thisItem = new ItemFirstTrain().setUnlocalizedName("itemFirstTrain").setTextureName(MODID + ":itemTests");
 
     /**
+     * these basic constructors only need to have their names changed to that of this class, that is assuming your editor doesn't automatically do that.
      * @see EntityTrainCore
      */
     public FirstTrain(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos, tank);
     }
-
-    /**
-     * we have to have the constructor for the initial spawn that puts the train in the world, minecraft does this, we don't have to mess with it other than just having it.
-     *
-     * @param world the world to spawn it in.
-     */
     public FirstTrain(World world){
         super(world);
     }
+
 
 
     /**
      * <h2>Variable Overrides</h2>
      * We override the functions defined in the super here, to give them different values.
      * This is more efficient than having to store them in the super because we won't have to store them in the NBT.
+     * You shouldn't need to modify these unless your train's features are a bit more 'special' than normal.
      */
     @Override
     public float getMaxSpeed(){return initMaxSpeed;}
@@ -90,8 +105,8 @@ public class FirstTrain extends EntityTrainCore {
     @Override
     public float getAcceleration(){return acceleration;}
     @Override
-    public ItemStack getItem(){
-        return new ItemStack(ItemRegistry.testCart, 1);
+    public Item getItem(){
+        return thisItem;
     }
     @Override
     public int[] getHitboxPositions(){return hitboxPositions;}

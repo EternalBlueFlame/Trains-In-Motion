@@ -6,7 +6,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import trains.blocks.LampBlock;
 import trains.entities.EntityTrainCore;
-import trains.registry.BlockRegistry;
+import trains.registry.GenericRegistry;
 
 public class LampHandler {
     public int X;
@@ -42,7 +42,7 @@ public class LampHandler {
             Z = MathHelper.floor_double(z);
             //create the block.
             if (!(worldObj.getBlock(X,Y,Z) instanceof LampBlock)) {
-                worldObj.setBlock(X,Y,Z, BlockRegistry.lampBlock);
+                worldObj.setBlock(X,Y,Z, GenericRegistry.lampBlock);
                 worldObj.getBlock(X,Y,Z).setLightLevel(1f);
             }
 

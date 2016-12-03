@@ -17,6 +17,7 @@ import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
 import trains.blocks.LampBlock;
 import trains.entities.EntityTrainCore;
+import trains.entities.GenericRailTransport;
 import trains.entities.render.RenderObj;
 import trains.gui.train.GUISteam;
 import trains.registry.TrainRegistry;
@@ -27,7 +28,7 @@ import java.util.List;
 
 public class ClientProxy extends CommonProxy {
     private static WorldClient clientWorld= null; //define this ahead of time so we dont have to instance the variable every client tick.
-    public static List<EntityTrainCore> carts = new ArrayList<EntityTrainCore>();
+    public static List<GenericRailTransport> carts = new ArrayList<GenericRailTransport>();
 
     /**
      * <h3>keybinds</h3>
@@ -127,7 +128,7 @@ public class ClientProxy extends CommonProxy {
         if (EnableLights && tick.phase == TickEvent.Phase.END && carts.size() > 0) {
             clientWorld = Minecraft.getMinecraft().theWorld;
             if (clientWorld != null) {
-                for (EntityTrainCore cart : carts) {
+                for (GenericRailTransport cart : carts) {
                     if (clientWorld.getBlock(cart.lamp.X, cart.lamp.Y, cart.lamp.Z) instanceof LampBlock) {
                         clientWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
                     }
