@@ -6,11 +6,11 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.networking.PacketKeyPress;
+import trains.networking.PacketMount;
 
 public class EventHandler {
 
@@ -59,18 +59,10 @@ public class EventHandler {
                 && !event.entity.worldObj.isRemote
                 && event.target.riddenByEntity == null) {
             event.entityPlayer.mountEntity(event.target);
+        } else if (event.target instanceof HitboxHandler.multipartHitbox
+                && event.entity.worldObj.isRemote
+                && event.target.riddenByEntity == null) {
+            TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
         }
     }
-
-    /**
-     * <h2>Entity destruction</h2>
-     * this event manages when the player tries to break a train or rollingstock
-     * TODO: manage breaking for non-creative mode
-     * TODO: be sure damagesource is not a projectile.
-     */
-    @SubscribeEvent
-    public void attackEntityEvent(AttackEntityEvent event){
-
-    }
-
 }

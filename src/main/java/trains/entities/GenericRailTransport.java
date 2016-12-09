@@ -91,7 +91,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public AxisAlignedBB getCollisionBox(Entity collidedWith){return boundingBox;}
     @Override
-    public boolean canBeCollidedWith() {return true;}
+    public boolean canBeCollidedWith() {return false;}
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
         this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
@@ -197,7 +197,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * @see ClientProxy#onTick(TickEvent.ClientTickEvent)
      *
      * TODO: we need to put back lamp management
-     * TODO: yaw rotation isn't right.
      */
     @Override
     public void onUpdate() {
@@ -276,7 +275,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (riddenByEntity != null) {
             if (bogie.size()>1) {
 
-                float[] riderOffset = rotatePoint(new float[]{getRiderOffset(),2f,0}, rotationPitch, rotationYaw, 0);
+                float[] riderOffset = rotatePoint(new float[]{getRiderOffset(),1.5f,0}, rotationPitch, rotationYaw, 0);
                 riddenByEntity.setPosition(posX + riderOffset[0], posY + riderOffset[1], posZ + riderOffset[2]);
             } else {
                 riddenByEntity.setPosition(posX, posY + 2D, posZ);
@@ -293,5 +292,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public float getRiderOffset(){return 0;}
     public int[] getHitboxPositions(){return new int[]{-1,0,1};}
     public Item getItem(){return null;}
+    public int getInventorySize(){return 3;}
+    public String getName(){return "error";}
+
+    //TODO we need to define smoke vector that can be called from the render
 
 }

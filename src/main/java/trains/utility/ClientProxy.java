@@ -16,10 +16,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
 import trains.blocks.LampBlock;
+import trains.entities.EntityBogie;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
-import trains.entities.render.RenderObj;
 import trains.gui.train.GUISteam;
+import trains.models.RenderEntity;
 import trains.registry.TrainRegistry;
 import trains.registry.URIRegistry;
 
@@ -88,17 +89,23 @@ public class ClientProxy extends CommonProxy {
     /**
      * <h2>Client Register</h2>
      * A redirect loop for registering he items in the train registry with their own textures and models, and for registering keybindings.
-     * TODO need java models and need to move away from the RenderObj class
      */
     @Override
     public void register() {
         for(TrainRegistry reg : TrainRegistry.listTrains()){
-            RenderingRegistry.registerEntityRenderingHandler(reg.trainClass, new RenderObj(
-                URIRegistry.MODEL_TRAIN.getResource(reg.model),
-                URIRegistry.TEXTURE_GENERIC.getResource(reg.texture)
-        ));
+            RenderingRegistry.registerEntityRenderingHandler(reg.trainClass, new RenderEntity(
+                    reg.model, URIRegistry.TEXTURE_GENERIC.getResource(reg.texture),
+                    reg.bogieModel, URIRegistry.TEXTURE_GENERIC.getResource(reg.bogieTexture),
+                    reg.smoke));
         }
         RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.multipartHitbox.class, new Render() {
+            @Override
+            public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {}
+            @Override
+            protected ResourceLocation getEntityTexture(Entity p_110775_1_) {return null;}
+        });
+
+        RenderingRegistry.registerEntityRenderingHandler(EntityBogie.class, new Render() {
             @Override
             public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {}
             @Override

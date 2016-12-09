@@ -2,9 +2,11 @@ package trains.registry;
 
 
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import net.minecraft.client.model.ModelBase;
 import net.minecraft.item.Item;
 import trains.entities.GenericRailTransport;
 import trains.entities.trains.FirstTrain;
+import trains.models.trains.TrainTest_1;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -22,14 +24,17 @@ public class TrainRegistry {
      * This all can mostly be ignored unless we're modifying how we registry trains.
      */
     public Class<? extends GenericRailTransport> trainClass;
-    public String model;
+    public ModelBase model;
     public String texture;
-    public String bogieModel;
+    public ModelBase bogieModel;
     public String bogieTexture;
     public String entityWorldName; //Note: Must be all lowercase
     public Item item;
+    public char smoke;
 
-    private TrainRegistry(Class<? extends GenericRailTransport> trainClass, Item item, String entityWorldName, String model, String texture, @Nullable String bogieModel, @Nullable String bogieTexture){
+    private TrainRegistry(Class<? extends GenericRailTransport> trainClass, Item item, String entityWorldName,
+                          ModelBase model, String texture, @Nullable ModelBase bogieModel, @Nullable String bogieTexture,
+                          char smoke){
         this.trainClass = trainClass;
         this.entityWorldName = entityWorldName;
         this.model = model;
@@ -37,6 +42,7 @@ public class TrainRegistry {
         this.bogieModel = bogieModel;
         this.bogieTexture = bogieTexture;
         this.item = item;
+        this.smoke = smoke;
     }
 
 
@@ -49,7 +55,10 @@ public class TrainRegistry {
     public static List<TrainRegistry> listTrains(){
         List<TrainRegistry> output = new ArrayList<TrainRegistry>();
 
-        output.add(new TrainRegistry(FirstTrain.class, FirstTrain.thisItem, "entityfirsttrain","060e2.obj", "null.png", null, null));
+        output.add(new TrainRegistry(FirstTrain.class, FirstTrain.thisItem, "entityfirsttrain",
+                new TrainTest_1(), "null.png",
+                null, null,
+                'n'));
 
         return output;
 

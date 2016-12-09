@@ -2,11 +2,12 @@ package trains.utility;
 
 
 import cpw.mods.fml.common.IFuelHandler;
-import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraftforge.fluids.FluidRegistry;
 import trains.entities.EntityTrainCore;
+import trains.entities.GenericRailTransport;
 
 public class FuelHandler implements IFuelHandler{
 
@@ -26,6 +27,31 @@ public class FuelHandler implements IFuelHandler{
 	}
 
 
+	public static boolean isFuel(ItemStack item, GenericRailTransport transport){
+		switch (transport.getType()){
+			case 1: {return item != null && TileEntityFurnace.getItemBurnTime(item) !=0;}
+
+		}
+		return false;
+	}
+
+	public static boolean isWater(ItemStack item, GenericRailTransport transport){
+		switch (transport.getType()){
+			case 1: {return item != null && item.getItem() == Items.water_bucket;}
+
+		}
+		return false;
+	}
+
+	public static int waterValue(ItemStack itemStack){
+		if (itemStack != null && itemStack.getItem() == Items.water_bucket){
+			return 1000;
+		}
+
+
+		return 0;
+	}
+
 	/**
 	 * <h2>Fuel management</h2>
 	 * this class manages the fuel for the train so we can keep it out of the train class to organize code bulk.
@@ -38,51 +64,37 @@ public class FuelHandler implements IFuelHandler{
 			 *
 			 *
 			 * first manage fuel slots for water buckets and burnables.
-			 * GameRegistry.getFuelValue will tell us how much fuel the item gives, assuming it is a valid fuel item
+			 * TileEntityFurnace.getItemBurnTime will tell us how much fuel the item gives, assuming it is a valid fuel item
 			 * After manage actual fuel consumption.
 			 */
 			case 1: {
-				if (GameRegistry.getFuelValue(cart.inventory.get(0)) > 0) {
+				if (isFuel(cart.inventory.getStackInSlot(0), cart) && cart.furnaceFuel + TileEntityFurnace.getItemBurnTime(cart.inventory.getStackInSlot(0)) < cart.getMaxFuel()) {
 					//if the first inventory slot contains a burnable listed in our supported burnables, then remove it and add it's value to our fuel.
-					if (cart.furnaceFuel + GameRegistry.getFuelValue(cart.inventory.get(0)) < cart.getMaxFuel()) {
-						cart.furnaceFuel += GameRegistry.getFuelValue(cart.inventory.get(0));
-						if (cart.inventory.get(0).stackSize > 1) {
-							cart.inventory.get(0).stackSize = cart.inventory.get(0).stackSize - 1;
-						} else {
-							cart.inventory.set(0, null);
+					cart.furnaceFuel += TileEntityFurnace.getItemBurnTime(cart.inventory.getStackInSlot(0));
+					cart.inventory.decrStackSize(0, 1);
+				}
 
-						}
+				//if the second slot contains a water bucket, add the contents of the water bucket to our tank and then place an empty bucket in the inventory
+				if ( isWater(cart.inventory.getStackInSlot(1), cart) && cart.tank.canFill(waterValue(cart.inventory.getStackInSlot(1)),0)) {
+					cart.tank.addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),0);
+					cart.inventory.decrStackSize(1,1);
+					cart.inventory.addItem(new ItemStack(Items.bucket));
+				}
+
+				//be sure there is fuel before trying to consume it
+				if (cart.furnaceFuel > 0) {
+					//add steam from burning to the steam tank.
+					int steam = Math.round(cart.furnaceFuel * 0.1f);
+					if (cart.tank.canDrain(steam,1)) {
+						cart.furnaceFuel -= 5;
+						cart.tank.drainFluid(steam, 1);
+					} else {
+						cart.worldObj.createExplosion(cart, cart.posX, cart.posY, cart.posZ, 5f, false);
+						cart.dropItem(cart.getItem(), 1);
+						cart.worldObj.removeEntity(cart);
+						break;
 					}
-					//if the second slot contains a water bucket, add the contents of the water bucket to our tank and then place an empty bucket in the inventory
-					if (cart.inventory.get(1).getItem() == Items.water_bucket && cart.tank[0].getFluidAmount() <= cart.tank[0].getCapacity() - 1000) {
-						cart.tank[0].fill(new FluidStack(cart.tank[1].getFluid().getFluid(), cart.tank[1].getFluidAmount() + 1000), true);
-						if (cart.inventory.get(1).stackSize > 1) {
-							cart.inventory.get(1).stackSize = cart.inventory.get(1).stackSize - 1;
-						} else {
-							cart.inventory.set(1, null);
-						}
-						cart.addItems(0, new ItemStack(Items.water_bucket));
-					}
 
-					//be sure there is fuel before trying to consume it
-					if (cart.furnaceFuel >= 0) {
-						//add steam from burning to the steam tank.
-						int steam = Math.round(cart.furnaceFuel * 0.1f);
-						if (cart.tank[0].getFluidAmount() >= steam) {
-							cart.furnaceFuel -= 5;
-							cart.tank[0].drain(steam, true);
-							cart.tank[1].fill(new FluidStack(cart.tank[1].getFluid().getFluid(), cart.tank[1].getFluidAmount() + steam), true);
-						} else {
-							cart.worldObj.createExplosion(cart, cart.posX, cart.posY, cart.posZ, 5f, false);
-							break;
-						}
-
-						//drain used steam from the tank TODO define amount used based on the current accelerator of the train
-						if (cart.tank[1].getFluidAmount() >= (cart.tank[1].getCapacity() * 0.5f)) {
-							cart.tank[1].drain(1, true);
-						}
-
-					}
 				}
 				break;
 			}

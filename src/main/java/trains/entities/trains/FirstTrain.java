@@ -4,13 +4,13 @@ import net.minecraft.client.audio.ISound;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTank;
 import trains.entities.EntityTrainCore;
 import trains.items.trains.ItemFirstTrain;
 import trains.registry.TrainRegistry;
 import trains.registry.URIRegistry;
+import trains.utility.LiquidManager;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,13 +55,10 @@ public class FirstTrain extends EntityTrainCore {
     private static final float initMaxSpeed = 0.9834875f;
     private static final float acceleration = 0.001F;
     private static final int type = 1;
-    private static final int maxFuel = 100;
-    private static FluidTank[] tank = new FluidTank[]{
-            new FluidTank(new FluidStack(FluidRegistry.WATER, 0),10),
-            new FluidTank(new FluidStack(FluidRegistry.WATER, 0),2)
-    };
+    private static final int maxFuel = 12800;
+    private static LiquidManager tank = new LiquidManager(new int[]{10000}, new Fluid[]{FluidRegistry.WATER},true);
     private static final int inventorySize= 3;
-    private static final float offsetXZ =0f;
+    private static final float offsetXZ =1f;
     private static final List<Double> bogieOffset = Arrays.asList(-1.0D, 1.0D);
     private static final int[] hitboxPositions = new int[]{-1,0,1};
     private static final ResourceLocation horn = URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");
@@ -77,7 +74,7 @@ public class FirstTrain extends EntityTrainCore {
         super(owner, world, xPos, yPos, zPos, tank);
     }
     public FirstTrain(World world){
-        super(world);
+        super(world, tank);
     }
 
 
@@ -91,7 +88,7 @@ public class FirstTrain extends EntityTrainCore {
     @Override
     public float getMaxSpeed(){return initMaxSpeed;}
     @Override
-    public String getInventoryName() {return trainName;}
+    public String getName() {return trainName;}
     @Override
     public List<Double> getBogieOffsets(){return bogieOffset;}
     @Override

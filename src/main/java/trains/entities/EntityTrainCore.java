@@ -2,24 +2,21 @@ package trains.entities;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.audio.ISound;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 import trains.utility.FuelHandler;
+import trains.utility.InventoryHandler;
+import trains.utility.LiquidManager;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
  * <h2> Train core</h2>
  * this is the management core for all train
  */
-public class EntityTrainCore extends GenericRailTransport implements IInventory {
+public class EntityTrainCore extends GenericRailTransport {
 
     /**
      * <h3>use variables</h3>
@@ -48,8 +45,8 @@ public class EntityTrainCore extends GenericRailTransport implements IInventory 
      * <h3>inventory</h3>
      * variables for the inventory.
      */
-    public List<ItemStack> inventory = new ArrayList<ItemStack>(){};//Inventory, every train will have this to some extent or another, //the first two slots are for crafting
-    public FluidTank[] tank = new FluidTank[]{};//depending on the train this is either used for diesel, steam, or redstone flux
+    public InventoryHandler inventory = new InventoryHandler(this); //Inventory, every train will have this to some extent or another, //the first two slots are for crafting
+    public LiquidManager tank = new LiquidManager(new int[]{1000}, new Fluid[]{FluidRegistry.WATER}, true);
 
 
 
@@ -58,7 +55,7 @@ public class EntityTrainCore extends GenericRailTransport implements IInventory 
     *
     * <h2> Base train Constructor</h2>
     *
-    * default constructor for all trains
+    * default constructor for all trains, server side only.
     *
     * @param owner the owner profile, used to define owner of the entity,
     * @param world the world to spawn the entity in, used in super's super.
@@ -70,7 +67,7 @@ public class EntityTrainCore extends GenericRailTransport implements IInventory 
     *             all tanks besides diesel should use FluidRegistry.WATER
     */
 
-    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, FluidTank[] tank){
+    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, LiquidManager tank){
         super(world);
         posY = yPos;
         posX = xPos;
@@ -79,22 +76,6 @@ public class EntityTrainCore extends GenericRailTransport implements IInventory 
         this.owner = owner;
         this.tank = tank;
 
-        //define the number of inventory slots to add to the train based on type for crafting slots and inventory scale
-        int craftingSlots =0;
-        switch (getType()){
-            case 1:case 5: {craftingSlots =2;break;}
-            case 2:case 3: case 4:case 6:{craftingSlots =1;break;}
-        }
-        switch (getSizeInventory()){
-            case 1:{craftingSlots+=4;break;}//2x2
-            case 2:{craftingSlots+=6;break;}//2x3
-            case 3:{craftingSlots+=9;break;}//3x3
-            case 4:{craftingSlots+=12;break;}//4x3
-            case 5:{craftingSlots+=16;break;}//4x4
-        }
-        for (int i=0; i<=craftingSlots;i++){
-            inventory.add(null);
-        }
         setSize(1f,2);
         this.boundingBox.minX = 0;
         this.boundingBox.minY = 0;
@@ -104,16 +85,10 @@ public class EntityTrainCore extends GenericRailTransport implements IInventory 
         this.boundingBox.maxZ = 0;
     }
     //this constructor is lower level spawning
-    public EntityTrainCore(World world){
+    public EntityTrainCore(World world, LiquidManager tank){
         super(world);
+        this.tank = tank;
     }
-
-    @Override
-    public boolean isUseableByPlayer(EntityPlayer player){
-        //if it is locked, return if player is owner, otherwise return false.
-        return isLocked || owner.equals(player.getUniqueID());
-    }
-
 
     /**
      * <h2> Data Syncing and Saving </h2>
@@ -125,131 +100,18 @@ public class EntityTrainCore extends GenericRailTransport implements IInventory 
         super.readEntityFromNBT(tag);
         isRunning = tag.getBoolean("isrunning");
         brake = tag.getBoolean("extended.brake");
-        //read through the itemstacks
-        NBTTagList taglist = tag.getTagList("items", 10);
-        for (int i = 0; i < taglist.tagCount(); i++) {
-            NBTTagCompound nbttagcompound1 = taglist.getCompoundTagAt(i);
-            byte b0 = nbttagcompound1.getByte("slot");
 
-            if (b0 >= 0 && b0 < inventory.size()) {
-                inventory.set(b0, ItemStack.loadItemStackFromNBT(nbttagcompound1));
-            }
-        }
-
-        for (FluidTank tempTank : tank){
-            tempTank.readFromNBT(tag);
-        }
+        inventory.readNBT(tag, "items");
+        tank.readFromNBT(tag);
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
         tag.setBoolean("isrunning",isRunning);
         tag.setBoolean("extended.brake", brake);
-        //write the itemset to a tag list before adding it
-        NBTTagList nbttaglist = new NBTTagList();
-        for (int i = 0; i < inventory.size(); ++i) {
-            if (inventory.get(i) != null) {
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                nbttagcompound1.setByte("slot", (byte)i);
-                inventory.get(i).writeToNBT(nbttagcompound1);
-                nbttaglist.appendTag(nbttagcompound1);
-            }
-        }
-        tag.setTag("items", nbttaglist);
 
-        for (FluidTank tempTank : tank){
-            tempTank.writeToNBT(tag);
-        }
-    }
-
-    /**
-     * <h2> Inventory management </h2>
-     * functions for managing the Inventory as defined in:
-     * @see IInventory
-     * getInventoryName is overidden in the chass that extends this to give it a proper name.
-     */
-    @Override
-    public String getInventoryName() {
-        return "";
-    }
-    @Override
-    public boolean hasCustomInventoryName() {
-        return true;
-    }
-    @Override
-    public void openInventory() {}
-    @Override
-    public void closeInventory() {}
-    @Override
-    public void markDirty() {}
-    @Override
-    public int getInventoryStackLimit() {
-        return 64;
-    }
-    @Override
-    public ItemStack getStackInSlot(int slot) {
-        if (slot>=0 && slot< inventory.size()) {
-            return inventory.get(slot);
-        }
-        return null;
-    }
-    @Override
-    public ItemStack getStackInSlotOnClosing(int slot) {
-        //we return null no matter what, but we want to make sure the slot is properly set as well.
-        if (slot>=0 && slot< inventory.size()) {
-            inventory.set(slot, null);
-        }
-        return null;
-    }
-    @Override
-    public ItemStack decrStackSize(int slot, int amount) {
-        if (slot>=0 && slot< inventory.size()) {
-            //if subtraction makes slot empty/null then set it to null and return null, otherwise return the stack.
-            if (inventory.get(slot).stackSize <= amount ^ inventory.get(slot).stackSize <= 0) {
-                inventory.set(slot, null);
-            } else {
-                return inventory.get(slot).splitStack(amount);
-            }
-        }
-        return null;
-    }
-    @Override
-    public void setInventorySlotContents(int slot, ItemStack itemstack) {
-        //be sure item stack isn't null, then add the itemstack, and be sure the slot doesn't go over the limit.
-        if (itemstack != null && slot >=0 && slot<inventory.size()) {
-            if (itemstack.stackSize >= getInventoryStackLimit()) {
-                itemstack.stackSize = getInventoryStackLimit();
-            }
-            inventory.set(slot, itemstack);
-        }
-    }
-    //return if the item can be placed in the slot, for this slot it's just a check if the slot exists, but other things may have slots for specific items Override this to filter that.
-    @Override
-    public boolean isItemValidForSlot(int slot, ItemStack item){
-        return (slot>=0 && slot< inventory.size());
-    }
-    @Override
-    public int getSizeInventory(){
-        if(inventory != null){
-            return inventory.size();
-        } else{
-            return 0;
-        }
-    }
-    //function for adding an itemstack to the inventory with an offset
-    public boolean addItems(int offset, ItemStack itemStack){
-        for (int i=offset; i<inventory.size();) {
-            if (inventory.get(i).getItem() == null){
-                inventory.set(i, itemStack);
-                return true;
-            } else if (inventory.get(i).getMaxStackSize() <= inventory.get(i).stackSize){
-                inventory.get(i).stackSize+=1;
-                return true;
-            } else {
-                i++;
-            }
-        }
-        return false;
+        tag.setTag("items", inventory.writeNBT());
+        tank.writeToNBT(tag);
     }
 
 
@@ -294,16 +156,14 @@ public class EntityTrainCore extends GenericRailTransport implements IInventory 
      * @see FuelHandler#ManageFuel(EntityTrainCore)
      */
     @Override
-    public void onUpdate(){
+    public void onUpdate() {
         super.onUpdate();
-
         //simple tick management so some code does not need to be run every tick.
-        switch (trainTicks) {
-            case 5: {
-                //deal with the fuel
-                if (!worldObj.isRemote && isRunning) {
+        if (!worldObj.isRemote) {
+            switch (trainTicks) {
+                case 5: {
+                    //deal with the fuel
                     FuelHandler.ManageFuel(this);
-                }
                 break;
             }
             default: {
@@ -315,6 +175,7 @@ public class EntityTrainCore extends GenericRailTransport implements IInventory 
 
         }
         trainTicks++;
+    }
     }
 
 
@@ -343,7 +204,6 @@ public class EntityTrainCore extends GenericRailTransport implements IInventory 
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
      */
     public float getMaxSpeed(){return 0;}
-    public int getInventorySize(){return 3;}
     public int getMaxFuel(){return 100;}
     public float getAcceleration(){return 0.025f;}
     public ISound getHorn(){return null;}

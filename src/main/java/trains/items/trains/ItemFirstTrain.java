@@ -43,7 +43,7 @@ public class ItemFirstTrain extends Item {
      * @see FirstTrain#FirstTrain(UUID, World, double, double, double)
      *
      * for the base functionality of how this works
-     * @see RailUtility#placeOnRail(GenericRailTransport, EntityPlayer, World, int, int, int) 
+     * @see RailUtility#placeOnRail(GenericRailTransport, EntityPlayer, World, int, int, int)
      *
      * @return defines whether or not to play the placing animation, we dont want to do this on server.
      */

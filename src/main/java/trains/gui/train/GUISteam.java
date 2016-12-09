@@ -82,10 +82,18 @@ public class GUISteam extends GuiContainer {
             drawTexturedModalRect(((width - xSize) / 2) + 7 + (iT * 18), ((height - ySize) / 2) + 141, 0, 0, 18, 18);
         }
 
-
+        int columns=0;
+        int rows=0;
+        switch (train.getInventorySize()){
+            case 1:{columns=2;rows=2;break;}
+            case 2:{columns=2;rows=3;break;}
+            case 3:{columns=3;rows=3;break;}
+            case 4:{columns=3;rows=4;break;}
+            case 5:{columns=4;rows=4;break;}
+        }
         //train's inventory
-        for (int ic = 0; ic < 3; ic++) {
-            for (int ir = 0; ir < 3; ir++) {
+        for (int ic = 0; ic < rows; ic++) {
+            for (int ir = 0; ir < columns; ir++) {
                 drawTexturedModalRect( ((width - xSize) / 2) + 97 + (ic * 18), ((height - ySize) / 2) + 7 + (ir * 18), 0, 0, 18, 18);
             }
         }

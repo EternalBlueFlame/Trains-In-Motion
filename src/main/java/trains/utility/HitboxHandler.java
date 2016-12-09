@@ -32,9 +32,10 @@ public class HitboxHandler {
      * @see HitboxHandler#getCollision(EntityTrainCore)
      */
     public class multipartHitbox extends EntityDragonPart{
-
-        public multipartHitbox(IEntityMultiPart host, double posX, double posY , double posZ){
+        Entity parent;
+        public multipartHitbox(IEntityMultiPart host, Entity parent, double posX, double posY , double posZ){
             super(host, "hitboxGeneric", 2,1);
+            this.parent = parent;
             this.posX = posX;
             this.posY = posY;
             this.posZ = posZ;
@@ -76,8 +77,10 @@ public class HitboxHandler {
         for (int iteration =0; iteration<train.getHitboxPositions().length; iteration++) {
             double[] position = rotatePoint(new double[]{train.getHitboxPositions()[iteration], 0, 0}, train.rotationPitch, train.rotationYaw, 0);
             if (train.hitboxList.size() <= iteration) {
-                train.hitboxList.add(new multipartHitbox(train, position[0] + train.posX, position[1] + train.posY, position[2] + train.posZ));
-                train.worldObj.spawnEntityInWorld(train.hitboxList.get(iteration));
+                train.hitboxList.add(new multipartHitbox(train, train, position[0] + train.posX, position[1] + train.posY, position[2] + train.posZ));
+                if(train.worldObj.isRemote) {
+                    train.worldObj.spawnEntityInWorld(train.hitboxList.get(iteration));
+                }
             }
             train.hitboxList.get(iteration).onUpdate();
             train.hitboxList.get(iteration).setLocationAndAngles(position[0] + train.posX, position[1] + train.posY, position[2] + train.posZ, 0, 0);
