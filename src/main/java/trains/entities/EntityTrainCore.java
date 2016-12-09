@@ -121,11 +121,16 @@ public class EntityTrainCore extends GenericRailTransport {
      * @see GenericRailTransport#onUpdate()
      */
     public float processMovement(){
-        if (hitboxHandler.getCollision(this) & (accelerator==0 && motion[0] + motion[2] == 0) & furnaceFuel==0){
+        float accel = 0;
+        if (motion[0]+ motion[2] !=0){
+            accel = (((motion[0] + motion[2]) / getMaxSpeed()) * 100);
+        }
+            accel *= (getAcceleration() * (16.66666666e7 * accelerator));
+        if (hitboxHandler.getCollision(this) & (accel==0 && motion[0] + motion[2] == 0) & !tank.canDrain((int) accel*20, 1)){
             //if we shouldn't be moving, return 0.
             return 0;
         } else {
-            float accel = (getAcceleration() * (accelerator / 6)) * (((motion[0] + motion[2]) / getMaxSpeed()) * 100);
+            tank.drainFluid((int) accel*20, 1);
             //compensate for if the train is stopped
             if (accel == 0 && accelerator > 0) {
                 accel = getAcceleration() * 0.10f;
@@ -134,10 +139,10 @@ public class EntityTrainCore extends GenericRailTransport {
             }
             //modify based on fuel
             if (getType() == 1) {
-                if (furnaceFuel <= getMaxFuel() / 3) {
+                if (tank.tankFluidAmount(1) <= tank.tankCapacity(1) / 3) {
                     //no boiler pressure
                     accel *= 0.1f;
-                } else if (furnaceFuel <= getMaxFuel() / 2) {
+                } else if (tank.tankFluidAmount(1) <= tank.tankCapacity(1)  / 2) {
                     //low boiler pressure
                     accel *= 0.5f;
                 }

@@ -84,10 +84,11 @@ public class FuelHandler implements IFuelHandler{
 				//be sure there is fuel before trying to consume it
 				if (cart.furnaceFuel > 0) {
 					//add steam from burning to the steam tank.
-					int steam = Math.round(cart.furnaceFuel * 0.1f);
-					if (cart.tank.canDrain(steam,1)) {
+					int steam = Math.round(cart.furnaceFuel * 0.01f);
+					if (cart.tank.canDrain(steam,0)) {
 						cart.furnaceFuel -= 5;
-						cart.tank.drainFluid(steam, 1);
+						cart.tank.drainFluid(steam, 0);
+						cart.tank.addFluid(FluidRegistry.WATER, steam/3, 1);
 					} else {
 						cart.worldObj.createExplosion(cart, cart.posX, cart.posY, cart.posZ, 5f, false);
 						cart.dropItem(cart.getItem(), 1);

@@ -3,6 +3,7 @@ package trains.utility;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 
 import java.util.ArrayList;
@@ -28,8 +29,30 @@ public class LiquidManager {
 
     }
 
+
+    public int tankCapacity(int tank){
+        if(tanks.size() >= tank) {
+            return tanks.get(tank).getCapacity();
+        } else{
+            return 0;
+        }
+    }
+
+    public int tankFluidAmount(int tank){
+        if(tanks.size() >= tank && tanks.get(tank).getFluid() != null) {
+            return tanks.get(tank).getFluidAmount();
+        } else{
+            return 0;
+        }
+    }
+
+
     public boolean canFill(int amount, int tank){
         if(tanks.size() >= tank) {
+            if (tanks.get(tank).getFluid() == null){
+                return true;
+            }
+            System.out.println(tanks.get(tank).getFluidAmount());
             return tanks.get(tank).getFluidAmount() + amount < tanks.get(tank).getCapacity();
         } else{
             return false;
@@ -53,7 +76,7 @@ public class LiquidManager {
 
 
     public boolean canDrain(int amount, int tank){
-        if(tanks.size() >= tank) {
+        if(tanks.size() >= tank && tanks.get(tank).getFluid() != null) {
             return tanks.get(tank).getFluidAmount() - amount > 0;
         } else{
             return false;
@@ -62,17 +85,22 @@ public class LiquidManager {
 
     public void addFluid(Fluid fluid, int amount, int tank){
         if(tanks.size() >= tank && isFluidValid(fluid) && tanks.get(tank).getFluidAmount() + amount < tanks.get(tank).getCapacity()){
-            tanks.get(tank).getFluid().amount += amount;
+            if(tanks.get(tank).getFluid() != null){
+                amount += tanks.get(tank).getFluidAmount();
+            }
+            tanks.get(tank).setFluid(new FluidStack(fluid, amount));
+            System.out.println(tanks.get(tank).getFluidAmount());
         }
     }
 
     public void drainFluid(int amount, int tank){
-        if (tanks.size() >= tank){
+        if (tanks.size() >= tank && tanks.get(tank).getFluid() != null){
             if (tanks.get(tank).getFluid().amount >= amount){
                 tanks.get(tank).getFluid().amount -= amount;
             } else {
                 tanks.get(tank).getFluid().amount =0;
             }
+            tanks.get(tank).getFluidAmount();
         }
     }
 

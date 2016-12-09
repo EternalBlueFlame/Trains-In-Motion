@@ -97,11 +97,11 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     public void onUpdate() {}
     @Override
     public AxisAlignedBB getBoundingBox(){
-        return null;
+        return boundingBox;
     }
     @Override
     public AxisAlignedBB getCollisionBox(Entity collidedWith){
-        return null;
+        return boundingBox;
     }
     @Override
     public boolean canBeCollidedWith() {

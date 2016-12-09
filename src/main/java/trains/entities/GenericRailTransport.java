@@ -200,6 +200,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     @Override
     public void onUpdate() {
+        //if the cart has fallen out of the map, destroy it.
+        if (posY < -64.0D){
+            worldObj.removeEntity(this);
+        }
         //be sure bogies exist
         int xyzSize = bogieXYZ.size()-1;
         if (xyzSize > 0) {

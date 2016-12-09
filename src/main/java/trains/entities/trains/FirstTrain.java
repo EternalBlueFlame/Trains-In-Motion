@@ -56,7 +56,7 @@ public class FirstTrain extends EntityTrainCore {
     private static final float acceleration = 0.001F;
     private static final int type = 1;
     private static final int maxFuel = 12800;
-    private static LiquidManager tank = new LiquidManager(new int[]{10000}, new Fluid[]{FluidRegistry.WATER},true);
+    private static LiquidManager tank = new LiquidManager(new int[]{10000, 10000}, new Fluid[]{FluidRegistry.WATER},true);
     private static final int inventorySize= 3;
     private static final float offsetXZ =1f;
     private static final List<Double> bogieOffset = Arrays.asList(-1.0D, 1.0D);

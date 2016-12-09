@@ -88,12 +88,12 @@ public class HitboxHandler {
 
 
         for (multipartHitbox box : train.hitboxList){
-            int i = MathHelper.floor_double(box.boundingBox.minX + 0.001D);
-            int j = MathHelper.floor_double(box.boundingBox.minY +0.501D);
-            int k = MathHelper.floor_double(box.boundingBox.minZ + 0.001D);
-            int l = MathHelper.floor_double(box.boundingBox.maxX - 0.001D);
-            int i1 = MathHelper.floor_double(box.boundingBox.maxY - 0.001D);
-            int j1 = MathHelper.floor_double(box.boundingBox.maxZ - 0.001D);
+            int i = MathHelper.floor_double(box.boundingBox.minX);
+            int j = MathHelper.floor_double(box.boundingBox.minY);
+            int k = MathHelper.floor_double(box.boundingBox.minZ);
+            int l = MathHelper.floor_double(box.boundingBox.maxX);
+            int i1 = MathHelper.floor_double(box.boundingBox.maxY);
+            int j1 = MathHelper.floor_double(box.boundingBox.maxZ);
 
             if (train.worldObj.checkChunksExist(i, j, k, l, i1, j1)) {
                 for (int k1 = i; k1 <= l; ++k1) {
@@ -124,6 +124,7 @@ public class HitboxHandler {
                                     ((Entity) entity).attackEntityFrom(new EntityDamageSource("Train", train), (float) (train.bogie.get(0).motionX + train.bogie.get(0).motionZ) * 1000);
                                 }
                                 ((Entity) entity).applyEntityCollision(train);
+                                System.out.println(entity.getClass().toString());
                                 return false;
                             } else {
                                 System.out.println(entity.getClass().toString());
