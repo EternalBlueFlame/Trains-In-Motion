@@ -15,10 +15,9 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import trains.utility.ClientProxy;
-import trains.utility.HitboxHandler;
-import trains.utility.LampHandler;
-import trains.utility.RailUtility;
+import trains.TrainsInMotion;
+import trains.networking.PacketRemove;
+import trains.utility.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -146,6 +145,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         lamp.Y = tag.getInteger("extended.lamp.y");
         lamp.Z = tag.getInteger("extended.lamp.z");
         isReverse = tag.getBoolean("extended.isreverse");
+        isDead = tag.getBoolean("extended.isdead");
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
         //read through the bogie positions
         NBTTagList bogieTaglList = tag.getTagList("extended.bogies", 10);
@@ -166,6 +166,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         tag.setInteger("extended.lamp.y", lamp.Y);
         tag.setInteger("extended.lamp.z", lamp.Z);
         tag.setBoolean("extended.isreverse", isReverse);
+        tag.setBoolean("extended.isdead", isDead);
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
         //write the list of bogies
@@ -201,7 +202,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public void onUpdate() {
         //if the cart has fallen out of the map, destroy it.
-        if (posY < -64.0D){
+        if (posY < -64.0D & isDead){
             worldObj.removeEntity(this);
         }
         //be sure bogies exist
@@ -229,26 +230,30 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
                 //handle movement for trains, this will likely need to be different for rollingstock.
                 if (this instanceof EntityTrainCore) {
-                    motion = rotatePoint(new float[]{((EntityTrainCore)this).processMovement(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                    //move the bogies, unit of motion, blocks per second 1/20
-                    for (EntityBogie currentBogie : bogie) {
-                        currentBogie.addVelocity(motion[0], currentBogie.motionY, motion[2]);
-                        currentBogie.minecartMove();
+                    if (!hitboxHandler.getCollision(this)) {
+                        motion = rotatePoint(new float[]{((EntityTrainCore) this).processMovement(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                    } else {
+                        motion =new float[]{0f,0f,0f};
                     }
                 }
-
+                for (EntityBogie currentBogie : bogie) {
+                    currentBogie.addVelocity(motion[0] + currentBogie.motionX, currentBogie.motionY, motion[2] + currentBogie.motionZ);
+                    currentBogie.minecartMove();
+                }
                 //position this
-                setPosition(
-                        (bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
-                        (bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) * 0.5D,
-                        (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D);
+                if ((bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) != 0) {
+                    setPosition(
+                            (bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
+                            ((bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) * 0.5D)+0.1d,
+                            (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D);
+                }
 
-                setRotation(
-                        (float) (Math.atan2(
-                                bogie.get(bogieSize).posZ - bogie.get(0).posZ,
-                                bogie.get(bogieSize).posX - bogie.get(0).posX)) * RailUtility.degreesF,
-                        MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY))
-                );
+
+                setRotation((float)Math.toDegrees(Math.atan2(
+                        bogie.get(bogieSize).posZ - bogie.get(0).posZ,
+                        bogie.get(bogieSize).posX - bogie.get(0).posX)),
+                        MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY)));
+
                 //align bogies
                 for (int i = 0; i < bogie.size(); ) {
                     float[] var = rotatePoint(new float[]{(float) getBogieOffsets().get(i).doubleValue(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
@@ -298,6 +303,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public Item getItem(){return null;}
     public int getInventorySize(){return 3;}
     public String getName(){return "error";}
+    public LiquidManager getTank(){return null;}
 
     //TODO we need to define smoke vector that can be called from the render
 

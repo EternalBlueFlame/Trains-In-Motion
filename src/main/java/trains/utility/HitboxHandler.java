@@ -14,9 +14,11 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
+import trains.TrainsInMotion;
 import trains.entities.EntityBogie;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
+import trains.networking.PacketRemove;
 
 import java.util.List;
 
@@ -29,7 +31,7 @@ public class HitboxHandler {
      * a generic hitbox class used for adding multiple hitboxes to an entity.
      * requires the entity to override getParts() and extend IEntityMultiPart
      * The hitboxes also need to be moved every onUpdate, for trains this is handled in
-     * @see HitboxHandler#getCollision(EntityTrainCore)
+     * @see HitboxHandler#getCollision(GenericRailTransport)
      */
     public class multipartHitbox extends EntityDragonPart{
         Entity parent;
@@ -72,7 +74,7 @@ public class HitboxHandler {
      * <h3>Process Entity Collision for train</h3>
      * this checks an area for blocks and other entities and returns true if there is something in that area besides what is supposed to be, (mounted players and bogies).
      */
-    public boolean getCollision(EntityTrainCore train){
+    public boolean getCollision(GenericRailTransport train){
 
         for (int iteration =0; iteration<train.getHitboxPositions().length; iteration++) {
             double[] position = rotatePoint(new double[]{train.getHitboxPositions()[iteration], 0, 0}, train.rotationPitch, train.rotationYaw, 0);
@@ -153,12 +155,18 @@ public class HitboxHandler {
         if (damageSource.getEntity() instanceof EntityPlayer && ((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode && !damageSource.isProjectile()){
             for (EntityMinecart cart : host.bogie){
                 cart.worldObj.removeEntity(cart);
+                cart.isDead = true;
+                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(cart.getEntityId()));
             }
             for (EntityDragonPart hitbox : host.hitboxList){
                 hitbox.worldObj.removeEntity(hitbox);
+                hitbox.isDead = true;
+                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId()));
             }
 
-            host.worldObj.removeEntity(host);
+            damageSource.getSourceOfDamage().worldObj.removeEntity(host);
+            host.isDead=true;
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(host.getEntityId()));
             return true;
         }
         return false;

@@ -4,11 +4,8 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
 import trains.utility.FuelHandler;
 import trains.utility.InventoryHandler;
-import trains.utility.LiquidManager;
 
 import java.util.UUID;
 
@@ -46,7 +43,6 @@ public class EntityTrainCore extends GenericRailTransport {
      * variables for the inventory.
      */
     public InventoryHandler inventory = new InventoryHandler(this); //Inventory, every train will have this to some extent or another, //the first two slots are for crafting
-    public LiquidManager tank = new LiquidManager(new int[]{1000}, new Fluid[]{FluidRegistry.WATER}, true);
 
 
 
@@ -62,19 +58,15 @@ public class EntityTrainCore extends GenericRailTransport {
     * @param xPos the x position to spawn entity at, used in super's super.
     * @param yPos the y position to spawn entity at, used in super's super.
     * @param zPos the z position to spawn entity at, used in super's super.
-    * @param tank used to define the fluid tank(s) if there are any
-    *             empty array for no tanks, - steam and nuclear take two tanks. - all other trains take one tank
-    *             all tanks besides diesel should use FluidRegistry.WATER
     */
 
-    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos, LiquidManager tank){
+    public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos){
         super(world);
         posY = yPos;
         posX = xPos;
         posZ = zPos;
 
         this.owner = owner;
-        this.tank = tank;
 
         setSize(1f,2);
         this.boundingBox.minX = 0;
@@ -85,9 +77,8 @@ public class EntityTrainCore extends GenericRailTransport {
         this.boundingBox.maxZ = 0;
     }
     //this constructor is lower level spawning
-    public EntityTrainCore(World world, LiquidManager tank){
+    public EntityTrainCore(World world){
         super(world);
-        this.tank = tank;
     }
 
     /**
@@ -102,7 +93,7 @@ public class EntityTrainCore extends GenericRailTransport {
         brake = tag.getBoolean("extended.brake");
 
         inventory.readNBT(tag, "items");
-        tank.readFromNBT(tag);
+        getTank().readFromNBT(tag);
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
@@ -111,7 +102,7 @@ public class EntityTrainCore extends GenericRailTransport {
         tag.setBoolean("extended.brake", brake);
 
         tag.setTag("items", inventory.writeNBT());
-        tank.writeToNBT(tag);
+        getTank().writeToNBT(tag);
     }
 
 
@@ -121,12 +112,31 @@ public class EntityTrainCore extends GenericRailTransport {
      * @see GenericRailTransport#onUpdate()
      */
     public float processMovement(){
+
+
+        float speed = 0;
+        if (accelerator!=0) {
+            //calculate acceleration based on train's throttle.
+           speed = getAcceleration() * (accelerator / 6);
+        }
+        speed *= (float) Math.exp(
+                -Math.pow(motionX-(getMaxSpeed() *0.5),2)
+                        /Math.pow(2*getMaxSpeed(),2)
+                        /Math.sqrt(Math.pow(2*Math.PI*getMaxSpeed(),2d)));
+        //System.out.println("speed : " + speed);
+        return speed;
+
+        //if motion > maxspeed/2 calcualte based on the negative result, else calculatue based on posative result
+
+
+        /**
+
         float accel = 0;
-        if (motion[0]+ motion[2] !=0){
-            accel = (((motion[0] + motion[2]) / getMaxSpeed()) * 100);
+        if (bogie.get(0).motionX + bogie.get(0).motionZ + bogie.get(bogie.size()-1).motionX + bogie.get(bogie.size()-1).motionZ !=0){
+            accel = (( (float) ((bogie.get(0).motionX + bogie.get(0).motionZ + bogie.get(bogie.size()-1).motionX + bogie.get(bogie.size()-1).motionZ)*0.5f)/ getMaxSpeed()) * 100);
         }
             accel *= (getAcceleration() * (16.66666666e7 * accelerator));
-        if (hitboxHandler.getCollision(this) & (accel==0 && motion[0] + motion[2] == 0) & !tank.canDrain((int) accel*20, 1)){
+        if (hitboxHandler.getCollision(this) & accel==0 & !tank.canDrain((int) accel*20, 1)){
             //if we shouldn't be moving, return 0.
             return 0;
         } else {
@@ -150,7 +160,8 @@ public class EntityTrainCore extends GenericRailTransport {
                 //TODO maybe a compensation for superheated boiler pressure?
             }
             return accel;
-        }
+
+        }*/
     }
 
     /**

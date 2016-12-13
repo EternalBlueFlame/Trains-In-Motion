@@ -7,7 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import trains.entities.GenericRailTransport;
 import trains.entities.trains.FirstTrain;
-import trains.models.trains.TrainTest_1;
+import trains.models.trains.Brigadelok_080;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class TrainRegistry {
         List<TrainRegistry> output = new ArrayList<TrainRegistry>();
 
         output.add(new TrainRegistry(FirstTrain.class, FirstTrain.thisItem, "entityfirsttrain",
-                new TrainTest_1(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
+                new Brigadelok_080(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
                 null, null,
                 'n'));
         return output;

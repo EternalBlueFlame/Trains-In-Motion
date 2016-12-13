@@ -53,12 +53,12 @@ public class FirstTrain extends EntityTrainCore {
      * TODO: we will need a list of items for the crafting recipe. we also need items to fill that list.....
      */
     private static final float initMaxSpeed = 0.9834875f;
-    private static final float acceleration = 0.001F;
+    private static final float acceleration = 0.0001F;
     private static final int type = 1;
     private static final int maxFuel = 12800;
-    private static LiquidManager tank = new LiquidManager(new int[]{10000, 10000}, new Fluid[]{FluidRegistry.WATER},true);
+    private LiquidManager tank = new LiquidManager(new int[]{10000, 10000}, new Fluid[]{FluidRegistry.WATER},true);
     private static final int inventorySize= 3;
-    private static final float offsetXZ =1f;
+    private static final float offsetXZ =1.3f;
     private static final List<Double> bogieOffset = Arrays.asList(-1.0D, 1.0D);
     private static final int[] hitboxPositions = new int[]{-1,0,1};
     private static final ResourceLocation horn = URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");
@@ -71,10 +71,10 @@ public class FirstTrain extends EntityTrainCore {
      * @see EntityTrainCore
      */
     public FirstTrain(UUID owner, World world, double xPos, double yPos, double zPos) {
-        super(owner, world, xPos, yPos, zPos, tank);
+        super(owner, world, xPos, yPos, zPos);
     }
     public FirstTrain(World world){
-        super(world, tank);
+        super(world);
     }
 
 
@@ -107,6 +107,8 @@ public class FirstTrain extends EntityTrainCore {
     }
     @Override
     public int[] getHitboxPositions(){return hitboxPositions;}
+    @Override
+    public LiquidManager getTank(){return tank;}
     @Override
     public ISound getHorn(){
         return new ISound() {

@@ -2,9 +2,12 @@ package trains.models;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderMinecart;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
+import trains.entities.GenericRailTransport;
 import trains.utility.ClientProxy;
 
 import javax.annotation.Nullable;
@@ -65,20 +68,20 @@ public class RenderEntity extends Render {
      * @param x the x position of the entity with offset for the camera position.
      * @param y the y position of the entity with offset for the camera position.
      * @param z the z position of the entity with offset for the camera position.
-     * @param rotation not used.
+     * @param yaw is used to rotate the train's yaw, its exactly the same as entity.rotationYaw.
      * @param partialTick not used.
      */
     
-    public void doRender(Entity entity, double x, double y, double z, float rotation, float partialTick){
+    public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick){
         
     	
     	GL11.glPushMatrix();
         //set the render position
-        GL11.glTranslated(x, y + 1.5d, z);
+        GL11.glTranslated(x, y + 1.4d, z);
         GL11.glPushMatrix();
         //rotate the model.
-        if (entity != null) {
-            GL11.glRotatef(entity.rotationYaw - 90f, 0.0f, 1.0f, 0.0f);
+        if (entity instanceof GenericRailTransport) {
+            GL11.glRotatef((-yaw) -90, 0.0f, 1.0f, 0.0f);
             GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
             GL11.glPushMatrix();
         }
@@ -103,6 +106,15 @@ public class RenderEntity extends Render {
         }
 
 
+        /**
+         * <h2>Animation</h2>
+         * while unimplemented, animation _should_ work by having the cube be initialized as
+         * 		Elem18 = new ModelRenderer(this, "wheel");
+         *      Elem18.setTextureOffset(0,0);
+         * rather than
+         * 		Elem18 = new ModelRenderer(this, 0,0);
+         * this same practice can be used for other features like pistons, the render only needs to check if the name of the cube matches and pragmatically apply the positioning.
+         */
 
         /**
          * <h4> render bogies</h4>

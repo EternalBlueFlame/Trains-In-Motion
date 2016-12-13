@@ -75,8 +75,8 @@ public class FuelHandler implements IFuelHandler{
 				}
 
 				//if the second slot contains a water bucket, add the contents of the water bucket to our tank and then place an empty bucket in the inventory
-				if ( isWater(cart.inventory.getStackInSlot(1), cart) && cart.tank.canFill(waterValue(cart.inventory.getStackInSlot(1)),0)) {
-					cart.tank.addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),0);
+				if ( isWater(cart.inventory.getStackInSlot(1), cart) && cart.getTank().canFill(waterValue(cart.inventory.getStackInSlot(1)),0)) {
+					cart.getTank().addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),0);
 					cart.inventory.decrStackSize(1,1);
 					cart.inventory.addItem(new ItemStack(Items.bucket));
 				}
@@ -85,10 +85,10 @@ public class FuelHandler implements IFuelHandler{
 				if (cart.furnaceFuel > 0) {
 					//add steam from burning to the steam tank.
 					int steam = Math.round(cart.furnaceFuel * 0.01f);
-					if (cart.tank.canDrain(steam,0)) {
+					if (cart.getTank().canDrain(steam,0)) {
 						cart.furnaceFuel -= 5;
-						cart.tank.drainFluid(steam, 0);
-						cart.tank.addFluid(FluidRegistry.WATER, steam/3, 1);
+						cart.getTank().drainFluid(steam, 0);
+						cart.getTank().addFluid(FluidRegistry.WATER, steam/3, 1);
 					} else {
 						cart.worldObj.createExplosion(cart, cart.posX, cart.posY, cart.posZ, 5f, false);
 						cart.dropItem(cart.getItem(), 1);
