@@ -1,5 +1,7 @@
 package trains.entities.trains;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -11,6 +13,7 @@ import trains.items.trains.ItemFirstTrain;
 import trains.registry.TrainRegistry;
 import trains.registry.URIRegistry;
 import trains.utility.LiquidManager;
+import trains.utility.RailUtility;
 
 import java.util.Arrays;
 import java.util.List;
@@ -77,6 +80,17 @@ public class FirstTrain extends EntityTrainCore {
         super(world);
     }
 
+    /**
+     * <h2>lamp management</h2>
+     * This defines the position the train is supposed to place the light, relative to its own, in this case 2 blocks above the rail block and 3 blocks in front of the train.
+     * Remove this function if the train has no lamp.
+     */
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void onUpdate(){
+        super.onUpdate();
+        lamp.ShouldUpdate(worldObj, RailUtility.rotatePoint(new double[]{posX+3,posY+2, posZ}, rotationPitch, rotationYaw, 0));
+    }
 
 
     /**

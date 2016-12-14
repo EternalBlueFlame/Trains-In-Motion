@@ -229,17 +229,20 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (bogieSize>0){
 
                 //handle movement for trains, this will likely need to be different for rollingstock.
+
                 if (this instanceof EntityTrainCore) {
-                    if (!hitboxHandler.getCollision(this)) {
-                        motion = rotatePoint(new float[]{((EntityTrainCore) this).processMovement(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                    } else {
-                        motion =new float[]{0f,0f,0f};
+                    for (EntityBogie currentBogie : bogie) {
+                        if (!hitboxHandler.getCollision(this)) {
+                            motion = rotatePoint(new float[]{-((EntityTrainCore) this).processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                        } else {
+                            motion = new float[]{0f, 0f, 0f};
+                        }
+
+                        currentBogie.addVelocity(motion[0], motion[1], motion[2]);
+                        currentBogie.minecartMove();
                     }
                 }
-                for (EntityBogie currentBogie : bogie) {
-                    currentBogie.addVelocity(motion[0] + currentBogie.motionX, currentBogie.motionY, motion[2] + currentBogie.motionZ);
-                    currentBogie.minecartMove();
-                }
+
                 //position this
                 if ((bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) != 0) {
                     setPosition(

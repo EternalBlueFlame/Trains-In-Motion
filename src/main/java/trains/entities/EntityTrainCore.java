@@ -111,57 +111,30 @@ public class EntityTrainCore extends GenericRailTransport {
      * called by the super class to figure out the amount of movement to apply every tick
      * @see GenericRailTransport#onUpdate()
      */
-    public float processMovement(){
+    public float processMovement(double X, double Z){
 
-
-        float speed = 0;
-        if (accelerator!=0) {
-            //calculate acceleration based on train's throttle.
-           speed = getAcceleration() * (accelerator / 6);
-        }
-        speed *= (float) Math.exp(
-                -Math.pow(motionX-(getMaxSpeed() *0.5),2)
-                        /Math.pow(2*getMaxSpeed(),2)
-                        /Math.sqrt(Math.pow(2*Math.PI*getMaxSpeed(),2d)));
-        //System.out.println("speed : " + speed);
-        return speed;
-
-        //if motion > maxspeed/2 calcualte based on the negative result, else calculatue based on posative result
-
-
-        /**
-
-        float accel = 0;
-        if (bogie.get(0).motionX + bogie.get(0).motionZ + bogie.get(bogie.size()-1).motionX + bogie.get(bogie.size()-1).motionZ !=0){
-            accel = (( (float) ((bogie.get(0).motionX + bogie.get(0).motionZ + bogie.get(bogie.size()-1).motionX + bogie.get(bogie.size()-1).motionZ)*0.5f)/ getMaxSpeed()) * 100);
-        }
-            accel *= (getAcceleration() * (16.66666666e7 * accelerator));
-        if (hitboxHandler.getCollision(this) & accel==0 & !tank.canDrain((int) accel*20, 1)){
-            //if we shouldn't be moving, return 0.
+        if (accelerator==0){
             return 0;
-        } else {
-            tank.drainFluid((int) accel*20, 1);
-            //compensate for if the train is stopped
-            if (accel == 0 && accelerator > 0) {
-                accel = getAcceleration() * 0.10f;
-            } else if (accel == 0 && accelerator < 0) {
-                accel = -getAcceleration() * 0.10f;
-            }
-            //modify based on fuel
-            if (getType() == 1) {
-                if (tank.tankFluidAmount(1) <= tank.tankCapacity(1) / 3) {
-                    //no boiler pressure
-                    accel *= 0.1f;
-                } else if (tank.tankFluidAmount(1) <= tank.tankCapacity(1)  / 2) {
-                    //low boiler pressure
-                    accel *= 0.5f;
-                }
-                //we don't compensate for normal/high boiler pressure because there would be no change.
-                //TODO maybe a compensation for superheated boiler pressure?
-            }
-            return accel;
+        }
 
-        }*/
+        double speed = 0;
+
+        if (X>Z){
+            speed = X;
+        } else {
+            speed = Z;
+        }
+
+        if (speed!=0) {
+            speed *= (accelerator/6)* getAcceleration();
+        } else {
+            speed = accelerator * getAcceleration();
+        }
+
+        if (speed>getMaxSpeed()){
+            speed=getMaxSpeed();
+        }
+        return (float) speed;
     }
 
     /**
