@@ -15,8 +15,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import trains.TrainsInMotion;
-import trains.networking.PacketRemove;
 import trains.utility.*;
 
 import java.util.ArrayList;
@@ -48,7 +46,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public UUID owner = null;
     public List<EntityBogie> bogie = new ArrayList<EntityBogie>();
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
-    protected float[] motion = new float[]{0,0,0};
+    protected double[] motion = new double[]{0,0,0};
     public boolean isReverse =false;
     public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
     public HitboxHandler hitboxHandler = new HitboxHandler();
@@ -228,26 +226,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
              */
             if (bogieSize>0){
 
-                //handle movement for trains, this will likely need to be different for rollingstock.
-
-                if (this instanceof EntityTrainCore) {
-                    for (EntityBogie currentBogie : bogie) {
-                        if (!hitboxHandler.getCollision(this)) {
-                            motion = rotatePoint(new float[]{-((EntityTrainCore) this).processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                        } else {
-                            motion = new float[]{0f, 0f, 0f};
-                        }
-
-                        currentBogie.addVelocity(motion[0], motion[1], motion[2]);
-                        currentBogie.minecartMove();
-                    }
-                }
-
                 //position this
                 if ((bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) != 0) {
                     setPosition(
                             (bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
-                            ((bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) * 0.5D)+0.1d,
+                            ((bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D),
                             (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D);
                 }
 
@@ -299,10 +282,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * <h2>Inherited variables</h2>
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
      */
-    public List<Double> getBogieOffsets(){return new ArrayList<Double>();}
+    public List<Float> getBogieOffsets(){return new ArrayList<Float>();}
     public int getType(){return 0;}
     public float getRiderOffset(){return 0;}
-    public int[] getHitboxPositions(){return new int[]{-1,0,1};}
+    public float[] getHitboxPositions(){return new float[]{-1,0,1};}
     public Item getItem(){return null;}
     public int getInventorySize(){return 3;}
     public String getName(){return "error";}

@@ -58,6 +58,12 @@ public class HitboxHandler {
                 return boundingBox;
         }
         @Override
+        public void onUpdate(){
+            if (parent == null){
+                worldObj.removeEntity(this);
+            }
+        }
+        @Override
         public boolean canBeCollidedWith() {
             return true;
         }
@@ -103,7 +109,6 @@ public class HitboxHandler {
                         for (int i2 = k; i2 <= j1; ++i2) {
                             Block block = train.worldObj.getBlock(k1, l1, i2);
                             if (!(block instanceof BlockAir) && !RailUtility.isRailBlockAt(block)){
-                                System.out.println(block.getClass().toString());
                                 return true;
                             }
                         }

@@ -15,9 +15,62 @@ import net.minecraft.entity.Entity;
 
 public class Brigadelok_080 extends ModelBase
 {
-	ModelRenderer Elem71;//Axle
+	ModelRenderer Elem126;//Cube
+	ModelRenderer Elem125;//Cube
+	ModelRenderer Elem124;//Upper_PistonValveConnector_Right
+	ModelRenderer Elem123;//PistonValveConnector_Right
+	ModelRenderer Elem122;//WheelConnectorPiston_Right
+	ModelRenderer Elem118;//Cube
+	ModelRenderer Elem117;//Cube
+	ModelRenderer Elem116;//Cube
+	ModelRenderer Elem115;//Cube
+	ModelRenderer Elem114;//Cube
+	ModelRenderer Elem113;//Cube
+	ModelRenderer Elem112;//Cube
+	ModelRenderer Elem111;//Cube
+	ModelRenderer Elem110;//Cube
+	ModelRenderer Elem109;//Cube
+	ModelRenderer Elem108;//Cube
+	ModelRenderer Elem107;//Cube
+	ModelRenderer Elem106;//Cube
+	ModelRenderer Elem105;//Cube
+	ModelRenderer Elem104;//Cube
+	ModelRenderer Elem103;//Cube
+	ModelRenderer Elem102;//Cube
+	ModelRenderer Elem101;//Cube
+	ModelRenderer Elem100;//Cube
+	ModelRenderer Elem99;//Cube
+	ModelRenderer Elem98;//Cube
+	ModelRenderer Elem97;//Cube
+	ModelRenderer Elem96;//Cube
+	ModelRenderer Elem95;//Cube
+	ModelRenderer Elem94;//Cube
+	ModelRenderer Elem93;//Cube
+	ModelRenderer Elem92;//Cube
+	ModelRenderer Elem91;//Cube
+	ModelRenderer Elem90;//Cube
+	ModelRenderer Elem89;//Cube
+	ModelRenderer Elem88;//Cube
+	ModelRenderer Elem87;//Cube
+	ModelRenderer Elem86;//Cube
+	ModelRenderer Elem85;//Cube
+	ModelRenderer Elem84;//Cube
+	ModelRenderer Elem83;//Cube
+	ModelRenderer Elem82;//Cube
+	ModelRenderer Elem81;//Cube
+	ModelRenderer Elem80;//Cube
+	ModelRenderer Elem79;//Cube
+	ModelRenderer Elem78;//Cube
+	ModelRenderer Elem77;//Cube
+	ModelRenderer Elem76;//Cube
+	ModelRenderer Elem75;//Cube
+	ModelRenderer Elem74;//Cube
+	ModelRenderer Elem73;//Cube
+	ModelRenderer Elem72;//Cube
+	ModelRenderer Elem71;//Cube
 	ModelRenderer Elem70;//Axle
 	ModelRenderer Elem69;//Axle
+	ModelRenderer Elem68;//Axle
 	ModelRenderer Elem67;//Axle
 	ModelRenderer Elem66;//Cube
 	ModelRenderer Elem65;//Cube
@@ -57,7 +110,7 @@ public class Brigadelok_080 extends ModelBase
 	ModelRenderer Elem31;//Cube
 	ModelRenderer Elem30;//Cube
 	ModelRenderer Elem29;//Cube
-	ModelRenderer Elem28;//Cube
+	ModelRenderer Elem28;//PistonValve
 	ModelRenderer Elem27;//Cube
 	ModelRenderer Elem26;//Cube
 	ModelRenderer Elem25;//Cube
@@ -88,10 +141,478 @@ public class Brigadelok_080 extends ModelBase
 		textureWidth = 64;
 		textureHeight = 32;
 
-		//Axle
+		//Cube
+		Elem126 = new ModelRenderer(this, 0, 0);
+		Elem126.addBox(0F, 0F, 0F, 1, 3, 1);
+		Elem126.setRotationPoint(-8.5F, 19.5F, 8.5F);
+		Elem126.setTextureSize(64, 32);
+		setRotation(Elem126, -0F, -0F, -0F);
+		//Elem126.rotateAngleX = -0F;
+		//Elem126.rotateAngleY = -0F;
+		//Elem126.rotateAngleZ = -0F;
+		//Cube
+		Elem125 = new ModelRenderer(this, 0, 0);
+		Elem125.addBox(0F, 0F, 0F, 1, 1, 8);
+		Elem125.setRotationPoint(-8.5F, 20.5F, 1F);
+		Elem125.setTextureSize(64, 32);
+		setRotation(Elem125, -0F, -0F, -0F);
+		//Elem125.rotateAngleX = -0F;
+		//Elem125.rotateAngleY = -0F;
+		//Elem125.rotateAngleZ = -0F;
+		//Upper_PistonValveConnector_Right
+		Elem124 = new ModelRenderer(this, 0, 0);
+		Elem124.addBox(0F, 0F, 0F, 1, 1, 9);
+		Elem124.setRotationPoint(-8.5F, 20.5F, 9F);
+		Elem124.setTextureSize(64, 32);
+		setRotation(Elem124, -0F, -0F, -0F);
+		//Elem124.rotateAngleX = -0F;
+		//Elem124.rotateAngleY = -0F;
+		//Elem124.rotateAngleZ = -0F;
+		//PistonValveConnector_Right
+		Elem123 = new ModelRenderer(this, 0, 0);
+		Elem123.addBox(0F, 0F, 0F, 1, 1, 18);
+		Elem123.setRotationPoint(-8F, 22F, 1F);
+		Elem123.setTextureSize(64, 32);
+		setRotation(Elem123, -0F, -0F, -0F);
+		//Elem123.rotateAngleX = -0F;
+		//Elem123.rotateAngleY = -0F;
+		//Elem123.rotateAngleZ = -0F;
+		//WheelConnectorPiston_Right
+		Elem122 = new ModelRenderer(this, 0, 0);
+		Elem122.addBox(0F, 0F, 0F, 1, 1, 19);
+		Elem122.setRotationPoint(-7.5F, 22.5F, -5F);
+		Elem122.setTextureSize(64, 32);
+		setRotation(Elem122, -0F, -0F, -0F);
+		//Elem122.rotateAngleX = -0F;
+		//Elem122.rotateAngleY = -0F;
+		//Elem122.rotateAngleZ = -0F;
+		//Cube
+		Elem118 = new ModelRenderer(this, 0, 0);
+		Elem118.addBox(0F, 0F, 0F, 1, 2, 1);
+		Elem118.setRotationPoint(-7.5F, 17.5F, 18.5F);
+		Elem118.setTextureSize(64, 32);
+		setRotation(Elem118, -0F, -0F, -0F);
+		//Elem118.rotateAngleX = -0F;
+		//Elem118.rotateAngleY = -0F;
+		//Elem118.rotateAngleZ = -0F;
+		//Cube
+		Elem117 = new ModelRenderer(this, 0, 0);
+		Elem117.addBox(0F, 0F, 0F, 1, 2, 1);
+		Elem117.setRotationPoint(-7.5F, 17.5F, 17F);
+		Elem117.setTextureSize(64, 32);
+		setRotation(Elem117, -0F, -0F, -0F);
+		//Elem117.rotateAngleX = -0F;
+		//Elem117.rotateAngleY = -0F;
+		//Elem117.rotateAngleZ = -0F;
+		//Cube
+		Elem116 = new ModelRenderer(this, 0, 0);
+		Elem116.addBox(0F, 0F, 0F, 3, 2, 2);
+		Elem116.setRotationPoint(-8F, 8.5F, 9.5F);
+		Elem116.setTextureSize(64, 32);
+		setRotation(Elem116, -0F, -0F, -0F);
+		//Elem116.rotateAngleX = -0F;
+		//Elem116.rotateAngleY = -0F;
+		//Elem116.rotateAngleZ = -0F;
+		//Cube
+		Elem115 = new ModelRenderer(this, 0, 0);
+		Elem115.addBox(0F, 0F, 0F, 2, 2, 3);
+		Elem115.setRotationPoint(-7.5F, 8.5F, 9F);
+		Elem115.setTextureSize(64, 32);
+		setRotation(Elem115, -0F, -0F, -0F);
+		//Elem115.rotateAngleX = -0F;
+		//Elem115.rotateAngleY = -0F;
+		//Elem115.rotateAngleZ = -0F;
+		//Cube
+		Elem114 = new ModelRenderer(this, 0, 0);
+		Elem114.addBox(0F, 0F, 0F, 1, 1, 12);
+		Elem114.setRotationPoint(-4.5F, 7.5F, -8F);
+		Elem114.setTextureSize(64, 32);
+		setRotation(Elem114, -0F, -0F, -0F);
+		//Elem114.rotateAngleX = -0F;
+		//Elem114.rotateAngleY = -0F;
+		//Elem114.rotateAngleZ = -0F;
+		//Cube
+		Elem113 = new ModelRenderer(this, 0, 0);
+		Elem113.addBox(0F, 0F, 0F, 1, 1, 1);
+		Elem113.setRotationPoint(-3.5F, 8F, 5F);
+		Elem113.setTextureSize(64, 32);
+		setRotation(Elem113, -0F, -0F, -0F);
+		//Elem113.rotateAngleX = -0F;
+		//Elem113.rotateAngleY = -0F;
+		//Elem113.rotateAngleZ = -0F;
+		//Cube
+		Elem112 = new ModelRenderer(this, 0, 0);
+		Elem112.addBox(0F, 0F, 0F, 1, 2, 2);
+		Elem112.setRotationPoint(-4.5F, 7F, 4.5F);
+		Elem112.setTextureSize(64, 32);
+		setRotation(Elem112, -0F, -0F, -0F);
+		//Elem112.rotateAngleX = -0F;
+		//Elem112.rotateAngleY = -0F;
+		//Elem112.rotateAngleZ = -0F;
+		//Cube
+		Elem111 = new ModelRenderer(this, 0, 0);
+		Elem111.addBox(0F, 0F, 0F, 3, 1, 4);
+		Elem111.setRotationPoint(5F, 9F, -7F);
+		Elem111.setTextureSize(64, 32);
+		setRotation(Elem111, -0F, -0F, -0F);
+		//Elem111.rotateAngleX = -0F;
+		//Elem111.rotateAngleY = -0F;
+		//Elem111.rotateAngleZ = -0F;
+		//Cube
+		Elem110 = new ModelRenderer(this, 0, 0);
+		Elem110.addBox(0F, 0F, 0F, 3, 1, 4);
+		Elem110.setRotationPoint(5F, 9F, -2F);
+		Elem110.setTextureSize(64, 32);
+		setRotation(Elem110, -0F, -0F, -0F);
+		//Elem110.rotateAngleX = -0F;
+		//Elem110.rotateAngleY = -0F;
+		//Elem110.rotateAngleZ = -0F;
+		//Cube
+		Elem109 = new ModelRenderer(this, 0, 0);
+		Elem109.addBox(0F, 0F, 0F, 3, 2, 2);
+		Elem109.setRotationPoint(5F, 8.5F, 13F);
+		Elem109.setTextureSize(64, 32);
+		setRotation(Elem109, -0F, -0F, -0F);
+		//Elem109.rotateAngleX = -0F;
+		//Elem109.rotateAngleY = -0F;
+		//Elem109.rotateAngleZ = -0F;
+		//Cube
+		Elem108 = new ModelRenderer(this, 0, 0);
+		Elem108.addBox(0F, 0F, 0F, 2, 2, 3);
+		Elem108.setRotationPoint(5.5F, 8.5F, 12.5F);
+		Elem108.setTextureSize(64, 32);
+		setRotation(Elem108, -0F, -0F, -0F);
+		//Elem108.rotateAngleX = -0F;
+		//Elem108.rotateAngleY = -0F;
+		//Elem108.rotateAngleZ = -0F;
+		//Cube
+		Elem107 = new ModelRenderer(this, 0, 0);
+		Elem107.addBox(0F, 0F, 0F, 1, 2, 1);
+		Elem107.setRotationPoint(-2.5F, 7F, -3F);
+		Elem107.setTextureSize(64, 32);
+		setRotation(Elem107, -0F, -0F, -0F);
+		//Elem107.rotateAngleX = -0F;
+		//Elem107.rotateAngleY = -0F;
+		//Elem107.rotateAngleZ = -0F;
+		//Cube
+		Elem106 = new ModelRenderer(this, 0, 0);
+		Elem106.addBox(0F, 0F, 0F, 1, 2, 1);
+		Elem106.setRotationPoint(1.5F, 7F, -3F);
+		Elem106.setTextureSize(64, 32);
+		setRotation(Elem106, -0F, -0F, -0F);
+		//Elem106.rotateAngleX = -0F;
+		//Elem106.rotateAngleY = -0F;
+		//Elem106.rotateAngleZ = -0F;
+		//Cube
+		Elem105 = new ModelRenderer(this, 0, 0);
+		Elem105.addBox(0F, 0F, 0F, 2, 1, 2);
+		Elem105.setRotationPoint(5.5F, 5F, 4.5F);
+		Elem105.setTextureSize(64, 32);
+		setRotation(Elem105, -0F, -0F, -0F);
+		//Elem105.rotateAngleX = -0F;
+		//Elem105.rotateAngleY = -0F;
+		//Elem105.rotateAngleZ = -0F;
+		//Cube
+		Elem104 = new ModelRenderer(this, 0, 0);
+		Elem104.addBox(0F, 0F, 0F, 1, 1, 1);
+		Elem104.setRotationPoint(6F, 6F, 5F);
+		Elem104.setTextureSize(64, 32);
+		setRotation(Elem104, -0F, -0F, -0F);
+		//Elem104.rotateAngleX = -0F;
+		//Elem104.rotateAngleY = -0F;
+		//Elem104.rotateAngleZ = -0F;
+		//Cube
+		Elem103 = new ModelRenderer(this, 0, 0);
+		Elem103.addBox(0F, 0F, 0F, 2, 2, 3);
+		Elem103.setRotationPoint(5.5F, 7F, 4F);
+		Elem103.setTextureSize(64, 32);
+		setRotation(Elem103, -0F, -0F, -0F);
+		//Elem103.rotateAngleX = -0F;
+		//Elem103.rotateAngleY = -0F;
+		//Elem103.rotateAngleZ = -0F;
+		//Cube
+		Elem102 = new ModelRenderer(this, 0, 0);
+		Elem102.addBox(0F, 0F, 0F, 3, 2, 2);
+		Elem102.setRotationPoint(5F, 7F, 4.5F);
+		Elem102.setTextureSize(64, 32);
+		setRotation(Elem102, -0F, -0F, -0F);
+		//Elem102.rotateAngleX = -0F;
+		//Elem102.rotateAngleY = -0F;
+		//Elem102.rotateAngleZ = -0F;
+		//Cube
+		Elem101 = new ModelRenderer(this, 0, 0);
+		Elem101.addBox(0F, 0F, 0F, 3, 1, 3);
+		Elem101.setRotationPoint(-1.5F, 7.5F, 19.5F);
+		Elem101.setTextureSize(64, 32);
+		setRotation(Elem101, -0F, -0F, -0F);
+		//Elem101.rotateAngleX = -0F;
+		//Elem101.rotateAngleY = -0F;
+		//Elem101.rotateAngleZ = -0F;
+		//Cube
+		Elem100 = new ModelRenderer(this, 0, 0);
+		Elem100.addBox(0F, 0F, 0F, 1, 1, 3);
+		Elem100.setRotationPoint(-0.5F, -1F, -8.5F);
+		Elem100.setTextureSize(64, 32);
+		setRotation(Elem100, -0F, -0F, -0F);
+		//Elem100.rotateAngleX = -0F;
+		//Elem100.rotateAngleY = -0F;
+		//Elem100.rotateAngleZ = -0F;
+		//Cube
+		Elem99 = new ModelRenderer(this, 0, 0);
+		Elem99.addBox(0F, 0F, 0F, 2, 2, 2);
+		Elem99.setRotationPoint(-1F, -9F, -7F);
+		Elem99.setTextureSize(64, 32);
+		setRotation(Elem99, -0F, -0F, -0F);
+		//Elem99.rotateAngleX = -0F;
+		//Elem99.rotateAngleY = -0F;
+		//Elem99.rotateAngleZ = -0F;
+		//Cube
+		Elem98 = new ModelRenderer(this, 0, 0);
+		Elem98.addBox(0F, 0F, 0F, 1, 3, 1);
+		Elem98.setRotationPoint(-0.5F, -9.5F, -6.5F);
+		Elem98.setTextureSize(64, 32);
+		setRotation(Elem98, -0F, -0F, -0F);
+		//Elem98.rotateAngleX = -0F;
+		//Elem98.rotateAngleY = -0F;
+		//Elem98.rotateAngleZ = -0F;
+		//Cube
+		Elem97 = new ModelRenderer(this, 0, 0);
+		Elem97.addBox(0F, 0F, 0F, 1, 5, 1);
+		Elem97.setRotationPoint(-0.5F, -6.5F, -6.5F);
+		Elem97.setTextureSize(64, 32);
+		setRotation(Elem97, -0F, -0F, -0F);
+		//Elem97.rotateAngleX = -0F;
+		//Elem97.rotateAngleY = -0F;
+		//Elem97.rotateAngleZ = -0F;
+		//Cube
+		Elem96 = new ModelRenderer(this, 0, 0);
+		Elem96.addBox(0F, 0F, 0F, 1, 2, 1);
+		Elem96.setRotationPoint(2F, 7F, 13.5F);
+		Elem96.setTextureSize(64, 32);
+		setRotation(Elem96, -0F, -0F, -0F);
+		//Elem96.rotateAngleX = -0F;
+		//Elem96.rotateAngleY = -0F;
+		//Elem96.rotateAngleZ = -0F;
+		//Cube
+		Elem95 = new ModelRenderer(this, 0, 0);
+		Elem95.addBox(0F, 0F, 0F, 1, 2, 1);
+		Elem95.setRotationPoint(-3F, 7F, 13.5F);
+		Elem95.setTextureSize(64, 32);
+		setRotation(Elem95, -0F, -0F, -0F);
+		//Elem95.rotateAngleX = -0F;
+		//Elem95.rotateAngleY = -0F;
+		//Elem95.rotateAngleZ = -0F;
+		//Cube
+		Elem94 = new ModelRenderer(this, 0, 0);
+		Elem94.addBox(0F, 0F, 0F, 1, 2, 1);
+		Elem94.setRotationPoint(-0.5F, -4.5F, 8F);
+		Elem94.setTextureSize(64, 32);
+		setRotation(Elem94, -0F, -0F, -0F);
+		//Elem94.rotateAngleX = -0F;
+		//Elem94.rotateAngleY = -0F;
+		//Elem94.rotateAngleZ = -0F;
+		//Cube
+		Elem93 = new ModelRenderer(this, 0, 0);
+		Elem93.addBox(0F, 0F, 0F, 1, 1, 3);
+		Elem93.setRotationPoint(-0.5F, -5.5F, 6.5F);
+		Elem93.setTextureSize(64, 32);
+		setRotation(Elem93, -0F, -0F, -0F);
+		//Elem93.rotateAngleX = -0F;
+		//Elem93.rotateAngleY = -0F;
+		//Elem93.rotateAngleZ = -0F;
+		//Cube
+		Elem92 = new ModelRenderer(this, 0, 0);
+		Elem92.addBox(0F, 0F, 0F, 2, 9, 5);
+		Elem92.setRotationPoint(-1F, 0F, 11.5F);
+		Elem92.setTextureSize(64, 32);
+		setRotation(Elem92, -0F, -0F, -0F);
+		//Elem92.rotateAngleX = -0F;
+		//Elem92.rotateAngleY = -0F;
+		//Elem92.rotateAngleZ = -0F;
+		//Cube
+		Elem91 = new ModelRenderer(this, 0, 0);
+		Elem91.addBox(0F, 0F, 0F, 5, 9, 2);
+		Elem91.setRotationPoint(-2.5F, 0F, 13F);
+		Elem91.setTextureSize(64, 32);
+		setRotation(Elem91, -0F, -0F, -0F);
+		//Elem91.rotateAngleX = -0F;
+		//Elem91.rotateAngleY = -0F;
+		//Elem91.rotateAngleZ = -0F;
+		//Cube
+		Elem90 = new ModelRenderer(this, 0, 0);
+		Elem90.addBox(0F, 0F, 0F, 4, 9, 4);
+		Elem90.setRotationPoint(-2F, 0F, 12F);
+		Elem90.setTextureSize(64, 32);
+		setRotation(Elem90, -0F, -0F, -0F);
+		//Elem90.rotateAngleX = -0F;
+		//Elem90.rotateAngleY = -0F;
+		//Elem90.rotateAngleZ = -0F;
+		//Cube
+		Elem89 = new ModelRenderer(this, 0, 0);
+		Elem89.addBox(0F, 0F, 0F, 3, 6, 3);
+		Elem89.setRotationPoint(-1.5F, -9.5F, 19.5F);
+		Elem89.setTextureSize(64, 32);
+		setRotation(Elem89, -0F, -0F, -0F);
+		//Elem89.rotateAngleX = -0F;
+		//Elem89.rotateAngleY = -0F;
+		//Elem89.rotateAngleZ = -0F;
+		//Cube
+		Elem88 = new ModelRenderer(this, 0, 0);
+		Elem88.addBox(0F, 0F, 0F, 2, 13, 2);
+		Elem88.setRotationPoint(-1F, -5F, 20F);
+		Elem88.setTextureSize(64, 32);
+		setRotation(Elem88, -0F, -0F, -0F);
+		//Elem88.rotateAngleX = -0F;
+		//Elem88.rotateAngleY = -0F;
+		//Elem88.rotateAngleZ = -0F;
+		//Cube
+		Elem87 = new ModelRenderer(this, 0, 0);
+		Elem87.addBox(0F, 0F, 0F, 2, 3, 2);
+		Elem87.setRotationPoint(-1F, -7F, 4.5F);
+		Elem87.setTextureSize(64, 32);
+		setRotation(Elem87, -0F, -0F, -0F);
+		//Elem87.rotateAngleX = -0F;
+		//Elem87.rotateAngleY = -0F;
+		//Elem87.rotateAngleZ = -0F;
+		//Cube
+		Elem86 = new ModelRenderer(this, 0, 0);
+		Elem86.addBox(0F, 0F, 0F, 4, 13, 4);
+		Elem86.setRotationPoint(-2F, -4F, 3.5F);
+		Elem86.setTextureSize(64, 32);
+		setRotation(Elem86, -0F, -0F, -0F);
+		//Elem86.rotateAngleX = -0F;
+		//Elem86.rotateAngleY = -0F;
+		//Elem86.rotateAngleZ = -0F;
+		//Cube
+		Elem85 = new ModelRenderer(this, 0, 0);
+		Elem85.addBox(0F, 0F, 0F, 5, 13, 2);
+		Elem85.setRotationPoint(-2.5F, -4F, 4.5F);
+		Elem85.setTextureSize(64, 32);
+		setRotation(Elem85, -0F, -0F, -0F);
+		//Elem85.rotateAngleX = -0F;
+		//Elem85.rotateAngleY = -0F;
+		//Elem85.rotateAngleZ = -0F;
+		//Cube
+		Elem84 = new ModelRenderer(this, 0, 0);
+		Elem84.addBox(0F, 0F, 0F, 3, 13, 5);
+		Elem84.setRotationPoint(-1.5F, -4F, 3F);
+		Elem84.setTextureSize(64, 32);
+		setRotation(Elem84, -0F, -0F, -0F);
+		//Elem84.rotateAngleX = -0F;
+		//Elem84.rotateAngleY = -0F;
+		//Elem84.rotateAngleZ = -0F;
+		//Cube
+		Elem83 = new ModelRenderer(this, 0, 0);
+		Elem83.addBox(0F, 0F, 0F, 2, 7, 4);
+		Elem83.setRotationPoint(-1F, 2F, -4.5F);
+		Elem83.setTextureSize(64, 32);
+		setRotation(Elem83, -0F, -0F, -0F);
+		//Elem83.rotateAngleX = -0F;
+		//Elem83.rotateAngleY = -0F;
+		//Elem83.rotateAngleZ = -0F;
+		//Cube
+		Elem82 = new ModelRenderer(this, 0, 0);
+		Elem82.addBox(0F, 0F, 0F, 4, 7, 2);
+		Elem82.setRotationPoint(-2F, 2F, -3.5F);
+		Elem82.setTextureSize(64, 32);
+		setRotation(Elem82, -0F, -0F, -0F);
+		//Elem82.rotateAngleX = -0F;
+		//Elem82.rotateAngleY = -0F;
+		//Elem82.rotateAngleZ = -0F;
+		//Cube
+		Elem81 = new ModelRenderer(this, 0, 0);
+		Elem81.addBox(0F, 0F, 0F, 3, 7, 3);
+		Elem81.setRotationPoint(-1.5F, 2F, -4F);
+		Elem81.setTextureSize(64, 32);
+		setRotation(Elem81, -0F, -0F, -0F);
+		//Elem81.rotateAngleX = -0F;
+		//Elem81.rotateAngleY = -0F;
+		//Elem81.rotateAngleZ = -0F;
+		//Cube
+		Elem80 = new ModelRenderer(this, 0, 0);
+		Elem80.addBox(0F, 0F, 0F, 10, 1, 1);
+		Elem80.setRotationPoint(-5F, -7F, -29F);
+		Elem80.setTextureSize(64, 32);
+		setRotation(Elem80, -0F, -0F, -0F);
+		//Elem80.rotateAngleX = -0F;
+		//Elem80.rotateAngleY = -0F;
+		//Elem80.rotateAngleZ = -0F;
+		//Cube
+		Elem79 = new ModelRenderer(this, 0, 0);
+		Elem79.addBox(0F, 0F, 0F, 4, 1, 7);
+		Elem79.setRotationPoint(-2F, -11.5F, -24F);
+		Elem79.setTextureSize(64, 32);
+		setRotation(Elem79, -0F, -0F, -0F);
+		//Elem79.rotateAngleX = -0F;
+		//Elem79.rotateAngleY = -0F;
+		//Elem79.rotateAngleZ = -0F;
+		//Cube
+		Elem78 = new ModelRenderer(this, 0, 0);
+		Elem78.addBox(0F, 0F, 0F, 7, 1, 7);
+		Elem78.setRotationPoint(-3.5F, -11F, -24F);
+		Elem78.setTextureSize(64, 32);
+		setRotation(Elem78, -0F, -0F, -0F);
+		//Elem78.rotateAngleX = -0F;
+		//Elem78.rotateAngleY = -0F;
+		//Elem78.rotateAngleZ = -0F;
+		//Cube
+		Elem77 = new ModelRenderer(this, 0, 0);
+		Elem77.addBox(0F, 0F, 0F, 10, 1, 1);
+		Elem77.setRotationPoint(-5F, -7F, -9F);
+		Elem77.setTextureSize(64, 32);
+		setRotation(Elem77, -0F, -0F, -0F);
+		//Elem77.rotateAngleX = -0F;
+		//Elem77.rotateAngleY = -0F;
+		//Elem77.rotateAngleZ = -0F;
+		//Cube
+		Elem76 = new ModelRenderer(this, 0, 0);
+		Elem76.addBox(0F, 0F, 0F, 6, 2, 5);
+		Elem76.setRotationPoint(-3F, -10F, -23F);
+		Elem76.setTextureSize(64, 32);
+		setRotation(Elem76, -0F, -0F, -0F);
+		//Elem76.rotateAngleX = -0F;
+		//Elem76.rotateAngleY = -0F;
+		//Elem76.rotateAngleZ = -0F;
+		//Cube
+		Elem75 = new ModelRenderer(this, 0, 0);
+		Elem75.addBox(0F, 0F, 0F, 10, 1, 23);
+		Elem75.setRotationPoint(-5F, -8F, -30F);
+		Elem75.setTextureSize(64, 32);
+		setRotation(Elem75, -0F, -0F, -0F);
+		//Elem75.rotateAngleX = -0F;
+		//Elem75.rotateAngleY = -0F;
+		//Elem75.rotateAngleZ = -0F;
+		//Cube
+		Elem74 = new ModelRenderer(this, 0, 0);
+		Elem74.addBox(0F, 0F, 0F, 3, 1, 23);
+		Elem74.setRotationPoint(5F, -7F, -30F);
+		Elem74.setTextureSize(64, 32);
+		setRotation(Elem74, -0F, -0F, -0F);
+		//Elem74.rotateAngleX = -0F;
+		//Elem74.rotateAngleY = -0F;
+		//Elem74.rotateAngleZ = -0F;
+		//Cube
+		Elem73 = new ModelRenderer(this, 0, 0);
+		Elem73.addBox(0F, 0F, 0F, 3, 1, 23);
+		Elem73.setRotationPoint(-8F, -7F, -30F);
+		Elem73.setTextureSize(64, 32);
+		setRotation(Elem73, -0F, -0F, -0F);
+		//Elem73.rotateAngleX = -0F;
+		//Elem73.rotateAngleY = -0F;
+		//Elem73.rotateAngleZ = -0F;
+		//Cube
+		Elem72 = new ModelRenderer(this, 0, 0);
+		Elem72.addBox(0F, 0F, 0F, 2, 1, 23);
+		Elem72.setRotationPoint(8F, -6F, -30F);
+		Elem72.setTextureSize(64, 32);
+		setRotation(Elem72, -0F, -0F, -0F);
+		//Elem72.rotateAngleX = -0F;
+		//Elem72.rotateAngleY = -0F;
+		//Elem72.rotateAngleZ = -0F;
+		//Cube
 		Elem71 = new ModelRenderer(this, 0, 0);
-		Elem71.addBox(0F, 0F, 0F, 13, 1, 1);
-		Elem71.setRotationPoint(-6.5F, 22F, 1F);
+		Elem71.addBox(0F, 0F, 0F, 2, 1, 23);
+		Elem71.setRotationPoint(-10F, -6F, -30F);
 		Elem71.setTextureSize(64, 32);
 		setRotation(Elem71, -0F, -0F, -0F);
 		//Elem71.rotateAngleX = -0F;
@@ -100,7 +621,7 @@ public class Brigadelok_080 extends ModelBase
 		//Axle
 		Elem70 = new ModelRenderer(this, 0, 0);
 		Elem70.addBox(0F, 0F, 0F, 13, 1, 1);
-		Elem70.setRotationPoint(-6.5F, 22F, 13F);
+		Elem70.setRotationPoint(-6.5F, 22F, 1F);
 		Elem70.setTextureSize(64, 32);
 		setRotation(Elem70, -0F, -0F, -0F);
 		//Elem70.rotateAngleX = -0F;
@@ -109,12 +630,21 @@ public class Brigadelok_080 extends ModelBase
 		//Axle
 		Elem69 = new ModelRenderer(this, 0, 0);
 		Elem69.addBox(0F, 0F, 0F, 13, 1, 1);
-		Elem69.setRotationPoint(-6.5F, 22F, 7F);
+		Elem69.setRotationPoint(-6.5F, 22F, 13F);
 		Elem69.setTextureSize(64, 32);
 		setRotation(Elem69, -0F, -0F, -0F);
 		//Elem69.rotateAngleX = -0F;
 		//Elem69.rotateAngleY = -0F;
 		//Elem69.rotateAngleZ = -0F;
+		//Axle
+		Elem68 = new ModelRenderer(this, 0, 0);
+		Elem68.addBox(0F, 0F, 0F, 13, 1, 1);
+		Elem68.setRotationPoint(-6.5F, 22F, 7F);
+		Elem68.setTextureSize(64, 32);
+		setRotation(Elem68, -0F, -0F, -0F);
+		//Elem68.rotateAngleX = -0F;
+		//Elem68.rotateAngleY = -0F;
+		//Elem68.rotateAngleZ = -0F;
 		//Axle
 		Elem67 = new ModelRenderer(this, 0, 0);
 		Elem67.addBox(0F, 0F, 0F, 13, 1, 1);
@@ -466,7 +996,7 @@ public class Brigadelok_080 extends ModelBase
 		//Elem29.rotateAngleX = -0F;
 		//Elem29.rotateAngleY = -0F;
 		//Elem29.rotateAngleZ = -0F;
-		//Cube
+		//PistonValve
 		Elem28 = new ModelRenderer(this, 0, 0);
 		Elem28.addBox(0F, 0F, 0F, 18, 5, 3);
 		Elem28.setRotationPoint(-9F, 19.5F, 17F);
@@ -477,8 +1007,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem28.rotateAngleZ = -0F;
 		//Cube
 		Elem27 = new ModelRenderer(this, 0, 0);
-		Elem27.addBox(0F, 0F, 0F, 12, 2, 16);
-		Elem27.setRotationPoint(-6F, 22F, -28F);
+		Elem27.addBox(0F, 0F, 0F, 12, 1, 16);
+		Elem27.setRotationPoint(-6F, 23F, -28F);
 		Elem27.setTextureSize(64, 32);
 		setRotation(Elem27, -0F, -0F, -0F);
 		//Elem27.rotateAngleX = -0F;
@@ -513,8 +1043,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem24.rotateAngleZ = -0F;
 		//Cube
 		Elem23 = new ModelRenderer(this, 0, 0);
-		Elem23.addBox(0F, 0F, 0F, 1, 17, 15);
-		Elem23.setRotationPoint(8F, 5F, -28F);
+		Elem23.addBox(0F, 0F, 0F, 1, 15, 9);
+		Elem23.setRotationPoint(8F, 7F, -22F);
 		Elem23.setTextureSize(64, 32);
 		setRotation(Elem23, -0F, -0F, -0F);
 		//Elem23.rotateAngleX = -0F;
@@ -522,8 +1052,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem23.rotateAngleZ = -0F;
 		//Cube
 		Elem22 = new ModelRenderer(this, 0, 0);
-		Elem22.addBox(0F, 0F, 0F, 18, 28, 1);
-		Elem22.setRotationPoint(-9F, -5F, -29F);
+		Elem22.addBox(0F, 0F, 0F, 18, 29, 1);
+		Elem22.setRotationPoint(-9F, -6F, -29F);
 		Elem22.setTextureSize(64, 32);
 		setRotation(Elem22, -0F, -0F, -0F);
 		//Elem22.rotateAngleX = -0F;
@@ -568,7 +1098,7 @@ public class Brigadelok_080 extends ModelBase
 		//Cube
 		Elem17 = new ModelRenderer(this, 0, 0);
 		Elem17.addBox(0F, 0F, 0F, 12, 3, 2);
-		Elem17.setRotationPoint(-6F, 20F, 21F);
+		Elem17.setRotationPoint(-6F, 20F, 21.5F);
 		Elem17.setTextureSize(64, 32);
 		setRotation(Elem17, -0F, -0F, -0F);
 		//Elem17.rotateAngleX = -0F;
@@ -585,8 +1115,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem16.rotateAngleZ = -0F;
 		//Cube
 		Elem15 = new ModelRenderer(this, 0, 0);
-		Elem15.addBox(0F, 0F, 0F, 1, 12, 15);
-		Elem15.setRotationPoint(8F, 5.5F, -28F);
+		Elem15.addBox(0F, 0F, 0F, 18, 1, 15);
+		Elem15.setRotationPoint(-9F, 22F, -28F);
 		Elem15.setTextureSize(64, 32);
 		setRotation(Elem15, -0F, -0F, -0F);
 		//Elem15.rotateAngleX = -0F;
@@ -594,8 +1124,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem15.rotateAngleZ = -0F;
 		//Cube
 		Elem14 = new ModelRenderer(this, 0, 0);
-		Elem14.addBox(0F, 0F, 0F, 1, 18, 15);
-		Elem14.setRotationPoint(-9F, 5F, -28F);
+		Elem14.addBox(0F, 0F, 0F, 1, 15, 9);
+		Elem14.setRotationPoint(-9F, 7F, -22F);
 		Elem14.setTextureSize(64, 32);
 		setRotation(Elem14, -0F, -0F, -0F);
 		//Elem14.rotateAngleX = -0F;
@@ -603,8 +1133,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem14.rotateAngleZ = -0F;
 		//Cube
 		Elem13 = new ModelRenderer(this, 0, 0);
-		Elem13.addBox(0F, 0F, 0F, 18, 24, 1);
-		Elem13.setRotationPoint(-9F, -5F, -9F);
+		Elem13.addBox(0F, 0F, 0F, 18, 25, 1);
+		Elem13.setRotationPoint(-9F, -6F, -9F);
 		Elem13.setTextureSize(64, 32);
 		setRotation(Elem13, -0F, -0F, -0F);
 		//Elem13.rotateAngleX = -0F;
@@ -697,9 +1227,62 @@ public class Brigadelok_080 extends ModelBase
 	{
 		super.render(entity, f, f1, f2, f3, f4, f5);
 		setRotationAngles(f, f1, f2, f3, f4, f5, entity);
-		Elem71.render(f5);//Axle
+		Elem126.render(f5);//Cube
+		Elem125.render(f5);//Cube
+		Elem124.render(f5);//Upper_PistonValveConnector_Right
+		Elem123.render(f5);//PistonValveConnector_Right
+		Elem122.render(f5);//WheelConnectorPiston_Right
+		Elem118.render(f5);//Cube
+		Elem117.render(f5);//Cube
+		Elem116.render(f5);//Cube
+		Elem115.render(f5);//Cube
+		Elem114.render(f5);//Cube
+		Elem113.render(f5);//Cube
+		Elem112.render(f5);//Cube
+		Elem111.render(f5);//Cube
+		Elem110.render(f5);//Cube
+		Elem109.render(f5);//Cube
+		Elem108.render(f5);//Cube
+		Elem107.render(f5);//Cube
+		Elem106.render(f5);//Cube
+		Elem105.render(f5);//Cube
+		Elem104.render(f5);//Cube
+		Elem103.render(f5);//Cube
+		Elem102.render(f5);//Cube
+		Elem101.render(f5);//Cube
+		Elem100.render(f5);//Cube
+		Elem99.render(f5);//Cube
+		Elem98.render(f5);//Cube
+		Elem97.render(f5);//Cube
+		Elem96.render(f5);//Cube
+		Elem95.render(f5);//Cube
+		Elem94.render(f5);//Cube
+		Elem93.render(f5);//Cube
+		Elem92.render(f5);//Cube
+		Elem91.render(f5);//Cube
+		Elem90.render(f5);//Cube
+		Elem89.render(f5);//Cube
+		Elem88.render(f5);//Cube
+		Elem87.render(f5);//Cube
+		Elem86.render(f5);//Cube
+		Elem85.render(f5);//Cube
+		Elem84.render(f5);//Cube
+		Elem83.render(f5);//Cube
+		Elem82.render(f5);//Cube
+		Elem81.render(f5);//Cube
+		Elem80.render(f5);//Cube
+		Elem79.render(f5);//Cube
+		Elem78.render(f5);//Cube
+		Elem77.render(f5);//Cube
+		Elem76.render(f5);//Cube
+		Elem75.render(f5);//Cube
+		Elem74.render(f5);//Cube
+		Elem73.render(f5);//Cube
+		Elem72.render(f5);//Cube
+		Elem71.render(f5);//Cube
 		Elem70.render(f5);//Axle
 		Elem69.render(f5);//Axle
+		Elem68.render(f5);//Axle
 		Elem67.render(f5);//Axle
 		Elem66.render(f5);//Cube
 		Elem65.render(f5);//Cube
@@ -739,7 +1322,7 @@ public class Brigadelok_080 extends ModelBase
 		Elem31.render(f5);//Cube
 		Elem30.render(f5);//Cube
 		Elem29.render(f5);//Cube
-		Elem28.render(f5);//Cube
+		Elem28.render(f5);//PistonValve
 		Elem27.render(f5);//Cube
 		Elem26.render(f5);//Cube
 		Elem25.render(f5);//Cube

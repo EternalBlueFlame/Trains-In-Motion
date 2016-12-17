@@ -9,6 +9,8 @@ import trains.utility.InventoryHandler;
 
 import java.util.UUID;
 
+import static trains.utility.RailUtility.rotatePoint;
+
 /**
  * <h2> Train core</h2>
  * this is the management core for all train
@@ -111,30 +113,25 @@ public class EntityTrainCore extends GenericRailTransport {
      * called by the super class to figure out the amount of movement to apply every tick
      * @see GenericRailTransport#onUpdate()
      */
-    public float processMovement(double X, double Z){
+    public float processMovement(double X){
 
-        if (accelerator==0){
-            return 0;
-        }
+        float speed = (float) X * 0.9f;
 
-        double speed = 0;
-
-        if (X>Z){
-            speed = X;
-        } else {
-            speed = Z;
-        }
-
-        if (speed!=0) {
-            speed *= (accelerator/6)* getAcceleration();
-        } else {
-            speed = accelerator * getAcceleration();
+        if (accelerator!=0) {
+            if (speed != 0) {
+                speed *= (accelerator / 6f) * getAcceleration();
+            } else {
+                speed = (0.1666666667f) * getAcceleration();
+            }
         }
 
         if (speed>getMaxSpeed()){
-            speed=getMaxSpeed();
+           // speed=getMaxSpeed();
         }
-        return (float) speed;
+        if(worldObj.isRemote){
+            speed *= 0.25d;
+        }
+        return speed;
     }
 
     /**
@@ -146,7 +143,24 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     @Override
     public void onUpdate() {
+        if (bogie.size()>0){
+            boolean collision = !hitboxHandler.getCollision(this);
+            //handle movement for trains, this will likely need to be different for rollingstock.
+            for (EntityBogie currentBogie : bogie) {
+                if (collision) {
+                    //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                    motion[0] = processMovement(currentBogie.motionX);
+                    motion[2] = processMovement(currentBogie.motionZ);
+                    motion[1] = currentBogie.motionY;
+                    currentBogie.setVelocity(motion[0], 0, motion[2]);
+                    currentBogie.minecartMove();
+                } else {
+                    motion = new double[]{0d, 0d, 0d};
+                }
+            }
+        }
         super.onUpdate();
+
         //simple tick management so some code does not need to be run every tick.
         if (!worldObj.isRemote) {
             switch (trainTicks) {
@@ -154,17 +168,17 @@ public class EntityTrainCore extends GenericRailTransport {
                     //deal with the fuel
                     FuelHandler.ManageFuel(this);
                 break;
-            }
-            default: {
-                //if the tick count is higher than the values used, reset it so it can count up again.
-                if (trainTicks > 10) {
-                    trainTicks = 1;
                 }
-            }
+                default: {
+                    //if the tick count is higher than the values used, reset it so it can count up again.
+                    if (trainTicks > 10) {
+                        trainTicks = 1;
+                    }
+                }
 
+            }
+            trainTicks++;
         }
-        trainTicks++;
-    }
     }
 
 

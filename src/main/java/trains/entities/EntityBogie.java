@@ -164,40 +164,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
         }
         if (worldObj.isRemote) {
-            prevPosX = posX;
-            prevPosY = posY;
-            prevPosZ = posZ;
-            motionY -= 0.03999999910593033D;
-            int l = MathHelper.floor_double(posX);
-            i = MathHelper.floor_double(posY);
-            int i1 = MathHelper.floor_double(posZ);
-
-            //deal with special rails
-            if (RailUtility.isRailBlockAt(worldObj, l, i - 1, i1)) {
-                --i;
-            }
-            Block block = worldObj.getBlock(l, i, i1);
-            if (canUseRail() && RailUtility.isRailBlockAt(block)) {
-                float railMaxSpeed = ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, l, i, i1);
-                double maxSpeed = Math.min(railMaxSpeed, getCurrentCartSpeedCapOnRail());
-                func_145821_a(l, i, i1, maxSpeed, getSlopeAdjustment(), block, ((BlockRailBase)block).getBasicRailMetadata(worldObj, this, l, i, i1));
-
-                if (block == Blocks.activator_rail) {
-                    onActivatorRailPass(l, i, i1, (worldObj.getBlockMetadata(l, i, i1) & 8) != 0);
-                }
-            } else {
-                func_94088_b(onGround ? 0.4D : getMaxSpeedAirLateral());
-            }
-
-            if (riddenByEntity != null && riddenByEntity.isDead) {
-                if (riddenByEntity.ridingEntity == this) {
-                    riddenByEntity.ridingEntity = null;
-                }
-
-                riddenByEntity = null;
-            }
-
-
+            setPosition(posX, posY, posZ);
         } else {
             prevPosX = posX;
             prevPosY = posY;
@@ -224,13 +191,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 func_94088_b(onGround ? 0.4D : getMaxSpeedAirLateral());
             }
 
-            if (riddenByEntity != null && riddenByEntity.isDead) {
-                if (riddenByEntity.ridingEntity == this) {
-                    riddenByEntity.ridingEntity = null;
-                }
-
-                riddenByEntity = null;
-            }
             //finally post a minecart update
             MinecraftForge.EVENT_BUS.post(new MinecartUpdateEvent(this, l, i, i1));
         }

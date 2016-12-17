@@ -56,14 +56,14 @@ public class FirstTrain extends EntityTrainCore {
      * TODO: we will need a list of items for the crafting recipe. we also need items to fill that list.....
      */
     private static final float initMaxSpeed = 0.9834875f;
-    private static final float acceleration = 0.0001F;
+    private static final float acceleration = 0.1F;
     private static final int type = 1;
     private static final int maxFuel = 12800;
     private LiquidManager tank = new LiquidManager(new int[]{10000, 10000}, new Fluid[]{FluidRegistry.WATER},true);
     private static final int inventorySize= 3;
     private static final float offsetXZ =1.3f;
-    private static final List<Double> bogieOffset = Arrays.asList(-1.0D, 1.0D);
-    private static final int[] hitboxPositions = new int[]{-1,0,1};
+    private static final List<Float> bogieOffset = Arrays.asList(-0.75f, 0.75f);
+    private static final float[] hitboxPositions = new float[]{-1.15f,0f,1.15f};
     private static final ResourceLocation horn = URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");
     private static final ResourceLocation running = URIRegistry.SOUND_RUNNING.getResource("r080brigadelok.ogg");
     private static final String trainName = "0-8-0 Brigadelok";
@@ -104,7 +104,7 @@ public class FirstTrain extends EntityTrainCore {
     @Override
     public String getName() {return trainName;}
     @Override
-    public List<Double> getBogieOffsets(){return bogieOffset;}
+    public List<Float> getBogieOffsets(){return bogieOffset;}
     @Override
     public int getInventorySize(){return inventorySize;}
     @Override
@@ -120,7 +120,7 @@ public class FirstTrain extends EntityTrainCore {
         return thisItem;
     }
     @Override
-    public int[] getHitboxPositions(){return hitboxPositions;}
+    public float[] getHitboxPositions(){return hitboxPositions;}
     @Override
     public LiquidManager getTank(){return tank;}
     @Override
