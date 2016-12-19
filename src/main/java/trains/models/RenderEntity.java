@@ -1,21 +1,22 @@
-package trains.entities.render;
+package trains.models;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderMinecart;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
+import trains.entities.GenericRailTransport;
 import trains.utility.ClientProxy;
 
 import javax.annotation.Nullable;
 
 /**
  * <h2> .Java Entity Rendering</h2>
- * this is planned to replace:
- * @see RenderObj
  * to be used for rendering all trains and rollingstock, along with their particle effects.
  * for the variables fed to this class:
- * @see ClientProxy#registerRenderers()
+ * @see ClientProxy#register()
  */
 public class RenderEntity extends Render {
 
@@ -23,8 +24,12 @@ public class RenderEntity extends Render {
     private ModelBase bogieModel;
     private ResourceLocation texture;
     private ResourceLocation bogieTexture;
+    /*
+     * hitboxBase is used for the bottom and top, side is used for the two long sides
+     * hitboxFront is used for front and back
+     */
+    
     private char smokeType = 'n';
-
     /**
      * <h3>class constructor</h3>
      * @param modelLoad the model class to render.
@@ -63,32 +68,59 @@ public class RenderEntity extends Render {
      * @param x the x position of the entity with offset for the camera position.
      * @param y the y position of the entity with offset for the camera position.
      * @param z the z position of the entity with offset for the camera position.
-     * @param rotation not used.
+     * @param yaw is used to rotate the train's yaw, its exactly the same as entity.rotationYaw.
      * @param partialTick not used.
      */
-    public void doRender(Entity entity, double x, double y, double z, float rotation, float partialTick){
-        GL11.glPushMatrix();
+    
+    public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick){
+        
+    	
+    	GL11.glPushMatrix();
         //set the render position
-        GL11.glTranslated(x, y, z);
+        GL11.glTranslated(x, y + 1.4d, z);
         GL11.glPushMatrix();
         //rotate the model.
-        GL11.glRotatef(entity.rotationYaw, 0.0F, 1.0F, 0.0F);
-        GL11.glRotatef(entity.rotationPitch, 0.0F, 0.0F, 1.0F);
-        GL11.glPushMatrix();
+        if (entity instanceof GenericRailTransport) {
+            GL11.glRotatef((-yaw) -90, 0.0f, 1.0f, 0.0f);
+            GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
+            GL11.glPushMatrix();
+        }
+
         //Bind the texture and render the model
         bindTexture(texture);
-        model.render(entity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.06f);
+        model.render(entity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.065f);
+        //hitbox is special since it is initialized in the draw method, if it isn't it may be too big or too small
+
+        GL11.glPushMatrix();
+
+
+
         //clear the cache, one pop for every push.
         GL11.glPopMatrix();
         GL11.glPopMatrix();
         GL11.glPopMatrix();
+
+        if (entity != null) {
+            GL11.glPopMatrix();
+
+        }
+
+
+        /**
+         * <h2>Animation</h2>
+         * while unimplemented, animation _should_ work by having the cube be initialized as
+         * 		Elem18 = new ModelRenderer(this, "wheel");
+         *      Elem18.setTextureOffset(0,0);
+         * rather than
+         * 		Elem18 = new ModelRenderer(this, 0,0);
+         * this same practice can be used for other features like pistons, the render only needs to check if the name of the cube matches and pragmatically apply the positioning.
+         */
 
         /**
          * <h4> render bogies</h4>
          * in TiM here we render the bogies.
          * we get the entity and do an instanceof check, see if it's a train or a rollingstock, then do a for loop on the bogies, and render them the same way we do trains and rollingstock.
          */
-
 
         /**
          * <h4>Smoke management</h4>

@@ -1,10 +1,10 @@
 package trains.entities;
 
 
-import java.util.List;
-
 import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.carts.IRoutableCart;
@@ -13,6 +13,7 @@ import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
@@ -20,12 +21,15 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
-import trains.utility.Utility;
+import trains.utility.RailUtility;
+
 
 public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart, IEntityAdditionalSpawnData {
 
     private int parentId = 0;
-
+    protected double cartVelocityX =0;
+    protected double cartVelocityY =0;
+    protected double cartVelocityZ =0;
 
     public EntityBogie(World world) {
         super(world);
@@ -40,9 +44,14 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     public void readSpawnData(ByteBuf additionalData) {
         parentId = additionalData.readInt();
         if (parentId != 0) {
-            ((EntityTrainCore) worldObj.getEntityByID(parentId)).addbogies(this);
+            EntityTrainCore parent = ((EntityTrainCore) worldObj.getEntityByID(parentId));
+            if (parent != null){
+                parent.addbogies(this);
+            } else {
+                worldObj.removeEntity(this);
+            }
         } else {
-            worldObj.getEntityByID(getEntityId());
+            worldObj.removeEntity(this);
         }
     }
     @Override
@@ -56,7 +65,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @see EntityMinecart
      *
      * TODO: getMaxCartSpeedOnRail needs to be reworked in accordance with the max speed the rail block will give, or a fallback for if there is no rail probably something to do in
-     * @see Utility
+     * @see RailUtility
      * onUpdate is intentionally empty because we don't want the super running it's own onUpdate method. we define when to run our movement code in the train/rollingstock
      * @see EntityTrainCore#onUpdate()
      */
@@ -77,8 +86,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         return false;
     }
     @Override
-    public boolean canRiderInteract()
-    {
+    public boolean canRiderInteract() {
         return true;
     }
     @Override
@@ -87,19 +95,30 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     }
     @Override
     public void onUpdate() {}
-
+    @Override
+    public AxisAlignedBB getBoundingBox(){
+        return boundingBox;
+    }
+    @Override
+    public AxisAlignedBB getCollisionBox(Entity collidedWith){
+        return boundingBox;
+    }
+    @Override
+    public boolean canBeCollidedWith() {
+        return false;
+    }
 
     /**
      * <h3> movement management</h3>
      * this is modified movement from the super class, should be more efficient, and reliable, but generally does the same thing.
      * @see EntityMinecart#onUpdate()
      * Some features are replaced using our own for compatibility with ZoraNoDensha
-     * @see Utility
+     * @see RailUtility
      *
      * TODO: Portal stuff needs to be moved into its own function in util so we can use it in train/rollingstock classes too.
      * TODO: all checks on rails and their features need to be moved to our utility class so we can interface them with ZoraNoDensha
      * TODO: worldObj.getEntitiesWithinAABBExcludingEntity(this, box) needs to be reworked using our own functionality that does proper class casting.
-     * @see Utility#isRailBlockAt(World, int, int, int)
+     * @see RailUtility#isRailBlockAt(World, int, int, int)
      */
     public void minecartMove(){
         //Why do we even have this?
@@ -146,7 +165,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         }
         if (worldObj.isRemote) {
             setPosition(posX, posY, posZ);
-
         } else {
             prevPosX = posX;
             prevPosY = posY;
@@ -157,11 +175,11 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             int i1 = MathHelper.floor_double(posZ);
 
             //deal with special rails
-            if (Utility.isRailBlockAt(worldObj, l, i - 1, i1)) {
+            if (RailUtility.isRailBlockAt(worldObj, l, i - 1, i1)) {
                 --i;
             }
             Block block = worldObj.getBlock(l, i, i1);
-            if (canUseRail() && Utility.isRailBlockAt(block)) {
+            if (canUseRail() && RailUtility.isRailBlockAt(block)) {
                 float railMaxSpeed = ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, l, i, i1);
                 double maxSpeed = Math.min(railMaxSpeed, getCurrentCartSpeedCapOnRail());
                 func_145821_a(l, i, i1, maxSpeed, getSlopeAdjustment(), block, ((BlockRailBase)block).getBasicRailMetadata(worldObj, this, l, i, i1));
@@ -172,32 +190,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             } else {
                 func_94088_b(onGround ? 0.4D : getMaxSpeedAirLateral());
             }
-            //deal with the bounding box and collisions
-            func_145775_I();
-            AxisAlignedBB box;
-            if (getCollisionHandler() != null) {
-                box = getCollisionHandler().getMinecartCollisionBox(this);
-            } else {
-                box = boundingBox.expand(0.2D, 0.0D, 0.2D);
-            }
 
-            List list = worldObj.getEntitiesWithinAABBExcludingEntity(this, box);
-
-            if (list != null && !list.isEmpty()) {
-                for (Entity entity: (List<Entity>)list) {
-                    if (entity != riddenByEntity && entity.canBePushed() && entity instanceof EntityMinecart) {
-                        entity.applyEntityCollision(this);
-                    }
-                }
-            }
-
-            if (riddenByEntity != null && riddenByEntity.isDead) {
-                if (riddenByEntity.ridingEntity == this) {
-                    riddenByEntity.ridingEntity = null;
-                }
-
-                riddenByEntity = null;
-            }
             //finally post a minecart update
             MinecraftForge.EVENT_BUS.post(new MinecartUpdateEvent(this, l, i, i1));
         }
@@ -220,8 +213,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         if (stack == null || worldObj.getEntityByID(parentId) == null) {
             return false;
         } else {
-            ItemStack cartItem = ((EntityTrainCore)worldObj.getEntityByID(parentId)).getItem();
-            return cartItem != null && stack.isItemEqual(cartItem);
+            Item cartItem = ((EntityTrainCore)worldObj.getEntityByID(parentId)).getItem();
+            return cartItem != null && stack.getItem() == cartItem;
         }
     }
     @Override
@@ -235,6 +228,24 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         return true;
     }
 
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void setPositionAndRotation2(double x, double y, double z, float yaw, float pitch, int turnProgress) {
+        posX = x;
+        posY = y;
+        posZ = z;
+        motionX = cartVelocityX;
+        motionY = cartVelocityY;
+        motionZ = cartVelocityZ;
+    }
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void setVelocity(double x, double y, double z) {
+        cartVelocityX = motionX = x;
+        cartVelocityY = motionY = y;
+        cartVelocityZ = motionZ = z;
+    }
 
     /**
      * this is a fix for the fact there may or may not be a rider entity, this is to serve until we fully replace the functionality of this.

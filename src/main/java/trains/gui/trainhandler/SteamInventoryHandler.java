@@ -1,15 +1,11 @@
 package trains.gui.trainhandler;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ICrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import trains.entities.EntityTrainCore;
-
 
 
 public class SteamInventoryHandler extends Container{
@@ -38,72 +34,69 @@ public class SteamInventoryHandler extends Container{
         //define the train's inventory size
         int columns=0;
         int rows=0;
-        switch (entityTrain.inventory.size()){
-            case 2:case 3:case 4:{columns=2;rows=2;break;}
-            case 6:case 7:case 8:{columns=2;rows=3;break;}
-            case 9:case 10:case 11:{columns=3;rows=3;break;}
-            case 12:case 13:case 14:{columns=3;rows=4;break;}
-            case 16:case 17:case 18:{columns=4;rows=4;break;}
+        int slot=1;
+        if (entityTrain.getType() ==1 || entityTrain.getType() ==5){
+            slot=2;
         }
+        switch (entityTrain.getInventorySize()){
+            case 1:{columns=2;rows=2;break;}
+            case 2:{columns=2;rows=3;break;}
+            case 3:{columns=3;rows=3;break;}
+            case 4:{columns=3;rows=4;break;}
+            case 5:{columns=4;rows=4;break;}
+        }
+        //train crafting slots
 
+        //fuel slot
+        addSlotToContainer(new Slot(trainEntity.inventory, 0, 8, 53));
+        if (slot==2) {
+            //water slot
+            addSlotToContainer(new Slot(trainEntity.inventory, 1, 35, 53));
+        }
 
         //train inventory
         for (int ia = 0; ia < rows; ia++) {
             for (int ib = 0; ib < columns; ib++) {
-                addSlotToContainer(new Slot(entityTrain, ((ib * columns) + ia) +2, 98 + (ib * 18), 8 + (ia * 18)));
+                addSlotToContainer(new Slot(trainEntity.inventory, slot, 98 + (ib * 18), 8 + (ia * 18)));
+                slot++;
             }
         }
 
-        //train crafting slots
 
-        //fuel slot
-        addSlotToContainer(new Slot(entityTrain, 0, 8, 53));
 
-        //water slot
-        addSlotToContainer(new Slot(entityTrain, 1, 35, 53));
-
-    }
-
-    /**
-     * <h2>slot change and crafters</h2>
-     * detects and manages changes in slots.
-     * TODO: can also be used for crafters (incomplete)
-     */
-    @Override
-    public void detectAndSendChanges() {
-        super.detectAndSendChanges();
-
-        /*/Iterator<?> itera;
-        for (int i = 0; i < lastData.length; ++i) {
-            if (lastData[i] != trainEntity.inventory[i]) {
-                lastData[i] = trainEntity.inventory[i];
-                itera = crafters.iterator();
-                while (itera.hasNext()) {
-                    ((ICrafting) itera.next()).sendProgressBarUpdate(this, i, trainEntity.inventory[i]);
-                }
-            }
-        }/*/
     }
 
     //for sorting items from inventory to the train inventory, or the reverse way.
     @Override
     public ItemStack transferStackInSlot(EntityPlayer player, int slot) {
-        return super.transferStackInSlot(player, slot);
-    }
-    //update other viewers
-    @Override
-    public void addCraftingToCrafters(ICrafting crafter){
-        super.addCraftingToCrafters(crafter);
-    }
-    //shift clicking functionality, i think.
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void putStacksInSlots(ItemStack[] stack) {
-        for (int i = 0; i < stack.length; ++i) {
-            if (i < inventorySlots.size())
-            getSlot(i).putStack(stack[i]);
+        Slot stack = (Slot)this.inventorySlots.get(slot);
+        Slot tempSlot;
+        if (stack.getStack() == null){
+            return null;
         }
+        ItemStack returnStack = stack.getStack().copy();
+        for (int currentSlot =0; currentSlot< this.inventorySlots.size(); currentSlot++){
+            tempSlot = (Slot)this.inventorySlots.get(currentSlot);
+            //if the item is in the train inventory
+            if (slot>35 || currentSlot>35) {
+                //if the slot is empty, just move it
+                if (!tempSlot.getHasStack()) {
+                    tempSlot.putStack(stack.getStack());
+                    ((Slot) this.inventorySlots.get(slot)).decrStackSize(stack.getStack().stackSize);
+                    return null;
+                    //if the slot contains the same item, and has room to add this stack to it, then add it
+                } else if (tempSlot.getStack().getItem().equals(stack.getStack().getItem()) &&
+                        tempSlot.getStack().getMaxStackSize() > stack.getStack().stackSize + tempSlot.getStack().stackSize) {
+                    tempSlot.getStack().stackSize += stack.getStack().stackSize;
+                    ((Slot) this.inventorySlots.get(slot)).decrStackSize(stack.getStack().stackSize);
+                    return null;
+                }
+            }
+        }
+
+        return returnStack;
     }
+
     //if inventory can be accessed/modified.
     @Override
     public boolean canInteractWith(EntityPlayer player) {

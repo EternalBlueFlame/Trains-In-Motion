@@ -2,8 +2,12 @@ package trains.registry;
 
 
 import cpw.mods.fml.common.event.FMLInitializationEvent;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.model.ModelBase;
+import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
+import trains.entities.GenericRailTransport;
 import trains.entities.trains.FirstTrain;
+import trains.models.trains.Brigadelok_080;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -18,33 +22,44 @@ public class TrainRegistry {
     /**
      * <h2>registry Constructor</h2>
      * because we define our own variable type for registering trains and rollingstock unlike the other registries, we have to define that and the variables here.
+     * This all can mostly be ignored unless we're modifying how we registry trains.
      */
-    public Class<? extends Entity> trainClass;
-    public String model;
-    public String texture;
-    public String bogieModel;
-    public String bogieTexture;
+    public Class<? extends GenericRailTransport> trainClass;
+    public ModelBase model;
+    public ResourceLocation texture;
+    public ModelBase bogieModel;
+    public ResourceLocation bogieTexture;
     public String entityWorldName; //Note: Must be all lowercase
-    private TrainRegistry(Class<? extends Entity> trainClass, String entityWorldName, String model, String texture, @Nullable String bogieModel, @Nullable String bogieTexture){
+    public Item item;
+    public char smoke;
+
+    private TrainRegistry(Class<? extends GenericRailTransport> trainClass, Item item, String entityWorldName,
+                          ModelBase model, ResourceLocation texture, @Nullable ModelBase bogieModel, @Nullable ResourceLocation bogieTexture,
+                          char smoke){
         this.trainClass = trainClass;
         this.entityWorldName = entityWorldName;
         this.model = model;
         this.texture = texture;
         this.bogieModel = bogieModel;
         this.bogieTexture = bogieTexture;
+        this.item = item;
+        this.smoke = smoke;
     }
 
 
     /**
      * <h2>Train register function</h2>
      * called by the main class to register the trains and rollingstock
+     * to add another train or rollingstock, just make another entry in the list, an example is already provided.
      * @see trains.TrainsInMotion#init(FMLInitializationEvent)
      */
     public static List<TrainRegistry> listTrains(){
         List<TrainRegistry> output = new ArrayList<TrainRegistry>();
 
-        output.add(new TrainRegistry(FirstTrain.class, "entityfirsttrain","060e2.obj", "null.png", null, null));
-
+        output.add(new TrainRegistry(FirstTrain.class, FirstTrain.thisItem, "entityfirsttrain",
+                new Brigadelok_080(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
+                null, null,
+                'n'));
         return output;
 
     }
