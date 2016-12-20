@@ -2,10 +2,8 @@ package trains.models;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderMinecart;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 import trains.entities.GenericRailTransport;
 import trains.utility.ClientProxy;
@@ -28,7 +26,7 @@ public class RenderEntity extends Render {
      * hitboxBase is used for the bottom and top, side is used for the two long sides
      * hitboxFront is used for front and back
      */
-    
+    private float wheelPitch=0;
     private char smokeType = 'n';
     /**
      * <h3>class constructor</h3>
@@ -78,16 +76,31 @@ public class RenderEntity extends Render {
     	GL11.glPushMatrix();
         //set the render position
         GL11.glTranslated(x, y + 1.4d, z);
-        GL11.glPushMatrix();
         //rotate the model.
         if (entity instanceof GenericRailTransport) {
             GL11.glRotatef((-yaw) -90, 0.0f, 1.0f, 0.0f);
             GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
-            GL11.glPushMatrix();
         }
 
         //Bind the texture and render the model
         bindTexture(texture);
+
+        wheelPitch+=0.1;
+        ModelRenderer boxRender;
+        for (Object box : model.boxList){
+            if (box instanceof ModelRenderer){
+                boxRender = (ModelRenderer) box;
+                if (boxRender.boxName != null && boxRender.boxName.contains("wheel")){
+                    ((ModelRenderer) box).rotateAngleX = wheelPitch;
+                }
+            }
+        }
+
+        if (model instanceof trains.models.tmt.ModelBase){
+            ((trains.models.tmt.ModelBase) model).wheelRotation = wheelPitch;
+        }
+
+
         model.render(entity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.065f);
         //hitbox is special since it is initialized in the draw method, if it isn't it may be too big or too small
 
@@ -98,12 +111,7 @@ public class RenderEntity extends Render {
         //clear the cache, one pop for every push.
         GL11.glPopMatrix();
         GL11.glPopMatrix();
-        GL11.glPopMatrix();
 
-        if (entity != null) {
-            GL11.glPopMatrix();
-
-        }
 
 
         /**

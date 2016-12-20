@@ -9,18 +9,18 @@
 
 package trains.models.trains;
 
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
+import org.lwjgl.opengl.GL11;
+import trains.models.ModelRenderer;
+import trains.models.tmt.ModelBase;
 
 public class Brigadelok_080 extends ModelBase
 {
-	ModelRenderer Elem126;//Cube
-	ModelRenderer Elem125;//Cube
-	ModelRenderer Elem124;//Upper_PistonValveConnector_Right
-	ModelRenderer Elem123;//PistonValveConnector_Right
-	ModelRenderer Elem122;//WheelConnectorPiston_Right
-	ModelRenderer Elem118;//Cube
+	ModelRenderer Elem122;//Upper_Piston_r_Right
+	ModelRenderer Elem121;//Upper_Piston_Right
+	ModelRenderer Elem120;//Upper_PistonValveConnector_Right
+	ModelRenderer Elem119;//PistonValveConnector_Right
+	ModelRenderer Elem118;//WheelConnectorPiston_Right
 	ModelRenderer Elem117;//Cube
 	ModelRenderer Elem116;//Cube
 	ModelRenderer Elem115;//Cube
@@ -68,16 +68,16 @@ public class Brigadelok_080 extends ModelBase
 	ModelRenderer Elem73;//Cube
 	ModelRenderer Elem72;//Cube
 	ModelRenderer Elem71;//Cube
-	ModelRenderer Elem70;//Axle
+	ModelRenderer Elem70;//Cube
 	ModelRenderer Elem69;//Axle
 	ModelRenderer Elem68;//Axle
 	ModelRenderer Elem67;//Axle
-	ModelRenderer Elem66;//Cube
+	ModelRenderer Elem66;//Axle
 	ModelRenderer Elem65;//Cube
 	ModelRenderer Elem64;//Cube
 	ModelRenderer Elem63;//Cube
 	ModelRenderer Elem62;//Cube
-	ModelRenderer Elem61;//TrainWheel_L
+	ModelRenderer Elem61;//Cube
 	ModelRenderer Elem60;//TrainWheel_L
 	ModelRenderer Elem59;//TrainWheel_L
 	ModelRenderer Elem58;//TrainWheel_L
@@ -89,17 +89,17 @@ public class Brigadelok_080 extends ModelBase
 	ModelRenderer Elem52;//TrainWheel_L
 	ModelRenderer Elem51;//TrainWheel_L
 	ModelRenderer Elem50;//TrainWheel_L
-	ModelRenderer Elem49;//Cube
+	ModelRenderer Elem49;//TrainWheel_L
 	ModelRenderer Elem48;//Cube
 	ModelRenderer Elem47;//Cube
 	ModelRenderer Elem46;//Cube
-	ModelRenderer Elem45;//TrainWheel_R
+	ModelRenderer Elem45;//Cube
 	ModelRenderer Elem44;//TrainWheel_R
 	ModelRenderer Elem43;//TrainWheel_R
 	ModelRenderer Elem42;//TrainWheel_R
-	ModelRenderer Elem41;//Cube
+	ModelRenderer Elem41;//TrainWheel_R
 	ModelRenderer Elem40;//Cube
-	ModelRenderer Elem39;//TrainWheel_R
+	ModelRenderer Elem39;//Cube
 	ModelRenderer Elem38;//TrainWheel_R
 	ModelRenderer Elem37;//TrainWheel_R
 	ModelRenderer Elem36;//TrainWheel_R
@@ -107,11 +107,11 @@ public class Brigadelok_080 extends ModelBase
 	ModelRenderer Elem34;//TrainWheel_R
 	ModelRenderer Elem33;//TrainWheel_R
 	ModelRenderer Elem32;//TrainWheel_R
-	ModelRenderer Elem31;//Cube
+	ModelRenderer Elem31;//TrainWheel_R
 	ModelRenderer Elem30;//Cube
 	ModelRenderer Elem29;//Cube
-	ModelRenderer Elem28;//PistonValve
-	ModelRenderer Elem27;//Cube
+	ModelRenderer Elem28;//Cube
+	ModelRenderer Elem27;//PistonValve
 	ModelRenderer Elem26;//Cube
 	ModelRenderer Elem25;//Cube
 	ModelRenderer Elem24;//Cube
@@ -141,55 +141,46 @@ public class Brigadelok_080 extends ModelBase
 		textureWidth = 64;
 		textureHeight = 32;
 
-		//Cube
-		Elem126 = new ModelRenderer(this, 0, 0);
-		Elem126.addBox(0F, 0F, 0F, 1, 3, 1);
-		Elem126.setRotationPoint(-8.5F, 19.5F, 8.5F);
-		Elem126.setTextureSize(64, 32);
-		setRotation(Elem126, -0F, -0F, -0F);
-		//Elem126.rotateAngleX = -0F;
-		//Elem126.rotateAngleY = -0F;
-		//Elem126.rotateAngleZ = -0F;
-		//Cube
-		Elem125 = new ModelRenderer(this, 0, 0);
-		Elem125.addBox(0F, 0F, 0F, 1, 1, 8);
-		Elem125.setRotationPoint(-8.5F, 20.5F, 1F);
-		Elem125.setTextureSize(64, 32);
-		setRotation(Elem125, -0F, -0F, -0F);
-		//Elem125.rotateAngleX = -0F;
-		//Elem125.rotateAngleY = -0F;
-		//Elem125.rotateAngleZ = -0F;
-		//Upper_PistonValveConnector_Right
-		Elem124 = new ModelRenderer(this, 0, 0);
-		Elem124.addBox(0F, 0F, 0F, 1, 1, 9);
-		Elem124.setRotationPoint(-8.5F, 20.5F, 9F);
-		Elem124.setTextureSize(64, 32);
-		setRotation(Elem124, -0F, -0F, -0F);
-		//Elem124.rotateAngleX = -0F;
-		//Elem124.rotateAngleY = -0F;
-		//Elem124.rotateAngleZ = -0F;
-		//PistonValveConnector_Right
-		Elem123 = new ModelRenderer(this, 0, 0);
-		Elem123.addBox(0F, 0F, 0F, 1, 1, 18);
-		Elem123.setRotationPoint(-8F, 22F, 1F);
-		Elem123.setTextureSize(64, 32);
-		setRotation(Elem123, -0F, -0F, -0F);
-		//Elem123.rotateAngleX = -0F;
-		//Elem123.rotateAngleY = -0F;
-		//Elem123.rotateAngleZ = -0F;
-		//WheelConnectorPiston_Right
+		//Upper_Piston_r_Right
 		Elem122 = new ModelRenderer(this, 0, 0);
-		Elem122.addBox(0F, 0F, 0F, 1, 1, 19);
-		Elem122.setRotationPoint(-7.5F, 22.5F, -5F);
+		Elem122.addBox(0F, 0F, 0F, 1, 3, 1);
+		Elem122.setRotationPoint(-8.5F, 19.5F, 8.5F);
 		Elem122.setTextureSize(64, 32);
 		setRotation(Elem122, -0F, -0F, -0F);
 		//Elem122.rotateAngleX = -0F;
 		//Elem122.rotateAngleY = -0F;
 		//Elem122.rotateAngleZ = -0F;
-		//Cube
+		//Upper_Piston_Right
+		Elem121 = new ModelRenderer(this, 0, 0);
+		Elem121.addBox(0F, 0F, 0F, 1, 1, 8);
+		Elem121.setRotationPoint(-8.5F, 20.5F, 1F);
+		Elem121.setTextureSize(64, 32);
+		setRotation(Elem121, -0F, -0F, -0F);
+		//Elem121.rotateAngleX = -0F;
+		//Elem121.rotateAngleY = -0F;
+		//Elem121.rotateAngleZ = -0F;
+		//Upper_PistonValveConnector_Right
+		Elem120 = new ModelRenderer(this, 0, 0);
+		Elem120.addBox(0F, 0F, 0F, 1, 1, 9);
+		Elem120.setRotationPoint(-8.5F, 20.5F, 9F);
+		Elem120.setTextureSize(64, 32);
+		setRotation(Elem120, -0F, -0F, -0F);
+		//Elem120.rotateAngleX = -0F;
+		//Elem120.rotateAngleY = -0F;
+		//Elem120.rotateAngleZ = -0F;
+		//PistonValveConnector_Right
+		Elem119 = new ModelRenderer(this, 0, 0);
+		Elem119.addBox(0F, 0F, 0F, 1, 1, 18);
+		Elem119.setRotationPoint(-8F, 22F, 1F);
+		Elem119.setTextureSize(64, 32);
+		setRotation(Elem119, -0F, -0F, -0F);
+		//Elem119.rotateAngleX = -0F;
+		//Elem119.rotateAngleY = -0F;
+		//Elem119.rotateAngleZ = -0F;
+		//WheelConnectorPiston_Right
 		Elem118 = new ModelRenderer(this, 0, 0);
-		Elem118.addBox(0F, 0F, 0F, 1, 2, 1);
-		Elem118.setRotationPoint(-7.5F, 17.5F, 18.5F);
+		Elem118.addBox(0F, 0F, 0F, 1, 1, 19);
+		Elem118.setRotationPoint(-7.5F, 22.5F, -5F);
 		Elem118.setTextureSize(64, 32);
 		setRotation(Elem118, -0F, -0F, -0F);
 		//Elem118.rotateAngleX = -0F;
@@ -198,7 +189,7 @@ public class Brigadelok_080 extends ModelBase
 		//Cube
 		Elem117 = new ModelRenderer(this, 0, 0);
 		Elem117.addBox(0F, 0F, 0F, 1, 2, 1);
-		Elem117.setRotationPoint(-7.5F, 17.5F, 17F);
+		Elem117.setRotationPoint(-7.5F, 17.5F, 18.5F);
 		Elem117.setTextureSize(64, 32);
 		setRotation(Elem117, -0F, -0F, -0F);
 		//Elem117.rotateAngleX = -0F;
@@ -206,8 +197,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem117.rotateAngleZ = -0F;
 		//Cube
 		Elem116 = new ModelRenderer(this, 0, 0);
-		Elem116.addBox(0F, 0F, 0F, 3, 2, 2);
-		Elem116.setRotationPoint(-8F, 8.5F, 9.5F);
+		Elem116.addBox(0F, 0F, 0F, 1, 2, 1);
+		Elem116.setRotationPoint(-7.5F, 17.5F, 17F);
 		Elem116.setTextureSize(64, 32);
 		setRotation(Elem116, -0F, -0F, -0F);
 		//Elem116.rotateAngleX = -0F;
@@ -215,8 +206,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem116.rotateAngleZ = -0F;
 		//Cube
 		Elem115 = new ModelRenderer(this, 0, 0);
-		Elem115.addBox(0F, 0F, 0F, 2, 2, 3);
-		Elem115.setRotationPoint(-7.5F, 8.5F, 9F);
+		Elem115.addBox(0F, 0F, 0F, 3, 2, 2);
+		Elem115.setRotationPoint(-8F, 8.5F, 9.5F);
 		Elem115.setTextureSize(64, 32);
 		setRotation(Elem115, -0F, -0F, -0F);
 		//Elem115.rotateAngleX = -0F;
@@ -224,8 +215,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem115.rotateAngleZ = -0F;
 		//Cube
 		Elem114 = new ModelRenderer(this, 0, 0);
-		Elem114.addBox(0F, 0F, 0F, 1, 1, 12);
-		Elem114.setRotationPoint(-4.5F, 7.5F, -8F);
+		Elem114.addBox(0F, 0F, 0F, 2, 2, 3);
+		Elem114.setRotationPoint(-7.5F, 8.5F, 9F);
 		Elem114.setTextureSize(64, 32);
 		setRotation(Elem114, -0F, -0F, -0F);
 		//Elem114.rotateAngleX = -0F;
@@ -233,8 +224,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem114.rotateAngleZ = -0F;
 		//Cube
 		Elem113 = new ModelRenderer(this, 0, 0);
-		Elem113.addBox(0F, 0F, 0F, 1, 1, 1);
-		Elem113.setRotationPoint(-3.5F, 8F, 5F);
+		Elem113.addBox(0F, 0F, 0F, 1, 1, 13);
+		Elem113.setRotationPoint(-4.5F, 7.5F, -8.5F);
 		Elem113.setTextureSize(64, 32);
 		setRotation(Elem113, -0F, -0F, -0F);
 		//Elem113.rotateAngleX = -0F;
@@ -242,8 +233,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem113.rotateAngleZ = -0F;
 		//Cube
 		Elem112 = new ModelRenderer(this, 0, 0);
-		Elem112.addBox(0F, 0F, 0F, 1, 2, 2);
-		Elem112.setRotationPoint(-4.5F, 7F, 4.5F);
+		Elem112.addBox(0F, 0F, 0F, 1, 1, 1);
+		Elem112.setRotationPoint(-3.5F, 8F, 5F);
 		Elem112.setTextureSize(64, 32);
 		setRotation(Elem112, -0F, -0F, -0F);
 		//Elem112.rotateAngleX = -0F;
@@ -251,8 +242,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem112.rotateAngleZ = -0F;
 		//Cube
 		Elem111 = new ModelRenderer(this, 0, 0);
-		Elem111.addBox(0F, 0F, 0F, 3, 1, 4);
-		Elem111.setRotationPoint(5F, 9F, -7F);
+		Elem111.addBox(0F, 0F, 0F, 1, 2, 2);
+		Elem111.setRotationPoint(-4.5F, 7F, 4.5F);
 		Elem111.setTextureSize(64, 32);
 		setRotation(Elem111, -0F, -0F, -0F);
 		//Elem111.rotateAngleX = -0F;
@@ -261,7 +252,7 @@ public class Brigadelok_080 extends ModelBase
 		//Cube
 		Elem110 = new ModelRenderer(this, 0, 0);
 		Elem110.addBox(0F, 0F, 0F, 3, 1, 4);
-		Elem110.setRotationPoint(5F, 9F, -2F);
+		Elem110.setRotationPoint(5F, 10F, -7F);
 		Elem110.setTextureSize(64, 32);
 		setRotation(Elem110, -0F, -0F, -0F);
 		//Elem110.rotateAngleX = -0F;
@@ -269,8 +260,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem110.rotateAngleZ = -0F;
 		//Cube
 		Elem109 = new ModelRenderer(this, 0, 0);
-		Elem109.addBox(0F, 0F, 0F, 3, 2, 2);
-		Elem109.setRotationPoint(5F, 8.5F, 13F);
+		Elem109.addBox(0F, 0F, 0F, 3, 1, 4);
+		Elem109.setRotationPoint(5F, 10F, -2F);
 		Elem109.setTextureSize(64, 32);
 		setRotation(Elem109, -0F, -0F, -0F);
 		//Elem109.rotateAngleX = -0F;
@@ -278,8 +269,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem109.rotateAngleZ = -0F;
 		//Cube
 		Elem108 = new ModelRenderer(this, 0, 0);
-		Elem108.addBox(0F, 0F, 0F, 2, 2, 3);
-		Elem108.setRotationPoint(5.5F, 8.5F, 12.5F);
+		Elem108.addBox(0F, 0F, 0F, 3, 3, 2);
+		Elem108.setRotationPoint(5F, 9F, 13F);
 		Elem108.setTextureSize(64, 32);
 		setRotation(Elem108, -0F, -0F, -0F);
 		//Elem108.rotateAngleX = -0F;
@@ -287,8 +278,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem108.rotateAngleZ = -0F;
 		//Cube
 		Elem107 = new ModelRenderer(this, 0, 0);
-		Elem107.addBox(0F, 0F, 0F, 1, 2, 1);
-		Elem107.setRotationPoint(-2.5F, 7F, -3F);
+		Elem107.addBox(0F, 0F, 0F, 2, 3, 3);
+		Elem107.setRotationPoint(5.5F, 9F, 12.5F);
 		Elem107.setTextureSize(64, 32);
 		setRotation(Elem107, -0F, -0F, -0F);
 		//Elem107.rotateAngleX = -0F;
@@ -297,7 +288,7 @@ public class Brigadelok_080 extends ModelBase
 		//Cube
 		Elem106 = new ModelRenderer(this, 0, 0);
 		Elem106.addBox(0F, 0F, 0F, 1, 2, 1);
-		Elem106.setRotationPoint(1.5F, 7F, -3F);
+		Elem106.setRotationPoint(-2.5F, 7F, -3F);
 		Elem106.setTextureSize(64, 32);
 		setRotation(Elem106, -0F, -0F, -0F);
 		//Elem106.rotateAngleX = -0F;
@@ -305,8 +296,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem106.rotateAngleZ = -0F;
 		//Cube
 		Elem105 = new ModelRenderer(this, 0, 0);
-		Elem105.addBox(0F, 0F, 0F, 2, 1, 2);
-		Elem105.setRotationPoint(5.5F, 5F, 4.5F);
+		Elem105.addBox(0F, 0F, 0F, 1, 2, 1);
+		Elem105.setRotationPoint(1.5F, 7F, -3F);
 		Elem105.setTextureSize(64, 32);
 		setRotation(Elem105, -0F, -0F, -0F);
 		//Elem105.rotateAngleX = -0F;
@@ -314,8 +305,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem105.rotateAngleZ = -0F;
 		//Cube
 		Elem104 = new ModelRenderer(this, 0, 0);
-		Elem104.addBox(0F, 0F, 0F, 1, 1, 1);
-		Elem104.setRotationPoint(6F, 6F, 5F);
+		Elem104.addBox(0F, 0F, 0F, 2, 1, 2);
+		Elem104.setRotationPoint(5.5F, 5.5F, 4.5F);
 		Elem104.setTextureSize(64, 32);
 		setRotation(Elem104, -0F, -0F, -0F);
 		//Elem104.rotateAngleX = -0F;
@@ -323,8 +314,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem104.rotateAngleZ = -0F;
 		//Cube
 		Elem103 = new ModelRenderer(this, 0, 0);
-		Elem103.addBox(0F, 0F, 0F, 2, 2, 3);
-		Elem103.setRotationPoint(5.5F, 7F, 4F);
+		Elem103.addBox(0F, 0F, 0F, 1, 1, 1);
+		Elem103.setRotationPoint(6F, 6.5F, 5F);
 		Elem103.setTextureSize(64, 32);
 		setRotation(Elem103, -0F, -0F, -0F);
 		//Elem103.rotateAngleX = -0F;
@@ -332,8 +323,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem103.rotateAngleZ = -0F;
 		//Cube
 		Elem102 = new ModelRenderer(this, 0, 0);
-		Elem102.addBox(0F, 0F, 0F, 3, 2, 2);
-		Elem102.setRotationPoint(5F, 7F, 4.5F);
+		Elem102.addBox(0F, 0F, 0F, 2, 3, 3);
+		Elem102.setRotationPoint(5.5F, 7.5F, 4F);
 		Elem102.setTextureSize(64, 32);
 		setRotation(Elem102, -0F, -0F, -0F);
 		//Elem102.rotateAngleX = -0F;
@@ -341,8 +332,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem102.rotateAngleZ = -0F;
 		//Cube
 		Elem101 = new ModelRenderer(this, 0, 0);
-		Elem101.addBox(0F, 0F, 0F, 3, 1, 3);
-		Elem101.setRotationPoint(-1.5F, 7.5F, 19.5F);
+		Elem101.addBox(0F, 0F, 0F, 3, 3, 2);
+		Elem101.setRotationPoint(5F, 7.5F, 4.5F);
 		Elem101.setTextureSize(64, 32);
 		setRotation(Elem101, -0F, -0F, -0F);
 		//Elem101.rotateAngleX = -0F;
@@ -350,8 +341,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem101.rotateAngleZ = -0F;
 		//Cube
 		Elem100 = new ModelRenderer(this, 0, 0);
-		Elem100.addBox(0F, 0F, 0F, 1, 1, 3);
-		Elem100.setRotationPoint(-0.5F, -1F, -8.5F);
+		Elem100.addBox(0F, 0F, 0F, 3, 1, 3);
+		Elem100.setRotationPoint(-1.5F, 7.5F, 19.5F);
 		Elem100.setTextureSize(64, 32);
 		setRotation(Elem100, -0F, -0F, -0F);
 		//Elem100.rotateAngleX = -0F;
@@ -359,8 +350,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem100.rotateAngleZ = -0F;
 		//Cube
 		Elem99 = new ModelRenderer(this, 0, 0);
-		Elem99.addBox(0F, 0F, 0F, 2, 2, 2);
-		Elem99.setRotationPoint(-1F, -9F, -7F);
+		Elem99.addBox(0F, 0F, 0F, 1, 1, 3);
+		Elem99.setRotationPoint(-0.5F, -1.5F, -8.5F);
 		Elem99.setTextureSize(64, 32);
 		setRotation(Elem99, -0F, -0F, -0F);
 		//Elem99.rotateAngleX = -0F;
@@ -368,8 +359,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem99.rotateAngleZ = -0F;
 		//Cube
 		Elem98 = new ModelRenderer(this, 0, 0);
-		Elem98.addBox(0F, 0F, 0F, 1, 3, 1);
-		Elem98.setRotationPoint(-0.5F, -9.5F, -6.5F);
+		Elem98.addBox(0F, 0F, 0F, 2, 2, 2);
+		Elem98.setRotationPoint(-1F, -9F, -7F);
 		Elem98.setTextureSize(64, 32);
 		setRotation(Elem98, -0F, -0F, -0F);
 		//Elem98.rotateAngleX = -0F;
@@ -377,8 +368,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem98.rotateAngleZ = -0F;
 		//Cube
 		Elem97 = new ModelRenderer(this, 0, 0);
-		Elem97.addBox(0F, 0F, 0F, 1, 5, 1);
-		Elem97.setRotationPoint(-0.5F, -6.5F, -6.5F);
+		Elem97.addBox(0F, 0F, 0F, 1, 3, 1);
+		Elem97.setRotationPoint(-0.5F, -9.5F, -6.5F);
 		Elem97.setTextureSize(64, 32);
 		setRotation(Elem97, -0F, -0F, -0F);
 		//Elem97.rotateAngleX = -0F;
@@ -386,8 +377,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem97.rotateAngleZ = -0F;
 		//Cube
 		Elem96 = new ModelRenderer(this, 0, 0);
-		Elem96.addBox(0F, 0F, 0F, 1, 2, 1);
-		Elem96.setRotationPoint(2F, 7F, 13.5F);
+		Elem96.addBox(0F, 0F, 0F, 1, 5, 1);
+		Elem96.setRotationPoint(-0.5F, -6.5F, -6.5F);
 		Elem96.setTextureSize(64, 32);
 		setRotation(Elem96, -0F, -0F, -0F);
 		//Elem96.rotateAngleX = -0F;
@@ -396,7 +387,7 @@ public class Brigadelok_080 extends ModelBase
 		//Cube
 		Elem95 = new ModelRenderer(this, 0, 0);
 		Elem95.addBox(0F, 0F, 0F, 1, 2, 1);
-		Elem95.setRotationPoint(-3F, 7F, 13.5F);
+		Elem95.setRotationPoint(2F, 7F, 13.5F);
 		Elem95.setTextureSize(64, 32);
 		setRotation(Elem95, -0F, -0F, -0F);
 		//Elem95.rotateAngleX = -0F;
@@ -405,7 +396,7 @@ public class Brigadelok_080 extends ModelBase
 		//Cube
 		Elem94 = new ModelRenderer(this, 0, 0);
 		Elem94.addBox(0F, 0F, 0F, 1, 2, 1);
-		Elem94.setRotationPoint(-0.5F, -4.5F, 8F);
+		Elem94.setRotationPoint(-3F, 7F, 13.5F);
 		Elem94.setTextureSize(64, 32);
 		setRotation(Elem94, -0F, -0F, -0F);
 		//Elem94.rotateAngleX = -0F;
@@ -413,8 +404,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem94.rotateAngleZ = -0F;
 		//Cube
 		Elem93 = new ModelRenderer(this, 0, 0);
-		Elem93.addBox(0F, 0F, 0F, 1, 1, 3);
-		Elem93.setRotationPoint(-0.5F, -5.5F, 6.5F);
+		Elem93.addBox(0F, 0F, 0F, 1, 2, 1);
+		Elem93.setRotationPoint(-0.5F, -4.5F, 8F);
 		Elem93.setTextureSize(64, 32);
 		setRotation(Elem93, -0F, -0F, -0F);
 		//Elem93.rotateAngleX = -0F;
@@ -422,8 +413,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem93.rotateAngleZ = -0F;
 		//Cube
 		Elem92 = new ModelRenderer(this, 0, 0);
-		Elem92.addBox(0F, 0F, 0F, 2, 9, 5);
-		Elem92.setRotationPoint(-1F, 0F, 11.5F);
+		Elem92.addBox(0F, 0F, 0F, 1, 1, 3);
+		Elem92.setRotationPoint(-0.5F, -5.5F, 6.5F);
 		Elem92.setTextureSize(64, 32);
 		setRotation(Elem92, -0F, -0F, -0F);
 		//Elem92.rotateAngleX = -0F;
@@ -431,8 +422,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem92.rotateAngleZ = -0F;
 		//Cube
 		Elem91 = new ModelRenderer(this, 0, 0);
-		Elem91.addBox(0F, 0F, 0F, 5, 9, 2);
-		Elem91.setRotationPoint(-2.5F, 0F, 13F);
+		Elem91.addBox(0F, 0F, 0F, 2, 9, 5);
+		Elem91.setRotationPoint(-1F, 0F, 11.5F);
 		Elem91.setTextureSize(64, 32);
 		setRotation(Elem91, -0F, -0F, -0F);
 		//Elem91.rotateAngleX = -0F;
@@ -440,8 +431,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem91.rotateAngleZ = -0F;
 		//Cube
 		Elem90 = new ModelRenderer(this, 0, 0);
-		Elem90.addBox(0F, 0F, 0F, 4, 9, 4);
-		Elem90.setRotationPoint(-2F, 0F, 12F);
+		Elem90.addBox(0F, 0F, 0F, 5, 9, 2);
+		Elem90.setRotationPoint(-2.5F, 0F, 13F);
 		Elem90.setTextureSize(64, 32);
 		setRotation(Elem90, -0F, -0F, -0F);
 		//Elem90.rotateAngleX = -0F;
@@ -449,8 +440,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem90.rotateAngleZ = -0F;
 		//Cube
 		Elem89 = new ModelRenderer(this, 0, 0);
-		Elem89.addBox(0F, 0F, 0F, 3, 6, 3);
-		Elem89.setRotationPoint(-1.5F, -9.5F, 19.5F);
+		Elem89.addBox(0F, 0F, 0F, 4, 9, 4);
+		Elem89.setRotationPoint(-2F, 0F, 12F);
 		Elem89.setTextureSize(64, 32);
 		setRotation(Elem89, -0F, -0F, -0F);
 		//Elem89.rotateAngleX = -0F;
@@ -458,8 +449,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem89.rotateAngleZ = -0F;
 		//Cube
 		Elem88 = new ModelRenderer(this, 0, 0);
-		Elem88.addBox(0F, 0F, 0F, 2, 13, 2);
-		Elem88.setRotationPoint(-1F, -5F, 20F);
+		Elem88.addBox(0F, 0F, 0F, 3, 6, 3);
+		Elem88.setRotationPoint(-1.5F, -9.5F, 19.5F);
 		Elem88.setTextureSize(64, 32);
 		setRotation(Elem88, -0F, -0F, -0F);
 		//Elem88.rotateAngleX = -0F;
@@ -467,8 +458,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem88.rotateAngleZ = -0F;
 		//Cube
 		Elem87 = new ModelRenderer(this, 0, 0);
-		Elem87.addBox(0F, 0F, 0F, 2, 3, 2);
-		Elem87.setRotationPoint(-1F, -7F, 4.5F);
+		Elem87.addBox(0F, 0F, 0F, 2, 13, 2);
+		Elem87.setRotationPoint(-1F, -5F, 20F);
 		Elem87.setTextureSize(64, 32);
 		setRotation(Elem87, -0F, -0F, -0F);
 		//Elem87.rotateAngleX = -0F;
@@ -476,8 +467,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem87.rotateAngleZ = -0F;
 		//Cube
 		Elem86 = new ModelRenderer(this, 0, 0);
-		Elem86.addBox(0F, 0F, 0F, 4, 13, 4);
-		Elem86.setRotationPoint(-2F, -4F, 3.5F);
+		Elem86.addBox(0F, 0F, 0F, 2, 3, 2);
+		Elem86.setRotationPoint(-1F, -7F, 4.5F);
 		Elem86.setTextureSize(64, 32);
 		setRotation(Elem86, -0F, -0F, -0F);
 		//Elem86.rotateAngleX = -0F;
@@ -485,8 +476,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem86.rotateAngleZ = -0F;
 		//Cube
 		Elem85 = new ModelRenderer(this, 0, 0);
-		Elem85.addBox(0F, 0F, 0F, 5, 13, 2);
-		Elem85.setRotationPoint(-2.5F, -4F, 4.5F);
+		Elem85.addBox(0F, 0F, 0F, 4, 13, 4);
+		Elem85.setRotationPoint(-2F, -4F, 3.5F);
 		Elem85.setTextureSize(64, 32);
 		setRotation(Elem85, -0F, -0F, -0F);
 		//Elem85.rotateAngleX = -0F;
@@ -494,8 +485,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem85.rotateAngleZ = -0F;
 		//Cube
 		Elem84 = new ModelRenderer(this, 0, 0);
-		Elem84.addBox(0F, 0F, 0F, 3, 13, 5);
-		Elem84.setRotationPoint(-1.5F, -4F, 3F);
+		Elem84.addBox(0F, 0F, 0F, 5, 13, 2);
+		Elem84.setRotationPoint(-2.5F, -4F, 4.5F);
 		Elem84.setTextureSize(64, 32);
 		setRotation(Elem84, -0F, -0F, -0F);
 		//Elem84.rotateAngleX = -0F;
@@ -503,8 +494,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem84.rotateAngleZ = -0F;
 		//Cube
 		Elem83 = new ModelRenderer(this, 0, 0);
-		Elem83.addBox(0F, 0F, 0F, 2, 7, 4);
-		Elem83.setRotationPoint(-1F, 2F, -4.5F);
+		Elem83.addBox(0F, 0F, 0F, 3, 13, 5);
+		Elem83.setRotationPoint(-1.5F, -4F, 3F);
 		Elem83.setTextureSize(64, 32);
 		setRotation(Elem83, -0F, -0F, -0F);
 		//Elem83.rotateAngleX = -0F;
@@ -512,8 +503,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem83.rotateAngleZ = -0F;
 		//Cube
 		Elem82 = new ModelRenderer(this, 0, 0);
-		Elem82.addBox(0F, 0F, 0F, 4, 7, 2);
-		Elem82.setRotationPoint(-2F, 2F, -3.5F);
+		Elem82.addBox(0F, 0F, 0F, 2, 7, 4);
+		Elem82.setRotationPoint(-1F, 2F, -4.5F);
 		Elem82.setTextureSize(64, 32);
 		setRotation(Elem82, -0F, -0F, -0F);
 		//Elem82.rotateAngleX = -0F;
@@ -521,8 +512,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem82.rotateAngleZ = -0F;
 		//Cube
 		Elem81 = new ModelRenderer(this, 0, 0);
-		Elem81.addBox(0F, 0F, 0F, 3, 7, 3);
-		Elem81.setRotationPoint(-1.5F, 2F, -4F);
+		Elem81.addBox(0F, 0F, 0F, 4, 7, 2);
+		Elem81.setRotationPoint(-2F, 2F, -3.5F);
 		Elem81.setTextureSize(64, 32);
 		setRotation(Elem81, -0F, -0F, -0F);
 		//Elem81.rotateAngleX = -0F;
@@ -530,8 +521,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem81.rotateAngleZ = -0F;
 		//Cube
 		Elem80 = new ModelRenderer(this, 0, 0);
-		Elem80.addBox(0F, 0F, 0F, 10, 1, 1);
-		Elem80.setRotationPoint(-5F, -7F, -29F);
+		Elem80.addBox(0F, 0F, 0F, 3, 7, 3);
+		Elem80.setRotationPoint(-1.5F, 2F, -4F);
 		Elem80.setTextureSize(64, 32);
 		setRotation(Elem80, -0F, -0F, -0F);
 		//Elem80.rotateAngleX = -0F;
@@ -539,8 +530,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem80.rotateAngleZ = -0F;
 		//Cube
 		Elem79 = new ModelRenderer(this, 0, 0);
-		Elem79.addBox(0F, 0F, 0F, 4, 1, 7);
-		Elem79.setRotationPoint(-2F, -11.5F, -24F);
+		Elem79.addBox(0F, 0F, 0F, 10, 1, 1);
+		Elem79.setRotationPoint(-5F, -7F, -29F);
 		Elem79.setTextureSize(64, 32);
 		setRotation(Elem79, -0F, -0F, -0F);
 		//Elem79.rotateAngleX = -0F;
@@ -548,8 +539,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem79.rotateAngleZ = -0F;
 		//Cube
 		Elem78 = new ModelRenderer(this, 0, 0);
-		Elem78.addBox(0F, 0F, 0F, 7, 1, 7);
-		Elem78.setRotationPoint(-3.5F, -11F, -24F);
+		Elem78.addBox(0F, 0F, 0F, 4, 1, 7);
+		Elem78.setRotationPoint(-2F, -11.5F, -24F);
 		Elem78.setTextureSize(64, 32);
 		setRotation(Elem78, -0F, -0F, -0F);
 		//Elem78.rotateAngleX = -0F;
@@ -557,8 +548,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem78.rotateAngleZ = -0F;
 		//Cube
 		Elem77 = new ModelRenderer(this, 0, 0);
-		Elem77.addBox(0F, 0F, 0F, 10, 1, 1);
-		Elem77.setRotationPoint(-5F, -7F, -9F);
+		Elem77.addBox(0F, 0F, 0F, 7, 1, 7);
+		Elem77.setRotationPoint(-3.5F, -11F, -24F);
 		Elem77.setTextureSize(64, 32);
 		setRotation(Elem77, -0F, -0F, -0F);
 		//Elem77.rotateAngleX = -0F;
@@ -566,8 +557,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem77.rotateAngleZ = -0F;
 		//Cube
 		Elem76 = new ModelRenderer(this, 0, 0);
-		Elem76.addBox(0F, 0F, 0F, 6, 2, 5);
-		Elem76.setRotationPoint(-3F, -10F, -23F);
+		Elem76.addBox(0F, 0F, 0F, 10, 1, 1);
+		Elem76.setRotationPoint(-5F, -7F, -9F);
 		Elem76.setTextureSize(64, 32);
 		setRotation(Elem76, -0F, -0F, -0F);
 		//Elem76.rotateAngleX = -0F;
@@ -575,8 +566,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem76.rotateAngleZ = -0F;
 		//Cube
 		Elem75 = new ModelRenderer(this, 0, 0);
-		Elem75.addBox(0F, 0F, 0F, 10, 1, 23);
-		Elem75.setRotationPoint(-5F, -8F, -30F);
+		Elem75.addBox(0F, 0F, 0F, 6, 2, 5);
+		Elem75.setRotationPoint(-3F, -10F, -23F);
 		Elem75.setTextureSize(64, 32);
 		setRotation(Elem75, -0F, -0F, -0F);
 		//Elem75.rotateAngleX = -0F;
@@ -584,8 +575,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem75.rotateAngleZ = -0F;
 		//Cube
 		Elem74 = new ModelRenderer(this, 0, 0);
-		Elem74.addBox(0F, 0F, 0F, 3, 1, 23);
-		Elem74.setRotationPoint(5F, -7F, -30F);
+		Elem74.addBox(0F, 0F, 0F, 10, 1, 23);
+		Elem74.setRotationPoint(-5F, -8F, -30F);
 		Elem74.setTextureSize(64, 32);
 		setRotation(Elem74, -0F, -0F, -0F);
 		//Elem74.rotateAngleX = -0F;
@@ -594,7 +585,7 @@ public class Brigadelok_080 extends ModelBase
 		//Cube
 		Elem73 = new ModelRenderer(this, 0, 0);
 		Elem73.addBox(0F, 0F, 0F, 3, 1, 23);
-		Elem73.setRotationPoint(-8F, -7F, -30F);
+		Elem73.setRotationPoint(5F, -7F, -30F);
 		Elem73.setTextureSize(64, 32);
 		setRotation(Elem73, -0F, -0F, -0F);
 		//Elem73.rotateAngleX = -0F;
@@ -602,8 +593,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem73.rotateAngleZ = -0F;
 		//Cube
 		Elem72 = new ModelRenderer(this, 0, 0);
-		Elem72.addBox(0F, 0F, 0F, 2, 1, 23);
-		Elem72.setRotationPoint(8F, -6F, -30F);
+		Elem72.addBox(0F, 0F, 0F, 3, 1, 23);
+		Elem72.setRotationPoint(-8F, -7F, -30F);
 		Elem72.setTextureSize(64, 32);
 		setRotation(Elem72, -0F, -0F, -0F);
 		//Elem72.rotateAngleX = -0F;
@@ -612,16 +603,16 @@ public class Brigadelok_080 extends ModelBase
 		//Cube
 		Elem71 = new ModelRenderer(this, 0, 0);
 		Elem71.addBox(0F, 0F, 0F, 2, 1, 23);
-		Elem71.setRotationPoint(-10F, -6F, -30F);
+		Elem71.setRotationPoint(8F, -6F, -30F);
 		Elem71.setTextureSize(64, 32);
 		setRotation(Elem71, -0F, -0F, -0F);
 		//Elem71.rotateAngleX = -0F;
 		//Elem71.rotateAngleY = -0F;
 		//Elem71.rotateAngleZ = -0F;
-		//Axle
+		//Cube
 		Elem70 = new ModelRenderer(this, 0, 0);
-		Elem70.addBox(0F, 0F, 0F, 13, 1, 1);
-		Elem70.setRotationPoint(-6.5F, 22F, 1F);
+		Elem70.addBox(0F, 0F, 0F, 2, 1, 23);
+		Elem70.setRotationPoint(-10F, -6F, -30F);
 		Elem70.setTextureSize(64, 32);
 		setRotation(Elem70, -0F, -0F, -0F);
 		//Elem70.rotateAngleX = -0F;
@@ -630,7 +621,7 @@ public class Brigadelok_080 extends ModelBase
 		//Axle
 		Elem69 = new ModelRenderer(this, 0, 0);
 		Elem69.addBox(0F, 0F, 0F, 13, 1, 1);
-		Elem69.setRotationPoint(-6.5F, 22F, 13F);
+		Elem69.setRotationPoint(-6.5F, 22F, 1F);
 		Elem69.setTextureSize(64, 32);
 		setRotation(Elem69, -0F, -0F, -0F);
 		//Elem69.rotateAngleX = -0F;
@@ -639,7 +630,7 @@ public class Brigadelok_080 extends ModelBase
 		//Axle
 		Elem68 = new ModelRenderer(this, 0, 0);
 		Elem68.addBox(0F, 0F, 0F, 13, 1, 1);
-		Elem68.setRotationPoint(-6.5F, 22F, 7F);
+		Elem68.setRotationPoint(-6.5F, 22F, 13F);
 		Elem68.setTextureSize(64, 32);
 		setRotation(Elem68, -0F, -0F, -0F);
 		//Elem68.rotateAngleX = -0F;
@@ -648,16 +639,16 @@ public class Brigadelok_080 extends ModelBase
 		//Axle
 		Elem67 = new ModelRenderer(this, 0, 0);
 		Elem67.addBox(0F, 0F, 0F, 13, 1, 1);
-		Elem67.setRotationPoint(-6.5F, 22F, -5F);
+		Elem67.setRotationPoint(-6.5F, 22F, 7F);
 		Elem67.setTextureSize(64, 32);
 		setRotation(Elem67, -0F, -0F, -0F);
 		//Elem67.rotateAngleX = -0F;
 		//Elem67.rotateAngleY = -0F;
 		//Elem67.rotateAngleZ = -0F;
-		//Cube
+		//Axle
 		Elem66 = new ModelRenderer(this, 0, 0);
-		Elem66.addBox(0F, 0F, 0F, 1, 2, 3);
-		Elem66.setRotationPoint(5F, 22F, -8F);
+		Elem66.addBox(0F, 0F, 0F, 13, 1, 1);
+		Elem66.setRotationPoint(-6.5F, 22F, -5F);
 		Elem66.setTextureSize(64, 32);
 		setRotation(Elem66, -0F, -0F, -0F);
 		//Elem66.rotateAngleX = -0F;
@@ -665,8 +656,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem66.rotateAngleZ = -0F;
 		//Cube
 		Elem65 = new ModelRenderer(this, 0, 0);
-		Elem65.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem65.setRotationPoint(5F, 22F, -4F);
+		Elem65.addBox(0F, 0F, 0F, 1, 2, 3);
+		Elem65.setRotationPoint(5F, 22F, -8F);
 		Elem65.setTextureSize(64, 32);
 		setRotation(Elem65, -0F, -0F, -0F);
 		//Elem65.rotateAngleX = -0F;
@@ -675,7 +666,7 @@ public class Brigadelok_080 extends ModelBase
 		//Cube
 		Elem64 = new ModelRenderer(this, 0, 0);
 		Elem64.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem64.setRotationPoint(5F, 22F, 2F);
+		Elem64.setRotationPoint(5F, 22F, -4F);
 		Elem64.setTextureSize(64, 32);
 		setRotation(Elem64, -0F, -0F, -0F);
 		//Elem64.rotateAngleX = -0F;
@@ -684,7 +675,7 @@ public class Brigadelok_080 extends ModelBase
 		//Cube
 		Elem63 = new ModelRenderer(this, 0, 0);
 		Elem63.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem63.setRotationPoint(5F, 22F, 8F);
+		Elem63.setRotationPoint(5F, 22F, 2F);
 		Elem63.setTextureSize(64, 32);
 		setRotation(Elem63, -0F, -0F, -0F);
 		//Elem63.rotateAngleX = -0F;
@@ -692,125 +683,125 @@ public class Brigadelok_080 extends ModelBase
 		//Elem63.rotateAngleZ = -0F;
 		//Cube
 		Elem62 = new ModelRenderer(this, 0, 0);
-		Elem62.addBox(0F, 0F, 0F, 1, 2, 3);
-		Elem62.setRotationPoint(5F, 22F, 14F);
+		Elem62.addBox(0F, 0F, 0F, 1, 2, 5);
+		Elem62.setRotationPoint(5F, 22F, 8F);
 		Elem62.setTextureSize(64, 32);
 		setRotation(Elem62, -0F, -0F, -0F);
 		//Elem62.rotateAngleX = -0F;
 		//Elem62.rotateAngleY = -0F;
 		//Elem62.rotateAngleZ = -0F;
-		//TrainWheel_L
+		//Cube
 		Elem61 = new ModelRenderer(this, 0, 0);
-		Elem61.addBox(0F, 0F, 0F, 1, 5, 2);
-		Elem61.setRotationPoint(4F, 20F, 12.5F);
+		Elem61.addBox(0F, 0F, 0F, 1, 2, 3);
+		Elem61.setRotationPoint(5F, 22F, 14F);
 		Elem61.setTextureSize(64, 32);
 		setRotation(Elem61, -0F, -0F, -0F);
 		//Elem61.rotateAngleX = -0F;
 		//Elem61.rotateAngleY = -0F;
 		//Elem61.rotateAngleZ = -0F;
 		//TrainWheel_L
-		Elem60 = new ModelRenderer(this, 0, 0);
+		Elem60 = new ModelRenderer(this,"wheel");
 		Elem60.addBox(0F, 0F, 0F, 1, 5, 2);
-		Elem60.setRotationPoint(4F, 20F, -5.5F);
+		Elem60.setRotationPoint(4F, 20F, 12.5F);
 		Elem60.setTextureSize(64, 32);
 		setRotation(Elem60, -0F, -0F, -0F);
 		//Elem60.rotateAngleX = -0F;
 		//Elem60.rotateAngleY = -0F;
 		//Elem60.rotateAngleZ = -0F;
 		//TrainWheel_L
-		Elem59 = new ModelRenderer(this, 0, 0);
+		Elem59 = new ModelRenderer(this, "wheel");
 		Elem59.addBox(0F, 0F, 0F, 1, 5, 2);
-		Elem59.setRotationPoint(4F, 20F, 6.5F);
+		Elem59.setRotationPoint(4F, 20F, -5.5F);
 		Elem59.setTextureSize(64, 32);
 		setRotation(Elem59, -0F, -0F, -0F);
 		//Elem59.rotateAngleX = -0F;
 		//Elem59.rotateAngleY = -0F;
 		//Elem59.rotateAngleZ = -0F;
 		//TrainWheel_L
-		Elem58 = new ModelRenderer(this, 0, 0);
+		Elem58 = new ModelRenderer(this, "wheel");
 		Elem58.addBox(0F, 0F, 0F, 1, 5, 2);
-		Elem58.setRotationPoint(4F, 20F, 0.5F);
+		Elem58.setRotationPoint(4F, 20F, 6.5F);
 		Elem58.setTextureSize(64, 32);
 		setRotation(Elem58, -0F, -0F, -0F);
 		//Elem58.rotateAngleX = -0F;
 		//Elem58.rotateAngleY = -0F;
 		//Elem58.rotateAngleZ = -0F;
 		//TrainWheel_L
-		Elem57 = new ModelRenderer(this, 0, 0);
-		Elem57.addBox(0F, 0F, 0F, 1, 4, 4);
-		Elem57.setRotationPoint(4F, 20.5F, -6.5F);
+		Elem57 = new ModelRenderer(this, "wheel");
+		Elem57.addBox(0F, 0F, 0F, 1, 5, 2);
+		Elem57.setRotationPoint(4F, 20F, 0.5F);
 		Elem57.setTextureSize(64, 32);
 		setRotation(Elem57, -0F, -0F, -0F);
 		//Elem57.rotateAngleX = -0F;
 		//Elem57.rotateAngleY = -0F;
 		//Elem57.rotateAngleZ = -0F;
 		//TrainWheel_L
-		Elem56 = new ModelRenderer(this, 0, 0);
+		Elem56 = new ModelRenderer(this, "wheel");
 		Elem56.addBox(0F, 0F, 0F, 1, 4, 4);
-		Elem56.setRotationPoint(4F, 20.5F, -0.5F);
+		Elem56.setRotationPoint(4F, 20.5F, -6.5F);
 		Elem56.setTextureSize(64, 32);
 		setRotation(Elem56, -0F, -0F, -0F);
 		//Elem56.rotateAngleX = -0F;
 		//Elem56.rotateAngleY = -0F;
 		//Elem56.rotateAngleZ = -0F;
 		//TrainWheel_L
-		Elem55 = new ModelRenderer(this, 0, 0);
+		Elem55 = new ModelRenderer(this, "wheel");
 		Elem55.addBox(0F, 0F, 0F, 1, 4, 4);
-		Elem55.setRotationPoint(4F, 20.5F, 5.5F);
+		Elem55.setRotationPoint(4F, 20.5F, -0.5F);
 		Elem55.setTextureSize(64, 32);
 		setRotation(Elem55, -0F, -0F, -0F);
 		//Elem55.rotateAngleX = -0F;
 		//Elem55.rotateAngleY = -0F;
 		//Elem55.rotateAngleZ = -0F;
 		//TrainWheel_L
-		Elem54 = new ModelRenderer(this, 0, 0);
+		Elem54 = new ModelRenderer(this, "wheel");
 		Elem54.addBox(0F, 0F, 0F, 1, 4, 4);
-		Elem54.setRotationPoint(4F, 20.5F, 11.5F);
+		Elem54.setRotationPoint(4F, 20.5F, 5.5F);
 		Elem54.setTextureSize(64, 32);
 		setRotation(Elem54, -0F, -0F, -0F);
 		//Elem54.rotateAngleX = -0F;
 		//Elem54.rotateAngleY = -0F;
 		//Elem54.rotateAngleZ = -0F;
 		//TrainWheel_L
-		Elem53 = new ModelRenderer(this, 0, 0);
-		Elem53.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem53.setRotationPoint(4F, 21.5F, -7F);
+		Elem53 = new ModelRenderer(this, "wheel");
+		Elem53.addBox(0F, 0F, 0F, 1, 4, 4);
+		Elem53.setRotationPoint(4F, 20.5F, 11.5F);
 		Elem53.setTextureSize(64, 32);
 		setRotation(Elem53, -0F, -0F, -0F);
 		//Elem53.rotateAngleX = -0F;
 		//Elem53.rotateAngleY = -0F;
 		//Elem53.rotateAngleZ = -0F;
 		//TrainWheel_L
-		Elem52 = new ModelRenderer(this, 0, 0);
+		Elem52 = new ModelRenderer(this, "wheel");
 		Elem52.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem52.setRotationPoint(4F, 21.5F, -1F);
+		Elem52.setRotationPoint(4F, 21.5F, -7F);
 		Elem52.setTextureSize(64, 32);
 		setRotation(Elem52, -0F, -0F, -0F);
 		//Elem52.rotateAngleX = -0F;
 		//Elem52.rotateAngleY = -0F;
 		//Elem52.rotateAngleZ = -0F;
 		//TrainWheel_L
-		Elem51 = new ModelRenderer(this, 0, 0);
+		Elem51 = new ModelRenderer(this, "wheel");
 		Elem51.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem51.setRotationPoint(4F, 21.5F, 5F);
+		Elem51.setRotationPoint(4F, 21.5F, -1F);
 		Elem51.setTextureSize(64, 32);
 		setRotation(Elem51, -0F, -0F, -0F);
 		//Elem51.rotateAngleX = -0F;
 		//Elem51.rotateAngleY = -0F;
 		//Elem51.rotateAngleZ = -0F;
 		//TrainWheel_L
-		Elem50 = new ModelRenderer(this, 0, 0);
+		Elem50 = new ModelRenderer(this, "wheel");
 		Elem50.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem50.setRotationPoint(4F, 21.5F, 11F);
+		Elem50.setRotationPoint(4F, 21.5F, 5F);
 		Elem50.setTextureSize(64, 32);
 		setRotation(Elem50, -0F, -0F, -0F);
 		//Elem50.rotateAngleX = -0F;
 		//Elem50.rotateAngleY = -0F;
 		//Elem50.rotateAngleZ = -0F;
-		//Cube
-		Elem49 = new ModelRenderer(this, 0, 0);
-		Elem49.addBox(0F, 0F, 0F, 12, 2, 4);
-		Elem49.setRotationPoint(-6F, 22F, -12F);
+		//TrainWheel_L
+		Elem49 = new ModelRenderer(this, "wheel");
+		Elem49.addBox(0F, 0F, 0F, 1, 2, 5);
+		Elem49.setRotationPoint(4F, 21.5F, 11F);
 		Elem49.setTextureSize(64, 32);
 		setRotation(Elem49, -0F, -0F, -0F);
 		//Elem49.rotateAngleX = -0F;
@@ -818,8 +809,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem49.rotateAngleZ = -0F;
 		//Cube
 		Elem48 = new ModelRenderer(this, 0, 0);
-		Elem48.addBox(0F, 0F, 0F, 1, 2, 3);
-		Elem48.setRotationPoint(-6F, 22F, -8F);
+		Elem48.addBox(0F, 0F, 0F, 12, 2, 4);
+		Elem48.setRotationPoint(-6F, 22F, -12F);
 		Elem48.setTextureSize(64, 32);
 		setRotation(Elem48, -0F, -0F, -0F);
 		//Elem48.rotateAngleX = -0F;
@@ -827,8 +818,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem48.rotateAngleZ = -0F;
 		//Cube
 		Elem47 = new ModelRenderer(this, 0, 0);
-		Elem47.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem47.setRotationPoint(-6F, 22F, -4F);
+		Elem47.addBox(0F, 0F, 0F, 1, 2, 3);
+		Elem47.setRotationPoint(-6F, 22F, -8F);
 		Elem47.setTextureSize(64, 32);
 		setRotation(Elem47, -0F, -0F, -0F);
 		//Elem47.rotateAngleX = -0F;
@@ -837,16 +828,16 @@ public class Brigadelok_080 extends ModelBase
 		//Cube
 		Elem46 = new ModelRenderer(this, 0, 0);
 		Elem46.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem46.setRotationPoint(-6F, 22F, 2F);
+		Elem46.setRotationPoint(-6F, 22F, -4F);
 		Elem46.setTextureSize(64, 32);
 		setRotation(Elem46, -0F, -0F, -0F);
 		//Elem46.rotateAngleX = -0F;
 		//Elem46.rotateAngleY = -0F;
 		//Elem46.rotateAngleZ = -0F;
-		//TrainWheel_R
+		//Cube
 		Elem45 = new ModelRenderer(this, 0, 0);
-		Elem45.addBox(0F, 0F, 0F, 1, 4, 4);
-		Elem45.setRotationPoint(-5F, 20.5F, -6.5F);
+		Elem45.addBox(0F, 0F, 0F, 1, 2, 5);
+		Elem45.setRotationPoint(-6F, 22F, 2F);
 		Elem45.setTextureSize(64, 32);
 		setRotation(Elem45, -0F, -0F, -0F);
 		//Elem45.rotateAngleX = -0F;
@@ -855,34 +846,34 @@ public class Brigadelok_080 extends ModelBase
 		//TrainWheel_R
 		Elem44 = new ModelRenderer(this, 0, 0);
 		Elem44.addBox(0F, 0F, 0F, 1, 4, 4);
-		Elem44.setRotationPoint(-5F, 20.5F, 5.5F);
+		Elem44.setRotationPoint(-5F, 20.5F, -6.5F);
 		Elem44.setTextureSize(64, 32);
 		setRotation(Elem44, -0F, -0F, -0F);
 		//Elem44.rotateAngleX = -0F;
 		//Elem44.rotateAngleY = -0F;
 		//Elem44.rotateAngleZ = -0F;
 		//TrainWheel_R
-		Elem43 = new ModelRenderer(this, 0, 0);
+		Elem43 = new ModelRenderer(this, "wheel");
 		Elem43.addBox(0F, 0F, 0F, 1, 4, 4);
-		Elem43.setRotationPoint(-5F, 20.5F, 11.5F);
+		Elem43.setRotationPoint(-5F, 20.5F, 5.5F);
 		Elem43.setTextureSize(64, 32);
 		setRotation(Elem43, -0F, -0F, -0F);
 		//Elem43.rotateAngleX = -0F;
 		//Elem43.rotateAngleY = -0F;
 		//Elem43.rotateAngleZ = -0F;
 		//TrainWheel_R
-		Elem42 = new ModelRenderer(this, 0, 0);
+		Elem42 = new ModelRenderer(this, "wheel");
 		Elem42.addBox(0F, 0F, 0F, 1, 4, 4);
-		Elem42.setRotationPoint(-5F, 20.5F, -0.5F);
+		Elem42.setRotationPoint(-5F, 20.5F, 11.5F);
 		Elem42.setTextureSize(64, 32);
 		setRotation(Elem42, -0F, -0F, -0F);
 		//Elem42.rotateAngleX = -0F;
 		//Elem42.rotateAngleY = -0F;
 		//Elem42.rotateAngleZ = -0F;
-		//Cube
-		Elem41 = new ModelRenderer(this, 0, 0);
-		Elem41.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem41.setRotationPoint(-6F, 22F, 8F);
+		//TrainWheel_R
+		Elem41 = new ModelRenderer(this, "wheel");
+		Elem41.addBox(0F, 0F, 0F, 1, 4, 4);
+		Elem41.setRotationPoint(-5F, 20.5F, -0.5F);
 		Elem41.setTextureSize(64, 32);
 		setRotation(Elem41, -0F, -0F, -0F);
 		//Elem41.rotateAngleX = -0F;
@@ -890,89 +881,89 @@ public class Brigadelok_080 extends ModelBase
 		//Elem41.rotateAngleZ = -0F;
 		//Cube
 		Elem40 = new ModelRenderer(this, 0, 0);
-		Elem40.addBox(0F, 0F, 0F, 1, 2, 3);
-		Elem40.setRotationPoint(-6F, 22F, 14F);
+		Elem40.addBox(0F, 0F, 0F, 1, 2, 5);
+		Elem40.setRotationPoint(-6F, 22F, 8F);
 		Elem40.setTextureSize(64, 32);
 		setRotation(Elem40, -0F, -0F, -0F);
 		//Elem40.rotateAngleX = -0F;
 		//Elem40.rotateAngleY = -0F;
 		//Elem40.rotateAngleZ = -0F;
-		//TrainWheel_R
+		//Cube
 		Elem39 = new ModelRenderer(this, 0, 0);
-		Elem39.addBox(0F, 0F, 0F, 1, 5, 2);
-		Elem39.setRotationPoint(-5F, 20F, -5.5F);
+		Elem39.addBox(0F, 0F, 0F, 1, 2, 3);
+		Elem39.setRotationPoint(-6F, 22F, 14F);
 		Elem39.setTextureSize(64, 32);
 		setRotation(Elem39, -0F, -0F, -0F);
 		//Elem39.rotateAngleX = -0F;
 		//Elem39.rotateAngleY = -0F;
 		//Elem39.rotateAngleZ = -0F;
 		//TrainWheel_R
-		Elem38 = new ModelRenderer(this, 0, 0);
+		Elem38 = new ModelRenderer(this, "wheel");
 		Elem38.addBox(0F, 0F, 0F, 1, 5, 2);
-		Elem38.setRotationPoint(-5F, 20F, 0.5F);
+		Elem38.setRotationPoint(-5F, 20F, -5.5F);
 		Elem38.setTextureSize(64, 32);
 		setRotation(Elem38, -0F, -0F, -0F);
 		//Elem38.rotateAngleX = -0F;
 		//Elem38.rotateAngleY = -0F;
 		//Elem38.rotateAngleZ = -0F;
 		//TrainWheel_R
-		Elem37 = new ModelRenderer(this, 0, 0);
-		Elem37.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem37.setRotationPoint(-5F, 21.5F, -7F);
+		Elem37 = new ModelRenderer(this, "wheel");
+		Elem37.addBox(0F, 0F, 0F, 1, 5, 2);
+		Elem37.setRotationPoint(-5F, 20F, 0.5F);
 		Elem37.setTextureSize(64, 32);
 		setRotation(Elem37, -0F, -0F, -0F);
 		//Elem37.rotateAngleX = -0F;
 		//Elem37.rotateAngleY = -0F;
 		//Elem37.rotateAngleZ = -0F;
 		//TrainWheel_R
-		Elem36 = new ModelRenderer(this, 0, 0);
+		Elem36 = new ModelRenderer(this, "wheel");
 		Elem36.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem36.setRotationPoint(-5F, 21.5F, -1F);
+		Elem36.setRotationPoint(-5F, 21.5F, -7F);
 		Elem36.setTextureSize(64, 32);
 		setRotation(Elem36, -0F, -0F, -0F);
 		//Elem36.rotateAngleX = -0F;
 		//Elem36.rotateAngleY = -0F;
 		//Elem36.rotateAngleZ = -0F;
 		//TrainWheel_R
-		Elem35 = new ModelRenderer(this, 0, 0);
+		Elem35 = new ModelRenderer(this, "wheel");
 		Elem35.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem35.setRotationPoint(-5F, 21.5F, 5F);
+		Elem35.setRotationPoint(-5F, 21.5F, -1F);
 		Elem35.setTextureSize(64, 32);
 		setRotation(Elem35, -0F, -0F, -0F);
 		//Elem35.rotateAngleX = -0F;
 		//Elem35.rotateAngleY = -0F;
 		//Elem35.rotateAngleZ = -0F;
 		//TrainWheel_R
-		Elem34 = new ModelRenderer(this, 0, 0);
-		Elem34.addBox(0F, 0F, 0F, 1, 5, 2);
-		Elem34.setRotationPoint(-5F, 20F, 6.5F);
+		Elem34 = new ModelRenderer(this, "wheel");
+		Elem34.addBox(0F, 0F, 0F, 1, 2, 5);
+		Elem34.setRotationPoint(-5F, 21.5F, 5F);
 		Elem34.setTextureSize(64, 32);
 		setRotation(Elem34, -0F, -0F, -0F);
 		//Elem34.rotateAngleX = -0F;
 		//Elem34.rotateAngleY = -0F;
 		//Elem34.rotateAngleZ = -0F;
 		//TrainWheel_R
-		Elem33 = new ModelRenderer(this, 0, 0);
-		Elem33.addBox(0F, 0F, 0F, 1, 2, 5);
-		Elem33.setRotationPoint(-5F, 21.5F, 11F);
+		Elem33 = new ModelRenderer(this, "wheel");
+		Elem33.addBox(0F, 0F, 0F, 1, 5, 2);
+		Elem33.setRotationPoint(-5F, 20F, 6.5F);
 		Elem33.setTextureSize(64, 32);
 		setRotation(Elem33, -0F, -0F, -0F);
 		//Elem33.rotateAngleX = -0F;
 		//Elem33.rotateAngleY = -0F;
 		//Elem33.rotateAngleZ = -0F;
 		//TrainWheel_R
-		Elem32 = new ModelRenderer(this, 0, 0);
-		Elem32.addBox(0F, 0F, 0F, 1, 5, 2);
-		Elem32.setRotationPoint(-5F, 20F, 12.5F);
+		Elem32 = new ModelRenderer(this, "wheel");
+		Elem32.addBox(0F, 0F, 0F, 1, 2, 5);
+		Elem32.setRotationPoint(-5F, 21.5F, 11F);
 		Elem32.setTextureSize(64, 32);
 		setRotation(Elem32, -0F, -0F, -0F);
 		//Elem32.rotateAngleX = -0F;
 		//Elem32.rotateAngleY = -0F;
 		//Elem32.rotateAngleZ = -0F;
-		//Cube
-		Elem31 = new ModelRenderer(this, 0, 0);
-		Elem31.addBox(0F, 0F, 0F, 1, 2, 1);
-		Elem31.setRotationPoint(-0.5F, 20.5F, 26F);
+		//TrainWheel_R
+		Elem31 = new ModelRenderer(this, "wheel");
+		Elem31.addBox(0F, 0F, 0F, 1, 5, 2);
+		Elem31.setRotationPoint(-5F, 20F, 12.5F);
 		Elem31.setTextureSize(64, 32);
 		setRotation(Elem31, -0F, -0F, -0F);
 		//Elem31.rotateAngleX = -0F;
@@ -980,8 +971,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem31.rotateAngleZ = -0F;
 		//Cube
 		Elem30 = new ModelRenderer(this, 0, 0);
-		Elem30.addBox(0F, 0F, 0F, 3, 3, 1);
-		Elem30.setRotationPoint(-1.5F, 21.5F, 25.5F);
+		Elem30.addBox(0F, 0F, 0F, 1, 2, 1);
+		Elem30.setRotationPoint(-0.5F, 20.5F, 26F);
 		Elem30.setTextureSize(64, 32);
 		setRotation(Elem30, -0F, -0F, -0F);
 		//Elem30.rotateAngleX = -0F;
@@ -989,26 +980,26 @@ public class Brigadelok_080 extends ModelBase
 		//Elem30.rotateAngleZ = -0F;
 		//Cube
 		Elem29 = new ModelRenderer(this, 0, 0);
-		Elem29.addBox(0F, 0F, 0F, 2, 2, 1);
-		Elem29.setRotationPoint(-1F, 22F, 24.5F);
+		Elem29.addBox(0F, 0F, 0F, 3, 3, 1);
+		Elem29.setRotationPoint(-1.5F, 21.5F, 25.5F);
 		Elem29.setTextureSize(64, 32);
 		setRotation(Elem29, -0F, -0F, -0F);
 		//Elem29.rotateAngleX = -0F;
 		//Elem29.rotateAngleY = -0F;
 		//Elem29.rotateAngleZ = -0F;
-		//PistonValve
+		//Cube
 		Elem28 = new ModelRenderer(this, 0, 0);
-		Elem28.addBox(0F, 0F, 0F, 18, 5, 3);
-		Elem28.setRotationPoint(-9F, 19.5F, 17F);
+		Elem28.addBox(0F, 0F, 0F, 2, 2, 1);
+		Elem28.setRotationPoint(-1F, 22F, 24.5F);
 		Elem28.setTextureSize(64, 32);
 		setRotation(Elem28, -0F, -0F, -0F);
 		//Elem28.rotateAngleX = -0F;
 		//Elem28.rotateAngleY = -0F;
 		//Elem28.rotateAngleZ = -0F;
-		//Cube
+		//PistonValve
 		Elem27 = new ModelRenderer(this, 0, 0);
-		Elem27.addBox(0F, 0F, 0F, 12, 1, 16);
-		Elem27.setRotationPoint(-6F, 23F, -28F);
+		Elem27.addBox(0F, 0F, 0F, 18, 5, 3);
+		Elem27.setRotationPoint(-9F, 19.5F, 17F);
 		Elem27.setTextureSize(64, 32);
 		setRotation(Elem27, -0F, -0F, -0F);
 		//Elem27.rotateAngleX = -0F;
@@ -1016,8 +1007,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem27.rotateAngleZ = -0F;
 		//Cube
 		Elem26 = new ModelRenderer(this, 0, 0);
-		Elem26.addBox(0F, 0F, 0F, 16, 1, 4);
-		Elem26.setRotationPoint(-8F, 18F, -13F);
+		Elem26.addBox(0F, 0F, 0F, 12, 1, 16);
+		Elem26.setRotationPoint(-6F, 23F, -28F);
 		Elem26.setTextureSize(64, 32);
 		setRotation(Elem26, -0F, -0F, -0F);
 		//Elem26.rotateAngleX = -0F;
@@ -1025,8 +1016,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem26.rotateAngleZ = -0F;
 		//Cube
 		Elem25 = new ModelRenderer(this, 0, 0);
-		Elem25.addBox(0F, 0F, 0F, 18, 4, 1);
-		Elem25.setRotationPoint(-9F, 19F, -13F);
+		Elem25.addBox(0F, 0F, 0F, 16, 1, 4);
+		Elem25.setRotationPoint(-8F, 18F, -13F);
 		Elem25.setTextureSize(64, 32);
 		setRotation(Elem25, -0F, -0F, -0F);
 		//Elem25.rotateAngleX = -0F;
@@ -1034,8 +1025,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem25.rotateAngleZ = -0F;
 		//Cube
 		Elem24 = new ModelRenderer(this, 0, 0);
-		Elem24.addBox(0F, 0F, 0F, 12, 3, 34);
-		Elem24.setRotationPoint(-6F, 19F, -12F);
+		Elem24.addBox(0F, 0F, 0F, 18, 4, 1);
+		Elem24.setRotationPoint(-9F, 19F, -13F);
 		Elem24.setTextureSize(64, 32);
 		setRotation(Elem24, -0F, -0F, -0F);
 		//Elem24.rotateAngleX = -0F;
@@ -1043,8 +1034,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem24.rotateAngleZ = -0F;
 		//Cube
 		Elem23 = new ModelRenderer(this, 0, 0);
-		Elem23.addBox(0F, 0F, 0F, 1, 15, 9);
-		Elem23.setRotationPoint(8F, 7F, -22F);
+		Elem23.addBox(0F, 0F, 0F, 12, 3, 34);
+		Elem23.setRotationPoint(-6F, 19F, -12F);
 		Elem23.setTextureSize(64, 32);
 		setRotation(Elem23, -0F, -0F, -0F);
 		//Elem23.rotateAngleX = -0F;
@@ -1052,8 +1043,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem23.rotateAngleZ = -0F;
 		//Cube
 		Elem22 = new ModelRenderer(this, 0, 0);
-		Elem22.addBox(0F, 0F, 0F, 18, 29, 1);
-		Elem22.setRotationPoint(-9F, -6F, -29F);
+		Elem22.addBox(0F, 0F, 0F, 1, 15, 9);
+		Elem22.setRotationPoint(8F, 7F, -22F);
 		Elem22.setTextureSize(64, 32);
 		setRotation(Elem22, -0F, -0F, -0F);
 		//Elem22.rotateAngleX = -0F;
@@ -1061,8 +1052,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem22.rotateAngleZ = -0F;
 		//Cube
 		Elem21 = new ModelRenderer(this, 0, 0);
-		Elem21.addBox(0F, 0F, 0F, 1, 24, 4);
-		Elem21.setRotationPoint(8F, -5F, -13F);
+		Elem21.addBox(0F, 0F, 0F, 18, 29, 1);
+		Elem21.setRotationPoint(-9F, -6F, -29F);
 		Elem21.setTextureSize(64, 32);
 		setRotation(Elem21, -0F, -0F, -0F);
 		//Elem21.rotateAngleX = -0F;
@@ -1071,7 +1062,7 @@ public class Brigadelok_080 extends ModelBase
 		//Cube
 		Elem20 = new ModelRenderer(this, 0, 0);
 		Elem20.addBox(0F, 0F, 0F, 1, 24, 4);
-		Elem20.setRotationPoint(-9F, -5F, -13F);
+		Elem20.setRotationPoint(8F, -5F, -13F);
 		Elem20.setTextureSize(64, 32);
 		setRotation(Elem20, -0F, -0F, -0F);
 		//Elem20.rotateAngleX = -0F;
@@ -1079,8 +1070,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem20.rotateAngleZ = -0F;
 		//Cube
 		Elem19 = new ModelRenderer(this, 0, 0);
-		Elem19.addBox(0F, 0F, 0F, 12, 2, 1);
-		Elem19.setRotationPoint(-6F, 23F, 22.5F);
+		Elem19.addBox(0F, 0F, 0F, 1, 24, 4);
+		Elem19.setRotationPoint(-9F, -5F, -13F);
 		Elem19.setTextureSize(64, 32);
 		setRotation(Elem19, -0F, -0F, -0F);
 		//Elem19.rotateAngleX = -0F;
@@ -1088,8 +1079,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem19.rotateAngleZ = -0F;
 		//Cube
 		Elem18 = new ModelRenderer(this, 0, 0);
-		Elem18.addBox(0F, 0F, 0F, 14, 3, 1);
-		Elem18.setRotationPoint(-6.5F, 21.5F, 23.5F);
+		Elem18.addBox(0F, 0F, 0F, 12, 2, 1);
+		Elem18.setRotationPoint(-6F, 23F, 22.5F);
 		Elem18.setTextureSize(64, 32);
 		setRotation(Elem18, -0F, -0F, -0F);
 		//Elem18.rotateAngleX = -0F;
@@ -1097,8 +1088,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem18.rotateAngleZ = -0F;
 		//Cube
 		Elem17 = new ModelRenderer(this, 0, 0);
-		Elem17.addBox(0F, 0F, 0F, 12, 3, 2);
-		Elem17.setRotationPoint(-6F, 20F, 21.5F);
+		Elem17.addBox(0F, 0F, 0F, 14, 3, 1);
+		Elem17.setRotationPoint(-6.5F, 21.5F, 23.5F);
 		Elem17.setTextureSize(64, 32);
 		setRotation(Elem17, -0F, -0F, -0F);
 		//Elem17.rotateAngleX = -0F;
@@ -1106,8 +1097,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem17.rotateAngleZ = -0F;
 		//Cube
 		Elem16 = new ModelRenderer(this, 0, 0);
-		Elem16.addBox(0F, 0F, 0F, 18, 7, 9);
-		Elem16.setRotationPoint(-9F, 10.5F, 8F);
+		Elem16.addBox(0F, 0F, 0F, 12, 3, 2);
+		Elem16.setRotationPoint(-6F, 20F, 21.5F);
 		Elem16.setTextureSize(64, 32);
 		setRotation(Elem16, -0F, -0F, -0F);
 		//Elem16.rotateAngleX = -0F;
@@ -1142,8 +1133,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem13.rotateAngleZ = -0F;
 		//Cube
 		Elem12 = new ModelRenderer(this, 0, 0);
-		Elem12.addBox(0F, 0F, 0F, 18, 8, 16);
-		Elem12.setRotationPoint(-9F, 9.5F, -8F);
+		Elem12.addBox(0F, 0F, 0F, 18, 7, 22);
+		Elem12.setRotationPoint(-9F, 10.5F, -8F);
 		Elem12.setTextureSize(64, 32);
 		setRotation(Elem12, -0F, -0F, -0F);
 		//Elem12.rotateAngleX = -0F;
@@ -1178,8 +1169,8 @@ public class Brigadelok_080 extends ModelBase
 		//Elem9.rotateAngleZ = -0F;
 		//Cube
 		Elem8 = new ModelRenderer(this, 0, 0);
-		Elem8.addBox(0F, 0F, 0F, 18, 6, 5);
-		Elem8.setRotationPoint(-9F, 11.5F, 17F);
+		Elem8.addBox(0F, 0F, 0F, 18, 6, 8);
+		Elem8.setRotationPoint(-9F, 11.5F, 14F);
 		Elem8.setTextureSize(64, 32);
 		setRotation(Elem8, -0F, -0F, -0F);
 		//Elem8.rotateAngleX = -0F;
@@ -1226,13 +1217,12 @@ public class Brigadelok_080 extends ModelBase
 	public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5)
 	{
 		super.render(entity, f, f1, f2, f3, f4, f5);
-		setRotationAngles(f, f1, f2, f3, f4, f5, entity);
-		Elem126.render(f5);//Cube
-		Elem125.render(f5);//Cube
-		Elem124.render(f5);//Upper_PistonValveConnector_Right
-		Elem123.render(f5);//PistonValveConnector_Right
-		Elem122.render(f5);//WheelConnectorPiston_Right
-		Elem118.render(f5);//Cube
+		setRotationAngles(f, f1, f2, f3, f4, f5,entity);
+		Elem122.render(f5);//Upper_Piston_r_Right
+		Elem121.render(f5);//Upper_Piston_Right
+		Elem120.render(f5);//Upper_PistonValveConnector_Right
+		Elem119.render(f5);//PistonValveConnector_Right
+		Elem118.render(f5);//WheelConnectorPiston_Right
 		Elem117.render(f5);//Cube
 		Elem116.render(f5);//Cube
 		Elem115.render(f5);//Cube
@@ -1280,16 +1270,16 @@ public class Brigadelok_080 extends ModelBase
 		Elem73.render(f5);//Cube
 		Elem72.render(f5);//Cube
 		Elem71.render(f5);//Cube
-		Elem70.render(f5);//Axle
+		Elem70.render(f5);//Cube
 		Elem69.render(f5);//Axle
 		Elem68.render(f5);//Axle
 		Elem67.render(f5);//Axle
-		Elem66.render(f5);//Cube
+		Elem66.render(f5);//Axle
 		Elem65.render(f5);//Cube
 		Elem64.render(f5);//Cube
 		Elem63.render(f5);//Cube
 		Elem62.render(f5);//Cube
-		Elem61.render(f5);//TrainWheel_L
+		Elem61.render(f5);//Cube
 		Elem60.render(f5);//TrainWheel_L
 		Elem59.render(f5);//TrainWheel_L
 		Elem58.render(f5);//TrainWheel_L
@@ -1301,17 +1291,11 @@ public class Brigadelok_080 extends ModelBase
 		Elem52.render(f5);//TrainWheel_L
 		Elem51.render(f5);//TrainWheel_L
 		Elem50.render(f5);//TrainWheel_L
-		Elem49.render(f5);//Cube
-		Elem48.render(f5);//Cube
-		Elem47.render(f5);//Cube
-		Elem46.render(f5);//Cube
-		Elem45.render(f5);//TrainWheel_R
+		Elem49.render(f5);//TrainWheel_L
 		Elem44.render(f5);//TrainWheel_R
 		Elem43.render(f5);//TrainWheel_R
 		Elem42.render(f5);//TrainWheel_R
-		Elem41.render(f5);//Cube
-		Elem40.render(f5);//Cube
-		Elem39.render(f5);//TrainWheel_R
+		Elem41.render(f5);//TrainWheel_R
 		Elem38.render(f5);//TrainWheel_R
 		Elem37.render(f5);//TrainWheel_R
 		Elem36.render(f5);//TrainWheel_R
@@ -1319,11 +1303,17 @@ public class Brigadelok_080 extends ModelBase
 		Elem34.render(f5);//TrainWheel_R
 		Elem33.render(f5);//TrainWheel_R
 		Elem32.render(f5);//TrainWheel_R
-		Elem31.render(f5);//Cube
+		Elem31.render(f5);//TrainWheel_R
+		Elem48.render(f5);//Cube
+		Elem47.render(f5);//Cube
+		Elem46.render(f5);//Cube
+		Elem45.render(f5);//Cube
+		Elem40.render(f5);//Cube
+		Elem39.render(f5);//Cube
 		Elem30.render(f5);//Cube
 		Elem29.render(f5);//Cube
-		Elem28.render(f5);//PistonValve
-		Elem27.render(f5);//Cube
+		Elem28.render(f5);//Cube
+		Elem27.render(f5);//PistonValve
 		Elem26.render(f5);//Cube
 		Elem25.render(f5);//Cube
 		Elem24.render(f5);//Cube
@@ -1356,9 +1346,5 @@ public class Brigadelok_080 extends ModelBase
 		model.rotateAngleZ = z;
 	}
 
-	public void setRotationAngles(float f, float f1, float f2, float f3, float f4, float f5, Entity entity)
-	{
-		super.setRotationAngles(f, f1, f2, f3, f4, f5, entity);
-	}
 
 }

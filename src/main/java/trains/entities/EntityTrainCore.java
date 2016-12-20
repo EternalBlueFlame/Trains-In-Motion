@@ -118,18 +118,15 @@ public class EntityTrainCore extends GenericRailTransport {
         float speed = (float) X * 0.9f;
 
         if (accelerator!=0) {
-            if (speed != 0) {
+            //if (speed != 0) {
                 speed *= (accelerator / 6f) * getAcceleration();
-            } else {
-                speed = (0.1666666667f) * getAcceleration();
-            }
+            //} else {
+            //    speed = (0.1666666667f) * getAcceleration();
+            //}
         }
 
         if (speed>getMaxSpeed()){
-           // speed=getMaxSpeed();
-        }
-        if(worldObj.isRemote){
-            speed *= 0.25d;
+           speed=getMaxSpeed();
         }
         return speed;
     }

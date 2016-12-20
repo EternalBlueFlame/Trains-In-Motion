@@ -270,7 +270,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (riddenByEntity != null) {
             if (bogie.size()>1) {
 
-                float[] riderOffset = rotatePoint(new float[]{getRiderOffset(),1.5f,0}, rotationPitch, rotationYaw, 0);
+                float[] riderOffset = rotatePoint(new float[]{getRiderOffset()[0],getRiderOffset()[1],0}, rotationPitch, rotationYaw, 0);
                 riddenByEntity.setPosition(posX + riderOffset[0], posY + riderOffset[1], posZ + riderOffset[2]);
             } else {
                 riddenByEntity.setPosition(posX, posY + 2D, posZ);
@@ -284,7 +284,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     public List<Float> getBogieOffsets(){return new ArrayList<Float>();}
     public int getType(){return 0;}
-    public float getRiderOffset(){return 0;}
+    public float[] getRiderOffset(){return new float[]{0,0};}
     public float[] getHitboxPositions(){return new float[]{-1,0,1};}
     public Item getItem(){return null;}
     public int getInventorySize(){return 3;}

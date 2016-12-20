@@ -61,7 +61,7 @@ public class FirstTrain extends EntityTrainCore {
     private static final int maxFuel = 12800;
     private LiquidManager tank = new LiquidManager(new int[]{10000, 10000}, new Fluid[]{FluidRegistry.WATER},true);
     private static final int inventorySize= 3;
-    private static final float offsetXZ =1.3f;
+    private static final float[] riderOffset = new float[]{1.3f,1f};
     private static final List<Float> bogieOffset = Arrays.asList(-0.75f, 0.75f);
     private static final float[] hitboxPositions = new float[]{-1.15f,0f,1.15f};
     private static final ResourceLocation horn = URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");
@@ -112,7 +112,7 @@ public class FirstTrain extends EntityTrainCore {
     @Override
     public int getMaxFuel(){return maxFuel;}
     @Override
-    public float getRiderOffset(){return offsetXZ;}
+    public float[] getRiderOffset(){return riderOffset;}
     @Override
     public float getAcceleration(){return acceleration;}
     @Override
