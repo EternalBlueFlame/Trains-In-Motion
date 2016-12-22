@@ -6,6 +6,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import trains.utility.FuelHandler;
 import trains.utility.InventoryHandler;
+import trains.utility.RailUtility;
 
 import java.util.UUID;
 
@@ -24,7 +25,6 @@ public class EntityTrainCore extends GenericRailTransport {
     public boolean brake = false; //bool for the train/rollingstock's break.
     public boolean isRunning = false;// if the train is running/using fuel
     public int furnaceFuel = 0; //the amount of fuel in the furnace, only used for steam and nuclear trains
-    public int trainTicks =0; //defines the train's tick count.
 
 
     /**
@@ -149,6 +149,7 @@ public class EntityTrainCore extends GenericRailTransport {
                     motion[0] = processMovement(currentBogie.motionX);
                     motion[2] = processMovement(currentBogie.motionZ);
                     motion[1] = currentBogie.motionY;
+                    motion = RailUtility.rotatePoint(new double[]{0.01,0,0},0, rotationYaw,0);
                     currentBogie.setVelocity(motion[0], 0, motion[2]);
                     currentBogie.minecartMove();
                 } else {
@@ -160,21 +161,9 @@ public class EntityTrainCore extends GenericRailTransport {
 
         //simple tick management so some code does not need to be run every tick.
         if (!worldObj.isRemote) {
-            switch (trainTicks) {
-                case 5: {
-                    //deal with the fuel
-                    FuelHandler.ManageFuel(this);
-                break;
-                }
-                default: {
-                    //if the tick count is higher than the values used, reset it so it can count up again.
-                    if (trainTicks > 10) {
-                        trainTicks = 1;
-                    }
-                }
-
+            if (transportTicks%5==1){
+                FuelHandler.ManageFuel(this);
             }
-            trainTicks++;
         }
     }
 

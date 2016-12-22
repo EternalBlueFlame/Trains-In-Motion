@@ -15,6 +15,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import trains.models.tmt.Vec3d;
 import trains.utility.*;
 
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public GenericRailTransport(World world){
         super(world);
     }
+    public int transportTicks =0;
 
 
 
@@ -256,6 +258,13 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (!ClientProxy.carts.contains(this)) {
                 ClientProxy.carts.add(this);
             }
+            if (transportTicks %2 ==1){
+                lamp.ShouldUpdate(worldObj, RailUtility.rotatePoint(new double[]{this.posX + getLampOffset().xCoord ,this.posY + getLampOffset().yCoord, this.posZ + getLampOffset().zCoord}, rotationPitch, rotationYaw, 0));
+            }
+            if (transportTicks>20){
+                transportTicks = 1;
+            }
+            transportTicks++;
         }
     }
 
@@ -290,6 +299,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public int getInventorySize(){return 3;}
     public String getName(){return "error";}
     public LiquidManager getTank(){return null;}
+    public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
 
     //TODO we need to define smoke vector that can be called from the render
 

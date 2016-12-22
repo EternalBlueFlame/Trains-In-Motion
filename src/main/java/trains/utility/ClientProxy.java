@@ -4,6 +4,8 @@ package trains.utility;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.entity.Render;
@@ -136,7 +138,7 @@ public class ClientProxy extends CommonProxy {
             clientWorld = Minecraft.getMinecraft().theWorld;
             if (clientWorld != null) {
                 for (GenericRailTransport cart : carts) {
-                    if (clientWorld.getBlock(cart.lamp.X, cart.lamp.Y, cart.lamp.Z) instanceof LampBlock) {
+                    if (cart != null) {
                         clientWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
                     }
                 }

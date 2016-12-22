@@ -112,6 +112,7 @@ public class TrainsInMotion {
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
         proxy.register();
         if (event.getSide().isClient()) {
+            GenericRegistry.RegisterClientStuff();
             HUDTrain hud = new HUDTrain();
             FMLCommonHandler.instance().bus().register(hud);
             MinecraftForge.EVENT_BUS.register(hud);

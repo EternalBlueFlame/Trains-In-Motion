@@ -10,6 +10,7 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import trains.entities.EntityTrainCore;
 import trains.items.trains.ItemFirstTrain;
+import trains.models.tmt.Vec3d;
 import trains.registry.TrainRegistry;
 import trains.registry.URIRegistry;
 import trains.utility.LiquidManager;
@@ -53,6 +54,7 @@ public class FirstTrain extends EntityTrainCore {
      * horn and running are refrences to the sound files for the train horn and running sounds.
      * trainName is the name of the train that displays in the GUI and on mods like WAILA.
      * thisItem is the item for this train that will get registered.
+     * lampOffset defines the offset the lamp is supposed to be placed from the train, negative amounts are towards the front of the train.
      * TODO: we will need a list of items for the crafting recipe. we also need items to fill that list.....
      */
     private static final float initMaxSpeed = 0.9834875f;
@@ -68,6 +70,7 @@ public class FirstTrain extends EntityTrainCore {
     private static final ResourceLocation running = URIRegistry.SOUND_RUNNING.getResource("r080brigadelok.ogg");
     private static final String trainName = "0-8-0 Brigadelok";
     public static final Item thisItem = new ItemFirstTrain().setUnlocalizedName("itemFirstTrain").setTextureName(MODID + ":itemTests");
+    public static final Vec3d lampOffset = new Vec3d(-3.5,2,0);
 
     /**
      * these basic constructors only need to have their names changed to that of this class, that is assuming your editor doesn't automatically do that.
@@ -79,19 +82,6 @@ public class FirstTrain extends EntityTrainCore {
     public FirstTrain(World world){
         super(world);
     }
-
-    /**
-     * <h2>lamp management</h2>
-     * This defines the position the train is supposed to place the light, relative to its own, in this case 2 blocks above the rail block and 3 blocks in front of the train.
-     * Remove this function if the train has no lamp.
-     */
-    @SideOnly(Side.CLIENT)
-    @Override
-    public void onUpdate(){
-        super.onUpdate();
-        lamp.ShouldUpdate(worldObj, RailUtility.rotatePoint(new double[]{posX+3,posY+2, posZ}, rotationPitch, rotationYaw, 0));
-    }
-
 
     /**
      * <h2>Variable Overrides</h2>
@@ -123,6 +113,8 @@ public class FirstTrain extends EntityTrainCore {
     public float[] getHitboxPositions(){return hitboxPositions;}
     @Override
     public LiquidManager getTank(){return tank;}
+    @Override
+    public Vec3d getLampOffset(){return lampOffset;}
     @Override
     public ISound getHorn(){
         return new ISound() {

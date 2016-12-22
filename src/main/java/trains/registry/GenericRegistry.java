@@ -2,6 +2,8 @@ package trains.registry;
 
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -31,6 +33,7 @@ public class GenericRegistry {
     public static final Item bucketOil = new Bucket(GenericRegistry.blockFluidOil).setUnlocalizedName("OilBucket").setContainerItem(Items.bucket);
 
     //initialize the lamp block
+    @SideOnly(Side.CLIENT)
     public static Block lampBlock = new LampBlock();
 
 
@@ -47,14 +50,23 @@ public class GenericRegistry {
         FluidRegistry.registerFluid(fluidOil);
         blockFluidOil = new BlockFluidClassic(fluidOil, Mat_Oil);
         GameRegistry.registerBlock(blockFluidOil, "OilBlock");
-        //register the lamp block
-        GameRegistry.registerBlock(lampBlock, "lampblock");
 
         /**
          * <h3>register Items</h3>
          */
         GameRegistry.registerItem(bucketOil, "OilBucket");
         FluidContainerRegistry.registerFluidContainer(GenericRegistry.fluidOil, new ItemStack(bucketOil), new ItemStack(Items.bucket));
+    }
+
+    /**
+     * <h2>Client onlyBlock and Item register function</h2>
+     * called by the main class to register the blocks and items, these are only on the client side.
+     * @see trains.TrainsInMotion#init(FMLInitializationEvent)
+     */
+    @SideOnly(Side.CLIENT)
+    public static void RegisterClientStuff(){
+        GameRegistry.registerBlock(lampBlock, "lampblock");
+        lampBlock.setLightLevel(1f);
     }
 
 }

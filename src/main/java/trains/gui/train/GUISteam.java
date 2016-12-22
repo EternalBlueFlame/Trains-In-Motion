@@ -1,6 +1,7 @@
 package trains.gui.train;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
@@ -10,6 +11,7 @@ import trains.registry.URIRegistry;
 
 public class GUISteam extends GuiContainer {
     private EntityTrainCore train;
+    private static final float guiScaler = 0.00390625F;
 
     /**
      * <h2>GUI initialization</h2>
@@ -42,6 +44,7 @@ public class GUISteam extends GuiContainer {
      * this draws the lower layer, good for backgrounds and things to go behind the foreground stuff
      * things later in the function render closer to the screen
      * Textures must be bound to the render, then every texture draw after will re-use that same texture, when you want a new texture, bind a new one.
+     * Item scale is defined by: x,y,u,v,width,height
      *
      * xSize, ySize, width, and height are defined in the super
      * @see GuiContainer
@@ -103,12 +106,60 @@ public class GUISteam extends GuiContainer {
 
 
 
-        int liquid =  Math.abs((train.getTank().tankFluidAmount(0) * 50) / train.getTank().tankCapacity(0));
-        drawTexturedModalRect(interfaceWidth + 48, interfaceHeight + 58 - liquid, 177, 107 - liquid, 18, liquid);
+        //draw the background
+        drawColor(0,0);
+        drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20, 0, 0, 18, 50, 256);
+        if (train.getTank().canDrain(1,0)) {
+            //draw the water tank
+            drawColor(train.getType(),0);
+            int liquid = Math.abs((train.getTank().tankFluidAmount(0) * 50) / train.getTank().tankCapacity(0));
+            drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20 - liquid, 177, 64 - liquid, 18, liquid);
+        }
 
-        int liquid2 =  Math.abs((train.getTank().tankFluidAmount(0) * 50) / train.getTank().tankCapacity(0));
-        drawTexturedModalRect(interfaceWidth + 32, interfaceHeight + 74 - liquid2, 177, 107 - liquid2, 18, liquid2);
+        if (train.getType() == 1 || train.getType() == 5) {
+            //draw the background
+            drawColor(0,0);
+            drawTexturedModalRect(interfaceWidth + 34, interfaceHeight+20, 30, 30, 18, 24);
+            if (train.getTank().canDrain(1, 1)) {
+                //draw the steam tank
+                drawColor(train.getType(), 1);
+                int liquid3 = Math.abs((train.getTank().tankFluidAmount(1) * 24) / train.getTank().tankCapacity(0));
+                drawTexturedModalRect(interfaceWidth + 34, interfaceHeight +20 - liquid3, 177, 24 - liquid3, 18, liquid3);
+            }
+        }
 
     }
 
+    public void drawTexturedModalRect(int posX, int posY, int posU, int posV, int width, int height, int textureScale) {
+        Tessellator tessellator = Tessellator.instance;
+        tessellator.startDrawingQuads();
+
+        tessellator.addVertexWithUV(posX, posY + height, this.zLevel, posU * guiScaler, (posV + textureScale) * guiScaler);
+
+        tessellator.addVertexWithUV(posX + width, posY + height, this.zLevel, (posU + textureScale) * guiScaler, (posV + textureScale) * guiScaler);
+
+        tessellator.addVertexWithUV(posX + width, posY, this.zLevel, (posU + textureScale) * guiScaler, posV * guiScaler);
+
+        tessellator.addVertexWithUV(posX, posY, this.zLevel, posU * guiScaler, posV * guiScaler);
+        tessellator.draw();
+    }
+
+
+    private void drawColor(int trainType, int tank){
+        switch (trainType){
+            case 0:{
+                mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("tank_empty.png"));
+                break;
+            }
+            case 1:{
+                if (tank==0){
+                    mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("tank_water.png"));
+                } else {
+                    mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("tank_steam.png"));
+                }
+                break;
+            }
+        }
+
+    }
 }
