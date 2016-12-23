@@ -1,12 +1,15 @@
 package trains.models;
 
+import com.sun.javafx.geom.Vec2f;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import trains.entities.GenericRailTransport;
 import trains.utility.ClientProxy;
+import trains.utility.RailUtility;
 
 import javax.annotation.Nullable;
 
@@ -22,6 +25,7 @@ public class RenderEntity extends Render {
     private ModelBase bogieModel;
     private ResourceLocation texture;
     private ResourceLocation bogieTexture;
+    private Vec2f wheelConnectorPos = null;
     /*
      * hitboxBase is used for the bottom and top, side is used for the two long sides
      * hitboxFront is used for front and back
@@ -52,6 +56,16 @@ public class RenderEntity extends Render {
         return texture;
     }
 
+    /**
+     * <h3>base render extension</h3>
+     * acts as a redirect for the base render function to our own class.
+     * This is just to do a more efficient type cast.
+     */
+    public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick){
+        if (entity instanceof GenericRailTransport){
+            doRender((GenericRailTransport) entity,x,y,z,yaw,partialTick);
+        }
+    }
 
     /**
      * <h3>Actually render</h3>
@@ -68,33 +82,47 @@ public class RenderEntity extends Render {
      * @param z the z position of the entity with offset for the camera position.
      * @param yaw is used to rotate the train's yaw, its exactly the same as entity.rotationYaw.
      * @param partialTick not used.
+     *
+     * TODO: texture recolor similar to game maker's colorize partial so we can change the color without effecting grayscale, or lighting like on rivets.
+     *                    May be able to use multiple instances of this to have multiple recolorable things on the train.
+     *
      */
-    
-    public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick){
-        
-    	
+    public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw, float partialTick){
+
     	GL11.glPushMatrix();
         //set the render position
-        GL11.glTranslated(x, y + 1.4d, z);
+        GL11.glTranslated(x, y + 2.4d, z);
         //rotate the model.
-        if (entity instanceof GenericRailTransport) {
-            GL11.glRotatef((-yaw) -90, 0.0f, 1.0f, 0.0f);
+            GL11.glRotatef((-yaw) - 90, 0.0f, 1.0f, 0.0f);
             GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
-        }
 
-        //Bind the texture and render the model
-        bindTexture(texture);
-
-        wheelPitch+=0.1;
-        ModelRenderer boxRender;
-        for (Object box : model.boxList){
-            if (box instanceof ModelRenderer){
-                boxRender = (ModelRenderer) box;
-                if (boxRender.boxName != null && boxRender.boxName.contains("wheel")){
-                    ((ModelRenderer) box).rotateAngleX = wheelPitch;
+            if (entity.bogie.size() > 0) {
+                wheelPitch += 1f;//(float) (((GenericRailTransport) entity).bogie.get(0).motionX + ((GenericRailTransport) entity).bogie.get(0).motionZ) * 0.05f;
+                if (wheelPitch > 360) {
+                    wheelPitch = 0;
                 }
             }
-        }
+
+            //Bind the texture and render the model
+            bindTexture(texture);
+
+            ModelRenderer boxRender;
+            for (Object box : model.boxList) {
+                if (box instanceof ModelRenderer) {
+                    boxRender = (ModelRenderer) box;
+                    if (boxRender.boxName != null) {
+                        if (boxRender.boxName.equals("wheel")) {
+                            boxRender.rotateAngleX = wheelPitch;
+                        } else if (boxRender.boxName.equals("wheelconnector")) {
+                            if (wheelConnectorPos == null) {
+                                wheelConnectorPos = new Vec2f(boxRender.rotationPointZ, boxRender.rotationPointY);
+                            }
+                            boxRender.rotationPointY = wheelConnectorPos.y - (entity.getPistonOffset() * MathHelper.cos(-wheelPitch * RailUtility.radianF));
+                            boxRender.rotationPointZ = wheelConnectorPos.x - (entity.getPistonOffset() * MathHelper.sin(-wheelPitch * RailUtility.radianF));
+                        }
+                    }
+                }
+            }
 
         if (model instanceof trains.models.tmt.ModelBase){
             ((trains.models.tmt.ModelBase) model).wheelRotation = wheelPitch;

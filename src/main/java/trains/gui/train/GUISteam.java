@@ -108,7 +108,7 @@ public class GUISteam extends GuiContainer {
 
         //draw the background
         drawColor(0,0);
-        drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20, 0, 0, 18, 50, 256);
+        drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20, 0, 0, 18, 50);
         if (train.getTank().canDrain(1,0)) {
             //draw the water tank
             drawColor(train.getType(),0);
@@ -130,15 +130,15 @@ public class GUISteam extends GuiContainer {
 
     }
 
-    public void drawTexturedModalRect(int posX, int posY, int posU, int posV, int width, int height, int textureScale) {
+    public void drawTexturedModalRect(int posX, int posY, int posU, int posV, int width, int height) {
         Tessellator tessellator = Tessellator.instance;
         tessellator.startDrawingQuads();
 
-        tessellator.addVertexWithUV(posX, posY + height, this.zLevel, posU * guiScaler, (posV + textureScale) * guiScaler);
+        tessellator.addVertexWithUV(posX, posY + height, this.zLevel, posU * guiScaler, (posV + 256) * guiScaler);
 
-        tessellator.addVertexWithUV(posX + width, posY + height, this.zLevel, (posU + textureScale) * guiScaler, (posV + textureScale) * guiScaler);
+        tessellator.addVertexWithUV(posX + width, posY + height, this.zLevel, (posU + 256) * guiScaler, (posV + 256) * guiScaler);
 
-        tessellator.addVertexWithUV(posX + width, posY, this.zLevel, (posU + textureScale) * guiScaler, posV * guiScaler);
+        tessellator.addVertexWithUV(posX + width, posY, this.zLevel, (posU + 256) * guiScaler, posV * guiScaler);
 
         tessellator.addVertexWithUV(posX, posY, this.zLevel, posU * guiScaler, posV * guiScaler);
         tessellator.draw();

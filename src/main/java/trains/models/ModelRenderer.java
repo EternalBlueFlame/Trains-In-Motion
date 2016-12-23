@@ -30,11 +30,17 @@ public class ModelRenderer extends ModelRendererTurbo {
     }
 
     @Override
-    public ModelRendererTurbo addBox(float p_78789_1_, float p_78789_2_, float p_78789_3_, int p_78789_4_, int p_78789_5_, int p_78789_6_) {
+    public ModelRendererTurbo addBox(float p_78789_1_, float p_78789_2_, float p_78789_3_, float p_78789_4_, float p_78789_5_, float p_78789_6_) {
         width = (-(p_78789_4_)*0.5f);
         height = (-(p_78789_5_ )*0.5f);
         depth = (-(p_78789_6_)*0.5f);
         super.addBox(width,height,depth,p_78789_4_,p_78789_5_,p_78789_6_);
+        return this;
+    }
+
+    @Override
+    public ModelRendererTurbo addBox(float p_78789_1_, float p_78789_2_, float p_78789_3_, int p_78789_4_, int p_78789_5_, int p_78789_6_) {
+        addBox(width,height,depth,(float) p_78789_4_,(float) p_78789_5_,(float) p_78789_6_);
         return this;
     }
 

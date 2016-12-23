@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
@@ -290,6 +291,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**
      * <h2>Inherited variables</h2>
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
+     * @see trains.entities.trains.FirstTrain for more information
      */
     public List<Float> getBogieOffsets(){return new ArrayList<Float>();}
     public int getType(){return 0;}
@@ -300,6 +302,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public String getName(){return "error";}
     public LiquidManager getTank(){return null;}
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
+    public ItemStack[] getCraftingRecipe(){return new ItemStack[]{null,null,null, null,null,null, null,null,null,};}
+    public float getPistonOffset(){return 0;}
+    public float[][] getSmokeOffset(){return new float[][]{{0}};}
 
     //TODO we need to define smoke vector that can be called from the render
 

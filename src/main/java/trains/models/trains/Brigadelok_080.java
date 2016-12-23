@@ -178,7 +178,7 @@ public class Brigadelok_080 extends ModelBase
 		//Elem119.rotateAngleY = -0F;
 		//Elem119.rotateAngleZ = -0F;
 		//WheelConnectorPiston_Right
-		Elem118 = new ModelRenderer(this, 0, 0);
+		Elem118 = new ModelRenderer(this, 0, 0, "wheelconnector");
 		Elem118.addBox(0F, 0F, 0F, 1, 1, 19);
 		Elem118.setRotationPoint(-7.5F, 22.5F, -5F);
 		Elem118.setTextureSize(64, 32);

@@ -125,7 +125,7 @@ public class ModelRendererTurbo extends ModelRenderer {
     	copyTo(verts, new TexturedPolygon[] {addPolygonReturn(verts, u1, v1, u2, v2)});
     }
     
-    private TexturedPolygon addPolygonReturn(PositionTextureVertex[] verts, int u1, int v1, int u2, int v2) {
+    private TexturedPolygon addPolygonReturn(PositionTextureVertex[] verts, float u1, float v1, float u2, float v2) {
     	if(verts.length < 3)
     		return null;
     	float uOffs = 1.0F / (textureWidth * 10.0F);
@@ -144,10 +144,10 @@ public class ModelRendererTurbo extends ModelRenderer {
     			yMax = Math.max(yMax, yPos);
     			yMin = (yMin < -1 ? yPos : Math.min(yMin, yPos));
     		}
-    		float uMin = (float) u1 / textureWidth + uOffs;
-    		float vMin = (float) v1 / textureHeight + vOffs;
-    		float uSize = (float) (u2 - u1) / textureWidth - uOffs * 2;
-    		float vSize = (float) (v2 - v1) / textureHeight - vOffs * 2;
+    		float uMin = u1 / textureWidth + uOffs;
+    		float vMin = v1 / textureHeight + vOffs;
+    		float uSize = (u2 - u1) / textureWidth - uOffs * 2;
+    		float vSize = (v2 - v1) / textureHeight - vOffs * 2;
     		
     		float xSize = xMax - xMin;
     		float ySize = yMax - yMin;
@@ -159,10 +159,10 @@ public class ModelRendererTurbo extends ModelRenderer {
     			verts[i] = verts[i].setTexturePosition(uMin + (xPos * uSize), vMin + (yPos * vSize));
     		}
     	} else {
-	    	verts[0] = verts[0].setTexturePosition((float)u2 / textureWidth - uOffs, (float)v1 / textureHeight + vOffs);
-	    	verts[1] = verts[1].setTexturePosition((float)u1 / textureWidth + uOffs, (float)v1 / textureHeight + vOffs);
-	    	verts[2] = verts[2].setTexturePosition((float)u1 / textureWidth + uOffs, (float)v2 / textureHeight - vOffs);
-	    	verts[3] = verts[3].setTexturePosition((float)u2 / textureWidth - uOffs, (float)v2 / textureHeight - vOffs);
+	    	verts[0] = verts[0].setTexturePosition(u2 / textureWidth - uOffs, v1 / textureHeight + vOffs);
+	    	verts[1] = verts[1].setTexturePosition(u1 / textureWidth + uOffs, v1 / textureHeight + vOffs);
+	    	verts[2] = verts[2].setTexturePosition(u1 / textureWidth + uOffs, v2 / textureHeight - vOffs);
+	    	verts[3] = verts[3].setTexturePosition(u2 / textureWidth - uOffs, v2 / textureHeight - vOffs);
     	}
     	return new TexturedPolygon(verts);
     }
@@ -182,7 +182,7 @@ public class ModelRendererTurbo extends ModelRenderer {
      * @param h the height of the shape, used in determining the texture
      * @param d the depth of the shape, used in determining the texture
      */
-    public void addRectShape(float[] v, float[] v1, float[] v2, float[] v3, float[] v4, float[] v5, float[] v6, float[] v7, int w, int h, int d) {
+    public void addRectShape(float[] v, float[] v1, float[] v2, float[] v3, float[] v4, float[] v5, float[] v6, float[] v7, float w, float h, float d) {
     	PositionTextureVertex[] verts = new PositionTextureVertex[8];
         TexturedPolygon[] poly = new TexturedPolygon[6];
         PositionTextureVertex positionTexturevertex = new PositionTextureVertex(v[0], v[1], v[2], 0.0F, 0.0F);
@@ -238,11 +238,26 @@ public class ModelRendererTurbo extends ModelRenderer {
      * @param h the height (over the y-direction)
      * @param d the depth (over the z-direction)
      */
-    public ModelRendererTurbo addBox(float x, float y, float z, int w, int h, int d) {
+    public ModelRendererTurbo addBox(float x, float y, float z, float w, float h, float d) {
         addBox(x, y, z, w, h, d, 0.0F);
         return this;
     }
-    
+
+    /**
+     * Adds a new box to the model.
+     * @param x the starting x-position
+     * @param y the starting y-position
+     * @param z the starting z-position
+     * @param w the width (over the x-direction)
+     * @param h the height (over the y-direction)
+     * @param d the depth (over the z-direction)
+     */
+    public ModelRendererTurbo addBox(float x, float y, float z, int w, int h, int d) {
+        addBox(x, y, z, (float) w, (float) h, (float) d, 0.0F);
+        return this;
+    }
+
+
     /**
      * Adds a new box to the model.
      * @param x the starting x-position
@@ -253,7 +268,7 @@ public class ModelRendererTurbo extends ModelRenderer {
      * @param d the depth (over the z-direction)
      * @param expansion the expansion of the box. It increases the size in each direction by that many.
      */
-    public void addBox(float x, float y, float z, int w, int h, int d, float expansion) {
+    public void addBox(float x, float y, float z, float w, float h, float d, float expansion) {
     	addBox(x, y, z, w, h, d, expansion, 1F);
     }
     
@@ -268,18 +283,18 @@ public class ModelRendererTurbo extends ModelRenderer {
      * @param expansion the expansion of the box. It increases the size in each direction by that many. It's independent from the scale.
      * @param scale
      */
-    public void addBox(float x, float y, float z, int w, int h, int d, float expansion, float scale) {
-        float scaleX = (float)w * scale;
-        float scaleY = (float)h * scale;
-        float scaleZ = (float)d * scale;
+    public void addBox(float x, float y, float z, float w, float h, float d, float expansion, float scale) {
+        float scaleX = w * scale;
+        float scaleY = h * scale;
+        float scaleZ = d * scale;
         
         float x1 = x + scaleX;
         float y1 = y + scaleY;
         float z1 = z + scaleZ;
         
-        float expX = expansion + scaleX - (float)w;
-        float expY = expansion + scaleY - (float)h;
-        float expZ = expansion + scaleZ - (float)d;
+        float expX = expansion + scaleX - w;
+        float expY = expansion + scaleY - h;
+        float expZ = expansion + scaleZ - d;
         
         x -= expX;
         y -= expY;
