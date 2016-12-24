@@ -6,6 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 
@@ -36,19 +37,19 @@ public class InventoryHandler implements IInventory{
     public int getSizeInventory() {
         if (host instanceof EntityTrainCore) {
             int size =1;
-            if (host.getType()==1 || host.getType()==5){
+            if (host.getType()== TrainsInMotion.transportTypes.STEAM || host.getType()== TrainsInMotion.transportTypes.NUCLEAR_STEAM){
                 size=2;
             }
             switch (host.getInventorySize()){
-                case 1:{return 4+size;}
-                case 2:{return 6+size;}
-                case 3:{return 9+size;}
-                case 4:{return 12+size;}
-                case 5:{return 16+size;}
+                case TWOxTWO:{return 4+size;}
+                case THREExTWO:{return 6+size;}
+                case THREExTHREE:{return 9+size;}
+                case FOURxTHREE:{return 12+size;}
+                case FOURxFOUR:{return 16+size;}
             }
 
         }
-        return host.getInventorySize();
+        return 0;
     }
 
     /**
@@ -173,7 +174,7 @@ public class InventoryHandler implements IInventory{
     public void addItem(ItemStack item){
         for (int i=1; i<getSizeInventory();i++){
             if (i==1){
-                if (host.getType() ==1 || host.getType() ==5){
+                if (host.getType() == TrainsInMotion.transportTypes.STEAM || host.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM){
                     i++;
                 }
             }

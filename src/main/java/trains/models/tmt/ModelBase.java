@@ -5,8 +5,6 @@ public class ModelBase extends net.minecraft.client.model.ModelBase {
 
 	public ModelRendererTurbo base[] = new ModelRendererTurbo[0];
 
-	public float wheelRotation =0;
-
 	public void render(){
 		render(base);
 	}

@@ -56,6 +56,15 @@ public class TrainsInMotion {
     //Instance the event handler, This is used for event based functionality, things like when you right-click an entity.
     public static EventHandler eventHandler = new EventHandler();
 
+
+    //enums
+    public enum transportTypes {
+        STEAM,DIESEL,HYDROGEN_DIESEL,ELECTRIC,NUCLEAR_STEAM,NUCLEAR_ELECTRIC,MAGLEV
+    }
+    public enum inventorySizes{
+        TWOxTWO, THREExTWO, THREExTHREE, FOURxTHREE, FOURxFOUR, FIVExFOUR, FIVExFIVE, SIXxFIVE, NINExTHREE, NINExSIX
+    }
+
     /**
      * <h2>load config</h2>
      * we use the pre-init to load the config file.

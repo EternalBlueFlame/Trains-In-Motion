@@ -16,6 +16,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import trains.TrainsInMotion;
 import trains.models.tmt.Vec3d;
 import trains.utility.*;
 
@@ -294,11 +295,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * @see trains.entities.trains.FirstTrain for more information
      */
     public List<Float> getBogieOffsets(){return new ArrayList<Float>();}
-    public int getType(){return 0;}
+    public TrainsInMotion.transportTypes getType(){return null;}
     public float[] getRiderOffset(){return new float[]{0,0};}
     public float[] getHitboxPositions(){return new float[]{-1,0,1};}
     public Item getItem(){return null;}
-    public int getInventorySize(){return 3;}
+    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.THREExTHREE;}
     public String getName(){return "error";}
     public LiquidManager getTank(){return null;}
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}

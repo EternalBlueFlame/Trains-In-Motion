@@ -5,6 +5,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 
 
@@ -35,15 +36,15 @@ public class SteamInventoryHandler extends Container{
         int columns=0;
         int rows=0;
         int slot=1;
-        if (entityTrain.getType() ==1 || entityTrain.getType() ==5){
+        if (entityTrain.getType() == TrainsInMotion.transportTypes.STEAM || entityTrain.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM){
             slot=2;
         }
         switch (entityTrain.getInventorySize()){
-            case 1:{columns=2;rows=2;break;}
-            case 2:{columns=2;rows=3;break;}
-            case 3:{columns=3;rows=3;break;}
-            case 4:{columns=3;rows=4;break;}
-            case 5:{columns=4;rows=4;break;}
+            case TWOxTWO:{columns=2;rows=2;break;}
+            case THREExTWO:{columns=2;rows=3;break;}
+            case THREExTHREE:{columns=3;rows=3;break;}
+            case FOURxTHREE:{columns=3;rows=4;break;}
+            case FOURxFOUR:{columns=4;rows=4;break;}
         }
         //train crafting slots
 

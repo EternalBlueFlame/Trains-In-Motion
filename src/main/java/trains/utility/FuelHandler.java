@@ -29,7 +29,7 @@ public class FuelHandler implements IFuelHandler{
 
 	public static boolean isFuel(ItemStack item, GenericRailTransport transport){
 		switch (transport.getType()){
-			case 1: {return item != null && TileEntityFurnace.getItemBurnTime(item) !=0;}
+			case STEAM: {return item != null && TileEntityFurnace.getItemBurnTime(item) !=0;}
 
 		}
 		return false;
@@ -37,7 +37,7 @@ public class FuelHandler implements IFuelHandler{
 
 	public static boolean isWater(ItemStack item, GenericRailTransport transport){
 		switch (transport.getType()){
-			case 1: {return item != null && item.getItem() == Items.water_bucket;}
+			case STEAM: {return item != null && item.getItem() == Items.water_bucket;}
 
 		}
 		return false;
@@ -67,7 +67,7 @@ public class FuelHandler implements IFuelHandler{
 			 * TileEntityFurnace.getItemBurnTime will tell us how much fuel the item gives, assuming it is a valid fuel item
 			 * After manage actual fuel consumption.
 			 */
-			case 1: {
+			case STEAM: {
 				if (isFuel(cart.inventory.getStackInSlot(0), cart) && cart.furnaceFuel + TileEntityFurnace.getItemBurnTime(cart.inventory.getStackInSlot(0)) < cart.getMaxFuel()) {
 					//if the first inventory slot contains a burnable listed in our supported burnables, then remove it and add it's value to our fuel.
 					cart.furnaceFuel += TileEntityFurnace.getItemBurnTime(cart.inventory.getStackInSlot(0));
@@ -104,7 +104,7 @@ public class FuelHandler implements IFuelHandler{
 			 *
 			 *
 			 */
-			case 2: {
+			case DIESEL: {
 				break;
 			}
 			/**
@@ -112,7 +112,7 @@ public class FuelHandler implements IFuelHandler{
 			 *
 			 *
 			 */
-			case 3: {
+			case HYDROGEN_DIESEL: {
 				break;
 			}
 			/**
@@ -120,7 +120,7 @@ public class FuelHandler implements IFuelHandler{
 			 *
 			 *
 			 */
-			case 4: {
+			case ELECTRIC: {
 				break;
 			}
 			/**
@@ -128,7 +128,7 @@ public class FuelHandler implements IFuelHandler{
 			 *
 			 *
 			 */
-			case 5: {
+			case NUCLEAR_STEAM: {
 				break;
 			}
 			/**
@@ -138,7 +138,7 @@ public class FuelHandler implements IFuelHandler{
 			 *
 			 *
 			 */
-			case 6: {
+			case NUCLEAR_ELECTRIC: {
 				break;
 			}
 			/**
@@ -148,7 +148,7 @@ public class FuelHandler implements IFuelHandler{
 			 *
 			 *
 			 */
-			case 7: {
+			case MAGLEV: {
 				break;
 			}
 			default:{break;}

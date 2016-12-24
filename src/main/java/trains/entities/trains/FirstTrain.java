@@ -7,6 +7,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
+import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.items.trains.ItemFirstTrain;
 import trains.models.tmt.Vec3d;
@@ -76,28 +77,16 @@ public class FirstTrain extends EntityTrainCore {
     public List<Float> getBogieOffsets(){return  Arrays.asList(-0.75f, 0.75f);}
     /**
      * <h2>Inventory Size</h2>
-     * @return the size of the inventory not counting any crafting/fuel slots. The available values are:
-     *              1: 2x2
-     *              2: 2x2
-     *              3: 3x3
-     *              4: 4x3
-     *              5: 4x4
+     * @return the size of the inventory not counting any crafting/fuel slots.
      */
     @Override
-    public int getInventorySize(){return 3;}
+    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.THREExTHREE;}
     /**
      * <h2>Train Type</h2>
-     * @return the type of train, defines a number of things like fuel management, GUI style, and animations. The values are:
-     *             1: steam
-     *             2: diesel
-     *             3: hydrogen diesel
-     *             4: electric
-     *             5: nuclear steam
-     *             6: nuclear electric
-     *             7: maglev
+     * @return the type of train, defines a number of things like fuel management, GUI style, and animations.
      */
     @Override
-    public int getType(){return 1;}
+    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.STEAM;}
     /**
      * <h2>Max Fuel</h2>
      * @return the max fuel the train can store.

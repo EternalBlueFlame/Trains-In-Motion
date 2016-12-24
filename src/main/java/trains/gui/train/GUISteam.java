@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
+import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.gui.trainhandler.SteamInventoryHandler;
 import trains.registry.URIRegistry;
@@ -91,11 +92,11 @@ public class GUISteam extends GuiContainer {
         int columns=0;
         int rows=0;
         switch (train.getInventorySize()){
-            case 1:{columns=2;rows=2;break;}
-            case 2:{columns=2;rows=3;break;}
-            case 3:{columns=3;rows=3;break;}
-            case 4:{columns=3;rows=4;break;}
-            case 5:{columns=4;rows=4;break;}
+            case TWOxTWO:{columns=2;rows=2;break;}
+            case THREExTWO:{columns=2;rows=3;break;}
+            case THREExTHREE:{columns=3;rows=3;break;}
+            case FOURxTHREE:{columns=3;rows=4;break;}
+            case FOURxFOUR:{columns=4;rows=4;break;}
         }
         //train's inventory
         for (int ic = 0; ic < rows; ic++) {
@@ -107,7 +108,7 @@ public class GUISteam extends GuiContainer {
 
 
         //draw the background
-        drawColor(0,0);
+        drawColor(null,0);
         drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20, 0, 0, 18, 50);
         if (train.getTank().canDrain(1,0)) {
             //draw the water tank
@@ -116,9 +117,9 @@ public class GUISteam extends GuiContainer {
             drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20 - liquid, 177, 64 - liquid, 18, liquid);
         }
 
-        if (train.getType() == 1 || train.getType() == 5) {
+        if (train.getType() == TrainsInMotion.transportTypes.STEAM || train.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
             //draw the background
-            drawColor(0,0);
+            drawColor(null,0);
             drawTexturedModalRect(interfaceWidth + 34, interfaceHeight+20, 30, 30, 18, 24);
             if (train.getTank().canDrain(1, 1)) {
                 //draw the steam tank
@@ -145,13 +146,13 @@ public class GUISteam extends GuiContainer {
     }
 
 
-    private void drawColor(int trainType, int tank){
+    private void drawColor(TrainsInMotion.transportTypes trainType, int tank){
         switch (trainType){
-            case 0:{
+            default:{
                 mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("tank_empty.png"));
                 break;
             }
-            case 1:{
+            case STEAM:{
                 if (tank==0){
                     mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("tank_water.png"));
                 } else {

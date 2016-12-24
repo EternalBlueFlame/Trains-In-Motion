@@ -46,7 +46,6 @@ public class TrainRegistry {
         this.smoke = smoke;
     }
 
-
     /**
      * <h2>Train register function</h2>
      * called by the main class to register the trains and rollingstock
