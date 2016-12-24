@@ -1,6 +1,7 @@
 package trains.models;
 
 import com.sun.javafx.geom.Vec2f;
+import com.sun.javafx.geom.Vec3f;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
@@ -26,6 +27,9 @@ public class RenderEntity extends Render {
     private ResourceLocation texture;
     private ResourceLocation bogieTexture;
     private Vec2f wheelConnectorPos = null;
+    private Vec3f pistonValveConnectorPos = null;
+    private Vec2f upperPistonPos = null;
+    private Vec2f pistonArmPos = null;
     /*
      * hitboxBase is used for the bottom and top, side is used for the two long sides
      * hitboxFront is used for front and back
@@ -105,22 +109,9 @@ public class RenderEntity extends Render {
 
             //Bind the texture and render the model
             bindTexture(texture);
-
-            ModelRenderer boxRender;
             for (Object box : model.boxList) {
                 if (box instanceof ModelRenderer) {
-                    boxRender = (ModelRenderer) box;
-                    if (boxRender.boxName != null) {
-                        if (boxRender.boxName.equals("wheel")) {
-                            boxRender.rotateAngleX = wheelPitch;
-                        } else if (boxRender.boxName.equals("wheelconnector")) {
-                            if (wheelConnectorPos == null) {
-                                wheelConnectorPos = new Vec2f(boxRender.rotationPointZ, boxRender.rotationPointY);
-                            }
-                            boxRender.rotationPointY = wheelConnectorPos.y - (entity.getPistonOffset() * MathHelper.cos(-wheelPitch * RailUtility.radianF));
-                            boxRender.rotationPointZ = wheelConnectorPos.x - (entity.getPistonOffset() * MathHelper.sin(-wheelPitch * RailUtility.radianF));
-                        }
-                    }
+                    animateTrain((ModelRenderer) box, entity);
                 }
             }
 
@@ -167,6 +158,58 @@ public class RenderEntity extends Render {
             //TODO
         }
 
+
+
+
+
+    }
+
+
+    
+    //TODO push positions to arrays and define animation by type, for example "wheelconnector", "upperpiston" and "upperpistonarm" can use the same kind of animation. Will need to figure out some way to determine the proper index
+
+    private void animateTrain(ModelRenderer boxRender, GenericRailTransport entity){
+        if (boxRender.boxName != null) {
+            Vec2f rotationvec = new Vec2f((entity.getPistonOffset() * MathHelper.sin(-wheelPitch * RailUtility.radianF)), (entity.getPistonOffset() * MathHelper.cos(-wheelPitch * RailUtility.radianF)));
+
+            if (boxRender.boxName.equals("wheel")) {
+                boxRender.rotateAngleX = wheelPitch;
+            }
+            else if (boxRender.boxName.equals("wheelconnector")) {
+                if (wheelConnectorPos == null) {
+                    wheelConnectorPos = new Vec2f(boxRender.rotationPointZ, boxRender.rotationPointY);
+                }
+                boxRender.rotationPointY = wheelConnectorPos.y - rotationvec.y;
+                boxRender.rotationPointZ = wheelConnectorPos.x - rotationvec.x;
+            }
+
+
+            else if (boxRender.boxName.equals("pistonvalveconnector")) {
+                if (pistonValveConnectorPos == null) {
+                    pistonValveConnectorPos = new Vec3f(boxRender.rotationPointZ, boxRender.rotationPointY, boxRender.rotateAngleX);
+                }
+                boxRender.rotationPointY = pistonValveConnectorPos.y - (rotationvec.y*0.5f);
+                boxRender.rotationPointZ = pistonValveConnectorPos.x - rotationvec.x;
+                boxRender.rotateAngleX = pistonValveConnectorPos.z - (rotationvec.y * 0.05f);
+            }
+
+            else if (boxRender.boxName.equals("upperpiston")) {
+                if (upperPistonPos == null) {
+                    upperPistonPos = new Vec2f(boxRender.rotationPointZ, boxRender.rotationPointY);
+                }
+                boxRender.rotationPointY = upperPistonPos.y - rotationvec.y;
+                boxRender.rotationPointZ = upperPistonPos.x - rotationvec.x;
+            }
+
+
+            else if (boxRender.boxName.equals("upperpistonarm")) {
+                if (pistonArmPos == null) {
+                    pistonArmPos = new Vec2f(boxRender.rotationPointZ, boxRender.rotationPointY);
+                }
+                boxRender.rotationPointZ = pistonArmPos.x - rotationvec.x;
+                boxRender.rotationPointY = pistonArmPos.y - rotationvec.y;
+            }
+        }
     }
 
 }

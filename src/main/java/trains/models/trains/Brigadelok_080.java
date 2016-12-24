@@ -142,8 +142,8 @@ public class Brigadelok_080 extends ModelBase
 		textureHeight = 32;
 
 		//Upper_Piston_r_Right
-		Elem122 = new ModelRenderer(this, 0, 0);
-		Elem122.addBox(0F, 0F, 0F, 1, 3, 1);
+		Elem122 = new ModelRenderer(this, 0, 0, "upperpistonarm");
+		Elem122.addBox(0F, 0F, 0F, 1, 2.5F, 1);
 		Elem122.setRotationPoint(-8.5F, 19.5F, 8.5F);
 		Elem122.setTextureSize(64, 32);
 		setRotation(Elem122, -0F, -0F, -0F);
@@ -151,11 +151,11 @@ public class Brigadelok_080 extends ModelBase
 		//Elem122.rotateAngleY = -0F;
 		//Elem122.rotateAngleZ = -0F;
 		//Upper_Piston_Right
-		Elem121 = new ModelRenderer(this, 0, 0);
-		Elem121.addBox(0F, 0F, 0F, 1, 1, 8);
-		Elem121.setRotationPoint(-8.5F, 20.5F, 1F);
+		Elem121 = new ModelRenderer(this, 0, 0, "upperpiston");
+		Elem121.addBox(0F, 0F, 0F, 1, 1, 8F);
+		Elem121.setRotationPoint(-8.5F, 21F, 1F);
 		Elem121.setTextureSize(64, 32);
-		setRotation(Elem121, -0F, -0F, -0F);
+		setRotation(Elem121, -24.9F, -0F, -0F);
 		//Elem121.rotateAngleX = -0F;
 		//Elem121.rotateAngleY = -0F;
 		//Elem121.rotateAngleZ = -0F;
@@ -169,18 +169,18 @@ public class Brigadelok_080 extends ModelBase
 		//Elem120.rotateAngleY = -0F;
 		//Elem120.rotateAngleZ = -0F;
 		//PistonValveConnector_Right
-		Elem119 = new ModelRenderer(this, 0, 0);
+		Elem119 = new ModelRenderer(this, 0, 0, "pistonvalveconnector");
 		Elem119.addBox(0F, 0F, 0F, 1, 1, 18);
 		Elem119.setRotationPoint(-8F, 22F, 1F);
 		Elem119.setTextureSize(64, 32);
-		setRotation(Elem119, -0F, -0F, -0F);
+		setRotation(Elem119, 0.02F, -0F, -0F);
 		//Elem119.rotateAngleX = -0F;
 		//Elem119.rotateAngleY = -0F;
 		//Elem119.rotateAngleZ = -0F;
 		//WheelConnectorPiston_Right
 		Elem118 = new ModelRenderer(this, 0, 0, "wheelconnector");
 		Elem118.addBox(0F, 0F, 0F, 1, 1, 19);
-		Elem118.setRotationPoint(-7.5F, 22.5F, -5F);
+		Elem118.setRotationPoint(-7.5F, 22F, -5F);
 		Elem118.setTextureSize(64, 32);
 		setRotation(Elem118, -0F, -0F, -0F);
 		//Elem118.rotateAngleX = -0F;
