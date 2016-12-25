@@ -14,46 +14,32 @@ import static trains.utility.RailUtility.rotatePoint;
 
 /**
  * <h2> Train core</h2>
- * this is the management core for all train
+ * this is the management core for all trains.
  */
 public class EntityTrainCore extends GenericRailTransport {
 
     /**
-     * <h3>use variables</h3>
-     * switch variables, mostly used to maintain things.
+     * <h3>variables</h3>
+     * Brake defines if the handbrake is on.
+     * isRunning is used for non-steam based trains to define if it's actually on.
+     * furnace fuel keeps track of how much burnable fuel is in steam trains.
+     * accelerator defines the speed percentage the user is attempting to apply.
+     * destination is used for routing, railcraft and otherwise.
+     * lastly the inventory defines the item storage of the train.
      */
-    public boolean brake = false; //bool for the train/rollingstock's break.
-    public boolean isRunning = false;// if the train is running/using fuel
-    public int furnaceFuel = 0; //the amount of fuel in the furnace, only used for steam and nuclear trains
-
-
-    /**
-     * <h3>movement and bogies</h3>
-     * variables to store bogies, motion, collision, and other movement related things.
-     */
-    public int accelerator =0; //defines the value of how much to speed up, or brake the
-
-
-    /**
-     * <h3>long-term stored variables</h3>
-     * these variables usually don't change often, or maybe even ever.
-     */
+    public boolean brake = false;
+    public boolean isRunning = false;
+    public int furnaceFuel = 0;
+    public int accelerator =0;
     public String destination ="";
-
-    /**
-     * <h3>inventory</h3>
-     * variables for the inventory.
-     */
-    public InventoryHandler inventory = new InventoryHandler(this); //Inventory, every train will have this to some extent or another, //the first two slots are for crafting
+    public InventoryHandler inventory = new InventoryHandler(this);
 
 
 
     /**
-    *
-    *
     * <h2> Base train Constructor</h2>
     *
-    * default constructor for all trains, server side only.
+    * default constructor for all trains, the first one is server only, the second is client only.
     *
     * @param owner the owner profile, used to define owner of the entity,
     * @param world the world to spawn the entity in, used in super's super.
@@ -61,7 +47,6 @@ public class EntityTrainCore extends GenericRailTransport {
     * @param yPos the y position to spawn entity at, used in super's super.
     * @param zPos the z position to spawn entity at, used in super's super.
     */
-
     public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos){
         super(world);
         posY = yPos;
@@ -78,7 +63,7 @@ public class EntityTrainCore extends GenericRailTransport {
         this.boundingBox.maxY = 0;
         this.boundingBox.maxZ = 0;
     }
-    //this constructor is lower level spawning
+    //this constructor is for client side spawning
     public EntityTrainCore(World world){
         super(world);
     }
@@ -93,6 +78,7 @@ public class EntityTrainCore extends GenericRailTransport {
         super.readEntityFromNBT(tag);
         isRunning = tag.getBoolean("isrunning");
         brake = tag.getBoolean("extended.brake");
+        furnaceFuel = tag.getInteger("fuel");
 
         inventory.readNBT(tag, "items");
         getTank().readFromNBT(tag);
@@ -102,6 +88,7 @@ public class EntityTrainCore extends GenericRailTransport {
         super.writeEntityToNBT(tag);
         tag.setBoolean("isrunning",isRunning);
         tag.setBoolean("extended.brake", brake);
+        tag.setInteger("fuel", furnaceFuel);
 
         tag.setTag("items", inventory.writeNBT());
         getTank().writeToNBT(tag);
@@ -110,16 +97,18 @@ public class EntityTrainCore extends GenericRailTransport {
 
     /**
      * <h2> process train movement</h2>
-     * called by the super class to figure out the amount of movement to apply every tick
-     * @see GenericRailTransport#onUpdate()
+     * called by onUpdate to figure out the amount of movement to apply every tick
+     * @see #onUpdate()
+     *
+     * currently this is only intended to provide a rather static amount.
      */
-    public float processMovement(double X){
+    private float processMovement(double X){
 
         float speed = (float) X * 0.9f;
 
         if (accelerator!=0) {
             //if (speed != 0) {
-                speed *= (accelerator / 6f) * getAcceleration();
+                speed *= 1+((accelerator / 6f) * getAcceleration());
             //} else {
             //    speed = (0.1666666667f) * getAcceleration();
             //}
@@ -133,10 +122,10 @@ public class EntityTrainCore extends GenericRailTransport {
 
     /**
      * <h2> on entity update</h2>
-     * after the super method is dealt with,
+     * first we have to manage our speed by updating our motion vector and applying it to the bogies.
+     * after that we let the super handle things.
      * @see GenericRailTransport#onUpdate()
-     * every 5 ticks we also need to deal with the fuel.
-     * @see FuelHandler#ManageFuel(EntityTrainCore)
+     * lastly we use a tick check to define if we should manage fuel, since we shouldn't be doing that every tick.
      */
     @Override
     public void onUpdate() {
@@ -149,7 +138,6 @@ public class EntityTrainCore extends GenericRailTransport {
                     motion[0] = processMovement(currentBogie.motionX);
                     motion[2] = processMovement(currentBogie.motionZ);
                     motion[1] = currentBogie.motionY;
-                    motion = RailUtility.rotatePoint(new double[]{0.01,0,0},0, rotationYaw,0);
                     currentBogie.setVelocity(motion[0], 0, motion[2]);
                     currentBogie.minecartMove();
                 } else {

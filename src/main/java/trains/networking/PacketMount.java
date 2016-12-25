@@ -10,7 +10,10 @@ import trains.utility.EventHandler;
 public class PacketMount implements IMessage {
     private int entityId;
     /**
-     * <h2>Packet for keybinds beyond inventory</h2>
+     * <h2>Packet for mounting the entity</h2>
+     * This is necessary because when interacting with the hitboxes they are client side only,
+     * so you have to make the train make the player mount the train from server through a packet.
+     *
      * when a entityId is pressed in
      * @see EventHandler#onClientKeyPress(InputEvent.KeyInputEvent)
      * it's processed by client to sent the defined action to server.

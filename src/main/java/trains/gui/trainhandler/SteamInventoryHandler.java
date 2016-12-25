@@ -33,18 +33,9 @@ public class SteamInventoryHandler extends Container{
         }
 
         //define the train's inventory size
-        int columns=0;
-        int rows=0;
         int slot=1;
         if (entityTrain.getType() == TrainsInMotion.transportTypes.STEAM || entityTrain.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM){
             slot=2;
-        }
-        switch (entityTrain.getInventorySize()){
-            case TWOxTWO:{columns=2;rows=2;break;}
-            case THREExTWO:{columns=2;rows=3;break;}
-            case THREExTHREE:{columns=3;rows=3;break;}
-            case FOURxTHREE:{columns=3;rows=4;break;}
-            case FOURxFOUR:{columns=4;rows=4;break;}
         }
         //train crafting slots
 
@@ -56,8 +47,8 @@ public class SteamInventoryHandler extends Container{
         }
 
         //train inventory
-        for (int ia = 0; ia < rows; ia++) {
-            for (int ib = 0; ib < columns; ib++) {
+        for (int ia = 0; ia < entityTrain.getInventorySize().getRow(); ia++) {
+            for (int ib = 0; ib < entityTrain.getInventorySize().getCollumn(); ib++) {
                 addSlotToContainer(new Slot(trainEntity.inventory, slot, 98 + (ib * 18), 8 + (ia * 18)));
                 slot++;
             }
@@ -67,7 +58,12 @@ public class SteamInventoryHandler extends Container{
 
     }
 
-    //for sorting items from inventory to the train inventory, or the reverse way.
+    /**
+     * <h2>Inventory sorting and shift-clicking</h2>
+     * sorts items from the players inventory to the train's inventory, and the reverse.
+     * This happens with shift click and during some other circumstances.
+     * We manage player inventory first because we bound it first, plus it's more reliable to be the size we expected.
+     */
     @Override
     public ItemStack transferStackInSlot(EntityPlayer player, int slot) {
         Slot stack = (Slot)this.inventorySlots.get(slot);
@@ -98,7 +94,10 @@ public class SteamInventoryHandler extends Container{
         return returnStack;
     }
 
-    //if inventory can be accessed/modified.
+    /**
+     * <h2>can interact with inventory</h2>
+     * just a simple return true/false if the train is dead, or if the owner locked the train and the player trying to access isn't the owner.
+     */
     @Override
     public boolean canInteractWith(EntityPlayer player) {
         if (trainEntity.isDead) {

@@ -31,7 +31,7 @@ public class FirstTrain extends EntityTrainCore {
      * @see TrainRegistry#listTrains()
      *
      * The fluid tank has 2 values, one for water/RF/fuel/uranium and another for steam.
-     * horn and running are refrences to the sound files for the train horn and running sounds.
+     * SOUND_HORN and SOUND_RUNNING are refrences to the sound files for the train horn and running sounds.
      * thisItem is the item for this train that will get registered.
      */
     private LiquidManager tank = new LiquidManager(new int[]{10000, 10000}, new Fluid[]{FluidRegistry.WATER},true);

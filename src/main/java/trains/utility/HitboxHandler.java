@@ -95,6 +95,7 @@ public class HitboxHandler {
         }
 
 
+        //detect collisions with blocks.
         for (multipartHitbox box : train.hitboxList){
             int i = MathHelper.floor_double(box.boundingBox.minX);
             int j = MathHelper.floor_double(box.boundingBox.minY);
@@ -117,6 +118,7 @@ public class HitboxHandler {
             }
 
 
+            //detect collisions with entities.
             List list = train.worldObj.getEntitiesWithinAABBExcludingEntity(train, box.boundingBox);
             if (list != null && !list.isEmpty()) {
                 for (Object entity: list) {

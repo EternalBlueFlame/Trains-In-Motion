@@ -4,8 +4,6 @@ package trains.utility;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.entity.Render;
@@ -17,14 +15,12 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
-import trains.blocks.LampBlock;
 import trains.entities.EntityBogie;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
-import trains.gui.train.GUISteam;
+import trains.gui.train.GUITrain;
 import trains.models.RenderEntity;
 import trains.registry.TrainRegistry;
-import trains.registry.URIRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +57,7 @@ public class ClientProxy extends CommonProxy {
         if (player != null && player.ridingEntity instanceof EntityTrainCore) {
             switch (ID) {
                 case TrainsInMotion.STEAM_GUI_ID: {
-                    return new GUISteam(player.inventory, (EntityTrainCore) player.ridingEntity);
+                    return new GUITrain(player.inventory, (EntityTrainCore) player.ridingEntity);
                 }
 
                 default: {return null;}

@@ -2,6 +2,11 @@ package trains.models.tmt;
 
 import net.minecraft.util.Vec3;
 
+/**
+ * <h1>Vector 3d</h1>
+ * this is intended to replicate the Vec3d from minecraft 1.8+
+ * mostly it just makes handling vector 3's simpler.
+ */
 public class Vec3d extends Vec3 {
 
     public Vec3d(double x, double y, double z){

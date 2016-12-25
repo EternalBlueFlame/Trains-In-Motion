@@ -20,14 +20,13 @@ import trains.blocks.Oil;
 import trains.items.Bucket;
 
 /**
- * <h2>Block registry</h2>
- * this class lists all the blocks provided by this mod.
- * If you need a reference to one of those blocks you have to call it from this class.
+ * <h2>Generic registry</h2>
+ * this class lists all the blocks, fluids, and non-train/rollingstock items provided by this mod.
+ * If you need a reference to one of those you have to call it from this class.
  */
 
 public class GenericRegistry {
     //initialize the oil
-    public static final Material Mat_Oil = new MaterialLiquid(MapColor.blackColor);
     public static final Fluid fluidOil = new Oil("Oil").setUnlocalizedName("Oil");
     public static BlockFluidClassic blockFluidOil;
     public static final Item bucketOil = new Bucket(GenericRegistry.blockFluidOil).setUnlocalizedName("OilBucket").setContainerItem(Items.bucket);
@@ -48,7 +47,7 @@ public class GenericRegistry {
          */
         //register oil
         FluidRegistry.registerFluid(fluidOil);
-        blockFluidOil = new BlockFluidClassic(fluidOil, Mat_Oil);
+        blockFluidOil = new BlockFluidClassic(fluidOil, new MaterialLiquid(MapColor.blackColor));
         GameRegistry.registerBlock(blockFluidOil, "OilBlock");
 
         /**

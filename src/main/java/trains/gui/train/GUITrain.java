@@ -10,7 +10,7 @@ import trains.entities.EntityTrainCore;
 import trains.gui.trainhandler.SteamInventoryHandler;
 import trains.registry.URIRegistry;
 
-public class GUISteam extends GuiContainer {
+public class GUITrain extends GuiContainer {
     private EntityTrainCore train;
     private static final float guiScaler = 0.00390625F;
 
@@ -20,7 +20,7 @@ public class GUISteam extends GuiContainer {
      * also puts the entity to a variable that can be accessed on client.
      * @see SteamInventoryHandler
      */
-    public GUISteam(InventoryPlayer inventoryPlayer, EntityTrainCore entity) {
+    public GUITrain(InventoryPlayer inventoryPlayer, EntityTrainCore entity) {
         super(new SteamInventoryHandler(inventoryPlayer, entity));
         train = entity;
     }
@@ -55,10 +55,11 @@ public class GUISteam extends GuiContainer {
         //draw the gui background color
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
+        //define the width and height of the screen.
         int interfaceWidth = (width - xSize) / 2;
         int interfaceHeight = (height - ySize) / 2;
 
-        //main background
+        //main background TODO disabled until we actually have an image for it.
         //mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("guilocobackground.png"));
         //drawTexturedModalRect((width - xSize) / 2, (height - ySize) / 2, 0, 0, xSize, ySize);
 
@@ -74,10 +75,8 @@ public class GUISteam extends GuiContainer {
 
         //slot for fuel
         drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 52, 0, 0, 18, 18);
-
         //slot for water
         drawTexturedModalRect(interfaceWidth + 34, interfaceHeight + 52, 0, 0, 18, 18);
-
         //player inventory slots
         for (int ic = 0; ic < 9; ic++) {
             for (int ir = 0; ir < 3; ir++) {
@@ -89,18 +88,9 @@ public class GUISteam extends GuiContainer {
             drawTexturedModalRect(interfaceWidth + 7 + (iT * 18), interfaceHeight + 141, 0, 0, 18, 18);
         }
 
-        int columns=0;
-        int rows=0;
-        switch (train.getInventorySize()){
-            case TWOxTWO:{columns=2;rows=2;break;}
-            case THREExTWO:{columns=2;rows=3;break;}
-            case THREExTHREE:{columns=3;rows=3;break;}
-            case FOURxTHREE:{columns=3;rows=4;break;}
-            case FOURxFOUR:{columns=4;rows=4;break;}
-        }
-        //train's inventory
-        for (int ic = 0; ic < rows; ic++) {
-            for (int ir = 0; ir < columns; ir++) {
+        //train inventory
+        for (int ic = 0; ic < train.getInventorySize().getRow(); ic++) {
+            for (int ir = 0; ir < train.getInventorySize().getCollumn(); ir++) {
                 drawTexturedModalRect( interfaceWidth + 97 + (ic * 18), interfaceHeight + 7 + (ir * 18), 0, 0, 18, 18);
             }
         }
@@ -131,21 +121,32 @@ public class GUISteam extends GuiContainer {
 
     }
 
+    /**
+     * <h2>Draw Texture</h2>
+     * This replaces the base class and allows us to draw textures that are stretched to the shape defined in a more efficient manner.
+     * @param posX the X position on screen to draw at.
+     * @param posY the Y position on screen to draw at.
+     * @param posU the X position of the texture to start from.
+     * @param posV the Y position of the texture to start from.
+     * @param width the width of the box.
+     * @param height the height of the box.
+     */
+    @Override
     public void drawTexturedModalRect(int posX, int posY, int posU, int posV, int width, int height) {
         Tessellator tessellator = Tessellator.instance;
         tessellator.startDrawingQuads();
-
         tessellator.addVertexWithUV(posX, posY + height, this.zLevel, posU * guiScaler, (posV + 256) * guiScaler);
-
         tessellator.addVertexWithUV(posX + width, posY + height, this.zLevel, (posU + 256) * guiScaler, (posV + 256) * guiScaler);
-
         tessellator.addVertexWithUV(posX + width, posY, this.zLevel, (posU + 256) * guiScaler, posV * guiScaler);
-
         tessellator.addVertexWithUV(posX, posY, this.zLevel, posU * guiScaler, posV * guiScaler);
         tessellator.draw();
     }
 
 
+    /**
+     * <h2>draw train tanks</h2>
+     * this binds the proper images for the fuel tanks of the train, and their backgrounds.
+     */
     private void drawColor(TrainsInMotion.transportTypes trainType, int tank){
         switch (trainType){
             default:{

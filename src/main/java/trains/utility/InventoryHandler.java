@@ -40,13 +40,7 @@ public class InventoryHandler implements IInventory{
             if (host.getType()== TrainsInMotion.transportTypes.STEAM || host.getType()== TrainsInMotion.transportTypes.NUCLEAR_STEAM){
                 size=2;
             }
-            switch (host.getInventorySize()){
-                case TWOxTWO:{return 4+size;}
-                case THREExTWO:{return 6+size;}
-                case THREExTHREE:{return 9+size;}
-                case FOURxTHREE:{return 12+size;}
-                case FOURxFOUR:{return 16+size;}
-            }
+            return size+ host.getInventorySize().getCollumn() + host.getInventorySize().getRow();
 
         }
         return 0;

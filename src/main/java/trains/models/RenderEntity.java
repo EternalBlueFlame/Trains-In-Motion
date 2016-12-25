@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
+import trains.TrainsInMotion;
 import trains.entities.GenericRailTransport;
 import trains.utility.ClientProxy;
 import trains.utility.RailUtility;
@@ -24,18 +25,26 @@ import java.util.List;
  */
 public class RenderEntity extends Render {
 
+    /**
+     * <h2>variables</h2>
+     * model defines the model of the train.
+     * texture defines the texture used for the train
+     * bogieModel defines the model that will get re-used for bogies, this can be null.
+     * bogie texture defines the texture to use on the bogies.
+     * simple and advanced pistons are used to cache the piston boxes of the train so we can animate them properly without needing to re-parse the base models.
+     * wheels is similar to the pistons but much simpler.
+     * we define rotationvec and wheel pitch here so we don't have to re-initialize it every frame.
+     * smoke type is defined in the train registry this will decide the thickness and color of smoke that comes from the train.
+     */
     private ModelBase model;
-    private ModelBase bogieModel;
     private ResourceLocation texture;
+    private ModelBase bogieModel;
     private ResourceLocation bogieTexture;
     private List<simplePiston> simplePistons = new ArrayList<simplePiston>();
     private List<advancedPiston> advancedPistons = new ArrayList<advancedPiston>();
     private List<wheel> wheels = new ArrayList<wheel>();
     private Vec2f rotationvec;
-    /*
-     * hitboxBase is used for the bottom and top, side is used for the two long sides
-     * hitboxFront is used for front and back
-     */
+
     private float wheelPitch=0;
     private char smokeType = 'n';
     /**
@@ -112,9 +121,19 @@ public class RenderEntity extends Render {
         //Bind the texture
         bindTexture(texture);
 
-        //cache the boxes to animate
-        if (wheels != null && wheels.size() <1) {
-            for (Object box : model.boxList) {
+        /**
+         * If the wheels aren't defined, and the train isn't maglev, then we need to parse all the ModelRenderers for the train and its bogies
+         * and cache references, along with original positions of all the pistons.
+         * In some cases we just need the reference, like for wheels, and more advanced pistons we also need the rotation.
+         *
+         * Assuming there are cached values to animate, then we'll animate them using the functionality from the variable classes.
+         */
+        if (wheels != null && wheels.size() <1 && entity.getType() != TrainsInMotion.transportTypes.MAGLEV) {
+            List boxes = model.boxList;
+            if (bogieModel != null) {
+                boxes.add(bogieModel.boxList);
+            }
+            for (Object box : boxes) {
                 if (box instanceof ModelRenderer) {
                     ModelRenderer render = ((ModelRenderer) box);
                     if (render.boxName.equals("wheel")) {
@@ -150,9 +169,8 @@ public class RenderEntity extends Render {
             }
         }
 
+        //finally render the model and push the changes to GL.
         model.render(entity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.065f);
-        //hitbox is special since it is initialized in the draw method, if it isn't it may be too big or too small
-
         GL11.glPushMatrix();
 
 
@@ -160,18 +178,6 @@ public class RenderEntity extends Render {
         //clear the cache, one pop for every push.
         GL11.glPopMatrix();
         GL11.glPopMatrix();
-
-
-
-        /**
-         * <h2>Animation</h2>
-         * while unimplemented, animation _should_ work by having the cube be initialized as
-         * 		Elem18 = new ModelRenderer(this, "wheel");
-         *      Elem18.setTextureOffset(0,0);
-         * rather than
-         * 		Elem18 = new ModelRenderer(this, 0,0);
-         * this same practice can be used for other features like pistons, the render only needs to check if the name of the cube matches and pragmatically apply the positioning.
-         */
 
         /**
          * <h4> render bogies</h4>
@@ -189,17 +195,14 @@ public class RenderEntity extends Render {
         }
 
 
-
-
-
     }
 
 
-
-
-
-
-
+    /**
+     * <h3>advanced piston</h3>
+     * this is used for pistons that require not only movement animation but also rotation.
+     * this caches a reference to the ModelRenderer as well.
+     */
     private class advancedPiston{
         private ModelRenderer boxRefrence = null;
         private Vec3f position = null;
@@ -220,6 +223,10 @@ public class RenderEntity extends Render {
     }
 
 
+    /**
+     * <h3>wheel</h3>
+     * used to store a reference to the wheel for quick animation.
+     */
     private class wheel {
         private ModelRenderer boxRefrence = null;
 
@@ -234,6 +241,11 @@ public class RenderEntity extends Render {
         }
     }
 
+    /**
+     * <h3>simple pistons</h3>
+     * This is used for pistons that only need a movement animation.
+     * in this case we only need to cache a reference and the original position.
+     */
     private class simplePiston {
         private ModelRenderer boxRefrence = null;
         private Vec2f position = null;

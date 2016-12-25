@@ -33,19 +33,20 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * <h2>class variables</h2>
      * isLocked is for if the owner has locked it.
      * lamp is used for the lamp, assuming this has one.
-     * colors define the skin colors in RGB format.
+     * colors define the skin colors in RGB format, because we plan to have multiple recolor points on the trains, dependant on skin, we need multiple sets of RGB values.
      * owner defines the UUID of the current owner (usually the player that spawns it)
      * bogie is the list of bogies this has.
      * bogieXYZ is the list of known positions for the bogies, this is mostly used to keep track of where the bogies are supposed to be via NBT.
      * motion is the vector angle that the train is facing, we only initialize it here, so we don't need to initialize it every tick.
      * TODO: isReverse is supposed to be for whether or not the train is in reverse, but we aren't actually using this yet, and it may not even be necessary.
      * hitboxList and hitboxHandler manage the hitboxes the train has, this is mostly dealt with via getParts() and the hitbox functionality.
+     * transportTicks is a simple tick count that allows us to manage functions that don't happen every tick, like fuel consumption in trains.
      *
      * the last part is the generic entity constructor
      */
     public boolean isLocked = false;
     public LampHandler lamp = new LampHandler();
-    public int[] colors = new int[]{0,0,0};
+    public int[][] colors = new int[][]{{0,0,0},{0,0,0},{0,0,0}};
     public UUID owner = null;
     public List<EntityBogie> bogie = new ArrayList<EntityBogie>();
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
@@ -53,10 +54,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public boolean isReverse =false;
     public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
     public HitboxHandler hitboxHandler = new HitboxHandler();
+    public int transportTicks =0;
     public GenericRailTransport(World world){
         super(world);
     }
-    public int transportTicks =0;
 
 
 
@@ -113,10 +114,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**
      * <h2> Data Syncing and Saving </h2>
      *
-     * used for syncing the bogies between client and server, syncing the spawn data with client and server(SpawnData), and saving/loading information from world (NBT)
+     * used for syncing the spawn data with client and server(SpawnData), and saving/loading information from world (NBT)
      * @see IEntityAdditionalSpawnData
      * @see NBTTagCompound
-     * the spawn data will make sure that variables that don't uually sync on spawn, like from the item, get synced.
+     * the spawn data will make sure variables that don't usually sync on spawn, like from the item, get synced.
      * the NBT will make sure that variables save to the world so it will be there next time you load the world up.
      */
     @Override
@@ -255,7 +256,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
         }
 
-        //this is just to be sure the client proxy knows this exists so it can manage the lamps.
+        /**
+         * be sure the client proxy has a reference to this so the lamps can be updated, and then every other tick, attempt to update the lamp position if it's necessary.
+         */
         if (worldObj.isRemote && xyzSize > 0 && bogieXYZ.get(0)[0] + bogieXYZ.get(0)[1] + bogieXYZ.get(0)[2] != 0.0D) {
             if (!ClientProxy.carts.contains(this)) {
                 ClientProxy.carts.add(this);
@@ -273,7 +276,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
     /**
      * <h2>Rider offset</h2>
-     * this runs every tick to be sure the rider is in the correct position for the
+     * this runs every tick to be sure the rider is in the correct position
      * TODO get rider offset may need to be a list of positions for rollingstock that can have multiple passengers
      */
     @Override
@@ -306,7 +309,5 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public ItemStack[] getCraftingRecipe(){return new ItemStack[]{null,null,null, null,null,null, null,null,null,};}
     public float getPistonOffset(){return 0;}
     public float[][] getSmokeOffset(){return new float[][]{{0}};}
-
-    //TODO we need to define smoke vector that can be called from the render
 
 }
