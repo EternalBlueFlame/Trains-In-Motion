@@ -15,31 +15,34 @@ Redistribution and use in source and binary forms, with or without modification,
 
 
 ## 1. Usage and Distribution
-1.1. The .cfg files in the Trains in Motion config folder are not considered part of Trains in Motion and may be freely distributed.<br/>
-1.2. You may distribute modified versions of Trains in Motion, as long as you:<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.2.1. Give credit where appropriate or reasonable.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.2.2. Provide a link to the license on the Official GitHub.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.2.2.1. You may optionally include a copy of the Trains in Motion license with your modified version if you have not made any modifications to the license.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.2.3. Indicate if changes were made, and to what.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.2.4. Have clear indication that the modified and, or redistributed version is not the official Trains in Motion.<br/>
-1.3. You may use Trains in Motion on a multiplayer server(s) and in modpack(s) provided that you abide by the following:<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.3.1. Private modpack(s) are permitted without requiring that you meet the restrictions, but they must be protected via password and, or whitelist.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.3.2. You must include Trains in Motion in your list of mods for the modpack(s) and, or server(s), along with a link to the Trains in Motion Website.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.3.3. You may optionally include a link to the Trains in Motion GitHub.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.3.4. If you use a beta build in your modpack(s) and, or server(s), you must note that the version of Trains in Motion included is developmental and prone to errors, unforseen and, or otherwise.<br/>
-1.4. You may create and publish addons, plugins, and, or expansions for Trains in Motion freely however:<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.4.1. Trains in Motion reserves the right to implement similar features, with or without credit to you or your content.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.4.2. No addon code will ever be included in Trains in Motion without the creator's permission to do so.<br/>
-1.5. You may earn revenue only from server(s), and, or addon(s), which use some or all of Trains in Motion provided that you do not go against the Minecraft EULA in doing so.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.5.1. You may not earn revenue, donation or otherwise, from the Trains in Motion source, assets, or compiled .jar, modified or otherwise, outside of a server(s), and, or addon(s).<br/>
-1.6. You may create and publish, both private and public, without restriction:<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.6.1. Texture pack(s) made for Trains in Motion so long as it does not contain any original Trains in Motion code or art assets.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.6.2. Videos that display all or part of Trains in Motion.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.6.2.1. You are advised to, but are not required to, provide a link to the Trains in Motion Website.<br/>
-1.7. Unless defined otherwise by this EULA, you may not publicly distribute the Trains in Motion source, mod, and, or assets, without [Eternal Blue Flame](https://github.com/EternalBlueFlame)'s explicit permission.<br/>
-1.8. To distribute your addon or modified Trains in Motion via the Official website, you are required to get permission from [Eternal Blue Flame](https://github.com/EternalBlueFlame)<br/>
-1.9. All advertising materials mentioning features or use of this software must display a link to the Trains in Motion GitHub.<br/>
-1.10. Neither Eternal Blue Flame, Trains in Motion, nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.<br/>
+1.1. You may distribute modified versions of the compiled Trains in Motion mod, as long as you:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.1.1. Give credit where appropriate or reasonable.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.1.2. Provide a link to the license on the Official GitHub.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1.2.1. You may optionally include a copy of the Trains in Motion license with your modified version if you have not made any modifications to the license.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.1.3. Indicate if changes were made, and to what.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.1.4. Have clear indication that the modified and, or redistributed version is not the official Trains in Motion.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.1.5. Have permission from the mod author [Eternal Blue Flame](https://github.com/EternalBlueFlame) to redistribute the modified mod.<br/>
+1.2. You may use Trains in Motion on a multiplayer server(s) and in modpack(s) provided that you abide by the following:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.2.1. Private modpack(s) are permitted without requiring that you meet the restrictions, but they must be protected via password and, or whitelist.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.2.2. You must include Trains in Motion in your list of mods for the modpack(s) and, or server(s), along with a link to the Trains in Motion Website.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.2.3. You may optionally include a link to the Trains in Motion GitHub.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.2.4. If you use a beta build in your modpack(s) and, or server(s), you must note that the version of Trains in Motion included is developmental and prone to errors, unforseen and, or otherwise.<br/>
+1.3. You may create and publish addons, plugins, and, or expansions for Trains in Motion freely however:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.3.1. Trains in Motion reserves the right to implement similar features, with or without credit to you or your content.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.3.2. No addon code or art will ever be included in Trains in Motion without the creator's permission to do so.<br/>
+1.4. You may earn revenue only from server(s), and, or modpack(s), which use some or all of Trains in Motion provided that you do not go against the Minecraft EULA in doing so.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.4.1. You may not earn revenue, donation or otherwise, from the Trains in Motion source, assets, or compiled .jar, modified or otherwise, outside of a server(s), and, or modpack(s).<br/>
+1.5. You may create and publish, both private and public, without restriction:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.5.1. Texture pack(s) made for Trains in Motion so long as it does not contain any original Trains in Motion code or art assets.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.5.2. Videos that display all or part of Trains in Motion.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.5.2.1. You are advised to, but are not required to, provide a link to the Trains in Motion Website.<br/>
+1.6. Unless defined otherwise by this EULA, you may not publicly distribute the Trains in Motion source, mod, and, or assets, without [Eternal Blue Flame](https://github.com/EternalBlueFlame)'s explicit permission.<br/>
+1.7. To distribute your addon or modified Trains in Motion via the Official website, you are required to get permission from [Eternal Blue Flame](https://github.com/EternalBlueFlame)<br/>
+1.8. All advertising materials mentioning features or use of this software must display a link to the Trains in Motion GitHub and, or curseforge.<br/>
+1.9. Neither Eternal Blue Flame, Trains in Motion, nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.<br/>
+1.10. You may use limited functions or segments of code from the TiM source towards other unrelated functions, these limitations include:
+&nbsp;&nbsp;&nbsp;&nbsp;1.10.1. If the included code is beyond 1000 characters you are required to get permission from [Eternal Blue Flame](https://github.com/EternalBlueFlame)
+&nbsp;&nbsp;&nbsp;&nbsp;1.10.2. You may not use any code from the tmt folder without getting permission from it's author [Ferdinand](https://github.com/Fexcraft)
 
 
 ## 2. Limitation of liability
