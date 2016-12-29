@@ -5,6 +5,7 @@ import com.sun.javafx.geom.Vec3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.particle.EntityFX;
+import net.minecraft.client.particle.EntitySmokeFX;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
@@ -16,6 +17,7 @@ import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.utility.ClientProxy;
+import trains.utility.HitboxHandler;
 import trains.utility.RailUtility;
 
 import javax.annotation.Nullable;
@@ -205,7 +207,7 @@ public class RenderEntity extends Render {
         for (float[] smoke : entity.getSmokeOffset()){
             for (int i=0; i< smoke[4]; i++) {
                 smokeFX renderSmoke = new smokeFX(entity.worldObj,
-                        entity.posX + smoke[0], entity.posY + smoke[1], entity.posZ + smoke[2], 10);
+                        entity.posX + smoke[0]-0.05, entity.posY + smoke[1], entity.posZ + smoke[2]+0.05, 10);
                 randomX = (rand.nextInt(100) -50)*0.0001f;
                 randomZ = (rand.nextInt(100) -50)*0.0001f;
                 colorOffset = (rand.nextInt(20) -10)*0.01f;
@@ -295,12 +297,16 @@ public class RenderEntity extends Render {
     }
 
 
-
-    private class smokeFX extends EntityFX{
+    /**
+     * <h3>Smoke effects</h3>
+     * this is used to render effect for smoke and steam
+     */
+    private class smokeFX extends EntityFX {
         private int lifespan =0;
 
         public smokeFX(World worldObj, double x, double y, double z, int life) {
-            super(worldObj, x,y,z);
+            super(worldObj, x,y,z,0,0,0);
+            this.particleScale *= 2.5f;
             lifespan = (int)(life / this.rand.nextFloat());
         }
 
@@ -310,16 +316,16 @@ public class RenderEntity extends Render {
                 this.setDead();
             }
 
-            if (motionX>0.01d){
-                motionX=0.01d;
-            } else if (motionX<-0.01d){
-                motionX=-0.01d;
+            if (motionX>0.02d){
+                motionX=0.02d;
+            } else if (motionX<-0.02d){
+                motionX=-0.02d;
             }
 
-            if (motionZ>0.01d){
-                motionZ=0.01d;
-            } else if (motionZ<-0.01d){
-                motionZ=-0.01d;
+            if (motionZ>0.02d){
+                motionZ=0.02d;
+            } else if (motionZ<-0.02d){
+                motionZ=-0.02d;
             }
 
             this.prevPosX = this.posX;
@@ -341,6 +347,13 @@ public class RenderEntity extends Render {
             double d8 = z;
 
             List list = this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox.addCoord(x, y, z));
+            for (Object box : list){
+                if (box instanceof HitboxHandler.multipartHitbox){
+                    list.remove(box);
+                } else if (box instanceof GenericRailTransport){
+                    list.remove(box);
+                }
+            }
 
             for (Object obj: list) {
                 y = ((AxisAlignedBB)obj).calculateYOffset(this.boundingBox, y);
@@ -348,7 +361,7 @@ public class RenderEntity extends Render {
 
             this.boundingBox.offset(0.0D, y, 0.0D);
 
-            if (!this.field_70135_K && d7 != y) {
+            if (d7 != y) {
                 z = 0.0D;
                 y = 0.0D;
                 x = 0.0D;
@@ -362,7 +375,7 @@ public class RenderEntity extends Render {
 
             this.boundingBox.offset(x, 0.0D, 0.0D);
 
-            if (!this.field_70135_K && d6 != x) {
+            if (d6 != x) {
                 z = 0.0D;
                 y = 0.0D;
                 x = 0.0D;
@@ -374,7 +387,7 @@ public class RenderEntity extends Render {
 
             this.boundingBox.offset(0.0D, 0.0D, z);
 
-            if (!this.field_70135_K && d8 != z) {
+            if (d8 != z) {
                 z = 0.0D;
                 y = 0.0D;
                 x = 0.0D;
@@ -383,7 +396,6 @@ public class RenderEntity extends Render {
             this.posX = (this.boundingBox.minX + this.boundingBox.maxX) / 2.0D;
             this.posY = this.boundingBox.minY + (double)this.yOffset - (double)this.ySize;
             this.posZ = (this.boundingBox.minZ + this.boundingBox.maxZ) / 2.0D;
-            this.onGround = d7 != y && d7 < 0.0D;
 
             if (d6 != x) {
                 this.motionX = this.motionX*-0.75d;
@@ -391,8 +403,8 @@ public class RenderEntity extends Render {
 
             if (d7 != y) {
                 this.motionY = -this.motionY * 0.25d;
-                this.motionZ *=2.5d;
-                this.motionX *=2.5d;
+                this.motionZ *=-2.5d;
+                this.motionX *=-2.5d;
             }
 
             if (d8 != z) {

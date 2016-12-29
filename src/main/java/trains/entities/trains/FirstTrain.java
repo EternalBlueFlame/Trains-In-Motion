@@ -147,7 +147,7 @@ public class FirstTrain extends EntityTrainCore {
      * the 5th number is for density, there's no min/max but larger numbers will create more lag.
      */
     @Override
-    public float[][] getSmokeOffset(){return new float[][]{{-1.40f,2,0,0.2f,22},{-1,0,0.5f,0.9f,1},{-1,0,-0.5f,0.9f,1}};}
+    public float[][] getSmokeOffset(){return new float[][]{{-1.40f,2,0,0.2f,12},{-1,0,0.5f,0.9f,1},{-1,0,-0.5f,0.9f,1}};}
 
 
 

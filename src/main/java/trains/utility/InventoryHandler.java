@@ -83,7 +83,7 @@ public class InventoryHandler implements IInventory{
      */
     @Override
     public void setInventorySlotContents(int p_70299_1_, ItemStack p_70299_2_) {
-        if (p_70299_1_>=0) {
+        if (p_70299_1_>=0 && p_70299_1_ < items.size()) {
             items.set(p_70299_1_, p_70299_2_);
         }
     }

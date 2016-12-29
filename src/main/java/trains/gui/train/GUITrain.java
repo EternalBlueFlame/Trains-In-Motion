@@ -60,62 +60,55 @@ public class GUITrain extends GuiContainer {
         int interfaceHeight = (height - ySize) / 2;
 
         //main background TODO disabled until we actually have an image for it.
-        //mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("guilocobackground.png"));
+        //draw the background
+        mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
+
         //drawTexturedModalRect((width - xSize) / 2, (height - ySize) / 2, 0, 0, xSize, ySize);
 
         //icon for fuel
-        mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("steam_fuelbackground.png"));
-        drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 25, 0, 0, 18, 18);
+        drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 25, 0, 64, 18, 18, 16);
         //icon for furnace
-        mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("steam_fuelicon.png"));
-        drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 25, 0, 0, 18, 18);
+        drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 25, 0, 64, 18, 18, 16);
 
         //set the generic slot icon, which will get re-used for every slot.
-        mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("itemslot.png"));
 
         //slot for fuel
-        drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 52, 0, 0, 18, 18);
+        drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 52, 0, 64, 18, 18, 16);
         //slot for water
-        drawTexturedModalRect(interfaceWidth + 34, interfaceHeight + 52, 0, 0, 18, 18);
+        drawTexturedModalRect(interfaceWidth + 34, interfaceHeight + 52, 0, 64, 18, 18, 16);
         //player inventory slots
         for (int ic = 0; ic < 9; ic++) {
             for (int ir = 0; ir < 3; ir++) {
-                drawTexturedModalRect( interfaceWidth + 7 + (ic * 18), interfaceHeight + 83 + (ir * 18), 0, 0, 18, 18);
+                drawTexturedModalRect( interfaceWidth + 7 + (ic * 18), interfaceHeight + 83 + (ir * 18), 0, 64, 18, 18, 16);
             }
         }
         //player toolbar slots
         for (int iT = 0; iT < 9; iT++) {
-            drawTexturedModalRect(interfaceWidth + 7 + (iT * 18), interfaceHeight + 141, 0, 0, 18, 18);
+            drawTexturedModalRect(interfaceWidth + 7 + (iT * 18), interfaceHeight + 141, 0, 64, 18, 18, 16);
         }
 
         //train inventory
         for (int ic = 0; ic < train.getInventorySize().getRow(); ic++) {
             for (int ir = 0; ir < train.getInventorySize().getCollumn(); ir++) {
-                drawTexturedModalRect( interfaceWidth + 97 + (ic * 18), interfaceHeight + 7 + (ir * 18), 0, 0, 18, 18);
+                drawTexturedModalRect( interfaceWidth + 97 + (ic * 18), interfaceHeight + 7 + (ir * 18), 0, 64, 18, 18, 16);
             }
         }
 
 
-
-        //draw the background
-        drawColor(null,0);
-        drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20, 0, 0, 18, 50);
+        drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20, 0, 0, 18, 50, 16);
         if (train.getTank().canDrain(1,0)) {
             //draw the water tank
-            drawColor(train.getType(),0);
             int liquid = Math.abs((train.getTank().tankFluidAmount(0) * 50) / train.getTank().tankCapacity(0));
-            drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20 - liquid, 177, 64 - liquid, 18, liquid);
+            drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20 - liquid, 0,16, 18, liquid, 16);
         }
 
         if (train.getType() == TrainsInMotion.transportTypes.STEAM || train.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
             //draw the background
-            drawColor(null,0);
-            drawTexturedModalRect(interfaceWidth + 34, interfaceHeight+20, 30, 30, 18, 24);
+            drawTexturedModalRect(interfaceWidth + 34, interfaceHeight+20, 0, 0, 18, 24, 16);
             if (train.getTank().canDrain(1, 1)) {
                 //draw the steam tank
-                drawColor(train.getType(), 1);
-                int liquid3 = Math.abs((train.getTank().tankFluidAmount(1) * 24) / train.getTank().tankCapacity(0));
-                drawTexturedModalRect(interfaceWidth + 34, interfaceHeight +20 - liquid3, 177, 24 - liquid3, 18, liquid3);
+                int liquid3 = Math.abs((train.getTank().tankFluidAmount(1) * 24) / train.getTank().tankCapacity(1));
+                drawTexturedModalRect(interfaceWidth + 34, interfaceHeight +20 - liquid3, 0,32, 18, liquid3, 16);
             }
         }
 
@@ -124,44 +117,22 @@ public class GUITrain extends GuiContainer {
     /**
      * <h2>Draw Texture</h2>
      * This replaces the base class and allows us to draw textures that are stretched to the shape defined in a more efficient manner.
+     * NOTE: all textures must be divisible by 256x256
      * @param posX the X position on screen to draw at.
      * @param posY the Y position on screen to draw at.
      * @param posU the X position of the texture to start from.
      * @param posV the Y position of the texture to start from.
      * @param width the width of the box.
      * @param height the height of the box.
+     * @param scale defines the X and Y size of the texture part used
      */
-    @Override
-    public void drawTexturedModalRect(int posX, int posY, int posU, int posV, int width, int height) {
+    public void drawTexturedModalRect(int posX, int posY, int posU, int posV, int width, int height, int scale) {
         Tessellator tessellator = Tessellator.instance;
         tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV(posX, posY + height, this.zLevel, posU * guiScaler, (posV + 256) * guiScaler);
-        tessellator.addVertexWithUV(posX + width, posY + height, this.zLevel, (posU + 256) * guiScaler, (posV + 256) * guiScaler);
-        tessellator.addVertexWithUV(posX + width, posY, this.zLevel, (posU + 256) * guiScaler, posV * guiScaler);
+        tessellator.addVertexWithUV(posX, posY + height, this.zLevel, posU * guiScaler, (posV + scale) * guiScaler);
+        tessellator.addVertexWithUV(posX + width, posY + height, this.zLevel, (posU + scale) * guiScaler, (posV + scale) * guiScaler);
+        tessellator.addVertexWithUV(posX + width, posY, this.zLevel, (posU + scale) * guiScaler, posV * guiScaler);
         tessellator.addVertexWithUV(posX, posY, this.zLevel, posU * guiScaler, posV * guiScaler);
         tessellator.draw();
-    }
-
-
-    /**
-     * <h2>draw train tanks</h2>
-     * this binds the proper images for the fuel tanks of the train, and their backgrounds.
-     */
-    private void drawColor(TrainsInMotion.transportTypes trainType, int tank){
-        switch (trainType){
-            default:{
-                mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("tank_empty.png"));
-                break;
-            }
-            case STEAM:{
-                if (tank==0){
-                    mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("tank_water.png"));
-                } else {
-                    mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("tank_steam.png"));
-                }
-                break;
-            }
-        }
-
     }
 }
