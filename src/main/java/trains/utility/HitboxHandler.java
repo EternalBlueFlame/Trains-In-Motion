@@ -160,23 +160,27 @@ public class HitboxHandler {
      */
     public static boolean AttackEvent(GenericRailTransport host, DamageSource damageSource, float damage){
         if (damageSource.getEntity() instanceof EntityPlayer && ((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode && !damageSource.isProjectile()){
-            for (EntityMinecart cart : host.bogie){
-                cart.worldObj.removeEntity(cart);
-                cart.isDead = true;
-                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(cart.getEntityId()));
-            }
-            for (EntityDragonPart hitbox : host.hitboxList){
-                hitbox.worldObj.removeEntity(hitbox);
-                hitbox.isDead = true;
-                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId()));
-            }
-
-            damageSource.getSourceOfDamage().worldObj.removeEntity(host);
-            host.isDead=true;
-            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(host.getEntityId()));
+            destroyTransport(host);
             return true;
         }
         return false;
+    }
+
+
+    public static void destroyTransport(GenericRailTransport host){
+        for (EntityMinecart cart : host.bogie){
+            cart.worldObj.removeEntity(cart);
+            cart.isDead = true;
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(cart.getEntityId()));
+        }
+        for (EntityDragonPart hitbox : host.hitboxList){
+            hitbox.worldObj.removeEntity(hitbox);
+            hitbox.isDead = true;
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId()));
+        }
+
+        host.isDead=true;
+        TrainsInMotion.keyChannel.sendToServer(new PacketRemove(host.getEntityId()));
     }
 
 }

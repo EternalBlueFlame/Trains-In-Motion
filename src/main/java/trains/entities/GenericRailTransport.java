@@ -50,7 +50,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public UUID owner = null;
     public List<EntityBogie> bogie = new ArrayList<EntityBogie>();
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
-    protected double[] motion = new double[]{0,0,0};
+    public double[] motion = new double[]{0,0,0};
     public boolean isReverse =false;
     public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
     public HitboxHandler hitboxHandler = new HitboxHandler();
@@ -308,6 +308,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
     public ItemStack[] getCraftingRecipe(){return new ItemStack[]{null,null,null, null,null,null, null,null,null,};}
     public float getPistonOffset(){return 0;}
-    public float[][] getSmokeOffset(){return new float[][]{{0}};}
+    public float[][] getSmokeOffset(){return new float[][]{{0,0,0,255}};}
 
 }

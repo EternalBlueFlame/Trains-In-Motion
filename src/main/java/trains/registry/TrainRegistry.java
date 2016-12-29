@@ -31,11 +31,9 @@ public class TrainRegistry {
     public ResourceLocation bogieTexture;
     public String entityWorldName; //Note: Must be all lowercase
     public Item item;
-    public char smoke;
 
     private TrainRegistry(Class<? extends GenericRailTransport> trainClass, Item item, String entityWorldName,
-                          ModelBase model, ResourceLocation texture, @Nullable ModelBase bogieModel, @Nullable ResourceLocation bogieTexture,
-                          char smoke){
+                          ModelBase model, ResourceLocation texture, @Nullable ModelBase bogieModel, @Nullable ResourceLocation bogieTexture){
         this.trainClass = trainClass;
         this.entityWorldName = entityWorldName;
         this.model = model;
@@ -43,7 +41,6 @@ public class TrainRegistry {
         this.bogieModel = bogieModel;
         this.bogieTexture = bogieTexture;
         this.item = item;
-        this.smoke = smoke;
     }
 
     /**
@@ -57,8 +54,7 @@ public class TrainRegistry {
 
         output.add(new TrainRegistry(FirstTrain.class, FirstTrain.thisItem, "entityfirsttrain",
                 new Brigadelok_080(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
-                null, null,
-                'n'));
+                null, null));
         return output;
 
     }

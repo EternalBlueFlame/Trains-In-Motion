@@ -93,8 +93,7 @@ public class ClientProxy extends CommonProxy {
         for(TrainRegistry reg : TrainRegistry.listTrains()){
             RenderingRegistry.registerEntityRenderingHandler(reg.trainClass, new RenderEntity(
                     reg.model, reg.texture,
-                    reg.bogieModel, reg.bogieTexture,
-                    reg.smoke));
+                    reg.bogieModel, reg.bogieTexture));
         }
         RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.multipartHitbox.class, new Render() {
             @Override

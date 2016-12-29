@@ -142,9 +142,12 @@ public class FirstTrain extends EntityTrainCore {
      * @return defines the array of positions in blocks for smoke.
      * the first number in the position defines the X/Z axis, negative values are towards the front of the train.
      * the second number defined the Y position, 0 is the rails.
+     * the third number defines left to right.
+     * the forth number defines the color from 255 (white) to 0 (black)
+     * the 5th number is for density, there's no min/max but larger numbers will create more lag.
      */
     @Override
-    public float[][] getSmokeOffset(){return new float[][]{{-1,2}};}
+    public float[][] getSmokeOffset(){return new float[][]{{-1.40f,2,0,0.2f,22},{-1,0,0.5f,0.9f,1},{-1,0,-0.5f,0.9f,1}};}
 
 
 

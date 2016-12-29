@@ -2,13 +2,18 @@ package trains.models;
 
 import com.sun.javafx.geom.Vec2f;
 import com.sun.javafx.geom.Vec3f;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 import trains.TrainsInMotion;
+import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.utility.ClientProxy;
 import trains.utility.RailUtility;
@@ -16,6 +21,7 @@ import trains.utility.RailUtility;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * <h2> .Java Entity Rendering</h2>
@@ -43,28 +49,22 @@ public class RenderEntity extends Render {
     private List<simplePiston> simplePistons = new ArrayList<simplePiston>();
     private List<advancedPiston> advancedPistons = new ArrayList<advancedPiston>();
     private List<wheel> wheels = new ArrayList<wheel>();
+    private List<ModelBase> bogieRenders = new ArrayList<ModelBase>();
     private Vec2f rotationvec;
 
     private float wheelPitch=0;
-    private char smokeType = 'n';
     /**
      * <h3>class constructor</h3>
      * @param modelLoad the model class to render.
      * @param textureLoad the texture ResourceLocation to apply to the model.
      * @param modelBogie the model to render for the bogies, if null then no bogies will not be rendered.
      * @param bogieTexture the texture to apply to the bogie, can be null if the bogie model is null.
-     * @param particleEffect the type of particle effect to render.
-     *                       n - null
-     *                       s - Smoke (steam)
-     *                       d - Smoke (diesel)
-     *                       r - Steam (nuclear steam)
      */
-    public RenderEntity(ModelBase modelLoad, ResourceLocation textureLoad, @Nullable ModelBase modelBogie, @Nullable ResourceLocation bogieTexture, char particleEffect) {
+    public RenderEntity(ModelBase modelLoad, ResourceLocation textureLoad, @Nullable ModelBase modelBogie, @Nullable ResourceLocation bogieTexture) {
         model = modelLoad;
         texture = textureLoad;
         bogieModel = modelBogie;
         this.bogieTexture = bogieTexture;
-        smokeType = particleEffect;
     }
 
     public ResourceLocation getEntityTexture(Entity entity){
@@ -106,7 +106,7 @@ public class RenderEntity extends Render {
 
     	GL11.glPushMatrix();
         //set the render position
-        GL11.glTranslated(x, y + 2.4d, z);
+        GL11.glTranslated(x, y + 1.3d, z);
         //rotate the model.
         GL11.glRotatef((-yaw) - 90, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
@@ -184,14 +184,45 @@ public class RenderEntity extends Render {
          * in TiM here we render the bogies.
          * we get the entity and do an instanceof check, see if it's a train or a rollingstock, then do a for loop on the bogies, and render them the same way we do trains and rollingstock.
          */
+        if (bogieModel != null){
+            for (int i=0; i<entity.getBogieOffsets().size();i++){
+                if (bogieRenders.size() <= i){
+                    //we move it to another variable before putting it in the array as an attempt to clone it. This is probably wrong but it will have to be sorted out later.
+                    ModelBase tempModel = bogieModel;
+                    bogieRenders.add(tempModel);
+                }
+            }
+        }
 
         /**
          * <h4>Smoke management</h4>
          * some trains, and even rollingstock will have smoke,
          */
-        switch (smokeType){
-            case 'n':{break;}
-            //TODO
+        float randomX;
+        float randomZ;
+        float colorOffset;
+        Random rand = new Random();
+        for (float[] smoke : entity.getSmokeOffset()){
+            for (int i=0; i< smoke[4]; i++) {
+                smokeFX renderSmoke = new smokeFX(entity.worldObj,
+                        entity.posX + smoke[0], entity.posY + smoke[1], entity.posZ + smoke[2], 10);
+                randomX = (rand.nextInt(100) -50)*0.0001f;
+                randomZ = (rand.nextInt(100) -50)*0.0001f;
+                colorOffset = (rand.nextInt(20) -10)*0.01f;
+                if (smoke[1] !=0) {
+                    renderSmoke.setVelocity(randomX, smoke[1] * 0.01,randomZ);
+                } else if (entity instanceof EntityTrainCore) {
+
+                    renderSmoke.setVelocity((entity.motion[0]* ((EntityTrainCore) entity).accelerator) + randomX,randomZ, (entity.motion[2]* ((EntityTrainCore) entity).accelerator) +randomX);
+                }
+                renderSmoke.setParticleTextureIndex(0);
+                if (smoke[3] >0.55f) {
+                    renderSmoke.setRBGColorF(smoke[3] - colorOffset, smoke[3] - colorOffset, smoke[3] - colorOffset);
+                } else {
+                    renderSmoke.setRBGColorF(smoke[3] + colorOffset, smoke[3] + colorOffset, smoke[3] + colorOffset);
+                }
+                Minecraft.getMinecraft().effectRenderer.addEffect(renderSmoke);
+            }
         }
 
 
@@ -261,6 +292,115 @@ public class RenderEntity extends Render {
             boxRefrence.rotationPointY = position.y - radian.y;
             boxRefrence.rotationPointZ = position.x - radian.x;
         }
+    }
+
+
+
+    private class smokeFX extends EntityFX{
+        private int lifespan =0;
+
+        public smokeFX(World worldObj, double x, double y, double z, int life) {
+            super(worldObj, x,y,z);
+            lifespan = (int)(life / this.rand.nextFloat());
+        }
+
+        @Override
+        public void onUpdate(){
+            if (this.particleAge++ >= this.lifespan) {
+                this.setDead();
+            }
+
+            if (motionX>0.01d){
+                motionX=0.01d;
+            } else if (motionX<-0.01d){
+                motionX=-0.01d;
+            }
+
+            if (motionZ>0.01d){
+                motionZ=0.01d;
+            } else if (motionZ<-0.01d){
+                motionZ=-0.01d;
+            }
+
+            this.prevPosX = this.posX;
+            this.prevPosY = this.posY;
+            this.prevPosZ = this.posZ;
+
+            this.moveEntity(this.motionX, this.motionY, this.motionZ);
+
+            this.motionX *= 0.99d;
+            this.motionZ *= 0.99d;
+        }
+
+        @Override
+        public void moveEntity(double x, double y, double z) {
+            this.ySize *= 0.4F;
+
+            double d6 = x;
+            double d7 = y;
+            double d8 = z;
+
+            List list = this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox.addCoord(x, y, z));
+
+            for (Object obj: list) {
+                y = ((AxisAlignedBB)obj).calculateYOffset(this.boundingBox, y);
+            }
+
+            this.boundingBox.offset(0.0D, y, 0.0D);
+
+            if (!this.field_70135_K && d7 != y) {
+                z = 0.0D;
+                y = 0.0D;
+                x = 0.0D;
+            }
+
+            int j;
+
+            for (j = 0; j < list.size(); ++j) {
+                x = ((AxisAlignedBB)list.get(j)).calculateXOffset(this.boundingBox, x);
+            }
+
+            this.boundingBox.offset(x, 0.0D, 0.0D);
+
+            if (!this.field_70135_K && d6 != x) {
+                z = 0.0D;
+                y = 0.0D;
+                x = 0.0D;
+            }
+
+            for (j = 0; j < list.size(); ++j) {
+                z = ((AxisAlignedBB)list.get(j)).calculateZOffset(this.boundingBox, z);
+            }
+
+            this.boundingBox.offset(0.0D, 0.0D, z);
+
+            if (!this.field_70135_K && d8 != z) {
+                z = 0.0D;
+                y = 0.0D;
+                x = 0.0D;
+            }
+
+            this.posX = (this.boundingBox.minX + this.boundingBox.maxX) / 2.0D;
+            this.posY = this.boundingBox.minY + (double)this.yOffset - (double)this.ySize;
+            this.posZ = (this.boundingBox.minZ + this.boundingBox.maxZ) / 2.0D;
+            this.onGround = d7 != y && d7 < 0.0D;
+
+            if (d6 != x) {
+                this.motionX = this.motionX*-0.75d;
+            }
+
+            if (d7 != y) {
+                this.motionY = -this.motionY * 0.25d;
+                this.motionZ *=2.5d;
+                this.motionX *=2.5d;
+            }
+
+            if (d8 != z) {
+                this.motionZ = this.motionZ*-0.75d;
+            }
+        }
+
+
     }
 
 }

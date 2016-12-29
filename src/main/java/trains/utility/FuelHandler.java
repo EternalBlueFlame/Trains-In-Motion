@@ -92,7 +92,7 @@ public class FuelHandler implements IFuelHandler{
 					} else {
 						cart.worldObj.createExplosion(cart, cart.posX, cart.posY, cart.posZ, 5f, false);
 						cart.dropItem(cart.getItem(), 1);
-						cart.worldObj.removeEntity(cart);
+						HitboxHandler.destroyTransport(cart);
 						break;
 					}
 
