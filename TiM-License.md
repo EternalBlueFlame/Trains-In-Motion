@@ -40,9 +40,9 @@ Redistribution and use in source and binary forms, with or without modification,
 1.7. To distribute your addon or modified Trains in Motion via the Official website, you are required to get permission from [Eternal Blue Flame](https://github.com/EternalBlueFlame)<br/>
 1.8. All advertising materials mentioning features or use of this software must display a link to the Trains in Motion GitHub and, or curseforge.<br/>
 1.9. Neither Eternal Blue Flame, Trains in Motion, nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.<br/>
-1.10. You may use limited functions or segments of code from the TiM source towards other unrelated functions, these limitations include:
-&nbsp;&nbsp;&nbsp;&nbsp;1.10.1. If the included code is beyond 1000 characters you are required to get permission from [Eternal Blue Flame](https://github.com/EternalBlueFlame)
-&nbsp;&nbsp;&nbsp;&nbsp;1.10.2. You may not use any code from the tmt folder without getting permission from it's author [Ferdinand](https://github.com/Fexcraft)
+1.10. You may use limited functions or segments of code from the TiM source towards other unrelated functions, these limitations include:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.10.1. If the included code is beyond 1000 characters you are required to get permission from [Eternal Blue Flame](https://github.com/EternalBlueFlame)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1.10.2. You may not use any code from the tmt folder without getting permission from it's author [Ferdinand](https://github.com/Fexcraft)<br/>
 
 
 ## 2. Limitation of liability
