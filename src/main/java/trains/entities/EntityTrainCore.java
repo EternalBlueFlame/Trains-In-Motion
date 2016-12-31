@@ -6,11 +6,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import trains.utility.FuelHandler;
 import trains.utility.InventoryHandler;
-import trains.utility.RailUtility;
 
 import java.util.UUID;
-
-import static trains.utility.RailUtility.rotatePoint;
 
 /**
  * <h2> Train core</h2>
@@ -22,14 +19,14 @@ public class EntityTrainCore extends GenericRailTransport {
      * <h3>variables</h3>
      * Brake defines if the handbrake is on.
      * isRunning is used for non-steam based trains to define if it's actually on.
-     * furnace fuel keeps track of how much burnable fuel is in steam trains.
+     * fuelHandler manages the items for fuel, and the fuel itself.
      * accelerator defines the speed percentage the user is attempting to apply.
      * destination is used for routing, railcraft and otherwise.
      * lastly the inventory defines the item storage of the train.
      */
     public boolean brake = false;
     public boolean isRunning = false;
-    public int furnaceFuel = 0;
+    public FuelHandler fuelHandler = new FuelHandler();
     public int accelerator =0;
     public String destination ="";
     public InventoryHandler inventory = new InventoryHandler(this);
@@ -78,20 +75,18 @@ public class EntityTrainCore extends GenericRailTransport {
         super.readEntityFromNBT(tag);
         isRunning = tag.getBoolean("isrunning");
         brake = tag.getBoolean("extended.brake");
-        furnaceFuel = tag.getInteger("fuel");
+        fuelHandler.readEntityFromNBT(tag);
 
         inventory.readNBT(tag, "items");
-        getTank().readFromNBT(tag);
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
         tag.setBoolean("isrunning",isRunning);
         tag.setBoolean("extended.brake", brake);
-        tag.setInteger("fuel", furnaceFuel);
+        fuelHandler.writeEntityToNBT(tag);
 
         tag.setTag("items", inventory.writeNBT());
-        getTank().writeToNBT(tag);
     }
 
 
@@ -150,7 +145,7 @@ public class EntityTrainCore extends GenericRailTransport {
         //simple tick management so some code does not need to be run every tick.
         if (!worldObj.isRemote) {
             if (transportTicks%5==1){
-                FuelHandler.ManageFuel(this);
+                fuelHandler.ManageFuel(this);
             }
         }
     }

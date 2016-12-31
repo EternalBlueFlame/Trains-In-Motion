@@ -5,7 +5,6 @@ import net.minecraft.block.BlockAir;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import trains.blocks.LampBlock;
 import trains.entities.EntityTrainCore;
 import trains.registry.GenericRegistry;
 

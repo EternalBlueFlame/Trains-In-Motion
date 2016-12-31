@@ -16,7 +16,6 @@ import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
 import trains.entities.EntityBogie;
-import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.networking.PacketRemove;
 

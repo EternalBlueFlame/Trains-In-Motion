@@ -2,14 +2,18 @@ package trains.utility;
 
 
 import cpw.mods.fml.common.IFuelHandler;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraftforge.fluids.FluidRegistry;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 
 public class FuelHandler implements IFuelHandler{
+
+	public int fuel=0;
 
 
 	/**
@@ -53,10 +57,23 @@ public class FuelHandler implements IFuelHandler{
 	}
 
 	/**
+	 * <h2> Data Syncing and Saving </h2>
+	 * this is explained in
+	 * @see GenericRailTransport#readSpawnData(ByteBuf)
+	 */
+	public void readEntityFromNBT(NBTTagCompound tag) {
+		this.fuel = tag.getInteger("fuelhandler");
+	}
+	public void writeEntityToNBT(NBTTagCompound tag) {
+		tag.setInteger("fuelhandler", this.fuel);
+
+	}
+
+	/**
 	 * <h2>Fuel management</h2>
 	 * this class manages the fuel for the train so we can keep it out of the train class to organize code bulk.
 	 */
-	public static void ManageFuel(EntityTrainCore cart){
+	public void ManageFuel(EntityTrainCore cart){
 
 		switch (cart.getType()) {
 			/**
@@ -68,27 +85,26 @@ public class FuelHandler implements IFuelHandler{
 			 * After manage actual fuel consumption.
 			 */
 			case STEAM: {
-				if (isFuel(cart.inventory.getStackInSlot(0), cart) && cart.furnaceFuel + TileEntityFurnace.getItemBurnTime(cart.inventory.getStackInSlot(0)) < cart.getMaxFuel()) {
+				if (isFuel(cart.inventory.getStackInSlot(0), cart) && fuel + TileEntityFurnace.getItemBurnTime(cart.inventory.getStackInSlot(0)) < cart.getMaxFuel()) {
 					//if the first inventory slot contains a burnable listed in our supported burnables, then remove it and add it's value to our fuel.
-					cart.furnaceFuel += TileEntityFurnace.getItemBurnTime(cart.inventory.getStackInSlot(0));
+					fuel += TileEntityFurnace.getItemBurnTime(cart.inventory.getStackInSlot(0));
 					cart.inventory.decrStackSize(0, 1);
 				}
 
 				//if the second slot contains a water bucket, add the contents of the water bucket to our tank and then place an empty bucket in the inventory
-				if ( isWater(cart.inventory.getStackInSlot(1), cart) && cart.getTank().canFill(waterValue(cart.inventory.getStackInSlot(1)),0)) {
-					cart.getTank().addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),0);
+				if (isWater(cart.inventory.getStackInSlot(1), cart) &&
+						cart.getTank().addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),true)) {
 					cart.inventory.decrStackSize(1,1);
 					cart.inventory.addItem(new ItemStack(Items.bucket));
 				}
 
 				//be sure there is fuel before trying to consume it
-				if (cart.furnaceFuel > 0) {
+				if (fuel > 0) {
 					//add steam from burning to the steam tank.
-					int steam = Math.round(cart.furnaceFuel * 0.01f);
-					if (cart.getTank().canDrain(steam,0)) {
-						cart.furnaceFuel -= 5;
-						cart.getTank().drainFluid(steam, 0);
-						cart.getTank().addFluid(FluidRegistry.WATER, steam/3, 1);
+					int steam = Math.round(fuel * 0.01f);
+					if (cart.getTank().drainFluid(steam,true)) {
+						fuel -= 5;
+						cart.getTank().addFluid(FluidRegistry.WATER, steam/3, false);
 					} else {
 						cart.worldObj.createExplosion(cart, cart.posX, cart.posY, cart.posZ, 5f, false);
 						cart.dropItem(cart.getItem(), 1);

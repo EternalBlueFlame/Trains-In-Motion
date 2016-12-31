@@ -1,11 +1,10 @@
 package trains.models.tmt;
 
-import java.util.ArrayList;
-
-import org.lwjgl.opengl.GL11;
-
 import net.minecraft.client.model.PositionTextureVertex;
 import net.minecraft.client.model.TexturedQuad;
+import org.lwjgl.opengl.GL11;
+
+import java.util.ArrayList;
 
 public class TexturedPolygon extends TexturedQuad {
 	public TexturedPolygon(PositionTextureVertex apositionTexturevertex[]) {

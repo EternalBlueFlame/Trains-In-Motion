@@ -96,19 +96,19 @@ public class GUITrain extends GuiContainer {
 
 
         drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20, 0, 0, 18, 50, 16);
-        if (train.getTank().canDrain(1,0)) {
+        if (train.getTank().getTank(true).getFluidAmount()>0) {
             //draw the water tank
-            int liquid = Math.abs((train.getTank().tankFluidAmount(0) * 50) / train.getTank().tankCapacity(0));
-            drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20 - liquid, 0,16, 18, liquid, 16);
+            int liquid = Math.abs((train.getTank().getTank(true).getFluidAmount() * 50) / train.getTank().getTank(true).getFluidAmount());
+            drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 70 - liquid, 16,0, 18, liquid, 16);
         }
 
         if (train.getType() == TrainsInMotion.transportTypes.STEAM || train.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
             //draw the background
             drawTexturedModalRect(interfaceWidth + 34, interfaceHeight+20, 0, 0, 18, 24, 16);
-            if (train.getTank().canDrain(1, 1)) {
+            if (train.getTank().getTank(false).getFluidAmount()>0) {
                 //draw the steam tank
-                int liquid3 = Math.abs((train.getTank().tankFluidAmount(1) * 24) / train.getTank().tankCapacity(1));
-                drawTexturedModalRect(interfaceWidth + 34, interfaceHeight +20 - liquid3, 0,32, 18, liquid3, 16);
+                int liquid3 = Math.abs((train.getTank().getTank(false).getFluidAmount() * 24) / train.getTank().getTank(false).getFluidAmount());
+                drawTexturedModalRect(interfaceWidth + 34, interfaceHeight +44 - liquid3, 32,0, 18, liquid3, 16);
             }
         }
 

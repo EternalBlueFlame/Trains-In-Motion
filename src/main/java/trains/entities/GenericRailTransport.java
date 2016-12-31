@@ -16,6 +16,8 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
 import trains.TrainsInMotion;
 import trains.models.tmt.Vec3d;
 import trains.utility.*;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static net.minecraftforge.fluids.FluidStack.loadFluidStackFromNBT;
 import static trains.utility.RailUtility.rotatePoint;
 
 
@@ -150,6 +153,17 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         isReverse = tag.getBoolean("extended.isreverse");
         isDead = tag.getBoolean("extended.isdead");
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
+
+        FluidStack tankA = loadFluidStackFromNBT(tag);
+        if (tankA.amount!=0) {
+            getTank().addFluid(tankA.getFluid(), tankA.amount, true);
+        }
+        FluidStack tankB = loadFluidStackFromNBT(tag);
+        if (tankB.amount!=0) {
+            getTank().addFluid(tankB.getFluid(), tankB.amount, false);
+        }
+
+
         //read through the bogie positions
         NBTTagList bogieTaglList = tag.getTagList("extended.bogies", 10);
         for (int i = 0; i < bogieTaglList.tagCount(); i++) {
@@ -160,6 +174,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 bogieXYZ.add(new double[]{nbttagcompound1.getDouble("bogieindex.a." + i),nbttagcompound1.getDouble("bogieindex.b." + i),nbttagcompound1.getDouble("bogieindex.c." + i)});
             }
         }
+
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
@@ -172,6 +187,21 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         tag.setBoolean("extended.isdead", isDead);
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
+
+
+        if (getTank().getTank(true).getFluid() != null){
+            getTank().getTank(true).getFluid().writeToNBT(tag);
+        } else {
+            new FluidStack(FluidRegistry.WATER,0).writeToNBT(tag);
+        }
+
+        if (getTank().getTank(false).getFluid() != null){
+            getTank().getTank(false).getFluid().writeToNBT(tag);
+        } else {
+            new FluidStack(FluidRegistry.WATER,0).writeToNBT(tag);
+        }
+
+
         //write the list of bogies
         NBTTagList nbtBogieTaglist = new NBTTagList();
         for (int i = 0; i < bogieXYZ.size(); ++i) {
@@ -185,6 +215,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
         }
         tag.setTag("extended.bogies", nbtBogieTaglist);
+
     }
 
 
@@ -259,11 +290,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         /**
          * be sure the client proxy has a reference to this so the lamps can be updated, and then every other tick, attempt to update the lamp position if it's necessary.
          */
-        if (worldObj.isRemote && xyzSize > 0 && bogieXYZ.get(0)[0] + bogieXYZ.get(0)[1] + bogieXYZ.get(0)[2] != 0.0D) {
-            if (!ClientProxy.carts.contains(this)) {
+        if (xyzSize > 0 && bogieXYZ.get(0)[0] + bogieXYZ.get(0)[1] + bogieXYZ.get(0)[2] != 0.0D) {
+            if (worldObj.isRemote && !ClientProxy.carts.contains(this)) {
                 ClientProxy.carts.add(this);
             }
-            if (transportTicks %2 ==1){
+            if (worldObj.isRemote && transportTicks %2 ==1){
                 lamp.ShouldUpdate(worldObj, RailUtility.rotatePoint(new double[]{this.posX + getLampOffset().xCoord ,this.posY + getLampOffset().yCoord, this.posZ + getLampOffset().zCoord}, rotationPitch, rotationYaw, 0));
             }
             if (transportTicks>20){

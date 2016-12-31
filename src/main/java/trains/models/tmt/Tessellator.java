@@ -1,17 +1,12 @@
 package trains.models.tmt;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
-import java.util.Arrays;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.GLAllocation;
 import org.lwjgl.opengl.GL11;
 
-import net.minecraft.client.renderer.GLAllocation;
+import java.nio.*;
+import java.util.Arrays;
 
 @SideOnly(Side.CLIENT)
 public class Tessellator extends net.minecraft.client.renderer.Tessellator{

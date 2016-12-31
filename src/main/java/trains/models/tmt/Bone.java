@@ -1,11 +1,11 @@
 package trains.models.tmt;
 
+import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.util.MathHelper;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.util.MathHelper;
 
 /**
  * The Bone class makes it possible to create skeletons, which should help you out in

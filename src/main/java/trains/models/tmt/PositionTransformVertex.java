@@ -1,8 +1,8 @@
 package trains.models.tmt;
 
-import java.util.ArrayList;
-
 import net.minecraft.client.model.PositionTextureVertex;
+
+import java.util.ArrayList;
 
 public class PositionTransformVertex extends PositionTextureVertex {
 	public PositionTransformVertex(float x, float y, float z, float u, float v) {

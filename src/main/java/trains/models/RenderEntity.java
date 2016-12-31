@@ -5,7 +5,6 @@ import com.sun.javafx.geom.Vec3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.particle.EntityFX;
-import net.minecraft.client.particle.EntitySmokeFX;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
@@ -204,10 +203,15 @@ public class RenderEntity extends Render {
         float randomZ;
         float colorOffset;
         Random rand = new Random();
+        float[] direction;
         for (float[] smoke : entity.getSmokeOffset()){
             for (int i=0; i< smoke[4]; i++) {
+                direction = RailUtility.rotatePoint(new float[]{smoke[0],smoke[1],smoke[2]}, entity.rotationPitch, entity.rotationYaw,0);
+                direction[0] += entity.posX;
+                direction[1] += entity.posY;
+                direction[2] += entity.posZ;
                 smokeFX renderSmoke = new smokeFX(entity.worldObj,
-                        entity.posX + smoke[0]-0.05, entity.posY + smoke[1], entity.posZ + smoke[2]+0.05, 10);
+                        direction[0],direction[1], direction[2], 10);
                 randomX = (rand.nextInt(100) -50)*0.0001f;
                 randomZ = (rand.nextInt(100) -50)*0.0001f;
                 colorOffset = (rand.nextInt(20) -10)*0.01f;
