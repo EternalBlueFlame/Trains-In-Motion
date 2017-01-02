@@ -23,7 +23,10 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
 import trains.utility.RailUtility;
 
-
+/**
+ * <h1>Bogie Core</h1>
+ * this controls the behavior of the bogies in trains and rollingstock.
+ */
 public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart, IEntityAdditionalSpawnData {
 
     private int parentId = 0;
@@ -40,6 +43,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             parentId = parent;
     }
 
+    /**
+     * <h2>Spawn Data</h2>
+     * Small networking check to add the bogie to the host train/rollingstock. Or to remove the bogie from the world if the host doesn't exist.
+     */
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         parentId = additionalData.readInt();
@@ -110,7 +117,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
     /**
      * <h3> movement management</h3>
-     * this is modified movement from the super class, should be more efficient, and reliable, but generally does the same thing.
+     * this is modified movement from the super class, should be more efficient, and reliable, but generally does the same thing, minus ability to collide.
      * @see EntityMinecart#onUpdate()
      * Some features are replaced using our own for compatibility with ZoraNoDensha
      * @see RailUtility
@@ -229,6 +236,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     }
 
 
+    /**
+     * <h2>Client Movement code</h2>
+     * this is mostly used to sync and smooth movement between client and server.
+     */
     @Override
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotation2(double x, double y, double z, float yaw, float pitch, int turnProgress) {
@@ -248,7 +259,9 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     }
 
     /**
-     * this is a fix for the fact there may or may not be a rider entity, this is to serve until we fully replace the functionality of this.
+     * <h2>Rail Movement</h2>
+     * This is a fix for the fact there may or may not be a rider entity, this is to serve until we fully replace the functionality of this.
+     * TODO: after we get in the ZnD api, we need to check if we can replicate the entire host function with our own calls, for better/more reliable results.
      */
     @Deprecated
     @Override

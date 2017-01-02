@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import trains.entities.EntityTrainCore;
+import trains.gui.train.GUITrain;
 import trains.registry.URIRegistry;
 
 public class HUDTrain extends GuiScreen {
@@ -21,7 +22,7 @@ public class HUDTrain extends GuiScreen {
     /**
      * <h2>Loco HUD</h2>
      * similar to the GUI, this will draw a HUD for the train when someone is in it.
-     * @see trains.gui.train.GUISteam
+     * @see GUITrain
      * The difference is that we override the experience bar render so that we can render the GUI alongside that, like a HUD.
      * @see GuiScreen
      */

@@ -12,6 +12,11 @@ import net.minecraftforge.event.entity.player.FillBucketEvent;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * <h1>Bucket Handler, is this even needed?</h1>
+ * theoretically this is intended to define the functionality for vanilla buckets to turn into our oil buckets.
+ * but this class is unused, and given the bucket changes in 1.8+ is this sort of thing even necessary anyway?
+ */
 public class BucketHandler {
 
     public static BucketHandler INSTANCE = new BucketHandler();

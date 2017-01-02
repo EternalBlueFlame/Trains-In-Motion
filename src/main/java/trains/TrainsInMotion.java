@@ -56,6 +56,31 @@ public class TrainsInMotion {
     //Instance the event handler, This is used for event based functionality, things like when you right-click an entity.
     public static EventHandler eventHandler = new EventHandler();
 
+
+    /**
+     * <h3>enums</h3>
+     * we define enums for transport types and inventory sizes here.
+     * makes it easier to add more later on.
+     */
+    public enum transportTypes {
+        STEAM,DIESEL,HYDROGEN_DIESEL,ELECTRIC,NUCLEAR_STEAM,NUCLEAR_ELECTRIC,MAGLEV
+    }
+    public enum inventorySizes{
+        TWOxTWO(2,2), TWOxTHREE(2,3), THREExTHREE(3,3), THREExFOUR(3,4), FOURxFOUR(4,4), FOURxFIVE(4,5), FIVExFIVE(5,5), FIVExSIX(5,6), SIXxSIX(6,6), NINExTHREE(9,3), NINExSIX(9,3);
+        private int row;
+        private int collumn;
+        inventorySizes(int row, int collumn){
+            this.row = row;
+            this.collumn = collumn;
+        }
+        public int getRow() {
+            return row;
+        }
+        public int getCollumn() {
+            return collumn;
+        }
+    }
+
     /**
      * <h2>load config</h2>
      * we use the pre-init to load the config file.
@@ -112,6 +137,7 @@ public class TrainsInMotion {
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
         proxy.register();
         if (event.getSide().isClient()) {
+            GenericRegistry.RegisterClientStuff();
             HUDTrain hud = new HUDTrain();
             FMLCommonHandler.instance().bus().register(hud);
             MinecraftForge.EVENT_BUS.register(hud);

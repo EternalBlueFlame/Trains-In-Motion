@@ -11,7 +11,8 @@ import trains.utility.EventHandler;
 public class PacketRemove implements IMessage {
     private int entityId;
     /**
-     * <h2>Packet for keybinds beyond inventory</h2>
+     * <h2>Packet for removing the train from world</h2>
+     * this is necessary because it happens from player interaction with hitboxes that are client only, so we have to send a packet to server for server to handle it.
      * when a entityId is pressed in
      * @see EventHandler#onClientKeyPress(InputEvent.KeyInputEvent)
      * it's processed by client to sent the defined action to server.

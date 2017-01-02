@@ -16,7 +16,6 @@ import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
 import trains.entities.EntityBogie;
-import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.networking.PacketRemove;
 
@@ -95,6 +94,7 @@ public class HitboxHandler {
         }
 
 
+        //detect collisions with blocks.
         for (multipartHitbox box : train.hitboxList){
             int i = MathHelper.floor_double(box.boundingBox.minX);
             int j = MathHelper.floor_double(box.boundingBox.minY);
@@ -117,6 +117,7 @@ public class HitboxHandler {
             }
 
 
+            //detect collisions with entities.
             List list = train.worldObj.getEntitiesWithinAABBExcludingEntity(train, box.boundingBox);
             if (list != null && !list.isEmpty()) {
                 for (Object entity: list) {
@@ -158,23 +159,27 @@ public class HitboxHandler {
      */
     public static boolean AttackEvent(GenericRailTransport host, DamageSource damageSource, float damage){
         if (damageSource.getEntity() instanceof EntityPlayer && ((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode && !damageSource.isProjectile()){
-            for (EntityMinecart cart : host.bogie){
-                cart.worldObj.removeEntity(cart);
-                cart.isDead = true;
-                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(cart.getEntityId()));
-            }
-            for (EntityDragonPart hitbox : host.hitboxList){
-                hitbox.worldObj.removeEntity(hitbox);
-                hitbox.isDead = true;
-                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId()));
-            }
-
-            damageSource.getSourceOfDamage().worldObj.removeEntity(host);
-            host.isDead=true;
-            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(host.getEntityId()));
+            destroyTransport(host);
             return true;
         }
         return false;
+    }
+
+
+    public static void destroyTransport(GenericRailTransport host){
+        for (EntityMinecart cart : host.bogie){
+            cart.worldObj.removeEntity(cart);
+            cart.isDead = true;
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(cart.getEntityId()));
+        }
+        for (EntityDragonPart hitbox : host.hitboxList){
+            hitbox.worldObj.removeEntity(hitbox);
+            hitbox.isDead = true;
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId()));
+        }
+
+        host.isDead=true;
+        TrainsInMotion.keyChannel.sendToServer(new PacketRemove(host.getEntityId()));
     }
 
 }

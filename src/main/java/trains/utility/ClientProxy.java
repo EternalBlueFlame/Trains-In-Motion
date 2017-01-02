@@ -15,14 +15,12 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
-import trains.blocks.LampBlock;
 import trains.entities.EntityBogie;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
-import trains.gui.train.GUISteam;
+import trains.gui.train.GUITrain;
 import trains.models.RenderEntity;
 import trains.registry.TrainRegistry;
-import trains.registry.URIRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +57,7 @@ public class ClientProxy extends CommonProxy {
         if (player != null && player.ridingEntity instanceof EntityTrainCore) {
             switch (ID) {
                 case TrainsInMotion.STEAM_GUI_ID: {
-                    return new GUISteam(player.inventory, (EntityTrainCore) player.ridingEntity);
+                    return new GUITrain(player.inventory, (EntityTrainCore) player.ridingEntity);
                 }
 
                 default: {return null;}
@@ -95,8 +93,7 @@ public class ClientProxy extends CommonProxy {
         for(TrainRegistry reg : TrainRegistry.listTrains()){
             RenderingRegistry.registerEntityRenderingHandler(reg.trainClass, new RenderEntity(
                     reg.model, reg.texture,
-                    reg.bogieModel, reg.bogieTexture,
-                    reg.smoke));
+                    reg.bogieModel, reg.bogieTexture));
         }
         RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.multipartHitbox.class, new Render() {
             @Override
@@ -136,7 +133,7 @@ public class ClientProxy extends CommonProxy {
             clientWorld = Minecraft.getMinecraft().theWorld;
             if (clientWorld != null) {
                 for (GenericRailTransport cart : carts) {
-                    if (clientWorld.getBlock(cart.lamp.X, cart.lamp.Y, cart.lamp.Z) instanceof LampBlock) {
+                    if (cart != null) {
                         clientWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
                     }
                 }

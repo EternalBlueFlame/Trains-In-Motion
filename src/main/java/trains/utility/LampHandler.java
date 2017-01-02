@@ -5,7 +5,6 @@ import net.minecraft.block.BlockAir;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import trains.blocks.LampBlock;
 import trains.entities.EntityTrainCore;
 import trains.registry.GenericRegistry;
 
@@ -30,7 +29,7 @@ public class LampHandler {
      * @param position defines the position to move the lamp to.
      */
     public void ShouldUpdate(World worldObj, double[] position){
-        if(isOn && (X !=position[0] & Y != position[1] & Z != position[2])){
+        if(X !=position[0] & Y != position[1] & Z != position[2]){
             //if there was a block placed previously, remove it.
             if (X != 0 && Y != 0 && Z != 0) {
                 worldObj.setBlockToAir(X, Y, Z);
@@ -42,7 +41,6 @@ public class LampHandler {
             //create the block.
             if (worldObj.getBlock(X,Y,Z) instanceof BlockAir) {
                 worldObj.setBlock(X,Y,Z, GenericRegistry.lampBlock);
-                worldObj.getBlock(X,Y,Z).setLightLevel(1f);
             }
 
         }

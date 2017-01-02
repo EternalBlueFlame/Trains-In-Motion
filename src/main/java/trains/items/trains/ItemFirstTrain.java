@@ -39,7 +39,7 @@ public class ItemFirstTrain extends Item {
      * for information on the world spawn see
      * @see World#spawnEntityInWorld(Entity)
      *
-     * for information on that the variables used in the spawn functions are doing
+     * for information on what the variables used in the spawn functions are doing
      * @see FirstTrain#FirstTrain(UUID, World, double, double, double)
      *
      * for the base functionality of how this works
