@@ -16,6 +16,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import trains.TrainsInMotion;
@@ -47,6 +48,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      *
      * the last part is the generic entity constructor
      */
+    public LiquidManager tanks = new LiquidManager(0,0, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
     public boolean isLocked = false;
     public LampHandler lamp = new LampHandler();
     public int[][] colors = new int[][]{{0,0,0},{0,0,0},{0,0,0}};
@@ -60,6 +62,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public int transportTicks =0;
     public GenericRailTransport(World world){
         super(world);
+        tanks = getTank();
     }
 
 
@@ -131,6 +134,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         for (int i=0; i<getBogieOffsets().size(); i++){
             bogieXYZ.add(new double[]{additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble()});
         }
+
     }
     @Override
     public void writeSpawnData(ByteBuf buffer) {
@@ -156,11 +160,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
         FluidStack tankA = loadFluidStackFromNBT(tag);
         if (tankA.amount!=0) {
-            getTank().addFluid(tankA.getFluid(), tankA.amount, true);
+            tanks.addFluid(tankA.getFluid(), tankA.amount, true);
         }
         FluidStack tankB = loadFluidStackFromNBT(tag);
         if (tankB.amount!=0) {
-            getTank().addFluid(tankB.getFluid(), tankB.amount, false);
+            tanks.addFluid(tankB.getFluid(), tankB.amount, false);
         }
 
 
@@ -189,14 +193,14 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
 
 
-        if (getTank().getTank(true).getFluid() != null){
-            getTank().getTank(true).getFluid().writeToNBT(tag);
+        if (tanks.getTank(true).getFluid() != null){
+            tanks.getTank(true).getFluid().writeToNBT(tag);
         } else {
             new FluidStack(FluidRegistry.WATER,0).writeToNBT(tag);
         }
 
-        if (getTank().getTank(false).getFluid() != null){
-            getTank().getTank(false).getFluid().writeToNBT(tag);
+        if (tanks.getTank(false).getFluid() != null){
+            tanks.getTank(false).getFluid().writeToNBT(tag);
         } else {
             new FluidStack(FluidRegistry.WATER,0).writeToNBT(tag);
         }
@@ -231,7 +235,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * being sure the train is listed in the main class (for lighting management).
      * @see ClientProxy#onTick(TickEvent.ClientTickEvent)
      *
-     * TODO: we need to put back lamp management
      */
     @Override
     public void onUpdate() {
@@ -276,12 +279,14 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         bogie.get(bogieSize).posX - bogie.get(0).posX)),
                         MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY)));
 
-                //align bogies
-                for (int i = 0; i < bogie.size(); ) {
-                    float[] var = rotatePoint(new float[]{(float) getBogieOffsets().get(i).doubleValue(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                    bogie.get(i).setPosition(var[0] + posX, bogie.get(i).posY, var[2] + posZ);
-                    bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
-                    i++;
+                if (transportTicks %2 ==0) {
+                    //align bogies
+                    for (int i = 0; i < bogie.size(); ) {
+                        float[] var = rotatePoint(new float[]{(float) getBogieOffsets().get(i).doubleValue(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                        bogie.get(i).setPosition(var[0] + posX, bogie.get(i).posY, var[2] + posZ);
+                        bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
+                        i++;
+                    }
                 }
             }
 

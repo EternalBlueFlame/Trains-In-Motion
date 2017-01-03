@@ -4,10 +4,13 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
+import trains.TrainsInMotion;
 import trains.utility.FuelHandler;
 import trains.utility.InventoryHandler;
 
 import java.util.UUID;
+
+import static trains.utility.RailUtility.rotatePoint;
 
 /**
  * <h2> Train core</h2>
@@ -98,14 +101,20 @@ public class EntityTrainCore extends GenericRailTransport {
      * currently this is only intended to provide a rather static amount.
      */
     private float processMovement(double X){
-
         float speed = (float) X * 0.9f;
 
+        if (speed ==0){
+            speed = ((accelerator / 6f)*0.1f) * getAcceleration();
+        }
+
         if (accelerator!=0) {
-            //if (speed != 0) {
-                speed *= 1+((accelerator / 6f) * getAcceleration());
-            //} else {
-            //    speed = (0.1666666667f) * getAcceleration();
+            //if ((getType() == TrainsInMotion.transportTypes.STEAM || getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM)) {
+            //    if (tanks.getTank(false).getFluidAmount() > tanks.getTank(false).getCapacity()*0.5f) {
+                    speed *= 1 + ((accelerator / 6f) * getAcceleration());
+            System.out.println(speed + " : " + getMaxSpeed());
+            //    }
+            //} else if (fuelHandler.fuel>0){
+            //    speed *= 1 + ((accelerator / 6f) * getAcceleration());
             //}
         }
 
@@ -133,7 +142,7 @@ public class EntityTrainCore extends GenericRailTransport {
                     motion[0] = processMovement(currentBogie.motionX);
                     motion[2] = processMovement(currentBogie.motionZ);
                     motion[1] = currentBogie.motionY;
-                    currentBogie.setVelocity(motion[0], 0, motion[2]);
+                    currentBogie.setVelocity(motion[0], motion[1], motion[2]);
                     currentBogie.minecartMove();
                 } else {
                     motion = new double[]{0d, 0d, 0d};

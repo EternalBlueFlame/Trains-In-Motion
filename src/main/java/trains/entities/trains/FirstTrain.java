@@ -34,7 +34,7 @@ public class FirstTrain extends EntityTrainCore {
      * SOUND_HORN and SOUND_RUNNING are refrences to the sound files for the train horn and running sounds.
      * thisItem is the item for this train that will get registered.
      */
-    private LiquidManager tank = new LiquidManager(10000,10000, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
+    private static final LiquidManager tank = new LiquidManager(10000,10000, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
     private static final ResourceLocation horn = URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");
     private static final ResourceLocation running = URIRegistry.SOUND_RUNNING.getResource("r080brigadelok.ogg");
     public static final Item thisItem = new ItemFirstTrain().setUnlocalizedName("itemFirstTrain").setTextureName(MODID + ":itemTests");
