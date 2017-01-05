@@ -47,9 +47,9 @@ public class SteamInventoryHandler extends Container{
         }
 
         //train inventory
-        for (int ia = 0; ia < entityTrain.getInventorySize().getRow(); ia++) {
+        for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
             for (int ib = 0; ib < entityTrain.getInventorySize().getCollumn(); ib++) {
-                addSlotToContainer(new Slot(trainEntity.inventory, slot, 98 + (ib * 18), 8 + (ia * 18)));
+                addSlotToContainer(new Slot(trainEntity.inventory, slot, 98 + (ib * 18), (ia * 18)+44));
                 slot++;
             }
         }

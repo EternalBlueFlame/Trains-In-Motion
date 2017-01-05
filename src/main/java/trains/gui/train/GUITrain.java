@@ -10,9 +10,13 @@ import trains.entities.EntityTrainCore;
 import trains.gui.trainhandler.SteamInventoryHandler;
 import trains.registry.URIRegistry;
 
+import java.util.Arrays;
+
 public class GUITrain extends GuiContainer {
     private EntityTrainCore train;
     private static final float guiScaler = 0.00390625F;
+    private static int interfaceWidth =0;
+    private static int interfaceHeight = 0;
 
     /**
      * <h2>GUI initialization</h2>
@@ -36,8 +40,8 @@ public class GUITrain extends GuiContainer {
      */
     @Override
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
-        fontRendererObj.drawString("Test Locomotive", 8, 6, 4210752);
-        fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, ySize - 94, 4210752);
+        fontRendererObj.drawString("Test Locomotive", 8, -18, 4210752);
+        fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, interfaceHeight+33, 4210752);
     }
 
     /**
@@ -51,13 +55,9 @@ public class GUITrain extends GuiContainer {
      * @see GuiContainer
      */
     @Override
-    protected void drawGuiContainerBackgroundLayer(float par1, int par2, int par3) {
+    protected void drawGuiContainerBackgroundLayer(float par1, int mouseX, int mouseY) {
         //draw the gui background color
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-
-        //define the width and height of the screen.
-        int interfaceWidth = (width - xSize) / 2;
-        int interfaceHeight = (height - ySize) / 2;
 
         //main background TODO disabled until we actually have an image for it.
         //draw the background
@@ -89,27 +89,32 @@ public class GUITrain extends GuiContainer {
 
         //train inventory
         for (int ic = 0; ic < train.getInventorySize().getRow(); ic++) {
-            for (int ir = 0; ir < train.getInventorySize().getCollumn(); ir++) {
-                drawTexturedModalRect( interfaceWidth + 97 + (ic * 18), interfaceHeight + 7 + (ir * 18), 0, 64, 18, 18, 16);
+            for (int ir = 0; ir > -train.getInventorySize().getCollumn(); ir--) {
+                drawTexturedModalRect( interfaceWidth + 97 + (ic * 18), interfaceHeight +43 + (ir * 18), 0, 64, 18, 18, 16);
             }
         }
 
 
-        drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 20, 0, 0, 18, 50, 16);
+        drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 10, 0, 0, 18, 50, 16);
         if (train.tanks.getTank(true).getFluidAmount()>0) {
             //draw the water tank
             int liquid = Math.abs((train.tanks.getTank(true).getFluidAmount() * 50) / train.tanks.getTank(true).getCapacity());
-            drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 70 - liquid, 16,0, 18, liquid, 16);
+            drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 60 - liquid, 16,0, 18, liquid, 16);
         }
 
         if (train.getType() == TrainsInMotion.transportTypes.STEAM || train.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
             //draw the background
-            drawTexturedModalRect(interfaceWidth + 34, interfaceHeight+20, 0, 0, 18, 24, 16);
+            drawTexturedModalRect(interfaceWidth + 34, interfaceHeight+10, 0, 0, 18, 30, 16);
             if (train.tanks.getTank(false).getFluidAmount()>0) {
                 //draw the steam tank
-                int liquid3 = Math.abs((train.tanks.getTank(false).getFluidAmount() * 24) / train.tanks.getTank(false).getCapacity());
-                drawTexturedModalRect(interfaceWidth + 34, interfaceHeight +44 - liquid3, 32,0, 18, liquid3, 16);
+                int liquid3 = Math.abs((train.tanks.getTank(false).getFluidAmount() * 30) / train.tanks.getTank(false).getCapacity());
+                drawTexturedModalRect(interfaceWidth + 34, interfaceHeight +50 - liquid3, 32,0, 18, liquid3, 16);
             }
+        }
+
+        //train toolbar slots
+        for (int iT = 0; iT < 5; iT++) {
+            drawTexturedModalRect(interfaceWidth + 70 + (iT * 18), interfaceHeight + 63, 0, 64, 18, 18, 16);
         }
 
     }
@@ -134,5 +139,55 @@ public class GUITrain extends GuiContainer {
         tessellator.addVertexWithUV(posX + width, posY, this.zLevel, (posU + scale) * guiScaler, posV * guiScaler);
         tessellator.addVertexWithUV(posX, posY, this.zLevel, posU * guiScaler, posV * guiScaler);
         tessellator.draw();
+    }
+
+
+    /**
+     * <h2>Draw upper layer</h2>
+     * this draws the upper layer of the GUI, and handles things like the tooltips.
+     */
+    @Override
+    public void drawScreen(int mouseX, int mouseY, float par3){
+        //define the width and height of the screen.
+        interfaceWidth = (width - xSize) / 2;
+        interfaceHeight = (height - ySize) / 2;
+
+        super.drawScreen(mouseX, mouseY, par3);
+
+        if ((mouseX >= interfaceWidth + 66 && mouseX <= interfaceWidth + 84 &&
+                mouseY >= interfaceHeight + 10 && mouseY <= interfaceHeight +60)) {
+            drawHoveringText(Arrays.asList(tankType(true), train.tanks.getTank(true).getFluidAmount()*0.001f + " of " + train.tanks.getTank(true).getCapacity()*0.001f, "Buckets"), mouseX, mouseY, fontRendererObj);
+        }
+
+        if ((train.getType() == TrainsInMotion.transportTypes.STEAM || train.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
+                (mouseX >= interfaceWidth + 34 && mouseX <= interfaceWidth + 52 &&
+                        mouseY >= interfaceHeight + 10 && mouseY <= interfaceHeight +40)) {
+            drawHoveringText(Arrays.asList(tankType(false), train.tanks.getTank(true).getFluidAmount()*0.001f + " of " + train.tanks.getTank(true).getCapacity()*0.001f, "Buckets"), mouseX, mouseY, fontRendererObj);
+        }
+    }
+
+    private String tankType(boolean firsttank){
+        switch (train.getType()){
+            case STEAM: case NUCLEAR_STEAM:{
+                if (firsttank){
+                    return "Water Boiler:";
+                } else {
+                    return "Steam:";
+                }
+            }
+            case DIESEL:{
+                return "Diesel:";
+            }
+            case ELECTRIC: case MAGLEV:{
+                return "Redstone Flux:";
+            }
+            case HYDROGEN_DIESEL:{
+                return "Hydrogen Cell:";
+            }
+            case NUCLEAR_ELECTRIC:{
+                return "Coolant:";
+            }
+            default:{return "";}
+        }
     }
 }

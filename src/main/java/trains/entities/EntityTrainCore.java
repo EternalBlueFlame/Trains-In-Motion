@@ -4,13 +4,10 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import trains.TrainsInMotion;
 import trains.utility.FuelHandler;
 import trains.utility.InventoryHandler;
 
 import java.util.UUID;
-
-import static trains.utility.RailUtility.rotatePoint;
 
 /**
  * <h2> Train core</h2>

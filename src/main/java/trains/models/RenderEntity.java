@@ -113,7 +113,7 @@ public class RenderEntity extends Render {
         GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
 
         if (entity.bogie.size() > 0) {
-            wheelPitch += 1f;//(float) (((GenericRailTransport) entity).bogie.get(0).motionX + ((GenericRailTransport) entity).bogie.get(0).motionZ) * 0.05f;
+            wheelPitch += (float) (entity.bogie.get(0).motionX + entity.bogie.get(0).motionZ) * 0.05f;
             if (wheelPitch > 360) {
                 wheelPitch = 0;
             }

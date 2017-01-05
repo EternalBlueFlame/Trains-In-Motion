@@ -43,8 +43,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * bogieXYZ is the list of known positions for the bogies, this is mostly used to keep track of where the bogies are supposed to be via NBT.
      * motion is the vector angle that the train is facing, we only initialize it here, so we don't need to initialize it every tick.
      * TODO: isReverse is supposed to be for whether or not the train is in reverse, but we aren't actually using this yet, and it may not even be necessary.
+     * isCreative defines whether or not it should actually remove the liquid/fuel item, this can be toggled from the GUI if the rider is in creative mode.
      * hitboxList and hitboxHandler manage the hitboxes the train has, this is mostly dealt with via getParts() and the hitbox functionality.
      * transportTicks is a simple tick count that allows us to manage functions that don't happen every tick, like fuel consumption in trains.
+     * front and back define references to the train/rollingstock connected to the front and back, so that way we can better control links.
      *
      * the last part is the generic entity constructor
      */
@@ -57,9 +59,12 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
     public double[] motion = new double[]{0,0,0};
     public boolean isReverse =false;
+    public boolean isCreative = false;
     public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
     public HitboxHandler hitboxHandler = new HitboxHandler();
     public int transportTicks =0;
+    public GenericRailTransport front;
+    public GenericRailTransport back;
     public GenericRailTransport(World world){
         super(world);
         tanks = getTank();

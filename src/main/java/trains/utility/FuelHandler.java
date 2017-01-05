@@ -7,6 +7,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.MathHelper;
 import net.minecraftforge.fluids.FluidRegistry;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
@@ -34,6 +35,7 @@ public class FuelHandler implements IFuelHandler{
 	public static boolean isFuel(ItemStack item, GenericRailTransport transport){
 		switch (transport.getType()){
 			case STEAM: {return item != null && TileEntityFurnace.getItemBurnTime(item) !=0;}
+			case ELECTRIC:{return item != null && item.getItem() == Items.redstone;}
 
 		}
 		return false;
@@ -48,10 +50,14 @@ public class FuelHandler implements IFuelHandler{
 	}
 
 	public static int waterValue(ItemStack itemStack){
-		if (itemStack != null && itemStack.getItem() == Items.water_bucket){
-			return 1000;
-		}
+		if (itemStack != null) {
+			if (itemStack.getItem() == Items.water_bucket) {
+				return 1000;
+			} else if (itemStack.getItem() == Items.redstone){
+				return 250;
+			}
 
+		}
 
 		return 0;
 	}
@@ -88,12 +94,14 @@ public class FuelHandler implements IFuelHandler{
 				if (isFuel(cart.inventory.getStackInSlot(0), cart) && fuel + TileEntityFurnace.getItemBurnTime(cart.inventory.getStackInSlot(0)) < cart.getMaxFuel()) {
 					//if the first inventory slot contains a burnable listed in our supported burnables, then remove it and add it's value to our fuel.
 					fuel += TileEntityFurnace.getItemBurnTime(cart.inventory.getStackInSlot(0));
-					cart.inventory.decrStackSize(0, 1);
+					if (!cart.isCreative) {
+						cart.inventory.decrStackSize(0, 1);
+					}
 				}
 
 				//if the second slot contains a water bucket, add the contents of the water bucket to our tank and then place an empty bucket in the inventory
 				if (isWater(cart.inventory.getStackInSlot(1), cart) &&
-						cart.tanks.addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),true)) {
+						cart.tanks.addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),true) && !cart.isCreative) {
 					cart.inventory.decrStackSize(1,1);
 					cart.inventory.addItem(new ItemStack(Items.bucket));
 				}
@@ -101,11 +109,12 @@ public class FuelHandler implements IFuelHandler{
 				//be sure there is fuel before trying to consume it
 				if (fuel > 0) {
 					//add steam from burning to the steam tank.
-					int steam = Math.round(fuel * 0.01f);
+					//steam is equal to water used, but generated from heat which is one part fuel 2 parts air, with more fuel burning more heat is created, but this only works to a point.
+					int steam = Math.round((fuel*0.025f)/ cart.getMaxFuel());
 					if (cart.tanks.drainFluid(steam,true)) {
-						fuel -= 5;
-						cart.tanks.addFluid(FluidRegistry.WATER, steam/3, false);
-					} else {
+						fuel -= 50; //a lava bucket lasts 1000 seconds, so burnables are processed at 20000*0.05 a second
+						cart.tanks.addFluid(FluidRegistry.WATER, steam, false);
+					} else if (!cart.isCreative){
 						cart.worldObj.createExplosion(cart, cart.posX, cart.posY, cart.posZ, 5f, false);
 						cart.dropItem(cart.getItem(), 1);
 						HitboxHandler.destroyTransport(cart);
@@ -113,6 +122,11 @@ public class FuelHandler implements IFuelHandler{
 					}
 
 				}
+				if (cart.tanks.getTank(false).getFluidAmount()>0){
+					//steam is expelled through the pistons to push them back and forth, but even when the accelerator is off, a degree of steam is still escaping.
+					cart.tanks.drainFluid(5+(10*cart.accelerator),false);
+				}
+
 				break;
 			}
 			/**
@@ -137,6 +151,17 @@ public class FuelHandler implements IFuelHandler{
 			 *
 			 */
 			case ELECTRIC: {
+				//add redstone to the fuel tank
+				if (isWater(cart.inventory.getStackInSlot(1), cart) &&
+						cart.tanks.addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),true) && !cart.isCreative) {
+					cart.inventory.decrStackSize(1,1);
+					cart.inventory.addItem(new ItemStack(Items.bucket));
+				}
+				//use stored energy
+				if (cart.isRunning){
+					//electric trains run at a generally set rate which is multiplied at the square of speed.
+					fuel -= 1 + MathHelper.sqrt_float(cart.accelerator*5);
+				}
 				break;
 			}
 			/**
