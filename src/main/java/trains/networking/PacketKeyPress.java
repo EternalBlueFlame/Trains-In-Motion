@@ -47,6 +47,18 @@ public class PacketKeyPress implements IMessage {
             //Toggles
             if (message.key == 0){
                 ((EntityTrainCore) ridingEntity).lamp.isOn = !((EntityTrainCore) ridingEntity).lamp.isOn;
+            } else if (message.key == 4){
+                ((EntityTrainCore) ridingEntity).brake = !((EntityTrainCore) ridingEntity).brake;
+            } else if (message.key == 5){
+                ((EntityTrainCore) ridingEntity).isCoupling = !((EntityTrainCore) ridingEntity).isCoupling;
+            } else if (message.key == 6){
+                ((EntityTrainCore) ridingEntity).isCreative = !((EntityTrainCore) ridingEntity).isCreative;
+            }  else if (message.key == 7){
+                ((EntityTrainCore) ridingEntity).isLocked = !((EntityTrainCore) ridingEntity).isLocked;
+            } else if (message.key == 8){
+                ((EntityTrainCore) ridingEntity).isRunning = !((EntityTrainCore) ridingEntity).isRunning;
+            } else if (message.key == 9){
+                //play horn
             }
             //speed
             else if (message.key == 2){

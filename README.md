@@ -37,7 +37,7 @@ Date: December, 2016
 <ul>
 <li> Models must match the Mod's Art-style.</li>
 <li> Format is limited to <b>.java</b> models only; you can use tools such as BDCraft Cubik, or even writing it manually.</li>
-<li> Model scale is <b>3 blocks/meters wide</b>, or <b>1/2.5 scale</b>.</li>
+<li> Model scale is <b>1.25 blocks/meters wide</b>, or <b>1/7.68 scale</b>.</li>
 <li> Textures must be in <b>.png</b> format.</li>
 <li> Audio must be in <b>.ogg</b> format and no more than 192kb/s.</li>
 </ul>

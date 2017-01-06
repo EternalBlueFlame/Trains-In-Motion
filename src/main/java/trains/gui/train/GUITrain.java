@@ -1,8 +1,11 @@
 package trains.gui.train;
 
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.gui.inventory.GuiFurnace;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
 import trains.TrainsInMotion;
@@ -11,8 +14,10 @@ import trains.gui.trainhandler.SteamInventoryHandler;
 import trains.registry.URIRegistry;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class GUITrain extends GuiContainer {
+    private static final ResourceLocation vanillaInventory = new ResourceLocation("textures/gui/container/furnace.png");
     private EntityTrainCore train;
     private static final float guiScaler = 0.00390625F;
     private static int interfaceWidth =0;
@@ -41,7 +46,7 @@ public class GUITrain extends GuiContainer {
     @Override
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
         fontRendererObj.drawString("Test Locomotive", 8, -18, 4210752);
-        fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, interfaceHeight+33, 4210752);
+        fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, 74, 4210752);
     }
 
     /**
@@ -61,40 +66,46 @@ public class GUITrain extends GuiContainer {
 
         //main background TODO disabled until we actually have an image for it.
         //draw the background
-        mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
-
         //drawTexturedModalRect((width - xSize) / 2, (height - ySize) / 2, 0, 0, xSize, ySize);
 
+
+
+        this.mc.getTextureManager().bindTexture(vanillaInventory);
         //icon for fuel
-        drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 25, 0, 64, 18, 18, 16);
+        drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 25, 54, 51, 18, 18, 20);
         //icon for furnace
-        drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 25, 0, 64, 18, 18, 16);
+        drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 25, 54, 51, 18, 18, 20);
 
         //set the generic slot icon, which will get re-used for every slot.
 
         //slot for fuel
-        drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 52, 0, 64, 18, 18, 16);
+        drawTexturedModalRect(interfaceWidth + 7, interfaceHeight + 52, 54, 51, 18, 18, 20);
         //slot for water
-        drawTexturedModalRect(interfaceWidth + 34, interfaceHeight + 52, 0, 64, 18, 18, 16);
-        //player inventory slots
-        for (int ic = 0; ic < 9; ic++) {
-            for (int ir = 0; ir < 3; ir++) {
-                drawTexturedModalRect( interfaceWidth + 7 + (ic * 18), interfaceHeight + 83 + (ir * 18), 0, 64, 18, 18, 16);
-            }
-        }
-        //player toolbar slots
-        for (int iT = 0; iT < 9; iT++) {
-            drawTexturedModalRect(interfaceWidth + 7 + (iT * 18), interfaceHeight + 141, 0, 64, 18, 18, 16);
-        }
+        drawTexturedModalRect(interfaceWidth + 34, interfaceHeight + 52, 54, 51, 18, 18, 20);
 
         //train inventory
         for (int ic = 0; ic < train.getInventorySize().getRow(); ic++) {
             for (int ir = 0; ir > -train.getInventorySize().getCollumn(); ir--) {
-                drawTexturedModalRect( interfaceWidth + 97 + (ic * 18), interfaceHeight +43 + (ir * 18), 0, 64, 18, 18, 16);
+                drawTexturedModalRect( interfaceWidth + 97 + (ic * 18), interfaceHeight +43 + (ir * 18), 54, 51, 18, 18, 20);
             }
         }
 
 
+        drawTexturedModalRect(interfaceWidth, interfaceHeight+ 82, 0, 82, 176, 176, 176);
+
+        //train toolbar slots
+        if (train.getType() != TrainsInMotion.transportTypes.STEAM){
+            for (int iT = 0; iT < 6; iT++) {
+                drawTexturedModalRect(interfaceWidth + 70 + (iT * 18), interfaceHeight + 63, 54, 51, 18, 18, 20);
+            }
+        } else {
+            for (int iT = 0; iT < 5; iT++) {
+                drawTexturedModalRect(interfaceWidth + 70 + (iT * 18), interfaceHeight + 63, 54, 51, 18, 18, 20);
+            }
+        }
+
+
+        mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
         drawTexturedModalRect(interfaceWidth + 66, interfaceHeight + 10, 0, 0, 18, 50, 16);
         if (train.tanks.getTank(true).getFluidAmount()>0) {
             //draw the water tank
@@ -110,11 +121,6 @@ public class GUITrain extends GuiContainer {
                 int liquid3 = Math.abs((train.tanks.getTank(false).getFluidAmount() * 30) / train.tanks.getTank(false).getCapacity());
                 drawTexturedModalRect(interfaceWidth + 34, interfaceHeight +50 - liquid3, 32,0, 18, liquid3, 16);
             }
-        }
-
-        //train toolbar slots
-        for (int iT = 0; iT < 5; iT++) {
-            drawTexturedModalRect(interfaceWidth + 70 + (iT * 18), interfaceHeight + 63, 0, 64, 18, 18, 16);
         }
 
     }
@@ -163,6 +169,57 @@ public class GUITrain extends GuiContainer {
                 (mouseX >= interfaceWidth + 34 && mouseX <= interfaceWidth + 52 &&
                         mouseY >= interfaceHeight + 10 && mouseY <= interfaceHeight +40)) {
             drawHoveringText(Arrays.asList(tankType(false), train.tanks.getTank(true).getFluidAmount()*0.001f + " of " + train.tanks.getTank(true).getCapacity()*0.001f, "Buckets"), mouseX, mouseY, fontRendererObj);
+        }
+
+        if (mouseY > interfaceHeight + 63 && mouseY < interfaceHeight +81){
+
+            if (mouseX > interfaceWidth + 70 && mouseX < interfaceWidth + 88) {
+                drawHoveringText(Collections.singletonList("Brake is " + checkBoolean(train.brake)), mouseX, mouseY, fontRendererObj);
+            } else if (mouseX > interfaceWidth + 88 && mouseX < interfaceWidth + 106){
+                drawHoveringText(Collections.singletonList("Lamp is " + checkBoolean(train.lamp.isOn)), mouseX, mouseY, fontRendererObj);
+            } else if (mouseX > interfaceWidth + 106 && mouseX < interfaceWidth + 124){
+                drawHoveringText(Collections.singletonList("Horn"), mouseX, mouseY, fontRendererObj);
+            } else if (mouseX > interfaceWidth + 124 && mouseX < interfaceWidth + 142){
+                drawHoveringText(Collections.singletonList(couplingCheck(train.isCoupling)), mouseX, mouseY, fontRendererObj);
+            } else if (mouseX > interfaceWidth + 142 && mouseX < interfaceWidth + 160){
+                drawHoveringText(Collections.singletonList("Open Map"), mouseX, mouseY, fontRendererObj);
+            } else if (train.getType() != TrainsInMotion.transportTypes.STEAM && mouseX > interfaceWidth + 160 && mouseX < interfaceWidth + 178){
+                drawHoveringText(Collections.singletonList("Train is " + checkBoolean(train.isRunning)), mouseX, mouseY, fontRendererObj);
+            }
+        }
+
+
+    }
+
+
+
+    @Override
+    public void initGui() {
+        this.buttonList.clear();
+        this.buttonList.add(new GuiButton(0, interfaceWidth+ 70, interfaceHeight + 63, 18, 18,""));
+    }
+
+    @Override
+    public void actionPerformed(GuiButton button) {
+        switch (button.id){
+            case 0:{}
+        }
+    }
+
+
+
+    private static String checkBoolean(boolean bool){
+        if (bool){
+            return "on.";
+        } else {
+            return "off.";
+        }
+    }
+    private static String couplingCheck(boolean bool){
+        if (bool){
+            return "Couplers are open.";
+        } else {
+            return "Couplers are closed.";
         }
     }
 

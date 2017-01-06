@@ -60,6 +60,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public double[] motion = new double[]{0,0,0};
     public boolean isReverse =false;
     public boolean isCreative = false;
+    public boolean isCoupling = false;
     public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
     public HitboxHandler hitboxHandler = new HitboxHandler();
     public int transportTicks =0;
@@ -159,8 +160,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         lamp.X = tag.getInteger("extended.lamp.x");
         lamp.Y = tag.getInteger("extended.lamp.y");
         lamp.Z = tag.getInteger("extended.lamp.z");
-        isReverse = tag.getBoolean("extended.isreverse");
-        isDead = tag.getBoolean("extended.isdead");
+        isReverse = tag.getBoolean("extended.reverse");
+        isDead = tag.getBoolean("extended.dead");
+        isCoupling = tag.getBoolean("extended.coupling");
+        isCreative = tag.getBoolean("extended.creative");
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
 
         FluidStack tankA = loadFluidStackFromNBT(tag);
@@ -192,8 +195,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         tag.setInteger("extended.lamp.x", lamp.X);
         tag.setInteger("extended.lamp.y", lamp.Y);
         tag.setInteger("extended.lamp.z", lamp.Z);
-        tag.setBoolean("extended.isreverse", isReverse);
-        tag.setBoolean("extended.isdead", isDead);
+        tag.setBoolean("extended.reverse", isReverse);
+        tag.setBoolean("extended.dead", isDead);
+        tag.setBoolean("extended.coupling", isCoupling);
+        tag.setBoolean("extended.creative", isCreative);
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
 

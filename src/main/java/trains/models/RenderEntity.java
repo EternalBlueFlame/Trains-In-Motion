@@ -128,6 +128,7 @@ public class RenderEntity extends Render {
          * In some cases we just need the reference, like for wheels, and more advanced pistons we also need the rotation.
          *
          * Assuming there are cached values to animate, then we'll animate them using the functionality from the variable classes.
+         * TODO: add a render for doors, the animation is started when an entity mounts/unmounts the train/rollingstock. needs a sliding and a swing animation.
          */
         if (ClientProxy.EnableAnimations) {
             if (wheels != null && wheels.size() < 1 && entity.getType() != TrainsInMotion.transportTypes.MAGLEV) {
