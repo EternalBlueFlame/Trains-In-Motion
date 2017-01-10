@@ -14,12 +14,12 @@ import net.minecraft.entity.Entity;
 import org.lwjgl.opengl.GL11;
 import trains.models.tmt.ModelRendererTurbo;
 
-public class Pullmans_Palace extends ModelBase
+public class PullmansPalace extends ModelBase
 {
 	int textureX = 512;
 	int textureY = 512;
 
-	public Pullmans_Palace()
+	public PullmansPalace()
 	{
 		pullmans_palaceModel = new ModelRendererTurbo[79];
 		pullmans_palaceModel[0] = new ModelRendererTurbo(this, 0, 0, textureX, textureY); // Box 0

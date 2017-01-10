@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import trains.TrainsInMotion;
 import trains.entities.EntityRollingStockCore;
-import trains.items.rollingstock.Item_Pullmans_Palace;
+import trains.items.rollingstock.ItemPullmansPalace;
 import trains.models.tmt.Vec3d;
 import trains.registry.TrainRegistry;
 import trains.utility.LiquidManager;
@@ -16,12 +16,12 @@ import java.util.UUID;
 
 import static trains.TrainsInMotion.MODID;
 
-public class Entity_Pullmans_Palace extends EntityRollingStockCore{
+public class EntityPullmansPalace extends EntityRollingStockCore{
     /**
      * <h2>Basic Train Constructor</h2>
      * To make your own custom train, create a new class that is a copy of this class, in that copy, you only need to change the values of private static final variables defined here.
      * You also have to make your own item class, for that
-     * @see Item_Pullmans_Palace
+     * @see ItemPullmansPalace
      * lastly you have to register them in
      * @see TrainRegistry#listTrains()
      *
@@ -29,16 +29,16 @@ public class Entity_Pullmans_Palace extends EntityRollingStockCore{
      * SOUND_HORN and SOUND_RUNNING are refrences to the sound files for the train horn and running sounds.
      * thisItem is the item for this train that will get registered.
      */
-    public static final Item thisItem = new Item_Pullmans_Palace().setUnlocalizedName("itempullmanspalace").setTextureName(MODID + ":itemTests");
+    public static final Item thisItem = new ItemPullmansPalace().setUnlocalizedName("itempullmanspalace").setTextureName(MODID + ":itemTests");
 
     /**
      * these basic constructors only need to have their names changed to that of this class, that is assuming your editor doesn't automatically do that.
      * @see EntityRollingStockCore
      */
-    public Entity_Pullmans_Palace(UUID owner, World world, double xPos, double yPos, double zPos) {
+    public EntityPullmansPalace(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);
     }
-    public Entity_Pullmans_Palace(World world){
+    public EntityPullmansPalace(World world){
         super(world);
     }
 

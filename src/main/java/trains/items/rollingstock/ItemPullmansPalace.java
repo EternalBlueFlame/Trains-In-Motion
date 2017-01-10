@@ -7,7 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import trains.TrainsInMotion;
 import trains.entities.GenericRailTransport;
-import trains.entities.rollingstock.Entity_Pullmans_Palace;
+import trains.entities.rollingstock.EntityPullmansPalace;
 import trains.entities.trains.FirstTrain;
 import trains.utility.RailUtility;
 
@@ -23,10 +23,10 @@ import java.util.UUID;
  * TODO: register icons may not even be necessary here, i think it can be covered in the train's constructor class for the item. needs testing.
  */
 
-public class Item_Pullmans_Palace extends Item {
+public class ItemPullmansPalace extends Item {
 
     //constructor
-    public Item_Pullmans_Palace() {
+    public ItemPullmansPalace() {
         super();
         setCreativeTab(TrainsInMotion.creativeTab);
         //we set any sub-text for the item here
@@ -50,7 +50,7 @@ public class Item_Pullmans_Palace extends Item {
      */
     @Override
     public boolean onItemUse(ItemStack itemStack, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ, int blockSide, float pointToRayX, float pointToRayY, float pointToRayZ) {
-        return RailUtility.placeOnRail(new Entity_Pullmans_Palace(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D),playerEntity,worldObj,posX,posY,posZ);
+        return RailUtility.placeOnRail(new EntityPullmansPalace(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D),playerEntity,worldObj,posX,posY,posZ);
     }
 
     /**
