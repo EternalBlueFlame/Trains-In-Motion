@@ -179,13 +179,15 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         brake = tag.getBoolean("extended.handbrake");
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
 
-        FluidStack tankA = loadFluidStackFromNBT(tag);
-        if (tankA.amount!=0) {
-            tanks.addFluid(tankA.getFluid(), tankA.amount, true);
-        }
-        FluidStack tankB = loadFluidStackFromNBT(tag);
-        if (tankB.amount!=0) {
-            tanks.addFluid(tankB.getFluid(), tankB.amount, false);
+        if (tanks != null) {
+            FluidStack tankA = loadFluidStackFromNBT(tag);
+            if (tankA.amount != 0) {
+                tanks.addFluid(tankA.getFluid(), tankA.amount, true);
+            }
+            FluidStack tankB = loadFluidStackFromNBT(tag);
+            if (tankB.amount != 0) {
+                tanks.addFluid(tankB.getFluid(), tankB.amount, false);
+            }
         }
 
 
@@ -217,16 +219,18 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
 
 
-        if (tanks.getTank(true).getFluid() != null){
-            tanks.getTank(true).getFluid().writeToNBT(tag);
-        } else {
-            new FluidStack(FluidRegistry.WATER,0).writeToNBT(tag);
-        }
+        if (tanks != null) {
+            if (tanks.getTank(true).getFluid() != null) {
+                tanks.getTank(true).getFluid().writeToNBT(tag);
+            } else {
+                new FluidStack(FluidRegistry.WATER, 0).writeToNBT(tag);
+            }
 
-        if (tanks.getTank(false).getFluid() != null){
-            tanks.getTank(false).getFluid().writeToNBT(tag);
-        } else {
-            new FluidStack(FluidRegistry.WATER,0).writeToNBT(tag);
+            if (tanks.getTank(false).getFluid() != null) {
+                tanks.getTank(false).getFluid().writeToNBT(tag);
+            } else {
+                new FluidStack(FluidRegistry.WATER, 0).writeToNBT(tag);
+            }
         }
 
 

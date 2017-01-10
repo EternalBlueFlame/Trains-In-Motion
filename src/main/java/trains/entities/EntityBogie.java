@@ -51,7 +51,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     public void readSpawnData(ByteBuf additionalData) {
         parentId = additionalData.readInt();
         if (parentId != 0) {
-            EntityTrainCore parent = ((EntityTrainCore) worldObj.getEntityByID(parentId));
+            GenericRailTransport parent = ((GenericRailTransport) worldObj.getEntityByID(parentId));
             if (parent != null){
                 parent.addbogies(this);
             } else {

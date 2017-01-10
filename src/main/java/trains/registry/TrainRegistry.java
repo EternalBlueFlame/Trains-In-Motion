@@ -6,7 +6,9 @@ import net.minecraft.client.model.ModelBase;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import trains.entities.GenericRailTransport;
+import trains.entities.rollingstock.Entity_Pullmans_Palace;
 import trains.entities.trains.FirstTrain;
+import trains.models.rollingstock.Pullmans_Palace;
 import trains.models.trains.Brigadelok_080;
 
 import javax.annotation.Nullable;
@@ -54,6 +56,11 @@ public class TrainRegistry {
 
         output.add(new TrainRegistry(FirstTrain.class, FirstTrain.thisItem, "entityfirsttrain",
                 new Brigadelok_080(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
+                null, null));
+
+
+        output.add(new TrainRegistry(Entity_Pullmans_Palace.class, Entity_Pullmans_Palace.thisItem, "entitypullmanspalace",
+                new Pullmans_Palace(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
                 null, null));
         return output;
 
