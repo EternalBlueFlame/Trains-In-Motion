@@ -220,7 +220,7 @@ public class RenderEntity extends Render {
                     randomZ = (rand.nextInt(100) - 50) * 0.0001f;
                     colorOffset = (rand.nextInt(20) - 10) * 0.01f;
                     if (smoke[1] != 0) {
-                        renderSmoke.setVelocity(randomX, smoke[1] * 0.05, randomZ);
+                        renderSmoke.setVelocity(randomX, smoke[1] * 0.0075, randomZ);
                     } else if (entity instanceof EntityTrainCore) {
 
                         renderSmoke.setVelocity((entity.motion[0] * ((EntityTrainCore) entity).accelerator) + randomX, randomZ, (entity.motion[2] * ((EntityTrainCore) entity).accelerator) + randomZ);

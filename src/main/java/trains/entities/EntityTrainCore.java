@@ -17,14 +17,12 @@ public class EntityTrainCore extends GenericRailTransport {
 
     /**
      * <h3>variables</h3>
-     * Brake defines if the handbrake is on.
      * isRunning is used for non-steam based trains to define if it's actually on.
      * fuelHandler manages the items for fuel, and the fuel itself.
      * accelerator defines the speed percentage the user is attempting to apply.
      * destination is used for routing, railcraft and otherwise.
      * lastly the inventory defines the item storage of the train.
      */
-    public boolean brake = false;
     public boolean isRunning = false;
     public FuelHandler fuelHandler = new FuelHandler();
     public int accelerator =0;
@@ -71,10 +69,24 @@ public class EntityTrainCore extends GenericRailTransport {
      * @see GenericRailTransport#readSpawnData(ByteBuf)
      */
     @Override
+    public void readSpawnData(ByteBuf additionalData) {
+    super.readSpawnData(additionalData);
+        isRunning = additionalData.readBoolean();
+        accelerator = additionalData.readInt();
+        fuelHandler.fuel = additionalData.readInt();
+    }
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        super.writeSpawnData(buffer);
+        buffer.writeBoolean(isRunning);
+        buffer.writeInt(accelerator);
+        buffer.writeInt(fuelHandler.fuel);
+    }
+    @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
         isRunning = tag.getBoolean("isrunning");
-        brake = tag.getBoolean("extended.brake");
+        accelerator = tag.getInteger("train.accel");
         fuelHandler.readEntityFromNBT(tag);
 
         inventory.readNBT(tag, "items");
@@ -83,7 +95,7 @@ public class EntityTrainCore extends GenericRailTransport {
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
         tag.setBoolean("isrunning",isRunning);
-        tag.setBoolean("extended.brake", brake);
+        tag.setInteger("train.accel", accelerator);
         fuelHandler.writeEntityToNBT(tag);
 
         tag.setTag("items", inventory.writeNBT());
@@ -108,7 +120,7 @@ public class EntityTrainCore extends GenericRailTransport {
             //if ((getType() == TrainsInMotion.transportTypes.STEAM || getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM)) {
             //    if (tanks.getTank(false).getFluidAmount() > tanks.getTank(false).getCapacity()*0.5f) {
                     speed *= 1 + ((accelerator / 6f) * getAcceleration());
-            System.out.println(speed + " : " + getMaxSpeed());
+            //System.out.println(speed + " : " + getMaxSpeed());
             //    }
             //} else if (fuelHandler.fuel>0){
             //    speed *= 1 + ((accelerator / 6f) * getAcceleration());
@@ -176,6 +188,21 @@ public class EntityTrainCore extends GenericRailTransport {
     }
 
 
+    @Override
+    public boolean toggleBool(int index){
+        if (!super.toggleBool(index)){
+            switch (index){
+                case 8:{
+                    isRunning = !isRunning;
+                    return true;
+                }case 9:{
+                    //Play horn
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     /**
      * <h2>Inherited variables</h2>

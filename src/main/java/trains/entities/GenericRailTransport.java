@@ -1,6 +1,7 @@
 package trains.entities;
 
 import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -16,6 +17,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -36,6 +38,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**
      * <h2>class variables</h2>
      * isLocked is for if the owner has locked it.
+     * Brake defines if the handbrake is on.
      * lamp is used for the lamp, assuming this has one.
      * colors define the skin colors in RGB format, because we plan to have multiple recolor points on the trains, dependant on skin, we need multiple sets of RGB values.
      * owner defines the UUID of the current owner (usually the player that spawns it)
@@ -52,6 +55,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     public LiquidManager tanks = new LiquidManager(0,0, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
     public boolean isLocked = false;
+    public boolean brake = false;
     public LampHandler lamp = new LampHandler();
     public int[][] colors = new int[][]{{0,0,0},{0,0,0},{0,0,0}};
     public UUID owner = null;
@@ -135,6 +139,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         isReverse = additionalData.readBoolean();
+        brake = additionalData.readBoolean();
+        isCoupling = additionalData.readBoolean();
+        isCreative = additionalData.readBoolean();
+        lamp.isOn = additionalData.readBoolean();
         owner = new UUID(additionalData.readLong(), additionalData.readLong());
         //we loop using the offset double length because we expect bogieXYZ to be null.
         for (int i=0; i<getBogieOffsets().size(); i++){
@@ -145,6 +153,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         buffer.writeBoolean(isReverse);
+        buffer.writeBoolean(brake);
+        buffer.writeBoolean(isCoupling);
+        buffer.writeBoolean(isCreative);
+        buffer.writeBoolean(lamp.isOn);
         buffer.writeLong(owner.getMostSignificantBits());
         buffer.writeLong(owner.getLeastSignificantBits());
         for (double[] xyz : bogieXYZ) {
@@ -164,6 +176,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         isDead = tag.getBoolean("extended.dead");
         isCoupling = tag.getBoolean("extended.coupling");
         isCreative = tag.getBoolean("extended.creative");
+        brake = tag.getBoolean("extended.handbrake");
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
 
         FluidStack tankA = loadFluidStackFromNBT(tag);
@@ -199,6 +212,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         tag.setBoolean("extended.dead", isDead);
         tag.setBoolean("extended.coupling", isCoupling);
         tag.setBoolean("extended.creative", isCreative);
+        tag.setBoolean("extended.handbrake", brake);
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
 
@@ -229,7 +243,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
         }
         tag.setTag("extended.bogies", nbtBogieTaglist);
-
     }
 
 
@@ -289,6 +302,12 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         bogie.get(bogieSize).posX - bogie.get(0).posX)),
                         MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY)));
 
+                if (brake){
+                    for (EntityBogie entityBogie : bogie){
+                        entityBogie.setVelocity(entityBogie.cartVelocityX * 0.8d, entityBogie.cartVelocityY, entityBogie.cartVelocityZ * 0.8d);
+                    }
+                }
+
                 if (transportTicks %2 ==0) {
                     //align bogies
                     for (int i = 0; i < bogie.size(); ) {
@@ -336,6 +355,30 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 riddenByEntity.setPosition(posX, posY + 2D, posZ);
             }
         }
+    }
+
+
+    public boolean toggleBool(int index){
+        switch (index){
+            case 4:{
+                brake = !brake;
+                System.out.println(brake);
+                return true;
+            }case 5:{
+                lamp.isOn = !lamp.isOn;
+                return true;
+            }case 6:{
+                isLocked = ! isLocked;
+                return true;
+            }case 7:{
+                isCoupling = !isCoupling;
+                return true;
+            }case 10:{
+                isCreative = !isCreative;
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

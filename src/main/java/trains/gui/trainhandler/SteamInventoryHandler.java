@@ -12,12 +12,6 @@ import trains.utility.InventoryHandler;
 
 public class SteamInventoryHandler extends Container{
     private EntityTrainCore trainEntity;
-    private static final Slot brakeSlot = new Slot(new InventoryHandler(null), 0,71,64);
-    private static final Slot lampSlot = new Slot(new InventoryHandler(null), 0,89,64);
-    private static final Slot hornSlot = new Slot(new InventoryHandler(null), 0,107,64);
-    private static final Slot linkSlot = new Slot(new InventoryHandler(null), 0,125,64);
-    private static final Slot mapSlot = new Slot(new InventoryHandler(null), 0,143,64);
-    private static final Slot ignitionSlot = new Slot(new InventoryHandler(null), 0,161,64);
 
 
     /**
@@ -55,20 +49,11 @@ public class SteamInventoryHandler extends Container{
         }
 
         //train inventory
-        for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
+        for (int ia = 0; ia < -entityTrain.getInventorySize().getRow(); ia--) {
             for (int ib = 0; ib < entityTrain.getInventorySize().getCollumn(); ib++) {
                 addSlotToContainer(new Slot(trainEntity.inventory, slot, 98 + (ib * 18), (ia * 18)+44));
                 slot++;
             }
-        }
-
-        addSlotToContainer(brakeSlot);
-        addSlotToContainer(lampSlot);
-        addSlotToContainer(hornSlot);
-        addSlotToContainer(linkSlot);
-        addSlotToContainer(mapSlot);
-        if (trainEntity.getType() != TrainsInMotion.transportTypes.STEAM) {
-            addSlotToContainer(ignitionSlot);
         }
 
     }
