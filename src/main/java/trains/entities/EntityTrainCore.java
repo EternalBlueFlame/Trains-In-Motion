@@ -145,17 +145,17 @@ public class EntityTrainCore extends GenericRailTransport {
         if (bogie.size()>0){
             boolean collision = !hitboxHandler.getCollision(this);
             //handle movement for trains, this will likely need to be different for rollingstock.
-            for (EntityBogie currentBogie : bogie) {
-                if (collision) {
+            if (collision) {
+                for (EntityBogie currentBogie : bogie) {
                     //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
                     motion[0] = processMovement(currentBogie.motionX);
                     motion[2] = processMovement(currentBogie.motionZ);
                     motion[1] = currentBogie.motionY;
                     currentBogie.setVelocity(motion[0], motion[1], motion[2]);
                     currentBogie.minecartMove();
-                } else {
-                    motion = new double[]{0d, 0d, 0d};
                 }
+            } else {
+                motion = new double[]{0d, 0d, 0d};
             }
         }
         super.onUpdate();

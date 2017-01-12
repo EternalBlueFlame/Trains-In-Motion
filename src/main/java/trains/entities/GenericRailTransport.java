@@ -251,6 +251,19 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
 
 
+    public void addVelocity(double velocityX, double velocityZ){
+        //handle movement for trains, this will likely need to be different for rollingstock.
+            for (EntityBogie currentBogie : bogie) {
+                //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                motion[0] = velocityX;
+                motion[2] = velocityZ;
+                motion[1] = currentBogie.motionY;
+                currentBogie.setVelocity(motion[0], motion[1], motion[2]);
+                currentBogie.minecartMove();
+            }
+    }
+
+
     /**
      * <h2> on entity update </h2>
      *
@@ -289,6 +302,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
              * no point in processing movement if they aren't moving or if the train hit something.
              * if it is clear however, then we need to add velocity to the bogies based on the current state of the train's speed and fuel, and reposition the train.
              * but either way we have to position the bogies around the train, just to be sure they don't accidentally fly off at some point.
+             *
+             * TODO: we need to also do a linking system, another transport can link to this one, and dependant on if it's the front or back connections, use rotate point to define where the other hitbox _should_ be.
+             * And if it's not there, calculate the distance between where it is and should be, then add velocity off the result. This should probably be limited to 8 blocks, to compensate not only for lag but other potential issues.
              */
             if (bogieSize>0){
 

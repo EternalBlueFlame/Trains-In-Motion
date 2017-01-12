@@ -16,6 +16,7 @@ import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
 import trains.entities.EntityBogie;
+import trains.entities.EntityRollingStockCore;
 import trains.entities.GenericRailTransport;
 import trains.networking.PacketRemove;
 
@@ -128,12 +129,14 @@ public class HitboxHandler {
                         if (entity != train.riddenByEntity && !(entity instanceof EntityBogie)) {
                             if (entity instanceof EntityLiving || entity instanceof EntityPlayer) {
                                 //dependant on velocity, fling it and do damage.
-                                if (train.motionX + train.motionZ != 0) {
+                                if (train.motionX + train.motionZ >1 || train.motionX + train.motionZ < -1 ) {
                                     ((Entity) entity).attackEntityFrom(new EntityDamageSource("Train", train), (float) (train.bogie.get(0).motionX + train.bogie.get(0).motionZ) * 1000);
+                                    ((Entity) entity).applyEntityCollision(train);
+                                    return false;
+                                } else if (train instanceof EntityRollingStockCore) {
+                                    train.addVelocity((train.posX - ((Entity)entity).posX) * 0.01, (((EntityRollingStockCore) train).posZ - ((Entity)entity).posZ) *0.01);
+                                    return true;
                                 }
-                                ((Entity) entity).applyEntityCollision(train);
-                                System.out.println(entity.getClass().toString());
-                                return false;
                             } else {
                                 System.out.println(entity.getClass().toString());
                                 return true;
