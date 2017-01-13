@@ -46,7 +46,7 @@ public class HitboxHandler {
             this.boundingBox.minY = posY;
             this.boundingBox.minZ = posZ-0.45;
             this.boundingBox.maxX = posX+0.45;
-            this.boundingBox.maxY = posY+2;
+            this.boundingBox.maxY = posY+2.5;
             this.boundingBox.maxZ = posZ+0.45;
         }
         @Override
@@ -90,7 +90,6 @@ public class HitboxHandler {
                     train.worldObj.spawnEntityInWorld(train.hitboxList.get(iteration));
                 }
             }
-            train.hitboxList.get(iteration).onUpdate();
             train.hitboxList.get(iteration).setLocationAndAngles(position[0] + train.posX, position[1] + train.posY, position[2] + train.posZ, 0, 0);
         }
 
@@ -119,26 +118,27 @@ public class HitboxHandler {
 
 
             //detect collisions with entities.
-            List list = train.worldObj.getEntitiesWithinAABBExcludingEntity(train, box.boundingBox);
-            if (list != null && !list.isEmpty()) {
+            AxisAlignedBB tempBox = box.boundingBox.copy().expand(0.25,0,0.25);
+            List list = train.worldObj.getEntitiesWithinAABBExcludingEntity(train, tempBox);
+            if (list != null && list.size()>0) {
                 for (Object entity: list) {
                     if (entity instanceof Entity) {
                         if (entity instanceof multipartHitbox && train.hitboxList.contains(entity)){
                             return false;
-                        }
-                        if (entity != train.riddenByEntity && !(entity instanceof EntityBogie)) {
+                        } else if (entity != train.riddenByEntity && !(entity instanceof EntityBogie)) {
                             if (entity instanceof EntityLiving || entity instanceof EntityPlayer) {
                                 //dependant on velocity, fling it and do damage.
-                                if (train.motionX + train.motionZ >1 || train.motionX + train.motionZ < -1 ) {
+                                if (train.bogie.get(0).motionX + train.bogie.get(0).motionZ >1 || train.bogie.get(0).motionX + train.bogie.get(0).motionZ < -1 ) {
                                     ((Entity) entity).attackEntityFrom(new EntityDamageSource("Train", train), (float) (train.bogie.get(0).motionX + train.bogie.get(0).motionZ) * 1000);
                                     ((Entity) entity).applyEntityCollision(train);
                                     return false;
                                 } else if (train instanceof EntityRollingStockCore) {
-                                    train.addVelocity((train.posX - ((Entity)entity).posX) * 0.01, (((EntityRollingStockCore) train).posZ - ((Entity)entity).posZ) *0.01);
+                                    System.out.println("entity collision");
+                                    train.addVelocity((train.posX - ((Entity)entity).posX) * 0.05, (((EntityRollingStockCore) train).posZ - ((Entity)entity).posZ) *0.05);
+                                    ((Entity) entity).applyEntityCollision(train);
                                     return true;
                                 }
                             } else {
-                                System.out.println(entity.getClass().toString());
                                 return true;
                             }
                         }
