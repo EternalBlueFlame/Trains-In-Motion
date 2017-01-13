@@ -107,7 +107,7 @@ public class RenderEntity extends Render {
 
     	GL11.glPushMatrix();
         //set the render position
-        GL11.glTranslated(x, y + 1.3d, z);
+        GL11.glTranslated(x, y+0.1, z);
         //rotate the model.
         GL11.glRotatef((-yaw) - 90, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);

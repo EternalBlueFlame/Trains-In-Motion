@@ -7,7 +7,6 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
-import trains.utility.InventoryHandler;
 
 
 public class SteamInventoryHandler extends Container{

@@ -1,7 +1,6 @@
 package trains.entities;
 
 import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -17,7 +16,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -308,6 +306,24 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
              */
             if (bogieSize>0){
 
+                if (bogie.size()>0){
+                    boolean collision = !hitboxHandler.getCollision(this);
+                    //handle movement for trains, this will likely need to be different for rollingstock.
+                    for (EntityBogie currentBogie : bogie) {
+                        if (collision) {
+                            //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                            motion[0] = processMovement(currentBogie.motionX);
+                            motion[2] = processMovement(currentBogie.motionZ);
+                            motion[1] = currentBogie.motionY;
+                            currentBogie.setVelocity(motion[0], motion[1], motion[2]);
+                            currentBogie.minecartMove();
+                        } else {
+                            motion = new double[]{0d, 0d, 0d};
+                        }
+                    }
+                }
+
+
                 //position this
                 if ((bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) != 0) {
                     setPosition(
@@ -358,7 +374,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
     }
 
-
+    public float processMovement(double X){
+        float speed = (float) X * 0.9f;
+        return speed;
+    }
     /**
      * <h2>Rider offset</h2>
      * this runs every tick to be sure the rider is in the correct position

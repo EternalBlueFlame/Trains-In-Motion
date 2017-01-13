@@ -1,10 +1,8 @@
 package trains.entities;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.audio.ISound;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import trains.utility.FuelHandler;
 import trains.utility.InventoryHandler;
 
 import java.util.UUID;
@@ -86,45 +84,5 @@ public class EntityRollingStockCore extends GenericRailTransport {
         tag.setTag("items", inventory.writeNBT());
     }
 
-
-    /**
-     * <h2> process train movement</h2>
-     * called by onUpdate to figure out the amount of movement to apply every tick
-     * @see #onUpdate()
-     *
-     * currently this is only intended to provide a rather static amount.
-     */
-    private float processMovement(double X){
-        float speed = (float) X * 0.9f;
-        return speed;
-    }
-
-    /**
-     * <h2> on entity update</h2>
-     * first we have to manage our speed by updating our motion vector and applying it to the bogies.
-     * after that we let the super handle things.
-     * @see GenericRailTransport#onUpdate()
-     * lastly we use a tick check to define if we should manage fuel, since we shouldn't be doing that every tick.
-     */
-    @Override
-    public void onUpdate() {
-        if (bogie.size()>0){
-            boolean collision = !hitboxHandler.getCollision(this);
-            //handle movement for trains, this will likely need to be different for rollingstock.
-            for (EntityBogie currentBogie : bogie) {
-                if (collision) {
-                    //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                    motion[0] = processMovement(currentBogie.motionX);
-                    motion[2] = processMovement(currentBogie.motionZ);
-                    motion[1] = currentBogie.motionY;
-                    currentBogie.setVelocity(motion[0], motion[1], motion[2]);
-                    currentBogie.minecartMove();
-                } else {
-                    motion = new double[]{0d, 0d, 0d};
-                }
-            }
-        }
-        super.onUpdate();
-    }
 
 }

@@ -109,7 +109,8 @@ public class EntityTrainCore extends GenericRailTransport {
      *
      * currently this is only intended to provide a rather static amount.
      */
-    private float processMovement(double X){
+    @Override
+    public float processMovement(double X){
         float speed = (float) X * 0.9f;
 
         if (speed ==0){
