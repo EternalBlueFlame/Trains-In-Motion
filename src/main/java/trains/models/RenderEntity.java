@@ -107,13 +107,13 @@ public class RenderEntity extends Render {
 
     	GL11.glPushMatrix();
         //set the render position
-        GL11.glTranslated(x, y + 1.3d, z);
+        GL11.glTranslated(x, y+0.1, z);
         //rotate the model.
         GL11.glRotatef((-yaw) - 90, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
 
         if (entity.bogie.size() > 0) {
-            wheelPitch += 1f;//(float) (((GenericRailTransport) entity).bogie.get(0).motionX + ((GenericRailTransport) entity).bogie.get(0).motionZ) * 0.05f;
+            wheelPitch += (float) (entity.bogie.get(0).motionX + entity.bogie.get(0).motionZ) * 0.05f;
             if (wheelPitch > 360) {
                 wheelPitch = 0;
             }
@@ -128,45 +128,48 @@ public class RenderEntity extends Render {
          * In some cases we just need the reference, like for wheels, and more advanced pistons we also need the rotation.
          *
          * Assuming there are cached values to animate, then we'll animate them using the functionality from the variable classes.
+         * TODO: add a render for doors, the animation is started when an entity mounts/unmounts the train/rollingstock. needs a sliding and a swing animation.
          */
-        if (wheels != null && wheels.size() <1 && entity.getType() != TrainsInMotion.transportTypes.MAGLEV) {
-            List boxes = model.boxList;
-            if (bogieModel != null) {
-                boxes.add(bogieModel.boxList);
-            }
-            for (Object box : boxes) {
-                if (box instanceof ModelRenderer) {
-                    ModelRenderer render = ((ModelRenderer) box);
-                    if (render.boxName.equals("wheel")) {
-                        wheels.add(new wheel(render));
-                    } else if (render.boxName.equals("pistonvalveconnector")){
-                        advancedPistons.add(new advancedPiston(render));
-                    } else if (
-                            render.boxName.equals("wheelconnector") || render.boxName.equals("upperpiston") ||render.boxName.equals("upperpistonarm")
-                            ){
-                        simplePistons.add(new simplePiston(render));
+        if (ClientProxy.EnableAnimations) {
+            if (wheels != null && wheels.size() < 1 && entity.getType() != TrainsInMotion.transportTypes.MAGLEV) {
+                List boxes = model.boxList;
+                if (bogieModel != null) {
+                    boxes.add(bogieModel.boxList);
+                }
+                for (Object box : boxes) {
+                    if (box instanceof ModelRenderer) {
+                        ModelRenderer render = ((ModelRenderer) box);
+                        if (render.boxName.equals("wheel")) {
+                            wheels.add(new wheel(render));
+                        } else if (render.boxName.equals("pistonvalveconnector")) {
+                            advancedPistons.add(new advancedPiston(render));
+                        } else if (
+                                render.boxName.equals("wheelconnector") || render.boxName.equals("upperpiston") || render.boxName.equals("upperpistonarm")
+                                ) {
+                            simplePistons.add(new simplePiston(render));
+                        }
                     }
                 }
-            }
-            //if there are no boxes to animate set wheels to null
-            if (wheels.size()<1){
-                wheels = null;
-            }
-        }
-
-        //if wheels is not null, then animate the model.
-        if (wheels != null){
-            rotationvec = new Vec2f((entity.getPistonOffset() * MathHelper.sin(-wheelPitch * RailUtility.radianF)), (entity.getPistonOffset() * MathHelper.cos(-wheelPitch * RailUtility.radianF)));
-            for (wheel tempWheel : wheels){
-                tempWheel.rotate(wheelPitch);
+                //if there are no boxes to animate set wheels to null
+                if (wheels.size() < 1) {
+                    wheels = null;
+                }
             }
 
-            for (advancedPiston advPiston : advancedPistons){
-                advPiston.rotationMoveYZX(rotationvec);
-            }
+            //if wheels is not null, then animate the model.
+            if (wheels != null) {
+                rotationvec = new Vec2f((entity.getPistonOffset() * MathHelper.sin(-wheelPitch * RailUtility.radianF)), (entity.getPistonOffset() * MathHelper.cos(-wheelPitch * RailUtility.radianF)));
+                for (wheel tempWheel : wheels) {
+                    tempWheel.rotate(wheelPitch);
+                }
 
-            for (simplePiston basicPiston : simplePistons){
-                basicPiston.moveYZ(rotationvec);
+                for (advancedPiston advPiston : advancedPistons) {
+                    advPiston.rotationMoveYZX(rotationvec);
+                }
+
+                for (simplePiston basicPiston : simplePistons) {
+                    basicPiston.moveYZ(rotationvec);
+                }
             }
         }
 
@@ -199,35 +202,37 @@ public class RenderEntity extends Render {
          * <h4>Smoke management</h4>
          * some trains, and even rollingstock will have smoke,
          */
-        float randomX;
-        float randomZ;
-        float colorOffset;
-        Random rand = new Random();
-        float[] direction;
-        for (float[] smoke : entity.getSmokeOffset()){
-            for (int i=0; i< smoke[4]; i++) {
-                direction = RailUtility.rotatePoint(new float[]{smoke[0],smoke[1],smoke[2]}, entity.rotationPitch, entity.rotationYaw,0);
-                direction[0] += entity.posX;
-                direction[1] += entity.posY;
-                direction[2] += entity.posZ;
-                smokeFX renderSmoke = new smokeFX(entity.worldObj,
-                        direction[0],direction[1], direction[2], 10);
-                randomX = (rand.nextInt(100) -50)*0.0001f;
-                randomZ = (rand.nextInt(100) -50)*0.0001f;
-                colorOffset = (rand.nextInt(20) -10)*0.01f;
-                if (smoke[1] !=0) {
-                    renderSmoke.setVelocity(randomX, smoke[1] * 0.01,randomZ);
-                } else if (entity instanceof EntityTrainCore) {
+        if (ClientProxy.EnableSmokeAndSteam) {
+            float randomX;
+            float randomZ;
+            float colorOffset;
+            Random rand = new Random();
+            float[] direction;
+            for (float[] smoke : entity.getSmokeOffset()) {
+                for (int i = 0; i < smoke[4]; i++) {
+                    direction = RailUtility.rotatePoint(new float[]{smoke[0], smoke[1], smoke[2]}, entity.rotationPitch, entity.rotationYaw, 0);
+                    direction[0] += entity.posX;
+                    direction[1] += entity.posY;
+                    direction[2] += entity.posZ;
+                    smokeFX renderSmoke = new smokeFX(entity.worldObj,
+                            direction[0], direction[1], direction[2], 10);
+                    randomX = (rand.nextInt(100) - 50) * 0.0001f;
+                    randomZ = (rand.nextInt(100) - 50) * 0.0001f;
+                    colorOffset = (rand.nextInt(20) - 10) * 0.01f;
+                    if (smoke[1] != 0) {
+                        renderSmoke.setVelocity(randomX, smoke[1] * 0.0075, randomZ);
+                    } else if (entity instanceof EntityTrainCore) {
 
-                    renderSmoke.setVelocity((entity.motion[0]* ((EntityTrainCore) entity).accelerator) + randomX,randomZ, (entity.motion[2]* ((EntityTrainCore) entity).accelerator) +randomX);
+                        renderSmoke.setVelocity((entity.motion[0] * ((EntityTrainCore) entity).accelerator) + randomX, randomZ, (entity.motion[2] * ((EntityTrainCore) entity).accelerator) + randomZ);
+                    }
+                    renderSmoke.setParticleTextureIndex(0);
+                    if (smoke[3] > 0.55f) {
+                        renderSmoke.setRBGColorF(smoke[3] - colorOffset, smoke[3] - colorOffset, smoke[3] - colorOffset);
+                    } else {
+                        renderSmoke.setRBGColorF(smoke[3] + colorOffset, smoke[3] + colorOffset, smoke[3] + colorOffset);
+                    }
+                    Minecraft.getMinecraft().effectRenderer.addEffect(renderSmoke);
                 }
-                renderSmoke.setParticleTextureIndex(0);
-                if (smoke[3] >0.55f) {
-                    renderSmoke.setRBGColorF(smoke[3] - colorOffset, smoke[3] - colorOffset, smoke[3] - colorOffset);
-                } else {
-                    renderSmoke.setRBGColorF(smoke[3] + colorOffset, smoke[3] + colorOffset, smoke[3] + colorOffset);
-                }
-                Minecraft.getMinecraft().effectRenderer.addEffect(renderSmoke);
             }
         }
 

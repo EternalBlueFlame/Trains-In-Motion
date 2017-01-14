@@ -17,14 +17,12 @@ public class EntityTrainCore extends GenericRailTransport {
 
     /**
      * <h3>variables</h3>
-     * Brake defines if the handbrake is on.
      * isRunning is used for non-steam based trains to define if it's actually on.
      * fuelHandler manages the items for fuel, and the fuel itself.
      * accelerator defines the speed percentage the user is attempting to apply.
      * destination is used for routing, railcraft and otherwise.
      * lastly the inventory defines the item storage of the train.
      */
-    public boolean brake = false;
     public boolean isRunning = false;
     public FuelHandler fuelHandler = new FuelHandler();
     public int accelerator =0;
@@ -71,10 +69,24 @@ public class EntityTrainCore extends GenericRailTransport {
      * @see GenericRailTransport#readSpawnData(ByteBuf)
      */
     @Override
+    public void readSpawnData(ByteBuf additionalData) {
+    super.readSpawnData(additionalData);
+        isRunning = additionalData.readBoolean();
+        accelerator = additionalData.readInt();
+        fuelHandler.fuel = additionalData.readInt();
+    }
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        super.writeSpawnData(buffer);
+        buffer.writeBoolean(isRunning);
+        buffer.writeInt(accelerator);
+        buffer.writeInt(fuelHandler.fuel);
+    }
+    @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
         isRunning = tag.getBoolean("isrunning");
-        brake = tag.getBoolean("extended.brake");
+        accelerator = tag.getInteger("train.accel");
         fuelHandler.readEntityFromNBT(tag);
 
         inventory.readNBT(tag, "items");
@@ -83,7 +95,7 @@ public class EntityTrainCore extends GenericRailTransport {
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
         tag.setBoolean("isrunning",isRunning);
-        tag.setBoolean("extended.brake", brake);
+        tag.setInteger("train.accel", accelerator);
         fuelHandler.writeEntityToNBT(tag);
 
         tag.setTag("items", inventory.writeNBT());
@@ -97,15 +109,22 @@ public class EntityTrainCore extends GenericRailTransport {
      *
      * currently this is only intended to provide a rather static amount.
      */
-    private float processMovement(double X){
-
+    @Override
+    public float processMovement(double X){
         float speed = (float) X * 0.9f;
 
+        if (speed ==0){
+            speed = ((accelerator / 6f)*0.1f) * getAcceleration();
+        }
+
         if (accelerator!=0) {
-            //if (speed != 0) {
-                speed *= 1+((accelerator / 6f) * getAcceleration());
-            //} else {
-            //    speed = (0.1666666667f) * getAcceleration();
+            //if ((getType() == TrainsInMotion.transportTypes.STEAM || getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM)) {
+            //    if (tanks.getTank(false).getFluidAmount() > tanks.getTank(false).getCapacity()*0.5f) {
+                    speed *= 1 + ((accelerator / 6f) * getAcceleration());
+            //System.out.println(speed + " : " + getMaxSpeed());
+            //    }
+            //} else if (fuelHandler.fuel>0){
+            //    speed *= 1 + ((accelerator / 6f) * getAcceleration());
             //}
         }
 
@@ -127,17 +146,17 @@ public class EntityTrainCore extends GenericRailTransport {
         if (bogie.size()>0){
             boolean collision = !hitboxHandler.getCollision(this);
             //handle movement for trains, this will likely need to be different for rollingstock.
-            for (EntityBogie currentBogie : bogie) {
-                if (collision) {
+            if (collision) {
+                for (EntityBogie currentBogie : bogie) {
                     //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
                     motion[0] = processMovement(currentBogie.motionX);
                     motion[2] = processMovement(currentBogie.motionZ);
                     motion[1] = currentBogie.motionY;
-                    currentBogie.setVelocity(motion[0], 0, motion[2]);
+                    currentBogie.setVelocity(motion[0], motion[1], motion[2]);
                     currentBogie.minecartMove();
-                } else {
-                    motion = new double[]{0d, 0d, 0d};
                 }
+            } else {
+                motion = new double[]{0d, 0d, 0d};
             }
         }
         super.onUpdate();
@@ -170,6 +189,21 @@ public class EntityTrainCore extends GenericRailTransport {
     }
 
 
+    @Override
+    public boolean toggleBool(int index){
+        if (!super.toggleBool(index)){
+            switch (index){
+                case 8:{
+                    isRunning = !isRunning;
+                    return true;
+                }case 9:{
+                    //Play horn
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     /**
      * <h2>Inherited variables</h2>

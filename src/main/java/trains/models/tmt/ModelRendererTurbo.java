@@ -22,6 +22,7 @@ import java.util.*;
  * support or have the addSprite method, methods that add a lot of vertices and
  * polygons.
  * @author GaryCXJk
+ * @license http://fexcraft.net/license?id=tmt
  *
  */
 public class ModelRendererTurbo extends ModelRenderer {
@@ -235,19 +236,13 @@ public class ModelRendererTurbo extends ModelRenderer {
         addBox(x, y, z, w, h, d, 0.0F);
         return this;
     }
-
-    /**
-     * Adds a new box to the model.
-     * @param x the starting x-position
-     * @param y the starting y-position
-     * @param z the starting z-position
-     * @param w the width (over the x-direction)
-     * @param h the height (over the y-direction)
-     * @param d the depth (over the z-direction)
-     */
     public ModelRendererTurbo addBox(float x, float y, float z, int w, int h, int d) {
         addBox(x, y, z, (float) w, (float) h, (float) d, 0.0F);
         return this;
+    }
+    @Override
+    public void addBox(float x, float y, float z, int w, int h, int d, float s) {
+        addBox(x, y, z, (float) w, (float) h, (float) d, s);
     }
 
 

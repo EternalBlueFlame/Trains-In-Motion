@@ -16,6 +16,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import trains.TrainsInMotion;
@@ -35,6 +36,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**
      * <h2>class variables</h2>
      * isLocked is for if the owner has locked it.
+     * Brake defines if the handbrake is on.
      * lamp is used for the lamp, assuming this has one.
      * colors define the skin colors in RGB format, because we plan to have multiple recolor points on the trains, dependant on skin, we need multiple sets of RGB values.
      * owner defines the UUID of the current owner (usually the player that spawns it)
@@ -42,12 +44,16 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * bogieXYZ is the list of known positions for the bogies, this is mostly used to keep track of where the bogies are supposed to be via NBT.
      * motion is the vector angle that the train is facing, we only initialize it here, so we don't need to initialize it every tick.
      * TODO: isReverse is supposed to be for whether or not the train is in reverse, but we aren't actually using this yet, and it may not even be necessary.
+     * isCreative defines whether or not it should actually remove the liquid/fuel item, this can be toggled from the GUI if the rider is in creative mode.
      * hitboxList and hitboxHandler manage the hitboxes the train has, this is mostly dealt with via getParts() and the hitbox functionality.
      * transportTicks is a simple tick count that allows us to manage functions that don't happen every tick, like fuel consumption in trains.
+     * front and back define references to the train/rollingstock connected to the front and back, so that way we can better control links.
      *
      * the last part is the generic entity constructor
      */
+    public LiquidManager tanks = new LiquidManager(0,0, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
     public boolean isLocked = false;
+    public boolean brake = false;
     public LampHandler lamp = new LampHandler();
     public int[][] colors = new int[][]{{0,0,0},{0,0,0},{0,0,0}};
     public UUID owner = null;
@@ -55,11 +61,16 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
     public double[] motion = new double[]{0,0,0};
     public boolean isReverse =false;
+    public boolean isCreative = false;
+    public boolean isCoupling = false;
     public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
     public HitboxHandler hitboxHandler = new HitboxHandler();
     public int transportTicks =0;
+    public GenericRailTransport front;
+    public GenericRailTransport back;
     public GenericRailTransport(World world){
         super(world);
+        tanks = getTank();
     }
 
 
@@ -126,15 +137,24 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         isReverse = additionalData.readBoolean();
+        brake = additionalData.readBoolean();
+        isCoupling = additionalData.readBoolean();
+        isCreative = additionalData.readBoolean();
+        lamp.isOn = additionalData.readBoolean();
         owner = new UUID(additionalData.readLong(), additionalData.readLong());
         //we loop using the offset double length because we expect bogieXYZ to be null.
         for (int i=0; i<getBogieOffsets().size(); i++){
             bogieXYZ.add(new double[]{additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble()});
         }
+
     }
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         buffer.writeBoolean(isReverse);
+        buffer.writeBoolean(brake);
+        buffer.writeBoolean(isCoupling);
+        buffer.writeBoolean(isCreative);
+        buffer.writeBoolean(lamp.isOn);
         buffer.writeLong(owner.getMostSignificantBits());
         buffer.writeLong(owner.getLeastSignificantBits());
         for (double[] xyz : bogieXYZ) {
@@ -150,17 +170,22 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         lamp.X = tag.getInteger("extended.lamp.x");
         lamp.Y = tag.getInteger("extended.lamp.y");
         lamp.Z = tag.getInteger("extended.lamp.z");
-        isReverse = tag.getBoolean("extended.isreverse");
-        isDead = tag.getBoolean("extended.isdead");
+        isReverse = tag.getBoolean("extended.reverse");
+        isDead = tag.getBoolean("extended.dead");
+        isCoupling = tag.getBoolean("extended.coupling");
+        isCreative = tag.getBoolean("extended.creative");
+        brake = tag.getBoolean("extended.handbrake");
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
 
-        FluidStack tankA = loadFluidStackFromNBT(tag);
-        if (tankA.amount!=0) {
-            getTank().addFluid(tankA.getFluid(), tankA.amount, true);
-        }
-        FluidStack tankB = loadFluidStackFromNBT(tag);
-        if (tankB.amount!=0) {
-            getTank().addFluid(tankB.getFluid(), tankB.amount, false);
+        if (tanks != null) {
+            FluidStack tankA = loadFluidStackFromNBT(tag);
+            if (tankA.amount != 0) {
+                tanks.addFluid(tankA.getFluid(), tankA.amount, true);
+            }
+            FluidStack tankB = loadFluidStackFromNBT(tag);
+            if (tankB.amount != 0) {
+                tanks.addFluid(tankB.getFluid(), tankB.amount, false);
+            }
         }
 
 
@@ -183,22 +208,27 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         tag.setInteger("extended.lamp.x", lamp.X);
         tag.setInteger("extended.lamp.y", lamp.Y);
         tag.setInteger("extended.lamp.z", lamp.Z);
-        tag.setBoolean("extended.isreverse", isReverse);
-        tag.setBoolean("extended.isdead", isDead);
+        tag.setBoolean("extended.reverse", isReverse);
+        tag.setBoolean("extended.dead", isDead);
+        tag.setBoolean("extended.coupling", isCoupling);
+        tag.setBoolean("extended.creative", isCreative);
+        tag.setBoolean("extended.handbrake", brake);
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
 
 
-        if (getTank().getTank(true).getFluid() != null){
-            getTank().getTank(true).getFluid().writeToNBT(tag);
-        } else {
-            new FluidStack(FluidRegistry.WATER,0).writeToNBT(tag);
-        }
+        if (tanks != null) {
+            if (tanks.getTank(true).getFluid() != null) {
+                tanks.getTank(true).getFluid().writeToNBT(tag);
+            } else {
+                new FluidStack(FluidRegistry.WATER, 0).writeToNBT(tag);
+            }
 
-        if (getTank().getTank(false).getFluid() != null){
-            getTank().getTank(false).getFluid().writeToNBT(tag);
-        } else {
-            new FluidStack(FluidRegistry.WATER,0).writeToNBT(tag);
+            if (tanks.getTank(false).getFluid() != null) {
+                tanks.getTank(false).getFluid().writeToNBT(tag);
+            } else {
+                new FluidStack(FluidRegistry.WATER, 0).writeToNBT(tag);
+            }
         }
 
 
@@ -215,9 +245,21 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
         }
         tag.setTag("extended.bogies", nbtBogieTaglist);
-
     }
 
+
+
+    public void addVelocity(double velocityX, double velocityZ){
+        //handle movement for trains, this will likely need to be different for rollingstock.
+            for (EntityBogie currentBogie : bogie) {
+                //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                motion[0] = velocityX;
+                motion[2] = velocityZ;
+                motion[1] = currentBogie.motionY;
+                currentBogie.setVelocity(motion[0], motion[1], motion[2]);
+                currentBogie.minecartMove();
+            }
+    }
 
 
     /**
@@ -231,7 +273,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * being sure the train is listed in the main class (for lighting management).
      * @see ClientProxy#onTick(TickEvent.ClientTickEvent)
      *
-     * TODO: we need to put back lamp management
      */
     @Override
     public void onUpdate() {
@@ -259,8 +300,29 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
              * no point in processing movement if they aren't moving or if the train hit something.
              * if it is clear however, then we need to add velocity to the bogies based on the current state of the train's speed and fuel, and reposition the train.
              * but either way we have to position the bogies around the train, just to be sure they don't accidentally fly off at some point.
+             *
+             * TODO: we need to also do a linking system, another transport can link to this one, and dependant on if it's the front or back connections, use rotate point to define where the other hitbox _should_ be.
+             * And if it's not there, calculate the distance between where it is and should be, then add velocity off the result. This should probably be limited to 8 blocks, to compensate not only for lag but other potential issues.
              */
             if (bogieSize>0){
+
+                if (bogie.size()>0){
+                    boolean collision = !hitboxHandler.getCollision(this);
+                    //handle movement for trains, this will likely need to be different for rollingstock.
+                    for (EntityBogie currentBogie : bogie) {
+                        if (collision) {
+                            //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                            motion[0] = processMovement(currentBogie.motionX);
+                            motion[2] = processMovement(currentBogie.motionZ);
+                            motion[1] = currentBogie.motionY;
+                            currentBogie.setVelocity(motion[0], motion[1], motion[2]);
+                            currentBogie.minecartMove();
+                        } else {
+                            motion = new double[]{0d, 0d, 0d};
+                        }
+                    }
+                }
+
 
                 //position this
                 if ((bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) != 0) {
@@ -276,12 +338,20 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         bogie.get(bogieSize).posX - bogie.get(0).posX)),
                         MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY)));
 
-                //align bogies
-                for (int i = 0; i < bogie.size(); ) {
-                    float[] var = rotatePoint(new float[]{(float) getBogieOffsets().get(i).doubleValue(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                    bogie.get(i).setPosition(var[0] + posX, bogie.get(i).posY, var[2] + posZ);
-                    bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
-                    i++;
+                if (brake){
+                    for (EntityBogie entityBogie : bogie){
+                        entityBogie.setVelocity(entityBogie.cartVelocityX * 0.8d, entityBogie.cartVelocityY, entityBogie.cartVelocityZ * 0.8d);
+                    }
+                }
+
+                if (transportTicks %2 ==0) {
+                    //align bogies
+                    for (int i = 0; i < bogie.size(); ) {
+                        float[] var = rotatePoint(new float[]{(float) getBogieOffsets().get(i).doubleValue(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                        bogie.get(i).setPosition(var[0] + posX, bogie.get(i).posY, var[2] + posZ);
+                        bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
+                        i++;
+                    }
                 }
             }
 
@@ -304,7 +374,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
     }
 
-
+    public float processMovement(double X){
+        float speed = (float) X * 0.9f;
+        return speed;
+    }
     /**
      * <h2>Rider offset</h2>
      * this runs every tick to be sure the rider is in the correct position
@@ -321,6 +394,30 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 riddenByEntity.setPosition(posX, posY + 2D, posZ);
             }
         }
+    }
+
+
+    public boolean toggleBool(int index){
+        switch (index){
+            case 4:{
+                brake = !brake;
+                System.out.println(brake);
+                return true;
+            }case 5:{
+                lamp.isOn = !lamp.isOn;
+                return true;
+            }case 6:{
+                isLocked = ! isLocked;
+                return true;
+            }case 7:{
+                isCoupling = !isCoupling;
+                return true;
+            }case 10:{
+                isCreative = !isCreative;
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

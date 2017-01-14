@@ -30,6 +30,7 @@ import trains.utility.RailUtility;
 public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart, IEntityAdditionalSpawnData {
 
     private int parentId = 0;
+    private GenericRailTransport parent;
     protected double cartVelocityX =0;
     protected double cartVelocityY =0;
     protected double cartVelocityZ =0;
@@ -51,7 +52,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     public void readSpawnData(ByteBuf additionalData) {
         parentId = additionalData.readInt();
         if (parentId != 0) {
-            EntityTrainCore parent = ((EntityTrainCore) worldObj.getEntityByID(parentId));
+            parent = ((GenericRailTransport) worldObj.getEntityByID(parentId));
             if (parent != null){
                 parent.addbogies(this);
             } else {
@@ -104,11 +105,11 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     public void onUpdate() {}
     @Override
     public AxisAlignedBB getBoundingBox(){
-        return boundingBox;
+        return null;
     }
     @Override
     public AxisAlignedBB getCollisionBox(Entity collidedWith){
-        return boundingBox;
+        return null;
     }
     @Override
     public boolean canBeCollidedWith() {

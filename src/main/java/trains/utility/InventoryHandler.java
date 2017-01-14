@@ -22,8 +22,12 @@ public class InventoryHandler implements IInventory{
      * sets the host variable, and inventory size then creates an instance of the class, this can be re-used for any train or rollingstock.
      */
     public InventoryHandler(GenericRailTransport host){
-        this.host = host;
-        while (items.size() < getSizeInventory()){
+        if (host != null) {
+            this.host = host;
+            while (items.size() < getSizeInventory()) {
+                items.add(null);
+            }
+        } else {
             items.add(null);
         }
     }
@@ -102,7 +106,11 @@ public class InventoryHandler implements IInventory{
     }
     @Override
     public int getInventoryStackLimit() {
-        return 64;
+        if (host != null) {
+            return 64;
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -112,7 +120,7 @@ public class InventoryHandler implements IInventory{
      */
     @Override
     public boolean isUseableByPlayer(EntityPlayer p_70300_1_) {
-        return (!host.isLocked || p_70300_1_.getUniqueID() == host.getOwnerUUID());
+        return host != null && (!host.isLocked || p_70300_1_.getUniqueID() == host.getOwnerUUID());
     }
 
     /**
@@ -127,6 +135,8 @@ public class InventoryHandler implements IInventory{
             } else if (p_94041_1_ ==1) {
                 return FuelHandler.isWater(p_94041_2_, host);
             }
+        } else if (host == null){
+            return false;
         }
         return true;
     }

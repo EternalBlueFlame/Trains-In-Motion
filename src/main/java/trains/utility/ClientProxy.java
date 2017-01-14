@@ -35,6 +35,8 @@ public class ClientProxy extends CommonProxy {
      * Courtesy of Ferdinand
      */
     public static boolean EnableLights = true;
+    public static boolean EnableSmokeAndSteam = true;
+    public static boolean EnableAnimations = true;
     public static KeyBinding KeyLamp = new KeyBinding("Lamp Toggle", 38, "Trains in Motion");
     public static KeyBinding KeyInventory = new KeyBinding("Open Train/rollingstock GUI", 23, "Trains in Motion");
     public static KeyBinding KeyAccelerate = new KeyBinding("Train Acceleration", 17, "Trains in Motion");
@@ -73,8 +75,12 @@ public class ClientProxy extends CommonProxy {
      */
     @Override
     public void loadConfig(Configuration config){
-        config.addCustomCategoryComment("Quality (Client only)", "Lamps take up a lot of extra processing on client side due to forced chunk reloading, \nLowEndRender turns off some of the extra graphical features that may cause lag.");
+        config.addCustomCategoryComment("Quality (Client only)", "Lamps take up a lot of extra processing on client side due to forced chunk reloading");
         EnableLights = config.get(Configuration.CATEGORY_GENERAL, "EnableLamp", true).getBoolean(true);
+        config.addCustomCategoryComment("Quality (Client only)", "Smoke and steam effects are more lightweight than those of normal minecraft. These shouldn't cause much lag if any, but its client only so if you wanna disable it you can.");
+        EnableSmokeAndSteam = config.get(Configuration.CATEGORY_GENERAL, "EnableSmokeAndSteam", true).getBoolean(true);
+        config.addCustomCategoryComment("Quality (Client only)", "Animations are calculated by vector positioning and rotation every frame. These shouldn't cause much lag if any, but its client only so if you wanna disable it you can.");
+        EnableAnimations = config.get(Configuration.CATEGORY_GENERAL, "EnableAnimations", true).getBoolean(true);
 
         config.addCustomCategoryComment("Keybinds", "accepted values are Lowercase a-z, along with the special characters:  ,.;'[]\\`-=");
 

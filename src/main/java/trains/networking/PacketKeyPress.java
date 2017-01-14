@@ -10,6 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
+import trains.entities.GenericRailTransport;
 import trains.utility.EventHandler;
 
 public class PacketKeyPress implements IMessage {
@@ -44,28 +45,28 @@ public class PacketKeyPress implements IMessage {
         @Override
         public IMessage onMessage(PacketKeyPress message, MessageContext context) {
             Entity ridingEntity = context.getServerHandler().playerEntity.ridingEntity;
-            //Toggles
-            if (message.key == 0){
-                ((EntityTrainCore) ridingEntity).lamp.isOn = !((EntityTrainCore) ridingEntity).lamp.isOn;
-            }
-            //speed
-            else if (message.key == 2){
-                ((EntityTrainCore) ridingEntity).setAcceleration(true);
-            }else if (message.key == 3){
-                ((EntityTrainCore) ridingEntity).setAcceleration(false);
-            }
-            /**
-             * <h3>Manage the inventory key press</h3>
-             * here we have to figure out what kind of train or rollingstock the player is riding, and activate the related GUI.
-             */
-            else if (message.key == 1){
-                EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
-                if (entityPlayer != null && entityPlayer.ridingEntity instanceof EntityTrainCore) {
-                    switch (((EntityTrainCore) entityPlayer.ridingEntity).getType()) {
-                        case STEAM: {
-                            entityPlayer.openGui(TrainsInMotion.instance, TrainsInMotion.STEAM_GUI_ID, entityPlayer.ridingEntity.worldObj,
-                                    MathHelper.floor_double(entityPlayer.ridingEntity.posX), MathHelper.floor_double(entityPlayer.ridingEntity.posY),
-                                    MathHelper.floor_double(entityPlayer.ridingEntity.posZ)); break;
+            //Toggles,
+            if(!((GenericRailTransport) ridingEntity).toggleBool(message.key)) {
+                //speed
+                if (message.key == 2) {
+                    ((EntityTrainCore) ridingEntity).setAcceleration(true);
+                } else if (message.key == 3) {
+                    ((EntityTrainCore) ridingEntity).setAcceleration(false);
+                }
+                /**
+                 * <h3>Manage the inventory key press</h3>
+                 * here we have to figure out what kind of train or rollingstock the player is riding, and activate the related GUI.
+                 */
+                else if (message.key == 1) {
+                    EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
+                    if (entityPlayer != null && entityPlayer.ridingEntity instanceof EntityTrainCore) {
+                        switch (((EntityTrainCore) entityPlayer.ridingEntity).getType()) {
+                            case STEAM: {
+                                entityPlayer.openGui(TrainsInMotion.instance, TrainsInMotion.STEAM_GUI_ID, entityPlayer.ridingEntity.worldObj,
+                                        MathHelper.floor_double(entityPlayer.ridingEntity.posX), MathHelper.floor_double(entityPlayer.ridingEntity.posY),
+                                        MathHelper.floor_double(entityPlayer.ridingEntity.posZ));
+                                break;
+                            }
                         }
                     }
                 }
