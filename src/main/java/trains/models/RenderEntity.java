@@ -1,7 +1,5 @@
 package trains.models;
 
-import com.sun.javafx.geom.Vec2f;
-import com.sun.javafx.geom.Vec3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.particle.EntityFX;
@@ -23,6 +21,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import trains.models.tmt.Vec2f;
+import trains.models.tmt.Vec3f;
 
 /**
  * <h2> .Java Entity Rendering</h2>
