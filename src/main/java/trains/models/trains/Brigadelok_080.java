@@ -1218,7 +1218,6 @@ public class Brigadelok_080 extends ModelBase
 	{
 		super.render(entity, f, f1, f2, f3, f4, f5);
 		setRotationAngles(f, f1, f2, f3, f4, f5,entity);
-		GL11.glTranslatef(0f, -1.125f, 0f);
 		Elem122.render(f5);//Upper_Piston_r_Right
 		Elem121.render(f5);//Upper_Piston_Right
 		Elem120.render(f5);//Upper_PistonValveConnector_Right
