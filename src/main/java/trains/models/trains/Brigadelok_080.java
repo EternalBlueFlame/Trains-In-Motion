@@ -10,7 +10,6 @@
 package trains.models.trains;
 
 import net.minecraft.entity.Entity;
-import org.lwjgl.opengl.GL11;
 import trains.models.ModelRenderer;
 import trains.models.tmt.ModelBase;
 
