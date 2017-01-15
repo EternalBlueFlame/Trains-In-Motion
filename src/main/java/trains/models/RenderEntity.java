@@ -207,10 +207,10 @@ public class RenderEntity extends Render {
             float randomZ;
             float colorOffset;
             Random rand = new Random();
-            float[] direction;
+            double[] direction;
             for (float[] smoke : entity.getSmokeOffset()) {
                 for (int i = 0; i < smoke[4]; i++) {
-                    direction = RailUtility.rotatePoint(new float[]{smoke[0], smoke[1], smoke[2]}, entity.rotationPitch, entity.rotationYaw, 0);
+                    direction = RailUtility.rotatePoint(new double[]{smoke[0], smoke[1], smoke[2]}, entity.rotationPitch, entity.rotationYaw, 0);
                     direction[0] += entity.posX;
                     direction[1] += entity.posY;
                     direction[2] += entity.posZ;

@@ -14,7 +14,6 @@ import trains.entities.GenericRailTransport;
 public class RailUtility {
     public static final float radianF = (float) Math.PI / 180.0f;
     public static final double radianD = Math.PI / 180.0d;
-    public static final float degreesF = (float) (180.0d / Math.PI);
     /**
      * <h2>Vanilla Track Overrrides</h2>
      * TODO: need ZND API for ITrackBase
@@ -38,41 +37,6 @@ public class RailUtility {
      * courtesy of Zora No Densha.
      * There are version for doubles and floats.
      */
-    public static float[] rotatePoint(float[] f, float pitch, float yaw, float roll) {
-        float cos;
-        float sin;
-        float[] xyz = new float[]{f[0],f[1],f[2]};
-
-        if (pitch != 0.0F) {
-            pitch *= radianF;
-            cos = MathHelper.cos(pitch);
-            sin = MathHelper.sin(pitch);
-
-            xyz[0] = (f[1] * sin) + (f[0] * cos);
-            xyz[1] = (f[1] * cos) - (f[0] * sin);
-        }
-
-        if (yaw != 0.0F) {
-            yaw *= radianF;
-            cos = MathHelper.cos(yaw);
-            sin = MathHelper.sin(yaw);
-
-            xyz[0] = (f[0] * cos) - (f[2] * sin);
-            xyz[2] = (f[0] * sin) + (f[2] * cos);
-        }
-
-        if (roll != 0.0F) {
-            roll *=  radianF;
-            cos = MathHelper.cos(roll);
-            sin = MathHelper.sin(roll);
-
-            xyz[1] = (f[2] * cos) - (f[1] * sin);
-            xyz[2] = (f[2] * sin) + (f[1] * cos);
-        }
-
-        return xyz;
-    }
-
     public static double[] rotatePoint(double[] f, float pitch, float yaw, float roll) {
         double cos;
         double sin;
@@ -109,6 +73,11 @@ public class RailUtility {
     }
 
 
+    /**
+     * <h2> rail placement from item</h2>
+     * basic functionality to place a train or rollingstock on the rails on item use.
+     * TODO: there seems to be an issue with train direction on placement
+     */
     public static boolean placeOnRail(GenericRailTransport entity, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ) {
 
         if (RailUtility.isRailBlockAt(worldObj, posX,posY,posZ) && !worldObj.isRemote) {

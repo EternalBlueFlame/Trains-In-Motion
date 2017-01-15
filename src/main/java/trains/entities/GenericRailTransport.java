@@ -306,23 +306,35 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
              */
             if (bogieSize>0){
 
-                if (bogie.size()>0){
-                    boolean collision = !hitboxHandler.getCollision(this);
-                    //handle movement for trains, this will likely need to be different for rollingstock.
-                    for (EntityBogie currentBogie : bogie) {
-                        if (collision) {
-                            //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                            motion[0] = processMovement(currentBogie.motionX);
-                            motion[2] = processMovement(currentBogie.motionZ);
-                            motion[1] = currentBogie.motionY;
-                            currentBogie.setVelocity(motion[0], motion[1], motion[2]);
-                            currentBogie.minecartMove();
-                        } else {
-                            motion = new double[]{0d, 0d, 0d};
-                        }
-                    }
+                if (front != null){
+
+                    double[] fromHere = rotatePoint(new double[]{1,0,0},0, rotationYaw,0);
+                    double[] toHere = rotatePoint(new double[]{-1,0,0},0, front.rotationYaw,0);
+                    fromHere[0] += hitboxList.get(0).posX;
+                    fromHere[2] += hitboxList.get(0).posZ;
+
+                    toHere[0] += front.hitboxList.get(front.hitboxList.size()-1).posX;
+                    toHere[2] += front.hitboxList.get(front.hitboxList.size()-1).posZ;
+
+                    addVelocity(fromHere[0] - toHere[0], fromHere[2] - toHere[2]);
+
                 }
 
+
+                boolean collision = !hitboxHandler.getCollision(this);
+                //handle movement for trains, this will likely need to be different for rollingstock.
+                for (EntityBogie currentBogie : bogie) {
+                    if (collision) {
+                        //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                        motion[0] = processMovement(currentBogie.motionX);
+                        motion[2] = processMovement(currentBogie.motionZ);
+                        motion[1] = currentBogie.motionY;
+                        currentBogie.setVelocity(motion[0], motion[1], motion[2]);
+                        currentBogie.minecartMove();
+                    } else {
+                        motion = new double[]{0d, 0d, 0d};
+                    }
+                }
 
                 //position this
                 if ((bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) != 0) {
@@ -347,7 +359,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 if (transportTicks %2 ==0) {
                     //align bogies
                     for (int i = 0; i < bogie.size(); ) {
-                        float[] var = rotatePoint(new float[]{(float) getBogieOffsets().get(i).doubleValue(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                        double[] var = rotatePoint(new double[]{getBogieOffsets().get(i).doubleValue(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
                         bogie.get(i).setPosition(var[0] + posX, bogie.get(i).posY, var[2] + posZ);
                         bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
                         i++;
@@ -388,7 +400,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (riddenByEntity != null) {
             if (bogie.size()>1) {
 
-                float[] riderOffset = rotatePoint(new float[]{getRiderOffset()[0],getRiderOffset()[1],0}, rotationPitch, rotationYaw, 0);
+                double[] riderOffset = rotatePoint(new double[]{getRiderOffset()[0],getRiderOffset()[1],0}, rotationPitch, rotationYaw, 0);
                 riddenByEntity.setPosition(posX + riderOffset[0], posY + riderOffset[1], posZ + riderOffset[2]);
             } else {
                 riddenByEntity.setPosition(posX, posY + 2D, posZ);
