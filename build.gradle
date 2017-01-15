@@ -1,14 +1,7 @@
 buildscript {
     repositories {
-        mavenCentral()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
@@ -18,8 +11,10 @@ buildscript {
 apply plugin: 'forge'
 
 version = "1.0"
-group= "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "modid"
+group= "trains" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "Trains in Motion"
+
+sourceCompatibility = targetCompatibility = "1.7"
 
 minecraft {
     version = "1.7.10-10.13.4.1558-1.7.10"

@@ -39,8 +39,8 @@ public class ClientProxy extends CommonProxy {
     public static boolean EnableAnimations = true;
     public static KeyBinding KeyLamp = new KeyBinding("Lamp Toggle", 38, "Trains in Motion");
     public static KeyBinding KeyInventory = new KeyBinding("Open Train/rollingstock GUI", 23, "Trains in Motion");
-    public static KeyBinding KeyAccelerate = new KeyBinding("Train Acceleration", 17, "Trains in Motion");
-    public static KeyBinding KeyReverse = new KeyBinding("Train Deceleration/Reverse", 31, "Trains in Motion");
+    public static KeyBinding KeyAccelerate = new KeyBinding("Train Acceleration", 19, "Trains in Motion");//R
+    public static KeyBinding KeyReverse = new KeyBinding("Train Deceleration/Reverse", 33, "Trains in Motion");//F
 
     /**
      * <h2> Client GUI Redirect </h2>
@@ -86,8 +86,8 @@ public class ClientProxy extends CommonProxy {
 
         KeyLamp.setKeyCode(config.getInt("LampKeybind", "Keybinds", 38, 0, 0, ""));
         KeyInventory.setKeyCode(config.getInt("InventoryKeybind", "Keybinds", 23, 0, 0, ""));
-        KeyAccelerate.setKeyCode(config.getInt("AccelerateKeybind", "Keybinds", 17, 0, 0, ""));
-        KeyReverse.setKeyCode(config.getInt("ReverseKeybind", "Keybinds", 31, 0, 0, ""));
+        KeyAccelerate.setKeyCode(config.getInt("AccelerateKeybind", "Keybinds", 19, 0, 0, ""));
+        KeyReverse.setKeyCode(config.getInt("ReverseKeybind", "Keybinds", 33, 0, 0, ""));
     }
 
     /**

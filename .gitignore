@@ -16,6 +16,9 @@ out
 build
 .gradle
 
+# netbeans
+.nb-gradle-*
+
 # build
 asm
 config
@@ -29,3 +32,4 @@ crash-reports
 # other
 run
 lib
+/.nb-gradle/
