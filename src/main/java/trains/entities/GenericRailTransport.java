@@ -62,7 +62,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public double[] motion = new double[]{0,0,0};
     public boolean isReverse =false;
     public boolean isCreative = false;
-    public boolean isCoupling = false;
+    public boolean isCoupling = true;//false;
     public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
     public HitboxHandler hitboxHandler = new HitboxHandler();
     public int transportTicks =0;
@@ -318,7 +318,55 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
                     addVelocity(fromHere[0] - toHere[0], fromHere[2] - toHere[2]);
 
+                } else if (isCoupling){
+                    double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[0]+2,0,0},0, rotationYaw,0);
+                    List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
+                            AxisAlignedBB.getBoundingBox(frontCheck[0] -0.5d + posX, posY, frontCheck[2] -0.5d + posZ,
+                                    frontCheck[0] +0.5d + posX, posY+2, frontCheck[2] +0.5d + posZ));
+
+                    if (list.size()>0){
+                        for (Object entity : list){
+                            if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((HitboxHandler.multipartHitbox)entity).parent.isCoupling){
+                                front =((HitboxHandler.multipartHitbox) entity).parent;
+                                System.out.println(getEntityId() + " : front linked : " + worldObj.isRemote);
+                            }
+                        }
+                    }
+
+
                 }
+                if (back != null){
+
+                    double[] fromHere = rotatePoint(new double[]{1,0,0},0, rotationYaw,0);
+                    double[] toHere = rotatePoint(new double[]{-1,0,0},0, back.rotationYaw,0);
+                    fromHere[0] += hitboxList.get(0).posX;
+                    fromHere[2] += hitboxList.get(0).posZ;
+
+                    toHere[0] += back.hitboxList.get(back.hitboxList.size()-1).posX;
+                    toHere[2] += back.hitboxList.get(back.hitboxList.size()-1).posZ;
+
+                    addVelocity(fromHere[0] - toHere[0], fromHere[2] - toHere[2]);
+
+                } else if (isCoupling){
+                    double[] backCheck = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length - 1]-2,0,0},0, rotationYaw,0);
+                    List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
+                            AxisAlignedBB.getBoundingBox(backCheck[0] -0.5d + posX, posY, backCheck[2] -0.5d + posZ,
+                                    backCheck[0] +0.5d + posX, posY+2, backCheck[2] +0.5d + posZ));
+
+                    if (list.size()>0){
+                        for (Object entity : list){
+                            if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((HitboxHandler.multipartHitbox)entity).parent.isCoupling){
+                                back =((HitboxHandler.multipartHitbox) entity).parent;
+                                System.out.println(getEntityId() + " : back linked : " + worldObj.isRemote);
+                            }
+                        }
+                    }
+
+
+                }
+
+
+
 
 
                 boolean collision = !hitboxHandler.getCollision(this);

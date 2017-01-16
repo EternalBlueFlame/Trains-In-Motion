@@ -34,8 +34,8 @@ public class HitboxHandler {
      * @see HitboxHandler#getCollision(GenericRailTransport)
      */
     public class multipartHitbox extends EntityDragonPart{
-        Entity parent;
-        public multipartHitbox(IEntityMultiPart host, Entity parent, double posX, double posY , double posZ){
+        public GenericRailTransport parent;
+        public multipartHitbox(IEntityMultiPart host, GenericRailTransport parent, double posX, double posY , double posZ){
             super(host, "hitboxGeneric", 2,1);
             this.parent = parent;
             this.posX = posX;
@@ -126,25 +126,13 @@ public class HitboxHandler {
                         if (entity instanceof multipartHitbox && train.hitboxList.contains(entity)){
                             return false;
                         } else if (entity != train.riddenByEntity && !(entity instanceof EntityBogie)) {
-                            if ((entity instanceof multipartHitbox)) {
-                                System.out.println("LINKED!");
-                                //linking
-                                //if the current colliding box is the front one
-                                if (train.hitboxList.get(0) == box){
-                                    train.front = (EntityRollingStockCore)((multipartHitbox) entity).parent;
-                                    //if the current colliding box is the back one
-                                } else {
-                                    train.back = (EntityRollingStockCore)((multipartHitbox) entity).parent;
-                                }
-
-                            } else if (entity instanceof EntityLiving || entity instanceof EntityPlayer) {
+                            if (entity instanceof EntityLiving || entity instanceof EntityPlayer) {
                                 //dependant on velocity, fling it and do damage.
                                 if (train.bogie.get(0).motionX + train.bogie.get(0).motionZ >1 || train.bogie.get(0).motionX + train.bogie.get(0).motionZ < -1 ) {
                                     ((Entity) entity).attackEntityFrom(new EntityDamageSource("Train", train), (float) (train.bogie.get(0).motionX + train.bogie.get(0).motionZ) * 1000);
                                     ((Entity) entity).applyEntityCollision(train);
                                     return false;
                                 } else if (train instanceof EntityRollingStockCore) {
-                                    System.out.println("entity collision");
                                     train.addVelocity((train.posX - ((Entity)entity).posX) * 0.05, (((EntityRollingStockCore) train).posZ - ((Entity)entity).posZ) *0.05);
                                     ((Entity) entity).applyEntityCollision(train);
                                     return true;
