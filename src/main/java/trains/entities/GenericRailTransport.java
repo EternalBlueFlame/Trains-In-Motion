@@ -173,6 +173,22 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         isReverse = tag.getBoolean("extended.reverse");
         isDead = tag.getBoolean("extended.dead");
         isCoupling = tag.getBoolean("extended.coupling");
+
+        int id = tag.getInteger("extended.front");
+        if(id !=0){
+            Entity getFront = worldObj.getEntityByID(id);
+            if (getFront instanceof GenericRailTransport){
+                front = (GenericRailTransport) getFront;
+            }
+        }
+        id = tag.getInteger("extended.back");
+        if(id !=0){
+            Entity getBack = worldObj.getEntityByID(id);
+            if (getBack instanceof GenericRailTransport){
+                back = (GenericRailTransport) getBack;
+            }
+        }
+
         isCreative = tag.getBoolean("extended.creative");
         brake = tag.getBoolean("extended.handbrake");
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
@@ -211,6 +227,17 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         tag.setBoolean("extended.reverse", isReverse);
         tag.setBoolean("extended.dead", isDead);
         tag.setBoolean("extended.coupling", isCoupling);
+        if (front != null){
+            tag.setInteger("extended.front", front.getEntityId());
+        } else {
+            tag.setInteger("extended.front", 0);
+        }
+        if (back != null){
+            tag.setInteger("extended.back", back.getEntityId());
+        } else {
+            tag.setInteger("extended.back", 0);
+        }
+
         tag.setBoolean("extended.creative", isCreative);
         tag.setBoolean("extended.handbrake", brake);
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
@@ -301,73 +328,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
              * if it is clear however, then we need to add velocity to the bogies based on the current state of the train's speed and fuel, and reposition the train.
              * but either way we have to position the bogies around the train, just to be sure they don't accidentally fly off at some point.
              *
-             * TODO: we need to also do a linking system, another transport can link to this one, and dependant on if it's the front or back connections, use rotate point to define where the other hitbox _should_ be.
-             * And if it's not there, calculate the distance between where it is and should be, then add velocity off the result. This should probably be limited to 8 blocks, to compensate not only for lag but other potential issues.
              */
             if (bogieSize>0){
-
-                if (front != null){
-
-                    double[] fromHere = rotatePoint(new double[]{1,0,0},0, rotationYaw,0);
-                    double[] toHere = rotatePoint(new double[]{-1,0,0},0, front.rotationYaw,0);
-                    fromHere[0] += hitboxList.get(0).posX;
-                    fromHere[2] += hitboxList.get(0).posZ;
-
-                    toHere[0] += front.hitboxList.get(front.hitboxList.size()-1).posX;
-                    toHere[2] += front.hitboxList.get(front.hitboxList.size()-1).posZ;
-
-                    addVelocity(fromHere[0] - toHere[0], fromHere[2] - toHere[2]);
-
-                } else if (isCoupling){
-                    double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[0]+2,0,0},0, rotationYaw,0);
-                    List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                            AxisAlignedBB.getBoundingBox(frontCheck[0] -0.5d + posX, posY, frontCheck[2] -0.5d + posZ,
-                                    frontCheck[0] +0.5d + posX, posY+2, frontCheck[2] +0.5d + posZ));
-
-                    if (list.size()>0){
-                        for (Object entity : list){
-                            if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((HitboxHandler.multipartHitbox)entity).parent.isCoupling){
-                                front =((HitboxHandler.multipartHitbox) entity).parent;
-                                System.out.println(getEntityId() + " : front linked : " + worldObj.isRemote);
-                            }
-                        }
-                    }
-
-
-                }
-                if (back != null){
-
-                    double[] fromHere = rotatePoint(new double[]{1,0,0},0, rotationYaw,0);
-                    double[] toHere = rotatePoint(new double[]{-1,0,0},0, back.rotationYaw,0);
-                    fromHere[0] += hitboxList.get(0).posX;
-                    fromHere[2] += hitboxList.get(0).posZ;
-
-                    toHere[0] += back.hitboxList.get(back.hitboxList.size()-1).posX;
-                    toHere[2] += back.hitboxList.get(back.hitboxList.size()-1).posZ;
-
-                    addVelocity(fromHere[0] - toHere[0], fromHere[2] - toHere[2]);
-
-                } else if (isCoupling){
-                    double[] backCheck = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length - 1]-2,0,0},0, rotationYaw,0);
-                    List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                            AxisAlignedBB.getBoundingBox(backCheck[0] -0.5d + posX, posY, backCheck[2] -0.5d + posZ,
-                                    backCheck[0] +0.5d + posX, posY+2, backCheck[2] +0.5d + posZ));
-
-                    if (list.size()>0){
-                        for (Object entity : list){
-                            if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((HitboxHandler.multipartHitbox)entity).parent.isCoupling){
-                                back =((HitboxHandler.multipartHitbox) entity).parent;
-                                System.out.println(getEntityId() + " : back linked : " + worldObj.isRemote);
-                            }
-                        }
-                    }
-
-
-                }
-
-
-
-
 
                 boolean collision = !hitboxHandler.getCollision(this);
                 //handle movement for trains, this will likely need to be different for rollingstock.
@@ -413,6 +375,85 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         i++;
                     }
                 }
+
+
+                if(!worldObj.isRemote) {
+
+
+                    if (front != null) {
+
+                        double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[0]+0.5, 0, 0}, 0, rotationYaw, 0);
+                        double[] toHere;
+                        fromHere[0] += posX;
+                        fromHere[2] += posZ;
+                        if (front.back == this) {
+                            toHere = rotatePoint(new double[]{front.getHitboxPositions()[front.getHitboxPositions().length-1]-0.5, 0, 0}, 0, front.rotationYaw, 0);
+                            toHere[0] += front.posX;
+                            toHere[2] += front.posZ;
+                        } else {
+                            toHere = rotatePoint(new double[]{front.getHitboxPositions()[0]+0.5, 0, 0}, 0, front.rotationYaw, 0);
+                            toHere[0] += front.posX;
+                            toHere[2] += front.posZ;
+                        }
+                        this.addVelocity(-(fromHere[0] - toHere[0])*0.1, -(fromHere[2] - toHere[2])*0.1);
+
+                    } else if (isCoupling) {
+                        double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[0] + 2, 0, 0}, 0, rotationYaw, 0);
+                        List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
+                                AxisAlignedBB.getBoundingBox(frontCheck[0] + posX, posY, frontCheck[2] + posZ,
+                                        frontCheck[0] + posX, posY + 2, frontCheck[2]+ posZ));
+
+                        if (list.size() > 0) {
+                            for (Object entity : list) {
+                                if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((HitboxHandler.multipartHitbox) entity).parent.isCoupling) {
+                                    front = ((HitboxHandler.multipartHitbox) entity).parent;
+                                    System.out.println(getEntityId() + " : front linked : " + worldObj.isRemote);
+                                }
+                            }
+                        }
+
+
+                    }
+                    if (back != null) {
+
+                        double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1]+0.5, 0, 0}, 0, rotationYaw, 0);
+                        double[] toHere;
+                        fromHere[0] += posX;
+                        fromHere[2] += posZ;
+                        if (back.back == this) {
+                            toHere = rotatePoint(new double[]{back.getHitboxPositions()[back.getHitboxPositions().length-1]-0.5, 0, 0}, 0, back.rotationYaw, 0);
+                            toHere[0] += back.posX;
+                            toHere[2] += back.posZ;
+                        } else {
+                            toHere = rotatePoint(new double[]{back.getHitboxPositions()[0]+0.5, 0, 0}, 0, back.rotationYaw, 0);
+                            toHere[0] += back.posX;
+                            toHere[2] += back.posZ;
+                        }
+                        this.addVelocity(-(fromHere[0] - toHere[0])*0.1, -(fromHere[2] - toHere[2])*0.1);
+
+                    } else if (isCoupling) {
+                        double[] backCheck = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length - 1] - 2, 0, 0}, 0, rotationYaw, 0);
+                        List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
+                                AxisAlignedBB.getBoundingBox(backCheck[0] + posX, posY, backCheck[2] + posZ,
+                                        backCheck[0] + posX, posY + 2, backCheck[2] + posZ));
+
+                        if (list.size() > 0) {
+                            for (Object entity : list) {
+                                if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((HitboxHandler.multipartHitbox) entity).parent.isCoupling) {
+                                    back = ((HitboxHandler.multipartHitbox) entity).parent;
+                                    System.out.println(getEntityId() + " : back linked : " + worldObj.isRemote);
+                                }
+                            }
+                        }
+
+
+                    }
+                }
+
+
+
+
+
             }
 
         }

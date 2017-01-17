@@ -138,7 +138,7 @@ public class HitboxHandler {
                                     return true;
                                 }
                             } else {
-                                return true;
+                                return entity instanceof multipartHitbox;
                             }
                         }
                     }

@@ -83,7 +83,7 @@ public class EntityPullmansPalace extends EntityRollingStockCore{
      * @return defines the positions for the hitboxes in blocks. 0 being the center of the train, negative values being towards the front..
      */
     @Override
-    public float[] getHitboxPositions(){return new float[]{-2.55f,-1.25f,0f,1.25f,2.55f};}
+    public float[] getHitboxPositions(){return new float[]{-2.75f,-1.25f,0f,1.35f,2.75f};}
     /**
      * <h2>Lamp offset</h2>
      * @return defines the offset for the lamp in blocks.
