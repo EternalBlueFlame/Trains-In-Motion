@@ -44,7 +44,7 @@ public class InventoryHandler implements IInventory{
             if (host.getType()== TrainsInMotion.transportTypes.STEAM || host.getType()== TrainsInMotion.transportTypes.NUCLEAR_STEAM){
                 size=2;
             }
-            return size+ host.getInventorySize().getCollumn() + host.getInventorySize().getRow();
+            return size+ (host.getInventorySize().getCollumn() * host.getInventorySize().getRow());
 
         }
         return 0;
@@ -68,14 +68,22 @@ public class InventoryHandler implements IInventory{
      * @return the itemstack with the decreased size. If the decreased size is equal to or less than the current stack size it returns null.
      */
     @Override
-    public ItemStack decrStackSize(int p_70298_1_, int p_70298_2_) {
-        if (getStackInSlot(p_70298_1_) != null) {
-            if (getStackInSlot(p_70298_1_).stackSize <= p_70298_2_) {
-                items.set(p_70298_1_, null);
-                return null;
+    public ItemStack decrStackSize(int slot, int stackSize) {
+        if (items.size()>=slot && items.get(slot) != null) {
+            ItemStack itemstack;
+
+            if (items.get(slot).stackSize <= stackSize) {
+                itemstack = items.get(slot).copy();
+                items.set(slot, null);
+                return itemstack;
+            } else {
+                itemstack = items.get(slot).splitStack(stackSize);
+                if (items.get(slot).stackSize == 0) {
+                    items.set(slot, null);
+                }
+
+                return itemstack;
             }
-            getStackInSlot(p_70298_1_).stackSize -= p_70298_2_;
-            return getStackInSlot(p_70298_1_);
         } else {
             return null;
         }
