@@ -7,6 +7,7 @@ import net.minecraft.world.World;
 import trains.utility.FuelHandler;
 import trains.utility.InventoryHandler;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 /**
@@ -103,6 +104,32 @@ public class EntityTrainCore extends GenericRailTransport {
 
 
     /**
+     * <h2>Calculate drag</h2>
+     * Add more drag if there are rollingstock.
+     * if you have more than one train pulling or pushing a load, the drag should be reduced accordingly.
+     */
+    public float calculateDrag(float current, @Nullable GenericRailTransport frontCheck, @Nullable GenericRailTransport backCheck){
+
+        if (frontCheck == null && backCheck == null) {
+            return current;
+        }
+
+        if (frontCheck instanceof EntityTrainCore){
+            current *= 1.25f;
+        } else if (frontCheck instanceof EntityRollingStockCore){
+            current *=0.9f;
+        }
+
+        if (backCheck instanceof EntityTrainCore){
+            current *= 1.25f;
+        } else if (backCheck instanceof EntityRollingStockCore){
+            current *=0.9f;
+        }
+
+        return calculateDrag(current, frontCheck.front, backCheck.back);
+    }
+
+    /**
      * <h2> process train movement</h2>
      * called by onUpdate to figure out the amount of movement to apply every tick
      * @see #onUpdate()
@@ -111,7 +138,8 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     @Override
     public float processMovement(double X){
-        float speed = (float) X * 0.9f;
+
+        float speed = (float) X * calculateDrag(0.9f, front, back);
 
         if (speed ==0){
             speed = ((accelerator / 6f)*0.1f) * getAcceleration();

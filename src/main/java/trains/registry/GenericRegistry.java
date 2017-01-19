@@ -14,6 +14,7 @@ import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
+import trains.blocks.BlockTrainTable;
 import trains.blocks.LampBlock;
 import trains.blocks.Oil;
 import trains.items.Bucket;
@@ -29,6 +30,8 @@ public class GenericRegistry {
     public static final Fluid fluidOil = new Oil("Oil").setUnlocalizedName("Oil");
     public static BlockFluidClassic blockFluidOil;
     public static final Item bucketOil = new Bucket(GenericRegistry.blockFluidOil).setUnlocalizedName("OilBucket").setContainerItem(Items.bucket);
+
+    public static BlockTrainTable trainTable = new BlockTrainTable();
 
     //initialize the lamp block
     @SideOnly(Side.CLIENT)
@@ -54,6 +57,8 @@ public class GenericRegistry {
          */
         GameRegistry.registerItem(bucketOil, "OilBucket");
         FluidContainerRegistry.registerFluidContainer(GenericRegistry.fluidOil, new ItemStack(bucketOil), new ItemStack(Items.bucket));
+
+        GameRegistry.registerBlock(trainTable, "TrainTable");
     }
 
     /**

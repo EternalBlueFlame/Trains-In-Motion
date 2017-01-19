@@ -21,7 +21,7 @@ import trains.networking.PacketRemove;
 import trains.registry.GenericRegistry;
 import trains.registry.TrainRegistry;
 import trains.utility.CommonProxy;
-import trains.utility.EventHandler;
+import trains.utility.EventManager;
 import trains.worldgen.OreGen;
 
 /**
@@ -54,7 +54,7 @@ public class TrainsInMotion {
 
 
     //Instance the event handler, This is used for event based functionality, things like when you right-click an entity.
-    public static EventHandler eventHandler = new EventHandler();
+    public static EventManager eventManager = new EventManager();
 
 
     /**
@@ -131,8 +131,8 @@ public class TrainsInMotion {
         //register the worldgen
         GameRegistry.registerWorldGenerator(new OreGen(), 0);
         //register the event handler
-        MinecraftForge.EVENT_BUS.register(eventHandler);
-        FMLCommonHandler.instance().bus().register(eventHandler);
+        MinecraftForge.EVENT_BUS.register(eventManager);
+        FMLCommonHandler.instance().bus().register(eventManager);
 
         //register GUI, model renders, Keybinds, and HUD
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);

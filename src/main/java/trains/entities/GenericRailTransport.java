@@ -48,7 +48,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * hitboxList and hitboxHandler manage the hitboxes the train has, this is mostly dealt with via getParts() and the hitbox functionality.
      * transportTicks is a simple tick count that allows us to manage functions that don't happen every tick, like fuel consumption in trains.
      * front and back define references to the train/rollingstock connected to the front and back, so that way we can better control links.
-     *
+     * the front and back unloaded ID's are used as a failsafe in case the front or back connected entities aren't loaded yet.
      * the last part is the generic entity constructor
      */
     public LiquidManager tanks = new LiquidManager(0,0, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
@@ -68,6 +68,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public int transportTicks =0;
     public GenericRailTransport front;
     public GenericRailTransport back;
+    public int frontUnloadedID =0;
+    public int backUnloadedID =0;
     public GenericRailTransport(World world){
         super(world);
         tanks = getTank();
@@ -179,6 +181,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             Entity getFront = worldObj.getEntityByID(id);
             if (getFront instanceof GenericRailTransport){
                 front = (GenericRailTransport) getFront;
+            } else if (getFront == null){
+                frontUnloadedID = id;
             }
         }
         id = tag.getInteger("extended.back");
@@ -186,6 +190,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             Entity getBack = worldObj.getEntityByID(id);
             if (getBack instanceof GenericRailTransport){
                 back = (GenericRailTransport) getBack;
+            } else if (getBack == null){
+                backUnloadedID = id;
             }
         }
 
@@ -426,28 +432,42 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if(!worldObj.isRemote) {
 
 
+            if (frontUnloadedID !=0){
+                front = (GenericRailTransport) worldObj.getEntityByID(frontUnloadedID);
+                frontUnloadedID =0;
+            }
+            if (backUnloadedID !=0){
+                back = (GenericRailTransport) worldObj.getEntityByID(backUnloadedID);
+                backUnloadedID =0;
+            }
+
+
+
             if (front != null) {
 
-                double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[0]+0.5, 0, 0}, 0, rotationYaw, 0);
+                double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[0]-2.65, 0, 0}, 0, rotationYaw, 0);
                 double[] toHere;
                 fromHere[0] += posX;
                 fromHere[2] += posZ;
                 if (front.back == this) {
-                    toHere = rotatePoint(new double[]{front.getHitboxPositions()[front.getHitboxPositions().length-1]-0.5, 0, 0}, 0, front.rotationYaw, 0);
+                    toHere = rotatePoint(new double[]{front.getHitboxPositions()[front.getHitboxPositions().length-1]-1.5, 0, 0}, 0, front.rotationYaw, 0);
                     toHere[0] += front.posX;
                     toHere[2] += front.posZ;
                 } else {
-                    toHere = rotatePoint(new double[]{front.getHitboxPositions()[0]+0.5, 0, 0}, 0, front.rotationYaw, 0);
+                    toHere = rotatePoint(new double[]{front.getHitboxPositions()[0]+1.5, 0, 0}, 0, front.rotationYaw, 0);
                     toHere[0] += front.posX;
                     toHere[2] += front.posZ;
                 }
                 this.addVelocity(-(fromHere[0] - toHere[0])*0.1, -(fromHere[2] - toHere[2])*0.1);
 
             } else if (isCoupling) {
-                double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[0] + 2, 0, 0}, 0, rotationYaw, 0);
+                double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[0] - 2.5, 0, 0}, 0, rotationYaw, 0);
+                frontCheck[0] +=posX;
+                frontCheck[1] +=posY;
+                frontCheck[2] +=posZ;
                 List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                        AxisAlignedBB.getBoundingBox(frontCheck[0] + posX, posY, frontCheck[2] + posZ,
-                                frontCheck[0] + posX, posY + 2, frontCheck[2]+ posZ));
+                        AxisAlignedBB.getBoundingBox(frontCheck[0] - 0.5d, frontCheck[1], frontCheck[2] - 0.5d,
+                                frontCheck[0] + 0.5d, frontCheck[1] + 2, frontCheck[2] +0.5d));
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
@@ -462,26 +482,29 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
             if (back != null) {
 
-                double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1]+0.5, 0, 0}, 0, rotationYaw, 0);
+                double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1]+2.65, 0, 0}, 0, rotationYaw, 0);
                 double[] toHere;
                 fromHere[0] += posX;
                 fromHere[2] += posZ;
                 if (back.back == this) {
-                    toHere = rotatePoint(new double[]{back.getHitboxPositions()[back.getHitboxPositions().length-1]-0.5, 0, 0}, 0, back.rotationYaw, 0);
+                    toHere = rotatePoint(new double[]{back.getHitboxPositions()[back.getHitboxPositions().length-1]-1.5, 0, 0}, 0, back.rotationYaw, 0);
                     toHere[0] += back.posX;
                     toHere[2] += back.posZ;
                 } else {
-                    toHere = rotatePoint(new double[]{back.getHitboxPositions()[0]+0.5, 0, 0}, 0, back.rotationYaw, 0);
+                    toHere = rotatePoint(new double[]{back.getHitboxPositions()[0]+1.5, 0, 0}, 0, back.rotationYaw, 0);
                     toHere[0] += back.posX;
                     toHere[2] += back.posZ;
                 }
                 this.addVelocity(-(fromHere[0] - toHere[0])*0.1, -(fromHere[2] - toHere[2])*0.1);
 
             } else if (isCoupling) {
-                double[] backCheck = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length - 1] - 2, 0, 0}, 0, rotationYaw, 0);
+                double[] backCheck = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length - 1] + 2.5, 0, 0}, 0, rotationYaw, 0);
+                backCheck[0] +=posX;
+                backCheck[1] +=posY;
+                backCheck[2] +=posZ;
                 List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                        AxisAlignedBB.getBoundingBox(backCheck[0] + posX, posY, backCheck[2] + posZ,
-                                backCheck[0] + posX, posY + 2, backCheck[2] + posZ));
+                        AxisAlignedBB.getBoundingBox(backCheck[0] - 0.5d, backCheck[1], backCheck[2] - 0.5d,
+                                backCheck[0] + 0.5d, backCheck[1] + 2, backCheck[2] +0.5d));
 
                 if (list.size() > 0) {
                     for (Object entity : list) {

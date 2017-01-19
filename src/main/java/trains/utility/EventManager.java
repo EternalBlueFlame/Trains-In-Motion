@@ -12,7 +12,7 @@ import trains.entities.EntityTrainCore;
 import trains.networking.PacketKeyPress;
 import trains.networking.PacketMount;
 
-public class EventHandler {
+public class EventManager {
 
     /**
      * <h2>Keybind management</h2>
