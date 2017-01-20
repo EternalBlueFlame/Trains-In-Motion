@@ -8,8 +8,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
+import trains.blocks.BlockTrainTable;
+import trains.crafting.TileEntityStorage;
 import trains.entities.EntityTrainCore;
-import trains.gui.trainhandler.SteamInventoryHandler;
+import trains.entities.GenericRailTransport;
+import trains.gui.trainhandler.ContainerHandler;
 
 
 
@@ -25,18 +28,22 @@ public class CommonProxy implements IGuiHandler {
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         //Trains
-        if (player != null && player.ridingEntity instanceof EntityTrainCore) {
-            switch (ID) {
-                case TrainsInMotion.STEAM_GUI_ID: {
-                    return new SteamInventoryHandler(player.inventory, (EntityTrainCore) player.ridingEntity);
-                }
+        if (player != null) {
+            if (player.ridingEntity instanceof GenericRailTransport) {
+                switch (ID) {
+                    case TrainsInMotion.STEAM_GUI_ID: {
+                        return new ContainerHandler(player.inventory, (EntityTrainCore) player.ridingEntity, null);
+                    }
 
-                default: {return null;}
+                    default: {
+                        return null;
+                    }
+                }
+            } else if (world.getTileEntity(x,y,z) instanceof TileEntityStorage){
+                return new ContainerHandler(player.inventory, null, (TileEntityStorage) world.getTileEntity(x,y,z));
             }
-        } else {
-            //Rollingstock
-            return null;
         }
+        return null;
     }
 
     /**

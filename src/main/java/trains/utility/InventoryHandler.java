@@ -2,11 +2,12 @@ package trains.utility;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import trains.TrainsInMotion;
+import trains.crafting.TileEntityStorage;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 public class InventoryHandler implements IInventory{
     private GenericRailTransport host;
+    private TileEntityStorage blockHost;
     private List<ItemStack> items = new ArrayList<ItemStack>();
 
     /**
@@ -32,6 +34,15 @@ public class InventoryHandler implements IInventory{
         }
     }
 
+    public InventoryHandler(TileEntity craftingTable){
+        if (craftingTable instanceof TileEntityStorage){
+            while (items.size() < 9) {
+                items.add(null);
+            }
+            blockHost = (TileEntityStorage) craftingTable;
+        }
+    }
+
     /**
      * <h2>inventory size</h2>
      * @return the number of slots the inventory should have.
@@ -46,6 +57,8 @@ public class InventoryHandler implements IInventory{
             }
             return size+ (host.getInventorySize().getCollumn() * host.getInventorySize().getRow());
 
+        } else if (blockHost != null){
+            return 9;
         }
         return 0;
     }
@@ -75,6 +88,7 @@ public class InventoryHandler implements IInventory{
             if (items.get(slot).stackSize <= stackSize) {
                 itemstack = items.get(slot).copy();
                 items.set(slot, null);
+
                 return itemstack;
             } else {
                 itemstack = items.get(slot).splitStack(stackSize);
@@ -106,7 +120,11 @@ public class InventoryHandler implements IInventory{
      */
     @Override
     public String getInventoryName() {
-        return host.getName();
+        if (host != null) {
+            return host.getName();
+        } else {
+            return blockHost.inventory.getInventoryName();
+        }
     }
     @Override
     public boolean hasCustomInventoryName() {
@@ -115,6 +133,8 @@ public class InventoryHandler implements IInventory{
     @Override
     public int getInventoryStackLimit() {
         if (host != null) {
+            return 64;
+        } else if (blockHost!= null) {
             return 64;
         } else {
             return 0;
@@ -128,7 +148,11 @@ public class InventoryHandler implements IInventory{
      */
     @Override
     public boolean isUseableByPlayer(EntityPlayer p_70300_1_) {
-        return host != null && (!host.isLocked || p_70300_1_.getUniqueID() == host.getOwnerUUID());
+        if (host != null){
+            return !host.isLocked || p_70300_1_.getUniqueID() == host.getOwnerUUID();
+        } else {
+            return blockHost != null;
+        }
     }
 
     /**
@@ -142,11 +166,12 @@ public class InventoryHandler implements IInventory{
                 return FuelHandler.isFuel(p_94041_2_, host);
             } else if (p_94041_1_ ==1) {
                 return FuelHandler.isWater(p_94041_2_, host);
+            } else {
+                return true;
             }
-        } else if (host == null){
-            return false;
+        } else{
+            return blockHost != null;
         }
-        return true;
     }
 
     /**
@@ -200,26 +225,17 @@ public class InventoryHandler implements IInventory{
                 return;
             }
         }
-        host.dropItem(item.getItem(), item.stackSize);
-    }
-
-    public boolean doesItemMatch(int slot, Item item){
-        if (items.get(slot) != null){
-            return items.get(slot).getItem() == item;
-        } else {
-            return false;
+        if (host != null) {
+            host.dropItem(item.getItem(), item.stackSize);
         }
     }
-
 
     /**
      * <h2>unused</h2>
      * we have to initialize these values, but due to the design of the entity we don't actually use them.
      */
     @Override
-    public ItemStack getStackInSlotOnClosing(int p_70304_1_) {
-        return null;
-    }
+    public ItemStack getStackInSlotOnClosing(int p_70304_1_) {return null;}
     @Override
     public void markDirty() {}
     @Override

@@ -17,6 +17,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 import trains.blocks.BlockTrainTable;
 import trains.blocks.LampBlock;
 import trains.blocks.Oil;
+import trains.crafting.TileEntityStorage;
 import trains.items.Bucket;
 
 /**
@@ -59,6 +60,7 @@ public class GenericRegistry {
         FluidContainerRegistry.registerFluidContainer(GenericRegistry.fluidOil, new ItemStack(bucketOil), new ItemStack(Items.bucket));
 
         GameRegistry.registerBlock(trainTable, "TrainTable");
+        GameRegistry.registerTileEntity(TileEntityStorage.class, "StorageEntity");
     }
 
     /**

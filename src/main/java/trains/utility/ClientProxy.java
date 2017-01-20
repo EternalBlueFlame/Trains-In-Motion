@@ -15,11 +15,15 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
+import trains.blocks.BlockTrainTable;
+import trains.crafting.TileEntityStorage;
 import trains.entities.EntityBogie;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
+import trains.gui.GUITrainTable;
 import trains.gui.train.GUITrain;
 import trains.models.RenderEntity;
+import trains.registry.GenericRegistry;
 import trains.registry.TrainRegistry;
 
 import java.util.ArrayList;
@@ -56,18 +60,22 @@ public class ClientProxy extends CommonProxy {
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         //Trains
-        if (player != null && player.ridingEntity instanceof EntityTrainCore) {
-            switch (ID) {
-                case TrainsInMotion.STEAM_GUI_ID: {
-                    return new GUITrain(player.inventory, (EntityTrainCore) player.ridingEntity);
-                }
+        if (player != null) {
+            if (player.ridingEntity instanceof GenericRailTransport) {
+                switch (ID) {
+                    case TrainsInMotion.STEAM_GUI_ID: {
+                        return new GUITrain(player.inventory, (EntityTrainCore) player.ridingEntity);
+                    }
 
-                default: {return null;}
+                    default: {
+                        return null;
+                    }
+                }
+            } else if (player.worldObj.getTileEntity(x,y,z) instanceof TileEntityStorage) {
+                return new GUITrainTable(player.inventory, player.worldObj, x, y, z);
             }
-        } else {
-            //Rollingstock
-            return null;
         }
+        return null;
     }
     /**
      * <h2>Load config</h2>

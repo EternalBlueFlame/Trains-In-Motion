@@ -3,14 +3,14 @@ package trains.gui.train;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
-import trains.gui.trainhandler.SteamInventoryHandler;
+import trains.gui.trainhandler.ContainerHandler;
 import trains.networking.PacketKeyPress;
 import trains.registry.URIRegistry;
 
@@ -26,10 +26,10 @@ public class GUITrain extends GuiContainer {
      * <h2>GUI initialization</h2>
      * instances the container for the inventory and passes it to the server side management
      * also puts the entity to a variable that can be accessed on client.
-     * @see SteamInventoryHandler
+     * @see ContainerHandler
      */
     public GUITrain(InventoryPlayer inventoryPlayer, EntityTrainCore entity) {
-        super(new SteamInventoryHandler(inventoryPlayer, entity));
+        super(new ContainerHandler(inventoryPlayer, entity, null));
         train = entity;
     }
 
@@ -45,7 +45,7 @@ public class GUITrain extends GuiContainer {
     @Override
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
         fontRendererObj.drawString("Test Locomotive", 8, -18, 4210752);
-        fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, 74, 4210752);
+        fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, 74, 4210752);
     }
 
     /**

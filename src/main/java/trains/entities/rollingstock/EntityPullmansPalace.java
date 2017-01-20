@@ -93,17 +93,6 @@ public class EntityPullmansPalace extends EntityRollingStockCore{
     @Override
     public Vec3d getLampOffset(){return new Vec3d(-0,2,0);}
     /**
-     * <h2>Crafting recipe</h2>
-     * @return the list of items used to make the train, the items go from left to right, and then from top row to bottom.
-     * must contain 9 values, with or without nulls.
-     */
-    @Override
-    public ItemStack[] getCraftingRecipe(){return new ItemStack[]{
-            null,null,null,
-            null,null,null,
-            null,null,null,
-    };}
-    /**
      * <h2>Lamp offset</h2>
      * @return defines the radius in microblocks for the piston rotation. Usually only used for steam
      */

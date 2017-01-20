@@ -3,6 +3,7 @@ package trains.registry;
 
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import trains.entities.GenericRailTransport;
@@ -13,6 +14,7 @@ import trains.models.trains.Brigadelok_080;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,9 +35,10 @@ public class TrainRegistry {
     public ResourceLocation bogieTexture;
     public String entityWorldName; //Note: Must be all lowercase
     public Item item;
+    public List<Item> recipe = new ArrayList<Item>();
 
     private TrainRegistry(Class<? extends GenericRailTransport> trainClass, Item item, String entityWorldName,
-                          ModelBase model, ResourceLocation texture, @Nullable ModelBase bogieModel, @Nullable ResourceLocation bogieTexture){
+                          ModelBase model, ResourceLocation texture, @Nullable ModelBase bogieModel, @Nullable ResourceLocation bogieTexture, List<Item> recipe){
         this.trainClass = trainClass;
         this.entityWorldName = entityWorldName;
         this.model = model;
@@ -43,6 +46,7 @@ public class TrainRegistry {
         this.bogieModel = bogieModel;
         this.bogieTexture = bogieTexture;
         this.item = item;
+        this.recipe = recipe;
     }
 
     /**
@@ -56,12 +60,16 @@ public class TrainRegistry {
 
         output.add(new TrainRegistry(FirstTrain.class, FirstTrain.thisItem, "entityfirsttrain",
                 new Brigadelok_080(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
-                null, null));
+                null, null,
+                new ArrayList<Item>(Arrays.asList(new Item[]{Items.blaze_rod,null,null,null,null,null,null,null,null,null}))
+        ));
 
 
         output.add(new TrainRegistry(EntityPullmansPalace.class, EntityPullmansPalace.thisItem, "entitypullmanspalace",
                 new PullmansPalace(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
-                null, null));
+                null, null,
+                new ArrayList<Item>(Arrays.asList(new Item[]{Items.sugar,null,null,null,null,null,null,null,null,null}))
+        ));
         return output;
 
     }

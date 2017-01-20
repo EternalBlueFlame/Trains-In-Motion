@@ -432,11 +432,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if(!worldObj.isRemote) {
 
 
-            if (frontUnloadedID !=0){
+            if (frontUnloadedID !=0 && worldObj.getEntityByID(frontUnloadedID) instanceof GenericRailTransport){
                 front = (GenericRailTransport) worldObj.getEntityByID(frontUnloadedID);
                 frontUnloadedID =0;
             }
-            if (backUnloadedID !=0){
+            if (backUnloadedID !=0 && worldObj.getEntityByID(backUnloadedID) instanceof GenericRailTransport){
                 back = (GenericRailTransport) worldObj.getEntityByID(backUnloadedID);
                 backUnloadedID =0;
             }
@@ -558,7 +558,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public String getName(){return "error";}
     public LiquidManager getTank(){return null;}
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
-    public ItemStack[] getCraftingRecipe(){return new ItemStack[]{null,null,null, null,null,null, null,null,null,};}
     public float getPistonOffset(){return 0;}
     public float[][] getSmokeOffset(){return new float[][]{{0,0,0,255}};}
 

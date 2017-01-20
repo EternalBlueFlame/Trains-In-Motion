@@ -126,7 +126,23 @@ public class EntityTrainCore extends GenericRailTransport {
             current *=0.9f;
         }
 
-        return calculateDrag(current, frontCheck.front, backCheck.back);
+        GenericRailTransport nextFront = null;
+        GenericRailTransport nextBack = null;
+        if (frontCheck != null)
+        if (frontCheck.front != null || frontCheck.front != this){
+            nextFront = frontCheck.front;
+        } else if (frontCheck.back != null || frontCheck.back != this){
+            nextFront = frontCheck.back;
+        }
+        if (backCheck != null) {
+            if (backCheck.front != null || backCheck.front != this) {
+                nextBack = backCheck.front;
+            } else if (backCheck.back != null || backCheck.back != this) {
+                nextBack = backCheck.back;
+            }
+        }
+        return calculateDrag(current, nextFront, nextBack);
+
     }
 
     /**
