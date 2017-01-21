@@ -14,7 +14,9 @@ public enum URIRegistry {
 
     GUI_PREFIX("textures/gui/"),
     MODEL_TRAIN_TEXTURE("models/train/texture/"),
+    ITEM_TRAIN_TEXTURE("train/"),
     MODEL_ROLLINGSTOCK_TEXTURE("models/rollingstock/texture/"),
+    ITEM_ROLLINGSTOCK_TEXTURE("rollingstock/"),
     MODEL_RAIL_TEXTURE("models/rail/textures/"),
     MODEL_BLOCK_TEXTURE("models/block/texture"),
     TEXTURE_GENERIC("textures/generic/"),

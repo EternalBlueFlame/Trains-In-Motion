@@ -8,7 +8,7 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import trains.entities.GenericRailTransport;
 import trains.entities.rollingstock.EntityPullmansPalace;
-import trains.entities.trains.FirstTrain;
+import trains.entities.trains.EntityBrigadelok080;
 import trains.models.rollingstock.PullmansPalace;
 import trains.models.trains.Brigadelok_080;
 
@@ -58,7 +58,7 @@ public class TrainRegistry {
     public static List<TrainRegistry> listTrains(){
         List<TrainRegistry> output = new ArrayList<TrainRegistry>();
 
-        output.add(new TrainRegistry(FirstTrain.class, FirstTrain.thisItem, "entityfirsttrain",
+        output.add(new TrainRegistry(EntityBrigadelok080.class, EntityBrigadelok080.thisItem, "entityfirsttrain",
                 new Brigadelok_080(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
                 null, null,
                 new ArrayList<Item>(Arrays.asList(new Item[]{Items.blaze_rod,null,null,null,null,null,null,null,null,null}))

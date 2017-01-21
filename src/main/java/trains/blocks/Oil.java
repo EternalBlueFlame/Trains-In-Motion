@@ -5,7 +5,6 @@ import trains.registry.GenericRegistry;
 
 /**
  * <h2> Oil Block</h2>
- * TODO Auto-generated constructor stub
  * this bock is the in-world block for our implementation of oil
  * @see GenericRegistry
  */

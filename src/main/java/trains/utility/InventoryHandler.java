@@ -7,9 +7,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import trains.TrainsInMotion;
-import trains.crafting.TileEntityStorage;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
+import trains.tileentities.TileEntityStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,9 +121,9 @@ public class InventoryHandler implements IInventory{
     @Override
     public String getInventoryName() {
         if (host != null) {
-            return host.getName();
+            return host.getItem().getUnlocalizedName();
         } else {
-            return blockHost.inventory.getInventoryName();
+            return TrainsInMotion.MODID + ":stroage";
         }
     }
     @Override

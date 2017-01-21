@@ -13,6 +13,8 @@ import org.lwjgl.opengl.GL11;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
+import trains.models.tmt.Vec2f;
+import trains.models.tmt.Vec3f;
 import trains.utility.ClientProxy;
 import trains.utility.HitboxHandler;
 import trains.utility.RailUtility;
@@ -21,8 +23,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import trains.models.tmt.Vec2f;
-import trains.models.tmt.Vec3f;
 
 /**
  * <h2> .Java Entity Rendering</h2>

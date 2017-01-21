@@ -1,15 +1,21 @@
 package trains.items.trains;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import trains.TrainsInMotion;
 import trains.entities.GenericRailTransport;
-import trains.entities.trains.FirstTrain;
+import trains.entities.trains.EntityBrigadelok080;
+import trains.registry.URIRegistry;
 import trains.utility.RailUtility;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -24,11 +30,27 @@ import java.util.UUID;
 
 public class ItemFirstTrain extends Item {
 
+    private static final String era = "\u00A77" + StatCollector.translateToLocal("menu.item.era") +  ": " + StatCollector.translateToLocal("menu.steam");
+    private static final String year = "\u00A77" + StatCollector.translateToLocal("menu.item.year") +": 1918";
+    private static final String country = "\u00A77" + StatCollector.translateToLocal("menu.item.country") + ": " + StatCollector.translateToLocal("menu.item.germany");
+    private static final String speed = "\u00A77" + StatCollector.translateToLocal("menu.item.speed") +": 70.81km";
+    private static final String pullingPower = "\u00A77" + StatCollector.translateToLocal("menu.item.pullingPower") +": ??? " + StatCollector.translateToLocal("menu.item.tons");
+
     //constructor
     public ItemFirstTrain() {
         super();
         setCreativeTab(TrainsInMotion.creativeTab);
         //we set any sub-text for the item here
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par3List, boolean par4) {
+        par3List.add(era);
+        par3List.add(year);
+        par3List.add(country);
+        par3List.add(speed);
+        par3List.add(pullingPower);
     }
 
 
@@ -40,7 +62,7 @@ public class ItemFirstTrain extends Item {
      * @see World#spawnEntityInWorld(Entity)
      *
      * for information on what the variables used in the spawn functions are doing
-     * @see FirstTrain#FirstTrain(UUID, World, double, double, double)
+     * @see EntityBrigadelok080#EntityBrigadelok080(UUID, World, double, double, double)
      *
      * for the base functionality of how this works
      * @see RailUtility#placeOnRail(GenericRailTransport, EntityPlayer, World, int, int, int)
@@ -49,18 +71,16 @@ public class ItemFirstTrain extends Item {
      */
     @Override
     public boolean onItemUse(ItemStack itemStack, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ, int blockSide, float pointToRayX, float pointToRayY, float pointToRayZ) {
-        return RailUtility.placeOnRail(new FirstTrain(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D),playerEntity,worldObj,posX,posY,posZ);
+        return RailUtility.placeOnRail(new EntityBrigadelok080(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D),playerEntity,worldObj,posX,posY,posZ);
     }
 
     /**
      * Sets the icon for the item
      */
-    /*/
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IIconRegister iconRegister) {
-        this.itemIcon = iconRegister.registerIcon(Info.modID.toLowerCase() + ":trains/" + this.iconName);
+        this.itemIcon = iconRegister.registerIcon(URIRegistry.ITEM_TRAIN_TEXTURE.getResource(this.getUnlocalizedName()).toString());
     }
-    /*/
 
 }

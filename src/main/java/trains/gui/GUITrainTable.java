@@ -7,15 +7,14 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
-
-import trains.crafting.TileEntityStorage;
 import trains.gui.trainhandler.ContainerHandler;
+import trains.tileentities.TileEntityStorage;
 
 public class GUITrainTable extends GuiContainer {
     private static final ResourceLocation craftingTableGuiTextures = new ResourceLocation("textures/gui/container/crafting_table.png");
 
     public GUITrainTable(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
-        super(new ContainerHandler(inventoryPlayer, null, (TileEntityStorage) world.getTileEntity(x,y,z)));
+        super(new ContainerHandler(inventoryPlayer, (TileEntityStorage) world.getTileEntity(x,y,z), true));
     }
 
     /**

@@ -4,19 +4,18 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
 import trains.TrainsInMotion;
-import trains.blocks.BlockTrainTable;
-import trains.crafting.TileEntityStorage;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.registry.TrainRegistry;
-
+import trains.tileentities.TileEntityStorage;
 
 public class ContainerHandler extends Container{
-    private EntityTrainCore trainEntity;
+    private GenericRailTransport trainEntity;
     private TileEntityStorage craftingTable;
     public IInventory craftResult = new InventoryCraftResult();
+    private boolean isCrafting;
+
 
 
     /**
@@ -25,7 +24,8 @@ public class ContainerHandler extends Container{
      *
      * runs a series of loops for managing the inventory slots.
      */
-    public ContainerHandler(InventoryPlayer iinventory, GenericRailTransport entityTrain, TileEntityStorage block) {
+    public ContainerHandler(InventoryPlayer iinventory, GenericRailTransport entityTrain,boolean isCrafting) {
+        this.isCrafting = isCrafting;
 
         //player inventory
         for (int ic = 0; ic < 9; ic++) {
@@ -38,50 +38,92 @@ public class ContainerHandler extends Container{
             addSlotToContainer(new Slot(iinventory, iT, 8 + iT * 18, 142));
         }
 
-        //for the crafter
-        if (block != null){
-            if (craftingTable == null){
-                craftingTable = block;
-            }
-
-            //crafting output slot
-            this.addSlotToContainer(new SlotCrafting(iinventory.player, craftingTable.inventory, this.craftResult, 10, 124, 35));
-            //train inventory
-            for (int l = 0; l < 3; ++l) {
-                for (int i1 = 0; i1 < 3; ++i1) {
-                    this.addSlotToContainer(new Slot(craftingTable.inventory, i1 + l * 3, 30 + i1 * 18, 17 + l * 18));
-                }
-            }
-            this.onCraftMatrixChanged(craftingTable.inventory);
-
-            //for Trains
-        } else if (entityTrain instanceof EntityTrainCore) {
-        //define the train's inventory size
-        int slot=1;
-        if (entityTrain.getType() == TrainsInMotion.transportTypes.STEAM || entityTrain.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM){
-            slot=2;
+        //train tileentities slots
+        if (trainEntity == null) {
+            trainEntity = entityTrain;
         }
-        //train crafting slots
-            if (trainEntity == null) {
-                trainEntity = (EntityTrainCore) entityTrain;
+
+
+        if (entityTrain instanceof EntityTrainCore) {
+            //define the train's inventory size
+            int slot=1;
+            if (entityTrain.getType() == TrainsInMotion.transportTypes.STEAM || entityTrain.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM){
+                slot=2;
             }
             //fuel slot
-            addSlotToContainer(new Slot(trainEntity.inventory, 0, 8, 53));
+            addSlotToContainer(new Slot(((EntityTrainCore)trainEntity).inventory, 0, 8, 53));
             if (slot == 2) {
                 //water slot
-                addSlotToContainer(new Slot(trainEntity.inventory, 1, 35, 53));
+                addSlotToContainer(new Slot(((EntityTrainCore)trainEntity).inventory, 1, 35, 53));
             }
 
 
             //train inventory
             for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
                 for (int ib = 0; ib < entityTrain.getInventorySize().getCollumn(); ib++) {
-                    addSlotToContainer(new Slot(trainEntity.inventory, slot, 98 + (ib * 18), (ia * 18) + 44));
+                    addSlotToContainer(new Slot(((EntityTrainCore)trainEntity).inventory, slot, 98 + (ib * 18), (ia * 18) + 44));
                     slot++;
                 }
             }
+        } else if (isCrafting){
+            //tileentities output slot
+            this.addSlotToContainer(new SlotCrafting(iinventory.player, ((EntityTrainCore)trainEntity).inventory, this.craftResult, 10, 124, 35));
+            //train inventory
+            for (int l = 0; l < 3; ++l) {
+                for (int i1 = 0; i1 < 3; ++i1) {
+                    this.addSlotToContainer(new craftingSlot(((EntityTrainCore)trainEntity).inventory, i1 + l * 3, 30 + i1 * 18, 17 + l * 18));
+                }
+            }
+
+            onCraftMatrixChanged(craftResult);
         }
     }
+
+
+    public ContainerHandler(InventoryPlayer iinventory, TileEntityStorage block, boolean isCrafting) {
+        this.isCrafting = isCrafting;
+
+        //player inventory
+        for (int ic = 0; ic < 9; ic++) {
+            for (int ir = 0; ir < 3; ir++) {
+                addSlotToContainer(new Slot(iinventory, (((ir * 9) + ic) + 9), 8 + (ic * 18), 84 + (ir * 18)));
+            }
+        }
+        //player toolbar
+        for (int iT = 0; iT < 9; iT++) {
+            addSlotToContainer(new Slot(iinventory, iT, 8 + iT * 18, 142));
+        }
+
+        //train tileentities slots
+        if (craftingTable == null) {
+            craftingTable = block;
+        }
+
+
+        if (!isCrafting) {
+            //train inventory
+            int slot=0;
+            for (int ia = 0; ia > -craftingTable.getInventorySize().getRow(); ia--) {
+                for (int ib = 0; ib < craftingTable.getInventorySize().getCollumn(); ib++) {
+                    addSlotToContainer(new Slot(craftingTable.inventory, slot, 98 + (ib * 18), (ia * 18) + 44));
+                    slot++;
+                }
+            }
+        } else {
+            //tileentities output slot
+            this.addSlotToContainer(new SlotCrafting(iinventory.player, craftingTable.inventory, this.craftResult, 10, 124, 35));
+            //train inventory
+            for (int l = 0; l < 3; ++l) {
+                for (int i1 = 0; i1 < 3; ++i1) {
+                    this.addSlotToContainer(new craftingSlot(craftingTable.inventory, i1 + l * 3, 30 + i1 * 18, 17 + l * 18));
+                }
+            }
+
+            onCraftMatrixChanged(craftResult);
+        }
+    }
+
+
 
     /**
      * <h2>Inventory sorting and shift-clicking</h2>
@@ -94,9 +136,6 @@ public class ContainerHandler extends Container{
         Slot stack = (Slot)this.inventorySlots.get(slot);
         Slot tempSlot;
         if (stack.getStack() == null){
-            if (craftingTable != null){
-                this.onCraftMatrixChanged(craftingTable.inventory);
-            }
             return null;
         }
         ItemStack returnStack = stack.getStack().copy();
@@ -108,24 +147,22 @@ public class ContainerHandler extends Container{
                 if (!tempSlot.getHasStack()) {
                     tempSlot.putStack(stack.getStack());
                     ((Slot) this.inventorySlots.get(slot)).decrStackSize(stack.getStack().stackSize);
-                    if (craftingTable != null){
-                        this.onCraftMatrixChanged(craftingTable.inventory);
-                    }
                     return null;
                     //if the slot contains the same item, and has room to add this stack to it, then add it
                 } else if (tempSlot.getStack().getItem().equals(stack.getStack().getItem()) &&
                         tempSlot.getStack().getMaxStackSize() > stack.getStack().stackSize + tempSlot.getStack().stackSize) {
                     tempSlot.getStack().stackSize += stack.getStack().stackSize;
                     ((Slot) this.inventorySlots.get(slot)).decrStackSize(stack.getStack().stackSize);
-                    if (craftingTable != null){
-                        this.onCraftMatrixChanged(craftingTable.inventory);
-                    }
                     return null;
                 }
             }
         }
-        if (craftingTable != null){
-            this.onCraftMatrixChanged(craftingTable.inventory);
+        if (isCrafting) {
+            if (craftingTable != null) {
+                onCraftMatrixChanged(craftingTable.inventory);
+            } else {
+                onCraftMatrixChanged(((EntityTrainCore)trainEntity).inventory);
+            }
         }
         return returnStack;
     }
@@ -152,33 +189,53 @@ public class ContainerHandler extends Container{
 
     @Override
     public void onCraftMatrixChanged(IInventory p_75130_1_) {
-        System.out.println("crafting matrix debug");
         this.craftResult.setInventorySlotContents(9, findMatchingRecipe());
     }
 
     private ItemStack findMatchingRecipe() {
-
-        for (TrainRegistry registry : TrainRegistry.listTrains()) {
-
-            System.out.println("found registry item for" + registry.entityWorldName);
-            System.out.println("The first item is: " + registry.recipe.get(0).getUnlocalizedName());
-            int i=0;
-            for (; i<8;i++) {
-                if (craftingTable.inventory.getStackInSlot(i) == null) {
-                    if (registry.recipe.get(i) != null) {
-                        i = 20;
-                    }
-                } else {
-                    if (registry.recipe.get(i) != craftingTable.inventory.getStackInSlot(i).getItem()) {
-                        i = 20;
+        if (craftingTable != null) {
+            for (TrainRegistry registry : TrainRegistry.listTrains()) {
+                int i = 0;
+                for (; i < 8; i++) {
+                    if (craftingTable.inventory.getStackInSlot(i) == null) {
+                        if (registry.recipe.get(i) != null) {
+                            i = 20;
+                        }
+                    } else {
+                        if (registry.recipe.get(i) != craftingTable.inventory.getStackInSlot(i).getItem()) {
+                            i = 20;
+                        }
                     }
                 }
+                if (i == 8) {
+                    return new ItemStack(registry.item, 1);
+                }
             }
-            if (i==8) {
-                System.out.println("found a match!");
-                return new ItemStack(registry.item, 1);
-            }
+        } else {
+            //TODO: normal crafting for rollingstock here
         }
         return null;
+    }
+
+
+
+
+
+
+    private class craftingSlot extends Slot{
+        public craftingSlot(IInventory p_i1824_1_, int p_i1824_2_, int p_i1824_3_, int p_i1824_4_) {
+            super(p_i1824_1_,p_i1824_2_,p_i1824_3_,p_i1824_4_);
+        }
+        @Override
+        public void onSlotChange(ItemStack p_75220_1_, ItemStack p_75220_2_) {
+            super.onSlotChange(p_75220_1_,p_75220_2_);
+            onCraftMatrixChanged(craftResult);
+        }
+        @Override
+        public void onSlotChanged(){
+            super.onSlotChanged();
+            onCraftMatrixChanged(craftResult);
+        }
+
     }
 }

@@ -15,16 +15,14 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
-import trains.blocks.BlockTrainTable;
-import trains.crafting.TileEntityStorage;
 import trains.entities.EntityBogie;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.gui.GUITrainTable;
 import trains.gui.train.GUITrain;
 import trains.models.RenderEntity;
-import trains.registry.GenericRegistry;
 import trains.registry.TrainRegistry;
+import trains.tileentities.TileEntityStorage;
 
 import java.util.ArrayList;
 import java.util.List;

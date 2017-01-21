@@ -1,8 +1,9 @@
-package trains.crafting;
+package trains.tileentities;
 
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import trains.TrainsInMotion;
 import trains.utility.InventoryHandler;
 
 public class TileEntityStorage extends TileEntity {
@@ -18,4 +19,6 @@ public class TileEntityStorage extends TileEntity {
         super.writeToNBT(p_145841_1_);
         p_145841_1_.setTag("items", inventory.writeNBT());
     }
+
+    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.NULL;}
 }

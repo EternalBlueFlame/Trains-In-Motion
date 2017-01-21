@@ -7,6 +7,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
@@ -29,7 +30,7 @@ public class GUITrain extends GuiContainer {
      * @see ContainerHandler
      */
     public GUITrain(InventoryPlayer inventoryPlayer, EntityTrainCore entity) {
-        super(new ContainerHandler(inventoryPlayer, entity, null));
+        super(new ContainerHandler(inventoryPlayer, entity,  false));
         train = entity;
     }
 
@@ -44,7 +45,7 @@ public class GUITrain extends GuiContainer {
      */
     @Override
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
-        fontRendererObj.drawString("Test Locomotive", 8, -18, 4210752);
+        fontRendererObj.drawString(StatCollector.translateToLocal(train.getItem().getUnlocalizedName()), 8, -18, 4210752);
         fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, 74, 4210752);
     }
 

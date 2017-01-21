@@ -8,11 +8,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
-import trains.blocks.BlockTrainTable;
-import trains.crafting.TileEntityStorage;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.gui.trainhandler.ContainerHandler;
+import trains.tileentities.TileEntityStorage;
 
 
 
@@ -32,7 +31,7 @@ public class CommonProxy implements IGuiHandler {
             if (player.ridingEntity instanceof GenericRailTransport) {
                 switch (ID) {
                     case TrainsInMotion.STEAM_GUI_ID: {
-                        return new ContainerHandler(player.inventory, (EntityTrainCore) player.ridingEntity, null);
+                        return new ContainerHandler(player.inventory, (EntityTrainCore) player.ridingEntity, false);
                     }
 
                     default: {
@@ -40,7 +39,7 @@ public class CommonProxy implements IGuiHandler {
                     }
                 }
             } else if (world.getTileEntity(x,y,z) instanceof TileEntityStorage){
-                return new ContainerHandler(player.inventory, null, (TileEntityStorage) world.getTileEntity(x,y,z));
+                return new ContainerHandler(player.inventory, (TileEntityStorage) world.getTileEntity(x,y,z), true);
             }
         }
         return null;

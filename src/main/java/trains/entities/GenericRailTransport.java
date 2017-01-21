@@ -9,7 +9,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
@@ -20,6 +19,7 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import trains.TrainsInMotion;
+import trains.entities.trains.EntityBrigadelok080;
 import trains.models.tmt.Vec3d;
 import trains.utility.*;
 
@@ -547,7 +547,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**
      * <h2>Inherited variables</h2>
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
-     * @see trains.entities.trains.FirstTrain for more information
+     * @see EntityBrigadelok080 for more information
      */
     public List<Float> getBogieOffsets(){return new ArrayList<Float>();}
     public TrainsInMotion.transportTypes getType(){return null;}
@@ -555,7 +555,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public float[] getHitboxPositions(){return new float[]{-1,0,1};}
     public Item getItem(){return null;}
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.THREExTHREE;}
-    public String getName(){return "error";}
     public LiquidManager getTank(){return null;}
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
     public float getPistonOffset(){return 0;}
