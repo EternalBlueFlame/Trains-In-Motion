@@ -1,9 +1,11 @@
 package trains.entities;
 
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
+import trains.networking.PacketKeyPress;
 import trains.utility.FuelHandler;
 import trains.utility.InventoryHandler;
 
@@ -21,13 +23,11 @@ public class EntityTrainCore extends GenericRailTransport {
      * isRunning is used for non-steam based trains to define if it's actually on.
      * fuelHandler manages the items for fuel, and the fuel itself.
      * accelerator defines the speed percentage the user is attempting to apply.
-     * destination is used for routing, railcraft and otherwise.
      * lastly the inventory defines the item storage of the train.
      */
     public boolean isRunning = false;
     public FuelHandler fuelHandler = new FuelHandler();
     public int accelerator =0;
-    public String destination ="";
     public InventoryHandler inventory = new InventoryHandler(this);
 
 
@@ -216,8 +216,9 @@ public class EntityTrainCore extends GenericRailTransport {
 
 
     /**
-     * <h2> acceleration</h2>
+     * <h2>acceleration</h2>
      * function called from a packet for setting the train's speed and whether or not it is reverse.
+     * @see trains.networking.PacketKeyPress.Handler#onMessage(PacketKeyPress, MessageContext)
      */
     public void setAcceleration(boolean increase){
         if (increase && accelerator <6){
@@ -225,14 +226,16 @@ public class EntityTrainCore extends GenericRailTransport {
         } else if (!increase && accelerator >-6){
             accelerator--;
         }
-        if (accelerator>0 && !isReverse){
-            isReverse = false;
-        } else if (accelerator <0 && isReverse){
-            isReverse = true;
-        }
     }
 
 
+    /**
+     * <h2>menu toggles</h2>
+     * called from a packet to change the settings.
+     * @see trains.networking.PacketKeyPress.Handler#onMessage(PacketKeyPress, MessageContext)
+     *
+     * @see GenericRailTransport#toggleBool(int) for more info.
+     */
     @Override
     public boolean toggleBool(int index){
         if (!super.toggleBool(index)){

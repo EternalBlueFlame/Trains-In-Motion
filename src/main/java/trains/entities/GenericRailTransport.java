@@ -43,12 +43,12 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * bogie is the list of bogies this has.
      * bogieXYZ is the list of known positions for the bogies, this is mostly used to keep track of where the bogies are supposed to be via NBT.
      * motion is the vector angle that the train is facing, we only initialize it here, so we don't need to initialize it every tick.
-     * TODO: isReverse is supposed to be for whether or not the train is in reverse, but we aren't actually using this yet, and it may not even be necessary.
      * isCreative defines whether or not it should actually remove the liquid/fuel item, this can be toggled from the GUI if the rider is in creative mode.
      * hitboxList and hitboxHandler manage the hitboxes the train has, this is mostly dealt with via getParts() and the hitbox functionality.
      * transportTicks is a simple tick count that allows us to manage functions that don't happen every tick, like fuel consumption in trains.
      * front and back define references to the train/rollingstock connected to the front and back, so that way we can better control links.
      * the front and back unloaded ID's are used as a failsafe in case the front or back connected entities aren't loaded yet.
+     * destination is used for routing, railcraft and otherwise.
      * the last part is the generic entity constructor
      */
     public LiquidManager tanks = new LiquidManager(0,0, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
@@ -60,7 +60,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public List<EntityBogie> bogie = new ArrayList<EntityBogie>();
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
     public double[] motion = new double[]{0,0,0};
-    public boolean isReverse =false;
     public boolean isCreative = false;
     public boolean isCoupling = true;//false;
     public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
@@ -70,6 +69,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public GenericRailTransport back;
     public int frontUnloadedID =0;
     public int backUnloadedID =0;
+    public String destination ="";
     public GenericRailTransport(World world){
         super(world);
         tanks = getTank();
@@ -138,7 +138,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     @Override
     public void readSpawnData(ByteBuf additionalData) {
-        isReverse = additionalData.readBoolean();
         brake = additionalData.readBoolean();
         isCoupling = additionalData.readBoolean();
         isCreative = additionalData.readBoolean();
@@ -152,7 +151,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
     @Override
     public void writeSpawnData(ByteBuf buffer) {
-        buffer.writeBoolean(isReverse);
         buffer.writeBoolean(brake);
         buffer.writeBoolean(isCoupling);
         buffer.writeBoolean(isCreative);
@@ -172,7 +170,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         lamp.X = tag.getInteger("extended.lamp.x");
         lamp.Y = tag.getInteger("extended.lamp.y");
         lamp.Z = tag.getInteger("extended.lamp.z");
-        isReverse = tag.getBoolean("extended.reverse");
         isDead = tag.getBoolean("extended.dead");
         isCoupling = tag.getBoolean("extended.coupling");
 
@@ -230,7 +227,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         tag.setInteger("extended.lamp.x", lamp.X);
         tag.setInteger("extended.lamp.y", lamp.Y);
         tag.setInteger("extended.lamp.z", lamp.Z);
-        tag.setBoolean("extended.reverse", isReverse);
         tag.setBoolean("extended.dead", isDead);
         tag.setBoolean("extended.coupling", isCoupling);
         if (front != null){
@@ -405,9 +401,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
 
     public float processMovement(double X){
-        float speed = (float) X * 0.9f;
-        return speed;
+        return (float) X * 0.9f;
     }
+
+
     /**
      * <h2>Rider offset</h2>
      * this runs every tick to be sure the rider is in the correct position

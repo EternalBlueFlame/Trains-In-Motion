@@ -1,10 +1,14 @@
 package trains.entities;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import trains.utility.InventoryHandler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -15,21 +19,17 @@ public class EntityRollingStockCore extends GenericRailTransport {
 
     /**
      * <h3>variables</h3>
-     * isRunning is used for non-steam based trains to define if it's actually on.
-     * fuelHandler manages the items for fuel, and the fuel itself.
-     * accelerator defines the speed percentage the user is attempting to apply.
-     * destination is used for routing, railcraft and otherwise.
-     * lastly the inventory defines the item storage of the train.
+     * the inventory defines the item storage of the train.
      */
-    public String destination ="";
     public InventoryHandler inventory = new InventoryHandler(this);
+    public List<Entity> riddenByEntities = new ArrayList<Entity>();
 
 
 
     /**
-    * <h2> Base train Constructor</h2>
+    * <h2> Base rollingstock Constructor</h2>
     *
-    * default constructor for all trains, the first one is server only, the second is client only.
+    * default constructor for all rollingstock, the first one is server only, the second is client only.
     *
     * @param owner the owner profile, used to define owner of the entity,
     * @param world the world to spawn the entity in, used in super's super.
@@ -76,13 +76,44 @@ public class EntityRollingStockCore extends GenericRailTransport {
         super.readEntityFromNBT(tag);
 
         inventory.readNBT(tag, "items");
+
+        NBTTagList taglist = tag.getTagList("extended.passengers", 10);
+        for (int i = 0; i < taglist.tagCount(); i++) {
+            NBTTagCompound nbttagcompound1 = taglist.getCompoundTagAt(i);
+            byte b0 = nbttagcompound1.getByte("riderindex");
+
+            if (b0 >= 0 && b0 < getRiderOffsets().length) {
+                Entity rider = worldObj.getEntityByID(nbttagcompound1.getInteger("rider"));
+                if (rider != null) {
+                    riddenByEntities.add(rider);
+                }
+            }
+        }
+
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
 
         tag.setTag("items", inventory.writeNBT());
+
+        NBTTagList nbttaglist = new NBTTagList();
+        for (int i = 0; i < riddenByEntities.size(); ++i) {
+            if (riddenByEntities.get(i) != null) {
+                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+                nbttagcompound1.setByte("riderindex", (byte)i);
+                nbttagcompound1.setInteger("rider", riddenByEntities.get(i).getEntityId());
+                nbttaglist.appendTag(nbttagcompound1);
+            }
+        }
+
+        tag.setTag("extended.passengers", nbttaglist);
+
     }
+
+
+
+    public float[][] getRiderOffsets(){return new float[][]{{0,0}};}
 
 
 }
