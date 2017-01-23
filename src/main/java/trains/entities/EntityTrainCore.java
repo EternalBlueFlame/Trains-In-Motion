@@ -4,6 +4,7 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import trains.networking.PacketKeyPress;
 import trains.utility.FuelHandler;
@@ -12,9 +13,12 @@ import trains.utility.InventoryHandler;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
+import static trains.utility.RailUtility.rotatePoint;
+
 /**
- * <h2> Train core</h2>
+ * <h1>Train core</h1>
  * this is the management core for all trains.
+ * @author Eternal Blue Flame
  */
 public class EntityTrainCore extends GenericRailTransport {
 
@@ -110,16 +114,18 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     public float calculateDrag(float current, @Nullable GenericRailTransport frontCheck, @Nullable GenericRailTransport backCheck){
 
+        //if front and back are null then return null
         if (frontCheck == null && backCheck == null) {
             return current;
         }
 
+        //if front is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
         if (frontCheck instanceof EntityTrainCore){
             current *= 1.25f;
         } else if (frontCheck instanceof EntityRollingStockCore){
             current *=0.9f;
         }
-
+        //if back is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
         if (backCheck instanceof EntityTrainCore){
             current *= 1.25f;
         } else if (backCheck instanceof EntityRollingStockCore){
@@ -128,12 +134,14 @@ public class EntityTrainCore extends GenericRailTransport {
 
         GenericRailTransport nextFront = null;
         GenericRailTransport nextBack = null;
+        //detect if the next bogie to look at stats for is in the front or back of the front bogie
         if (frontCheck != null)
         if (frontCheck.front != null || frontCheck.front != this){
             nextFront = frontCheck.front;
         } else if (frontCheck.back != null || frontCheck.back != this){
             nextFront = frontCheck.back;
         }
+        //detect if the next bogie to look at stats for is in the front or back of the back bogie
         if (backCheck != null) {
             if (backCheck.front != null || backCheck.front != this) {
                 nextBack = backCheck.front;
@@ -141,30 +149,39 @@ public class EntityTrainCore extends GenericRailTransport {
                 nextBack = backCheck.back;
             }
         }
+        //loop again to get the next carts in the list.
         return calculateDrag(current, nextFront, nextBack);
 
     }
 
     /**
-     * <h2> process train movement</h2>
-     * called by onUpdate to figure out the amount of movement to apply every tick
+     * <h2>process train movement</h2>
+     * called by onUpdate to figure out the amount of movement to apply every tick and in what direction
      * @see #onUpdate()
-     *
-     * currently this is only intended to provide a rather static amount.
      */
     @Override
-    public float processMovement(double X){
+    public double processMovement(EntityBogie entityBogie){
 
-        float speed = (float) X * calculateDrag(0.9f, front, back);
+        //first define direction
+        double X =0;
+        if (MathHelper.floor_double(entityBogie.motionX) !=0){
+            X = entityBogie.motionX;
+        } else {
+            X = entityBogie.motionZ;
+        }
+        //add drag.
+        double speed =  X * calculateDrag(0.9f, front, back);
 
+        //compensate for if the train is still.
         if (speed ==0){
             speed = ((accelerator / 6f)*0.1f) * getAcceleration();
         }
 
+        //now apply the accelerator if it's not 0 and there is enough fuel.
         if (accelerator!=0) {
             //if ((getType() == TrainsInMotion.transportTypes.STEAM || getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM)) {
             //    if (tanks.getTank(false).getFluidAmount() > tanks.getTank(false).getCapacity()*0.5f) {
-                    speed *= 1 + ((accelerator / 6f) * getAcceleration());
+            speed *=  (Math.copySign(1f, accelerator) + ((accelerator / 6f) * getAcceleration()));
             //System.out.println(speed + " : " + getMaxSpeed());
             //    }
             //} else if (fuelHandler.fuel>0){
@@ -172,8 +189,11 @@ public class EntityTrainCore extends GenericRailTransport {
             //}
         }
 
+        //cap speed to max.
         if (speed>getMaxSpeed()){
            speed=getMaxSpeed();
+        } else if (speed<-getMaxSpeed()) {
+            speed=-getMaxSpeed();
         }
         return speed;
     }
@@ -189,13 +209,11 @@ public class EntityTrainCore extends GenericRailTransport {
     public void onUpdate() {
         if (bogie.size()>0){
             boolean collision = !hitboxHandler.getCollision(this);
-            //handle movement for trains, this will likely need to be different for rollingstock.
+            //if theres no collision then process movement for the bogies.
             if (collision) {
                 for (EntityBogie currentBogie : bogie) {
-                    //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                    motion[0] = processMovement(currentBogie.motionX);
-                    motion[2] = processMovement(currentBogie.motionZ);
-                    motion[1] = currentBogie.motionY;
+                    motion = rotatePoint(new double[]{processMovement(currentBogie), (float) motionY, 0}, 0.0f, currentBogie.rotationYaw, 0.0f);
+
                     currentBogie.setVelocity(motion[0], motion[1], motion[2]);
                     currentBogie.minecartMove();
                 }
@@ -219,6 +237,7 @@ public class EntityTrainCore extends GenericRailTransport {
      * <h2>acceleration</h2>
      * function called from a packet for setting the train's speed and whether or not it is reverse.
      * @see trains.networking.PacketKeyPress.Handler#onMessage(PacketKeyPress, MessageContext)
+     * TODO: for traincraft we need to limit the accelerator to 1.
      */
     public void setAcceleration(boolean increase){
         if (increase && accelerator <6){

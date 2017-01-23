@@ -10,17 +10,19 @@ import trains.tileentities.TileEntityStorage;
 
 
 /**
- * <h1>Class for the train crafting table block</h1>
+ * <h1>Train crafting table block</h1>
+ * @author Eternal Blue Flame
  */
 public class BlockTrainTable extends BlockContainer {
 
     /**
      * <h2>block initializer</h2>
-     *  Defines the material like what is necessary to make it and the creative tab for it
+     *  Defines the material like what is necessary to make it and the creative tab for it, and the block name.
      */
     public BlockTrainTable(){
         super(Material.wood);
         setCreativeTab(TrainsInMotion.creativeTab);
+        setBlockName("block.traintable");
     }
 
     /**

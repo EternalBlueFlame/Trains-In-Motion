@@ -1,0 +1,61 @@
+<!-- ## This is a comment, do no remove or modify these! ## -->
+<!-- ## Only replace the words on the right side of "=" ## -->
+
+<!-- ## Credit to Eternal Blue Flame ## -->
+
+<!-- ## GUI ## -->
+gui.waterboiler=Water Boiler
+gui.creativemode=Creative Mode is 
+gui.brake=Brake is 
+gui.lamp=Lamp is 
+gui.horn=Use Horn.
+gui.trainisrunning=Train is 
+gui.on=on.
+gui.off=off.
+gui.couplersopen=Couplers are open.
+gui.couplersclosed=Couplers are closed.
+gui.locked=Locked to owner.
+gui.unlocked=Unlocked.
+gui.rf=Redstone Flux
+gui.hydrogencell=Hydrogen Cell
+gui.coolant=Reactor Coolant
+gui.of= of 
+gui.buckets=Buckets.
+
+container.traincrafting=Train Crafting Table
+
+
+<!-- ## Items ## -->
+menu.item.era=Era
+menu.item.steam=Steam
+menu.item.diesel=Diesel
+menu.item.Electric=Electric
+menu.item.hydrogen=Hydro-electric
+menu.item.maglev=Maglev
+menu.item.nuclearsteam=Nuclear Steam
+menu.item.nuclearelectric=Nuclear Electric
+menu.item.speed=Speed
+menu.item.year=Year
+menu.item.country=Country
+menu.item.germany=Germany
+menu.item.america=USA
+menu.item.pullingpower=Pulling power
+menu.item.tons=Tons
+menu.item.weight=Weight
+
+item.oilbucket=Oil bucket
+
+
+<!-- ## Blocks ## -->
+fluid.oil=Oil
+block.traintable=Train crafting table
+
+
+<!-- ## Trains ## -->
+<!-- ## These are actually defined from the item name, so one name covers all areas ## -->
+item.brigadelok080.name=Brigadelok 0-8-0
+
+
+<!-- ## Rollingstock ## -->
+<!-- ## These are actually defined from the item name, so one name covers all areas ## -->
+item.pullmanspalace.name=Pullman's Palace

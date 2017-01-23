@@ -5,7 +5,7 @@ import net.minecraft.util.ResourceLocation;
 import static trains.TrainsInMotion.MODID;
 
 /**
- * <h2> Resource Locations</h2>
+ * <h1> Resource Locations</h1>
  * Similar to android design, we use enums to define URI's for individual things, to keep it organized.
  * this is less of a registry and more of a list, because nothing is actually registered, this is just variables.
  * but it makes more sense to organize it with the registries then in a folder of it's own.

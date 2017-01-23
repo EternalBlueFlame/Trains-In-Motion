@@ -11,14 +11,24 @@ import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
-import trains.gui.trainhandler.ContainerHandler;
+import trains.utility.ContainerHandler;
 import trains.networking.PacketKeyPress;
 import trains.registry.URIRegistry;
 
 import java.util.Arrays;
 import java.util.Collections;
 
+/**
+ * <h1>Train GUI</h1>
+ * used to draw the GUI for trains (the menu with the inventory).
+ * @author Eternal Blue Flame
+ */
 public class GUITrain extends GuiContainer {
+    /**
+     * <h2>variables</h2>
+     * we re-use the furnace texture so the inventory is at least partially customized by the player's texturepack.
+     * guiScaler is just a more convenient method to scale, its similar to what the base game does, but with less overhead.
+     */
     private static final ResourceLocation vanillaInventory = new ResourceLocation("textures/gui/container/furnace.png");
     private static EntityTrainCore train;
     private static final float guiScaler = 0.00390625F;
@@ -69,14 +79,12 @@ public class GUITrain extends GuiContainer {
         //drawTexturedModalRect((width - xSize) / 2, (height - ySize) / 2, 0, 0, xSize, ySize);
 
 
-
+        //bind the inventory image which we use the slot images and inventory image from.
         this.mc.getTextureManager().bindTexture(vanillaInventory);
         //icon for fuel
         drawTexturedModalRect(guiLeft + 7, guiTop + 25, 54, 51, 18, 18, 20);
         //icon for furnace
         drawTexturedModalRect(guiLeft + 7, guiTop + 25, 54, 51, 18, 18, 20);
-
-        //set the generic slot icon, which will get re-used for every slot.
 
         //slot for fuel
         drawTexturedModalRect(guiLeft + 7, guiTop + 52, 54, 51, 18, 18, 20);
@@ -89,23 +97,22 @@ public class GUITrain extends GuiContainer {
                 drawTexturedModalRect( guiLeft + 97 + (ic * 18), guiTop +43 + (ir * 18), 54, 51, 18, 18, 20);
             }
         }
-
-
+        //draw the player inventory and toolbar background.
         drawTexturedModalRect(guiLeft, guiTop+ 82, 0, 82, 176, 176, 176);
 
+        //draw the tanks
         mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
+        //liquid fuel tank
         drawTexturedModalRect(guiLeft + 66, guiTop + 10, 0, 0, 18, 50, 16);
         if (train.tanks.getTank(true).getFluidAmount()>0) {
             //draw the water tank
             int liquid = Math.abs((train.tanks.getTank(true).getFluidAmount() * 50) / train.tanks.getTank(true).getCapacity());
             drawTexturedModalRect(guiLeft + 66, guiTop + 60 - liquid, 16,0, 18, liquid, 16);
         }
-
+        //steam tank
         if (train.getType() == TrainsInMotion.transportTypes.STEAM || train.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
-            //draw the background
             drawTexturedModalRect(guiLeft + 34, guiTop+10, 0, 0, 18, 30, 16);
             if (train.tanks.getTank(false).getFluidAmount()>0) {
-                //draw the steam tank
                 int liquid3 = Math.abs((train.tanks.getTank(false).getFluidAmount() * 30) / train.tanks.getTank(false).getCapacity());
                 drawTexturedModalRect(guiLeft + 34, guiTop +50 - liquid3, 32,0, 18, liquid3, 16);
             }
@@ -140,40 +147,41 @@ public class GUITrain extends GuiContainer {
      * <h2>Draw upper layer</h2>
      * this draws the upper layer of the GUI, and handles things like the tooltips.
      * Most of this is just checking if the cursor position is in the correct place for displaying tooltips.
+     * TODO: maps are disabled
      */
     @Override
     public void drawScreen(int mouseX, int mouseY, float par3){
         super.drawScreen(mouseX, mouseY, par3);
-
+        //draw the fuel fluid tank hover text
         if ((mouseX >= guiLeft + 66 && mouseX <= guiLeft + 84 &&
                 mouseY >= guiTop + 10 && mouseY <= guiTop +60)) {
-            drawHoveringText(Arrays.asList(tankType(true), train.tanks.getTank(true).getFluidAmount()*0.001f + " of " + train.tanks.getTank(true).getCapacity()*0.001f, "Buckets"), mouseX, mouseY, fontRendererObj);
+            drawHoveringText(Arrays.asList(tankType(true), train.tanks.getTank(true).getFluidAmount()*0.001f + StatCollector.translateToLocal("gui.of") + train.tanks.getTank(true).getCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
         }
-
+        //draw the steam tank hover text
         if ((train.getType() == TrainsInMotion.transportTypes.STEAM || train.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
                 (mouseX >= guiLeft + 34 && mouseX <= guiLeft + 52 &&
                         mouseY >= guiTop + 10 && mouseY <= guiTop +40)) {
-            drawHoveringText(Arrays.asList(tankType(false), train.tanks.getTank(true).getFluidAmount()*0.001f + " of " + train.tanks.getTank(true).getCapacity()*0.001f, "Buckets"), mouseX, mouseY, fontRendererObj);
+            drawHoveringText(Arrays.asList(tankType(false), train.tanks.getTank(true).getFluidAmount()*0.001f + StatCollector.translateToLocal("gui.of") + train.tanks.getTank(true).getCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
         }
-
+        //draw toggle button hover text
         if (mouseY > guiTop + 63 && mouseY < guiTop +81){
             if (train.ridingEntity instanceof EntityPlayer && ((EntityPlayer)train.ridingEntity).capabilities.isCreativeMode &&
                     mouseX > guiLeft + 52 && mouseX < guiLeft + 70) {
-                drawHoveringText(Collections.singletonList("Creative mode is " + checkBoolean(train.brake)), mouseX, mouseY, fontRendererObj);
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.creativemode") + checkBoolean(train.brake)), mouseX, mouseY, fontRendererObj);
             } else if (mouseX > guiLeft + 70 && mouseX < guiLeft + 88) {
-                drawHoveringText(Collections.singletonList("Brake is " + checkBoolean(train.brake)), mouseX, mouseY, fontRendererObj);
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.brake")  + checkBoolean(train.brake)), mouseX, mouseY, fontRendererObj);
             } else if (mouseX > guiLeft + 88 && mouseX < guiLeft + 106){
-                drawHoveringText(Collections.singletonList("Lamp is " + checkBoolean(train.lamp.isOn)), mouseX, mouseY, fontRendererObj);
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.lamp")  + checkBoolean(train.lamp.isOn)), mouseX, mouseY, fontRendererObj);
             } else if (mouseX > guiLeft + 106 && mouseX < guiLeft + 124){
                 drawHoveringText(Collections.singletonList(lockedCheck(train.isLocked)), mouseX, mouseY, fontRendererObj);
             } else if (mouseX > guiLeft + 124 && mouseX < guiLeft + 142){
                 drawHoveringText(Collections.singletonList(couplingCheck(train.isCoupling)), mouseX, mouseY, fontRendererObj);
             } else if (mouseX > guiLeft + 142 && mouseX < guiLeft + 160){
-                drawHoveringText(Collections.singletonList("Horn"), mouseX, mouseY, fontRendererObj);
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.horn") ), mouseX, mouseY, fontRendererObj);
             } else if(false && mouseX > guiLeft + 160 && mouseX < guiLeft + 178) {
                 //drawHoveringText(Collections.singletonList("Open Map"), mouseX, mouseY, fontRendererObj);
             }else if (train.getType() != TrainsInMotion.transportTypes.STEAM && mouseX > guiLeft + 178 && mouseX < guiLeft + 196){
-                drawHoveringText(Collections.singletonList("Train is " + checkBoolean(train.isRunning)), mouseX, mouseY, fontRendererObj);
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.trainisrunning")  + checkBoolean(train.isRunning)), mouseX, mouseY, fontRendererObj);
             }
         }
 
@@ -184,7 +192,7 @@ public class GUITrain extends GuiContainer {
 
     /**
      * <h2>GUI initialization</h2>
-     * the super defines the screen size and scale. beyond that we just initialize th buttons
+     * the super defines the screen size and scale. beyond that we just initialize th buttons and their positions
      */
     @Override
     public void initGui() {
@@ -228,49 +236,56 @@ public class GUITrain extends GuiContainer {
     }
 
 
-
+    /**
+     * <h3>gui bool checks</h3>
+     * @return the text from the language files for the proper value, based on the boolean
+     */
     private String checkBoolean(boolean bool){
         if (bool){
-            return "on.";
+            return StatCollector.translateToLocal("gui.on");
         } else {
-            return "off.";
+            return StatCollector.translateToLocal("gui.off");
         }
     }
     private String couplingCheck(boolean bool){
         if (bool){
-            return "Couplers are open.";
+            return StatCollector.translateToLocal("gui.couplersopen");
         } else {
-            return "Couplers are closed.";
+            return StatCollector.translateToLocal("gui.couplersclosed");
         }
     }
     private String lockedCheck(Boolean bool){
         if (bool){
-            return "Locked";
+            return StatCollector.translateToLocal("gui.locked");
         } else {
-            return "Unlocked";
+            return StatCollector.translateToLocal("gui.unlocked");
         }
     }
 
+    /**
+     * <h3>gui Tank name</h3>
+     * @return the name of the defined tank dependant in the current train and the user's language.
+     */
     private String tankType(boolean firsttank){
         switch (train.getType()){
             case STEAM: case NUCLEAR_STEAM:{
                 if (firsttank){
-                    return "Water Boiler:";
+                    return StatCollector.translateToLocal("gui.waterboiler") + ":";
                 } else {
-                    return "Steam:";
+                    return StatCollector.translateToLocal("menu.item.steam") + ":";
                 }
             }
             case DIESEL:{
-                return "Diesel:";
+                return StatCollector.translateToLocal("gui.diesel") + ":";
             }
             case ELECTRIC: case MAGLEV:{
-                return "Redstone Flux:";
+                return StatCollector.translateToLocal("gui.rf") + ":";
             }
             case HYDROGEN_DIESEL:{
-                return "Hydrogen Cell:";
+                return StatCollector.translateToLocal("gui.hydrogencell") + ":";
             }
             case NUCLEAR_ELECTRIC:{
-                return "Coolant:";
+                return StatCollector.translateToLocal("gui.coolant") + ":";
             }
             default:{return "";}
         }

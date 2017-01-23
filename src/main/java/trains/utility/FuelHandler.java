@@ -12,6 +12,12 @@ import net.minecraftforge.fluids.FluidRegistry;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 
+/**
+ * <h1>Fuel management for trains</h1>
+ * used to process fuel addition and consumption.
+ *
+ * @author Eternal Blue Flame
+ */
 public class FuelHandler implements IFuelHandler{
 
 	public int fuel=0;
@@ -19,8 +25,9 @@ public class FuelHandler implements IFuelHandler{
 
 	/**
 	 * <h2>Register burnables with minecraft</h2>
-	 * use getBurnTime to register a burnable that will work with other mods. this will need to be
-	 * use getCustom to register a burnable that will only work with TiM
+	 * use getBurnTime to register a custom burnable that will work with other mods and the base game.
+	 * use getCustom to register a burnable that will only work with TiM.
+	 *TODO: not actually implemented.
      */
 	@Override
 	public int getBurnTime(ItemStack fuel) {
@@ -32,6 +39,10 @@ public class FuelHandler implements IFuelHandler{
 	}
 
 
+	/**
+	 * <h2>check if an item is a usable fuel</h2>
+	 * returns if the train can consume the fuel or not.
+     */
 	public static boolean isFuel(ItemStack item, GenericRailTransport transport){
 		switch (transport.getType()){
 			case STEAM: {return item != null && TileEntityFurnace.getItemBurnTime(item) !=0;}
@@ -41,14 +52,22 @@ public class FuelHandler implements IFuelHandler{
 		return false;
 	}
 
+	/**
+	 * <h2>check if an item is a usable water source item</h2>
+	 * @return if the train can add the water to the boiler or not.
+	 */
 	public static boolean isWater(ItemStack item, GenericRailTransport transport){
 		switch (transport.getType()){
-			case STEAM: {return item != null && item.getItem() == Items.water_bucket;}
+			case STEAM: case NUCLEAR_STEAM: {return item != null && item.getItem() == Items.water_bucket;}
 
 		}
 		return false;
 	}
 
+	/**
+	 * <h2>get liquid fuel value</h2>
+	 * @return the value in millibuckets for the item
+	 */
 	public static int waterValue(ItemStack itemStack){
 		if (itemStack != null) {
 			if (itemStack.getItem() == Items.water_bucket) {

@@ -13,6 +13,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * <h1>Pullman's Palace entity</h1>
+ * @author Eternal Blue Flame
+ */
 public class EntityPullmansPalace extends EntityRollingStockCore{
     /**
      * <h2>Basic Rollingstock Constructor</h2>

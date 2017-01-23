@@ -8,7 +8,7 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
-import trains.items.trains.ItemFirstTrain;
+import trains.items.trains.ItemBrigadelok080;
 import trains.models.tmt.Vec3d;
 import trains.registry.TrainRegistry;
 import trains.registry.URIRegistry;
@@ -20,12 +20,16 @@ import java.util.UUID;
 
 import static trains.TrainsInMotion.MODID;
 
+/**
+ * <h1>Brigadelok 0-8-0 entity</h1>
+ * @author Eternal Blue Flame
+ */
 public class EntityBrigadelok080 extends EntityTrainCore {
     /**
      * <h2>Basic Train Constructor</h2>
      * To make your own custom train, create a new class that is a copy of this class, in that copy, you only need to change the values of private static final variables defined here.
      * You also have to make your own item class, for that
-     * @see ItemFirstTrain
+     * @see ItemBrigadelok080
      * lastly you have to register them in
      * @see TrainRegistry#listTrains()
      *
@@ -36,7 +40,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
     private static final LiquidManager tank = new LiquidManager(1100,1100, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
     private static final ResourceLocation horn = URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");
     private static final ResourceLocation running = URIRegistry.SOUND_RUNNING.getResource("r080brigadelok.ogg");
-    public static final Item thisItem = new ItemFirstTrain().setUnlocalizedName("brigadelok080").setTextureName(MODID + ":itemTests");
+    public static final Item thisItem = new ItemBrigadelok080().setUnlocalizedName("brigadelok080").setTextureName(MODID + ":itemTests");
 
     /**
      * these basic constructors only need to have their names changed to that of this class, that is assuming your editor doesn't automatically do that.

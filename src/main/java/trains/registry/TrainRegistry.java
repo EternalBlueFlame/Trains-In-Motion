@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <h2>Train registry</h2>
+ * <h1>Train registry</h1>
  * this class lists all the trains and rollingstock provided by this mod.
  * If you need a reference to one of those, you have to call it from this class.
  */

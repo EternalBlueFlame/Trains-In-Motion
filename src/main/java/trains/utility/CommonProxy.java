@@ -10,18 +10,20 @@ import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
-import trains.gui.trainhandler.ContainerHandler;
 import trains.tileentities.TileEntityStorage;
 
 
-
+/**
+ * <h1>Common and Server proxy</h1>
+ * defines some of the more important server only, and dual sided functionality that runs on the main thread of the mod.
+ * @author Eternal Blue Flame
+ */
 public class CommonProxy implements IGuiHandler {
     /**
      * <h2> Server GUI Redirect </h2>
-     * Mostly a redirect between the event handler and the actual Inventory Handler
+     * Mostly a redirect between the event handler and the actual Container Handler
      *
-     *
-     * define the stuff for client here too, however this is overridden in client proxy so that way it doesn't get run on server.
+     * the inventory manager that server uses for this menu is defined in
      * @see ClientProxy#getClientGuiElement(int, EntityPlayer, World, int, int, int)
      */
     @Override
@@ -38,6 +40,7 @@ public class CommonProxy implements IGuiHandler {
                         return null;
                     }
                 }
+                //tile entities
             } else if (world.getTileEntity(x,y,z) instanceof TileEntityStorage){
                 return new ContainerHandler(player.inventory, (TileEntityStorage) world.getTileEntity(x,y,z), true);
             }
@@ -57,8 +60,7 @@ public class CommonProxy implements IGuiHandler {
     /**
      * <h2>registry</h2>
      * placeholder code for the client registration.
-     * can be used if we ever need to register something only on server.
-     * @see ClientProxy#register)
+     * @see ClientProxy#register) for actual use:
      */
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {return null;}

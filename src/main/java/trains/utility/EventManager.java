@@ -12,6 +12,11 @@ import trains.entities.EntityTrainCore;
 import trains.networking.PacketKeyPress;
 import trains.networking.PacketMount;
 
+/**
+ * <h1>event management</h1>
+ * used to manage specific events that can't be predicted, like player key presses.
+ * @author Eternal Blue Flame
+ */
 public class EventManager {
 
     /**

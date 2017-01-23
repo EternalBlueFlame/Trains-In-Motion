@@ -13,15 +13,21 @@ import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.utility.EventManager;
 
+/**
+ * <h1>Key press packet</h1>
+ *
+ * when a key is pressed in
+ * @see EventManager#onClientKeyPress(InputEvent.KeyInputEvent)
+ * it's processed by client to sent the defined action to server.
+ * The only data sent in the packet, beyond the normal overhead is a single int to define what action to do.
+ * @author Eternal Blue Flame
+ */
 public class PacketKeyPress implements IMessage {
-    private int key;
     /**
-     * <h2>Packet for keybinds beyond inventory</h2>
-     * when a key is pressed in
-     * @see EventManager#onClientKeyPress(InputEvent.KeyInputEvent)
-     * it's processed by client to sent the defined action to server.
-     * The only data sent in the packet, beyond the normal overhead is a single int to define what action to do.
+     * <h2>data transfer variables</h2>
+     * stores and transfers the variable through the byte buffer.
      */
+    private int key;
     public PacketKeyPress() {}
     public PacketKeyPress(int key) {
         this.key = key;

@@ -4,9 +4,10 @@ import net.minecraftforge.fluids.Fluid;
 import trains.registry.GenericRegistry;
 
 /**
- * <h2> Oil Block</h2>
+ * <h1>Oil Block</h1>
  * this bock is the in-world block for our implementation of oil
  * @see GenericRegistry
+ * @author Justice
  */
 public class Oil extends Fluid {
 

@@ -21,16 +21,18 @@ import trains.items.Bucket;
 import trains.tileentities.TileEntityStorage;
 
 /**
- * <h2>Generic registry</h2>
+ * <h1>Generic registry</h1>
  * this class lists all the blocks, fluids, and non-train/rollingstock items provided by this mod.
  * If you need a reference to one of those you have to call it from this class.
+ * @author Eternal Blue Flame
+ * @author Justice
  */
 
 public class GenericRegistry {
     //initialize the oil
-    public static final Fluid fluidOil = new Oil("Oil").setUnlocalizedName("Oil");
+    public static final Fluid fluidOil = new Oil("Oil").setUnlocalizedName("fluid.oil");
     public static BlockFluidClassic blockFluidOil;
-    public static final Item bucketOil = new Bucket(GenericRegistry.blockFluidOil).setUnlocalizedName("OilBucket").setContainerItem(Items.bucket);
+    public static final Item bucketOil = new Bucket(GenericRegistry.blockFluidOil).setUnlocalizedName("item.oilbucket").setContainerItem(Items.bucket);
 
     public static BlockTrainTable trainTable = new BlockTrainTable();
 
@@ -53,14 +55,14 @@ public class GenericRegistry {
         blockFluidOil = new BlockFluidClassic(fluidOil, new MaterialLiquid(MapColor.blackColor));
         GameRegistry.registerBlock(blockFluidOil, "OilBlock");
 
+        GameRegistry.registerBlock(trainTable, "TrainTable");
+        GameRegistry.registerTileEntity(TileEntityStorage.class, "StorageEntity");
+
         /**
          * <h3>register Items</h3>
          */
         GameRegistry.registerItem(bucketOil, "OilBucket");
         FluidContainerRegistry.registerFluidContainer(GenericRegistry.fluidOil, new ItemStack(bucketOil), new ItemStack(Items.bucket));
-
-        GameRegistry.registerBlock(trainTable, "TrainTable");
-        GameRegistry.registerTileEntity(TileEntityStorage.class, "StorageEntity");
     }
 
     /**

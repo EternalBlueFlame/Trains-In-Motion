@@ -30,11 +30,15 @@ import java.util.UUID;
 import static net.minecraftforge.fluids.FluidStack.loadFluidStackFromNBT;
 import static trains.utility.RailUtility.rotatePoint;
 
-
+/**
+ * <h1>Generic Rail Transport</h1>
+ * this is the base for all trains and rollingstock.
+ * @author Eternal Blue Flame
+ */
 public class GenericRailTransport extends Entity implements IEntityAdditionalSpawnData, IEntityMultiPart{
 
     /**
-     * <h2>class variables</h2>
+     * <h2>variables</h2>
      * isLocked is for if the owner has locked it.
      * Brake defines if the handbrake is on.
      * lamp is used for the lamp, assuming this has one.
@@ -112,8 +116,24 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public boolean canBeCollidedWith() {return false;}
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
-        this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
-        this.setRotation(p_70056_7_, p_70056_8_);
+        int bogieSize = bogie.size()-1;
+        if (bogieSize>0){
+            if ((bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) != 0) {
+                setPosition(
+                        (bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
+                        ((bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D),
+                        (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D);
+                } else {
+                this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
+            }
+                setRotation((float)Math.toDegrees(Math.atan2(
+                    bogie.get(bogieSize).posZ - bogie.get(0).posZ,
+                    bogie.get(bogieSize).posX - bogie.get(0).posX)),
+                    MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY)));
+
+        } else {
+            this.setRotation(p_70056_7_, p_70056_8_);
+        }
     }
 
 
@@ -337,10 +357,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 //handle movement for trains, this will likely need to be different for rollingstock.
                 for (EntityBogie currentBogie : bogie) {
                     if (collision) {
-                        //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                        motion[0] = processMovement(currentBogie.motionX);
-                        motion[2] = processMovement(currentBogie.motionZ);
-                        motion[1] = currentBogie.motionY;
+                        motion = rotatePoint(new double[]{processMovement(currentBogie), (float) motionY, 0}, 0.0f, currentBogie.rotationYaw, 0.0f);
                         currentBogie.setVelocity(motion[0], motion[1], motion[2]);
                         currentBogie.minecartMove();
                     } else {
@@ -400,8 +417,16 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
     }
 
-    public float processMovement(double X){
-        return (float) X * 0.9f;
+    public double processMovement(EntityBogie entityBogie){
+
+        double X =0;
+        if (MathHelper.floor_double(entityBogie.motionX) !=0){
+            X = entityBogie.motionX;
+        } else {
+            X = entityBogie.motionZ;
+        }
+
+        return X * 0.9f;
     }
 
 

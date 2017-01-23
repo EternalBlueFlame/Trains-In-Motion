@@ -27,14 +27,19 @@ import trains.tileentities.TileEntityStorage;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <h1>client proxy</h1>
+ * defines some of the more important client-only functionality that runs on the main thread of the mod.
+ * @author Eternal Blue Flame
+ */
 public class ClientProxy extends CommonProxy {
-    private static WorldClient clientWorld= null; //define this ahead of time so we dont have to instance the variable every client tick.
+    private static WorldClient clientWorld= null; //define this ahead of time so we don't have to instance the variable every client tick.
     public static List<GenericRailTransport> carts = new ArrayList<GenericRailTransport>();
 
     /**
      * <h3>keybinds</h3>
      * Initialize the default values for keybinds.
-     * Courtesy of Ferdinand
+     * Default values courtesy of Ferdinand
      */
     public static boolean EnableLights = true;
     public static boolean EnableSmokeAndSteam = true;
@@ -69,15 +74,17 @@ public class ClientProxy extends CommonProxy {
                         return null;
                     }
                 }
+                //tile entities
             } else if (player.worldObj.getTileEntity(x,y,z) instanceof TileEntityStorage) {
                 return new GUITrainTable(player.inventory, player.worldObj, x, y, z);
             }
         }
         return null;
     }
+
     /**
      * <h2>Load config</h2>
-     * this loads the config values that will only effect server.
+     * this loads the config values that will only effect client.
      */
     @Override
     public void loadConfig(Configuration config){
@@ -98,22 +105,24 @@ public class ClientProxy extends CommonProxy {
 
     /**
      * <h2>Client Register</h2>
-     * A redirect loop for registering he items in the train registry with their own textures and models, and for registering keybindings.
+     * A redirect loop for registering the items in the train registry with their own textures and models, and for registering keybindings.
      */
     @Override
     public void register() {
+        //trains and rollingstock
         for(TrainRegistry reg : TrainRegistry.listTrains()){
             RenderingRegistry.registerEntityRenderingHandler(reg.trainClass, new RenderEntity(
                     reg.model, reg.texture,
                     reg.bogieModel, reg.bogieTexture));
         }
+        //hitboxes
         RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.multipartHitbox.class, new Render() {
             @Override
             public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {}
             @Override
             protected ResourceLocation getEntityTexture(Entity p_110775_1_) {return null;}
         });
-
+        //bogies
         RenderingRegistry.registerEntityRenderingHandler(EntityBogie.class, new Render() {
             @Override
             public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {}

@@ -20,29 +20,31 @@ import java.util.UUID;
 
 
 /**
- * <h2> First Train Item</h2>
+ * <h2>Brigadelok 0-8-0Item</h2>
  * when creating a new train or rollingstock you must make a clone of this class and set the values to match.
- * the constructor is the same for all except for and sub-text that the new train may or may not have.
+ * the constructor is the same for all except for the sub-text .
  * onItemUse only needs the first value in placeOnRail changed to the class for your train/rollingstock entity.
- * registerIcons is used to change the icon of this item.
- * TODO: register icons may not even be necessary here, i think it can be covered in the train's constructor class for the item. needs testing.
+ * @author Eternal Blue Flame
  */
 
-public class ItemFirstTrain extends Item {
+public class ItemBrigadelok080 extends Item {
 
     private static final String era = "\u00A77" + StatCollector.translateToLocal("menu.item.era") +  ": " + StatCollector.translateToLocal("menu.steam");
     private static final String year = "\u00A77" + StatCollector.translateToLocal("menu.item.year") +": 1918";
     private static final String country = "\u00A77" + StatCollector.translateToLocal("menu.item.country") + ": " + StatCollector.translateToLocal("menu.item.germany");
     private static final String speed = "\u00A77" + StatCollector.translateToLocal("menu.item.speed") +": 70.81km";
-    private static final String pullingPower = "\u00A77" + StatCollector.translateToLocal("menu.item.pullingPower") +": ??? " + StatCollector.translateToLocal("menu.item.tons");
+    private static final String pullingPower = "\u00A77" + StatCollector.translateToLocal("menu.item.pullingpower") +": ??? " + StatCollector.translateToLocal("menu.item.tons");
 
     //constructor
-    public ItemFirstTrain() {
+    public ItemBrigadelok080() {
         super();
         setCreativeTab(TrainsInMotion.creativeTab);
-        //we set any sub-text for the item here
     }
 
+    /**
+     * <h2>item subtext</h2>
+     * add description text to the item. To add a new line, add another entry to the list.
+     */
     @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par3List, boolean par4) {
@@ -75,7 +77,8 @@ public class ItemFirstTrain extends Item {
     }
 
     /**
-     * Sets the icon for the item
+     * <h2>Item icon</h2>
+     * Sets the icon for the item, this shouldn't need to be changed.
      */
     @Override
     @SideOnly(Side.CLIENT)

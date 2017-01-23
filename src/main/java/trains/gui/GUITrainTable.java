@@ -7,9 +7,13 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
-import trains.gui.trainhandler.ContainerHandler;
+import trains.utility.ContainerHandler;
 import trains.tileentities.TileEntityStorage;
 
+/**
+ * <h1>Train crafting table GUI</h1>
+ * @author Eternal Blue Flame
+ */
 public class GUITrainTable extends GuiContainer {
     private static final ResourceLocation craftingTableGuiTextures = new ResourceLocation("textures/gui/container/crafting_table.png");
 
@@ -24,7 +28,9 @@ public class GUITrainTable extends GuiContainer {
         this.fontRendererObj.drawString(StatCollector.translateToLocal("container.traincrafting"), 28, 6, 4210752);
         this.fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, this.ySize - 96 + 2, 4210752);
     }
-
+    /**
+     * Draw the background layer for the GuiContainer (everything behind the items)
+     */
     protected void drawGuiContainerBackgroundLayer(float p_146976_1_, int p_146976_2_, int p_146976_3_) {
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(craftingTableGuiTextures);

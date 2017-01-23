@@ -26,6 +26,7 @@ import trains.utility.RailUtility;
 /**
  * <h1>Bogie Core</h1>
  * this controls the behavior of the bogies in trains and rollingstock.
+ * @author Eternal Blue Flame
  */
 public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart, IEntityAdditionalSpawnData {
 

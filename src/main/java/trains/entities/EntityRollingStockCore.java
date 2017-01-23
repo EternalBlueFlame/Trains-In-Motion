@@ -12,14 +12,16 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * <h2> Train core</h2>
+ * <h1>Rollingstock core</h1>
  * this is the management core for all trains.
+ * @author Eternal Blue Flame
  */
 public class EntityRollingStockCore extends GenericRailTransport {
 
     /**
      * <h3>variables</h3>
      * the inventory defines the item storage of the train.
+     * riddenByEntities defines the entities riding this.
      */
     public InventoryHandler inventory = new InventoryHandler(this);
     public List<Entity> riddenByEntities = new ArrayList<Entity>();
@@ -76,7 +78,7 @@ public class EntityRollingStockCore extends GenericRailTransport {
         super.readEntityFromNBT(tag);
 
         inventory.readNBT(tag, "items");
-
+        //sync passengers
         NBTTagList taglist = tag.getTagList("extended.passengers", 10);
         for (int i = 0; i < taglist.tagCount(); i++) {
             NBTTagCompound nbttagcompound1 = taglist.getCompoundTagAt(i);
@@ -96,7 +98,7 @@ public class EntityRollingStockCore extends GenericRailTransport {
         super.writeEntityToNBT(tag);
 
         tag.setTag("items", inventory.writeNBT());
-
+        //sync passengers
         NBTTagList nbttaglist = new NBTTagList();
         for (int i = 0; i < riddenByEntities.size(); ++i) {
             if (riddenByEntities.get(i) != null) {
@@ -106,13 +108,15 @@ public class EntityRollingStockCore extends GenericRailTransport {
                 nbttaglist.appendTag(nbttagcompound1);
             }
         }
-
         tag.setTag("extended.passengers", nbttaglist);
 
     }
 
 
-
+    /**
+     * <h2>Inherited variables</h2>
+     * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
+     */
     public float[][] getRiderOffsets(){return new float[][]{{0,0}};}
 
 
