@@ -11,6 +11,7 @@ import java.util.List;
 /**
  * <h1>fluid management</h1>
  * this is more of a replacement for the base game fluid management to better allow us to use multiple tanks of fluids.
+ * @author Eternal Blue Flame
  */
 public class LiquidManager {
     private FluidTank firstTank;

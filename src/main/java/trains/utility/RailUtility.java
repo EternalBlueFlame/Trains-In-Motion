@@ -10,10 +10,18 @@ import net.minecraft.world.World;
 import trains.entities.EntityBogie;
 import trains.entities.GenericRailTransport;
 
-
+/**
+ * <h1>utilities</h1>
+ * used for misc utility functions
+ *
+ * @author Eternal Blue Flame
+ * @author Zora No Densha
+ */
 public class RailUtility {
     public static final float radianF = (float) Math.PI / 180.0f;
     public static final double radianD = Math.PI / 180.0d;
+
+
     /**
      * <h2>Vanilla Track Overrrides</h2>
      * TODO: need ZND API for ITrackBase
@@ -74,35 +82,36 @@ public class RailUtility {
 
 
     /**
-     * <h2> rail placement from item</h2>
+     * <h2>rail placement from item</h2>
      * basic functionality to place a train or rollingstock on the rails on item use.
-     * TODO: there seems to be an issue with train direction on placement
      */
     public static boolean placeOnRail(GenericRailTransport entity, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ) {
 
+        //be sure there is a rail at the location
         if (RailUtility.isRailBlockAt(worldObj, posX,posY,posZ) && !worldObj.isRemote) {
-
+            //define the direction
             int playerMeta = MathHelper.floor_double((playerEntity.rotationYaw / 90.0F) + 2.5D) & 3;
-
+            //check rail axis
             if (((BlockRailBase)worldObj.getBlock(posX,posY,posZ)).getBasicRailMetadata(worldObj, null,posX,posY,posZ) == 1){
-
-                if (playerMeta == 1) {
-
+                //check player direction
+                if (playerMeta == 3) {
+                    //check if the transport can be placed in the area
                     if (!RailUtility.isRailBlockAt(worldObj, posX + MathHelper.floor_double(entity.getBogieOffsets().get(entity.getBogieOffsets().size()-1)+ 1.0D ), posY, posZ)
                             && !RailUtility.isRailBlockAt(worldObj, posX + MathHelper.floor_double(entity.getBogieOffsets().get(0)- 1.0D ), posY, posZ)) {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
-
+                    //define the bogie positions
                     for (double offset: entity.getBogieOffsets()){
                         entity.bogieXYZ.add(new double[]{posX + 0.5D + offset, posY, posZ + 0.5D});
                     }
-
+                    //spawn the entity
                     worldObj.spawnEntityInWorld(entity);
                     return true;
 
                 }
-                else if (playerMeta == 3) {
+                //same as above, but reverse direction.
+                else if (playerMeta == 1) {
 
                     if (!RailUtility.isRailBlockAt(worldObj, posX - MathHelper.floor_double(entity.getBogieOffsets().get(entity.getBogieOffsets().size()-1)+ 1.0D ), posY, posZ)
                             && !RailUtility.isRailBlockAt(worldObj, posX - MathHelper.floor_double(entity.getBogieOffsets().get(0)- 1.0D ), posY, posZ)) {
@@ -118,9 +127,10 @@ public class RailUtility {
                     return true;
                 }
             }
+            //same as above but a different axis.
             else if (((BlockRailBase)worldObj.getBlock(posX,posY,posZ)).getBasicRailMetadata(worldObj, null,posX,posY,posZ) == 0){
 
-                if (playerMeta == 2) {
+                if (playerMeta == 0) {
 
                     if (!RailUtility.isRailBlockAt(worldObj, posX, posY, posZ + MathHelper.floor_double(entity.getBogieOffsets().get(entity.getBogieOffsets().size()-1)+ 1.0D ))
                             && !RailUtility.isRailBlockAt(worldObj, posX, posY, posZ + MathHelper.floor_double(entity.getBogieOffsets().get(0)- 1.0D ))) {
@@ -135,7 +145,7 @@ public class RailUtility {
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }
-                else if (playerMeta == 0) {
+                else if (playerMeta == 2) {
 
                     if (!RailUtility.isRailBlockAt(worldObj, posX, posY, posZ - MathHelper.floor_double(entity.getBogieOffsets().get(entity.getBogieOffsets().size()-1)+ 1.0D ))
                             && !RailUtility.isRailBlockAt(worldObj, posX, posY, posZ - MathHelper.floor_double(entity.getBogieOffsets().get(0)- 1.0D ))) {

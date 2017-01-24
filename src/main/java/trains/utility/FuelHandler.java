@@ -27,7 +27,7 @@ public class FuelHandler implements IFuelHandler{
 	 * <h2>Register burnables with minecraft</h2>
 	 * use getBurnTime to register a custom burnable that will work with other mods and the base game.
 	 * use getCustom to register a burnable that will only work with TiM.
-	 *TODO: not actually implemented.
+	 *TODO: get custom is not actually implemented.
      */
 	@Override
 	public int getBurnTime(ItemStack fuel) {
@@ -128,11 +128,13 @@ public class FuelHandler implements IFuelHandler{
 				//be sure there is fuel before trying to consume it
 				if (fuel > 0) {
 					//add steam from burning to the steam tank.
-					//steam is equal to water used, but generated from heat which is one part fuel 2 parts air, with more fuel burning more heat is created, but this only works to a point.
-					int steam = Math.round((fuel*0.025f)/ cart.getMaxFuel());
+					//steam is equal to water used, minus a small percentage to compensate for impurities in the water that dont transition to steam,
+					//the amount of water used is generated from heat which is one part fuel 2 parts air, with more fuel burning more heat is created, but this only works to a point.
+					//steam beyond the max point of storage is considered to be expelled through a failsafe.
+					int steam = Math.round((fuel*0.0025f)/ cart.getMaxFuel());
 					if (cart.tanks.drainFluid(steam,true)) {
 						fuel -= 50; //a lava bucket lasts 1000 seconds, so burnables are processed at 20000*0.05 a second
-						cart.tanks.addFluid(FluidRegistry.WATER, steam, false);
+						cart.tanks.addFluid(FluidRegistry.WATER, MathHelper.floor_float(steam*0.9f), false);
 					} else if (!cart.isCreative){
 						cart.worldObj.createExplosion(cart, cart.posX, cart.posY, cart.posZ, 5f, false);
 						cart.dropItem(cart.getItem(), 1);
@@ -165,11 +167,11 @@ public class FuelHandler implements IFuelHandler{
 				break;
 			}
 			/**
-			 * <h3> Electric Fuel Management</h3>
+			 * <h3> Electric and maglev Fuel Management</h3>
 			 *
 			 *
 			 */
-			case ELECTRIC: {
+			case ELECTRIC: case MAGLEV: {
 				//add redstone to the fuel tank
 				if (isWater(cart.inventory.getStackInSlot(1), cart) &&
 						cart.tanks.addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),true) && !cart.isCreative) {
@@ -199,16 +201,6 @@ public class FuelHandler implements IFuelHandler{
 			 *
 			 */
 			case NUCLEAR_ELECTRIC: {
-				break;
-			}
-			/**
-			 *
-			 *
-			 * <h3> Maglev Fuel Management</h3>
-			 *
-			 *
-			 */
-			case MAGLEV: {
 				break;
 			}
 			default:{break;}

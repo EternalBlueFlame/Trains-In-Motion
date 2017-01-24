@@ -33,8 +33,9 @@ import trains.worldgen.OreGen;
  *      Third is for bugfix and/or minor optimization releases, where as we didn't change any features, but it works better.
  *      fourth is new minor content, like new trains or rollingstock that use existing features.
  *
+ * @author Eternal Blue Flame
  */
-@Mod(modid = TrainsInMotion.MODID, version = "0.6.0.0pre-alpha", name = "Trains in Motion")
+@Mod(modid = TrainsInMotion.MODID, version = "0.7.0.0pre-alpha", name = "Trains in Motion")
 public class TrainsInMotion {
 
     public static final String MODID = "tim";
@@ -50,6 +51,7 @@ public class TrainsInMotion {
     public static SimpleNetworkWrapper keyChannel;
 
     //GUI ID's
+    //TODO: theres gotta be a better way to do this
     public static final int STEAM_GUI_ID = 200;
 
 

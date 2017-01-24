@@ -7,7 +7,11 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import trains.entities.EntityTrainCore;
 import trains.registry.GenericRegistry;
-
+/** <h1>Lamp management</h1>
+* stores the lamp variables and updates it's position in world if it should be.
+*
+* @author Eternal Blue Flame
+*/
 public class LampHandler {
     public int X;
     public int Y;
@@ -15,9 +19,8 @@ public class LampHandler {
     public boolean isOn;
 
     /**
-     * <h2>Lamp management</h2>
-     * define the variables for the lamp, like position, in this class.
-     * and define the check function for whether or not to update here.
+     * <h2>Update functionality</h2>
+     * the check function for whether or not to update here.
      *
      * this us used by
      * @see EntityTrainCore#onUpdate()

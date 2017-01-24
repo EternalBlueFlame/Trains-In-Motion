@@ -14,13 +14,20 @@ import trains.tileentities.TileEntityStorage;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <h1>Inventory management</h1>
+ * sores the inventory variables, handles a good degree of the inventory processing, and NBT management.
+ * @see ContainerHandler for the related code.
+ *
+ * @author Eternal Blue Flame
+ */
 public class InventoryHandler implements IInventory{
     private GenericRailTransport host;
     private TileEntityStorage blockHost;
     private List<ItemStack> items = new ArrayList<ItemStack>();
 
     /**
-     * <h2>constructor</h2>
+     * <h2>entity constructor</h2>
      * sets the host variable, and inventory size then creates an instance of the class, this can be re-used for any train or rollingstock.
      */
     public InventoryHandler(GenericRailTransport host){
@@ -33,7 +40,10 @@ public class InventoryHandler implements IInventory{
             items.add(null);
         }
     }
-
+    /**
+     * <h2>tile entity constructor</h2>
+     * sets the host variable, and inventory size then creates an instance of the class, this can be re-used for any tile entity.
+     */
     public InventoryHandler(TileEntity craftingTable){
         if (craftingTable instanceof TileEntityStorage){
             while (items.size() < 9) {
@@ -123,7 +133,7 @@ public class InventoryHandler implements IInventory{
         if (host != null) {
             return host.getItem().getUnlocalizedName();
         } else {
-            return TrainsInMotion.MODID + ":stroage";
+            return TrainsInMotion.MODID + ":storage";
         }
     }
     @Override
@@ -143,8 +153,9 @@ public class InventoryHandler implements IInventory{
 
     /**
      * <h2>is Locked</h2>
-     * returns if the train is locked, and if it is, if the player is the owner.
+     * returns if the entity is locked, and if it is, if the player is the owner.
      * This makes sure the inventory can be accessed by anyone if its unlocked and only by the owner when it is locked.
+     * if it's a tile entity, it's just another null check to be sure no one crashes.
      */
     @Override
     public boolean isUseableByPlayer(EntityPlayer p_70300_1_) {
@@ -158,6 +169,7 @@ public class InventoryHandler implements IInventory{
     /**
      * <h2>slot limiter</h2>
      * this limits certain items to certain slots, most of the functionality is dealt with from the fuel handler.
+     * @see FuelHandler
      */
     @Override
     public boolean isItemValidForSlot(int p_94041_1_, ItemStack p_94041_2_) {
