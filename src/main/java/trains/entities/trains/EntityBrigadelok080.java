@@ -1,5 +1,7 @@
 package trains.entities.trains;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -95,10 +97,11 @@ public class EntityBrigadelok080 extends EntityTrainCore {
     public int getMaxFuel(){return 71680;}
     /**
      * <h2>Rider offset</h2>
-     * @return defines the offset of the rider in blocks, the first value is how far back, and the second is how high.
+     * @return defines the offsets of the riders in blocks, the first value is how far back, and the second is how high. Negative values are towards the front, ground, or right.
+     *     Each set of floats represents a different rider.
      */
     @Override
-    public float[] getRiderOffset(){return new float[]{1.3f,1.1f};}
+    public float[][] getRiderOffsets(){return new float[][]{{1.3f,1.1f, 0f}, {-1.3f,1.1f,0f}};}
     /**
      * <h2>Acceleration</h2>
      * @return defines the acceleration that is applied to the train in blocks per second.
@@ -150,6 +153,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
     public Item getItem(){
         return thisItem;
     }
+    @SideOnly(Side.CLIENT)
     @Override
     public ISound getHorn(){
         return new ISound() {
@@ -199,6 +203,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
             }
         };
     }
+    @SideOnly(Side.CLIENT)
     @Override
     public ISound getRunning(){
         return new ISound() {

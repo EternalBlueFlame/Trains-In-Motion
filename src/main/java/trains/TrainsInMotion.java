@@ -66,7 +66,7 @@ public class TrainsInMotion {
      */
     public enum transportTypes {
         STEAM,DIESEL,HYDROGEN_DIESEL,ELECTRIC,NUCLEAR_STEAM,NUCLEAR_ELECTRIC,MAGLEV,
-        PASSENGER
+        PASSENGER, FREIGHT
     }
     public enum inventorySizes{NULL(0,0),
         TWOxTWO(2,2), TWOxTHREE(2,3), THREExTHREE(3,3), THREExFOUR(3,4), FOURxFOUR(4,4), FOURxFIVE(4,5), FIVExFIVE(5,5), FIVExSIX(5,6), SIXxSIX(6,6), NINExTHREE(9,3), NINExSIX(9,6);

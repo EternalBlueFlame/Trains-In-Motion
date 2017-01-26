@@ -8,6 +8,8 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -53,6 +55,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * front and back define references to the train/rollingstock connected to the front and back, so that way we can better control links.
      * the front and back unloaded ID's are used as a failsafe in case the front or back connected entities aren't loaded yet.
      * destination is used for routing, railcraft and otherwise.
+     * riddenByEntities defines the entities riding this.
      * the last part is the generic entity constructor
      */
     public LiquidManager tanks = new LiquidManager(0,0, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
@@ -74,6 +77,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public int frontUnloadedID =0;
     public int backUnloadedID =0;
     public String destination ="";
+    public List<Entity> riddenByEntities = new ArrayList<Entity>();
     public GenericRailTransport(World world){
         super(world);
         tanks = getTank();
@@ -89,8 +93,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * getParts returns the list of hitboxes so they can be treated as if they are part of this entity.
      * The positionAndRotation2 override is intended to do the same as the super, except for giving a Y offset on collision, we skip that similar to EntityMinecart.
      */
-    public void setOwner(UUID player){owner = player;}
-    public UUID getOwnerUUID(){return owner;}
     @Override
     public boolean canBePushed()
     {
@@ -192,7 +194,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         lamp.Z = tag.getInteger("extended.lamp.z");
         isDead = tag.getBoolean("extended.dead");
         isCoupling = tag.getBoolean("extended.coupling");
-
+        //load front link
         int id = tag.getInteger("extended.front");
         if(id !=0){
             Entity getFront = worldObj.getEntityByID(id);
@@ -202,6 +204,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 frontUnloadedID = id;
             }
         }
+        //load back link
         id = tag.getInteger("extended.back");
         if(id !=0){
             Entity getBack = worldObj.getEntityByID(id);
@@ -211,11 +214,13 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 backUnloadedID = id;
             }
         }
-
+        //more bools
         isCreative = tag.getBoolean("extended.creative");
         brake = tag.getBoolean("extended.handbrake");
+        //load owner
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
 
+        //load tanks
         if (tanks != null) {
             FluidStack tankA = loadFluidStackFromNBT(tag);
             if (tankA.amount != 0) {
@@ -227,16 +232,27 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
         }
 
+        //riders
+        NBTTagCompound nbtRiders = tag.getCompoundTag("extended.riders");
+        for (int iteration=0; iteration< getRiderOffsets().length-1; iteration++){
+            int rider = nbtRiders.getInteger("rider_" + iteration);
+            if (rider != 0 && worldObj.getEntityByID(rider) != null){
+                if (riddenByEntities.size()-1 < iteration){
+                    riddenByEntities.add(worldObj.getEntityByID(rider));
+                } else {
+                    riddenByEntities.set(iteration, worldObj.getEntityByID(rider));
+                }
+            }
+        }
 
         //read through the bogie positions
-        NBTTagList bogieTaglList = tag.getTagList("extended.bogies", 10);
-        for (int i = 0; i < bogieTaglList.tagCount(); i++) {
-            NBTTagCompound nbttagcompound1 = bogieTaglList.getCompoundTagAt(i);
-            byte b0 = nbttagcompound1.getByte("bogie");
-
-            if (b0 >= 0) {
-                bogieXYZ.add(new double[]{nbttagcompound1.getDouble("bogieindex.a." + i),nbttagcompound1.getDouble("bogieindex.b." + i),nbttagcompound1.getDouble("bogieindex.c." + i)});
+        NBTTagCompound nbtBogiePos = tag.getCompoundTag("extended.bogies");
+        for (int i=0; i< getBogieOffsets().size(); i++) {
+            double[] pos = new double[]{nbtBogiePos.getDouble("bogieindex.a." + i), nbtBogiePos.getDouble("bogieindex.b." + i), nbtBogiePos.getDouble("bogieindex.c." + i)};
+            if (pos[0] !=0 && pos[1] !=0 && pos[2] !=0) {
+                bogieXYZ.add(pos);
             }
+
         }
 
     }
@@ -249,6 +265,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         tag.setInteger("extended.lamp.z", lamp.Z);
         tag.setBoolean("extended.dead", isDead);
         tag.setBoolean("extended.coupling", isCoupling);
+        //front and back bogies
         if (front != null){
             tag.setInteger("extended.front", front.getEntityId());
         } else {
@@ -259,13 +276,14 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         } else {
             tag.setInteger("extended.back", 0);
         }
-
+        //more bools
         tag.setBoolean("extended.creative", isCreative);
         tag.setBoolean("extended.handbrake", brake);
+        //owner
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
 
-
+        //tanks
         if (tanks != null) {
             if (tanks.getTank(true).getFluid() != null) {
                 tanks.getTank(true).getFluid().writeToNBT(tag);
@@ -280,20 +298,32 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
         }
 
-
-        //write the list of bogies
-        NBTTagList nbtBogieTaglist = new NBTTagList();
-        for (int i = 0; i < bogieXYZ.size(); ++i) {
-            if (bogieXYZ.get(i) != null) {
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                nbttagcompound1.setByte("bogie", (byte)i);
-                nbttagcompound1.setDouble("bogieindex.a." + i,bogieXYZ.get(i)[0]);
-                nbttagcompound1.setDouble("bogieindex.b." + i,bogieXYZ.get(i)[1]);
-                nbttagcompound1.setDouble("bogieindex.c." + i,bogieXYZ.get(i)[2]);
-                nbtBogieTaglist.appendTag(nbttagcompound1);
+        //riders
+        NBTTagCompound nbtRiders = new NBTTagCompound();
+        for (int iteration=0; iteration< getRiderOffsets().length-1; iteration++){
+            if (riddenByEntities.size()-1 <iteration || riddenByEntities.get(iteration) == null){
+                nbtRiders.setInteger("rider_" + iteration, 0);
+            } else {
+                nbtRiders.setInteger("rider_" + iteration, riddenByEntities.get(iteration).getEntityId());
             }
         }
-        tag.setTag("extended.bogies", nbtBogieTaglist);
+        tag.setTag("extended.riders", nbtRiders);
+
+        //write the list of bogies
+        NBTTagCompound nbtbogies = new NBTTagCompound();
+
+        for (int i = 0; i < getBogieOffsets().size(); ++i) {
+            if (bogieXYZ.get(i) != null) {
+                nbtbogies.setDouble("bogieindex.a." + i,bogieXYZ.get(i)[0]);
+                nbtbogies.setDouble("bogieindex.b." + i,bogieXYZ.get(i)[1]);
+                nbtbogies.setDouble("bogieindex.c." + i,bogieXYZ.get(i)[2]);
+            } else {
+                nbtbogies.setDouble("bogieindex.a." + i,0);
+                nbtbogies.setDouble("bogieindex.b." + i,0);
+                nbtbogies.setDouble("bogieindex.c." + i,0);
+            }
+        }
+        tag.setTag("extended.bogies", nbtbogies);
     }
 
 
@@ -357,9 +387,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 //handle movement for trains, this will likely need to be different for rollingstock.
                 for (EntityBogie currentBogie : bogie) {
                     if (collision) {
-                        motion = rotatePoint(new double[]{processMovement(currentBogie), (float) motionY, 0}, 0.0f, currentBogie.rotationYaw, 0.0f);
-                        currentBogie.setVelocity(motion[0], motion[1], motion[2]);
-                        currentBogie.minecartMove();
+                        if (currentBogie != null) {
+                            motion = rotatePoint(new double[]{processMovement(currentBogie), (float) motionY, 0}, 0.0f, currentBogie.rotationYaw, 0.0f);
+                            currentBogie.setVelocity(motion[0], motion[1], motion[2]);
+                            currentBogie.minecartMove();
+                        }
                     } else {
                         motion = new double[]{0d, 0d, 0d};
                     }
@@ -432,21 +464,30 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
     /**
      * <h2>Rider offset</h2>
-     * this runs every tick to be sure the rider is in the correct position
-     * TODO get rider offset may need to be a list of positions for rollingstock that can have multiple passengers
+     * this runs every tick to be sure the riders are in the correct positions.
      */
     @Override
     public void updateRiderPosition() {
-        if (riddenByEntity != null) {
-            if (bogie.size()>1) {
+        super.updateRiderPosition();
+        for(int i =0; i< getRiderOffsets().length; i++) {
 
-                double[] riderOffset = rotatePoint(new double[]{getRiderOffset()[0],getRiderOffset()[1],0}, rotationPitch, rotationYaw, 0);
-                riddenByEntity.setPosition(posX + riderOffset[0], posY + riderOffset[1], posZ + riderOffset[2]);
-            } else {
-                riddenByEntity.setPosition(posX, posY + 2D, posZ);
+            if (i>= riddenByEntities.size()){
+                return;
+            }
+
+            double[] riderOffset = rotatePoint(new double[]{getRiderOffsets()[i][0], getRiderOffsets()[i][1], getRiderOffsets()[i][2]}, rotationPitch, rotationYaw, 0);
+
+
+            if (riddenByEntities.get(i) != null){
+                this.riddenByEntities.get(i).setPosition(riderOffset[0]+this.posX, riderOffset[1]+this.posY, riderOffset[2]+this.posZ);
             }
         }
     }
+
+
+
+
+
 
 
 
@@ -566,6 +607,34 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         return false;
     }
 
+
+    public boolean getPermissions(EntityPlayer player, boolean driverOnly) {
+        //if this requires the player to be the driver, and they aren't, just return false before we even go any further.
+        if (driverOnly && player != this.riddenByEntities.get(0)){
+            return false;
+        }
+
+        //be sure admins and owners can do whatever
+        if (player.capabilities.isCreativeMode || owner == player.getUniqueID()) {
+            return true;
+        }
+
+        //if the key is needed, like for trains and freight
+        //if (isLocked && (this instanceof EntityTrainCore || getType() == TrainsInMotion.transportTypes.FREIGHT)) {
+            //return player.inventory.hasItem(?KEYITEM?);
+        //}
+        //if a ticket is needed like for passenger cars
+        //if(?TICKETITEM? != null && isLocked){
+            //return player.inventory.hasItem(?TICKETITEM?);
+        //}
+
+        //all else fails, just return if this is locked.
+        return !isLocked;
+
+    }
+
+
+
     /**
      * <h2>Inherited variables</h2>
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
@@ -573,7 +642,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     public List<Float> getBogieOffsets(){return new ArrayList<Float>();}
     public TrainsInMotion.transportTypes getType(){return null;}
-    public float[] getRiderOffset(){return new float[]{0,0};}
+    public float[][] getRiderOffsets(){return new float[][]{{0,0}};}
     public float[] getHitboxPositions(){return new float[]{-1,0,1};}
     public Item getItem(){return null;}
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.THREExTHREE;}

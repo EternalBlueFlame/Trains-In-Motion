@@ -70,11 +70,12 @@ public class EntityPullmansPalace extends EntityRollingStockCore{
     @Override
     public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.PASSENGER;}
     /**
-     * <h2>Rider offset</h2>
-     * @return defines the offset of the rider in blocks, the first value is how far back, and the second is how high. Negative values are towards the front.
+     * <h2>Rider offsets</h2>
+     * @return defines the offsets of the riders in blocks, the first value is how far back, and the second is how high. Negative values are towards the front, ground, or right.
+     *     Each set of floats represents a different rider.
      */
     @Override
-    public float[] getRiderOffset(){return new float[]{1.3f,1.5f};}
+    public float[][] getRiderOffsets(){return new float[][]{{1.3f,1.5f, 0f}};}
     /**
      * <h2>Hitbox offsets</h2>
      * @return defines the positions for the hitboxes in blocks. 0 being the center of the train, negative values being towards the front..

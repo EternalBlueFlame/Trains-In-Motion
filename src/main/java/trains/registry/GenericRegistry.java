@@ -37,8 +37,7 @@ public class GenericRegistry {
     public static BlockTrainTable trainTable = new BlockTrainTable();
 
     //initialize the lamp block
-    @SideOnly(Side.CLIENT)
-    public static Block lampBlock = new LampBlock();
+    public static Block lampBlock;
 
 
     /**
@@ -72,6 +71,7 @@ public class GenericRegistry {
      */
     @SideOnly(Side.CLIENT)
     public static void RegisterClientStuff(){
+        lampBlock = new LampBlock();
         GameRegistry.registerBlock(lampBlock, "lampblock");
         lampBlock.setLightLevel(1f);
     }

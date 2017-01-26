@@ -258,7 +258,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         motionZ = cartVelocityZ;
     }
     @Override
-    @SideOnly(Side.CLIENT)
     public void setVelocity(double x, double y, double z) {
         cartVelocityX = motionX = x;
         cartVelocityY = motionY = y;

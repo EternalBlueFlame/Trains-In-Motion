@@ -212,10 +212,12 @@ public class EntityTrainCore extends GenericRailTransport {
             //if theres no collision then process movement for the bogies.
             if (collision) {
                 for (EntityBogie currentBogie : bogie) {
-                    motion = rotatePoint(new double[]{processMovement(currentBogie), (float) motionY, 0}, 0.0f, currentBogie.rotationYaw, 0.0f);
+                    if (currentBogie != null) {
+                        motion = rotatePoint(new double[]{processMovement(currentBogie), (float) motionY, 0}, 0.0f, currentBogie.rotationYaw, 0.0f);
 
-                    currentBogie.setVelocity(motion[0], motion[1], motion[2]);
-                    currentBogie.minecartMove();
+                        currentBogie.setVelocity(motion[0], motion[1], motion[2]);
+                        currentBogie.minecartMove();
+                    }
                 }
             } else {
                 motion = new double[]{0d, 0d, 0d};

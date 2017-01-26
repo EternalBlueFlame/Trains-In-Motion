@@ -192,13 +192,12 @@ public class ContainerHandler extends Container{
         if (railTransport != null) {
             if (railTransport.isDead) {
                 return false;
-            } else if (railTransport.isLocked && railTransport.owner != player.getUniqueID()) {
-                return false;
+            } else {
+                return railTransport.getPermissions(player, true);
             }
         } else {
             return craftingTable != null;
         }
-        return true;
     }
 
 

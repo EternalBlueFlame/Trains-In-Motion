@@ -125,7 +125,12 @@ public class HitboxHandler {
                     if (entity instanceof Entity) {
                         if (entity instanceof multipartHitbox && train.hitboxList.contains(entity)){
                             return false;
-                        } else if (entity != train.riddenByEntity && !(entity instanceof EntityBogie)) {
+                        } else if (!(entity instanceof EntityBogie)) {
+                            if (train.riddenByEntities.size()>0){
+                                if (train.riddenByEntities.get(0) == entity){
+                                    break;
+                                }
+                            }
                             if (entity instanceof EntityLiving || entity instanceof EntityPlayer) {
                                 //dependant on velocity, fling it and do damage.
                                 if (train.bogie.get(0).motionX + train.bogie.get(0).motionZ >1 || train.bogie.get(0).motionX + train.bogie.get(0).motionZ < -1 ) {

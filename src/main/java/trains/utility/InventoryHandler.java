@@ -1,6 +1,7 @@
 package trains.utility;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -160,7 +161,7 @@ public class InventoryHandler implements IInventory{
     @Override
     public boolean isUseableByPlayer(EntityPlayer p_70300_1_) {
         if (host != null){
-            return !host.isLocked || p_70300_1_.getUniqueID() == host.getOwnerUUID();
+            return host.getPermissions(p_70300_1_, false);
         } else {
             return blockHost != null;
         }
@@ -190,26 +191,23 @@ public class InventoryHandler implements IInventory{
      * <h2>NBT functionality</h2>
      * we manage the functionality for reading and writing NBT tags of the inventory here, to simplify it in other classes.
      */
-    public NBTTagList writeNBT(){
-        NBTTagList nbttaglist = new NBTTagList();
+    public NBTTagCompound writeNBT(){
+        NBTTagCompound nbtitems = new NBTTagCompound();
         for (int i = 0; i < items.size(); ++i) {
             if (items.get(i) != null) {
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                nbttagcompound1.setByte("slot", (byte)i);
-                items.get(i).writeToNBT(nbttagcompound1);
-                nbttaglist.appendTag(nbttagcompound1);
+                items.get(i).writeToNBT(nbtitems);
+            } else {
+                new ItemStack(Items.potato, 0).writeToNBT(nbtitems);
             }
         }
-        return nbttaglist;
+        return nbtitems;
     }
     public void readNBT(NBTTagCompound tag, String tagName){
-        NBTTagList taglist = tag.getTagList(tagName, 10);
-        for (int i = 0; i < taglist.tagCount(); i++) {
-            NBTTagCompound nbttagcompound1 = taglist.getCompoundTagAt(i);
-            byte b0 = nbttagcompound1.getByte("slot");
-
-            if (b0 >= 0 && b0 < getSizeInventory()) {
-                setInventorySlotContents(b0, ItemStack.loadItemStackFromNBT(nbttagcompound1));
+        NBTTagCompound nbtitems = tag.getCompoundTag(tagName);
+        for (int i = 0; i < items.size(); i++) {
+            ItemStack item = ItemStack.loadItemStackFromNBT(nbtitems);
+            if (item.stackSize != 0) {
+                setInventorySlotContents(i, item);
             }
         }
     }

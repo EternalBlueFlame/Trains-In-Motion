@@ -60,13 +60,8 @@ public class EventManager {
      */
     @SubscribeEvent
     public void entityInteractEvent(EntityInteractEvent event) {
-        if (event.target instanceof EntityTrainCore
-                && !event.entity.worldObj.isRemote
-                && event.target.riddenByEntity == null) {
-            event.entityPlayer.mountEntity(event.target);
-        } else if (event.target instanceof HitboxHandler.multipartHitbox
-                && event.entity.worldObj.isRemote
-                && event.target.riddenByEntity == null) {
+        if (event.target instanceof HitboxHandler.multipartHitbox
+                && event.entity.worldObj.isRemote) {
             TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
         }
     }
