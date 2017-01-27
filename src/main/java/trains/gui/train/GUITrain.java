@@ -55,7 +55,7 @@ public class GUITrain extends GuiContainer {
      */
     @Override
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
-        fontRendererObj.drawString(StatCollector.translateToLocal(train.getItem().getUnlocalizedName()), 8, -18, 4210752);
+        fontRendererObj.drawString(StatCollector.translateToLocal(train.getItem().getUnlocalizedName() + ".name"), 8, -18, 4210752);
         fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, 74, 4210752);
     }
 

@@ -23,6 +23,7 @@ import net.minecraftforge.fluids.FluidStack;
 import trains.TrainsInMotion;
 import trains.entities.trains.EntityBrigadelok080;
 import trains.models.tmt.Vec3d;
+import trains.networking.PacketMount;
 import trains.utility.*;
 
 import java.util.ArrayList;
@@ -77,7 +78,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public int frontUnloadedID =0;
     public int backUnloadedID =0;
     public String destination ="";
-    public List<Entity> riddenByEntities = new ArrayList<Entity>();
+    public List<EntityPlayer> riddenByEntities = new ArrayList<EntityPlayer>();
+    public List<String> unloadedriders = new ArrayList<String>();
     public GenericRailTransport(World world){
         super(world);
         tanks = getTank();
@@ -235,12 +237,16 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //riders
         NBTTagCompound nbtRiders = tag.getCompoundTag("extended.riders");
         for (int iteration=0; iteration< getRiderOffsets().length-1; iteration++){
-            int rider = nbtRiders.getInteger("rider_" + iteration);
-            if (rider != 0 && worldObj.getEntityByID(rider) != null){
-                if (riddenByEntities.size()-1 < iteration){
-                    riddenByEntities.add(worldObj.getEntityByID(rider));
+            String rider = nbtRiders.getString("rider_" + iteration);
+            if (!rider.equals("")){
+                if (worldObj.getPlayerEntityByName(rider) != null) {
+                    if (riddenByEntities.size() - 1 < iteration) {
+                        riddenByEntities.add(worldObj.getPlayerEntityByName(rider));
+                    } else {
+                        riddenByEntities.set(iteration, worldObj.getPlayerEntityByName(rider));
+                    }
                 } else {
-                    riddenByEntities.set(iteration, worldObj.getEntityByID(rider));
+                    unloadedriders.add(rider);
                 }
             }
         }
@@ -302,9 +308,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         NBTTagCompound nbtRiders = new NBTTagCompound();
         for (int iteration=0; iteration< getRiderOffsets().length-1; iteration++){
             if (riddenByEntities.size()-1 <iteration || riddenByEntities.get(iteration) == null){
-                nbtRiders.setInteger("rider_" + iteration, 0);
+                nbtRiders.setString("rider_" + iteration, "");
             } else {
-                nbtRiders.setInteger("rider_" + iteration, riddenByEntities.get(iteration).getEntityId());
+                nbtRiders.setString("rider_" + iteration, riddenByEntities.get(iteration).getCommandSenderName());
             }
         }
         tag.setTag("extended.riders", nbtRiders);
@@ -374,6 +380,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 bogieSize = xyzSize;
             }
 
+            if (riddenByEntities.size() < getRiderOffsets().length){
+                riddenByEntities.add(null);
+            }
+
             /**
              *check if the bogies exist, because they may not yet, and if they do, check if they are actually moving or colliding.
              * no point in processing movement if they aren't moving or if the train hit something.
@@ -428,6 +438,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 }
                 manageLinks();
 
+                if (unloadedriders .size()>0){
+                    updateRiderPosition();
+                }
+
             }
 
         }
@@ -468,15 +482,27 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     @Override
     public void updateRiderPosition() {
-        super.updateRiderPosition();
-        for(int i =0; i< getRiderOffsets().length; i++) {
 
-            if (i>= riddenByEntities.size()){
-                return;
+        if (unloadedriders.size()>0){
+            for (int r=0; r<unloadedriders.size();r++){
+                System.out.println(unloadedriders.get(r));
+                if (worldObj.getPlayerEntityByName(unloadedriders.get(r)) != null){
+                    System.out.println(unloadedriders.get(r) + " exists!");
+                }
+                for(int i =0; i< getRiderOffsets().length; i++) {
+                    if (i >= riddenByEntities.size()){
+                        riddenByEntities.add(worldObj.getPlayerEntityByName(unloadedriders.get(r)));
+                        break;
+                    }
+                    if (riddenByEntities.get(i) == null) {
+                        riddenByEntities.set(i, worldObj.getPlayerEntityByName(unloadedriders.get(r)));
+                    }
+                }
             }
+        }
 
+        for(int i =0; i< getRiderOffsets().length && i <riddenByEntities.size(); i++) {
             double[] riderOffset = rotatePoint(new double[]{getRiderOffsets()[i][0], getRiderOffsets()[i][1], getRiderOffsets()[i][2]}, rotationPitch, rotationYaw, 0);
-
 
             if (riddenByEntities.get(i) != null){
                 this.riddenByEntities.get(i).setPosition(riderOffset[0]+this.posX, riderOffset[1]+this.posY, riderOffset[2]+this.posZ);

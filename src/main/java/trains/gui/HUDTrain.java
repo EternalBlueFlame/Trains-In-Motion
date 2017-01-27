@@ -36,7 +36,7 @@ public class HUDTrain extends GuiScreen {
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void onRenderExperienceBar(RenderGameOverlayEvent event) {
         if (game != null && game.thePlayer != null && game.thePlayer.ridingEntity instanceof EntityTrainCore) {
-            fontRendererObj.drawString(StatCollector.translateToLocal(((GenericRailTransport)game.thePlayer.ridingEntity).getItem().getUnlocalizedName()), 8, 6, 4210752);
+            fontRendererObj.drawString(StatCollector.translateToLocal(((GenericRailTransport)game.thePlayer.ridingEntity).getItem().getUnlocalizedName()+ ".name"), 8, 6, 4210752);
             //draw the gui background color
             //GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             //set the texture.

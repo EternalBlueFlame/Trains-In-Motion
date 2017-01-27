@@ -58,42 +58,19 @@ public class PacketMount implements IMessage {
              */
 
 
-            for (int i =0; i< entity.getRiderOffsets().length; i++) {
-                if (i>=entity.riddenByEntities.size()){
-                    mount(player, entity);
+            for (int i = 0; i < entity.getRiderOffsets().length; i++) {
+                if (i >= entity.riddenByEntities.size()) {
+                    player.mountEntity(entity);
                     entity.riddenByEntities.add(player);
                     break;
-                } else if (entity.riddenByEntities.get(i) == null){
-                    mount(player, entity);
+                } else if (entity.riddenByEntities.get(i) == null) {
+                    player.mountEntity(entity);
                     entity.riddenByEntities.set(i, player);
                     break;
 
                 }
             }
             return null;
-        }
-
-        private void mount(EntityPlayer player, Entity p_70078_1_){
-            if (p_70078_1_ == null) {
-                if (player.ridingEntity != null) {
-                    player.setLocationAndAngles(player.ridingEntity.posX, player.ridingEntity.boundingBox.minY + (double)player.ridingEntity.height, player.ridingEntity.posZ, player.rotationYaw, player.rotationPitch);
-                    player.ridingEntity.riddenByEntity = null;
-                }
-
-                player.ridingEntity = null;
-            } else {
-                if (player.ridingEntity != null) {
-                    player.ridingEntity.riddenByEntity = null;
-                }
-
-                for (Entity entity1 = p_70078_1_.ridingEntity; entity1 != null; entity1 = entity1.ridingEntity) {
-                    if (entity1 == player) {
-                        return;
-                    }
-                }
-
-                player.ridingEntity = p_70078_1_;
-            }
         }
     }
 }

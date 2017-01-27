@@ -62,6 +62,20 @@ public class EventManager {
     public void entityInteractEvent(EntityInteractEvent event) {
         if (event.target instanceof HitboxHandler.multipartHitbox
                 && event.entity.worldObj.isRemote) {
+
+            for (int i = 0; i < ((HitboxHandler.multipartHitbox) event.target).parent.getRiderOffsets().length; i++) {
+                if (i >= ((HitboxHandler.multipartHitbox) event.target).parent.riddenByEntities.size()) {
+                    event.entityPlayer.mountEntity(((HitboxHandler.multipartHitbox) event.target).parent);
+                    ((HitboxHandler.multipartHitbox) event.target).parent.riddenByEntities.add(event.entityPlayer);
+                    break;
+                } else if (((HitboxHandler.multipartHitbox) event.target).parent.riddenByEntities.get(i) == null) {
+                    event.entityPlayer.mountEntity(((HitboxHandler.multipartHitbox) event.target).parent);
+                    ((HitboxHandler.multipartHitbox) event.target).parent.riddenByEntities.set(i, event.entityPlayer);
+                    break;
+
+                }
+            }
+
             TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
         }
     }
