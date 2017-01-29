@@ -4,13 +4,11 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.play.server.S1BPacketEntityAttach;
-import trains.entities.EntityRollingStockCore;
+import trains.TrainsInMotion;
 import trains.entities.GenericRailTransport;
+
+import java.util.UUID;
 
 /**
  * <h1>Mount packet</h1>
@@ -18,22 +16,22 @@ import trains.entities.GenericRailTransport;
  * @author Eternal Blue Flame
  */
 public class PacketMount implements IMessage {
-    private int entityId;
+    private UUID entityId;
     /**
      * <h2>data transfer variables</h2>
      * stores and transfers the variable through the byte buffer.
      */
     public PacketMount() {}
-    public PacketMount(int entityId) {
+    public PacketMount(UUID entityId) {
         this.entityId = entityId;
     }
     @Override
     public void fromBytes(ByteBuf bbuf) {
-        entityId = bbuf.readInt();
+        entityId = new UUID(bbuf.readLong(), bbuf.readLong());
     }
     @Override
     public void toBytes(ByteBuf bbuf) {
-        bbuf.writeInt(entityId);
+        bbuf.writeLong(entityId.getMostSignificantBits()); bbuf.writeLong(entityId.getLeastSignificantBits());
     }
 
     /**
@@ -46,28 +44,13 @@ public class PacketMount implements IMessage {
         @Override
         public IMessage onMessage(PacketMount message, MessageContext context) {
             EntityPlayer player = context.getServerHandler().playerEntity;
-            GenericRailTransport entity = (GenericRailTransport) player.worldObj.getEntityByID(message.entityId);
-
-            /*
-            for (int i =0; i< entity.getRiderOffsets().length; i++) {
-                if (entity.seatEntities.get(i).riddenByEntity == null) {
-                    context.getServerHandler().playerEntity.mountEntity(((GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId)).seatEntities.get(i));
-                    break;
-                }
-            }
-             */
-
+            GenericRailTransport entity = (GenericRailTransport) TrainsInMotion.proxy.getEntityFromUuid(message.entityId);
 
             for (int i = 0; i < entity.getRiderOffsets().length; i++) {
-                if (i >= entity.riddenByEntities.size()) {
+                if (entity.riddenByEntities.get(i) == null) {
                     player.mountEntity(entity);
-                    entity.riddenByEntities.add(player);
+                    entity.riddenByEntities.set(i, player.getUniqueID());
                     break;
-                } else if (entity.riddenByEntities.get(i) == null) {
-                    player.mountEntity(entity);
-                    entity.riddenByEntities.set(i, player);
-                    break;
-
                 }
             }
             return null;

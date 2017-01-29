@@ -5,7 +5,9 @@ import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,10 +15,12 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -24,8 +28,12 @@ import trains.TrainsInMotion;
 import trains.entities.trains.EntityBrigadelok080;
 import trains.models.tmt.Vec3d;
 import trains.networking.PacketMount;
+import trains.networking.PacketTransportSync;
 import trains.utility.*;
 
+import javax.annotation.Nullable;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -78,8 +86,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public int frontUnloadedID =0;
     public int backUnloadedID =0;
     public String destination ="";
-    public List<EntityPlayer> riddenByEntities = new ArrayList<EntityPlayer>();
-    public List<String> unloadedriders = new ArrayList<String>();
+    public List<UUID> riddenByEntities = new ArrayList<UUID>();
     public GenericRailTransport(World world){
         super(world);
         tanks = getTank();
@@ -181,11 +188,19 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         buffer.writeBoolean(lamp.isOn);
         buffer.writeLong(owner.getMostSignificantBits());
         buffer.writeLong(owner.getLeastSignificantBits());
+        if (riddenByEntities == null){
+            for (int i=0; i<getRiderOffsets().length; i++){
+                riddenByEntities.add(new UUID(0,0));
+            }
+        }
+
         for (double[] xyz : bogieXYZ) {
             buffer.writeDouble(xyz[0]);
             buffer.writeDouble(xyz[1]);
             buffer.writeDouble(xyz[2]);
         }
+
+        //send rider UUID packet
     }
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
@@ -237,17 +252,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //riders
         NBTTagCompound nbtRiders = tag.getCompoundTag("extended.riders");
         for (int iteration=0; iteration< getRiderOffsets().length-1; iteration++){
-            String rider = nbtRiders.getString("rider_" + iteration);
-            if (!rider.equals("")){
-                if (worldObj.getPlayerEntityByName(rider) != null) {
-                    if (riddenByEntities.size() - 1 < iteration) {
-                        riddenByEntities.add(worldObj.getPlayerEntityByName(rider));
-                    } else {
-                        riddenByEntities.set(iteration, worldObj.getPlayerEntityByName(rider));
-                    }
-                } else {
-                    unloadedriders.add(rider);
-                }
+            UUID rider = new UUID(nbtRiders.getLong("rider_most_" + iteration) ,nbtRiders.getLong("rider_least_" + iteration));
+            if (riddenByEntities.size() - 1 < iteration) {
+                riddenByEntities.add(rider);
+            } else {
+                riddenByEntities.set(iteration, rider);
             }
         }
 
@@ -307,10 +316,12 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //riders
         NBTTagCompound nbtRiders = new NBTTagCompound();
         for (int iteration=0; iteration< getRiderOffsets().length-1; iteration++){
-            if (riddenByEntities.size()-1 <iteration || riddenByEntities.get(iteration) == null){
-                nbtRiders.setString("rider_" + iteration, "");
+            if (iteration<riddenByEntities.size()){
+                nbtRiders.setLong("rider_most_", riddenByEntities.get(iteration).getMostSignificantBits());
+                nbtRiders.setLong("rider_least_", riddenByEntities.get(iteration).getLeastSignificantBits());
             } else {
-                nbtRiders.setString("rider_" + iteration, riddenByEntities.get(iteration).getCommandSenderName());
+                nbtRiders.setLong("rider_most_", 0);
+                nbtRiders.setLong("rider_least_", 0);
             }
         }
         tag.setTag("extended.riders", nbtRiders);
@@ -380,8 +391,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 bogieSize = xyzSize;
             }
 
-            if (riddenByEntities.size() < getRiderOffsets().length){
-                riddenByEntities.add(null);
+            while (riddenByEntities.size() < getRiderOffsets().length){
+                riddenByEntities.add(new UUID(0,0));
             }
 
             /**
@@ -437,11 +448,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     }
                 }
                 manageLinks();
-
-                if (unloadedriders .size()>0){
-                    updateRiderPosition();
-                }
-
+            }
+            if (!worldObj.isRemote && transportTicks % CommonProxy.UpdateFrequency == 0){
+                TrainsInMotion.syncChannel.sendToAll(new PacketTransportSync(riddenByEntities, this.entityUniqueID));
             }
 
         }
@@ -482,34 +491,17 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     @Override
     public void updateRiderPosition() {
+        for (int i = 0; i < getRiderOffsets().length && i < riddenByEntities.size(); i++) {
+            if (riddenByEntities.get(i) != new UUID(0,0)) {
 
-        if (unloadedriders.size()>0){
-            for (int r=0; r<unloadedriders.size();r++){
-                System.out.println(unloadedriders.get(r));
-                if (worldObj.getPlayerEntityByName(unloadedriders.get(r)) != null){
-                    System.out.println(unloadedriders.get(r) + " exists!");
+                Entity entity = TrainsInMotion.proxy.getEntityFromUuid(riddenByEntities.get(i));
+                if (entity != null) {
+                    double[] riderOffset = rotatePoint(new double[]{getRiderOffsets()[i][0], getRiderOffsets()[i][1], getRiderOffsets()[i][2]}, rotationPitch, rotationYaw, 0);
+                    entity.setPosition(riderOffset[0] + this.posX, riderOffset[1] + this.posY, riderOffset[2] + this.posZ);
                 }
-                for(int i =0; i< getRiderOffsets().length; i++) {
-                    if (i >= riddenByEntities.size()){
-                        riddenByEntities.add(worldObj.getPlayerEntityByName(unloadedriders.get(r)));
-                        break;
-                    }
-                    if (riddenByEntities.get(i) == null) {
-                        riddenByEntities.set(i, worldObj.getPlayerEntityByName(unloadedriders.get(r)));
-                    }
-                }
-            }
-        }
-
-        for(int i =0; i< getRiderOffsets().length && i <riddenByEntities.size(); i++) {
-            double[] riderOffset = rotatePoint(new double[]{getRiderOffsets()[i][0], getRiderOffsets()[i][1], getRiderOffsets()[i][2]}, rotationPitch, rotationYaw, 0);
-
-            if (riddenByEntities.get(i) != null){
-                this.riddenByEntities.get(i).setPosition(riderOffset[0]+this.posX, riderOffset[1]+this.posY, riderOffset[2]+this.posZ);
             }
         }
     }
-
 
 
 
@@ -636,7 +628,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
     public boolean getPermissions(EntityPlayer player, boolean driverOnly) {
         //if this requires the player to be the driver, and they aren't, just return false before we even go any further.
-        if (driverOnly && player != this.riddenByEntities.get(0)){
+        if (driverOnly && player.getUniqueID() != this.riddenByEntities.get(0)){
             return false;
         }
 

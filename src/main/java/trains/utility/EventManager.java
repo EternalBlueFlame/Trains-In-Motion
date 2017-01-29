@@ -6,11 +6,15 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
+import trains.entities.GenericRailTransport;
 import trains.networking.PacketKeyPress;
 import trains.networking.PacketMount;
+
+import java.util.UUID;
 
 /**
  * <h1>event management</h1>
@@ -62,21 +66,23 @@ public class EventManager {
     public void entityInteractEvent(EntityInteractEvent event) {
         if (event.target instanceof HitboxHandler.multipartHitbox
                 && event.entity.worldObj.isRemote) {
-
-            for (int i = 0; i < ((HitboxHandler.multipartHitbox) event.target).parent.getRiderOffsets().length; i++) {
-                if (i >= ((HitboxHandler.multipartHitbox) event.target).parent.riddenByEntities.size()) {
-                    event.entityPlayer.mountEntity(((HitboxHandler.multipartHitbox) event.target).parent);
-                    ((HitboxHandler.multipartHitbox) event.target).parent.riddenByEntities.add(event.entityPlayer);
-                    break;
-                } else if (((HitboxHandler.multipartHitbox) event.target).parent.riddenByEntities.get(i) == null) {
-                    event.entityPlayer.mountEntity(((HitboxHandler.multipartHitbox) event.target).parent);
-                    ((HitboxHandler.multipartHitbox) event.target).parent.riddenByEntities.set(i, event.entityPlayer);
-                    break;
-
-                }
-            }
-
-            TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
+            mountEntity(((HitboxHandler.multipartHitbox) event.target).parent, event.entityPlayer);
         }
+    }
+
+
+    public static void mountEntity(GenericRailTransport transport, EntityPlayer player){
+
+        for (int i = 0; i < transport.getRiderOffsets().length; i++) {
+            System.out.println("tried to interact" + transport.riddenByEntities.get(i).getMostSignificantBits() + " : " + transport.riddenByEntities.get(i).getLeastSignificantBits());
+            if (transport.riddenByEntities.get(i).getLeastSignificantBits() == 0 && transport.riddenByEntities.get(i).getMostSignificantBits() == 0) {
+                System.out.println("id was valid");
+                player.mountEntity(transport);
+                transport.riddenByEntities.set(i, player.getUniqueID());
+                break;
+            }
+        }
+
+        TrainsInMotion.keyChannel.sendToServer(new PacketMount(transport.getEntityId()));
     }
 }

@@ -10,9 +10,11 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
 import trains.entities.EntityBogie;
@@ -24,8 +26,10 @@ import trains.models.RenderEntity;
 import trains.registry.TrainRegistry;
 import trains.tileentities.TileEntityStorage;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * <h1>client proxy</h1>
@@ -88,6 +92,7 @@ public class ClientProxy extends CommonProxy {
      */
     @Override
     public void loadConfig(Configuration config){
+        super.loadConfig(config);
         config.addCustomCategoryComment("Quality (Client only)", "Lamps take up a lot of extra processing on client side due to forced chunk reloading");
         EnableLights = config.get(Configuration.CATEGORY_GENERAL, "EnableLamp", true).getBoolean(true);
         config.addCustomCategoryComment("Quality (Client only)", "Smoke and steam effects are more lightweight than those of normal minecraft. These shouldn't cause much lag if any, but its client only so if you wanna disable it you can.");
@@ -101,6 +106,24 @@ public class ClientProxy extends CommonProxy {
         KeyInventory.setKeyCode(config.getInt("InventoryKeybind", "Keybinds", 23, 0, 0, ""));
         KeyAccelerate.setKeyCode(config.getInt("AccelerateKeybind", "Keybinds", 19, 0, 0, ""));
         KeyReverse.setKeyCode(config.getInt("ReverseKeybind", "Keybinds", 33, 0, 0, ""));
+    }
+
+    /**
+     * <h2>load entity from UUID</h2>
+     * This is a client only version for getting an entity from UUID,
+     * unlike server only one world is ever loaded, so we don't have to loop for every world.
+     */
+    @Override
+    @Nullable
+    public Entity getEntityFromUuid(UUID uuid) {
+            if (Minecraft.getMinecraft().theWorld != null) {
+                for (Object entity : Minecraft.getMinecraft().theWorld.getLoadedEntityList()) {
+                    if (entity instanceof Entity && ((Entity) entity).getUniqueID().equals(uuid)) {
+                        return (Entity) entity;
+                    }
+                }
+            }
+        return null;
     }
 
     /**
