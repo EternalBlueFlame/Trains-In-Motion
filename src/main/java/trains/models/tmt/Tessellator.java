@@ -12,11 +12,10 @@ import java.util.Arrays;
 public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 	
 	private static ByteBuffer bbuf = GLAllocation.createDirectByteBuffer(0x200000 * 4);
-	private int rbs = 0, verts = 0, br, c, rbi = 0, vertices = 0, dm, n;
+	private int rbs = 0, verts = 0, c, rbi = 0, dm, n;
 	private boolean ht = false, in = false, drawing = false, hc = false;
 	public static Tessellator INSTANCE = new Tessellator();
 	private static FloatBuffer fbuf = bbuf.asFloatBuffer();
-	private static ShortBuffer sbuf = bbuf.asShortBuffer();
 	private static IntBuffer ibuf = bbuf.asIntBuffer();
 	private double u, v, w, x_o, y_o, z_o;
 	private int[] rb;
@@ -83,7 +82,7 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 	}
 	
 	private void reset(){
-		verts = rbi = vertices = 0;
+		verts = rbi = 0;
 		
 		bbuf.clear();
 	}
@@ -101,7 +100,7 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 		rb[rbi] = Float.floatToRawIntBits((float)(par1 + x_o));
 		rb[rbi + 1] = Float.floatToRawIntBits((float)(par3 + y_o));
 		rb[rbi + 2] = Float.floatToRawIntBits((float)(par5 + z_o));
-		rbi += 10; verts++; vertices++;
+		rbi += 10; verts++;
 	}
 	
 	public void addVertexWithUV(double i, double j, double k, double l, double m){

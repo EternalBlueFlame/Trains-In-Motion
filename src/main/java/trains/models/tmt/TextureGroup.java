@@ -3,6 +3,7 @@ package trains.models.tmt;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
+import trains.utility.ClientProxy;
 
 import java.util.ArrayList;
 
@@ -24,8 +25,7 @@ public class TextureGroup {
 	
 	public void loadTexture(int defaultTexture) {
 		if(!texture.equals("")) {
-			TextureManager renderengine = Minecraft.getMinecraft().renderEngine;
-	        renderengine.bindTexture(new ResourceLocation("", texture));
+			Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation("", texture));
 		}
 		else if(defaultTexture > -1) {
 			Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation("", ""));

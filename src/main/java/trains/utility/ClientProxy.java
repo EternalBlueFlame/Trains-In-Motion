@@ -5,16 +5,15 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
 import trains.entities.EntityBogie;
@@ -37,7 +36,6 @@ import java.util.UUID;
  * @author Eternal Blue Flame
  */
 public class ClientProxy extends CommonProxy {
-    private static WorldClient clientWorld= null; //define this ahead of time so we don't have to instance the variable every client tick.
     public static List<GenericRailTransport> carts = new ArrayList<GenericRailTransport>();
 
     /**
@@ -174,11 +172,10 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void onTick(TickEvent.ClientTickEvent tick) {
         if (EnableLights && tick.phase == TickEvent.Phase.END && carts.size() > 0) {
-            clientWorld = Minecraft.getMinecraft().theWorld;
-            if (clientWorld != null) {
+            if (Minecraft.getMinecraft().theWorld != null) {
                 for (GenericRailTransport cart : carts) {
                     if (cart != null) {
-                        clientWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
+                        Minecraft.getMinecraft().theWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
                     }
                 }
             }

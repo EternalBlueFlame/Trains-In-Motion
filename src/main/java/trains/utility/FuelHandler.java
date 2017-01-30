@@ -120,7 +120,7 @@ public class FuelHandler implements IFuelHandler{
 
 				//if the second slot contains a water bucket, add the contents of the water bucket to our tank and then place an empty bucket in the inventory
 				if (isWater(cart.inventory.getStackInSlot(1), cart) &&
-						cart.tanks.addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),true) && !cart.isCreative) {
+						cart.tanks.addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),true, cart) && !cart.isCreative) {
 					cart.inventory.decrStackSize(1,1);
 					cart.inventory.addItem(new ItemStack(Items.bucket));
 				}
@@ -132,9 +132,9 @@ public class FuelHandler implements IFuelHandler{
 					//the amount of water used is generated from heat which is one part fuel 2 parts air, with more fuel burning more heat is created, but this only works to a point.
 					//steam beyond the max point of storage is considered to be expelled through a failsafe.
 					int steam = Math.round((fuel*0.0025f)/ cart.getMaxFuel());
-					if (cart.tanks.drainFluid(steam,true)) {
+					if (cart.tanks.drainFluid(steam,true, cart)) {
 						fuel -= 50; //a lava bucket lasts 1000 seconds, so burnables are processed at 20000*0.05 a second
-						cart.tanks.addFluid(FluidRegistry.WATER, MathHelper.floor_float(steam*0.9f), false);
+						cart.tanks.addFluid(FluidRegistry.WATER, MathHelper.floor_float(steam*0.9f), false, cart);
 					} else if (!cart.isCreative){
 						cart.worldObj.createExplosion(cart, cart.posX, cart.posY, cart.posZ, 5f, false);
 						cart.dropItem(cart.getItem(), 1);
@@ -145,7 +145,7 @@ public class FuelHandler implements IFuelHandler{
 				}
 				if (cart.tanks.getTank(false).getFluidAmount()>0){
 					//steam is expelled through the pistons to push them back and forth, but even when the accelerator is off, a degree of steam is still escaping.
-					cart.tanks.drainFluid(5+(10*cart.accelerator),false);
+					cart.tanks.drainFluid(5+(10*cart.accelerator),false, cart);
 				}
 
 				break;
@@ -174,7 +174,7 @@ public class FuelHandler implements IFuelHandler{
 			case ELECTRIC: case MAGLEV: {
 				//add redstone to the fuel tank
 				if (isWater(cart.inventory.getStackInSlot(1), cart) &&
-						cart.tanks.addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),true) && !cart.isCreative) {
+						cart.tanks.addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),true, cart) && !cart.isCreative) {
 					cart.inventory.decrStackSize(1,1);
 					cart.inventory.addItem(new ItemStack(Items.bucket));
 				}

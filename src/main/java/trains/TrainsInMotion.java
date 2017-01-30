@@ -18,7 +18,6 @@ import trains.items.TiMTab;
 import trains.networking.PacketKeyPress;
 import trains.networking.PacketMount;
 import trains.networking.PacketRemove;
-import trains.networking.PacketTransportSync;
 import trains.registry.GenericRegistry;
 import trains.registry.TrainRegistry;
 import trains.utility.CommonProxy;
@@ -50,7 +49,6 @@ public class TrainsInMotion {
 
     //instance the network wrapper for each channel.
     public static SimpleNetworkWrapper keyChannel;
-    public static SimpleNetworkWrapper syncChannel;
 
     //GUI ID's
     //TODO: theres gotta be a better way to do this
@@ -131,8 +129,6 @@ public class TrainsInMotion {
         TrainsInMotion.keyChannel.registerMessage(PacketKeyPress.Handler.class, PacketKeyPress.class, 1, Side.SERVER);
         TrainsInMotion.keyChannel.registerMessage(PacketMount.Handler.class, PacketMount.class, 2, Side.SERVER);
         TrainsInMotion.keyChannel.registerMessage(PacketRemove.Handler.class, PacketRemove.class, 3, Side.SERVER);
-        TrainsInMotion.syncChannel = NetworkRegistry.INSTANCE.newSimpleChannel("TiM.sync");
-        TrainsInMotion.syncChannel.registerMessage(PacketTransportSync.Handler.class, PacketTransportSync.class, 1, Side.CLIENT);
 
         //register the worldgen
         GameRegistry.registerWorldGenerator(new OreGen(), 0);

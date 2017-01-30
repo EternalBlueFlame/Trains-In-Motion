@@ -77,7 +77,7 @@ public abstract class ModelPoolEntry {
     	while(groupsItr.hasNext()) {
     		int nameIdx = 0;
     		String groupKey = groupsItr.next();
-    		String currentGroup = name + "_" + nameIdx + ":" + groupKey;
+    		String currentGroup = name + "_0:" + groupKey;
     		while(groupsMap.size() > 0 && groupsMap.containsKey(currentGroup)) {
     			nameIdx++;
     			currentGroup = name + "_" + nameIdx + ":" + groupKey;
@@ -88,7 +88,7 @@ public abstract class ModelPoolEntry {
     	while(texturesItr.hasNext()) {
     		int nameIdx = 0;
     		String groupKey = texturesItr.next();
-    		String currentGroup = name + "_" + nameIdx + ":" + groupKey;
+    		String currentGroup = name + "_0:" + groupKey;
     		while(groupsMap.size() > 0 && texturesMap.containsKey(currentGroup)) {
     			nameIdx++;
     			currentGroup = name + "_" + nameIdx + ":" + groupKey;

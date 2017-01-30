@@ -1,14 +1,10 @@
 package trains.entities;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import trains.utility.InventoryHandler;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**

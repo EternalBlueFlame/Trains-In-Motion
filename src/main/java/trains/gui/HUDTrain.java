@@ -10,6 +10,7 @@ import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.gui.train.GUITrain;
 import trains.registry.URIRegistry;
+import trains.utility.ClientProxy;
 
 /**
  * <h1>Train HUD</h1>

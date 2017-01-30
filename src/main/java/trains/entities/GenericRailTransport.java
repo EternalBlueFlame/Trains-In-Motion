@@ -5,35 +5,24 @@ import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import trains.TrainsInMotion;
 import trains.entities.trains.EntityBrigadelok080;
 import trains.models.tmt.Vec3d;
-import trains.networking.PacketMount;
-import trains.networking.PacketTransportSync;
 import trains.utility.*;
 
-import javax.annotation.Nullable;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -241,11 +230,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (tanks != null) {
             FluidStack tankA = loadFluidStackFromNBT(tag);
             if (tankA.amount != 0) {
-                tanks.addFluid(tankA.getFluid(), tankA.amount, true);
+                tanks.addFluid(tankA.getFluid(), tankA.amount, true, this);
             }
             FluidStack tankB = loadFluidStackFromNBT(tag);
             if (tankB.amount != 0) {
-                tanks.addFluid(tankB.getFluid(), tankB.amount, false);
+                tanks.addFluid(tankB.getFluid(), tankB.amount, false, this);
             }
         }
 
@@ -253,6 +242,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         NBTTagCompound nbtRiders = tag.getCompoundTag("extended.riders");
         for (int iteration=0; iteration< getRiderOffsets().length-1; iteration++){
             UUID rider = new UUID(nbtRiders.getLong("rider_most_" + iteration) ,nbtRiders.getLong("rider_least_" + iteration));
+            System.out.println(rider.getMostSignificantBits() + " : " + rider.getLeastSignificantBits());
             if (riddenByEntities.size() - 1 < iteration) {
                 riddenByEntities.add(rider);
             } else {
@@ -316,9 +306,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //riders
         NBTTagCompound nbtRiders = new NBTTagCompound();
         for (int iteration=0; iteration< getRiderOffsets().length-1; iteration++){
-            if (iteration<riddenByEntities.size()){
-                nbtRiders.setLong("rider_most_", riddenByEntities.get(iteration).getMostSignificantBits());
-                nbtRiders.setLong("rider_least_", riddenByEntities.get(iteration).getLeastSignificantBits());
+            if (riddenByEntities.get(iteration) != null){
+                nbtRiders.setLong("rider_most_" + iteration, riddenByEntities.get(iteration).getMostSignificantBits());
+                nbtRiders.setLong("rider_least_" + iteration, riddenByEntities.get(iteration).getLeastSignificantBits());
             } else {
                 nbtRiders.setLong("rider_most_", 0);
                 nbtRiders.setLong("rider_least_", 0);
@@ -449,9 +439,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 }
                 manageLinks();
             }
-            if (!worldObj.isRemote && transportTicks % CommonProxy.UpdateFrequency == 0){
-                TrainsInMotion.syncChannel.sendToAll(new PacketTransportSync(riddenByEntities, this.entityUniqueID));
-            }
 
         }
 
@@ -498,6 +485,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 if (entity != null) {
                     double[] riderOffset = rotatePoint(new double[]{getRiderOffsets()[i][0], getRiderOffsets()[i][1], getRiderOffsets()[i][2]}, rotationPitch, rotationYaw, 0);
                     entity.setPosition(riderOffset[0] + this.posX, riderOffset[1] + this.posY, riderOffset[2] + this.posZ);
+                    entity.ridingEntity = this;
                 }
             }
         }
@@ -668,5 +656,19 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
     public float getPistonOffset(){return 0;}
     public float[][] getSmokeOffset(){return new float[][]{{0,0,0,255}};}
+
+
+    /**
+     * <h2>Datawatchers</h2>
+     * Similar to packs this is used to transfer values of various things between client and server.
+     */
+
+    public int getTankFluid(boolean isFirstTank){
+        if (isFirstTank) {
+            return this.dataWatcher.getWatchableObjectInt(20);
+        } else{
+            return this.dataWatcher.getWatchableObjectInt(21);
+        }
+    }
 
 }

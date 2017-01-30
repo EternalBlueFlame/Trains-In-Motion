@@ -26,7 +26,7 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 			ArrayList<TexturedPolygon> face = new ArrayList<TexturedPolygon>();
 			
 			while((s = in.readLine()) != null) {
-				if(s.indexOf("#") > -1) {
+				if(s.contains("#")) {
 					s = s.substring(0, s.indexOf("#"));
 				}
 				
@@ -47,7 +47,7 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 						if(ind > -1)
 							v[i] = Float.parseFloat(s.substring(0, ind));
 						else
-							v[i] = Float.parseFloat(s.substring(0));
+							v[i] = Float.parseFloat(s);
 						s = s.substring(s.indexOf(" ") + 1).trim();
 					}
 					
@@ -66,7 +66,7 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 						if(ind > -1)
 							v[i] = Float.parseFloat(s.substring(0, ind));
 						else
-							v[i] = Float.parseFloat(s.substring(0));
+							v[i] = Float.parseFloat(s);
 						s = s.substring(s.indexOf(" ") + 1).trim();
 					}
 					
@@ -81,7 +81,7 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 						if(ind > -1)
 							v[i] = Float.parseFloat(s.substring(0, ind));
 						else
-							v[i] = Float.parseFloat(s.substring(0));
+							v[i] = Float.parseFloat(s);
 						s = s.substring(s.indexOf(" ") + 1).trim();
 					}
 					
@@ -107,7 +107,7 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 						s1 = s;
 						if(ind > -1)
 							s1 = s.substring(0, ind);
-						if(s1.indexOf("/") > -1) {
+						if(s1.contains("/")) {
 							String[] f = s1.split("/");
 							vInt = Integer.parseInt(f[0]) - 1;
 							if(f[1].equals(""))

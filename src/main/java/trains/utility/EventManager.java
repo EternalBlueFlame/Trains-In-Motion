@@ -6,6 +6,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import trains.TrainsInMotion;
@@ -36,24 +37,28 @@ public class EventManager {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onClientKeyPress(InputEvent.KeyInputEvent event){
-        EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
-        if(player.ridingEntity instanceof EntityTrainCore) {
+        if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntityTrainCore) {
             //for lamp
             if (ClientProxy.KeyLamp.isPressed() ) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0));
-                ((EntityTrainCore) player.ridingEntity).lamp.isOn = ! ((EntityTrainCore) player.ridingEntity).lamp.isOn;
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0, Minecraft.getMinecraft().thePlayer.ridingEntity.getPersistentID()));
+                ((EntityTrainCore) Minecraft.getMinecraft().thePlayer.ridingEntity).lamp.isOn = ! ((EntityTrainCore) Minecraft.getMinecraft().thePlayer.ridingEntity).lamp.isOn;
             }
             //for inventory
             if (ClientProxy.KeyInventory.isPressed()) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1));
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, Minecraft.getMinecraft().thePlayer.ridingEntity.getPersistentID()));
+                System.out.println("pressed inventory key on" + TrainsInMotion.proxy.getEntityFromUuid(Minecraft.getMinecraft().thePlayer.ridingEntity.getPersistentID()));
             }
             //for speed change
             if(ClientProxy.KeyAccelerate.isPressed()){
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2));
-                ((EntityTrainCore) player.ridingEntity).setAcceleration(true);
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2, Minecraft.getMinecraft().thePlayer.ridingEntity.getPersistentID()));
+                ((EntityTrainCore) Minecraft.getMinecraft().thePlayer.ridingEntity).setAcceleration(true);
             } else if(ClientProxy.KeyReverse.getIsKeyPressed()){
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3));
-                ((EntityTrainCore) player.ridingEntity).setAcceleration(false);
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3, Minecraft.getMinecraft().thePlayer.ridingEntity.getPersistentID()));
+                ((EntityTrainCore) Minecraft.getMinecraft().thePlayer.ridingEntity).setAcceleration(false);
+            }
+            //player dismount
+            if (Minecraft.getMinecraft().gameSettings.keyBindSneak.isPressed()){
+                dismountEntity(Minecraft.getMinecraft().thePlayer.getPersistentID());
             }
         }
     }
@@ -79,10 +84,21 @@ public class EventManager {
                 System.out.println("id was valid");
                 player.mountEntity(transport);
                 transport.riddenByEntities.set(i, player.getUniqueID());
+                System.out.println("tried to interact" + transport.riddenByEntities.get(i).getMostSignificantBits() + " : " + transport.riddenByEntities.get(i).getLeastSignificantBits());
                 break;
             }
         }
 
-        TrainsInMotion.keyChannel.sendToServer(new PacketMount(transport.getEntityId()));
+        TrainsInMotion.keyChannel.sendToServer(new PacketMount(transport.getPersistentID()));
+    }
+
+    public static void dismountEntity(UUID player){
+        Entity entityPlayer = TrainsInMotion.proxy.getEntityFromUuid(player);
+        if (entityPlayer instanceof EntityPlayer) {
+            if (entityPlayer.ridingEntity instanceof GenericRailTransport) {
+                ((GenericRailTransport) entityPlayer.ridingEntity).riddenByEntities.remove(player);
+                ((EntityPlayer) entityPlayer).dismountEntity(entityPlayer.ridingEntity);
+            }
+        }
     }
 }

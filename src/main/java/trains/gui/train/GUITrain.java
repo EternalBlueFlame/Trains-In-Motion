@@ -11,9 +11,9 @@ import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
-import trains.utility.ContainerHandler;
 import trains.networking.PacketKeyPress;
 import trains.registry.URIRegistry;
+import trains.utility.ContainerHandler;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,6 +31,8 @@ public class GUITrain extends GuiContainer {
      */
     private static final ResourceLocation vanillaInventory = new ResourceLocation("textures/gui/container/furnace.png");
     private static EntityTrainCore train;
+    private int firstTankFluid;
+    private int secondTankFluid;
     private static final float guiScaler = 0.00390625F;
 
     /**
@@ -104,16 +106,16 @@ public class GUITrain extends GuiContainer {
         mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
         //liquid fuel tank
         drawTexturedModalRect(guiLeft + 66, guiTop + 10, 0, 0, 18, 50, 16);
-        if (train.tanks.getTank(true).getFluidAmount()>0) {
+        if (firstTankFluid>0) {
             //draw the water tank
-            int liquid = Math.abs((train.tanks.getTank(true).getFluidAmount() * 50) / train.tanks.getTank(true).getCapacity());
+            int liquid = Math.abs((firstTankFluid * 50) / train.tanks.getTank(true).getCapacity());
             drawTexturedModalRect(guiLeft + 66, guiTop + 60 - liquid, 16,0, 18, liquid, 16);
         }
         //steam tank
         if (train.getType() == TrainsInMotion.transportTypes.STEAM || train.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
             drawTexturedModalRect(guiLeft + 34, guiTop+10, 0, 0, 18, 30, 16);
-            if (train.tanks.getTank(false).getFluidAmount()>0) {
-                int liquid3 = Math.abs((train.tanks.getTank(false).getFluidAmount() * 30) / train.tanks.getTank(false).getCapacity());
+            if (secondTankFluid>0) {
+                int liquid3 = Math.abs((secondTankFluid * 30) / train.tanks.getTank(false).getCapacity());
                 drawTexturedModalRect(guiLeft + 34, guiTop +50 - liquid3, 32,0, 18, liquid3, 16);
             }
         }
@@ -152,16 +154,18 @@ public class GUITrain extends GuiContainer {
     @Override
     public void drawScreen(int mouseX, int mouseY, float par3){
         super.drawScreen(mouseX, mouseY, par3);
+        firstTankFluid = train.getDataWatcher().getWatchableObjectInt(20);
+        secondTankFluid = train.getDataWatcher().getWatchableObjectInt(21);
         //draw the fuel fluid tank hover text
         if ((mouseX >= guiLeft + 66 && mouseX <= guiLeft + 84 &&
                 mouseY >= guiTop + 10 && mouseY <= guiTop +60)) {
-            drawHoveringText(Arrays.asList(tankType(true), train.tanks.getTank(true).getFluidAmount()*0.001f + StatCollector.translateToLocal("gui.of") + train.tanks.getTank(true).getCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
+            drawHoveringText(Arrays.asList(tankType(true), firstTankFluid*0.001f + StatCollector.translateToLocal("gui.of") + train.tanks.getTank(true).getCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
         }
         //draw the steam tank hover text
         if ((train.getType() == TrainsInMotion.transportTypes.STEAM || train.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
                 (mouseX >= guiLeft + 34 && mouseX <= guiLeft + 52 &&
                         mouseY >= guiTop + 10 && mouseY <= guiTop +40)) {
-            drawHoveringText(Arrays.asList(tankType(false), train.tanks.getTank(true).getFluidAmount()*0.001f + StatCollector.translateToLocal("gui.of") + train.tanks.getTank(true).getCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
+            drawHoveringText(Arrays.asList(tankType(false), secondTankFluid*0.001f + StatCollector.translateToLocal("gui.of") + train.tanks.getTank(true).getCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
         }
         //draw toggle button hover text
         if (mouseY > guiTop + 63 && mouseY < guiTop +81){
@@ -218,19 +222,19 @@ public class GUITrain extends GuiContainer {
     @Override
     public void actionPerformed(GuiButton button) {
         switch (button.id){
-            case 0:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(4));
+            case 0:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(4, train.getPersistentID()));
                 train.brake = !train.brake; break;}
-            case 1:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(5));
+            case 1:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(5, train.getPersistentID()));
                 train.lamp.isOn = !train.lamp.isOn; break;}
-            case 2:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(6));
+            case 2:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(6, train.getPersistentID()));
                 train.isLocked = ! train.isLocked; break;}
-            case 3:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(7));
+            case 3:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(7, train.getPersistentID()));
                 train.isCoupling = !train.isCoupling; break;}
-            case 4:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(8)); break;}//horn
-            case 5:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(9)); break;}//map
-            case 6:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(10));
+            case 4:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(8, train.getPersistentID())); break;}//horn
+            case 5:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(9, train.getPersistentID())); break;}//map
+            case 6:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(10, train.getPersistentID()));
                 train.isRunning = !train.isRunning; break;}
-            case 7:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(11));
+            case 7:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(11, train.getPersistentID()));
                 train.isCreative = !train.isCreative; break;}
         }
     }

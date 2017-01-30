@@ -7,8 +7,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
-import trains.utility.ContainerHandler;
 import trains.tileentities.TileEntityStorage;
+import trains.utility.ContainerHandler;
 
 /**
  * <h1>Train crafting table GUI</h1>
