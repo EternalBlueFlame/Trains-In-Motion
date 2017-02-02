@@ -24,6 +24,9 @@ import trains.utility.CommonProxy;
 import trains.utility.EventManager;
 import trains.worldgen.OreGen;
 
+import java.util.UUID;
+
+
 /**
  * <h1>Main class</h1>
  * all other classes eventually lead back to this class, which manages the mod as a whole.
@@ -35,10 +38,11 @@ import trains.worldgen.OreGen;
  *
  * @author Eternal Blue Flame
  */
-@Mod(modid = TrainsInMotion.MODID, version = "0.7.0.0pre-alpha", name = "Trains in Motion")
+@Mod(modid = TrainsInMotion.MODID, version = TrainsInMotion.MOD_VERSION, name = "Trains in Motion")
 public class TrainsInMotion {
 
     public static final String MODID = "tim";
+    public static final String MOD_VERSION="0.7.0.0pre-alpha";
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
     public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
@@ -58,7 +62,8 @@ public class TrainsInMotion {
     //Instance the event handler, This is used for event based functionality, things like when you right-click an entity.
     public static EventManager eventManager = new EventManager();
 
-
+    //instance a null UUID here so we never have to create one again and can just reference this.
+    public static final UUID nullUUID = new UUID(0,0);
     /**
      * <h3>enums</h3>
      * we define enums for transport types and inventory sizes here.

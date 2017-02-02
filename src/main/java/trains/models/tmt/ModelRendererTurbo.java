@@ -235,12 +235,12 @@ public class ModelRendererTurbo extends ModelRenderer {
         return this;
     }
     public ModelRendererTurbo addBox(float x, float y, float z, int w, int h, int d) {
-        addBox(x, y, z,  w,  h,  d, 0.0F);
+        addBox(x, y, z, (float) w, (float) h, (float) d, 0.0F);
         return this;
     }
     @Override
     public void addBox(float x, float y, float z, int w, int h, int d, float s) {
-        addBox(x, y, z,  w,  h,  d, s);
+        addBox(x, y, z, (float) w, (float) h, (float) d, s);
     }
 
 

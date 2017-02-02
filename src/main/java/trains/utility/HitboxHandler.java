@@ -17,6 +17,7 @@ import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
 import trains.entities.EntityBogie;
 import trains.entities.EntityRollingStockCore;
+import trains.entities.EntitySeat;
 import trains.entities.GenericRailTransport;
 import trains.networking.PacketRemove;
 
@@ -125,12 +126,7 @@ public class HitboxHandler {
                     if (entity instanceof Entity) {
                         if (entity instanceof multipartHitbox && train.hitboxList.contains(entity)){
                             return false;
-                        } else if (!(entity instanceof EntityBogie)) {
-                            if (train.riddenByEntities.size()>0){
-                                if (train.riddenByEntities.get(0) == entity){
-                                    break;
-                                }
-                            }
+                        } else if (entity != train.riddenByEntity && !(entity instanceof EntityBogie) && !(entity instanceof EntitySeat)) {
                             if (entity instanceof EntityLiving || entity instanceof EntityPlayer) {
                                 //dependant on velocity, fling it and do damage.
                                 if (train.bogie.get(0).motionX + train.bogie.get(0).motionZ >1 || train.bogie.get(0).motionX + train.bogie.get(0).motionZ < -1 ) {

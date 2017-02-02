@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static net.minecraftforge.fluids.FluidStack.loadFluidStackFromNBT;
+import static trains.TrainsInMotion.nullUUID;
+import static trains.TrainsInMotion.proxy;
 import static trains.utility.RailUtility.rotatePoint;
 
 /**
@@ -63,6 +65,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public int[][] colors = new int[][]{{0,0,0},{0,0,0},{0,0,0}};
     public UUID owner = null;
     public List<EntityBogie> bogie = new ArrayList<EntityBogie>();
+    public List<EntitySeat> seats = new ArrayList<EntitySeat>();
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
     public double[] motion = new double[]{0,0,0};
     public boolean isCreative = false;
@@ -70,12 +73,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
     public HitboxHandler hitboxHandler = new HitboxHandler();
     public int transportTicks =0;
-    public GenericRailTransport front;
-    public GenericRailTransport back;
-    public int frontUnloadedID =0;
-    public int backUnloadedID =0;
+    public UUID front;
+    public UUID back;
     public String destination ="";
-    public List<UUID> riddenByEntities = new ArrayList<UUID>();
     public GenericRailTransport(World world){
         super(world);
         tanks = getTank();
@@ -143,9 +143,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * @see EntityBogie#readSpawnData(ByteBuf)
      */
     @SideOnly(Side.CLIENT)
-    public void addbogies(EntityBogie cart){
-        bogie.add(cart);
-    }
+    public void addbogies(EntityBogie cart){bogie.add(cart);}
+    @SideOnly(Side.CLIENT)
+    public void addseats(EntitySeat cart){seats.add(cart);}
 
     /**
      * <h2> Data Syncing and Saving </h2>
@@ -177,11 +177,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         buffer.writeBoolean(lamp.isOn);
         buffer.writeLong(owner.getMostSignificantBits());
         buffer.writeLong(owner.getLeastSignificantBits());
-        if (riddenByEntities == null){
-            for (int i=0; i<getRiderOffsets().length; i++){
-                riddenByEntities.add(new UUID(0,0));
-            }
-        }
 
         for (double[] xyz : bogieXYZ) {
             buffer.writeDouble(xyz[0]);
@@ -200,26 +195,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         lamp.Z = tag.getInteger("extended.lamp.z");
         isDead = tag.getBoolean("extended.dead");
         isCoupling = tag.getBoolean("extended.coupling");
-        //load front link
-        int id = tag.getInteger("extended.front");
-        if(id !=0){
-            Entity getFront = worldObj.getEntityByID(id);
-            if (getFront instanceof GenericRailTransport){
-                front = (GenericRailTransport) getFront;
-            } else if (getFront == null){
-                frontUnloadedID = id;
-            }
-        }
-        //load back link
-        id = tag.getInteger("extended.back");
-        if(id !=0){
-            Entity getBack = worldObj.getEntityByID(id);
-            if (getBack instanceof GenericRailTransport){
-                back = (GenericRailTransport) getBack;
-            } else if (getBack == null){
-                backUnloadedID = id;
-            }
-        }
+        //load links
+        front = new UUID(tag.getLong("extended.front.most"), tag.getLong("extended.front.least"));
+        back = new UUID(tag.getLong("extended.back.most"), tag.getLong("extended.back.least"));
         //more bools
         isCreative = tag.getBoolean("extended.creative");
         brake = tag.getBoolean("extended.handbrake");
@@ -235,18 +213,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             FluidStack tankB = loadFluidStackFromNBT(tag);
             if (tankB.amount != 0) {
                 tanks.addFluid(tankB.getFluid(), tankB.amount, false, this);
-            }
-        }
-
-        //riders
-        NBTTagCompound nbtRiders = tag.getCompoundTag("extended.riders");
-        for (int iteration=0; iteration< getRiderOffsets().length-1; iteration++){
-            UUID rider = new UUID(nbtRiders.getLong("rider_most_" + iteration) ,nbtRiders.getLong("rider_least_" + iteration));
-            System.out.println(rider.getMostSignificantBits() + " : " + rider.getLeastSignificantBits());
-            if (riddenByEntities.size() - 1 < iteration) {
-                riddenByEntities.add(rider);
-            } else {
-                riddenByEntities.set(iteration, rider);
             }
         }
 
@@ -272,14 +238,18 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         tag.setBoolean("extended.coupling", isCoupling);
         //front and back bogies
         if (front != null){
-            tag.setInteger("extended.front", front.getEntityId());
+            tag.setLong("extended.front.most", front.getMostSignificantBits());
+            tag.setLong("extended.front.least", front.getLeastSignificantBits());
         } else {
-            tag.setInteger("extended.front", 0);
+            tag.setLong("extended.front.most", 0);
+            tag.setLong("extended.front.least", 0);
         }
         if (back != null){
-            tag.setInteger("extended.back", back.getEntityId());
+            tag.setLong("extended.back.most", front.getMostSignificantBits());
+            tag.setLong("extended.back.least", front.getLeastSignificantBits());
         } else {
-            tag.setInteger("extended.back", 0);
+            tag.setLong("extended.back.most", 0);
+            tag.setLong("extended.back.least", 0);
         }
         //more bools
         tag.setBoolean("extended.creative", isCreative);
@@ -302,19 +272,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 new FluidStack(FluidRegistry.WATER, 0).writeToNBT(tag);
             }
         }
-
-        //riders
-        NBTTagCompound nbtRiders = new NBTTagCompound();
-        for (int iteration=0; iteration< getRiderOffsets().length-1; iteration++){
-            if (riddenByEntities.get(iteration) != null){
-                nbtRiders.setLong("rider_most_" + iteration, riddenByEntities.get(iteration).getMostSignificantBits());
-                nbtRiders.setLong("rider_least_" + iteration, riddenByEntities.get(iteration).getLeastSignificantBits());
-            } else {
-                nbtRiders.setLong("rider_most_", 0);
-                nbtRiders.setLong("rider_least_", 0);
-            }
-        }
-        tag.setTag("extended.riders", nbtRiders);
 
         //write the list of bogies
         NBTTagCompound nbtbogies = new NBTTagCompound();
@@ -378,11 +335,12 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     worldObj.spawnEntityInWorld(spawnBogie);
                     bogie.add(spawnBogie);
                 }
+                for (int i=0; i< getRiderOffset().length; i++){
+                    EntitySeat seat = new EntitySeat(worldObj, posX, posY, posZ, getEntityId(), i);
+                    worldObj.spawnEntityInWorld(seat);
+                    seats.add(seat);
+                }
                 bogieSize = xyzSize;
-            }
-
-            while (riddenByEntities.size() < getRiderOffsets().length){
-                riddenByEntities.add(new UUID(0,0));
             }
 
             /**
@@ -440,8 +398,19 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 manageLinks();
             }
 
-        }
+            rot++;
+            if (rot>360){
+                rot=0;
+            }
+            for (int i=0; i< seats.size(); i++) {
+                double[] riderOffset = rotatePoint(getRiderOffset()[i], rotationPitch, rotationYaw+rot, 0);
+                riderOffset[0]+=posX;
+                riderOffset[1]+=posY;
+                riderOffset[2]+=posZ;
+                seats.get(i).setPosition(riderOffset[0], riderOffset[1], riderOffset[2]);
+            }
 
+        }
         /**
          * be sure the client proxy has a reference to this so the lamps can be updated, and then every other tick, attempt to update the lamp position if it's necessary.
          */
@@ -458,7 +427,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             transportTicks++;
         }
     }
-
+ int rot=0;
     public double processMovement(EntityBogie entityBogie){
 
         double X =0;
@@ -478,21 +447,14 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     @Override
     public void updateRiderPosition() {
-        for (int i = 0; i < getRiderOffsets().length && i < riddenByEntities.size(); i++) {
-            if (riddenByEntities.get(i) != new UUID(0,0)) {
-
-                Entity entity = TrainsInMotion.proxy.getEntityFromUuid(riddenByEntities.get(i));
-                if (entity != null) {
-                    double[] riderOffset = rotatePoint(new double[]{getRiderOffsets()[i][0], getRiderOffsets()[i][1], getRiderOffsets()[i][2]}, rotationPitch, rotationYaw, 0);
-                    entity.setPosition(riderOffset[0] + this.posX, riderOffset[1] + this.posY, riderOffset[2] + this.posZ);
-                    entity.ridingEntity = this;
-                }
-            }
+        if (riddenByEntity != null) {
+            double[] riderOffset = rotatePoint(getRiderOffset()[0], rotationPitch, rotationYaw, 0);
+            riddenByEntity.setPosition(riderOffset[0] + this.posX, riderOffset[1] + this.posY, riderOffset[2] + this.posZ);
         }
+
+
+
     }
-
-
-
 
 
 
@@ -500,35 +462,24 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public void manageLinks(){
         if(!worldObj.isRemote) {
 
-
-            if (frontUnloadedID !=0 && worldObj.getEntityByID(frontUnloadedID) instanceof GenericRailTransport){
-                front = (GenericRailTransport) worldObj.getEntityByID(frontUnloadedID);
-                frontUnloadedID =0;
-            }
-            if (backUnloadedID !=0 && worldObj.getEntityByID(backUnloadedID) instanceof GenericRailTransport){
-                back = (GenericRailTransport) worldObj.getEntityByID(backUnloadedID);
-                backUnloadedID =0;
-            }
-
-
-
-            if (front != null) {
-
-                double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[0]-2.65, 0, 0}, 0, rotationYaw, 0);
-                double[] toHere;
-                fromHere[0] += posX;
-                fromHere[2] += posZ;
-                if (front.back == this) {
-                    toHere = rotatePoint(new double[]{front.getHitboxPositions()[front.getHitboxPositions().length-1]-1.5, 0, 0}, 0, front.rotationYaw, 0);
-                    toHere[0] += front.posX;
-                    toHere[2] += front.posZ;
-                } else {
-                    toHere = rotatePoint(new double[]{front.getHitboxPositions()[0]+1.5, 0, 0}, 0, front.rotationYaw, 0);
-                    toHere[0] += front.posX;
-                    toHere[2] += front.posZ;
+            if (front != nullUUID) {
+                GenericRailTransport frontLink = proxy.getTransportFromUuid(front);
+                if (frontLink != null) {
+                    double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[0] - 2.65, 0, 0}, 0, rotationYaw, 0);
+                    double[] toHere;
+                    fromHere[0] += posX;
+                    fromHere[2] += posZ;
+                    if (frontLink.back == this.getPersistentID()) {
+                        toHere = rotatePoint(new double[]{frontLink.getHitboxPositions()[frontLink.getHitboxPositions().length - 1] - 1.5, 0, 0}, 0, frontLink.rotationYaw, 0);
+                        toHere[0] += frontLink.posX;
+                        toHere[2] += frontLink.posZ;
+                    } else {
+                        toHere = rotatePoint(new double[]{frontLink.getHitboxPositions()[0] + 1.5, 0, 0}, 0, frontLink.rotationYaw, 0);
+                        toHere[0] += frontLink.posX;
+                        toHere[2] += frontLink.posZ;
+                    }
+                    this.addVelocity(-(fromHere[0] - toHere[0]) * 0.1, -(fromHere[2] - toHere[2]) * 0.1);
                 }
-                this.addVelocity(-(fromHere[0] - toHere[0])*0.1, -(fromHere[2] - toHere[2])*0.1);
-
             } else if (isCoupling) {
                 double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[0] - 2.5, 0, 0}, 0, rotationYaw, 0);
                 frontCheck[0] +=posX;
@@ -540,8 +491,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((HitboxHandler.multipartHitbox) entity).parent.isCoupling) {
-                            front = ((HitboxHandler.multipartHitbox) entity).parent;
+                        if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && proxy.getTransportFromUuid(((HitboxHandler.multipartHitbox) entity).parent.getPersistentID()).isCoupling) {
+                            front = ((HitboxHandler.multipartHitbox) entity).parent.getPersistentID();
                             System.out.println(getEntityId() + " : front linked : " + worldObj.isRemote);
                         }
                     }
@@ -549,23 +500,24 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
 
             }
-            if (back != null) {
-
-                double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1]+2.65, 0, 0}, 0, rotationYaw, 0);
-                double[] toHere;
-                fromHere[0] += posX;
-                fromHere[2] += posZ;
-                if (back.back == this) {
-                    toHere = rotatePoint(new double[]{back.getHitboxPositions()[back.getHitboxPositions().length-1]-1.5, 0, 0}, 0, back.rotationYaw, 0);
-                    toHere[0] += back.posX;
-                    toHere[2] += back.posZ;
-                } else {
-                    toHere = rotatePoint(new double[]{back.getHitboxPositions()[0]+1.5, 0, 0}, 0, back.rotationYaw, 0);
-                    toHere[0] += back.posX;
-                    toHere[2] += back.posZ;
+            if (back != nullUUID) {
+                GenericRailTransport backLink = proxy.getTransportFromUuid(back);
+                if (backLink != null) {
+                    double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length - 1] + 2.65, 0, 0}, 0, rotationYaw, 0);
+                    double[] toHere;
+                    fromHere[0] += posX;
+                    fromHere[2] += posZ;
+                    if (backLink.back == this.getPersistentID()) {
+                        toHere = rotatePoint(new double[]{backLink.getHitboxPositions()[backLink.getHitboxPositions().length - 1] - 1.5, 0, 0}, 0, backLink.rotationYaw, 0);
+                        toHere[0] += backLink.posX;
+                        toHere[2] += backLink.posZ;
+                    } else {
+                        toHere = rotatePoint(new double[]{backLink.getHitboxPositions()[0] + 1.5, 0, 0}, 0, backLink.rotationYaw, 0);
+                        toHere[0] += backLink.posX;
+                        toHere[2] += backLink.posZ;
+                    }
+                    this.addVelocity(-(fromHere[0] - toHere[0]) * 0.1, -(fromHere[2] - toHere[2]) * 0.1);
                 }
-                this.addVelocity(-(fromHere[0] - toHere[0])*0.1, -(fromHere[2] - toHere[2])*0.1);
-
             } else if (isCoupling) {
                 double[] backCheck = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length - 1] + 2.5, 0, 0}, 0, rotationYaw, 0);
                 backCheck[0] +=posX;
@@ -577,8 +529,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((HitboxHandler.multipartHitbox) entity).parent.isCoupling) {
-                            back = ((HitboxHandler.multipartHitbox) entity).parent;
+                        if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && proxy.getTransportFromUuid(((HitboxHandler.multipartHitbox) entity).parent.getPersistentID()).isCoupling) {
+                            back = ((HitboxHandler.multipartHitbox) entity).parent.getPersistentID();
                             System.out.println(getEntityId() + " : back linked : " + worldObj.isRemote);
                         }
                     }
@@ -616,7 +568,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
     public boolean getPermissions(EntityPlayer player, boolean driverOnly) {
         //if this requires the player to be the driver, and they aren't, just return false before we even go any further.
-        if (driverOnly && player.getUniqueID() != this.riddenByEntities.get(0)){
+        if (driverOnly && player.getEntityId() != this.riddenByEntity.getEntityId()){
             return false;
         }
 
@@ -648,7 +600,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     public List<Float> getBogieOffsets(){return new ArrayList<Float>();}
     public TrainsInMotion.transportTypes getType(){return null;}
-    public float[][] getRiderOffsets(){return new float[][]{{0,0}};}
+    public double[][] getRiderOffset(){return new double[][]{{0,0}};}
     public float[] getHitboxPositions(){return new float[]{-1,0,1};}
     public Item getItem(){return null;}
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.THREExTHREE;}

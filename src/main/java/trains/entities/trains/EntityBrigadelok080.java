@@ -101,7 +101,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      *     Each set of floats represents a different rider.
      */
     @Override
-    public float[][] getRiderOffsets(){return new float[][]{{1.3f,1.1f, 0f}, {-1.3f,1.1f,0f}};}
+    public double[] getRiderOffset(){return new double[]{1.3f,1.1f, 0f};}
     /**
      * <h2>Acceleration</h2>
      * @return defines the acceleration that is applied to the train in blocks per second.
@@ -140,6 +140,14 @@ public class EntityBrigadelok080 extends EntityTrainCore {
     @Override
     public float[][] getSmokeOffset(){return new float[][]{{-1.40f,2,0,0.2f,12},{-1,0,0.5f,0.9f,1},{-1,0,-0.5f,0.9f,1}};}
 
+    /**
+     * <h2>rider sit or stand</h2>
+     * @return true if the rider should be sitting, false if the rider should be standing.
+     */
+    @Override
+    public boolean shouldRiderSit(){
+        return false;
+    }
 
 
     /**

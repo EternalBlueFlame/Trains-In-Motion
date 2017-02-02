@@ -6,16 +6,11 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
-import trains.entities.GenericRailTransport;
 import trains.networking.PacketKeyPress;
 import trains.networking.PacketMount;
-
-import java.util.UUID;
 
 /**
  * <h1>event management</h1>
@@ -37,28 +32,24 @@ public class EventManager {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onClientKeyPress(InputEvent.KeyInputEvent event){
-        if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntityTrainCore) {
+        EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+        if(player.ridingEntity instanceof EntityTrainCore) {
             //for lamp
             if (ClientProxy.KeyLamp.isPressed() ) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0, Minecraft.getMinecraft().thePlayer.ridingEntity.getPersistentID()));
-                ((EntityTrainCore) Minecraft.getMinecraft().thePlayer.ridingEntity).lamp.isOn = ! ((EntityTrainCore) Minecraft.getMinecraft().thePlayer.ridingEntity).lamp.isOn;
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0));
+                ((EntityTrainCore) player.ridingEntity).lamp.isOn = ! ((EntityTrainCore) player.ridingEntity).lamp.isOn;
             }
             //for inventory
             if (ClientProxy.KeyInventory.isPressed()) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, Minecraft.getMinecraft().thePlayer.ridingEntity.getPersistentID()));
-                System.out.println("pressed inventory key on" + TrainsInMotion.proxy.getEntityFromUuid(Minecraft.getMinecraft().thePlayer.ridingEntity.getPersistentID()));
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1));
             }
             //for speed change
             if(ClientProxy.KeyAccelerate.isPressed()){
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2, Minecraft.getMinecraft().thePlayer.ridingEntity.getPersistentID()));
-                ((EntityTrainCore) Minecraft.getMinecraft().thePlayer.ridingEntity).setAcceleration(true);
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2));
+                ((EntityTrainCore) player.ridingEntity).setAcceleration(true);
             } else if(ClientProxy.KeyReverse.getIsKeyPressed()){
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3, Minecraft.getMinecraft().thePlayer.ridingEntity.getPersistentID()));
-                ((EntityTrainCore) Minecraft.getMinecraft().thePlayer.ridingEntity).setAcceleration(false);
-            }
-            //player dismount
-            if (Minecraft.getMinecraft().gameSettings.keyBindSneak.isPressed()){
-                dismountEntity(Minecraft.getMinecraft().thePlayer.getPersistentID());
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3));
+                ((EntityTrainCore) player.ridingEntity).setAcceleration(false);
             }
         }
     }
@@ -71,34 +62,7 @@ public class EventManager {
     public void entityInteractEvent(EntityInteractEvent event) {
         if (event.target instanceof HitboxHandler.multipartHitbox
                 && event.entity.worldObj.isRemote) {
-            mountEntity(((HitboxHandler.multipartHitbox) event.target).parent, event.entityPlayer);
-        }
-    }
-
-
-    public static void mountEntity(GenericRailTransport transport, EntityPlayer player){
-
-        for (int i = 0; i < transport.getRiderOffsets().length; i++) {
-            System.out.println("tried to interact" + transport.riddenByEntities.get(i).getMostSignificantBits() + " : " + transport.riddenByEntities.get(i).getLeastSignificantBits());
-            if (transport.riddenByEntities.get(i).getLeastSignificantBits() == 0 && transport.riddenByEntities.get(i).getMostSignificantBits() == 0) {
-                System.out.println("id was valid");
-                player.mountEntity(transport);
-                transport.riddenByEntities.set(i, player.getUniqueID());
-                System.out.println("tried to interact" + transport.riddenByEntities.get(i).getMostSignificantBits() + " : " + transport.riddenByEntities.get(i).getLeastSignificantBits());
-                break;
-            }
-        }
-
-        TrainsInMotion.keyChannel.sendToServer(new PacketMount(transport.getPersistentID()));
-    }
-
-    public static void dismountEntity(UUID player){
-        Entity entityPlayer = TrainsInMotion.proxy.getEntityFromUuid(player);
-        if (entityPlayer instanceof EntityPlayer) {
-            if (entityPlayer.ridingEntity instanceof GenericRailTransport) {
-                ((GenericRailTransport) entityPlayer.ridingEntity).riddenByEntities.remove(player);
-                ((EntityPlayer) entityPlayer).dismountEntity(entityPlayer.ridingEntity);
-            }
+            TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
         }
     }
 }

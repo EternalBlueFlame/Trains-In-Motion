@@ -4,11 +4,9 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayer;
-import trains.TrainsInMotion;
+import net.minecraft.util.ChatComponentText;
+import trains.entities.EntitySeat;
 import trains.entities.GenericRailTransport;
-
-import java.util.UUID;
 
 /**
  * <h1>Mount packet</h1>
@@ -16,22 +14,22 @@ import java.util.UUID;
  * @author Eternal Blue Flame
  */
 public class PacketMount implements IMessage {
-    private UUID entityId;
+    private int entityId;
     /**
      * <h2>data transfer variables</h2>
      * stores and transfers the variable through the byte buffer.
      */
     public PacketMount() {}
-    public PacketMount(UUID entityId) {
+    public PacketMount(int entityId) {
         this.entityId = entityId;
     }
     @Override
     public void fromBytes(ByteBuf bbuf) {
-        entityId = new UUID(bbuf.readLong(), bbuf.readLong());
+        entityId = bbuf.readInt();
     }
     @Override
     public void toBytes(ByteBuf bbuf) {
-        bbuf.writeLong(entityId.getMostSignificantBits()); bbuf.writeLong(entityId.getLeastSignificantBits());
+        bbuf.writeInt(entityId);
     }
 
     /**
@@ -43,16 +41,19 @@ public class PacketMount implements IMessage {
     public static class Handler implements IMessageHandler<PacketMount, IMessage> {
         @Override
         public IMessage onMessage(PacketMount message, MessageContext context) {
-            EntityPlayer player = context.getServerHandler().playerEntity;
-            GenericRailTransport entity = (GenericRailTransport) TrainsInMotion.proxy.getEntityFromUuid(message.entityId);
-
-            for (int i = 0; i < entity.getRiderOffsets().length; i++) {
-                if (entity.riddenByEntities.get(i) == null) {
-                    player.mountEntity(entity);
-                    entity.riddenByEntities.set(i, player.getUniqueID());
-                    break;
+            GenericRailTransport transport = (GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId);
+            if (transport.riddenByEntity == null) {
+                context.getServerHandler().playerEntity.mountEntity(transport);
+                return null;
+            } else {
+                for (EntitySeat seat : transport.seats){
+                    if (seat.riddenByEntity == null){
+                        context.getServerHandler().playerEntity.mountEntity(seat);
+                        return null;
+                    }
                 }
             }
+            context.getServerHandler().playerEntity.addChatMessage(new ChatComponentText("There are no available seats"));
             return null;
         }
     }

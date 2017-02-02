@@ -13,8 +13,6 @@ import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.utility.EventManager;
 
-import java.util.UUID;
-
 /**
  * <h1>Key press packet</h1>
  *
@@ -30,22 +28,17 @@ public class PacketKeyPress implements IMessage {
      * stores and transfers the variable through the byte buffer.
      */
     private int key;
-    private UUID entity;
     public PacketKeyPress() {}
-    public PacketKeyPress(int key, UUID entity) {
+    public PacketKeyPress(int key) {
         this.key = key;
-        this.entity = entity;
     }
     @Override
     public void fromBytes(ByteBuf bbuf) {
         key = bbuf.readInt();
-        entity = new UUID(bbuf.readLong(), bbuf.readLong());
     }
     @Override
     public void toBytes(ByteBuf bbuf) {
         bbuf.writeInt(key);
-        bbuf.writeLong(entity.getMostSignificantBits());
-        bbuf.writeLong(entity.getLeastSignificantBits());
     }
 
     /**
@@ -57,9 +50,9 @@ public class PacketKeyPress implements IMessage {
     public static class Handler implements IMessageHandler<PacketKeyPress, IMessage> {
         @Override
         public IMessage onMessage(PacketKeyPress message, MessageContext context) {
-            Entity ridingEntity = TrainsInMotion.proxy.getEntityFromUuid(message.entity);
+            Entity ridingEntity = context.getServerHandler().playerEntity.ridingEntity;
             //Toggles,
-            if(ridingEntity instanceof GenericRailTransport && !((GenericRailTransport) ridingEntity).toggleBool(message.key)) {
+            if(!((GenericRailTransport) ridingEntity).toggleBool(message.key)) {
                 //speed
                 if (message.key == 2) {
                     ((EntityTrainCore) ridingEntity).setAcceleration(true);

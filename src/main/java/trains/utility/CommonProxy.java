@@ -16,6 +16,7 @@ import trains.entities.GenericRailTransport;
 import trains.tileentities.TileEntityStorage;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -75,20 +76,40 @@ public class CommonProxy implements IGuiHandler {
     /**
      * <h2>load entity from UUID</h2>
      * this is very similar to the system used in 1.8+ the difference is that we override this in client proxy so we can only check the loaded world.
+     * There are also a second version specifically for Generic Rail Transport.
+     *
+     * We can't use a foreach loop, if we do it will very often throw a java.util.ConcurrentModificationException
      */
     @Nullable
-    public Entity getEntityFromUuid(UUID uuid) {
-        for (WorldServer worldserver : MinecraftServer.getServer().worldServers) {
-            if (worldserver != null) {
-                for (Object entity : worldserver.getLoadedEntityList()) {
-                    if (entity instanceof Entity && ((Entity) entity).getUniqueID().equals(uuid)) {
-                        return (Entity) entity;
+    public GenericRailTransport getTransportFromUuid(UUID uuid) {
+        for (int w=0; w < MinecraftServer.getServer().worldServers.length; w++) {
+            if (MinecraftServer.getServer().worldServers[w] != null) {
+                for (int i=0; i< MinecraftServer.getServer().worldServers[w].getLoadedEntityList().size();i++) {
+                    if (MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i) instanceof GenericRailTransport &&
+                            ((GenericRailTransport) MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i)).getUniqueID().equals(uuid)) {
+                        return (GenericRailTransport) MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i);
                     }
                 }
             }
         }
         return null;
     }
+
+    @Nullable
+    public Entity getEntityFromUuid(UUID uuid) {
+        for (int w=0; w < MinecraftServer.getServer().worldServers.length; w++) {
+            if (MinecraftServer.getServer().worldServers[w] != null) {
+                for (int i=0; i< MinecraftServer.getServer().worldServers[w].getLoadedEntityList().size();i++) {
+                    if (MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i) instanceof Entity &&
+                            ((Entity) MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i)).getUniqueID().equals(uuid)) {
+                        return (Entity) MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
 
     /**
      * <h2>registry</h2>

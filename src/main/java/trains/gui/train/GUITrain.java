@@ -154,8 +154,8 @@ public class GUITrain extends GuiContainer {
     @Override
     public void drawScreen(int mouseX, int mouseY, float par3){
         super.drawScreen(mouseX, mouseY, par3);
-        firstTankFluid = train.getDataWatcher().getWatchableObjectInt(20);
-        secondTankFluid = train.getDataWatcher().getWatchableObjectInt(21);
+        firstTankFluid = train.getTankFluid(true);
+        secondTankFluid = train.getTankFluid(false);
         //draw the fuel fluid tank hover text
         if ((mouseX >= guiLeft + 66 && mouseX <= guiLeft + 84 &&
                 mouseY >= guiTop + 10 && mouseY <= guiTop +60)) {
@@ -222,19 +222,19 @@ public class GUITrain extends GuiContainer {
     @Override
     public void actionPerformed(GuiButton button) {
         switch (button.id){
-            case 0:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(4, train.getPersistentID()));
+            case 0:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(4));
                 train.brake = !train.brake; break;}
-            case 1:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(5, train.getPersistentID()));
+            case 1:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(5));
                 train.lamp.isOn = !train.lamp.isOn; break;}
-            case 2:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(6, train.getPersistentID()));
+            case 2:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(6));
                 train.isLocked = ! train.isLocked; break;}
-            case 3:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(7, train.getPersistentID()));
+            case 3:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(7));
                 train.isCoupling = !train.isCoupling; break;}
-            case 4:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(8, train.getPersistentID())); break;}//horn
-            case 5:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(9, train.getPersistentID())); break;}//map
-            case 6:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(10, train.getPersistentID()));
+            case 4:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(8)); break;}//horn
+            case 5:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(9)); break;}//map
+            case 6:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(10));
                 train.isRunning = !train.isRunning; break;}
-            case 7:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(11, train.getPersistentID()));
+            case 7:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(11));
                 train.isCreative = !train.isCreative; break;}
         }
     }

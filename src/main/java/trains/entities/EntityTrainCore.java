@@ -13,6 +13,8 @@ import trains.utility.InventoryHandler;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
+import static trains.TrainsInMotion.nullUUID;
+import static trains.TrainsInMotion.proxy;
 import static trains.utility.RailUtility.rotatePoint;
 
 /**
@@ -112,12 +114,14 @@ public class EntityTrainCore extends GenericRailTransport {
      * Add more drag if there are rollingstock.
      * if you have more than one train pulling or pushing a load, the drag should be reduced accordingly.
      */
-    public float calculateDrag(float current, @Nullable GenericRailTransport frontCheck, @Nullable GenericRailTransport backCheck){
+    public float calculateDrag(float current, @Nullable UUID frontCheckID, @Nullable UUID backCheckID){
 
         //if front and back are null then return null
-        if (frontCheck == null && backCheck == null) {
+        if (frontCheckID == nullUUID && backCheckID == nullUUID) {
             return current;
         }
+        GenericRailTransport frontCheck = proxy.getTransportFromUuid(frontCheckID);
+        GenericRailTransport backCheck = proxy.getTransportFromUuid(backCheckID);
 
         //if front is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
         if (frontCheck instanceof EntityTrainCore){
@@ -132,20 +136,20 @@ public class EntityTrainCore extends GenericRailTransport {
             current *=0.9f;
         }
 
-        GenericRailTransport nextFront = null;
-        GenericRailTransport nextBack = null;
+        UUID nextFront = nullUUID;
+        UUID nextBack = nullUUID;
         //detect if the next bogie to look at stats for is in the front or back of the front bogie
         if (frontCheck != null)
-        if (frontCheck.front != null || frontCheck.front != this){
+        if (frontCheck.front != null || frontCheck.front != this.getPersistentID()){
             nextFront = frontCheck.front;
-        } else if (frontCheck.back != null || frontCheck.back != this){
+        } else if (frontCheck.back != null || frontCheck.back != this.getPersistentID()){
             nextFront = frontCheck.back;
         }
         //detect if the next bogie to look at stats for is in the front or back of the back bogie
         if (backCheck != null) {
-            if (backCheck.front != null || backCheck.front != this) {
+            if (backCheck.front != null || backCheck.front != this.getPersistentID()) {
                 nextBack = backCheck.front;
-            } else if (backCheck.back != null || backCheck.back != this) {
+            } else if (backCheck.back != null || backCheck.back != this.getPersistentID()) {
                 nextBack = backCheck.back;
             }
         }
