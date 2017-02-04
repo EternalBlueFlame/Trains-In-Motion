@@ -13,6 +13,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import trains.entities.EntityBogie;
+import trains.entities.EntitySeat;
 import trains.gui.HUDTrain;
 import trains.items.TiMTab;
 import trains.networking.PacketKeyPress;
@@ -117,13 +118,14 @@ public class TrainsInMotion {
         GenericRegistry.RegisterStuff();
 
         //loop for registering the entities.
-        int index =3;
-        cpw.mods.fml.common.registry.EntityRegistry.registerGlobalEntityID(EntityBogie.class, "Bogie", index);
-        cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", index, TrainsInMotion.instance, 64, 1, true);
-        index++;
+        cpw.mods.fml.common.registry.EntityRegistry.registerGlobalEntityID(EntityBogie.class, "Bogie", 3);
+        cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", 3, TrainsInMotion.instance, 60, 1, true);
+        cpw.mods.fml.common.registry.EntityRegistry.registerGlobalEntityID(EntitySeat.class, "Seat", 4);
+        cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntitySeat.class, "Seat", 4, TrainsInMotion.instance, 60, 2, true);
+        int index =5;
         for (TrainRegistry train : TrainRegistry.listTrains()) {
             cpw.mods.fml.common.registry.EntityRegistry.registerGlobalEntityID(train.trainClass, train.entityWorldName, index);
-            cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(train.trainClass, train.entityWorldName, index, TrainsInMotion.instance, 64, 1, true);
+            cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(train.trainClass, train.entityWorldName, index, TrainsInMotion.instance, 60, 1, true);
             GameRegistry.registerItem(train.item, train.item.getUnlocalizedName().substring(5));
             index++;
         }

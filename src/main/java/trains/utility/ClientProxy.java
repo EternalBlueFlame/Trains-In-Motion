@@ -18,6 +18,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import trains.TrainsInMotion;
 import trains.entities.EntityBogie;
+import trains.entities.EntitySeat;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.gui.GUITrainTable;
@@ -143,19 +144,12 @@ public class ClientProxy extends CommonProxy {
                     reg.bogieModel, reg.bogieTexture));
         }
         //hitboxes
-        RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.multipartHitbox.class, new Render() {
-            @Override
-            public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {}
-            @Override
-            protected ResourceLocation getEntityTexture(Entity p_110775_1_) {return null;}
-        });
+        RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.multipartHitbox.class, nullRender);
         //bogies
-        RenderingRegistry.registerEntityRenderingHandler(EntityBogie.class, new Render() {
-            @Override
-            public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {}
-            @Override
-            protected ResourceLocation getEntityTexture(Entity p_110775_1_) {return null;}
-        });
+        RenderingRegistry.registerEntityRenderingHandler(EntityBogie.class, nullRender);
+        //seats
+        RenderingRegistry.registerEntityRenderingHandler(EntitySeat.class, nullRender);
+        //player scaler
         RenderingRegistry.registerEntityRenderingHandler(EntityPlayer.class, new RenderScaledPlayer());
 
         ClientRegistry.registerKeyBinding(KeyLamp);
@@ -164,6 +158,20 @@ public class ClientProxy extends CommonProxy {
         ClientRegistry.registerKeyBinding(KeyReverse);
 
     }
+
+    /**
+     * <h3>null render</h3>
+     * this is just a simple render that never draws anything, since its static it only ever needs to exist once, which makes it lighter on the render.
+     */
+    private static final Render nullRender = new Render() {
+        @Override
+        public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {}
+
+        @Override
+        protected ResourceLocation getEntityTexture(Entity p_110775_1_) {
+            return null;
+        }
+    };
 
     /**
      * <h2> Forced Dynamic Lighting </h2>

@@ -101,7 +101,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      *     Each set of floats represents a different rider.
      */
     @Override
-    public double[] getRiderOffset(){return new double[]{1.3f,1.1f, 0f};}
+    public double[][] getRiderOffset(){return new double[][]{{1.3f,1.1f, 0f}};}
     /**
      * <h2>Acceleration</h2>
      * @return defines the acceleration that is applied to the train in blocks per second.
