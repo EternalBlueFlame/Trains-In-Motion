@@ -50,20 +50,7 @@ public class EntityTrainCore extends GenericRailTransport {
     * @param zPos the z position to spawn entity at, used in super's super.
     */
     public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos){
-        super(world);
-        posY = yPos;
-        posX = xPos;
-        posZ = zPos;
-
-        this.owner = owner;
-
-        setSize(1f,2);
-        this.boundingBox.minX = 0;
-        this.boundingBox.minY = 0;
-        this.boundingBox.minZ = 0;
-        this.boundingBox.maxX = 0;
-        this.boundingBox.maxY = 0;
-        this.boundingBox.maxZ = 0;
+        super(world, owner, xPos, yPos, zPos);
     }
     //this constructor is for client side spawning
     public EntityTrainCore(World world){

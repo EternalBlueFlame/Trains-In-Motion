@@ -63,6 +63,10 @@ public class ContainerHandler extends Container{
                 //water slot
                 addSlotToContainer(new Slot(((EntityTrainCore) railTransport).inventory, 1, 35, 53));
             }
+            if (railTransport.getRiderOffset().length >1){
+                addSlotToContainer(new Slot(((EntityTrainCore) railTransport).inventory,2,0,0));
+                slot++;
+            }
 
 
             //transport inventory

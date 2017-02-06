@@ -9,6 +9,8 @@ import net.minecraft.tileentity.TileEntity;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
+import trains.items.ItemKey;
+import trains.items.ItemTicket;
 import trains.tileentities.TileEntityStorage;
 
 import java.util.ArrayList;
@@ -60,10 +62,16 @@ public class InventoryHandler implements IInventory{
      */
     @Override
     public int getSizeInventory() {
-        if (host instanceof EntityTrainCore) {
-            int size =1;
+        if (host != null) {
+            int size =0;
+            if (host instanceof EntityTrainCore){
+                size++;
+            }
             if (host.getType()== TrainsInMotion.transportTypes.STEAM || host.getType()== TrainsInMotion.transportTypes.NUCLEAR_STEAM){
-                size=2;
+                size++;
+            }
+            if (host.getRiderOffset().length >1){
+                size++;
             }
             return size+ (host.getInventorySize().getCollumn() * host.getInventorySize().getRow());
 
@@ -168,22 +176,60 @@ public class InventoryHandler implements IInventory{
 
     /**
      * <h2>slot limiter</h2>
-     * this limits certain items to certain slots, most of the functionality is dealt with from the fuel handler.
+     * this limits certain items to certain slots, this way ticket slots can only take tickets, and fuel slots can only take fuels.
+     * TODO: this needs to be expanded to support blacklists and whitelists.
      * @see FuelHandler
      */
     @Override
-    public boolean isItemValidForSlot(int p_94041_1_, ItemStack p_94041_2_) {
-        if (host instanceof EntityTrainCore) {
-            if (p_94041_1_ == 0) {
-                return FuelHandler.isFuel(p_94041_2_, host);
-            } else if (p_94041_1_ ==1) {
-                return FuelHandler.isWater(p_94041_2_, host);
+    public boolean isItemValidForSlot(int slot, ItemStack itemStack) {
+
+        if (slot ==0) {
+            if (host instanceof EntityTrainCore) {
+                //if its a train, slot 0 is always fuel
+                return FuelHandler.isFuel(itemStack, host);
+            } else if (host != null && host.getRiderOffset().length > 1) {
+                //if it's not a train, the first slot is a ticket, assuming there are passengers.
+                return itemStack.getItem() instanceof ItemTicket && ((ItemTicket) itemStack.getItem()).getTransport() == host.getPersistentID();
             } else {
+                //if it's not a train, or rollingstock, it's either null or its a crafter.
+                return blockHost != null;
+            }
+        }
+
+        if (slot == 1) {
+            if (host instanceof EntityTrainCore) {
+                //if it's a train the second slot is either for the water for the boiler, or the ticket depending on the type of train
+                if (host.getType() == TrainsInMotion.transportTypes.STEAM || host.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
+                    return FuelHandler.isWater(itemStack, host);
+                } else if (host.getRiderOffset().length > 1) {
+                    //if it's not a train with a boiler, the second slot is a ticket,
+                    return itemStack.getItem() instanceof ItemTicket && ((ItemTicket) itemStack.getItem()).getTransport() == host.getPersistentID();
+                } else {
+                    //if there are no passenger slots and it doesn't have a boiler then it's a generic inventory slot.
+                    return true;
+                }
+            } else {
+                //if it's not a train, it's a generic inventory slot for either a rollingstock or a crafter, so we only need to null check.
+                return host != null || blockHost != null;
+            }
+
+
+        } else if (slot == 2) {
+            //if it's a train with passenger slots and a boiler then the third slot is for a ticket.
+            if ((host.getType() == TrainsInMotion.transportTypes.STEAM || host.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
+                    host.getRiderOffset().length > 1) {
+                return itemStack.getItem() instanceof ItemTicket && ((ItemTicket) itemStack.getItem()).getTransport() == host.getPersistentID();
+            } else if (host instanceof EntityTrainCore) {
+                //otherwise its a normal inventory slot
                 return true;
             }
-        } else{
-            return blockHost != null;
+        } else {
+            //otherwise it's just a null check
+            return host != null || blockHost != null;
         }
+
+        //if it's not one of the 3 main slots, then it's just a normal slot and we only need to null check.
+        return host != null || blockHost != null;
     }
 
     /**
@@ -216,6 +262,7 @@ public class InventoryHandler implements IInventory{
      * custom function for adding items to the train's inventory.
      * similar to a container's TransferStackInSlot function, this will automatically sort an item into the inventory.
      * if there is no room in the inventory for the item, it will drop on the ground.
+     * TODO: does not compensate for tickets yet.
      */
     public void addItem(ItemStack item){
         for (int i=1; i<getSizeInventory();i++){

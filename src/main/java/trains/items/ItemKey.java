@@ -18,19 +18,32 @@ import java.util.UUID;
  */
 public class ItemKey extends Item{
 
+    public ItemKey(UUID host, String entityName){
+        data.host = host;
+        data.hostname = entityName;
+    }
 
     private KeySaveData data = new KeySaveData("ItemKey");
 
     /**
-     * allows items to add custom lines of information to the mouseover description
+     * <h2>Description text</h2>
+     * allows items to add custom lines of information to the mouseover description.
+     * We can cover the key and ticket description here, to simplify other classes.
      */
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack p_77624_1_, EntityPlayer p_77624_2_, List p_77624_3_, boolean p_77624_4_) {
-        p_77624_3_.add("This key belongs to:");
+        if (this instanceof ItemTicket){
+            p_77624_3_.add("This ticket is for: ");
+        } else {
+            p_77624_3_.add("This key belongs to a: ");
+        }
         p_77624_3_.add(data.hostname);
     }
 
 
+    public UUID getTransport(){
+        return data.host;
+    }
 
     private class KeySaveData extends WorldSavedData{
 
@@ -54,14 +67,20 @@ public class ItemKey extends Item{
          */
         @Override
         public void readFromNBT(NBTTagCompound tag) {
-            return;
+            host = new UUID(tag.getLong("key.most"), tag.getLong("key.least"));
+            hostname = tag.getString("key.parent");
+
         }
 
         /**
          * Assigns a NBTTagCompound to the ItemStack, minecraft validates that only non-stackable items can have it.
          */
         @Override
-        public void writeToNBT(NBTTagCompound p_77982_1_) {
+        public void writeToNBT(NBTTagCompound tag) {
+            tag.setLong("key.most", host.getMostSignificantBits());
+            tag.setLong("key.least", host.getLeastSignificantBits());
+            tag.setString("key.parent", hostname);
+
 
         }
     }

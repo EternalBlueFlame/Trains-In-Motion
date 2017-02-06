@@ -10,6 +10,7 @@ import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
@@ -20,6 +21,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import trains.TrainsInMotion;
 import trains.entities.trains.EntityBrigadelok080;
+import trains.items.ItemKey;
 import trains.models.tmt.Vec3d;
 import trains.utility.*;
 
@@ -76,9 +78,29 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public UUID front;
     public UUID back;
     public String destination ="";
+    public ItemStack key;
     public GenericRailTransport(World world){
         super(world);
+    }
+    public GenericRailTransport(World world, UUID owner, double xPos, double yPos, double zPos){
+        super(world);
         tanks = getTank();
+
+        posY = yPos;
+        posX = xPos;
+        posZ = zPos;
+
+        this.owner = owner;
+
+        key = new ItemStack(new ItemKey(owner, getItem().getUnlocalizedName()));
+
+        setSize(1f,2);
+        this.boundingBox.minX = 0;
+        this.boundingBox.minY = 0;
+        this.boundingBox.minZ = 0;
+        this.boundingBox.maxX = 0;
+        this.boundingBox.maxY = 0;
+        this.boundingBox.maxZ = 0;
     }
 
 
@@ -163,6 +185,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         isCreative = additionalData.readBoolean();
         lamp.isOn = additionalData.readBoolean();
         owner = new UUID(additionalData.readLong(), additionalData.readLong());
+        key = new ItemStack(new ItemKey(owner, getItem().getUnlocalizedName()));
         //we loop using the offset double length because we expect bogieXYZ to be null.
         for (int i=0; i<getBogieOffsets().size(); i++){
             bogieXYZ.add(new double[]{additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble()});
@@ -203,6 +226,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         brake = tag.getBoolean("extended.handbrake");
         //load owner
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
+        key.readFromNBT(tag);
 
         //load tanks
         if (tanks != null) {
@@ -257,6 +281,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //owner
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
+
+        key.writeToNBT(tag);
 
         //tanks
         if (tanks != null) {
@@ -323,6 +349,12 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (posY < -64.0D & isDead){
             worldObj.removeEntity(this);
         }
+        if (owner != null) {
+            System.out.println("owner is " + owner.getMostSignificantBits());
+        }
+        if (key != null && key.getItem() != null && ((ItemKey)key.getItem()).getTransport() != null){
+            System.out.println((((ItemKey)key.getItem()).getTransport() == owner) + "key is");
+        }
         //be sure bogies exist
         int xyzSize = bogieXYZ.size()-1;
         if (xyzSize > 0) {
@@ -335,7 +367,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     worldObj.spawnEntityInWorld(spawnBogie);
                     bogie.add(spawnBogie);
                 }
-                for (int i=0; i< getRiderOffset().length; i++){
+                for (int i=0; i< getRiderOffset().length-1; i++){
                     EntitySeat seat = new EntitySeat(worldObj, posX, posY, posZ, getEntityId(), i);
                     worldObj.spawnEntityInWorld(seat);
                     seats.add(seat);
@@ -398,16 +430,15 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 manageLinks();
             }
 
-            rot++;
-            if (rot>360){
-                rot=0;
-            }
-            for (int i=0; i< seats.size(); i++) {
-                double[] riderOffset = rotatePoint(getRiderOffset()[i], rotationPitch, rotationYaw+rot, 0);
-                riderOffset[0]+=posX;
-                riderOffset[1]+=posY;
-                riderOffset[2]+=posZ;
-                seats.get(i).setPosition(riderOffset[0], riderOffset[1], riderOffset[2]);
+            //rider updating isn't called if there's no driver/conductor, so just in case of that, we reposition the seats here too.
+            if (riddenByEntity == null) {
+                for (int i = 0; i < seats.size(); i++) {
+                    double[] riderOffset = rotatePoint(getRiderOffset()[i], rotationPitch, rotationYaw, 0);
+                    riderOffset[0] += posX;
+                    riderOffset[1] += posY;
+                    riderOffset[2] += posZ;
+                    seats.get(i).setPosition(riderOffset[0], riderOffset[1], riderOffset[2]);
+                }
             }
 
         }
@@ -427,7 +458,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             transportTicks++;
         }
     }
- int rot=0;
+
     public double processMovement(EntityBogie entityBogie){
 
         double X =0;
@@ -450,6 +481,14 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (riddenByEntity != null) {
             double[] riderOffset = rotatePoint(getRiderOffset()[0], rotationPitch, rotationYaw, 0);
             riddenByEntity.setPosition(riderOffset[0] + this.posX, riderOffset[1] + this.posY, riderOffset[2] + this.posZ);
+        }
+
+        for (int i = 0; i < seats.size(); i++) {
+            double[] riderOffset = rotatePoint(getRiderOffset()[i], rotationPitch, rotationYaw, 0);
+            riderOffset[0] += posX;
+            riderOffset[1] += posY;
+            riderOffset[2] += posZ;
+            seats.get(i).setPosition(riderOffset[0], riderOffset[1], riderOffset[2]);
         }
 
 
