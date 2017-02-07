@@ -63,7 +63,7 @@ public class ContainerHandler extends Container{
                 //water slot
                 addSlotToContainer(new Slot(((EntityTrainCore) railTransport).inventory, 1, 35, 53));
             }
-            if (railTransport.getRiderOffset().length >1){
+            if (railTransport.getRiderOffsets().length >1){
                 addSlotToContainer(new Slot(((EntityTrainCore) railTransport).inventory,2,0,0));
                 slot++;
             }
@@ -197,7 +197,7 @@ public class ContainerHandler extends Container{
             if (railTransport.isDead) {
                 return false;
             } else {
-                return railTransport.getPermissions(player, true);
+                return railTransport.getPermissions(player, true, false);
             }
         } else {
             return craftingTable != null;

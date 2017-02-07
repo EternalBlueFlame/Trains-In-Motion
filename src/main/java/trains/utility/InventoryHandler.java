@@ -1,19 +1,24 @@
 package trains.utility;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.common.IPlantable;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
-import trains.items.ItemKey;
 import trains.items.ItemTicket;
 import trains.tileentities.TileEntityStorage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,21 +26,37 @@ import java.util.List;
  * sores the inventory variables, handles a good degree of the inventory processing, and NBT management.
  * @see ContainerHandler for the related code.
  *
+ * if the inventory needs to be filtered, on entity creation call
+ * @see InventoryHandler#setFilter(boolean, TrainsInMotion.itemTypes, ItemStack[]) 
+ *
  * @author Eternal Blue Flame
  */
 public class InventoryHandler implements IInventory{
+    /**
+     * <h2>variables</h2>
+     * host defines the entity host, if this is null then it's expected to be a tile entity.
+     * blockHost defines the tile entity host, if this is null, everything is expected to be null.
+     * filter defines the array of items to check with the blacklist/whitelist, assuming isType is false.
+     * isWhitelist defines if it searches via blacklist or whitelist.
+     * isType defines if it should search via item or block type defined in
+     *     @see TrainsInMotion.itemTypes
+     */
     private GenericRailTransport host;
     private TileEntityStorage blockHost;
     private List<ItemStack> items = new ArrayList<ItemStack>();
+    private List<ItemStack> filter = new ArrayList<ItemStack>();
+    private boolean isWhitelist = false;
+    private TrainsInMotion.itemTypes isType = TrainsInMotion.itemTypes.ALL;
 
     /**
      * <h2>entity constructor</h2>
      * sets the host variable, and inventory size then creates an instance of the class, this can be re-used for any train or rollingstock.
+     * also creates ticket slots for every additional rider.
      */
     public InventoryHandler(GenericRailTransport host){
         if (host != null) {
             this.host = host;
-            while (items.size() < getSizeInventory()) {
+            while (items.size() < getSizeInventory() + (host.getRiderOffsets().length-1)) {
                 items.add(null);
             }
         } else {
@@ -56,6 +77,20 @@ public class InventoryHandler implements IInventory{
     }
 
     /**
+     * <h2>define filters</h2>
+     * this is called on the creation of an entity that need it's inventory filtered, or on the event that the entity's filter is set.
+     * whitelist as true will allow only the defined types or items. while as false will allow anything except the defined types or items.
+     * types in most cases will override items because items are always checked last, if at all.
+     * itemTypes.ALL is basically just ignored, this is only called when you are not going to filter by type.
+     */
+    public void setFilter(boolean isWhitelist, TrainsInMotion.itemTypes type, ItemStack[] items){
+        this.isWhitelist = isWhitelist;
+        filter.clear();
+        filter.addAll(Arrays.asList(items));
+        isType = type;
+    }
+
+    /**
      * <h2>inventory size</h2>
      * @return the number of slots the inventory should have.
      * if it's a train we have to calculate the size based on the type and the size of inventory its supposed to have.
@@ -70,7 +105,7 @@ public class InventoryHandler implements IInventory{
             if (host.getType()== TrainsInMotion.transportTypes.STEAM || host.getType()== TrainsInMotion.transportTypes.NUCLEAR_STEAM){
                 size++;
             }
-            if (host.getRiderOffset().length >1){
+            if (host.getRiderOffsets().length >1){
                 size++;
             }
             return size+ (host.getInventorySize().getCollumn() * host.getInventorySize().getRow());
@@ -168,7 +203,7 @@ public class InventoryHandler implements IInventory{
     @Override
     public boolean isUseableByPlayer(EntityPlayer p_70300_1_) {
         if (host != null){
-            return host.getPermissions(p_70300_1_, false);
+            return host.getPermissions(p_70300_1_, false, false);
         } else {
             return blockHost != null;
         }
@@ -187,12 +222,12 @@ public class InventoryHandler implements IInventory{
             if (host instanceof EntityTrainCore) {
                 //if its a train, slot 0 is always fuel
                 return FuelHandler.isFuel(itemStack, host);
-            } else if (host != null && host.getRiderOffset().length > 1) {
+            } else if (host != null && host.getRiderOffsets().length > 1) {
                 //if it's not a train, the first slot is a ticket, assuming there are passengers.
                 return itemStack.getItem() instanceof ItemTicket && ((ItemTicket) itemStack.getItem()).getTransport() == host.getPersistentID();
             } else {
                 //if it's not a train, or rollingstock, it's either null or its a crafter.
-                return blockHost != null;
+                return blockHost != null && isFiltered(itemStack.getItem());
             }
         }
 
@@ -201,35 +236,103 @@ public class InventoryHandler implements IInventory{
                 //if it's a train the second slot is either for the water for the boiler, or the ticket depending on the type of train
                 if (host.getType() == TrainsInMotion.transportTypes.STEAM || host.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
                     return FuelHandler.isWater(itemStack, host);
-                } else if (host.getRiderOffset().length > 1) {
+                } else if (host.getRiderOffsets().length > 1) {
                     //if it's not a train with a boiler, the second slot is a ticket,
                     return itemStack.getItem() instanceof ItemTicket && ((ItemTicket) itemStack.getItem()).getTransport() == host.getPersistentID();
                 } else {
                     //if there are no passenger slots and it doesn't have a boiler then it's a generic inventory slot.
-                    return true;
+                    return isFiltered(itemStack.getItem());
                 }
             } else {
                 //if it's not a train, it's a generic inventory slot for either a rollingstock or a crafter, so we only need to null check.
-                return host != null || blockHost != null;
+                return (host != null || blockHost != null) && isFiltered(itemStack.getItem());
             }
 
 
         } else if (slot == 2) {
             //if it's a train with passenger slots and a boiler then the third slot is for a ticket.
             if ((host.getType() == TrainsInMotion.transportTypes.STEAM || host.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
-                    host.getRiderOffset().length > 1) {
+                    host.getRiderOffsets().length > 1) {
                 return itemStack.getItem() instanceof ItemTicket && ((ItemTicket) itemStack.getItem()).getTransport() == host.getPersistentID();
             } else if (host instanceof EntityTrainCore) {
                 //otherwise its a normal inventory slot
-                return true;
+                return isFiltered(itemStack.getItem());
             }
         } else {
             //otherwise it's just a null check
-            return host != null || blockHost != null;
+            return (host != null || blockHost != null) && isFiltered(itemStack.getItem());
         }
 
         //if it's not one of the 3 main slots, then it's just a normal slot and we only need to null check.
-        return host != null || blockHost != null;
+        return (host != null || blockHost != null)  && isFiltered(itemStack.getItem());
+    }
+
+
+    /**
+     * <h2>filter items</h2>
+     * @return if the item should be allowed or blocked.
+     */
+    private boolean isFiltered(Item item){
+        //before we even bother to try and check everything else, check if it's filtered in the first place.
+        if (isType == TrainsInMotion.itemTypes.ALL && filter.size()==0){
+            return true;
+        }
+
+        if (isWhitelist){
+            //if it's filtered by type, return if the given type is correct for the item
+            if (isType != TrainsInMotion.itemTypes.ALL){
+                switch (isType){
+                    case LUMBER:{return Block.getBlockFromItem(item).getMaterial() == Material.wood;}
+                    case STONE_AND_ORE: {return Block.getBlockFromItem(item).getMaterial() == Material.rock;}
+                    case FOOD:{ return item instanceof ItemFood;}
+                    //TODO: this is a horrid method to do this, there has to be a better way
+                    case INGOTS: {return item.getUnlocalizedName().contains("ingot");}
+                    //TODO: this one probably isn't right either
+                    case SEEDS:{ return item instanceof IPlantable;}
+
+                }
+            }
+            //otherwise check if the list contains the item.
+            return filter.contains(item);
+
+        } else {
+            //if it's a blacklist do exactly the same as above but return the opposite value.
+            if (isType != TrainsInMotion.itemTypes.ALL){
+                switch (isType){
+                    case LUMBER:{return Block.getBlockFromItem(item).getMaterial() != Material.wood;}
+                    case STONE_AND_ORE: {return Block.getBlockFromItem(item).getMaterial() != Material.rock;}
+                    case FOOD:{ return !(item instanceof ItemFood);}
+                    //TODO: this is a horrid method to do this, there has to be a better way
+                    case INGOTS: {return !item.getUnlocalizedName().contains("ingot");}
+                    //TODO: this one probably isn't right either
+                    case SEEDS:{ return !(item instanceof IPlantable);}
+
+                }
+            }
+            return !filter.contains(item);
+        }
+
+    }
+
+
+    /**
+     * <h2>Get Ticket Slot</h2>
+     * this just simply returns the itemstack in the ticket slot, assuming there is one.
+     */
+    public ItemStack getTicketSlot(){
+        //if it's a train with a boiler, send back slot 2.
+        if ((host.getType() == TrainsInMotion.transportTypes.STEAM || host.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
+                host.getRiderOffsets().length > 1) {
+            return items.get(2);
+        } else if (host instanceof EntityTrainCore && host.getRiderOffsets().length > 1){
+            //if it's a train without a boiler, send back slot 1
+            return items.get(1);
+        } else if (host.getRiderOffsets().length > 1){
+            //if it's not a train, send back slot 0
+            return items.get(0);
+        }
+        //if it's not meant to have multiple passengers, send back null because there is no ticket slot.
+        return null;
     }
 
     /**
@@ -245,6 +348,17 @@ public class InventoryHandler implements IInventory{
                 new ItemStack(Items.potato, 0).writeToNBT(nbtitems);
             }
         }
+
+        nbtitems.setInteger("filter.length", filter.size());
+        for (ItemStack item : filter){
+            if (item != null) {
+                item.writeToNBT(nbtitems);
+            } else {
+                new ItemStack(Items.potato, 0).writeToNBT(nbtitems);
+            }
+        }
+
+
         return nbtitems;
     }
     public void readNBT(NBTTagCompound tag, String tagName){
@@ -262,12 +376,14 @@ public class InventoryHandler implements IInventory{
      * custom function for adding items to the train's inventory.
      * similar to a container's TransferStackInSlot function, this will automatically sort an item into the inventory.
      * if there is no room in the inventory for the item, it will drop on the ground.
-     * TODO: does not compensate for tickets yet.
      */
     public void addItem(ItemStack item){
         for (int i=1; i<getSizeInventory();i++){
             if (i==1){
                 if (host.getType() == TrainsInMotion.transportTypes.STEAM || host.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM){
+                    i++;
+                }
+                if (host.getRiderOffsets().length>1){
                     i++;
                 }
             }

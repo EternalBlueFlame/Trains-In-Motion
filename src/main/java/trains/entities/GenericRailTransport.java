@@ -58,6 +58,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * the front and back unloaded ID's are used as a failsafe in case the front or back connected entities aren't loaded yet.
      * destination is used for routing, railcraft and otherwise.
      * riddenByEntities defines the entities riding this.
+     * the inventory defines the item storage.
+     * the key defines the ownership key item, this is used to allow other people access to the transport.
      * the last part is the generic entity constructor
      */
     public LiquidManager tanks = new LiquidManager(0,0, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
@@ -78,6 +80,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public UUID front;
     public UUID back;
     public String destination ="";
+    public InventoryHandler inventory = new InventoryHandler(this);
     public ItemStack key;
     public GenericRailTransport(World world){
         super(world);
@@ -250,6 +253,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
         }
 
+
+        inventory.readNBT(tag, "items");
+
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
@@ -314,6 +320,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
         }
         tag.setTag("extended.bogies", nbtbogies);
+
+        tag.setTag("items", inventory.writeNBT());
     }
 
 
@@ -367,7 +375,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     worldObj.spawnEntityInWorld(spawnBogie);
                     bogie.add(spawnBogie);
                 }
-                for (int i=0; i< getRiderOffset().length-1; i++){
+                for (int i = 0; i< getRiderOffsets().length-1; i++){
                     EntitySeat seat = new EntitySeat(worldObj, posX, posY, posZ, getEntityId(), i);
                     worldObj.spawnEntityInWorld(seat);
                     seats.add(seat);
@@ -433,7 +441,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             //rider updating isn't called if there's no driver/conductor, so just in case of that, we reposition the seats here too.
             if (riddenByEntity == null) {
                 for (int i = 0; i < seats.size(); i++) {
-                    double[] riderOffset = rotatePoint(getRiderOffset()[i], rotationPitch, rotationYaw, 0);
+                    double[] riderOffset = rotatePoint(getRiderOffsets()[i], rotationPitch, rotationYaw, 0);
                     riderOffset[0] += posX;
                     riderOffset[1] += posY;
                     riderOffset[2] += posZ;
@@ -479,12 +487,12 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public void updateRiderPosition() {
         if (riddenByEntity != null) {
-            double[] riderOffset = rotatePoint(getRiderOffset()[0], rotationPitch, rotationYaw, 0);
+            double[] riderOffset = rotatePoint(getRiderOffsets()[0], rotationPitch, rotationYaw, 0);
             riddenByEntity.setPosition(riderOffset[0] + this.posX, riderOffset[1] + this.posY, riderOffset[2] + this.posZ);
         }
 
         for (int i = 0; i < seats.size(); i++) {
-            double[] riderOffset = rotatePoint(getRiderOffset()[i], rotationPitch, rotationYaw, 0);
+            double[] riderOffset = rotatePoint(getRiderOffsets()[i], rotationPitch, rotationYaw, 0);
             riderOffset[0] += posX;
             riderOffset[1] += posY;
             riderOffset[2] += posZ;
@@ -605,7 +613,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
 
 
-    public boolean getPermissions(EntityPlayer player, boolean driverOnly) {
+    public boolean getPermissions(EntityPlayer player, boolean driverOnly, boolean destroy) {
         //if this requires the player to be the driver, and they aren't, just return false before we even go any further.
         if (driverOnly && player.getEntityId() != this.riddenByEntity.getEntityId()){
             return false;
@@ -614,16 +622,18 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //be sure admins and owners can do whatever
         if (player.capabilities.isCreativeMode || owner == player.getUniqueID()) {
             return true;
+        } else if (destroy){
+            return false;
         }
 
         //if the key is needed, like for trains and freight
-        //if (isLocked && (this instanceof EntityTrainCore || getType() == TrainsInMotion.transportTypes.FREIGHT)) {
-            //return player.inventory.hasItem(?KEYITEM?);
-        //}
+        if (isLocked && player.inventory.hasItem(key.getItem())) {
+            return true;
+        }
         //if a ticket is needed like for passenger cars
-        //if(?TICKETITEM? != null && isLocked){
-            //return player.inventory.hasItem(?TICKETITEM?);
-        //}
+        if(isLocked && getRiderOffsets().length>1){
+            return player.inventory.hasItem(inventory.getTicketSlot().getItem());
+        }
 
         //all else fails, just return if this is locked.
         return !isLocked;
@@ -639,7 +649,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     public List<Float> getBogieOffsets(){return new ArrayList<Float>();}
     public TrainsInMotion.transportTypes getType(){return null;}
-    public double[][] getRiderOffset(){return new double[][]{{0,0}};}
+    public double[][] getRiderOffsets(){return new double[][]{{0,0}};}
     public float[] getHitboxPositions(){return new float[]{-1,0,1};}
     public Item getItem(){return null;}
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.THREExTHREE;}

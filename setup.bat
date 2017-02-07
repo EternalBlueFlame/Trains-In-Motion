@@ -9,8 +9,8 @@
 @ECHO ##########################################################################
 
 @ECHO Choose an IDE:
-@ECHO [1] Eclipse
-@ECHO [2] Idea (Intelij)
+@ECHO [1] Eclipse - (Does not work)
+@ECHO [2] Idea (Intelij) - (Does work)
 @ECHO [3] Build the source.
 @echo off
 @ECHO.

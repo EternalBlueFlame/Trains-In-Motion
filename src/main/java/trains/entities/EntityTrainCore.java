@@ -8,7 +8,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import trains.networking.PacketKeyPress;
 import trains.utility.FuelHandler;
-import trains.utility.InventoryHandler;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -29,12 +28,10 @@ public class EntityTrainCore extends GenericRailTransport {
      * isRunning is used for non-steam based trains to define if it's actually on.
      * fuelHandler manages the items for fuel, and the fuel itself.
      * accelerator defines the speed percentage the user is attempting to apply.
-     * lastly the inventory defines the item storage of the train.
      */
     public boolean isRunning = false;
     public FuelHandler fuelHandler = new FuelHandler();
     public int accelerator =0;
-    public InventoryHandler inventory = new InventoryHandler(this);
 
 
 
@@ -83,7 +80,6 @@ public class EntityTrainCore extends GenericRailTransport {
         accelerator = tag.getInteger("train.accel");
         fuelHandler.readEntityFromNBT(tag);
 
-        inventory.readNBT(tag, "items");
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
@@ -92,7 +88,6 @@ public class EntityTrainCore extends GenericRailTransport {
         tag.setInteger("train.accel", accelerator);
         fuelHandler.writeEntityToNBT(tag);
 
-        tag.setTag("items", inventory.writeNBT());
     }
 
 

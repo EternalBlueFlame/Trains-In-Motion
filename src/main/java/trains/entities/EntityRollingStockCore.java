@@ -3,7 +3,6 @@ package trains.entities;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import trains.utility.InventoryHandler;
 
 import java.util.UUID;
 
@@ -13,12 +12,6 @@ import java.util.UUID;
  * @author Eternal Blue Flame
  */
 public class EntityRollingStockCore extends GenericRailTransport {
-
-    /**
-     * <h3>variables</h3>
-     * the inventory defines the item storage of the train.
-     */
-    public InventoryHandler inventory = new InventoryHandler(this);
 
 
 
@@ -58,14 +51,10 @@ public class EntityRollingStockCore extends GenericRailTransport {
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
 
-        inventory.readNBT(tag, "items");
-
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
-
-        tag.setTag("items", inventory.writeNBT());
 
     }
 

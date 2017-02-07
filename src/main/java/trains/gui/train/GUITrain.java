@@ -6,6 +6,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
@@ -169,7 +170,9 @@ public class GUITrain extends GuiContainer {
         }
         //draw toggle button hover text
         if (mouseY > guiTop + 63 && mouseY < guiTop +81){
-            if (train.ridingEntity instanceof EntityPlayer && ((EntityPlayer)train.ridingEntity).capabilities.isCreativeMode &&
+            if (train.riddenByEntity.getPersistentID() == train.owner && mouseX > guiLeft && mouseX < guiLeft + 18){
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.dropkey") + checkBoolean(train.brake)), mouseX, mouseY, fontRendererObj);
+            } else if (train.riddenByEntity instanceof EntityPlayer && ((EntityPlayer)train.ridingEntity).capabilities.isCreativeMode &&
                     mouseX > guiLeft + 52 && mouseX < guiLeft + 70) {
                 drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.creativemode") + checkBoolean(train.brake)), mouseX, mouseY, fontRendererObj);
             } else if (mouseX > guiLeft + 70 && mouseX < guiLeft + 88) {
@@ -201,6 +204,9 @@ public class GUITrain extends GuiContainer {
     @Override
     public void initGui() {
         super.initGui();
+        if (train.ridingEntity.getPersistentID() == train.owner) {
+            this.buttonList.add(new GuiButton(8, guiLeft, guiTop + 63, 18, 18, ""));
+        }
         if (train.ridingEntity instanceof EntityPlayer && ((EntityPlayer)train.ridingEntity).capabilities.isCreativeMode){
             this.buttonList.add(new GuiButton(7, guiLeft+ 52, guiTop + 63, 18, 18,""));
         }
@@ -236,6 +242,7 @@ public class GUITrain extends GuiContainer {
                 train.isRunning = !train.isRunning; break;}
             case 7:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(11));
                 train.isCreative = !train.isCreative; break;}
+            case 8:{train.entityDropItem(train.key, 0);}
         }
     }
 

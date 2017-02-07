@@ -10,10 +10,7 @@ import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
-import trains.TrainsInMotion;
 import trains.utility.RailUtility;
-
-import java.util.UUID;
 
 /**
  * <h1>Bogie Core</h1>
