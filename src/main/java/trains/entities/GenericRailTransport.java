@@ -107,11 +107,21 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
 
 
+    /**
+     * <h2>Entity initialization</h2>
+     * Entity init runs right before the first tick.
+     * This is useful for registering the datawatchers before we actually use them.
+     */
+    @Override
+    public void entityInit(){
+        this.dataWatcher.addObject(20, 0);
+        this.dataWatcher.addObject(21, 0);
+    }
+
 
     /**
      * <h2>base entity overrides</h2>
      * modify basic entity variables to give different uses/values.
-     * entity init runs right before the first tick, but we don't use this.
      * collision and bounding box stuff just return the in-built stuff.
      * getParts returns the list of hitboxes so they can be treated as if they are part of this entity.
      * The positionAndRotation2 override is intended to do the same as the super, except for giving a Y offset on collision, we skip that similar to EntityMinecart.
@@ -121,8 +131,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     {
         return false;
     }
-    @Override
-    public void entityInit(){}
     @Override
     public World func_82194_d(){return worldObj;}
     @Override
@@ -356,12 +364,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //if the cart has fallen out of the map, destroy it.
         if (posY < -64.0D & isDead){
             worldObj.removeEntity(this);
-        }
-        if (owner != null) {
-            System.out.println("owner is " + owner.getMostSignificantBits());
-        }
-        if (key != null && key.getItem() != null && ((ItemKey)key.getItem()).getTransport() != null){
-            System.out.println((((ItemKey)key.getItem()).getTransport() == owner) + "key is");
         }
         //be sure bogies exist
         int xyzSize = bogieXYZ.size()-1;

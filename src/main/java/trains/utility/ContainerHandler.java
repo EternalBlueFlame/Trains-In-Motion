@@ -1,9 +1,14 @@
 package trains.utility;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.IPlantable;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
@@ -58,12 +63,13 @@ public class ContainerHandler extends Container{
                 slot=2;
             }
             //fuel slot
-            addSlotToContainer(new Slot(((EntityTrainCore) railTransport).inventory, 0, 8, 53));
+            addSlotToContainer(new fuelSlot(((EntityTrainCore) railTransport).inventory, 0, 8, 53));
             if (slot == 2) {
                 //water slot
-                addSlotToContainer(new Slot(((EntityTrainCore) railTransport).inventory, 1, 35, 53));
+                addSlotToContainer(new waterSlot(((EntityTrainCore) railTransport).inventory, 1, 35, 53));
             }
             if (railTransport.getRiderOffsets().length >1){
+                //TODO: slot ticket
                 addSlotToContainer(new Slot(((EntityTrainCore) railTransport).inventory,2,0,0));
                 slot++;
             }
@@ -72,7 +78,7 @@ public class ContainerHandler extends Container{
             //transport inventory
             for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
                 for (int ib = 0; ib < entityTrain.getInventorySize().getCollumn(); ib++) {
-                    addSlotToContainer(new Slot(((EntityTrainCore) railTransport).inventory, slot, 98 + (ib * 18), (ia * 18) + 44));
+                    addSlotToContainer(new filteredSlot(((EntityTrainCore) railTransport).inventory, slot, 98 + (ib * 18), (ia * 18) + 44));
                     slot++;
                 }
             }
@@ -266,6 +272,97 @@ public class ContainerHandler extends Container{
             super.onSlotChanged();
             onCraftMatrixChanged(craftResult);
         }
+    }
 
+
+    private class filteredSlot extends Slot{
+
+        private InventoryHandler inventoryHandler;
+
+        public filteredSlot(InventoryHandler p_i1824_1_, int p_i1824_2_, int p_i1824_3_, int p_i1824_4_) {
+            super(p_i1824_1_,p_i1824_2_,p_i1824_3_,p_i1824_4_);
+            inventoryHandler = p_i1824_1_;
+        }
+
+        /**
+         * <h2>filter items</h2>
+         * @return if the item should be allowed or blocked.
+         */
+        @Override
+        public boolean isItemValid(ItemStack item) {
+            //before we even bother to try and check everything else, check if it's filtered in the first place.
+            System.out.println("attempted to check slot " + (inventoryHandler.isType == TrainsInMotion.itemTypes.COAL));
+            if (item == null || (inventoryHandler.isType == TrainsInMotion.itemTypes.ALL && inventoryHandler.filter.size()==0)){
+                return true;
+            }
+
+            if (inventoryHandler.isWhitelist){
+                //if it's filtered by type, return if the given type is correct for the item
+                if (inventoryHandler.isType != TrainsInMotion.itemTypes.ALL){
+                    switch (inventoryHandler.isType){
+                        case LUMBER:{return Block.getBlockFromItem(item.getItem()).getMaterial() == Material.wood;}
+                        case STONE_AND_ORE: {return Block.getBlockFromItem(item.getItem()).getMaterial() == Material.rock;}
+                        case FOOD:{ return item.getItem() instanceof ItemFood;}
+                        case INGOTS: {return item.getUnlocalizedName().contains("ingot");}
+                        case SEEDS:{ return item.getItem() instanceof IPlantable;}
+                        case COAL:{return item.getUnlocalizedName().contains("coal") || item.getUnlocalizedName().contains("Coal");}
+
+                    }
+                }
+                //otherwise check if the list contains the item.
+                return inventoryHandler.filter.size() ==0 || inventoryHandler.filter.contains(item);
+
+            } else {
+                //if it's a blacklist do exactly the same as above but return the opposite value.
+                if (inventoryHandler.isType != TrainsInMotion.itemTypes.ALL){
+                    switch (inventoryHandler.isType){
+                        case LUMBER:{return Block.getBlockFromItem(item.getItem()).getMaterial() != Material.wood;}
+                        case STONE_AND_ORE: {return Block.getBlockFromItem(item.getItem()).getMaterial() != Material.rock;}
+                        case FOOD:{ return !(item.getItem() instanceof ItemFood);}
+                        //TODO: this is a horrid method to do this, there has to be a better way
+                        case INGOTS: {return !item.getUnlocalizedName().contains("ingot");}
+                        //TODO: this one probably isn't right either
+                        case SEEDS:{ return !(item.getItem() instanceof IPlantable);}
+                        case COAL:{return !(item.getUnlocalizedName().contains("coal") || item.getUnlocalizedName().contains("Coal"));}
+
+                    }
+                }
+                return !(inventoryHandler.filter.size() ==0) || !inventoryHandler.filter.contains(item);
+            }
+
+        }
+
+
+    }
+
+
+
+    private class waterSlot extends Slot{
+        public waterSlot(IInventory p_i1824_1_, int p_i1824_2_, int p_i1824_3_, int p_i1824_4_) {
+            super(p_i1824_1_,p_i1824_2_,p_i1824_3_,p_i1824_4_);
+        }
+        /**
+         * <h2>filter items</h2>
+         * @return if the item should be allowed or blocked.
+         */
+        @Override
+        public boolean isItemValid(ItemStack item) {
+         return FuelHandler.isWater(item, railTransport);
+        }
+    }
+
+
+    private class fuelSlot extends Slot{
+        public fuelSlot(IInventory p_i1824_1_, int p_i1824_2_, int p_i1824_3_, int p_i1824_4_) {
+            super(p_i1824_1_,p_i1824_2_,p_i1824_3_,p_i1824_4_);
+        }
+        /**
+         * <h2>filter items</h2>
+         * @return if the item should be allowed or blocked.
+         */
+        @Override
+        public boolean isItemValid(ItemStack item) {
+            return FuelHandler.isFuel(item, railTransport);
+        }
     }
 }

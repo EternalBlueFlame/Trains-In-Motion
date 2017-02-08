@@ -50,9 +50,11 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      */
     public EntityBrigadelok080(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);
+        inventory.setFilter(true, TrainsInMotion.itemTypes.COAL, null);
     }
     public EntityBrigadelok080(World world){
         super(world);
+        inventory.setFilter(true, TrainsInMotion.itemTypes.COAL, null);
     }
 
     /**

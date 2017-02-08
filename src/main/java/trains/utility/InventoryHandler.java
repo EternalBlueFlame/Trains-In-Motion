@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.IPlantable;
+import net.minecraftforge.oredict.OreDictionary;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
@@ -27,7 +28,7 @@ import java.util.List;
  * @see ContainerHandler for the related code.
  *
  * if the inventory needs to be filtered, on entity creation call
- * @see InventoryHandler#setFilter(boolean, TrainsInMotion.itemTypes, ItemStack[]) 
+ * @see InventoryHandler#setFilter(boolean, TrainsInMotion.itemTypes, ItemStack[])
  *
  * @author Eternal Blue Flame
  */
@@ -44,9 +45,9 @@ public class InventoryHandler implements IInventory{
     private GenericRailTransport host;
     private TileEntityStorage blockHost;
     private List<ItemStack> items = new ArrayList<ItemStack>();
-    private List<ItemStack> filter = new ArrayList<ItemStack>();
-    private boolean isWhitelist = false;
-    private TrainsInMotion.itemTypes isType = TrainsInMotion.itemTypes.ALL;
+    public List<ItemStack> filter = new ArrayList<ItemStack>();
+    public boolean isWhitelist = false;
+    public TrainsInMotion.itemTypes isType = TrainsInMotion.itemTypes.ALL;
 
     /**
      * <h2>entity constructor</h2>
@@ -85,8 +86,10 @@ public class InventoryHandler implements IInventory{
      */
     public void setFilter(boolean isWhitelist, TrainsInMotion.itemTypes type, ItemStack[] items){
         this.isWhitelist = isWhitelist;
-        filter.clear();
-        filter.addAll(Arrays.asList(items));
+        if (items != null) {
+            filter.clear();
+            filter.addAll(Arrays.asList(items));
+        }
         isType = type;
     }
 
@@ -213,6 +216,7 @@ public class InventoryHandler implements IInventory{
      * <h2>slot limiter</h2>
      * this limits certain items to certain slots, this way ticket slots can only take tickets, and fuel slots can only take fuels.
      * TODO: this needs to be expanded to support blacklists and whitelists.
+     * TODO: this may not even be needed with proper slot use.
      * @see FuelHandler
      */
     @Override
@@ -227,7 +231,7 @@ public class InventoryHandler implements IInventory{
                 return itemStack.getItem() instanceof ItemTicket && ((ItemTicket) itemStack.getItem()).getTransport() == host.getPersistentID();
             } else {
                 //if it's not a train, or rollingstock, it's either null or its a crafter.
-                return blockHost != null && isFiltered(itemStack.getItem());
+                return blockHost != null;
             }
         }
 
@@ -241,11 +245,11 @@ public class InventoryHandler implements IInventory{
                     return itemStack.getItem() instanceof ItemTicket && ((ItemTicket) itemStack.getItem()).getTransport() == host.getPersistentID();
                 } else {
                     //if there are no passenger slots and it doesn't have a boiler then it's a generic inventory slot.
-                    return isFiltered(itemStack.getItem());
+                    return true;
                 }
             } else {
                 //if it's not a train, it's a generic inventory slot for either a rollingstock or a crafter, so we only need to null check.
-                return (host != null || blockHost != null) && isFiltered(itemStack.getItem());
+                return (host != null || blockHost != null);
             }
 
 
@@ -256,62 +260,15 @@ public class InventoryHandler implements IInventory{
                 return itemStack.getItem() instanceof ItemTicket && ((ItemTicket) itemStack.getItem()).getTransport() == host.getPersistentID();
             } else if (host instanceof EntityTrainCore) {
                 //otherwise its a normal inventory slot
-                return isFiltered(itemStack.getItem());
+                return true;
             }
         } else {
             //otherwise it's just a null check
-            return (host != null || blockHost != null) && isFiltered(itemStack.getItem());
+            return (host != null || blockHost != null);
         }
 
         //if it's not one of the 3 main slots, then it's just a normal slot and we only need to null check.
-        return (host != null || blockHost != null)  && isFiltered(itemStack.getItem());
-    }
-
-
-    /**
-     * <h2>filter items</h2>
-     * @return if the item should be allowed or blocked.
-     */
-    private boolean isFiltered(Item item){
-        //before we even bother to try and check everything else, check if it's filtered in the first place.
-        if (isType == TrainsInMotion.itemTypes.ALL && filter.size()==0){
-            return true;
-        }
-
-        if (isWhitelist){
-            //if it's filtered by type, return if the given type is correct for the item
-            if (isType != TrainsInMotion.itemTypes.ALL){
-                switch (isType){
-                    case LUMBER:{return Block.getBlockFromItem(item).getMaterial() == Material.wood;}
-                    case STONE_AND_ORE: {return Block.getBlockFromItem(item).getMaterial() == Material.rock;}
-                    case FOOD:{ return item instanceof ItemFood;}
-                    //TODO: this is a horrid method to do this, there has to be a better way
-                    case INGOTS: {return item.getUnlocalizedName().contains("ingot");}
-                    //TODO: this one probably isn't right either
-                    case SEEDS:{ return item instanceof IPlantable;}
-
-                }
-            }
-            //otherwise check if the list contains the item.
-            return filter.contains(item);
-
-        } else {
-            //if it's a blacklist do exactly the same as above but return the opposite value.
-            if (isType != TrainsInMotion.itemTypes.ALL){
-                switch (isType){
-                    case LUMBER:{return Block.getBlockFromItem(item).getMaterial() != Material.wood;}
-                    case STONE_AND_ORE: {return Block.getBlockFromItem(item).getMaterial() != Material.rock;}
-                    case FOOD:{ return !(item instanceof ItemFood);}
-                    //TODO: this is a horrid method to do this, there has to be a better way
-                    case INGOTS: {return !item.getUnlocalizedName().contains("ingot");}
-                    //TODO: this one probably isn't right either
-                    case SEEDS:{ return !(item instanceof IPlantable);}
-
-                }
-            }
-            return !filter.contains(item);
-        }
-
+        return (host != null || blockHost != null);
     }
 
 
@@ -348,7 +305,7 @@ public class InventoryHandler implements IInventory{
                 new ItemStack(Items.potato, 0).writeToNBT(nbtitems);
             }
         }
-
+        /*
         nbtitems.setInteger("filter.length", filter.size());
         for (ItemStack item : filter){
             if (item != null) {
@@ -357,7 +314,7 @@ public class InventoryHandler implements IInventory{
                 new ItemStack(Items.potato, 0).writeToNBT(nbtitems);
             }
         }
-
+        */
 
         return nbtitems;
     }

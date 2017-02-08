@@ -32,6 +32,7 @@ public class GUITrain extends GuiContainer {
      */
     private static final ResourceLocation vanillaInventory = new ResourceLocation("textures/gui/container/furnace.png");
     private static EntityTrainCore train;
+    private EntityPlayer player;
     private int firstTankFluid;
     private int secondTankFluid;
     private static final float guiScaler = 0.00390625F;
@@ -44,6 +45,7 @@ public class GUITrain extends GuiContainer {
      */
     public GUITrain(InventoryPlayer inventoryPlayer, EntityTrainCore entity) {
         super(new ContainerHandler(inventoryPlayer, entity,  false));
+        player = inventoryPlayer.player;
         train = entity;
     }
 
@@ -169,10 +171,10 @@ public class GUITrain extends GuiContainer {
             drawHoveringText(Arrays.asList(tankType(false), secondTankFluid*0.001f + StatCollector.translateToLocal("gui.of") + train.tanks.getTank(true).getCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
         }
         //draw toggle button hover text
-        if (mouseY > guiTop + 63 && mouseY < guiTop +81){
-            if (train.riddenByEntity.getPersistentID() == train.owner && mouseX > guiLeft && mouseX < guiLeft + 18){
+        if (mouseY > guiTop + 166 && mouseY < guiTop +81){
+            if (player.getPersistentID() == train.owner && mouseX > guiLeft && mouseX < guiLeft + 18){
                 drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.dropkey") + checkBoolean(train.brake)), mouseX, mouseY, fontRendererObj);
-            } else if (train.riddenByEntity instanceof EntityPlayer && ((EntityPlayer)train.ridingEntity).capabilities.isCreativeMode &&
+            } else if (player.capabilities.isCreativeMode &&
                     mouseX > guiLeft + 52 && mouseX < guiLeft + 70) {
                 drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.creativemode") + checkBoolean(train.brake)), mouseX, mouseY, fontRendererObj);
             } else if (mouseX > guiLeft + 70 && mouseX < guiLeft + 88) {
@@ -204,21 +206,21 @@ public class GUITrain extends GuiContainer {
     @Override
     public void initGui() {
         super.initGui();
-        if (train.ridingEntity.getPersistentID() == train.owner) {
-            this.buttonList.add(new GuiButton(8, guiLeft, guiTop + 63, 18, 18, ""));
+        if (player.getPersistentID() == train.owner) {
+            this.buttonList.add(new GuiButton(8, guiLeft, guiTop + 166, 18, 18, ""));
         }
-        if (train.ridingEntity instanceof EntityPlayer && ((EntityPlayer)train.ridingEntity).capabilities.isCreativeMode){
-            this.buttonList.add(new GuiButton(7, guiLeft+ 52, guiTop + 63, 18, 18,""));
+        if (player.capabilities.isCreativeMode){
+            this.buttonList.add(new GuiButton(7, guiLeft+ 52, guiTop + 166, 18, 18,""));
         }
-        this.buttonList.add(new GuiButton(0, guiLeft+ 70, guiTop + 63, 18, 18,""));
-        this.buttonList.add(new GuiButton(1, guiLeft+ 88, guiTop + 63, 18, 18,""));
-        this.buttonList.add(new GuiButton(2, guiLeft+ 106, guiTop + 63, 18, 18,""));
-        this.buttonList.add(new GuiButton(3, guiLeft+ 124, guiTop + 63, 18, 18,""));
-        this.buttonList.add(new GuiButton(4, guiLeft+ 142, guiTop + 63, 18, 18,""));
+        this.buttonList.add(new GuiButton(0, guiLeft+ 70, guiTop + 166, 18, 18,""));
+        this.buttonList.add(new GuiButton(1, guiLeft+ 88, guiTop + 166, 18, 18,""));
+        this.buttonList.add(new GuiButton(2, guiLeft+ 106, guiTop + 166, 18, 18,""));
+        this.buttonList.add(new GuiButton(3, guiLeft+ 124, guiTop + 166, 18, 18,""));
+        this.buttonList.add(new GuiButton(4, guiLeft+ 142, guiTop + 166, 18, 18,""));
         if (train.getType() != TrainsInMotion.transportTypes.STEAM) {
-            this.buttonList.add(new GuiButton(5, guiLeft + 160, guiTop + 63, 18, 18, ""));
+            this.buttonList.add(new GuiButton(5, guiLeft + 160, guiTop + 166, 18, 18, ""));
         }
-        //this.buttonList.add(new GuiButton(6, guiLeft + 178, guiTop + 63, 18, 18, ""));
+        //this.buttonList.add(new GuiButton(6, guiLeft + 178, guiTop + 166, 18, 18, ""));
     }
 
     /**
