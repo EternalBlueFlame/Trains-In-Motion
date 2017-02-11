@@ -28,17 +28,21 @@ public class PacketKeyPress implements IMessage {
      * stores and transfers the variable through the byte buffer.
      */
     private int key;
+    private int entity;
     public PacketKeyPress() {}
-    public PacketKeyPress(int key) {
+    public PacketKeyPress(int key, int entity) {
         this.key = key;
+        this.entity = entity;
     }
     @Override
     public void fromBytes(ByteBuf bbuf) {
         key = bbuf.readInt();
+        entity = bbuf.readInt();
     }
     @Override
     public void toBytes(ByteBuf bbuf) {
         bbuf.writeInt(key);
+        bbuf.writeInt(entity);
     }
 
     /**
@@ -50,7 +54,7 @@ public class PacketKeyPress implements IMessage {
     public static class Handler implements IMessageHandler<PacketKeyPress, IMessage> {
         @Override
         public IMessage onMessage(PacketKeyPress message, MessageContext context) {
-            Entity ridingEntity = context.getServerHandler().playerEntity.ridingEntity;
+            Entity ridingEntity = context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entity);
             //Toggles,
             if(!((GenericRailTransport) ridingEntity).toggleBool(message.key)) {
                 //speed
@@ -68,7 +72,7 @@ public class PacketKeyPress implements IMessage {
                     if (entityPlayer != null && entityPlayer.ridingEntity instanceof EntityTrainCore) {
                         switch (((EntityTrainCore) entityPlayer.ridingEntity).getType()) {
                             case STEAM: {
-                                entityPlayer.openGui(TrainsInMotion.instance, TrainsInMotion.STEAM_GUI_ID, entityPlayer.ridingEntity.worldObj,
+                                entityPlayer.openGui(TrainsInMotion.instance, message.entity, entityPlayer.ridingEntity.worldObj,
                                         MathHelper.floor_double(entityPlayer.ridingEntity.posX), MathHelper.floor_double(entityPlayer.ridingEntity.posY),
                                         MathHelper.floor_double(entityPlayer.ridingEntity.posZ));
                                 break;

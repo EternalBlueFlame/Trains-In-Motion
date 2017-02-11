@@ -38,16 +38,8 @@ public class CommonProxy implements IGuiHandler {
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         //Trains
         if (player != null) {
-            if (player.ridingEntity instanceof GenericRailTransport) {
-                switch (ID) {
-                    case TrainsInMotion.STEAM_GUI_ID: {
-                        return new ContainerHandler(player.inventory, (EntityTrainCore) player.ridingEntity, false);
-                    }
-
-                    default: {
-                        return null;
-                    }
-                }
+            if (player.worldObj.getEntityByID(ID) instanceof GenericRailTransport) {
+                return new ContainerHandler(player.inventory, (EntityTrainCore) player.worldObj.getEntityByID(ID), false);
                 //tile entities
             } else if (world.getTileEntity(x,y,z) instanceof TileEntityStorage){
                 return new ContainerHandler(player.inventory, (TileEntityStorage) world.getTileEntity(x,y,z), true);

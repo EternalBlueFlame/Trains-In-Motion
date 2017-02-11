@@ -1,21 +1,14 @@
 package trains.utility;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.oredict.OreDictionary;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
-import trains.items.ItemTicket;
 import trains.tileentities.TileEntityStorage;
 
 import java.util.ArrayList;
@@ -28,7 +21,7 @@ import java.util.List;
  * @see ContainerHandler for the related code.
  *
  * if the inventory needs to be filtered, on entity creation call
- * @see InventoryHandler#setFilter(boolean, TrainsInMotion.itemTypes, ItemStack[])
+ * @see InventoryHandler#setFilter(boolean, ItemStack[])
  *
  * @author Eternal Blue Flame
  */
@@ -47,7 +40,6 @@ public class InventoryHandler implements IInventory{
     private List<ItemStack> items = new ArrayList<ItemStack>();
     public List<ItemStack> filter = new ArrayList<ItemStack>();
     public boolean isWhitelist = false;
-    public TrainsInMotion.itemTypes isType = TrainsInMotion.itemTypes.ALL;
 
     /**
      * <h2>entity constructor</h2>
@@ -84,13 +76,12 @@ public class InventoryHandler implements IInventory{
      * types in most cases will override items because items are always checked last, if at all.
      * itemTypes.ALL is basically just ignored, this is only called when you are not going to filter by type.
      */
-    public void setFilter(boolean isWhitelist, TrainsInMotion.itemTypes type, ItemStack[] items){
+    public void setFilter(boolean isWhitelist, ItemStack[] items){
         this.isWhitelist = isWhitelist;
         if (items != null) {
             filter.clear();
             filter.addAll(Arrays.asList(items));
         }
-        isType = type;
     }
 
     /**
@@ -214,62 +205,10 @@ public class InventoryHandler implements IInventory{
 
     /**
      * <h2>slot limiter</h2>
-     * this limits certain items to certain slots, this way ticket slots can only take tickets, and fuel slots can only take fuels.
-     * TODO: this needs to be expanded to support blacklists and whitelists.
-     * TODO: this may not even be needed with proper slot use.
-     * @see FuelHandler
+     * this is supposed to be for limiting how items are added to the inventory, but no circumstance should ever be called where this is needed.
      */
     @Override
-    public boolean isItemValidForSlot(int slot, ItemStack itemStack) {
-
-        if (slot ==0) {
-            if (host instanceof EntityTrainCore) {
-                //if its a train, slot 0 is always fuel
-                return FuelHandler.isFuel(itemStack, host);
-            } else if (host != null && host.getRiderOffsets().length > 1) {
-                //if it's not a train, the first slot is a ticket, assuming there are passengers.
-                return itemStack.getItem() instanceof ItemTicket && ((ItemTicket) itemStack.getItem()).getTransport() == host.getPersistentID();
-            } else {
-                //if it's not a train, or rollingstock, it's either null or its a crafter.
-                return blockHost != null;
-            }
-        }
-
-        if (slot == 1) {
-            if (host instanceof EntityTrainCore) {
-                //if it's a train the second slot is either for the water for the boiler, or the ticket depending on the type of train
-                if (host.getType() == TrainsInMotion.transportTypes.STEAM || host.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
-                    return FuelHandler.isWater(itemStack, host);
-                } else if (host.getRiderOffsets().length > 1) {
-                    //if it's not a train with a boiler, the second slot is a ticket,
-                    return itemStack.getItem() instanceof ItemTicket && ((ItemTicket) itemStack.getItem()).getTransport() == host.getPersistentID();
-                } else {
-                    //if there are no passenger slots and it doesn't have a boiler then it's a generic inventory slot.
-                    return true;
-                }
-            } else {
-                //if it's not a train, it's a generic inventory slot for either a rollingstock or a crafter, so we only need to null check.
-                return (host != null || blockHost != null);
-            }
-
-
-        } else if (slot == 2) {
-            //if it's a train with passenger slots and a boiler then the third slot is for a ticket.
-            if ((host.getType() == TrainsInMotion.transportTypes.STEAM || host.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
-                    host.getRiderOffsets().length > 1) {
-                return itemStack.getItem() instanceof ItemTicket && ((ItemTicket) itemStack.getItem()).getTransport() == host.getPersistentID();
-            } else if (host instanceof EntityTrainCore) {
-                //otherwise its a normal inventory slot
-                return true;
-            }
-        } else {
-            //otherwise it's just a null check
-            return (host != null || blockHost != null);
-        }
-
-        //if it's not one of the 3 main slots, then it's just a normal slot and we only need to null check.
-        return (host != null || blockHost != null);
-    }
+    public boolean isItemValidForSlot(int slot, ItemStack itemStack) {return true;}
 
 
     /**
@@ -305,19 +244,25 @@ public class InventoryHandler implements IInventory{
                 new ItemStack(Items.potato, 0).writeToNBT(nbtitems);
             }
         }
-        /*
+        nbtitems.setBoolean("filter.whitelist", isWhitelist);
+
+
         nbtitems.setInteger("filter.length", filter.size());
-        for (ItemStack item : filter){
-            if (item != null) {
-                item.writeToNBT(nbtitems);
-            } else {
-                new ItemStack(Items.potato, 0).writeToNBT(nbtitems);
+        if (filter.size()>0) {
+            for (ItemStack item : filter) {
+                if (item != null) {
+                    item.writeToNBT(nbtitems);
+                } else {
+                    new ItemStack(Items.potato, 0).writeToNBT(nbtitems);
+                }
             }
         }
-        */
+
 
         return nbtitems;
     }
+
+
     public void readNBT(NBTTagCompound tag, String tagName){
         NBTTagCompound nbtitems = tag.getCompoundTag(tagName);
         for (int i = 0; i < items.size(); i++) {
@@ -326,6 +271,16 @@ public class InventoryHandler implements IInventory{
                 setInventorySlotContents(i, item);
             }
         }
+        isWhitelist = nbtitems.getBoolean("filter.whitelist");
+
+        int length = nbtitems.getInteger("filter.length");
+        if (length>0) {
+            for (int i = 0; i < length; i++) {
+                filter.add(ItemStack.loadItemStackFromNBT(nbtitems));
+            }
+        }
+
+
     }
 
     /**

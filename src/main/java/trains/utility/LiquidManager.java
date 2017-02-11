@@ -28,6 +28,7 @@ public class LiquidManager {
      * sets the initial values of the class.
      */
     public LiquidManager(int firstCapacity, int secondCapacity, Fluid[] firstList, Fluid[] secondList, boolean firstIsWhitelist, boolean secondIsWhitelist){
+        System.out.println(firstCapacity + ":" + secondCapacity + " and whitelists are" + firstCapacity + ":" + secondIsWhitelist);
         this.firstTank = new FluidTank(firstCapacity);
         this.secondTank = new FluidTank(secondCapacity);
         this.firstIsWhitelist = firstIsWhitelist;

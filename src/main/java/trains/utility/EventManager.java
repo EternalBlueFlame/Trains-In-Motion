@@ -6,11 +6,19 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.networking.PacketKeyPress;
 import trains.networking.PacketMount;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * <h1>event management</h1>
@@ -36,19 +44,19 @@ public class EventManager {
         if(player.ridingEntity instanceof EntityTrainCore) {
             //for lamp
             if (ClientProxy.KeyLamp.isPressed() ) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0));
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0, player.ridingEntity.getEntityId()));
                 ((EntityTrainCore) player.ridingEntity).lamp.isOn = ! ((EntityTrainCore) player.ridingEntity).lamp.isOn;
             }
             //for inventory
             if (ClientProxy.KeyInventory.isPressed()) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1));
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, player.ridingEntity.getEntityId()));
             }
             //for speed change
             if(ClientProxy.KeyAccelerate.isPressed()){
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2));
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2, player.ridingEntity.getEntityId()));
                 ((EntityTrainCore) player.ridingEntity).setAcceleration(true);
             } else if(ClientProxy.KeyReverse.getIsKeyPressed()){
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3));
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3, player.ridingEntity.getEntityId()));
                 ((EntityTrainCore) player.ridingEntity).setAcceleration(false);
             }
         }
@@ -63,6 +71,33 @@ public class EventManager {
         if (event.target instanceof HitboxHandler.multipartHitbox
                 && event.entity.worldObj.isRemote) {
             TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
+        }
+    }
+
+
+
+    @SubscribeEvent
+    public void entityJoinWorldEvent(EntityJoinWorldEvent event) {
+        if (event.entity instanceof EntityPlayer && event.entity.worldObj.isRemote) {
+            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("You are currently playing an alpha pre-release of Trains In Motion."));
+            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("For official releases, check out https://github.com/EternalBlueFlame/Trains-In-Motion/"));
+            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Keep in mind that everything in this mod is subject to change, and report any bugs you find."));
+            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Good luck and thanks for the assistance. - Eternal Blue Flame."));
+
+            /*
+            try {
+                HttpURLConnection conn = (HttpURLConnection) new URL("https://raw.githubusercontent.com/USER/PROJECT/BRANCH/version.txt").openConnection();
+                conn.setRequestMethod("GET");
+                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+                if (!TrainsInMotion.MOD_VERSION.equals(rd.readLine())) {
+                    ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("A new version of Trains In Motion is available, check it out at:"));
+                    ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText(rd.readLine()));
+                }
+            } catch (Exception e) {
+                //couldn't check for new version, so just do nothing.
+            }
+             */
         }
     }
 }

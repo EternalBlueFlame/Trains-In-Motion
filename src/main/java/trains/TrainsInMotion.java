@@ -55,10 +55,6 @@ public class TrainsInMotion {
     //instance the network wrapper for each channel.
     public static SimpleNetworkWrapper keyChannel;
 
-    //GUI ID's
-    //TODO: theres gotta be a better way to do this
-    public static final int STEAM_GUI_ID = 200;
-
 
     //Instance the event handler, This is used for event based functionality, things like when you right-click an entity.
     public static EventManager eventManager = new EventManager();
@@ -73,9 +69,6 @@ public class TrainsInMotion {
     public enum transportTypes {
         STEAM,DIESEL,HYDROGEN_DIESEL,ELECTRIC,NUCLEAR_STEAM,NUCLEAR_ELECTRIC,MAGLEV,
         PASSENGER, FREIGHT, HOPPER, TANKER, WORKCAR, TENDER
-    }
-    public enum itemTypes {
-        LUMBER, FOOD, SEEDS, STONE_AND_ORE, COAL, GEMS, GRAIN, INGOTS, ALL
     }
     public enum inventorySizes{NULL(0,0),
         TWOxTWO(2,2), TWOxTHREE(2,3), THREExTHREE(3,3), THREExFOUR(3,4), FOURxFOUR(4,4), FOURxFIVE(4,5), FIVExFIVE(5,5), FIVExSIX(5,6), SIXxSIX(6,6), NINExTHREE(9,3), NINExSIX(9,6);

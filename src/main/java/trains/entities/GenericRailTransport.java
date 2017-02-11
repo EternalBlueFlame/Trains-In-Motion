@@ -62,12 +62,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * the key defines the ownership key item, this is used to allow other people access to the transport.
      * the last part is the generic entity constructor
      */
-    public LiquidManager tanks = new LiquidManager(0,0, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
     public boolean isLocked = false;
     public boolean brake = false;
     public LampHandler lamp = new LampHandler();
     public int[][] colors = new int[][]{{0,0,0},{0,0,0},{0,0,0}};
-    public UUID owner = null;
+    private UUID owner = null;
     public List<EntityBogie> bogie = new ArrayList<EntityBogie>();
     public List<EntitySeat> seats = new ArrayList<EntitySeat>();
     public List<double[]> bogieXYZ = new ArrayList<double[]>();
@@ -79,6 +78,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public int transportTicks =0;
     public UUID front;
     public UUID back;
+    public int ownerID =0;
     public String destination ="";
     public InventoryHandler inventory = new InventoryHandler(this);
     public ItemStack key;
@@ -87,7 +87,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
     public GenericRailTransport(World world, UUID owner, double xPos, double yPos, double zPos){
         super(world);
-        tanks = getTank();
 
         posY = yPos;
         posX = xPos;
@@ -114,8 +113,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     @Override
     public void entityInit(){
-        this.dataWatcher.addObject(20, 0);
-        this.dataWatcher.addObject(21, 0);
+        this.dataWatcher.addObject(19, 0);//owner
+        this.dataWatcher.addObject(20, 0);//tankA
+        this.dataWatcher.addObject(21, 0);//TankB
     }
 
 
@@ -237,20 +237,18 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         brake = tag.getBoolean("extended.handbrake");
         //load owner
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
-        key.readFromNBT(tag);
-
+//        key.readFromNBT(tag);
         //load tanks
-        if (tanks != null) {
+        if (getTank() != null) {
             FluidStack tankA = loadFluidStackFromNBT(tag);
             if (tankA.amount != 0) {
-                tanks.addFluid(tankA.getFluid(), tankA.amount, true, this);
+                getTank().addFluid(tankA.getFluid(), tankA.amount, true, this);
             }
             FluidStack tankB = loadFluidStackFromNBT(tag);
             if (tankB.amount != 0) {
-                tanks.addFluid(tankB.getFluid(), tankB.amount, false, this);
+                getTank().addFluid(tankB.getFluid(), tankB.amount, false, this);
             }
         }
-
         //read through the bogie positions
         NBTTagCompound nbtBogiePos = tag.getCompoundTag("extended.bogies");
         for (int i=0; i< getBogieOffsets().size(); i++) {
@@ -258,7 +256,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (pos[0] !=0 && pos[1] !=0 && pos[2] !=0) {
                 bogieXYZ.add(pos);
             }
-
         }
 
 
@@ -295,19 +292,19 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //owner
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
+//        key.writeToNBT(tag);
 
-        key.writeToNBT(tag);
 
         //tanks
-        if (tanks != null) {
-            if (tanks.getTank(true).getFluid() != null) {
-                tanks.getTank(true).getFluid().writeToNBT(tag);
+        if (getTank() != null) {
+            if (getTank().getTank(true).getFluid() != null) {
+                getTank().getTank(true).getFluid().writeToNBT(tag);
             } else {
                 new FluidStack(FluidRegistry.WATER, 0).writeToNBT(tag);
             }
 
-            if (tanks.getTank(false).getFluid() != null) {
-                tanks.getTank(false).getFluid().writeToNBT(tag);
+            if (getTank().getTank(false).getFluid() != null) {
+                getTank().getTank(false).getFluid().writeToNBT(tag);
             } else {
                 new FluidStack(FluidRegistry.WATER, 0).writeToNBT(tag);
             }
@@ -328,7 +325,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
         }
         tag.setTag("extended.bogies", nbtbogies);
-
         tag.setTag("items", inventory.writeNBT());
     }
 
@@ -452,6 +448,16 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
 
         }
+
+        //be sure the owner entityID is currently loaded, this variable is dynamic so we don't save it to NBT.
+        if (!worldObj.isRemote && transportTicks %10==0){
+            Entity player = proxy.getEntityFromUuid(owner);
+            if (player!= null) {
+                ownerID = player.getEntityId();
+                this.dataWatcher.updateObject(19,ownerID);
+            }
+        }
+
         /**
          * be sure the client proxy has a reference to this so the lamps can be updated, and then every other tick, attempt to update the lamp position if it's necessary.
          */
@@ -672,6 +678,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         } else{
             return this.dataWatcher.getWatchableObjectInt(21);
         }
+    }
+    public int getOwnerID(){
+        return this.dataWatcher.getWatchableObjectInt(19);
     }
 
 }

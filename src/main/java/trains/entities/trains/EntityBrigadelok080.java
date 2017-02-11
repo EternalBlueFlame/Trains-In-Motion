@@ -39,7 +39,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      * SOUND_HORN and SOUND_RUNNING are refrences to the sound files for the train horn and running sounds.
      * thisItem is the item for this train that will get registered.
      */
-    private static final LiquidManager tank = new LiquidManager(1100,1100, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
+    private LiquidManager tank = new LiquidManager(1100,1100, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
     private static final ResourceLocation horn = URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");
     private static final ResourceLocation running = URIRegistry.SOUND_RUNNING.getResource("r080brigadelok.ogg");
     public static final Item thisItem = new ItemBrigadelok080().setUnlocalizedName("brigadelok080").setTextureName(MODID + ":itemTests");
@@ -50,11 +50,9 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      */
     public EntityBrigadelok080(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);
-        inventory.setFilter(true, TrainsInMotion.itemTypes.COAL, null);
     }
     public EntityBrigadelok080(World world){
         super(world);
-        inventory.setFilter(true, TrainsInMotion.itemTypes.COAL, null);
     }
 
     /**

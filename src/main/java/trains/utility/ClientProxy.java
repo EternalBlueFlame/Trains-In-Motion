@@ -66,16 +66,8 @@ public class ClientProxy extends CommonProxy {
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         //Trains
         if (player != null) {
-            if (player.ridingEntity instanceof GenericRailTransport) {
-                switch (ID) {
-                    case TrainsInMotion.STEAM_GUI_ID: {
-                        return new GUITrain(player.inventory, (EntityTrainCore) player.ridingEntity);
-                    }
-
-                    default: {
-                        return null;
-                    }
-                }
+            if (player.worldObj.getEntityByID(ID) instanceof GenericRailTransport) {
+                return new GUITrain(player.inventory, (EntityTrainCore) player.worldObj.getEntityByID(ID));
                 //tile entities
             } else if (player.worldObj.getTileEntity(x,y,z) instanceof TileEntityStorage) {
                 return new GUITrainTable(player.inventory, player.worldObj, x, y, z);

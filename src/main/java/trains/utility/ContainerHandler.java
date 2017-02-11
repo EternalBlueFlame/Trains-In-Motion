@@ -291,42 +291,14 @@ public class ContainerHandler extends Container{
         @Override
         public boolean isItemValid(ItemStack item) {
             //before we even bother to try and check everything else, check if it's filtered in the first place.
-            System.out.println("attempted to check slot " + (inventoryHandler.isType == TrainsInMotion.itemTypes.COAL));
-            if (item == null || (inventoryHandler.isType == TrainsInMotion.itemTypes.ALL && inventoryHandler.filter.size()==0)){
+            if (item == null || inventoryHandler.filter.size()==0){
                 return true;
             }
 
             if (inventoryHandler.isWhitelist){
-                //if it's filtered by type, return if the given type is correct for the item
-                if (inventoryHandler.isType != TrainsInMotion.itemTypes.ALL){
-                    switch (inventoryHandler.isType){
-                        case LUMBER:{return Block.getBlockFromItem(item.getItem()).getMaterial() == Material.wood;}
-                        case STONE_AND_ORE: {return Block.getBlockFromItem(item.getItem()).getMaterial() == Material.rock;}
-                        case FOOD:{ return item.getItem() instanceof ItemFood;}
-                        case INGOTS: {return item.getUnlocalizedName().contains("ingot");}
-                        case SEEDS:{ return item.getItem() instanceof IPlantable;}
-                        case COAL:{return item.getUnlocalizedName().contains("coal") || item.getUnlocalizedName().contains("Coal");}
-
-                    }
-                }
-                //otherwise check if the list contains the item.
                 return inventoryHandler.filter.size() ==0 || inventoryHandler.filter.contains(item);
-
             } else {
                 //if it's a blacklist do exactly the same as above but return the opposite value.
-                if (inventoryHandler.isType != TrainsInMotion.itemTypes.ALL){
-                    switch (inventoryHandler.isType){
-                        case LUMBER:{return Block.getBlockFromItem(item.getItem()).getMaterial() != Material.wood;}
-                        case STONE_AND_ORE: {return Block.getBlockFromItem(item.getItem()).getMaterial() != Material.rock;}
-                        case FOOD:{ return !(item.getItem() instanceof ItemFood);}
-                        //TODO: this is a horrid method to do this, there has to be a better way
-                        case INGOTS: {return !item.getUnlocalizedName().contains("ingot");}
-                        //TODO: this one probably isn't right either
-                        case SEEDS:{ return !(item.getItem() instanceof IPlantable);}
-                        case COAL:{return !(item.getUnlocalizedName().contains("coal") || item.getUnlocalizedName().contains("Coal"));}
-
-                    }
-                }
                 return !(inventoryHandler.filter.size() ==0) || !inventoryHandler.filter.contains(item);
             }
 
