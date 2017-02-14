@@ -1,5 +1,6 @@
 package trains.models;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.particle.EntityFX;
@@ -15,6 +16,7 @@ import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.models.tmt.Vec2f;
 import trains.models.tmt.Vec3f;
+import trains.registry.URIRegistry;
 import trains.utility.ClientProxy;
 import trains.utility.HitboxHandler;
 import trains.utility.RailUtility;
@@ -23,6 +25,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * <h2> .Java Entity Rendering</h2>
@@ -51,6 +54,7 @@ public class RenderEntity extends Render {
     private List<advancedPiston> advancedPistons = new ArrayList<advancedPiston>();
     private List<wheel> wheels = new ArrayList<wheel>();
     private List<ModelBase> bogieRenders = new ArrayList<ModelBase>();
+    private List<blockCargo> blockCargoRenders = new ArrayList<blockCargo>();
     private Vec2f rotationvec;
 
     private float wheelPitch=0;
@@ -119,9 +123,6 @@ public class RenderEntity extends Render {
             }
         }
 
-        //Bind the texture
-        bindTexture(texture);
-
         /**
          * If the wheels aren't defined, and the train isn't maglev, then we need to parse all the ModelRenderers for the train and its bogies
          * and cache references, along with original positions of all the pistons.
@@ -147,6 +148,8 @@ public class RenderEntity extends Render {
                                 render.boxName.equals("wheelconnector") || render.boxName.equals("upperpiston") || render.boxName.equals("upperpistonarm")
                                 ) {
                             simplePistons.add(new simplePiston(render));
+                        } else if (render.boxName.equals("BlockLog")){
+                            blockCargoRenders.add(new blockCargo(render));
                         }
                     }
                 }
@@ -170,8 +173,21 @@ public class RenderEntity extends Render {
                 for (simplePiston basicPiston : simplePistons) {
                     basicPiston.moveYZ(rotationvec);
                 }
+
+                for (int i=0; i< blockCargoRenders.size(); i++){
+                    if (i <=entity.inventory.calculatePercentageUsed(blockCargoRenders.size())){
+                        //TODO: i dont think this texture binding will work.... And even if it does we need a way to better define the specific item
+                        blockCargoRenders.get(i).boxRefrence.setDefaultTexture(Block.getBlockFromItem(entity.inventory.getStackInSlot(i).getItem()).getBlockTextureFromSide(0).toString());
+                    } else {
+                        blockCargoRenders.get(i).boxRefrence.setDefaultTexture("textures/generic/transparent.png");
+                    }
+                }
             }
         }
+
+
+        //Bind the texture
+        bindTexture(texture);
 
         //finally render the model and push the changes to GL.
         model.render(entity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.065f);
@@ -280,6 +296,23 @@ public class RenderEntity extends Render {
 
         public void rotate(float radian){
             boxRefrence.rotateAngleX = radian;
+        }
+    }
+
+    /**
+     * <h3>BlockCargo</h3>
+     * used to store references to logs and other similar carried cargo blocks.
+     * also stores the random rotation for the block so we can define different rotations for each block
+     */
+    private class blockCargo {
+        private ModelRenderer boxRefrence = null;
+        public int randomRotation = ThreadLocalRandom.current().nextInt(0, 3) *90;
+
+        public blockCargo(ModelRenderer boxToRender){
+            if (boxRefrence == null){
+                boxRefrence = boxToRender;
+                boxRefrence.rotateAngleX = randomRotation;
+            }
         }
     }
 

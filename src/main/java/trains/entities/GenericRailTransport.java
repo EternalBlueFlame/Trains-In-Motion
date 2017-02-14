@@ -391,11 +391,14 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (bogieSize>0){
 
                 boolean collision = !hitboxHandler.getCollision(this);
-                //handle movement for trains, this will likely need to be different for rollingstock.
+                //handle movement.
                 for (EntityBogie currentBogie : bogie) {
                     if (collision) {
                         if (currentBogie != null) {
-                            motion = rotatePoint(new double[]{processMovement(currentBogie), (float) motionY, 0}, 0.0f, currentBogie.rotationYaw, 0.0f);
+                            motion = rotatePoint(new double[]{processMovement(currentBogie), motionY, 0}, 0.0f, currentBogie.rotationYaw, 0.0f);
+                            if (brake) {
+                                currentBogie.setVelocity(currentBogie.cartVelocityX * 0.8d, currentBogie.cartVelocityY, currentBogie.cartVelocityZ * 0.8d);
+                            }
                             currentBogie.setVelocity(motion[0], motion[1], motion[2]);
                             currentBogie.minecartMove();
                         }
@@ -418,16 +421,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         bogie.get(bogieSize).posX - bogie.get(0).posX)),
                         MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY)));
 
-                if (brake){
-                    for (EntityBogie entityBogie : bogie){
-                        entityBogie.setVelocity(entityBogie.cartVelocityX * 0.8d, entityBogie.cartVelocityY, entityBogie.cartVelocityZ * 0.8d);
-                    }
-                }
 
                 if (transportTicks %2 ==0) {
                     //align bogies
                     for (int i = 0; i < bogie.size(); ) {
-                        double[] var = rotatePoint(new double[]{getBogieOffsets().get(i).doubleValue(), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
+                        double[] var = rotatePoint(new double[]{getBogieOffsets().get(i), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
                         bogie.get(i).setPosition(var[0] + posX, bogie.get(i).posY, var[2] + posZ);
                         bogieXYZ.set(i, new double[]{bogie.get(i).posX, bogie.get(i).posY, bogie.get(i).posZ});
                         i++;
@@ -655,7 +653,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
      * @see EntityBrigadelok080 for more information
      */
-    public List<Float> getBogieOffsets(){return new ArrayList<Float>();}
+    public List<Double> getBogieOffsets(){return new ArrayList<Double>();}
     public TrainsInMotion.transportTypes getType(){return null;}
     public double[][] getRiderOffsets(){return new double[][]{{0,0}};}
     public float[] getHitboxPositions(){return new float[]{-1,0,1};}

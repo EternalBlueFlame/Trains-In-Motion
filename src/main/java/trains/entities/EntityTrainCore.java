@@ -193,22 +193,6 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     @Override
     public void onUpdate() {
-        if (bogie.size()>0){
-            boolean collision = !hitboxHandler.getCollision(this);
-            //if theres no collision then process movement for the bogies.
-            if (collision) {
-                for (EntityBogie currentBogie : bogie) {
-                    if (currentBogie != null) {
-                        motion = rotatePoint(new double[]{processMovement(currentBogie), (float) motionY, 0}, 0.0f, currentBogie.rotationYaw, 0.0f);
-
-                        currentBogie.setVelocity(motion[0], motion[1], motion[2]);
-                        currentBogie.minecartMove();
-                    }
-                }
-            } else {
-                motion = new double[]{0d, 0d, 0d};
-            }
-        }
         super.onUpdate();
 
         //simple tick management so some code does not need to be run every tick.

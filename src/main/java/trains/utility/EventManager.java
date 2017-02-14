@@ -70,7 +70,18 @@ public class EventManager {
     public void entityInteractEvent(EntityInteractEvent event) {
         if (event.target instanceof HitboxHandler.multipartHitbox
                 && event.entity.worldObj.isRemote) {
-            TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
+
+            switch (((HitboxHandler.multipartHitbox) event.target).parent.getType()){
+                case LOGCAR:{
+                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, event.target.getEntityId()));
+                    break;
+                }
+                default:{
+                    TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
+                    break;
+                }
+            }
+
         }
     }
 

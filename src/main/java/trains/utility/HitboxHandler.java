@@ -175,6 +175,11 @@ public class HitboxHandler {
             cart.isDead = true;
             TrainsInMotion.keyChannel.sendToServer(new PacketRemove(cart.getEntityId()));
         }
+        for (EntitySeat seat : host.seats){
+            seat.worldObj.removeEntity(seat);
+            seat.isDead = true;
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(seat.getEntityId()));
+        }
         for (EntityDragonPart hitbox : host.hitboxList){
             hitbox.worldObj.removeEntity(hitbox);
             hitbox.isDead = true;

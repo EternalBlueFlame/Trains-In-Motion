@@ -264,20 +264,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         cartVelocityZ = motionZ = z;
     }
 
-    /**
-     * <h2>Rail Movement</h2>
-     * This is a fix for the fact there may or may not be a rider entity, this is to serve until we fully replace the functionality of this.
-     * TODO: after we get in the ZnD api, we need to check if we can replicate the entire host function with our own calls, for better/more reliable results.
-     */
-    @Deprecated
-    @Override
-    protected void func_145821_a(int p_145821_1_, int p_145821_2_, int p_145821_3_, double p_145821_4_, double p_145821_6_, Block p_145821_8_, int p_145821_9_) {
-        Entity entity = riddenByEntity;
-        riddenByEntity = null;
-        super.func_145821_a(p_145821_1_, p_145821_2_, p_145821_3_, p_145821_4_, p_145821_6_, p_145821_8_, p_145821_9_);
-        riddenByEntity = entity;
-    }
-
 
 
 }

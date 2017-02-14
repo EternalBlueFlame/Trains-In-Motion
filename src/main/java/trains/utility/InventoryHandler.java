@@ -6,6 +6,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
@@ -32,8 +33,6 @@ public class InventoryHandler implements IInventory{
      * blockHost defines the tile entity host, if this is null, everything is expected to be null.
      * filter defines the array of items to check with the blacklist/whitelist, assuming isType is false.
      * isWhitelist defines if it searches via blacklist or whitelist.
-     * isType defines if it should search via item or block type defined in
-     *     @see TrainsInMotion.itemTypes
      */
     private GenericRailTransport host;
     private TileEntityStorage blockHost;
@@ -311,6 +310,27 @@ public class InventoryHandler implements IInventory{
         }
         if (host != null) {
             host.dropItem(item.getItem(), item.stackSize);
+        }
+    }
+
+    /**
+     * <h2>inventory percentage count</h2>
+     * calculates percentage of inventory used then returns a value based on the intervals.
+     * for example if the inventory is half full and the intervals are 100, it returns 50. or if the intervals were 90 it would return 45.
+     */
+    public int calculatePercentageUsed(int indexes){
+        int i=0;
+        for (ItemStack item : items){
+            if (item != null && item.stackSize >0){
+                i++;
+            }
+        }
+        if (i==0){
+            return 0;
+        } else if (indexes ==100) {
+            return MathHelper.floor_double((i / items.size()) * 100);
+        } else {
+            return MathHelper.floor_double(((i / items.size()) * 100) * (indexes * 0.01));
         }
     }
 

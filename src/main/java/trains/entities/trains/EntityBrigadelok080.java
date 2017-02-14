@@ -74,7 +74,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      * @return the list of offsets for the bogies, 0 being the center. negative values are towards the front of the train.
      */
     @Override
-    public List<Float> getBogieOffsets(){return  Arrays.asList(-0.75f, 0.75f);}
+    public List<Double> getBogieOffsets(){return  Arrays.asList(-0.75, 0.75);}
     /**
      * <h2>Inventory Size</h2>
      * @return the size of the inventory not counting any fuel or crafting slots.
@@ -107,7 +107,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      * @return defines the acceleration that is applied to the train in blocks per second.
      */
     @Override
-    public float getAcceleration(){return 0.1f;}
+    public float getAcceleration(){return 0.4f;}
     /**
      * <h2>Hitbox offsets</h2>
      * @return defines the positions for the hitboxes in blocks. 0 being the center, negative values being towards the front..

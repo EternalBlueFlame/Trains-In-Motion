@@ -1,19 +1,18 @@
 package trains.utility;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.*;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.IPlantable;
+import net.minecraftforge.oredict.OreDictionary;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.registry.TrainRegistry;
 import trains.tileentities.TileEntityStorage;
+
+import java.util.ArrayList;
 
 /**
  * <h1>Container manager</h1>
@@ -23,12 +22,21 @@ import trains.tileentities.TileEntityStorage;
  * @author Eternal Blue Flame
  */
 public class ContainerHandler extends Container{
+
+    private static final ArrayList<ItemStack> logCarrier = combineStacks(combineStacks(OreDictionary.getOres("plankWood"), OreDictionary.getOres("slabWood")), OreDictionary.getOres("logWood"));
+
     private GenericRailTransport railTransport;
     private TileEntityStorage craftingTable;
     public IInventory craftResult = new InventoryCraftResult();
     private boolean isCrafting;
 
 
+    private static ArrayList<ItemStack> combineStacks(ArrayList<ItemStack> oldStacks, ArrayList<ItemStack> newStacks){
+        ArrayList<ItemStack> items = new ArrayList<ItemStack>();
+        items.addAll(oldStacks);
+        items.addAll(newStacks);
+        return items;
+    }
 
     /**
      * <h2>Server-side inventory GUI for trains and rollingstock</h2>
@@ -290,6 +298,17 @@ public class ContainerHandler extends Container{
          */
         @Override
         public boolean isItemValid(ItemStack item) {
+            //compensate for specific rollingstock
+            if (railTransport.getType() == TrainsInMotion.transportTypes.LOGCAR){
+                Block block = Block.getBlockFromItem(item.getItem());
+                for (ItemStack log : logCarrier) {
+                    if (block == Block.getBlockFromItem(log.getItem())) {
+                        return true;
+                    }
+                }
+            }
+
+
             //before we even bother to try and check everything else, check if it's filtered in the first place.
             if (item == null || inventoryHandler.filter.size()==0){
                 return true;

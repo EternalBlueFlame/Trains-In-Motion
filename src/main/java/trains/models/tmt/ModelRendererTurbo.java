@@ -81,6 +81,27 @@ public class ModelRendererTurbo extends ModelRenderer {
         textureWidth = textureU;
         textureHeight = textureV;
     }
+
+    /**
+     * Creates a new ModelRenderTurbo object with a name. It requires the coordinates of the
+     * position of the texture, but also allows you to specify the width and height
+     * of the texture, allowing you to use bigger textures instead.
+     * It also requires a string to define the name of the box, this is used for animation
+     * @see trains.models.RenderEntity
+     * @param modelbase the shape.
+     * @param textureX the texture left position
+     * @param textureY the texture top position
+     * @param textureU the texture width
+     * @param textureV the texture heught
+     * @param boxName the name of the shape.
+     */
+    public ModelRendererTurbo(ModelBase modelbase, int textureX, int textureY, int textureU, int textureV, String boxName) {
+        this(modelbase, boxName);
+        textureOffsetX = textureX;
+        textureOffsetY = textureY;
+        textureWidth = textureU;
+        textureHeight = textureV;
+    }
     
     /**
      * Creates a new polygon.

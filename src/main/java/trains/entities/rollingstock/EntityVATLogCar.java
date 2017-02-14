@@ -5,6 +5,7 @@ import net.minecraft.world.World;
 import trains.TrainsInMotion;
 import trains.entities.EntityRollingStockCore;
 import trains.items.rollingstock.ItemPullmansPalace;
+import trains.items.rollingstock.ItemVATLogCar;
 import trains.models.tmt.Vec3d;
 import trains.registry.TrainRegistry;
 import trains.utility.LiquidManager;
@@ -17,7 +18,7 @@ import java.util.UUID;
  * <h1>Pullman's Palace entity</h1>
  * @author Eternal Blue Flame
  */
-public class EntityPullmansPalace extends EntityRollingStockCore{
+public class EntityVATLogCar extends EntityRollingStockCore{
     /**
      * <h2>Basic Rollingstock Constructor</h2>
      * To make your own custom rollingstock, create a new class that is a copy of this class, in that copy, you only need to change the values of private static final variables defined here.
@@ -32,16 +33,16 @@ public class EntityPullmansPalace extends EntityRollingStockCore{
      *     and it will define the name shown for all instances like items, gui, the entity name, and the texture name.
      */
     private static final LiquidManager tank = null;
-    public static final Item thisItem = new ItemPullmansPalace().setUnlocalizedName("pullmanspalace");
+    public static final Item thisItem = new ItemVATLogCar().setUnlocalizedName("vatlogcar");
 
     /**
      * these basic constructors only need to have their names changed to that of this class, that is assuming your editor doesn't automatically do that.
      * @see EntityRollingStockCore
      */
-    public EntityPullmansPalace(UUID owner, World world, double xPos, double yPos, double zPos) {
+    public EntityVATLogCar(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);
     }
-    public EntityPullmansPalace(World world){
+    public EntityVATLogCar(World world){
         super(world);
     }
 
@@ -56,32 +57,32 @@ public class EntityPullmansPalace extends EntityRollingStockCore{
      * @return the list of offsets for the bogies, 0 being the center. negative values are towards the front.
      */
     @Override
-    public List<Double> getBogieOffsets(){return  Arrays.asList(-1.75, 1.75);}
+    public List<Double> getBogieOffsets(){return  Arrays.asList(-0.9, 0.9);}
     /**
      * <h2>Inventory Size</h2>
      * @return the size of the inventory not counting any fuel or crafting slots.
      */
     @Override
-    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.NULL;}
+    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.NINExTHREE;}
     /**
      * <h2>Type</h2>
      * @return the type which will define it's features, GUI, and a number of other things.
      */
     @Override
-    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.PASSENGER;}
+    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.LOGCAR;}
     /**
      * <h2>Rider offsets</h2>
      * @return defines the offsets of the riders in blocks, the first value is how far back, and the second is how high. Negative values are towards the front, ground, or right.
      *     Each set of floats represents a different rider.
      */
     @Override
-    public double[][] getRiderOffsets(){return new double[][]{{1.3f,1.5f, 0f}};}
+    public double[][] getRiderOffsets(){return new double[][]{{}};}
     /**
      * <h2>Hitbox offsets</h2>
      * @return defines the positions for the hitboxes in blocks. 0 being the center of the train, negative values being towards the front..
      */
     @Override
-    public float[] getHitboxPositions(){return new float[]{-2.75f,-1.25f,0f,1.35f,2.75f};}
+    public float[] getHitboxPositions(){return new float[]{-1.25f,0f,1.25f};}
     /**
      * <h2>Lamp offset</h2>
      * @return defines the offset for the lamp in blocks.
