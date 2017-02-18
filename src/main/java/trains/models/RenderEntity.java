@@ -1,21 +1,32 @@
 package trains.models;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.*;
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.particle.EntityFX;
+import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
-import trains.models.tmt.Vec2f;
-import trains.models.tmt.Vec3f;
+import trains.models.tmt.*;
 import trains.registry.URIRegistry;
 import trains.utility.ClientProxy;
 import trains.utility.HitboxHandler;
@@ -26,6 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+
+import static trains.TrainsInMotion.MODID;
 
 /**
  * <h2> .Java Entity Rendering</h2>
@@ -56,6 +69,7 @@ public class RenderEntity extends Render {
     private List<ModelBase> bogieRenders = new ArrayList<ModelBase>();
     private List<blockCargo> blockCargoRenders = new ArrayList<blockCargo>();
     private Vec2f rotationvec;
+    private List<ModelRendererTurbo> baseRenders = new ArrayList<ModelRendererTurbo>();
 
     private float wheelPitch=0;
     /**
@@ -116,103 +130,66 @@ public class RenderEntity extends Render {
         GL11.glRotatef((-yaw) - 90, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
 
-        if (entity.bogie.size() > 0) {
+
+        /**
+         * <h3>model caching</h3>
+         * cache individual geometry parts so we can render them properly later.
+         */
+        for (Object box : model.boxList) {
+            if (box instanceof ModelRendererTurbo) {
+                ModelRendererTurbo render = ((ModelRendererTurbo) box);
+                switch (render.boxName){
+                    case "wheel":case "axel":{wheels.add(new wheel(render)); break;}
+                    case "pistonvalveconnector":{advancedPistons.add(new advancedPiston(render)); break;}
+                    case "wheelconnector":case "upperpiston":case "upperpistonarm":{simplePistons.add(new simplePiston(render)); break;}
+                    case "blocklog":{blockCargoRenders.add(new blockCargo(render)); break;}
+                    default:{ baseRenders.add(render); break;}
+                }
+            }
+        }
+
+        /**
+         * <h3>animations</h3>
+         * Be sure animations are enabled in user settings, then check of there is something to animate.
+         * if there is, then calculate the vectors and apply the animations
+         */
+        if (ClientProxy.EnableAnimations && wheels.size()>0 || advancedPistons.size()>0 || simplePistons.size()>0) {
             wheelPitch += (float) (entity.bogie.get(0).motionX + entity.bogie.get(0).motionZ) * 0.05f;
             if (wheelPitch > 360) {
                 wheelPitch = 0;
             }
+            rotationvec = new Vec2f((entity.getPistonOffset() * MathHelper.sin(-wheelPitch * RailUtility.radianF)), (entity.getPistonOffset() * MathHelper.cos(-wheelPitch * RailUtility.radianF)));
+            for (wheel tempWheel : wheels) {tempWheel.rotate(wheelPitch);}
+
+            for (advancedPiston advPiston : advancedPistons) {advPiston.rotationMoveYZX(rotationvec);}
+
+            for (simplePiston basicPiston : simplePistons) {basicPiston.moveYZ(rotationvec);}
         }
 
         /**
-         * If the wheels aren't defined, and the train isn't maglev, then we need to parse all the ModelRenderers for the train and its bogies
-         * and cache references, along with original positions of all the pistons.
-         * In some cases we just need the reference, like for wheels, and more advanced pistons we also need the rotation.
-         *
-         * Assuming there are cached values to animate, then we'll animate them using the functionality from the variable classes.
-         * TODO: add a render for doors, the animation is started when an entity mounts/unmounts the train/rollingstock. needs a sliding and a swing animation.
+         * <h3>Render geometry</h3>
+         * Bind the texture first, then render any geometry that is supposed to use the default texture.
+         * Next check if there are any cargo blocks, if there is, bind the block texture from minecraft and render the cargo.
          */
-        if (ClientProxy.EnableAnimations) {
-            if (wheels != null && wheels.size() < 1 && entity.getType() != TrainsInMotion.transportTypes.MAGLEV) {
-                List boxes = model.boxList;
-                if (bogieModel != null) {
-                    boxes.add(bogieModel.boxList);
-                }
-                for (Object box : boxes) {
-                    if (box instanceof ModelRenderer) {
-                        ModelRenderer render = ((ModelRenderer) box);
-                        if (render.boxName.equals("wheel")) {
-                            wheels.add(new wheel(render));
-                        } else if (render.boxName.equals("pistonvalveconnector")) {
-                            advancedPistons.add(new advancedPiston(render));
-                        } else if (
-                                render.boxName.equals("wheelconnector") || render.boxName.equals("upperpiston") || render.boxName.equals("upperpistonarm")
-                                ) {
-                            simplePistons.add(new simplePiston(render));
-                        } else if (render.boxName.equals("BlockLog")){
-                            blockCargoRenders.add(new blockCargo(render));
-                        }
-                    }
-                }
-                //if there are no boxes to animate set wheels to null
-                if (wheels.size() < 1) {
-                    wheels = null;
-                }
-            }
-
-            //if wheels is not null, then animate the model.
-            if (wheels != null) {
-                rotationvec = new Vec2f((entity.getPistonOffset() * MathHelper.sin(-wheelPitch * RailUtility.radianF)), (entity.getPistonOffset() * MathHelper.cos(-wheelPitch * RailUtility.radianF)));
-                for (wheel tempWheel : wheels) {
-                    tempWheel.rotate(wheelPitch);
-                }
-
-                for (advancedPiston advPiston : advancedPistons) {
-                    advPiston.rotationMoveYZX(rotationvec);
-                }
-
-                for (simplePiston basicPiston : simplePistons) {
-                    basicPiston.moveYZ(rotationvec);
-                }
-
-                for (int i=0; i< blockCargoRenders.size(); i++){
-                    if (i <=entity.inventory.calculatePercentageUsed(blockCargoRenders.size())){
-                        //TODO: i dont think this texture binding will work.... And even if it does we need a way to better define the specific item
-                        blockCargoRenders.get(i).boxRefrence.setDefaultTexture(Block.getBlockFromItem(entity.inventory.getStackInSlot(i).getItem()).getBlockTextureFromSide(0).toString());
-                    } else {
-                        blockCargoRenders.get(i).boxRefrence.setDefaultTexture("textures/generic/transparent.png");
-                    }
-                }
-            }
-        }
-
-
-        //Bind the texture
         bindTexture(texture);
-
-        //finally render the model and push the changes to GL.
-        model.render(entity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.065f);
-        GL11.glPushMatrix();
-
-
-
-        //clear the cache, one pop for every push.
-        GL11.glPopMatrix();
-        GL11.glPopMatrix();
-
-        /**
-         * <h4> render bogies</h4>
-         * in TiM here we render the bogies.
-         * we get the entity and do an instanceof check, see if it's a train or a rollingstock, then do a for loop on the bogies, and render them the same way we do trains and rollingstock.
-         */
-        if (bogieModel != null){
-            for (int i=0; i<entity.getBogieOffsets().size();i++){
-                if (bogieRenders.size() <= i){
-                    //we move it to another variable before putting it in the array as an attempt to clone it. This is probably wrong but it will have to be sorted out later.
-                    ModelBase tempModel = bogieModel;
-                    bogieRenders.add(tempModel);
-                }
+        for(Object cube : model.boxList){
+            if (cube instanceof ModelRendererTurbo &&
+                    !"blocklog".equals(((ModelRendererTurbo) cube).boxName)) {
+                ((ModelRendererTurbo)cube).render();
             }
         }
+
+        if (blockCargoRenders.size()>0){
+            bindTexture(TextureMap.locationBlocksTexture);
+            for (blockCargo cargo : blockCargoRenders){
+                GL11.glPushMatrix();
+                GL11.glTranslated((cargo.boxRefrence.rotationPointX /16), (cargo.boxRefrence.rotationPointY /16), (cargo.boxRefrence.rotationPointZ /16));
+                GL11.glScaled(0.25,0.25,0.25);
+                field_147909_c.renderBlockAsItem(Blocks.brick_block, 0, 1f);
+                GL11.glPopMatrix();
+            }
+        }
+
 
         /**
          * <h4>Smoke management</h4>
@@ -252,9 +229,32 @@ public class RenderEntity extends Render {
             }
         }
 
+        /**
+         * <h4> render bogies</h4>
+         * in TiM here we render the bogies.
+         * we get the entity and do an instanceof check, see if it's a train or a rollingstock, then do a for loop on the bogies, and render them the same way we do trains and rollingstock.
+         * TODO: bogie renders aren't properly cached yet
+         */
+        if (bogieModel != null){
+            for (int i=0; i<entity.getBogieOffsets().size();i++){
+                if (bogieRenders.size() <= i){
+                    //we move it to another variable before putting it in the array as an attempt to clone it. This is probably wrong but it will have to be sorted out later.
+                    ModelBase tempModel = bogieModel;
+                    bogieRenders.add(tempModel);
+                }
+            }
+        }
+
+
 
     }
 
+
+    /**
+     * <h2>variables</h2>
+     * Rather than make a bunch of new class files to define variables that are only used in this class,
+     * we just define them like functions and use them as variables.
+     */
 
     /**
      * <h3>advanced piston</h3>
@@ -262,10 +262,10 @@ public class RenderEntity extends Render {
      * this caches a reference to the ModelRenderer as well.
      */
     private class advancedPiston{
-        private ModelRenderer boxRefrence = null;
+        private ModelRendererTurbo boxRefrence = null;
         private Vec3f position = null;
 
-        public advancedPiston(ModelRenderer boxToRender){
+        public advancedPiston(ModelRendererTurbo boxToRender){
             if (boxRefrence == null){
                 boxRefrence = boxToRender;
                 position = new Vec3f(boxToRender.rotationPointZ, boxToRender.rotationPointY, boxToRender.rotateAngleX);
@@ -286,9 +286,9 @@ public class RenderEntity extends Render {
      * used to store a reference to the wheel for quick animation.
      */
     private class wheel {
-        private ModelRenderer boxRefrence = null;
+        private ModelRendererTurbo boxRefrence = null;
 
-        public wheel(ModelRenderer boxToRender){
+        public wheel(ModelRendererTurbo boxToRender){
             if (boxRefrence == null){
                 boxRefrence = boxToRender;
             }
@@ -305,13 +305,13 @@ public class RenderEntity extends Render {
      * also stores the random rotation for the block so we can define different rotations for each block
      */
     private class blockCargo {
-        private ModelRenderer boxRefrence = null;
-        public int randomRotation = ThreadLocalRandom.current().nextInt(0, 3) *90;
+        private ModelRendererTurbo boxRefrence = null;
+        public int randomRotation = (ThreadLocalRandom.current().nextInt(0, 3)) *90;
 
-        public blockCargo(ModelRenderer boxToRender){
+        public blockCargo(ModelRendererTurbo boxToRender){
             if (boxRefrence == null){
                 boxRefrence = boxToRender;
-                boxRefrence.rotateAngleX = randomRotation;
+                //boxRefrence.rotateAngleZ = randomRotation;
             }
         }
     }
@@ -322,10 +322,10 @@ public class RenderEntity extends Render {
      * in this case we only need to cache a reference and the original position.
      */
     private class simplePiston {
-        private ModelRenderer boxRefrence = null;
+        private ModelRendererTurbo boxRefrence = null;
         private Vec2f position = null;
 
-        public simplePiston(ModelRenderer boxToRender){
+        public simplePiston(ModelRendererTurbo boxToRender){
             if (boxRefrence == null){
                 boxRefrence = boxToRender;
                 position = new Vec2f(boxToRender.rotationPointZ, boxToRender.rotationPointY);

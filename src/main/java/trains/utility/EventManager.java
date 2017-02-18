@@ -12,6 +12,7 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
+import trains.entities.rollingstock.EntityVATLogCar;
 import trains.networking.PacketKeyPress;
 import trains.networking.PacketMount;
 
@@ -73,7 +74,7 @@ public class EventManager {
 
             switch (((HitboxHandler.multipartHitbox) event.target).parent.getType()){
                 case LOGCAR:{
-                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, event.target.getEntityId()));
+                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, ((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
                     break;
                 }
                 default:{

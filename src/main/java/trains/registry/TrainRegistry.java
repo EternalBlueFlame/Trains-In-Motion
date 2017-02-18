@@ -74,7 +74,7 @@ public class TrainRegistry {
         ));
 
         output.add(new TrainRegistry(EntityVATLogCar.class, EntityVATLogCar.thisItem, "entityvatlogcar",
-                new VATLogCar(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
+                new VATLogCar(), URIRegistry.TEXTURE_GENERIC.getResource("null.png"),
                 null, null,
                 new ArrayList<Item>(Arrays.asList(new Item[]{Items.apple,null,null,null,null,null,null,null,null,null}))
         ));

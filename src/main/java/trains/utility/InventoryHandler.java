@@ -48,9 +48,13 @@ public class InventoryHandler implements IInventory{
     public InventoryHandler(GenericRailTransport host){
         if (host != null) {
             this.host = host;
-            while (items.size() < getSizeInventory() + (host.getRiderOffsets().length-1)) {
+            while (items.size() < getSizeInventory()) {
                 items.add(null);
             }
+            if (host.getRiderOffsets().length >1){
+                items.add(null);
+            }
+
         } else {
             items.add(null);
         }

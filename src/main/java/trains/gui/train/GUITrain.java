@@ -84,7 +84,8 @@ public class GUITrain extends GuiContainer {
             renderTrainInventory(guiTop,guiLeft,this.zLevel, this.mc, firstTankFluid, secondTankFluid);
         } else if (transport != null){
             switch (transport.getType()){
-                case PASSENGER:{renderPassengerInventory(guiTop,guiLeft,this.zLevel, this.mc);}
+                case PASSENGER:{renderPassengerInventory(guiTop,guiLeft,this.zLevel, this.mc); break;}
+                case LOGCAR: case FREIGHT:{renderFreightInventory(guiTop,guiLeft, this.zLevel, this.mc); break;}
             }
         }
 
@@ -304,6 +305,16 @@ public class GUITrain extends GuiContainer {
 
     //similar to the above but for passenger cars. make a different call for freight, and etc.
     public static void renderPassengerInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
+
+        int rows=0;
+        mc.getTextureManager().bindTexture(vanillaInventory);
+        //make a loop that will make a new row every 5 items
+        for (int i=0;i<transport.getRiderOffsets().length; i++) {
+            if (i/(rows+1) >=5*(rows+1)){
+                rows++;
+            }
+            drawTexturedModalRect(guiLeft + 7 + (18*(i-(rows * 5))), guiTop + 30+(30*rows), 54, 51, 24, 24, 20, zLevel);
+        }
 
     }
 

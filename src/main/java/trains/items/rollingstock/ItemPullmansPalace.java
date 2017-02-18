@@ -29,7 +29,8 @@ import java.util.UUID;
 
 public class ItemPullmansPalace extends Item {
 
-    private static final String weight = "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2" + StatCollector.translateToLocal("menu.item.tons");
+    private static final String weight = "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2 " + StatCollector.translateToLocal("menu.item.tons");
+    private static final String seats = "\u00A77" + StatCollector.translateToLocal("menu.item.seats") +": 4 " + StatCollector.translateToLocal("menu.item.players");
 
     /**
      * <h2>constructor</h2>
@@ -48,11 +49,13 @@ public class ItemPullmansPalace extends Item {
     @Override
     public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par3List, boolean par4) {
         par3List.add(weight);
+        par3List.add(seats);
     }
 
 
     /**
-     * spawns the train when the player/entity tries to use it on a tile.
+     * <h2>Spawn the rollingstock</h2>
+     * spawns the rollingstock when the player/entity tries to use it on a tile.
      *
      * for information on the world spawn see
      * @see World#spawnEntityInWorld(Entity)

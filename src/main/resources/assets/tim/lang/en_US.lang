@@ -43,6 +43,10 @@ menu.item.america=USA
 menu.item.pullingpower=Pulling power
 menu.item.tons=Tons
 menu.item.weight=Weight
+menu.item.seats=Seats
+menu.item.weight=Players
+menu.item.iszeof=Inventory size of
+menu.item.slots=Slots
 
 item.oilbucket=Oil bucket
 

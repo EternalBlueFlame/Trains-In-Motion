@@ -21,16 +21,16 @@ import java.util.UUID;
 
 
 /**
- * <h2>Pullman's palace Item</h2>
- * when creating a new train or rollingstock you must make a clone of this class and set the values to match.
- * the constructor is the same for all except for the sub-text .
- * onItemUse only needs the first value in placeOnRail changed to the class for your train/rollingstock entity.
+ * <h2>VAT Log Car Item</h2>
+ * for more information:
+ * @see ItemPullmansPalace
  * @author Eternal Blue Flame
  */
 
 public class ItemVATLogCar extends Item {
 
     private static final String weight = "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2" + StatCollector.translateToLocal("menu.item.tons");
+    private static final String inventorySize = "\u00A77" + StatCollector.translateToLocal("menu.item.sizeof") +": 27" + StatCollector.translateToLocal("menu.item.slots");
 
     /**
      * <h2>constructor</h2>
@@ -49,22 +49,13 @@ public class ItemVATLogCar extends Item {
     @Override
     public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par3List, boolean par4) {
         par3List.add(weight);
+        par3List.add(inventorySize);
     }
 
 
     /**
-     * spawns the train when the player/entity tries to use it on a tile.
-     *
-     * for information on the world spawn see
-     * @see World#spawnEntityInWorld(Entity)
-     *
-     * for information on what the variables used in the spawn functions are doing
-     * @see EntityPullmansPalace#EntityPullmansPalace(UUID, World, double, double, double)
-     *
-     * for the base functionality of how this works
-     * @see RailUtility#placeOnRail(GenericRailTransport, EntityPlayer, World, int, int, int)
-     *
-     * @return defines whether or not to play the placing animation, we dont want to do this on server.
+     * <h2>Spawn the rollingstock</h2>
+     * spawns the rollingstock when the player/entity tries to use it on a tile.
      */
     @Override
     public boolean onItemUse(ItemStack itemStack, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ, int blockSide, float pointToRayX, float pointToRayY, float pointToRayZ) {

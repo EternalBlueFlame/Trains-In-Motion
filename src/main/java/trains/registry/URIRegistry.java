@@ -13,12 +13,12 @@ import static trains.TrainsInMotion.MODID;
 public enum URIRegistry {
 
     GUI_PREFIX("textures/gui/"),
-    MODEL_TRAIN_TEXTURE("models/train/texture/"),
-    ITEM_TRAIN_TEXTURE("train/"),
-    MODEL_ROLLINGSTOCK_TEXTURE("models/rollingstock/texture/"),
-    ITEM_ROLLINGSTOCK_TEXTURE("rollingstock/"),
-    MODEL_RAIL_TEXTURE("models/rail/textures/"),
-    MODEL_BLOCK_TEXTURE("models/block/texture"),
+    MODEL_TRAIN_TEXTURE("texture/train"),
+    ITEM_TRAIN_TEXTURE("item/train/"),
+    MODEL_ROLLINGSTOCK_TEXTURE("texture/rollingstock/"),
+    ITEM_ROLLINGSTOCK_TEXTURE("item/rollingstock/"),
+    MODEL_RAIL_TEXTURE("texture/rail/"),
+    MODEL_BLOCK_TEXTURE("texture/block/"),
     TEXTURE_GENERIC("textures/generic/"),
     TEXTURE_BLOCK("textures/block/"),
     SOUND_HORN("audio/horns/"),

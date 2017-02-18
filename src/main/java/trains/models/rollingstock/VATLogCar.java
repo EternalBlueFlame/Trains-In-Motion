@@ -35,17 +35,17 @@ public class VATLogCar extends ModelBase {
 		modelvatlogcarModel[13] = new ModelRendererTurbo(this, 25, 25, textureX, textureY); // Box 16
 		modelvatlogcarModel[14] = new ModelRendererTurbo(this, 33, 25, textureX, textureY); // Box 17
 		modelvatlogcarModel[15] = new ModelRendererTurbo(this, 41, 25, textureX, textureY); // Box 18
-		modelvatlogcarModel[16] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "BlockLog"); // BlockLog
-		modelvatlogcarModel[17] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "BlockLog"); // BlockLog 2
-		modelvatlogcarModel[18] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "BlockLog"); // BlockLog 3
-		modelvatlogcarModel[19] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "BlockLog"); // BlockLog 4
-		modelvatlogcarModel[20] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "BlockLog"); // BlockLog 5
-		modelvatlogcarModel[21] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "BlockLog"); // BlockLog 6
-		modelvatlogcarModel[22] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "BlockLog"); // BlockLog 7
-		modelvatlogcarModel[23] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "BlockLog"); // BlockLog 8
-		modelvatlogcarModel[24] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "BlockLog"); // BlockLog 9
-		modelvatlogcarModel[25] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "BlockLog"); // BlockLog 10
-		modelvatlogcarModel[26] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "BlockLog"); // BlockLog 11
+		modelvatlogcarModel[16] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog"); // BlockLog
+		modelvatlogcarModel[17] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog"); // BlockLog 2
+		modelvatlogcarModel[18] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog"); // BlockLog 3
+		modelvatlogcarModel[19] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog"); // BlockLog 4
+		modelvatlogcarModel[20] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog"); // BlockLog 5
+		modelvatlogcarModel[21] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog"); // BlockLog 6
+		modelvatlogcarModel[22] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog"); // BlockLog 7
+		modelvatlogcarModel[23] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog"); // BlockLog 8
+		modelvatlogcarModel[24] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog"); // BlockLog 9
+		modelvatlogcarModel[25] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog"); // BlockLog 10
+		modelvatlogcarModel[26] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog"); // BlockLog 11
 
 		modelvatlogcarModel[0].addBox(0F, 0F, 0F, 18, 2, 44, 0F); // Box 0
 		modelvatlogcarModel[0].setRotationPoint(-9F, -2F, -22F);
