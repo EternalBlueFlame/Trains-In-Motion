@@ -329,16 +329,15 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
 
 
-
-    public void addVelocity(double velocityX, double velocityZ){
+    @Override
+    public void addVelocity(double velocityX, double velocityY, double velocityZ){
         //handle movement for trains, this will likely need to be different for rollingstock.
             for (EntityBogie currentBogie : bogie) {
                 //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                motion[0] = velocityX;
-                motion[2] = velocityZ;
-                motion[1] = currentBogie.motionY;
-                currentBogie.setVelocity(motion[0], motion[1], motion[2]);
-                currentBogie.minecartMove();
+                currentBogie.cartVelocityX = currentBogie.motionX += velocityX;
+                currentBogie.cartVelocityY = currentBogie.motionY += velocityY;
+                currentBogie.cartVelocityZ = currentBogie.motionZ += velocityZ;
+                currentBogie.isAirBorne = true;
             }
     }
 
@@ -390,21 +389,19 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
              */
             if (bogieSize>0){
 
-                boolean collision = !hitboxHandler.getCollision(this);
+                boolean collision = hitboxHandler.getCollision(this);
                 //handle movement.
+                if (!collision) {
                 for (EntityBogie currentBogie : bogie) {
-                    if (collision) {
                         if (currentBogie != null) {
-                            motion = rotatePoint(new double[]{processMovement(currentBogie), motionY, 0}, 0.0f, currentBogie.rotationYaw, 0.0f);
                             if (brake) {
                                 currentBogie.setVelocity(currentBogie.cartVelocityX * 0.8d, currentBogie.cartVelocityY, currentBogie.cartVelocityZ * 0.8d);
                             }
-                            currentBogie.setVelocity(motion[0], motion[1], motion[2]);
                             currentBogie.minecartMove();
                         }
-                    } else {
-                        motion = new double[]{0d, 0d, 0d};
                     }
+                }else {
+                    motion = new double[]{0d, 0d, 0d};
                 }
 
                 //position this
@@ -431,7 +428,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         i++;
                     }
                 }
-                manageLinks();
+                //manageLinks();
             }
 
             //rider updating isn't called if there's no driver/conductor, so just in case of that, we reposition the seats here too.
@@ -531,7 +528,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         toHere[0] += frontLink.posX;
                         toHere[2] += frontLink.posZ;
                     }
-                    this.addVelocity(-(fromHere[0] - toHere[0]) * 0.1, -(fromHere[2] - toHere[2]) * 0.1);
+                    this.addVelocity(-(fromHere[0] - toHere[0]) * 0.1,0, -(fromHere[2] - toHere[2]) * 0.1);
                 }
             } else if (isCoupling) {
                 double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[0] - 2.5, 0, 0}, 0, rotationYaw, 0);
@@ -569,7 +566,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         toHere[0] += backLink.posX;
                         toHere[2] += backLink.posZ;
                     }
-                    this.addVelocity(-(fromHere[0] - toHere[0]) * 0.1, -(fromHere[2] - toHere[2]) * 0.1);
+                    this.addVelocity(-(fromHere[0] - toHere[0]) * 0.1, 0, -(fromHere[2] - toHere[2]) * 0.1);
                 }
             } else if (isCoupling) {
                 double[] backCheck = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length - 1] + 2.5, 0, 0}, 0, rotationYaw, 0);

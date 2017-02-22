@@ -45,7 +45,7 @@ public class GUITrain extends GuiContainer {
      * also puts the entity to a variable that can be accessed on client.
      * @see ContainerHandler
      */
-    public GUITrain(InventoryPlayer inventoryPlayer, EntityTrainCore entity) {
+    public GUITrain(InventoryPlayer inventoryPlayer, GenericRailTransport entity) {
         super(new ContainerHandler(inventoryPlayer, entity,  false));
         player = inventoryPlayer.player;
         transport = entity;
@@ -332,7 +332,7 @@ public class GUITrain extends GuiContainer {
             default:{
                 for (int ic = 0; ic < transport.getInventorySize().getRow(); ic++) {
                     for (int ir = 0; ir > -transport.getInventorySize().getCollumn(); ir--) {
-                        drawTexturedModalRect( guiLeft + 40 + (ic * 18), guiTop +43 + (ir * 18), 54, 51, 18, 18, 20, zLevel);
+                        drawTexturedModalRect( guiLeft + 8 + (ic * 18), guiTop +43 + (ir * 18), 54, 51, 18, 18, 20, zLevel);
                     }
                 }
                 break;

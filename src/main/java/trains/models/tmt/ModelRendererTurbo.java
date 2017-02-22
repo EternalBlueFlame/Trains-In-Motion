@@ -293,6 +293,11 @@ public class ModelRendererTurbo extends ModelRenderer {
         float scaleX = w * scale;
         float scaleY = h * scale;
         float scaleZ = d * scale;
+
+        xScale = (w * scale) * 0.065f;
+        yScale = (h * scale) * 0.065f;
+        zScale = (d * scale) * 0.065f;
+
         
         float x1 = x + scaleX;
         float y1 = y + scaleY;
@@ -1684,6 +1689,9 @@ public class ModelRendererTurbo extends ModelRenderer {
     public boolean useLegacyCompiler;
     public List<ModelRenderer> childModels = new ArrayList<ModelRenderer>();
     public final String boxName;
+    public float xScale;
+    public float yScale;
+    public float zScale;
     
     private String defaultTexture;
     

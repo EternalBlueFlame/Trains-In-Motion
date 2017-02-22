@@ -69,7 +69,6 @@ public class RenderEntity extends Render {
     private List<ModelBase> bogieRenders = new ArrayList<ModelBase>();
     private List<blockCargo> blockCargoRenders = new ArrayList<blockCargo>();
     private Vec2f rotationvec;
-    private List<ModelRendererTurbo> baseRenders = new ArrayList<ModelRendererTurbo>();
 
     private float wheelPitch=0;
     /**
@@ -142,8 +141,20 @@ public class RenderEntity extends Render {
                     case "wheel":case "axel":{wheels.add(new wheel(render)); break;}
                     case "pistonvalveconnector":{advancedPistons.add(new advancedPiston(render)); break;}
                     case "wheelconnector":case "upperpiston":case "upperpistonarm":{simplePistons.add(new simplePiston(render)); break;}
-                    case "blocklog":{blockCargoRenders.add(new blockCargo(render)); break;}
-                    default:{ baseRenders.add(render); break;}
+                    default:{
+                        if (render.boxName.contains("blocklog")) {
+                            boolean added = false;
+                            for (blockCargo cargo : blockCargoRenders) {
+                                if (cargo.name.equals(render.boxName)) {
+                                    cargo.add(render);
+                                    added = true;
+                                    break;
+                                }
+                            }
+                            if (!added) {
+                                blockCargoRenders.add(new blockCargo().add(render));
+                            }
+                        } break;}
                 }
             }
         }
@@ -153,12 +164,14 @@ public class RenderEntity extends Render {
          * Be sure animations are enabled in user settings, then check of there is something to animate.
          * if there is, then calculate the vectors and apply the animations
          */
-        if (ClientProxy.EnableAnimations && wheels.size()>0 || advancedPistons.size()>0 || simplePistons.size()>0) {
-            wheelPitch += (float) (entity.bogie.get(0).motionX + entity.bogie.get(0).motionZ) * 0.05f;
+        if ((ClientProxy.EnableAnimations && entity.bogie.size()>0) && (wheels.size()>0 || advancedPistons.size()>0 || simplePistons.size()>0)) {
+            wheelPitch += (float) (1);
             if (wheelPitch > 360) {
                 wheelPitch = 0;
             }
-            rotationvec = new Vec2f((entity.getPistonOffset() * MathHelper.sin(-wheelPitch * RailUtility.radianF)), (entity.getPistonOffset() * MathHelper.cos(-wheelPitch * RailUtility.radianF)));
+            double[] pos = RailUtility.rotatePoint(new double[]{entity.getPistonOffset()*RailUtility.radianF,0,0}, wheelPitch,wheelPitch,0);
+            rotationvec.x = (float) pos[0];
+            rotationvec.y = (float) pos[2];
             for (wheel tempWheel : wheels) {tempWheel.rotate(wheelPitch);}
 
             for (advancedPiston advPiston : advancedPistons) {advPiston.rotationMoveYZX(rotationvec);}
@@ -174,21 +187,38 @@ public class RenderEntity extends Render {
         bindTexture(texture);
         for(Object cube : model.boxList){
             if (cube instanceof ModelRendererTurbo &&
-                    !"blocklog".equals(((ModelRendererTurbo) cube).boxName)) {
+                    !(((ModelRendererTurbo) cube).boxName).contains("blocklog")) {
                 ((ModelRendererTurbo)cube).render();
             }
         }
 
+        int itteration=0;
         if (blockCargoRenders.size()>0){
             bindTexture(TextureMap.locationBlocksTexture);
-            for (blockCargo cargo : blockCargoRenders){
-                GL11.glPushMatrix();
-                GL11.glTranslated((cargo.boxRefrence.rotationPointX /16), (cargo.boxRefrence.rotationPointY /16), (cargo.boxRefrence.rotationPointZ /16));
-                GL11.glScaled(0.25,0.25,0.25);
-                field_147909_c.renderBlockAsItem(Blocks.brick_block, 0, 1f);
-                GL11.glPopMatrix();
+            //loop for the groups of cargo
+            for (blockCargo cargo : blockCargoRenders) {
+                //limit loops to how much should be rendered based on inventory content
+                if (itteration<entity.inventory.calculatePercentageUsed(blockCargoRenders.size())) {
+                    //loop through the models in the group
+                    for (ModelRendererTurbo block : cargo.boxRefrence) {
+                        GL11.glPushMatrix();
+                        //define position from model
+                        GL11.glTranslated(((block.offsetX + block.rotationPointX) / 16),
+                                ((block.offsetY + block.rotationPointY) / 16),
+                                ((block.offsetZ + block.rotationPointZ) / 16));
+                        //define the rotation from the model
+                        GL11.glRotated(block.rotateAngleX * RailUtility.degreesD, 1, 0, 0);
+                        GL11.glRotated(block.rotateAngleY * RailUtility.degreesD, 0, 1, 0);
+                        GL11.glRotated(block.rotateAngleZ * RailUtility.degreesD, 0, 0, 1);
+                        GL11.glScaled(block.xScale, block.yScale, block.zScale);
+                        field_147909_c.renderBlockAsItem(Blocks.log, 0, 1f);
+                        GL11.glPopMatrix();
+                    }
+                }
+                itteration++;
             }
         }
+        GL11.glPopMatrix();
 
 
         /**
@@ -207,7 +237,7 @@ public class RenderEntity extends Render {
                     direction[0] += entity.posX;
                     direction[1] += entity.posY;
                     direction[2] += entity.posZ;
-                    smokeFX renderSmoke = new smokeFX(entity.worldObj,
+                    smokeFX renderSmoke = new smokeFX(Minecraft.getMinecraft().theWorld,
                             direction[0], direction[1], direction[2], 10);
                     randomX = (rand.nextInt(100) - 50) * 0.0001f;
                     randomZ = (rand.nextInt(100) - 50) * 0.0001f;
@@ -216,7 +246,7 @@ public class RenderEntity extends Render {
                         renderSmoke.setVelocity(randomX, smoke[1] * 0.0075, randomZ);
                     } else if (entity instanceof EntityTrainCore) {
 
-                        renderSmoke.setVelocity((entity.motion[0] * ((EntityTrainCore) entity).accelerator) + randomX, randomZ, (entity.motion[2] * ((EntityTrainCore) entity).accelerator) + randomZ);
+                        renderSmoke.setVelocity((entity.motion[0] * ((EntityTrainCore) entity).accelerator) + randomX, smoke[1], (entity.motion[2] * ((EntityTrainCore) entity).accelerator) + randomZ);
                     }
                     renderSmoke.setParticleTextureIndex(0);
                     if (smoke[3] > 0.55f) {
@@ -305,14 +335,14 @@ public class RenderEntity extends Render {
      * also stores the random rotation for the block so we can define different rotations for each block
      */
     private class blockCargo {
-        private ModelRendererTurbo boxRefrence = null;
+        public String name;
+        private List<ModelRendererTurbo> boxRefrence = new ArrayList<ModelRendererTurbo>();
         public int randomRotation = (ThreadLocalRandom.current().nextInt(0, 3)) *90;
 
-        public blockCargo(ModelRendererTurbo boxToRender){
-            if (boxRefrence == null){
-                boxRefrence = boxToRender;
-                //boxRefrence.rotateAngleZ = randomRotation;
-            }
+        public blockCargo add(ModelRendererTurbo boxToRender){
+            name = boxToRender.boxName;
+            boxRefrence.add(boxToRender);
+            return this;
         }
     }
 

@@ -67,7 +67,7 @@ public class ClientProxy extends CommonProxy {
         //Trains
         if (player != null) {
             if (player.worldObj.getEntityByID(ID) instanceof GenericRailTransport) {
-                return new GUITrain(player.inventory, (EntityTrainCore) player.worldObj.getEntityByID(ID));
+                return new GUITrain(player.inventory, (GenericRailTransport) player.worldObj.getEntityByID(ID));
                 //tile entities
             } else if (player.worldObj.getTileEntity(x,y,z) instanceof TileEntityStorage) {
                 return new GUITrainTable(player.inventory, player.worldObj, x, y, z);

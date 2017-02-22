@@ -71,15 +71,10 @@ public class PacketKeyPress implements IMessage {
                  */
                 else if (message.key == 1) {
                     EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
-                    if (entityPlayer != null && ridingEntity instanceof EntityTrainCore) {
-                        switch (((EntityTrainCore) ridingEntity).getType()) {
-                            case STEAM: {
-                                entityPlayer.openGui(TrainsInMotion.instance, message.entity, entityPlayer.worldObj,
-                                        MathHelper.floor_double(ridingEntity.posX), MathHelper.floor_double(ridingEntity.posY),
-                                        MathHelper.floor_double(ridingEntity.posZ));
-                                break;
-                            }
-                        }
+                    if (entityPlayer != null) {
+                        entityPlayer.openGui(TrainsInMotion.instance, message.entity, entityPlayer.worldObj,
+                                MathHelper.floor_double(ridingEntity.posX), MathHelper.floor_double(ridingEntity.posY),
+                                MathHelper.floor_double(ridingEntity.posZ));
                     }
                 }
             }

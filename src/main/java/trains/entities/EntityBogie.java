@@ -264,6 +264,13 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         cartVelocityZ = motionZ = z;
     }
 
+    @Override
+    public void addVelocity(double velocityX, double velocityY, double velocityZ){
+        //handle movement for trains, this will likely need to be different for rollingstock.
+            setVelocity(motionX + velocityX, motionY + velocityY, motionZ + velocityZ);
+            isAirBorne = true;
+    }
+
 
 
 }

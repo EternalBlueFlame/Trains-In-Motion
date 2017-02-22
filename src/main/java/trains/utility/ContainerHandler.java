@@ -64,6 +64,7 @@ public class ContainerHandler extends Container{
         }
 
 
+        //cover trains
         if (entityTrain instanceof EntityTrainCore) {
             //define the transport's inventory size
             int slot=1;
@@ -76,21 +77,27 @@ public class ContainerHandler extends Container{
                 //water slot
                 addSlotToContainer(new waterSlot(((EntityTrainCore) railTransport).inventory, 1, 35, 53));
             }
-            if (railTransport.getRiderOffsets().length >1){
-                //TODO: slot ticket
-                addSlotToContainer(new Slot(((EntityTrainCore) railTransport).inventory,2,0,0));
-                slot++;
-            }
 
 
             //transport inventory
             for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
                 for (int ib = 0; ib < entityTrain.getInventorySize().getCollumn(); ib++) {
-                    addSlotToContainer(new filteredSlot(((EntityTrainCore) railTransport).inventory, slot, 98 + (ib * 18), (ia * 18) + 44));
+                    addSlotToContainer(new filteredSlot(railTransport.inventory, slot, 98 + (ib * 18), (ia * 18) + 44));
                     slot++;
                 }
             }
-        } else if (isCrafting){
+            //cover rollingstock
+        } else if (entityTrain != null){
+            int slot =0;
+            //transport inventory
+            for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
+                for (int ib = 0; ib < entityTrain.getInventorySize().getCollumn(); ib++) {
+                    addSlotToContainer(new filteredSlot(railTransport.inventory, slot, 9 + (ib * 18), (ia * 18) + 44));
+                    slot++;
+                }
+            }
+        }
+        else if (isCrafting){
             //crafting item output slot
             this.addSlotToContainer(new SlotCrafting(iinventory.player, ((EntityTrainCore) railTransport).inventory, this.craftResult, 10, 124, 35));
             //crafting grid.
@@ -211,7 +218,7 @@ public class ContainerHandler extends Container{
             if (railTransport.isDead) {
                 return false;
             } else {
-                return railTransport.getPermissions(player, true, false);
+                return railTransport.getPermissions(player, railTransport instanceof EntityTrainCore, false);
             }
         } else {
             return craftingTable != null;

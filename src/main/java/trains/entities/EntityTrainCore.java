@@ -3,11 +3,13 @@ package trains.entities;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.audio.ISound;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import trains.networking.PacketKeyPress;
 import trains.utility.FuelHandler;
+import trains.utility.RailUtility;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -140,49 +142,6 @@ public class EntityTrainCore extends GenericRailTransport {
 
     }
 
-    /**
-     * <h2>process train movement</h2>
-     * called by onUpdate to figure out the amount of movement to apply every tick and in what direction
-     * @see #onUpdate()
-     */
-    @Override
-    public double processMovement(EntityBogie entityBogie){
-
-        //first define direction
-        double X =0;
-        if (MathHelper.floor_double(entityBogie.motionX) !=0){
-            X = entityBogie.motionX;
-        } else {
-            X = entityBogie.motionZ;
-        }
-        //add drag.
-        double speed =  X * calculateDrag(0.9f, front, back);
-
-        //compensate for if the train is still.
-        if (speed ==0){
-            speed = ((accelerator / 6f)*0.1f) * getAcceleration();
-        }
-
-        //now apply the accelerator if it's not 0 and there is enough fuel.
-        if (accelerator!=0) {
-            //if ((getType() == TrainsInMotion.transportTypes.STEAM || getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM)) {
-            //    if (tanks.getTank(false).getFluidAmount() > tanks.getTank(false).getCapacity()*0.5f) {
-            speed *=  (Math.copySign(1f, accelerator) + ((accelerator / 6f) * getAcceleration()));
-            //System.out.println(speed + " : " + getMaxSpeed());
-            //    }
-            //} else if (fuelHandler.fuel>0){
-            //    speed *= 1 + ((accelerator / 6f) * getAcceleration());
-            //}
-        }
-
-        //cap speed to max.
-        if (speed>getMaxSpeed()){
-           speed=getMaxSpeed();
-        } else if (speed<-getMaxSpeed()) {
-            speed=-getMaxSpeed();
-        }
-        return speed;
-    }
 
     /**
      * <h2> on entity update</h2>
@@ -193,6 +152,26 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     @Override
     public void onUpdate() {
+
+        double[] move;
+        double speed;
+
+        for (EntityBogie entityBogie : bogie){
+            speed =((accelerator / 6f)*0.1f) * getAcceleration();
+
+            //cap speed to max.
+            if (speed>getMaxSpeed()){
+                speed=getMaxSpeed();
+            } else if (speed<-getMaxSpeed()) {
+                speed=-getMaxSpeed();
+            }
+
+
+            move = RailUtility.rotatePoint(new double[]{speed, 0, 0}, 0, Math.copySign(rotationYaw, 1), 0);
+            entityBogie.addVelocity(move[0], 0, move[2]);
+
+        }
+
         super.onUpdate();
 
         //simple tick management so some code does not need to be run every tick.
