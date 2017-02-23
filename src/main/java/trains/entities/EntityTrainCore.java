@@ -8,6 +8,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import trains.networking.PacketKeyPress;
+import trains.utility.CommonProxy;
 import trains.utility.FuelHandler;
 import trains.utility.RailUtility;
 
@@ -104,8 +105,8 @@ public class EntityTrainCore extends GenericRailTransport {
         if (frontCheckID == nullUUID && backCheckID == nullUUID) {
             return current;
         }
-        GenericRailTransport frontCheck = proxy.getTransportFromUuid(frontCheckID);
-        GenericRailTransport backCheck = proxy.getTransportFromUuid(backCheckID);
+        GenericRailTransport frontCheck = CommonProxy.getTransportFromUuid(frontCheckID);
+        GenericRailTransport backCheck = CommonProxy.getTransportFromUuid(backCheckID);
 
         //if front is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
         if (frontCheck instanceof EntityTrainCore){
@@ -123,17 +124,18 @@ public class EntityTrainCore extends GenericRailTransport {
         UUID nextFront = nullUUID;
         UUID nextBack = nullUUID;
         //detect if the next bogie to look at stats for is in the front or back of the front bogie
-        if (frontCheck != null)
-        if (frontCheck.front != null || frontCheck.front != this.getPersistentID()){
-            nextFront = frontCheck.front;
-        } else if (frontCheck.back != null || frontCheck.back != this.getPersistentID()){
-            nextFront = frontCheck.back;
+        if (frontCheck != null) {
+            if (frontCheck.front != null & frontCheck.front != this.getPersistentID()) {
+                nextFront = frontCheck.front;
+            } else if (frontCheck.back != null & frontCheck.back != this.getPersistentID()) {
+                nextFront = frontCheck.back;
+            }
         }
         //detect if the next bogie to look at stats for is in the front or back of the back bogie
         if (backCheck != null) {
-            if (backCheck.front != null || backCheck.front != this.getPersistentID()) {
+            if (backCheck.front != null & backCheck.front != this.getPersistentID()) {
                 nextBack = backCheck.front;
-            } else if (backCheck.back != null || backCheck.back != this.getPersistentID()) {
+            } else if (backCheck.back != null & backCheck.back != this.getPersistentID()) {
                 nextBack = backCheck.back;
             }
         }
@@ -157,18 +159,21 @@ public class EntityTrainCore extends GenericRailTransport {
         double speed;
 
         for (EntityBogie entityBogie : bogie){
-            speed =((accelerator / 6f)*0.1f) * getAcceleration();
+            if(accelerator!=0) {
+                //acceleration is scaled down to fit the scale of the trains.
+                speed = ((accelerator / 6f) * 0.01302083f) * getAcceleration();
 
-            //cap speed to max.
-            if (speed>getMaxSpeed()){
-                speed=getMaxSpeed();
-            } else if (speed<-getMaxSpeed()) {
-                speed=-getMaxSpeed();
+                //cap speed to max.
+                if (speed > getMaxSpeed()) {
+                    speed = getMaxSpeed();
+                } else if (speed < -getMaxSpeed()) {
+                    speed = -getMaxSpeed();
+                }
+
+
+                move = RailUtility.rotatePoint(new double[]{speed, 0, 0}, rotationPitch, rotationYaw, 0);
+                entityBogie.addVelocity(move[0], move[1], move[2]);
             }
-
-
-            move = RailUtility.rotatePoint(new double[]{speed, 0, 0}, 0, Math.copySign(rotationYaw, 1), 0);
-            entityBogie.addVelocity(move[0], 0, move[2]);
 
         }
 

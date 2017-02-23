@@ -68,7 +68,7 @@ public class RenderEntity extends Render {
     private List<wheel> wheels = new ArrayList<wheel>();
     private List<ModelBase> bogieRenders = new ArrayList<ModelBase>();
     private List<blockCargo> blockCargoRenders = new ArrayList<blockCargo>();
-    private Vec2f rotationvec;
+    private Vec2f rotationvec = new Vec2f(0,0);
 
     private float wheelPitch=0;
     /**
@@ -165,13 +165,13 @@ public class RenderEntity extends Render {
          * if there is, then calculate the vectors and apply the animations
          */
         if ((ClientProxy.EnableAnimations && entity.bogie.size()>0) && (wheels.size()>0 || advancedPistons.size()>0 || simplePistons.size()>0)) {
-            wheelPitch += (float) (1);
+            wheelPitch += (float) (entity.motionX + entity.motionZ);
             if (wheelPitch > 360) {
                 wheelPitch = 0;
             }
             double[] pos = RailUtility.rotatePoint(new double[]{entity.getPistonOffset()*RailUtility.radianF,0,0}, wheelPitch,wheelPitch,0);
-            rotationvec.x = (float) pos[0];
-            rotationvec.y = (float) pos[2];
+            rotationvec.x = MathHelper.floor_double(pos[0]);
+            rotationvec.y = MathHelper.floor_double(pos[2]);
             for (wheel tempWheel : wheels) {tempWheel.rotate(wheelPitch);}
 
             for (advancedPiston advPiston : advancedPistons) {advPiston.rotationMoveYZX(rotationvec);}

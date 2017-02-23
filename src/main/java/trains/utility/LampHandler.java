@@ -17,6 +17,7 @@ public class LampHandler {
     public int Y;
     public int Z;
     public boolean isOn;
+    private boolean shouldUpdate = true;
 
     /**
      * <h2>Update functionality</h2>
@@ -32,7 +33,14 @@ public class LampHandler {
      * @param position defines the position to move the lamp to.
      */
     public void ShouldUpdate(World worldObj, double[] position){
-        if(X !=position[0] || Y != position[1] || Z != position[2]){
+        if (X != position[0]){
+            shouldUpdate = true;
+        } else if (Y != position[1]){
+            shouldUpdate = true;
+        } else if (Z != position[2]){
+            shouldUpdate = true;
+        }
+        if(shouldUpdate){
             //if there was a block placed previously, remove it.
             if (X != 0 && Y != 0 && Z != 0) {
                 worldObj.setBlockToAir(X, Y, Z);
@@ -45,6 +53,7 @@ public class LampHandler {
             if (worldObj.getBlock(X,Y,Z) instanceof BlockAir) {
                 worldObj.setBlock(X,Y,Z, GenericRegistry.lampBlock);
             }
+            shouldUpdate = false;
 
         }
     }

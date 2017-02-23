@@ -99,28 +99,6 @@ public class ClientProxy extends CommonProxy {
     }
 
     /**
-     * <h2>load entity from UUID</h2>
-     * This is a client only version for getting an entity from UUID,
-     * unlike server only one world is ever loaded, so we don't have to loop for every world.
-     * There is a second version of this specifically for Generic Rail Transports.
-     *
-     * We can't use a foreach loop, if we do it will very often throw a java.util.ConcurrentModificationException
-     */
-    @Override
-    @Nullable
-    public GenericRailTransport getTransportFromUuid(UUID uuid) {
-        if (Minecraft.getMinecraft() != null && Minecraft.getMinecraft().theWorld != null) {
-            for (int i=0; i<Minecraft.getMinecraft().theWorld.getLoadedEntityList().size(); i++) {
-                if (Minecraft.getMinecraft().theWorld.getLoadedEntityList().get(i) instanceof GenericRailTransport &&
-                        ((GenericRailTransport) Minecraft.getMinecraft().theWorld.getLoadedEntityList().get(i)).getUniqueID().equals(uuid)) {
-                    return (GenericRailTransport) Minecraft.getMinecraft().theWorld.getLoadedEntityList().get(i);
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
      * <h2>Client Register</h2>
      * A redirect loop for registering the items in the train registry with their own textures and models, and for registering keybindings.
      */

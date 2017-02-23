@@ -71,12 +71,12 @@ public class CommonProxy implements IGuiHandler {
      * We can't use a foreach loop, if we do it will very often throw a java.util.ConcurrentModificationException
      */
     @Nullable
-    public GenericRailTransport getTransportFromUuid(UUID uuid) {
+    public static GenericRailTransport getTransportFromUuid(UUID uuid) {
         for (int w=0; w < MinecraftServer.getServer().worldServers.length; w++) {
             if (MinecraftServer.getServer().worldServers[w] != null) {
                 for (int i=0; i< MinecraftServer.getServer().worldServers[w].getLoadedEntityList().size();i++) {
                     if (MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i) instanceof GenericRailTransport &&
-                            ((GenericRailTransport) MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i)).getUniqueID().equals(uuid)) {
+                            ((GenericRailTransport) MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i)).getPersistentID().equals(uuid)) {
                         return (GenericRailTransport) MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i);
                     }
                 }
