@@ -90,7 +90,7 @@ public class EntityVATLogCar extends EntityRollingStockCore{
      * a Y value of less than 2 will register the lamp as null (this is to allow for null lamps, and to prevent from breaking the rails).
      */
     @Override
-    public Vec3d getLampOffset(){return new Vec3d(0,2,0);}
+    public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
     /**
      * <h2>Smoke offset</h2>
      * @return defines the array of positions in blocks for smoke.

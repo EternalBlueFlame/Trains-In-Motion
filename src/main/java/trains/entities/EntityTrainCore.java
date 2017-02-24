@@ -5,14 +5,17 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import trains.networking.PacketKeyPress;
 import trains.utility.CommonProxy;
 import trains.utility.FuelHandler;
+import trains.utility.HitboxHandler;
 import trains.utility.RailUtility;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.UUID;
 
 import static trains.TrainsInMotion.nullUUID;
@@ -200,6 +203,59 @@ public class EntityTrainCore extends GenericRailTransport {
             accelerator++;
         } else if (!increase && accelerator >-6){
             accelerator--;
+        }
+    }
+
+
+    /**
+     * <h2>linking management</h2>
+     * this is an override to make sure rollingstock doesn't push trains
+     * @see GenericRailTransport#manageLinks()
+     */
+    @Override
+    public void manageLinks(){
+        if(!worldObj.isRemote) {
+
+            if (front == nullUUID && isCoupling) {
+                double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[0] - 2, 0, 0}, 0, rotationYaw, 0);
+                frontCheck[0] +=posX;
+                frontCheck[1] +=posY;
+                frontCheck[2] +=posZ;
+                //TODO: this calculation could be more efficient
+                List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
+                        AxisAlignedBB.getBoundingBox(frontCheck[0] - 0.5d, frontCheck[1], frontCheck[2] - 0.5d,
+                                frontCheck[0] + 0.5d, frontCheck[1] + 2, frontCheck[2] +0.5d));
+
+                if (list.size() > 0) {
+                    for (Object entity : list) {
+                        if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.multipartHitbox) entity).parent.getEntityId())).isCoupling) {
+                            front = ((HitboxHandler.multipartHitbox) entity).parent.getPersistentID();
+                            System.out.println(getEntityId() + " : train front linked : ");
+                        }
+                    }
+                }
+            }
+
+
+            if (back == nullUUID && isCoupling) {
+                double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1] + 2, 0, 0}, 0, rotationYaw, 0);
+                frontCheck[0] +=posX;
+                frontCheck[1] +=posY;
+                frontCheck[2] +=posZ;
+                //TODO: this calculation could be more efficient
+                List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
+                        AxisAlignedBB.getBoundingBox(frontCheck[0] - 0.5d, frontCheck[1], frontCheck[2] - 0.5d,
+                                frontCheck[0] + 0.5d, frontCheck[1] + 2, frontCheck[2] +0.5d));
+
+                if (list.size() > 0) {
+                    for (Object entity : list) {
+                        if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.multipartHitbox) entity).parent.getEntityId())).isCoupling) {
+                            back = ((HitboxHandler.multipartHitbox) entity).parent.getPersistentID();
+                            System.out.println(getEntityId() + " : train back linked : ");
+                        }
+                    }
+                }
+            }
         }
     }
 

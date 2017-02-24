@@ -42,7 +42,7 @@ public class LampHandler {
         }
         if(shouldUpdate){
             //if there was a block placed previously, remove it.
-            if (X != 0 && Y != 0 && Z != 0) {
+            if (X+Y+Z != 0) {
                 worldObj.setBlockToAir(X, Y, Z);
             }
             //set the values

@@ -165,8 +165,8 @@ public class RenderEntity extends Render {
          * if there is, then calculate the vectors and apply the animations
          */
         if ((ClientProxy.EnableAnimations && entity.bogie.size()>0) && (wheels.size()>0 || advancedPistons.size()>0 || simplePistons.size()>0)) {
-            wheelPitch += (float) (entity.motionX + entity.motionZ);
-            if (wheelPitch > 360) {
+            wheelPitch += (float) -(entity.bogie.get(0).motionX + entity.bogie.get(0).motionZ) *0.2;
+            if (wheelPitch > 360 || wheelPitch <-360) {
                 wheelPitch = 0;
             }
             double[] pos = RailUtility.rotatePoint(new double[]{entity.getPistonOffset()*RailUtility.radianF,0,0}, wheelPitch,wheelPitch,0);
