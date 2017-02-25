@@ -102,10 +102,7 @@ public class RailUtility {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
-                    //define the bogie positions
-                    for (double offset: entity.getBogieOffsets()){
-                        entity.bogieXYZ.add(new double[]{posX + 0.5D + offset, posY, posZ + 0.5D});
-                    }
+                    entity.rotationYaw= 0;
                     //spawn the entity
                     worldObj.spawnEntityInWorld(entity);
                     return true;
@@ -119,10 +116,7 @@ public class RailUtility {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
-
-                    for (double offset: entity.getBogieOffsets()){
-                        entity.bogieXYZ.add(new double[]{posX + 0.5D - offset, posY, posZ + 0.5D});
-                    }
+                    entity.rotationYaw= 180;
 
                     worldObj.spawnEntityInWorld(entity);
                     return true;
@@ -138,10 +132,7 @@ public class RailUtility {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
-
-                    for (double offset: entity.getBogieOffsets()){
-                        entity.bogieXYZ.add(new double[]{posX + 0.5D, posY, posZ + 0.5D + offset});
-                    }
+                    entity.rotationYaw= 90;
 
                     worldObj.spawnEntityInWorld(entity);
                     return true;
@@ -154,10 +145,7 @@ public class RailUtility {
                         return false;
                     }
 
-                    for (double offset: entity.getBogieOffsets()){
-                        entity.bogieXYZ.add(new double[]{posX + 0.5D, posY, posZ + 0.5D - offset});
-                    }
-
+                    entity.rotationYaw= 270;
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }

@@ -238,7 +238,7 @@ public class RenderEntity extends Render {
                     direction[1] += entity.posY;
                     direction[2] += entity.posZ;
                     smokeFX renderSmoke = new smokeFX(Minecraft.getMinecraft().theWorld,
-                            direction[0], direction[1], direction[2], 10);
+                            direction[0], direction[1], direction[2], 5);
                     randomX = (rand.nextInt(100) - 50) * 0.0001f;
                     randomZ = (rand.nextInt(100) - 50) * 0.0001f;
                     colorOffset = (rand.nextInt(20) - 10) * 0.01f;
