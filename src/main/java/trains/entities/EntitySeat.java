@@ -24,7 +24,7 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
      * parentId is used to keep a reference to the parent train/rollingstock.
      * the velocities are to replace the client only velocities in forge that have private access.
      */
-    private int parentId = 0;
+    public int parentId = 0;
     private int seatNumber =0;
     protected double cartVelocityX =0;
     protected double cartVelocityY =0;
@@ -41,7 +41,6 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
         this.posZ = zPos;
         parentId = parent;
         this.seatNumber = seatNumber;
-        System.out.println("spawned seat");
     }
 
     /**
@@ -90,14 +89,11 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
         if (parentId != 0) {
             GenericRailTransport parent = ((GenericRailTransport) worldObj.getEntityByID(parentId));
             if (parent != null){
-                System.out.println("owner exists");
                 parent.addseats(this);
             } else {
-                System.out.println("removing seat");
                 worldObj.removeEntity(this);
             }
         } else {
-            System.out.println("removing seat");
             worldObj.removeEntity(this);
         }
     }

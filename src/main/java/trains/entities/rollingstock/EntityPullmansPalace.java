@@ -75,7 +75,7 @@ public class EntityPullmansPalace extends EntityRollingStockCore{
      *     Each set of floats represents a different rider.
      */
     @Override
-    public double[][] getRiderOffsets(){return new double[][]{{1.3f,1.5f, 0f}};}
+    public double[][] getRiderOffsets(){return new double[][]{{2.5f,1.5f, 0f},{1f,1.5f, 0f},{-1f,1.5f, 0f},{-2.5f,1.5f, 0f}};}
     /**
      * <h2>Hitbox offsets</h2>
      * @return defines the positions for the hitboxes in blocks. 0 being the center of the train, negative values being towards the front..

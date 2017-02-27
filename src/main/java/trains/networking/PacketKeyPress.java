@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
+import trains.entities.EntitySeat;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.entities.rollingstock.EntityVATLogCar;
@@ -72,7 +73,13 @@ public class PacketKeyPress implements IMessage {
                 else if (message.key == 1) {
                     EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
                     if (entityPlayer != null) {
-                        entityPlayer.openGui(TrainsInMotion.instance, message.entity, entityPlayer.worldObj,
+                    int transport;
+                    if (entityPlayer.worldObj.getEntityByID(message.entity) instanceof EntitySeat){
+                        transport = ((EntitySeat)entityPlayer.worldObj.getEntityByID(message.entity)).parentId;
+                    } else {
+                        transport = message.entity;
+                    }
+                        entityPlayer.openGui(TrainsInMotion.instance, transport, entityPlayer.worldObj,
                                 MathHelper.floor_double(ridingEntity.posX), MathHelper.floor_double(ridingEntity.posY),
                                 MathHelper.floor_double(ridingEntity.posZ));
                     }

@@ -1,9 +1,11 @@
 package trains.gui.train;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -19,6 +21,8 @@ import trains.utility.ContainerHandler;
 
 import java.util.Arrays;
 import java.util.Collections;
+
+import static trains.TrainsInMotion.transportTypes.PASSENGER;
 
 /**
  * <h1>Train GUI</h1>
@@ -63,7 +67,9 @@ public class GUITrain extends GuiContainer {
     @Override
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
         fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), 8, -18, 4210752);
-        fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, 74, 4210752);
+        if (transport.getType() != PASSENGER) {
+            fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 8, 74, 4210752);
+        }
     }
 
     /**
@@ -102,14 +108,15 @@ public class GUITrain extends GuiContainer {
      * @param posV the Y position of the texture to start from.
      * @param width the width of the box.
      * @param height the height of the box.
-     * @param scale defines the X and Y size of the texture part used
+     * @param scaleU defines the X size of the texture part used
+     * @param scaleV defines the X Y size of the texture part used
      */
-    public static void drawTexturedModalRect(int posX, int posY, int posU, int posV, int width, int height, int scale, double zLevel) {
+    public static void drawTexturedModalRect(int posX, int posY, int posU, int posV, int width, int height, int scaleU, int scaleV, double zLevel) {
         Tessellator tessellator = Tessellator.instance;
         tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV(posX, posY + height, zLevel, posU * guiScaler, (posV + scale) * guiScaler);
-        tessellator.addVertexWithUV(posX + width, posY + height, zLevel, (posU + scale) * guiScaler, (posV + scale) * guiScaler);
-        tessellator.addVertexWithUV(posX + width, posY, zLevel, (posU + scale) * guiScaler, posV * guiScaler);
+        tessellator.addVertexWithUV(posX, posY + height, zLevel, posU * guiScaler, (posV + scaleV) * guiScaler);
+        tessellator.addVertexWithUV(posX + width, posY + height, zLevel, (posU + scaleU) * guiScaler, (posV + scaleV) * guiScaler);
+        tessellator.addVertexWithUV(posX + width, posY, zLevel, (posU + scaleU) * guiScaler, posV * guiScaler);
         tessellator.addVertexWithUV(posX, posY, zLevel, posU * guiScaler, posV * guiScaler);
         tessellator.draw();
     }
@@ -265,45 +272,45 @@ public class GUITrain extends GuiContainer {
         //bind the inventory image which we use the slot images and inventory image from.
         mc.getTextureManager().bindTexture(vanillaInventory);
         //icon for fuel
-        drawTexturedModalRect(guiLeft + 7, guiTop + 25, 54, 51, 18, 18, 20, zLevel);
+        drawTexturedModalRect(guiLeft + 7, guiTop + 25, 54, 51, 18, 18, 20, 20, zLevel);
         //icon for furnace
-        drawTexturedModalRect(guiLeft + 7, guiTop + 25, 54, 51, 18, 18, 20, zLevel);
+        drawTexturedModalRect(guiLeft + 7, guiTop + 25, 54, 51, 18, 18, 20, 20, zLevel);
 
         //slot for fuel
-        drawTexturedModalRect(guiLeft + 7, guiTop + 52, 54, 51, 18, 18, 20, zLevel);
+        drawTexturedModalRect(guiLeft + 7, guiTop + 52, 54, 51, 18, 18, 20, 20, zLevel);
         //slot for water
-        drawTexturedModalRect(guiLeft + 34, guiTop + 52, 54, 51, 18, 18, 20, zLevel);
+        drawTexturedModalRect(guiLeft + 34, guiTop + 52, 54, 51, 18, 18, 20, 20, zLevel);
 
         //transport inventory
         for (int ic = 0; ic < transport.getInventorySize().getRow(); ic++) {
             for (int ir = 0; ir > -transport.getInventorySize().getCollumn(); ir--) {
-                drawTexturedModalRect( guiLeft + 97 + (ic * 18), guiTop +43 + (ir * 18), 54, 51, 18, 18, 20, zLevel);
+                drawTexturedModalRect( guiLeft + 97 + (ic * 18), guiTop +43 + (ir * 18), 54, 51, 18, 18, 20, 20, zLevel);
             }
         }
         //draw the player inventory and toolbar background.
-        drawTexturedModalRect(guiLeft, guiTop+ 82, 0, 82, 176, 176, 176, zLevel);
+        drawTexturedModalRect(guiLeft, guiTop+ 82, 0, 82, 176, 176, 176, 176, zLevel);
 
         //draw the tanks
         mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
         //liquid fuel tank
-        drawTexturedModalRect(guiLeft + 66, guiTop + 10, 0, 0, 18, 50, 16, zLevel);
+        drawTexturedModalRect(guiLeft + 66, guiTop + 10, 0, 0, 18, 50, 16, 16, zLevel);
         if (firstTankFluid>0) {
             //draw the water tank
             int liquid = Math.abs((firstTankFluid * 50) / transport.getTank().getTank(true).getCapacity());
-            drawTexturedModalRect(guiLeft + 66, guiTop + 60 - liquid, 16,0, 18, liquid, 16, zLevel);
+            drawTexturedModalRect(guiLeft + 66, guiTop + 60 - liquid, 16,0, 18, liquid, 16, 16, zLevel);
         }
         //steam tank
         if (transport.getType() == TrainsInMotion.transportTypes.STEAM || transport.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
-            drawTexturedModalRect(guiLeft + 34, guiTop+10, 0, 0, 18, 30, 16, zLevel);
+            drawTexturedModalRect(guiLeft + 34, guiTop+10, 0, 0, 18, 30, 16, 16, zLevel);
             if (secondTankFluid>0) {
                 int liquid3 = Math.abs((secondTankFluid * 30) / transport.getTank().getTank(false).getCapacity());
-                drawTexturedModalRect(guiLeft + 34, guiTop +40 - liquid3, 32,0, 18, liquid3, 16, zLevel);
+                drawTexturedModalRect(guiLeft + 34, guiTop +40 - liquid3, 32,0, 18, liquid3, 16, 16, zLevel);
             }
         }
     }
 
 
-    //similar to the above but for passenger cars. make a different call for freight, and etc.
+    //similar to the above but for passenger cars.
     public static void renderPassengerInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
 
         int rows=0;
@@ -313,26 +320,40 @@ public class GUITrain extends GuiContainer {
             if (i/(rows+1) >=5*(rows+1)){
                 rows++;
             }
-            drawTexturedModalRect(guiLeft + 7 + (18*(i-(rows * 5))), guiTop + 30+(30*rows), 54, 51, 24, 24, 20, zLevel);
+            drawTexturedModalRect(guiLeft + 7 + (30*(i-(rows * 5))), guiTop + 30+(30*rows), 54, 51, 27, 27, 20, 20, zLevel);
+        }
+        //make a new loop that does the same as above but binds the character's face rather than the inventory slot.
+        for (int i=0;i<transport.getRiderOffsets().length; i++) {
+            if (i/(rows+1) >=5*(rows+1)){
+                rows++;
+            }
+            if (i==0 && transport.riddenByEntity instanceof AbstractClientPlayer){
+                mc.getTextureManager().bindTexture(((AbstractClientPlayer) transport.riddenByEntity).getLocationSkin());
+                drawTexturedModalRect(guiLeft + 10 + (30*(i-(rows * 5))), guiTop + 32+(30*rows), 30, 70, 22, 22, 36, 56, zLevel);
+            } else if (i>0 && transport.seats.get(i-1).riddenByEntity instanceof AbstractClientPlayer){
+                mc.getTextureManager().bindTexture(((AbstractClientPlayer) transport.seats.get(i-1).riddenByEntity).getLocationSkin());
+                drawTexturedModalRect(guiLeft + 10 + (30*(i-(rows * 5))), guiTop + 32+(30*rows), 30, 70, 22, 22, 36, 56, zLevel);
+            }
         }
 
     }
 
+    //similar to the above but for freight cars.
     public static void renderFreightInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
         mc.getTextureManager().bindTexture(vanillaInventory);
         //draw the player inventory and toolbar background.
-        drawTexturedModalRect(guiLeft, guiTop+ 82, 0, 82, 176, 176, 176, zLevel);
+        drawTexturedModalRect(guiLeft, guiTop+ 82, 0, 82, 176, 176, 176, 176, zLevel);
 
         switch (transport.getInventorySize()){
             case NINExSIX:{
-                drawTexturedModalRect(guiLeft, guiTop, 0, 0, 176, 176, 176, zLevel);
+                drawTexturedModalRect(guiLeft, guiTop, 0, 0, 176, 176, 176, 176, zLevel);
                 break;
             }
 
             default:{
                 for (int ic = 0; ic < transport.getInventorySize().getRow(); ic++) {
                     for (int ir = 0; ir > -transport.getInventorySize().getCollumn(); ir--) {
-                        drawTexturedModalRect( guiLeft + 8 + (ic * 18), guiTop +43 + (ir * 18), 54, 51, 18, 18, 20, zLevel);
+                        drawTexturedModalRect( guiLeft + 8 + (ic * 18), guiTop +43 + (ir * 18), 54, 51, 18, 18, 20, 20, zLevel);
                     }
                 }
                 break;

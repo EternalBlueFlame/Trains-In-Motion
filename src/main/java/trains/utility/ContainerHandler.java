@@ -46,16 +46,17 @@ public class ContainerHandler extends Container{
      */
     public ContainerHandler(InventoryPlayer iinventory, GenericRailTransport entityTrain,boolean isCrafting) {
         this.isCrafting = isCrafting;
-
-        //player inventory
-        for (int ic = 0; ic < 9; ic++) {
-            for (int ir = 0; ir < 3; ir++) {
-                addSlotToContainer(new Slot(iinventory, (((ir * 9) + ic) + 9), 8 + (ic * 18), 84 + (ir * 18)));
+        if (entityTrain.getType() != TrainsInMotion.transportTypes.PASSENGER) {
+            //player inventory
+            for (int ic = 0; ic < 9; ic++) {
+                for (int ir = 0; ir < 3; ir++) {
+                    addSlotToContainer(new Slot(iinventory, (((ir * 9) + ic) + 9), 8 + (ic * 18), 84 + (ir * 18)));
+                }
             }
-        }
-        //player toolbar
-        for (int iT = 0; iT < 9; iT++) {
-            addSlotToContainer(new Slot(iinventory, iT, 8 + iT * 18, 142));
+            //player toolbar
+            for (int iT = 0; iT < 9; iT++) {
+                addSlotToContainer(new Slot(iinventory, iT, 8 + iT * 18, 142));
+            }
         }
 
         //transport reference

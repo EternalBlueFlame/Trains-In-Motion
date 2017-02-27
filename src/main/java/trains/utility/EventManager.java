@@ -11,7 +11,9 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import trains.TrainsInMotion;
+import trains.entities.EntitySeat;
 import trains.entities.EntityTrainCore;
+import trains.entities.GenericRailTransport;
 import trains.entities.rollingstock.EntityVATLogCar;
 import trains.networking.PacketKeyPress;
 import trains.networking.PacketMount;
@@ -42,7 +44,7 @@ public class EventManager {
     @SubscribeEvent
     public void onClientKeyPress(InputEvent.KeyInputEvent event){
         EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
-        if(player.ridingEntity instanceof EntityTrainCore) {
+        if(player.ridingEntity instanceof GenericRailTransport || player.ridingEntity instanceof EntitySeat) {
             //for lamp
             if (ClientProxy.KeyLamp.isPressed() ) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0, player.ridingEntity.getEntityId()));

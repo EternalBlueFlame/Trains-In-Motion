@@ -421,7 +421,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (worldObj.isRemote && !ClientProxy.carts.contains(this)) {
                 ClientProxy.carts.add(this);
             }
-            if (worldObj.isRemote && transportTicks %2 ==1){
+            if (lamp.Y >1 && worldObj.isRemote && transportTicks %2 ==1){
                 lamp.ShouldUpdate(worldObj, RailUtility.rotatePoint(new double[]{this.posX + getLampOffset().xCoord ,this.posY + getLampOffset().yCoord, this.posZ + getLampOffset().zCoord}, rotationPitch, rotationYaw, 0));
             }
             if (transportTicks>20){
@@ -467,7 +467,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (front != nullUUID) {
                 GenericRailTransport frontLink = CommonProxy.getTransportFromUuid(front);
                 if (frontLink != null) {
-                    System.out.println(frontLink.posX + " : " + frontLink.posY + " : " + frontLink.posZ);
                     double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[0]-1, 0, 0}, 0, rotationYaw, 0);
                     fromHere[0] += posX;
                     fromHere[2] += posZ;
@@ -476,15 +475,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                             ], 0, 0}, 0, frontLink.rotationYaw, 0);
                     toHere[0] += frontLink.posX;
                     toHere[2] += frontLink.posZ;
-                    double clampA = -(fromHere[0] - toHere[0]) * 0.01;
-                    if (clampA<0.005 && clampA >-0.005){
-                        clampA =0;
-                    }
-                    double clampB = -(fromHere[2] - toHere[2]) * 0.01;
-                    if (clampB<0.005 && clampB >-0.005){
-                        clampB =0;
-                    }
-                    this.addVelocity(clampA,0, clampB);
+                    this.addVelocity(-(fromHere[0] - toHere[0]) * 0.05,0, -(fromHere[2] - toHere[2]) * 0.05);
                 }
             } else if (isCoupling) {
                 double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[0] - 2, 0, 0}, 0, rotationYaw, 0);
@@ -517,15 +508,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                             ], 0, 0}, 0, backLink.rotationYaw, 0);
                     toHere[0] += backLink.posX;
                     toHere[2] += backLink.posZ;
-                    double clampA = (fromHere[0] - toHere[0]) * 0.01;
-                    if (clampA<0.005 && clampA >-0.005){
-                        clampA =0;
-                    }
-                    double clampB = (fromHere[2] - toHere[2]) * 0.01;
-                    if (clampB<0.005 && clampB >-0.005){
-                        clampB =0;
-                    }
-                    this.addVelocity(clampA,0, clampB);
+                    this.addVelocity(-(fromHere[0] - toHere[0]) * 0.05,0, -(fromHere[2] - toHere[2]) * 0.05);
                 }
             } else if (isCoupling) {
                 double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1] + 2, 0, 0}, 0, rotationYaw, 0);
