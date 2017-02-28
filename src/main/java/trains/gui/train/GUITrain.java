@@ -146,6 +146,8 @@ public class GUITrain extends GuiContainer {
                 drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.locked." + transport.isLocked)), mouseX, mouseY, fontRendererObj);
             } else if (mouseX > guiLeft + 36 && mouseX < guiLeft + 54) {
                 drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.coupler." + transport.isCoupling)), mouseX, mouseY, fontRendererObj);
+            } else if (mouseX > guiLeft + 54 && mouseX < guiLeft + 72) {
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.unlink")), mouseX, mouseY, fontRendererObj);
             }
         }
 
@@ -166,6 +168,7 @@ public class GUITrain extends GuiContainer {
         }
         this.buttonList.add(new GuiButton(2, guiLeft+ 18, guiTop + 166, 18, 18,""));
         this.buttonList.add(new GuiButton(3, guiLeft+ 36, guiTop + 166, 18, 18,""));
+        this.buttonList.add(new GuiButton(9, guiLeft+ 54, guiTop + 166, 18, 18,""));
 
         //train specific
         if (transport instanceof EntityTrainCore) {
@@ -204,21 +207,8 @@ public class GUITrain extends GuiContainer {
                 ((EntityTrainCore)transport).isRunning = !((EntityTrainCore)transport).isRunning; break;}
             case 7:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(11, transport.getEntityId()));
                 transport.isCreative = !transport.isCreative; break;}
-            case 8:{
-                transport.entityDropItem(transport.key, 0);}
-        }
-    }
-
-
-    /**
-     * <h3>gui bool checks</h3>
-     * @return the text from the language files for the proper value, based on the boolean
-     */
-    private static String checkBoolean(boolean bool){
-        if (bool){
-            return StatCollector.translateToLocal("gui.on");
-        } else {
-            return StatCollector.translateToLocal("gui.off");
+            case 8:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(13, transport.getEntityId())); break;}
+            case 9:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(12, transport.getEntityId())) ; break;}
         }
     }
 
@@ -383,13 +373,13 @@ public class GUITrain extends GuiContainer {
         if (mouseY > guiTop + 166 && mouseY < guiTop +184){
             if (player.capabilities.isCreativeMode &&
                     mouseX > guiLeft + 72 && mouseX < guiLeft + 90) {
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.creativemode") + checkBoolean(transport.brake)), mouseX, mouseY, fontRendererObj);
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.creativemode") + ((transport.brake)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
             } else if (transport.getType() != TrainsInMotion.transportTypes.STEAM && mouseX > guiLeft + 90 && mouseX < guiLeft + 108){
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.trainisrunning")  + checkBoolean(((EntityTrainCore)transport).isRunning)), mouseX, mouseY, fontRendererObj);
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.trainisrunning")  + ((((EntityTrainCore)transport).isRunning)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
             } else if (mouseX > guiLeft + 108 && mouseX < guiLeft + 126) {
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.brake")  + checkBoolean(transport.brake)), mouseX, mouseY, fontRendererObj);
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.brake")  + ((transport.brake)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
             } else if (mouseX > guiLeft + 126 && mouseX < guiLeft + 144){
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.lamp")  + checkBoolean(transport.lamp.isOn)), mouseX, mouseY, fontRendererObj);
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.lamp")  + ((transport.lamp.isOn)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
             } else if (mouseX > guiLeft + 144 && mouseX < guiLeft + 162){
                 drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.horn") ), mouseX, mouseY, fontRendererObj);
             } /*else if(mouseX > guiLeft + 162 && mouseX < guiLeft + 180) {

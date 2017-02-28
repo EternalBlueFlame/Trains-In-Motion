@@ -22,6 +22,8 @@ gui.hydrogencell=Hydrogen Cell
 gui.coolant=Reactor Coolant
 gui.of= of 
 gui.buckets=Buckets.
+gui.unlink=Unlink couplers.
+gui.dropkey=Copy Ownership Key.
 
 container.traincrafting=Train Crafting Table
 
@@ -64,3 +66,4 @@ item.brigadelok080.name=Brigadelok 0-8-0
 <!-- ## Rollingstock ## -->
 <!-- ## These are actually defined from the item name, so one name covers all areas ## -->
 item.pullmanspalace.name=Pullman's Palace
+item.vatlogcar.name=V.A.T Log Car

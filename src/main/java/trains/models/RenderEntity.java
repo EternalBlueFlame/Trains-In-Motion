@@ -124,7 +124,7 @@ public class RenderEntity extends Render {
 
     	GL11.glPushMatrix();
         //set the render position
-        GL11.glTranslated(x, y+1.3, z);
+        GL11.glTranslated(x, y+0.15, z);
         //rotate the model.
         GL11.glRotatef((-yaw) - 90, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
@@ -139,8 +139,8 @@ public class RenderEntity extends Render {
                 ModelRendererTurbo render = ((ModelRendererTurbo) box);
                 switch (render.boxName){
                     case "wheel":case "axel":{wheels.add(new wheel(render)); break;}
-                    case "pistonvalveconnector":{advancedPistons.add(new advancedPiston(render)); break;}
-                    case "wheelconnector":case "upperpiston":case "upperpistonarm":{simplePistons.add(new simplePiston(render)); break;}
+                    case "pistonvalveconnector":case "advanced":{advancedPistons.add(new advancedPiston(render)); break;}
+                    case "wheelconnector":case "upperpiston":case "upperpistonarm":case "simple":{simplePistons.add(new simplePiston(render)); break;}
                     default:{
                         if (render.boxName.contains("blocklog")) {
                             boolean added = false;
@@ -165,18 +165,24 @@ public class RenderEntity extends Render {
          * if there is, then calculate the vectors and apply the animations
          */
         if ((ClientProxy.EnableAnimations && entity.bogie.size()>0) && (wheels.size()>0 || advancedPistons.size()>0 || simplePistons.size()>0)) {
-            wheelPitch += (float) -(entity.bogie.get(0).motionX + entity.bogie.get(0).motionZ) *0.2;
+            wheelPitch += (entity.motionX + entity.motionZ);
             if (wheelPitch > 360 || wheelPitch <-360) {
                 wheelPitch = 0;
             }
-            double[] pos = RailUtility.rotatePoint(new double[]{entity.getPistonOffset()*RailUtility.radianF,0,0}, wheelPitch,wheelPitch,0);
-            rotationvec.x = MathHelper.floor_double(pos[0]);
-            rotationvec.y = MathHelper.floor_double(pos[2]);
-            for (wheel tempWheel : wheels) {tempWheel.rotate(wheelPitch);}
+            if (wheelPitch !=0) {
+                double[] pos = RailUtility.rotatePoint(new double[]{entity.getPistonOffset() * RailUtility.radianF, 0, 0}, Math.copySign(wheelPitch, 1), Math.copySign(wheelPitch, 1), 0);
+                for (wheel tempWheel : wheels) {
+                    tempWheel.rotate(wheelPitch * RailUtility.radianF);
+                }
 
-            for (advancedPiston advPiston : advancedPistons) {advPiston.rotationMoveYZX(rotationvec);}
+                for (advancedPiston advPiston : advancedPistons) {
+                    advPiston.rotationMoveYZX((float) pos[0], (float) pos[1]);
+                }
 
-            for (simplePiston basicPiston : simplePistons) {basicPiston.moveYZ(rotationvec);}
+                for (simplePiston basicPiston : simplePistons) {
+                    basicPiston.moveYZ((float) pos[0], (float) pos[1]);
+                }
+            }
         }
 
         /**
@@ -303,10 +309,10 @@ public class RenderEntity extends Render {
         }
 
 
-        public void rotationMoveYZX(Vec2f radian){
-            boxRefrence.rotationPointY = position.y - (radian.y*0.5f);
-            boxRefrence.rotationPointZ = position.x - radian.x;
-            boxRefrence.rotateAngleX = position.z - (radian.y * 0.05f);
+        public void rotationMoveYZX(float x, float y){
+            boxRefrence.rotationPointY = position.y - (y*0.5f);
+            boxRefrence.rotationPointZ = position.x - x;
+            boxRefrence.rotateAngleX = position.z - (y * 0.05f);
         }
     }
 
@@ -337,7 +343,6 @@ public class RenderEntity extends Render {
     private class blockCargo {
         public String name;
         private List<ModelRendererTurbo> boxRefrence = new ArrayList<ModelRendererTurbo>();
-        public int randomRotation = (ThreadLocalRandom.current().nextInt(0, 3)) *90;
 
         public blockCargo add(ModelRendererTurbo boxToRender){
             name = boxToRender.boxName;
@@ -362,9 +367,9 @@ public class RenderEntity extends Render {
             }
         }
 
-        public void moveYZ(Vec2f radian){
-            boxRefrence.rotationPointY = position.y - radian.y;
-            boxRefrence.rotationPointZ = position.x - radian.x;
+        public void moveYZ(float x, float y){
+            boxRefrence.rotationPointY = position.y - y;
+            boxRefrence.rotationPointZ = position.x - x;
         }
     }
 

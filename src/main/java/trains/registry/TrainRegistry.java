@@ -63,7 +63,7 @@ public class TrainRegistry {
         output.add(new TrainRegistry(EntityBrigadelok080.class, EntityBrigadelok080.thisItem, "entityfirsttrain",
                 new Brigadelok_080(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
                 null, null,
-                new ArrayList<Item>(Arrays.asList(new Item[]{Items.blaze_rod,null,null,null,null,null,null,null,null,null}))
+                new ArrayList<Item>(Arrays.asList(new Item[]{Items.coal,null,null,null,null,null,null,null,null,null}))
         ));
 
 

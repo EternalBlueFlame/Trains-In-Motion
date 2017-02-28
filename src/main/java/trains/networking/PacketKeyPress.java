@@ -13,8 +13,11 @@ import trains.entities.EntitySeat;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.entities.rollingstock.EntityVATLogCar;
+import trains.utility.CommonProxy;
 import trains.utility.EventManager;
 import trains.utility.HitboxHandler;
+
+import static trains.TrainsInMotion.nullUUID;
 
 /**
  * <h1>Key press packet</h1>
@@ -57,37 +60,52 @@ public class PacketKeyPress implements IMessage {
     public static class Handler implements IMessageHandler<PacketKeyPress, IMessage> {
         @Override
         public IMessage onMessage(PacketKeyPress message, MessageContext context) {
-            Entity ridingEntity = context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entity);
+            GenericRailTransport ridingEntity = (GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entity);
             //Toggles,
-            if(!((GenericRailTransport) ridingEntity).toggleBool(message.key)) {
+            if(!ridingEntity.toggleBool(message.key)) {
                 //speed
-                if (message.key == 2) {
-                    ((EntityTrainCore) ridingEntity).setAcceleration(true);
-                } else if (message.key == 3) {
-                    ((EntityTrainCore) ridingEntity).setAcceleration(false);
-                }
-                /**
-                 * <h3>Manage the inventory key press</h3>
-                 * here we have to figure out what kind of train or rollingstock the player is riding, and activate the related GUI.
-                 */
-                else if (message.key == 1) {
-                    EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
-                    if (entityPlayer != null) {
-                    int transport;
-                    if (entityPlayer.worldObj.getEntityByID(message.entity) instanceof EntitySeat){
-                        transport = ((EntitySeat)entityPlayer.worldObj.getEntityByID(message.entity)).parentId;
-                    } else {
-                        transport = message.entity;
-                    }
-                        entityPlayer.openGui(TrainsInMotion.instance, transport, entityPlayer.worldObj,
-                                MathHelper.floor_double(ridingEntity.posX), MathHelper.floor_double(ridingEntity.posY),
-                                MathHelper.floor_double(ridingEntity.posZ));
+                switch (message.key){
+                    case 2:{((EntityTrainCore) ridingEntity).setAcceleration(false); break;}
+                    case 3:{ ((EntityTrainCore) ridingEntity).setAcceleration(true); break;}
+                    case 12:{ridingEntity.entityDropItem(ridingEntity.key, 0); break;}
+                    case 13:{
+                        if (ridingEntity.front != nullUUID){
+                            if(ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.front).front){
+                                CommonProxy.getTransportFromUuid(ridingEntity.front).front =nullUUID;
+                            } else if (ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.front).back){
+                                CommonProxy.getTransportFromUuid(ridingEntity.front).back =nullUUID;
+                            }
+                        }
+                        if (ridingEntity.back != nullUUID){
+                            if(ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.back).front){
+                                CommonProxy.getTransportFromUuid(ridingEntity.back).front =nullUUID;
+                            } else if (ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.back).back){
+                                CommonProxy.getTransportFromUuid(ridingEntity.back).back =nullUUID;
+                            }
+                        }
+                        ridingEntity.front = nullUUID; ridingEntity.back = nullUUID; break;}
+
+                    /**
+                     * <h3>Manage the inventory key press</h3>
+                     * here we have to figure out if the player is riding a seat entity or a train/rollingstock and activate the GUI accordingly.
+                     */
+                    case 1:{
+                        EntityPlayer entityPlayer = context.getServerHandler().playerEntity;
+                        if (entityPlayer != null) {
+                            int transport;
+                            if (entityPlayer.worldObj.getEntityByID(message.entity) instanceof EntitySeat){
+                                transport = ((EntitySeat)entityPlayer.worldObj.getEntityByID(message.entity)).parentId;
+                            } else {
+                                transport = message.entity;
+                            }
+                            entityPlayer.openGui(TrainsInMotion.instance, transport, entityPlayer.worldObj,
+                                    MathHelper.floor_double(ridingEntity.posX), MathHelper.floor_double(ridingEntity.posY),
+                                    MathHelper.floor_double(ridingEntity.posZ));
+                        }
+                        break;
                     }
                 }
             }
-
-
-
             return null;
         }
     }

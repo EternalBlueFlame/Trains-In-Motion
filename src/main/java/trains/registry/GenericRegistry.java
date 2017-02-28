@@ -7,6 +7,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.MaterialLiquid;
+import net.minecraft.client.Minecraft;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -19,6 +21,8 @@ import trains.blocks.LampBlock;
 import trains.blocks.Oil;
 import trains.items.Bucket;
 import trains.tileentities.TileEntityStorage;
+
+import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
 
 /**
  * <h1>Generic registry</h1>
@@ -56,6 +60,7 @@ public class GenericRegistry {
 
         GameRegistry.registerBlock(trainTable, "TrainTable");
         GameRegistry.registerTileEntity(TileEntityStorage.class, "StorageEntity");
+        addRecipe(new ItemStack(trainTable, 1),  "WWW", "WIW", "WWW", 'W', Blocks.planks, 'I', Items.iron_ingot);
 
         /**
          * <h3>register Items</h3>
