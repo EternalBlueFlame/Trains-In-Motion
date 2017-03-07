@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.oredict.OreDictionary;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
@@ -39,6 +40,9 @@ public class InventoryHandler implements IInventory{
     private List<ItemStack> items = new ArrayList<ItemStack>();
     public List<ItemStack> filter = new ArrayList<ItemStack>();
     public boolean isWhitelist = false;
+
+    private static final ArrayList<ItemStack> logCarrier = combineStacks(combineStacks(OreDictionary.getOres("plankWood"), OreDictionary.getOres("slabWood")), OreDictionary.getOres("logWood"));
+    private static final ArrayList<ItemStack> coalCarrier = OreDictionary.getOres("coal");
 
     /**
      * <h2>entity constructor</h2>
@@ -208,10 +212,48 @@ public class InventoryHandler implements IInventory{
 
     /**
      * <h2>slot limiter</h2>
-     * this is supposed to be for limiting how items are added to the inventory, but no circumstance should ever be called where this is needed.
+     * This is supposed to see if a specific slot will take a specific item. However it's only called from slots we know are actual inventory slots.
+     * Because of this we don't even need to check the slot, just the item.
      */
     @Override
-    public boolean isItemValidForSlot(int slot, ItemStack itemStack) {return true;}
+    public boolean isItemValidForSlot(int slot, ItemStack itemStack) {
+        if (host != null) {
+            //compensate for specific rollingstock
+            switch (host.getType()) {
+                case LOGCAR: {
+                    for (ItemStack log : logCarrier) {
+                        if (log.getItem() == itemStack.getItem()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                case COALHOPPER: {
+                    for (ItemStack coal : coalCarrier) {
+                        if (coal.getItem() == itemStack.getItem()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            }
+
+
+            //before we even bother to try and check everything else, check if it's filtered in the first place.
+            if (itemStack == null || filter.size() == 0) {
+                return true;
+            }
+
+            if (isWhitelist) {
+                return filter.size() != 0 && filter.contains(itemStack);
+            } else {
+                //if it's a blacklist do exactly the same as above but return the opposite value.
+                return filter.size() == 0 || !filter.contains(itemStack);
+            }
+        }
+        //if this is a crafter, just return true.
+        return true;
+    }
 
 
     /**
@@ -350,4 +392,17 @@ public class InventoryHandler implements IInventory{
     public void openInventory() {}
     @Override
     public void closeInventory() {}
+
+
+    /**
+     * <h3> combine itemstacks</h3>
+     * combines multiple arrays of itemstacks into a single array,
+     * this allows us to create an array comprised of multiple sets of itemstacks
+     */
+    private static ArrayList<ItemStack> combineStacks(ArrayList<ItemStack> oldStacks, ArrayList<ItemStack> newStacks){
+        ArrayList<ItemStack> items = new ArrayList<ItemStack>();
+        items.addAll(oldStacks);
+        items.addAll(newStacks);
+        return items;
+    }
 }

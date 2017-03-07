@@ -1,18 +1,14 @@
 package trains.utility;
 
-import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.oredict.OreDictionary;
 import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.registry.TrainRegistry;
 import trains.tileentities.TileEntityStorage;
-
-import java.util.ArrayList;
 
 /**
  * <h1>Container manager</h1>
@@ -23,20 +19,10 @@ import java.util.ArrayList;
  */
 public class ContainerHandler extends Container{
 
-    private static final ArrayList<ItemStack> logCarrier = combineStacks(combineStacks(OreDictionary.getOres("plankWood"), OreDictionary.getOres("slabWood")), OreDictionary.getOres("logWood"));
-
     private GenericRailTransport railTransport;
     private TileEntityStorage craftingTable;
     public IInventory craftResult = new InventoryCraftResult();
     private boolean isCrafting;
-
-
-    private static ArrayList<ItemStack> combineStacks(ArrayList<ItemStack> oldStacks, ArrayList<ItemStack> newStacks){
-        ArrayList<ItemStack> items = new ArrayList<ItemStack>();
-        items.addAll(oldStacks);
-        items.addAll(newStacks);
-        return items;
-    }
 
     /**
      * <h2>Server-side inventory GUI for trains and rollingstock</h2>
@@ -291,47 +277,26 @@ public class ContainerHandler extends Container{
     }
 
 
+    /**
+     * <h2>filtered slot</h2>
+     * A simple slot meant for the actual inventory to allow filtering.
+     */
     private class filteredSlot extends Slot{
-
-        private InventoryHandler inventoryHandler;
 
         public filteredSlot(InventoryHandler p_i1824_1_, int p_i1824_2_, int p_i1824_3_, int p_i1824_4_) {
             super(p_i1824_1_,p_i1824_2_,p_i1824_3_,p_i1824_4_);
-            inventoryHandler = p_i1824_1_;
         }
 
         /**
          * <h2>filter items</h2>
+         * This is actually handled through
+         * @see InventoryHandler#isItemValidForSlot(int, ItemStack)
          * @return if the item should be allowed or blocked.
          */
         @Override
         public boolean isItemValid(ItemStack item) {
-            //compensate for specific rollingstock
-            if (railTransport.getType() == TrainsInMotion.transportTypes.LOGCAR){
-                Block block = Block.getBlockFromItem(item.getItem());
-                for (ItemStack log : logCarrier) {
-                    if (block == Block.getBlockFromItem(log.getItem())) {
-                        return true;
-                    }
-                }
-            }
-
-
-            //before we even bother to try and check everything else, check if it's filtered in the first place.
-            if (item == null || inventoryHandler.filter.size()==0){
-                return true;
-            }
-
-            if (inventoryHandler.isWhitelist){
-                return inventoryHandler.filter.size() ==0 || inventoryHandler.filter.contains(item);
-            } else {
-                //if it's a blacklist do exactly the same as above but return the opposite value.
-                return !(inventoryHandler.filter.size() ==0) || !inventoryHandler.filter.contains(item);
-            }
-
+            return railTransport.inventory.isItemValidForSlot(0, item);
         }
-
-
     }
 
 

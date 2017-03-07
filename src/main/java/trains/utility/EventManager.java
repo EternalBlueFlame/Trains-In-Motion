@@ -48,19 +48,21 @@ public class EventManager {
             //for lamp
             if (ClientProxy.KeyLamp.isPressed() ) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0, player.ridingEntity.getEntityId()));
-                ((EntityTrainCore) player.ridingEntity).lamp.isOn = ! ((EntityTrainCore) player.ridingEntity).lamp.isOn;
+                ((GenericRailTransport) player.ridingEntity).lamp.isOn = ! ((EntityTrainCore) player.ridingEntity).lamp.isOn;
             }
             //for inventory
             if (ClientProxy.KeyInventory.isPressed()) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, player.ridingEntity.getEntityId()));
             }
-            //for speed change
-            if(ClientProxy.KeyAccelerate.isPressed()){
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2, player.ridingEntity.getEntityId()));
-                ((EntityTrainCore) player.ridingEntity).setAcceleration(true);
-            } else if(ClientProxy.KeyReverse.getIsKeyPressed()){
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3, player.ridingEntity.getEntityId()));
-                ((EntityTrainCore) player.ridingEntity).setAcceleration(false);
+            if (player.ridingEntity instanceof EntityTrainCore) {
+                //for speed change
+                if (ClientProxy.KeyAccelerate.isPressed()) {
+                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2, player.ridingEntity.getEntityId()));
+                    ((EntityTrainCore) player.ridingEntity).setAcceleration(true);
+                } else if (ClientProxy.KeyReverse.getIsKeyPressed()) {
+                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3, player.ridingEntity.getEntityId()));
+                    ((EntityTrainCore) player.ridingEntity).setAcceleration(false);
+                }
             }
         }
     }

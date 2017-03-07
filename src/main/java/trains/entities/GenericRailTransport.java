@@ -325,6 +325,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
 
         bogie.remove(null);
+        seats.remove(null);
+        hitboxList.remove(null);
 
         //be sure bogies exist
         int bogieSize = bogie.size() - 1;
