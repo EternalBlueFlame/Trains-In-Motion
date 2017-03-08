@@ -290,6 +290,15 @@ public class ModelRendererTurbo extends ModelRenderer {
      * @param scale
      */
     public void addBox(float x, float y, float z, float w, float h, float d, float expansion, float scale) {
+        if (w ==0){
+            w=0.001f;
+        }
+        if (h ==0){
+            h=0.001f;
+        }
+        if (d ==0){
+            d=0.001f;
+        }
         float scaleX = w * scale;
         float scaleY = h * scale;
         float scaleZ = d * scale;

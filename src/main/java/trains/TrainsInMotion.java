@@ -73,7 +73,7 @@ public class TrainsInMotion {
         TENDER, JUKEBOX, TRACKBUILDER //specialized Rollingstock
     }
     public enum inventorySizes{NULL(0,0),
-        TWOxTWO(2,2), TWOxTHREE(2,3), THREExTHREE(3,3), THREExFOUR(3,4), FOURxFOUR(4,4), FOURxFIVE(4,5), FIVExFIVE(5,5), FIVExSIX(5,6), SIXxSIX(6,6), NINExTHREE(9,3), NINExSIX(9,6);
+        TWOxTWO(2,2), TWOxTHREE(3,2), THREExTHREE(3,3), THREExFOUR(4,3), FOURxFOUR(4,4), FOURxFIVE(5,4), FIVExFIVE(5,5), FIVExSIX(6,5), SIXxSIX(6,6), NINExTHREE(3,9), NINExSIX(6,9);
         private int row;
         private int collumn;
         inventorySizes(int row, int collumn){

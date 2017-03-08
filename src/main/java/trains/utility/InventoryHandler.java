@@ -1,6 +1,8 @@
 package trains.utility;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -295,11 +297,7 @@ public class InventoryHandler implements IInventory{
         nbtitems.setInteger("filter.length", filter.size());
         if (filter.size()>0) {
             for (ItemStack item : filter) {
-                if (item != null) {
                     item.writeToNBT(nbtitems);
-                } else {
-                    new ItemStack(Items.potato, 0).writeToNBT(nbtitems);
-                }
             }
         }
 
@@ -365,7 +363,7 @@ public class InventoryHandler implements IInventory{
      * for example if the inventory is half full and the intervals are 100, it returns 50. or if the intervals were 90 it would return 45.
      */
     public int calculatePercentageUsed(int indexes){
-        int i=0;
+        float i=0;
         for (ItemStack item : items){
             if (item != null && item.stackSize >0){
                 i++;
@@ -373,11 +371,39 @@ public class InventoryHandler implements IInventory{
         }
         if (i==0){
             return 0;
-        } else if (indexes ==100) {
-            return MathHelper.floor_double((i / items.size()) * 100);
         } else {
-            return MathHelper.floor_double(((i / items.size()) * 100) * (indexes * 0.01));
+            return MathHelper.floor_double((i / items.size()) *indexes);
         }
+    }
+
+
+    /**
+     * <h2>get an item from inventory to render</h2>
+     * cycles through the items in the inventory and returns the first non-null item that's index is greater than the provided number.
+     * if it fails to find one it subtracts one from the index and tries again.
+     * The function after this does the same thing but instead returns the damage of that item, which defines the metadata of the block in some cases.
+     */
+    public Block getFirstBlock(int index){
+        if (index<0){
+            return Blocks.brick_block;
+        }
+        for (int i=0; i<items.size(); i++){
+            if (i>= index && items.get(i) != null && items.get(i).stackSize>0){
+                return Block.getBlockFromItem(items.get(i).getItem());
+            }
+        }
+        return getFirstBlock(index-1);
+    }
+    public int getFirstBlockMeta(int index){
+        if (index<0){
+            return 0;
+        }
+        for (int i=0; i<items.size(); i++){
+            if (i>= index && items.get(i) != null && items.get(i).stackSize>0){
+                return items.get(i).getItem().getDamage(items.get(i));
+            }
+        }
+        return getFirstBlockMeta(index-1);
     }
 
     /**

@@ -10,6 +10,7 @@ import trains.entities.GenericRailTransport;
 import trains.entities.rollingstock.EntityPullmansPalace;
 import trains.entities.rollingstock.EntityVATLogCar;
 import trains.entities.trains.EntityBrigadelok080;
+import trains.models.bogies.CMDBogie;
 import trains.models.rollingstock.PullmansPalace;
 import trains.models.rollingstock.VATLogCar;
 import trains.models.trains.Brigadelok_080;
@@ -75,7 +76,7 @@ public class TrainRegistry {
 
         output.add(new TrainRegistry(EntityVATLogCar.class, EntityVATLogCar.thisItem, "entityvatlogcar",
                 new VATLogCar(), URIRegistry.TEXTURE_GENERIC.getResource("null.png"),
-                null, null,
+                new CMDBogie(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
                 new ArrayList<Item>(Arrays.asList(new Item[]{Items.apple,null,null,null,null,null,null,null,null,null}))
         ));
         return output;

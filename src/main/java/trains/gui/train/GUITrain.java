@@ -341,8 +341,8 @@ public class GUITrain extends GuiContainer {
             }
 
             default:{
-                for (int ic = 0; ic < transport.getInventorySize().getRow(); ic++) {
-                    for (int ir = 0; ir > -transport.getInventorySize().getCollumn(); ir--) {
+                for (int ic = 0; ic < transport.getInventorySize().getCollumn(); ic++) {
+                    for (int ir = 0; ir > -transport.getInventorySize().getRow(); ir--) {
                         drawTexturedModalRect( guiLeft + 8 + (ic * 18), guiTop +43 + (ir * 18), 54, 51, 18, 18, 20, 20, zLevel);
                     }
                 }
