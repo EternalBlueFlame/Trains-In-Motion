@@ -372,7 +372,7 @@ public class InventoryHandler implements IInventory{
         if (i==0){
             return 0;
         } else {
-            return MathHelper.floor_double((i / items.size()) *indexes);
+            return MathHelper.floor_double(((i / items.size()) *indexes)+0.5);
         }
     }
 

@@ -107,8 +107,7 @@ public class ClientProxy extends CommonProxy {
         //trains and rollingstock
         for(TrainRegistry reg : TrainRegistry.listTrains()){
             RenderingRegistry.registerEntityRenderingHandler(reg.trainClass, new RenderEntity(
-                    reg.model, reg.texture,
-                    reg.bogieModel, reg.bogieTexture));
+                    reg.model, reg.texture, reg.bogieModels));
         }
         //hitboxes
         RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.multipartHitbox.class, nullRender);

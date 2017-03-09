@@ -28,6 +28,7 @@ import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.models.tmt.*;
 import trains.registry.URIRegistry;
+import trains.utility.Bogie;
 import trains.utility.ClientProxy;
 import trains.utility.HitboxHandler;
 import trains.utility.RailUtility;
@@ -61,14 +62,12 @@ public class RenderEntity extends Render {
      */
     private ModelBase model;
     private ResourceLocation texture;
-    private ModelBase bogieModel;
-    private ResourceLocation bogieTexture;
+    private Bogie[] bogieRenders;
     private List<simplePiston> simplePistons = new ArrayList<simplePiston>();
     private List<advancedPiston> advancedPistons = new ArrayList<advancedPiston>();
     private List<wheel> wheels = new ArrayList<wheel>();
-    private List<ModelBase> bogieRenders = new ArrayList<ModelBase>();
     private List<blockCargo> blockCargoRenders = new ArrayList<blockCargo>();
-    private double[][] animationCache = new double[4][3];
+    private double[][] animationCache = new double[5][3];
 
     //TODO
     private List<ModelRendererTurbo> liveriesSquare = new ArrayList<ModelRendererTurbo>();
@@ -79,14 +78,12 @@ public class RenderEntity extends Render {
      * <h3>class constructor</h3>
      * @param modelLoad the model class to render.
      * @param textureLoad the texture ResourceLocation to apply to the model.
-     * @param modelBogie the model to render for the bogies, if null then no bogies will not be rendered.
-     * @param bogieTexture the texture to apply to the bogie, can be null if the bogie model is null.
+     * @param bogieRenders the model and texture class to render for the bogies, if null then no bogies will not be rendered. null indexes are allowed as well.
      */
-    public RenderEntity(ModelBase modelLoad, ResourceLocation textureLoad, @Nullable ModelBase modelBogie, @Nullable ResourceLocation bogieTexture) {
+    public RenderEntity(ModelBase modelLoad, ResourceLocation textureLoad, @Nullable Bogie[] bogieRenders) {
         model = modelLoad;
         texture = textureLoad;
-        bogieModel = modelBogie;
-        this.bogieTexture = bogieTexture;
+        this.bogieRenders = bogieRenders;
 
         /**
          * <h3>model caching</h3>
@@ -97,24 +94,59 @@ public class RenderEntity extends Render {
             for (Object box : model.boxList) {
                 if (box instanceof ModelRendererTurbo) {
                     ModelRendererTurbo render = ((ModelRendererTurbo) box);
-                    switch (render.boxName){
-                        case "wheel":case "axel":{wheels.add(new wheel(render)); break;}
-                        case "pistonvalveconnector":case "advanced":{advancedPistons.add(new advancedPiston(render)); break;}
-                        case "wheelconnector":case "upperpiston":case "upperpistonarm":case "simple":{simplePistons.add(new simplePiston(render)); break;}
-                        default:{
-                            if (render.boxName.contains("blocklog")) {
-                                boolean added = false;
-                                for (blockCargo cargo : blockCargoRenders) {
-                                    if (cargo.name.equals(render.boxName)) {
-                                        cargo.add(render);
-                                        added = true;
-                                        break;
-                                    }
-                                }
-                                if (!added) {
-                                    blockCargoRenders.add(new blockCargo().add(render));
-                                }
-                            } break;}
+                    if (render.boxName.contains("wheel") || render.boxName.contains("axel")) {
+                        wheels.add(new wheel(render));
+                    }
+                    if (render.boxName.contains("pistonvalveconnector") || render.boxName.contains("advanced")) {
+                        advancedPistons.add(new advancedPiston(render));
+                    }
+                    if (render.boxName.contains("wheelconnector") || render.boxName.contains("upperpiston") || render.boxName.contains("upperpistonarm") ||render.boxName.contains("simple")) {
+                        simplePistons.add(new simplePiston(render));
+                    }
+                    if (render.boxName.contains("blocklog")) {
+                        boolean isAdded =false;
+                        for (blockCargo cargo : blockCargoRenders) {
+                            if (cargo.name.equals(render.boxName)){
+                                cargo.boxRefrence.add(render);
+                                isAdded= true;break;
+                            }
+                        }
+                        if (!isAdded){
+                            blockCargoRenders.add(new blockCargo().add(render, false));
+                        }
+                    }
+                    if (render.boxName.contains("crate")) {
+                        boolean isAdded =false;
+                        for (blockCargo cargo : blockCargoRenders) {
+                            if (cargo.name.equals(render.boxName)){
+                                cargo.boxRefrence.add(render);
+                                isAdded= true;break;
+                            }
+                        }
+                        if (!isAdded){
+                            blockCargoRenders.add(new blockCargo().add(render, false));
+                        }
+                    }
+                }
+            }
+
+
+            //we need an entity instance to cache the bogies, so we have to do it here.
+            if (bogieRenders != null){
+                for (Bogie bogie : bogieRenders){
+                    for (Object box : bogie.bogieModel.boxList) {
+                        if (ClientProxy.EnableAnimations && box instanceof ModelRendererTurbo) {
+                            ModelRendererTurbo render = ((ModelRendererTurbo) box);
+                            if (render.boxName.contains("wheel") || render.boxName.contains("axel")) {
+                                wheels.add(new wheel(render));
+                            }
+                            if (render.boxName.contains("pistonvalveconnector") || render.boxName.contains("advanced")) {
+                                advancedPistons.add(new advancedPiston(render));
+                            }
+                            if (render.boxName.contains("wheelconnector") || render.boxName.contains("upperpiston") || render.boxName.contains("upperpistonarm") ||render.boxName.contains("simple")) {
+                                simplePistons.add(new simplePiston(render));
+                            }
+                        }
                     }
                 }
             }
@@ -156,38 +188,9 @@ public class RenderEntity extends Render {
      *
      */
     public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw){
-
-        //we need an entity instance to cache the bogies, so we have to do it here.
-        if (bogieModel != null && bogieRenders.size()<1){
-            for (int i=0; i<entity.getBogieOffsets().size();i++) {
-                if (bogieRenders.size() <= i) {
-                    //we move it to another variable before putting it in the array as an attempt to clone it.
-                    ModelBase tempModel = bogieModel;
-                    bogieRenders.add(tempModel);
-                }
-            }
-
-            for (ModelBase bogie : bogieRenders){
-                for (Object box : bogie.boxList) {
-                    if (ClientProxy.EnableAnimations && box instanceof ModelRendererTurbo) {
-                        ModelRendererTurbo render = ((ModelRendererTurbo) box);
-                        switch (render.boxName){
-                            case "wheel":case "axel":{wheels.add(new wheel(render)); break;}
-                            case "pistonvalveconnector":case "advanced":{advancedPistons.add(new advancedPiston(render)); break;}
-                            case "wheelconnector":case "upperpiston":case "upperpistonarm":case "simple":{simplePistons.add(new simplePiston(render)); break;}
-                            default:{break;}
-                        }
-                    }
-                }
-            }
-        }
-
-
-
-
     	GL11.glPushMatrix();
         //set the render position
-        GL11.glTranslated(x, y+0.15, z);
+        GL11.glTranslated(x, y+0.175, z);
         //rotate the model.
         GL11.glRotatef((-yaw) - 90, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
@@ -227,33 +230,39 @@ public class RenderEntity extends Render {
          */
         bindTexture(texture);
         for(Object cube : model.boxList){
-            if (cube instanceof ModelRendererTurbo &&
-                    !(((ModelRendererTurbo) cube).boxName).contains("blocklog")) {
-                ((ModelRendererTurbo)cube).render();
+            if (cube instanceof ModelRenderer &&
+                    !(((ModelRendererTurbo) cube).boxName).contains("blocklog") && !(((ModelRendererTurbo) cube).boxName).contains("crate")) {
+                ((ModelRenderer)cube).render(0.065f);
             }
         }
 
         int itteration=0;
         if (blockCargoRenders.size()>0){
-            //bindTexture(TextureMap.locationBlocksTexture);
             //loop for the groups of cargo
             for (blockCargo cargo : blockCargoRenders) {
                 //limit loops to how much should be rendered based on inventory content
                 if (itteration<entity.inventory.calculatePercentageUsed(blockCargoRenders.size())) {
                     //loop through the models in the group
-                    for (ModelRendererTurbo block : cargo.boxRefrence) {
-                        GL11.glPushMatrix();
-                        //define position from model
-                        GL11.glTranslated(((block.offsetX + block.rotationPointX) / 16),
-                                ((block.offsetY + block.rotationPointY) / 16),
-                                ((block.offsetZ + block.rotationPointZ) / 16));
-                        //define the rotation from the model
-                        GL11.glRotated(block.rotateAngleX * RailUtility.degreesD, 1, 0, 0);
-                        GL11.glRotated(block.rotateAngleY * RailUtility.degreesD, 0, 1, 0);
-                        GL11.glRotated(block.rotateAngleZ * RailUtility.degreesD, 0, 0, 1);
-                        GL11.glScaled(block.xScale -0.0175, block.yScale -0.0175, block.zScale -0.0175);
-                        field_147909_c.renderBlockAsItem(entity.inventory.getFirstBlock(itteration), entity.inventory.getFirstBlockMeta(itteration), 1f);
-                        GL11.glPopMatrix();
+                    if (cargo.isBlock) {
+                        for (ModelRendererTurbo block : cargo.boxRefrence) {
+                            GL11.glPushMatrix();
+                            //define position from model
+                            GL11.glTranslated(((block.offsetX + block.rotationPointX) / 16),
+                                    ((block.offsetY + block.rotationPointY) / 16),
+                                    ((block.offsetZ + block.rotationPointZ) / 16));
+                            //define the rotation from the model
+                            GL11.glRotated(block.rotateAngleX * RailUtility.degreesD, 1, 0, 0);
+                            GL11.glRotated(block.rotateAngleY * RailUtility.degreesD, 0, 1, 0);
+                            GL11.glRotated(block.rotateAngleZ * RailUtility.degreesD, 0, 0, 1);
+                            GL11.glScaled(block.xScale - 0.0175, block.yScale - 0.0175, block.zScale - 0.0175);
+                            field_147909_c.renderBlockAsItem(entity.inventory.getFirstBlock(itteration), entity.inventory.getFirstBlockMeta(itteration), 1f);
+                            GL11.glPopMatrix();
+                        }
+                    } else {
+                        System.out.println("its not a block");
+                        for (ModelRendererTurbo block : cargo.boxRefrence) {
+                            block.render();
+                        }
                     }
                 }
                 itteration++;
@@ -265,19 +274,22 @@ public class RenderEntity extends Render {
          * <h4> render bogies</h4>
          * in TiM here we render the bogies.
          * we get the entity and do an instanceof check, see if it's a train or a rollingstock, then do a for loop on the bogies, and render them the same way we do trains and rollingstock.
-         * TODO: doesn't rotate yet
          */
-        if (bogieModel != null){
+        if (bogieRenders != null && bogieRenders.length >0){
             for (int i=0; i<entity.getBogieOffsets().size();i++){
-                GL11.glPushMatrix();
-                GL11.glTranslated(0,0,entity.getBogieOffsets().get(i));
-                bindTexture(bogieTexture);
-                for (Object modelBogiePart : bogieRenders.get(i).boxList){
-                    if (modelBogiePart instanceof ModelRendererTurbo){
-                        ((ModelRendererTurbo) modelBogiePart).render();
+                if (bogieRenders.length>i && bogieRenders[i] != null) {
+                    bindTexture(bogieRenders[i].bogieTexture);
+                    GL11.glPushMatrix();
+                    GL11.glTranslated(0, 0, entity.getBogieOffsets().get(i));
+                    animationCache[4][0] = entity.getBogieOffsets().get(i);
+                    bogieRenders[i].setPositionAndRotation(RailUtility.rotatePoint(animationCache[4],entity.rotationPitch, entity.rotationYaw,0), entity);
+                    for (Object modelBogiePart : bogieRenders[i].bogieModel.boxList) {
+                        if (modelBogiePart instanceof ModelRendererTurbo) {
+                            ((ModelRendererTurbo) modelBogiePart).render();
+                        }
                     }
+                    GL11.glPopMatrix();
                 }
-                GL11.glPopMatrix();
             }
         }
 
@@ -383,11 +395,13 @@ public class RenderEntity extends Render {
      */
     private class blockCargo {
         public String name;
+        public boolean isBlock;
         private List<ModelRendererTurbo> boxRefrence = new ArrayList<ModelRendererTurbo>();
 
-        public blockCargo add(ModelRendererTurbo boxToRender){
+        public blockCargo add(ModelRendererTurbo boxToRender, boolean block){
             name = boxToRender.boxName;
             boxRefrence.add(boxToRender);
+            isBlock = block;
             return this;
         }
     }

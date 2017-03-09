@@ -79,7 +79,7 @@ public class ContainerHandler extends Container{
             //transport inventory
             for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
                 for (int ib = 0; ib < entityTrain.getInventorySize().getCollumn(); ib++) {
-                    addSlotToContainer(new filteredSlot(railTransport.inventory, slot, 9 + (ib * 18), (ia * 18) + 44));
+                    addSlotToContainer(new filteredSlot(railTransport.inventory, slot, 8 + (ib * 18), (ia * 18) + 48));
                     slot++;
                 }
             }
@@ -160,38 +160,41 @@ public class ContainerHandler extends Container{
      */
     @Override
     public ItemStack transferStackInSlot(EntityPlayer player, int slot) {
-        Slot stack = (Slot)this.inventorySlots.get(slot);
-        Slot tempSlot;
-        if (stack.getStack() == null){
-            return null;
-        }
-        ItemStack returnStack = stack.getStack().copy();
-        for (int currentSlot =0; currentSlot< this.inventorySlots.size(); currentSlot++){
-            tempSlot = (Slot)this.inventorySlots.get(currentSlot);
-            //if the item is in the train inventory
-            if (slot>35 || currentSlot>35) {
-                //if the slot is empty, just move it
-                if (!tempSlot.getHasStack()) {
-                    tempSlot.putStack(stack.getStack());
-                    ((Slot) this.inventorySlots.get(slot)).decrStackSize(stack.getStack().stackSize);
-                    return null;
-                    //if the slot contains the same item, and has room to add this stack to it, then add it
-                } else if (tempSlot.getStack().getItem().equals(stack.getStack().getItem()) &&
-                        tempSlot.getStack().getMaxStackSize() > stack.getStack().stackSize + tempSlot.getStack().stackSize) {
-                    tempSlot.getStack().stackSize += stack.getStack().stackSize;
-                    ((Slot) this.inventorySlots.get(slot)).decrStackSize(stack.getStack().stackSize);
-                    return null;
+        if (this.inventorySlots.size()>=slot) {
+            Slot stack = (Slot) this.inventorySlots.get(slot);
+            Slot tempSlot;
+            if (stack.getStack() == null) {
+                return null;
+            }
+            ItemStack returnStack = stack.getStack().copy();
+            for (int currentSlot = 0; currentSlot < this.inventorySlots.size(); currentSlot++) {
+                tempSlot = (Slot) this.inventorySlots.get(currentSlot);
+                //if the item is in the train inventory
+                if (slot > 35 || currentSlot > 35) {
+                    //if the slot is empty, just move it
+                    if (!tempSlot.getHasStack()) {
+                        tempSlot.putStack(stack.getStack());
+                        ((Slot) this.inventorySlots.get(slot)).decrStackSize(stack.getStack().stackSize);
+                        return null;
+                        //if the slot contains the same item, and has room to add this stack to it, then add it
+                    } else if (tempSlot.getStack().getItem().equals(stack.getStack().getItem()) &&
+                            tempSlot.getStack().getMaxStackSize() > stack.getStack().stackSize + tempSlot.getStack().stackSize) {
+                        tempSlot.getStack().stackSize += stack.getStack().stackSize;
+                        ((Slot) this.inventorySlots.get(slot)).decrStackSize(stack.getStack().stackSize);
+                        return null;
+                    }
                 }
             }
-        }
-        if (isCrafting) {
-            if (craftingTable != null) {
-                onCraftMatrixChanged(craftingTable.inventory);
-            } else {
-                onCraftMatrixChanged(((EntityTrainCore) railTransport).inventory);
+            if (isCrafting) {
+                if (craftingTable != null) {
+                    onCraftMatrixChanged(craftingTable.inventory);
+                } else {
+                    onCraftMatrixChanged(((EntityTrainCore) railTransport).inventory);
+                }
             }
+            return returnStack;
         }
-        return returnStack;
+        return null;
     }
 
     /**
@@ -234,11 +237,11 @@ public class ContainerHandler extends Container{
                 int i = 0;
                 for (; i < 8; i++) {
                     if (craftingTable.inventory.getStackInSlot(i) == null) {
-                        if (registry.recipe.get(i) != null) {
+                        if (registry.recipe[i] != null) {
                             i = 20;
                         }
                     } else {
-                        if (registry.recipe.get(i) != craftingTable.inventory.getStackInSlot(i).getItem()) {
+                        if (registry.recipe[i] != craftingTable.inventory.getStackInSlot(i).getItem()) {
                             i = 20;
                         }
                     }

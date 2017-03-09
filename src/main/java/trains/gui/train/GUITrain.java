@@ -36,7 +36,7 @@ public class GUITrain extends GuiContainer {
      * guiScaler is just a more convenient method to scale, its similar to what the base game does, but with less overhead.
      */
     private static final ResourceLocation vanillaInventory = new ResourceLocation("textures/gui/container/furnace.png");
-    private static final ResourceLocation vanillaChest = new ResourceLocation("textures/gui/container/chest.png");
+    private static final ResourceLocation vanillaChest = new ResourceLocation("textures/gui/container/generic_54.png");
     private static GenericRailTransport transport;
     private EntityPlayer player;
     private int firstTankFluid;
@@ -329,14 +329,16 @@ public class GUITrain extends GuiContainer {
     }
 
     //similar to the above but for freight cars.
-    public static void renderFreightInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
+    public void renderFreightInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
         mc.getTextureManager().bindTexture(vanillaInventory);
         //draw the player inventory and toolbar background.
-        drawTexturedModalRect(guiLeft, guiTop+ 82, 0, 82, 176, 176, 176, 176, zLevel);
+        drawTexturedModalRect(guiLeft, guiTop+ 72, 0, 72, 176, 176, 176, 176, zLevel);
 
         switch (transport.getInventorySize()){
-            case NINExSIX:{
-                drawTexturedModalRect(guiLeft, guiTop, 0, 0, 176, 176, 176, 176, zLevel);
+            case NINExFOUR:{
+                mc.getTextureManager().bindTexture(vanillaChest);
+                drawTexturedModalRect(guiLeft, guiTop-24, 0, 0, xSize, transport.getInventorySize().getRow() * 18 + 17);
+                //drawTexturedModalRect(guiLeft, guiTop + transport.getInventorySize().getRow() * 18 + 17, 0, 126, xSize, 96);
                 break;
             }
 
