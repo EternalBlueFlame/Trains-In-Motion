@@ -13,7 +13,7 @@ import org.lwjgl.opengl.GL11;
 import java.io.IOException;
 import java.util.*;
 /**
- * An extension to the ModelRenderer class. It basically is a copy to ModelRenderer,
+ * An extension to the CubikModelRenderer class. It basically is a copy to CubikModelRenderer,
  * however, it contains various new methods to make your models.
  * <br /><br />
  * Since the ModelRendererTurbo class gets loaded during startup, the models made
@@ -55,25 +55,13 @@ public class ModelRendererTurbo extends ModelRenderer {
 	
 	/**
 	 * Creates a new ModelRenderTurbo object. It requires the coordinates of the
-	 * position of the texture, and assumes the texture has a base resolution of 512x512.
+	 * position of the texture, and assumes the texture has a base resolution of 128x64
 	 * @param modelbase
 	 * @param textureX the x-coordinate on the texture
 	 * @param textureY the y-coordinate on the texture
 	 */
     public ModelRendererTurbo(ModelBase modelbase, int textureX, int textureY) {
-    	this(modelbase, textureX, textureY, 512, 512);
-    }
-
-    /**
-     * Creates a new ModelRenderTurbo object. It requires the coordinates of the
-     * position of the texture. and assumes the texture has a base resolution of 512x512.
-     * @param modelbase
-     * @param textureX the x-coordinate on the texture
-     * @param textureY the y-coordinate on the texture
-     * @param boxname the name of the model part.
-     */
-    public ModelRendererTurbo(ModelBase modelbase, int textureX, int textureY, String boxname) {
-        this(modelbase, textureX, textureY, 512, 512, boxname);
+    	this(modelbase, textureX, textureY, 128, 64);
     }
 
     /**

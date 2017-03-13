@@ -10,21 +10,21 @@ import trains.models.tmt.ModelRendererTurbo;
  * A middleman class to convert Cubik pro models to something tmt can actually render properly.
  * Theoretically this should work with any models that use the setRotationPoint instead of defining position with addBox.
  */
-public class ModelRenderer extends ModelRendererTurbo {
+public class CubikModelRenderer extends ModelRendererTurbo {
 
     private float width=0;
     private float height=0;
     private float depth=0;
-    public ModelRenderer(ModelBase p_i1172_1_, String p_i1172_2_) {
+    public CubikModelRenderer(ModelBase p_i1172_1_, String p_i1172_2_) {
         super(p_i1172_1_, p_i1172_2_);
     }
 
-    public ModelRenderer(ModelBase p_i1174_1_, int p_i1174_2_, int p_i1174_3_) {
+    public CubikModelRenderer(ModelBase p_i1174_1_, int p_i1174_2_, int p_i1174_3_) {
         this(p_i1174_1_, "void");
         this.setTextureOffset(p_i1174_2_,p_i1174_3_);
     }
 
-    public ModelRenderer(ModelBase p_i1174_1_, int p_i1174_2_, int p_i1174_3_, String name) {
+    public CubikModelRenderer(ModelBase p_i1174_1_, int p_i1174_2_, int p_i1174_3_, String name) {
         this(p_i1174_1_, name);
         this.setTextureOffset(p_i1174_2_,p_i1174_3_);
     }

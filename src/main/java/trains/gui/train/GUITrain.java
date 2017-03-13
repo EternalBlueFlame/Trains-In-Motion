@@ -333,12 +333,13 @@ public class GUITrain extends GuiContainer {
         mc.getTextureManager().bindTexture(vanillaInventory);
         //draw the player inventory and toolbar background.
         drawTexturedModalRect(guiLeft, guiTop+ 72, 0, 72, 176, 176, 176, 176, zLevel);
+        drawTexturedModalRect(guiLeft, guiTop+ 70, 0, 0, xSize, 16);
 
         switch (transport.getInventorySize()){
-            case NINExFOUR:{
+            case NINExFOUR: case NINExTHREE:{
                 mc.getTextureManager().bindTexture(vanillaChest);
-                drawTexturedModalRect(guiLeft, guiTop-24, 0, 0, xSize, transport.getInventorySize().getRow() * 18 + 17);
-                //drawTexturedModalRect(guiLeft, guiTop + transport.getInventorySize().getRow() * 18 + 17, 0, 126, xSize, 96);
+                drawTexturedModalRect(guiLeft, guiTop-24, 0, 0, xSize, (transport.getInventorySize().getRow() * 18) + 17);
+                drawTexturedModalRect(guiLeft, guiTop + (transport.getInventorySize().getRow() * 17)-3, 0, 472, xSize, 16);
                 break;
             }
 

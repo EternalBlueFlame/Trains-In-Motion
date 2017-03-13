@@ -165,7 +165,7 @@ public class HitboxHandler {
                                 //if it's an item, then check if it's valid for the slot
                             } else if ((transport.getType() == TrainsInMotion.transportTypes.HOPPER || transport.getType() == TrainsInMotion.transportTypes.COALHOPPER ||
                                     transport.getType() == TrainsInMotion.transportTypes.GRAINHOPPER) &&
-                                    entity instanceof EntityItem && transport.inventory.isItemValidForSlot(0,((EntityItem) entity).getEntityItem())){
+                                    entity instanceof EntityItem && transport.inventory.isItemValidForSlot(0,((EntityItem) entity).getEntityItem()) && ((EntityItem) entity).posY > transport.posY+1){
                                 transport.inventory.addItem(((EntityItem) entity).getEntityItem());
                                 ((EntityItem) entity).worldObj.removeEntity((EntityItem)entity);
                             }

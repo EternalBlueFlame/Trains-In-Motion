@@ -56,9 +56,10 @@ public class EntityWellCar extends EntityRollingStockCore{
     /**
      * <h2>Bogie Offset</h2>
      * @return the list of offsets for the bogies, 0 being the center. negative values are towards the front.
+     * TODO: in alpha 3 this should be for the bogie render only, and have a second function to get the actual offset which only needs 1 double, because the values have to be perfectly opposite.
      */
     @Override
-    public List<Double> getBogieOffsets(){return  Arrays.asList(-0.9, 0.9);}
+    public List<Double> getBogieOffsets(){return  Arrays.asList(-3.25, 3.25);}
     /**
      * <h2>Inventory Size</h2>
      * @return the size of the inventory not counting any fuel or crafting slots.
@@ -83,7 +84,7 @@ public class EntityWellCar extends EntityRollingStockCore{
      * @return defines the positions for the hitboxes in blocks. 0 being the center of the train, negative values being towards the front..
      */
     @Override
-    public float[] getHitboxPositions(){return new float[]{-2.25f,0f,2.25f};}
+    public float[] getHitboxPositions(){return new float[]{-3.35f,-2.2f,-1.1f,0f,1.1f,2.175f,3.25f};}
     /**
      * <h2>Lamp offset</h2>
      * @return defines the offset for the lamp in blocks.

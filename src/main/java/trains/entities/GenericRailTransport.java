@@ -81,6 +81,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public String destination ="";
     public InventoryHandler inventory = new InventoryHandler(this);
     public ItemStack key;
+    private double[][] vectorCache = new double[7][3];
     public GenericRailTransport(World world){
         super(world);
     }
@@ -334,8 +335,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (!worldObj.isRemote && bogieSize < 1) {
             for (double pos : getBogieOffsets()) {
                 //it should never be possible for bogieXYZ to be null unless there is severe server data corruption.
-                double[] point = RailUtility.rotatePoint(new double[]{pos,0,0},rotationPitch, rotationYaw,0);
-                EntityBogie spawnBogie = new EntityBogie(worldObj, posX + point[0], posY + point[1], posZ + point[2], getEntityId());
+                vectorCache[1][0] = pos;
+                vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
+                EntityBogie spawnBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId());
                 worldObj.spawnEntityInWorld(spawnBogie);
                 bogie.add(spawnBogie);
             }
@@ -374,9 +376,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             //position this
             if ((bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) != 0) {
                 setPosition(
-                        (bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
+                        ((bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D),
                         ((bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D),
-                        (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D);
+                        ((bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D));
             }
 
 
@@ -389,8 +391,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (transportTicks %2 ==0) {
                 //align bogies
                 for (int i = 0; i < bogie.size(); i++) {
-                    double[] var = rotatePoint(new double[]{getBogieOffsets().get(i), 0.0f, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                    bogie.get(i).setPosition(var[0] + posX, bogie.get(i).posY, var[2] + posZ);
+                    vectorCache[1][0]=getBogieOffsets().get(i);
+                    vectorCache[0] = rotatePoint(vectorCache[5], 0.0f, rotationYaw, 0.0f);
+                    bogie.get(i).setPosition(vectorCache[4][0] + posX, bogie.get(i).posY, vectorCache[4][2] + posZ);
                 }
             }
             manageLinks();
@@ -399,11 +402,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //rider updating isn't called if there's no driver/conductor, so just in case of that, we reposition the seats here too.
         if (riddenByEntity == null) {
             for (int i = 0; i < seats.size(); i++) {
-                double[] riderOffset = rotatePoint(getRiderOffsets()[i], rotationPitch, rotationYaw, 0);
-                riderOffset[0] += posX;
-                riderOffset[1] += posY;
-                riderOffset[2] += posZ;
-                seats.get(i).setPosition(riderOffset[0], riderOffset[1], riderOffset[2]);
+                vectorCache[0] = rotatePoint(getRiderOffsets()[i], rotationPitch, rotationYaw, 0);
+                vectorCache[0][0] += posX;
+                vectorCache[0][1] += posY;
+                vectorCache[0][2] += posZ;
+                seats.get(i).setPosition(vectorCache[0][0], vectorCache[0][1], vectorCache[0][2]);
             }
         }
 
@@ -424,7 +427,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 ClientProxy.carts.add(this);
             }
             if (lamp.Y >1 && worldObj.isRemote && transportTicks %2 ==1){
-                lamp.ShouldUpdate(worldObj, RailUtility.rotatePoint(new double[]{this.posX + getLampOffset().xCoord ,this.posY + getLampOffset().yCoord, this.posZ + getLampOffset().zCoord}, rotationPitch, rotationYaw, 0));
+                vectorCache[0][0] =this.posX + getLampOffset().xCoord;
+                vectorCache[0][1] =this.posY + getLampOffset().yCoord;
+                vectorCache[0][2] =this.posZ + getLampOffset().zCoord;
+                lamp.ShouldUpdate(worldObj, RailUtility.rotatePoint(vectorCache[0], rotationPitch, rotationYaw, 0));
             }
             if (transportTicks>20){
                 transportTicks = 1;
@@ -441,16 +447,16 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public void updateRiderPosition() {
         if (riddenByEntity != null) {
-            double[] riderOffset = rotatePoint(getRiderOffsets()[0], rotationPitch, rotationYaw, 0);
-            riddenByEntity.setPosition(riderOffset[0] + this.posX, riderOffset[1] + this.posY, riderOffset[2] + this.posZ);
+            vectorCache[2] = rotatePoint(getRiderOffsets()[0], rotationPitch, rotationYaw, 0);
+            riddenByEntity.setPosition(vectorCache[2][0] + this.posX, vectorCache[2][1] + this.posY, vectorCache[2][2] + this.posZ);
         }
 
         for (int i = 0; i < seats.size(); i++) {
-            double[] riderOffset = rotatePoint(getRiderOffsets()[i], rotationPitch, rotationYaw, 0);
-            riderOffset[0] += posX;
-            riderOffset[1] += posY;
-            riderOffset[2] += posZ;
-            seats.get(i).setPosition(riderOffset[0], riderOffset[1], riderOffset[2]);
+            vectorCache[2] = rotatePoint(getRiderOffsets()[i], rotationPitch, rotationYaw, 0);
+            vectorCache[2][0] += posX;
+            vectorCache[2][1] += posY;
+            vectorCache[2][2] += posZ;
+            seats.get(i).setPosition(vectorCache[2][0], vectorCache[2][1], vectorCache[2][2]);
         }
 
 
@@ -469,25 +475,28 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (front != nullUUID) {
                 GenericRailTransport frontLink = CommonProxy.getTransportFromUuid(front);
                 if (frontLink != null) {
-                    double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[0]-1, 0, 0}, 0, rotationYaw, 0);
-                    fromHere[0] += posX;
-                    fromHere[2] += posZ;
-                    double[] toHere = rotatePoint(new double[]{frontLink.getHitboxPositions()[
-                            (frontLink.back == this.getPersistentID())?(frontLink.getHitboxPositions().length - 1):0
-                            ], 0, 0}, 0, frontLink.rotationYaw, 0);
-                    toHere[0] += frontLink.posX;
-                    toHere[2] += frontLink.posZ;
-                    this.addVelocity(-(fromHere[0] - toHere[0]) * 0.05,0, -(fromHere[2] - toHere[2]) * 0.05);
+                    //to here
+                    vectorCache[3][0] = getHitboxPositions()[0]-1;
+                    vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
+                    vectorCache[4][0] += posX;
+                    vectorCache[4][2] += posZ;
+                    //from here
+                    vectorCache[5][0]=frontLink.getHitboxPositions()[(frontLink.back == this.getPersistentID())?(frontLink.getHitboxPositions().length - 1):0];
+                    vectorCache[6] = rotatePoint(vectorCache[5], 0, frontLink.rotationYaw, 0);
+                    vectorCache[6][0] += frontLink.posX;
+                    vectorCache[6][2] += frontLink.posZ;
+                    this.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05,0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
                 }
             } else if (isCoupling) {
-                double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[0] - 2, 0, 0}, 0, rotationYaw, 0);
-                frontCheck[0] +=posX;
-                frontCheck[1] +=posY;
-                frontCheck[2] +=posZ;
+                vectorCache[3][0] = getHitboxPositions()[0]-2;
+                vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
+                vectorCache[4][0] += posX;
+                vectorCache[4][1] += posY;
+                vectorCache[4][2] += posZ;
                 //TODO: this calculation could be more efficient
                 List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                        AxisAlignedBB.getBoundingBox(frontCheck[0] - 0.5d, frontCheck[1], frontCheck[2] - 0.5d,
-                                frontCheck[0] + 0.5d, frontCheck[1] + 2, frontCheck[2] +0.5d));
+                        AxisAlignedBB.getBoundingBox(vectorCache[4][0] - 0.5d, vectorCache[4][1], vectorCache[4][2] - 0.5d,
+                                vectorCache[4][0] + 0.5d, vectorCache[4][1] + 2, vectorCache[4][2] +0.5d));
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
@@ -502,25 +511,28 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (back != nullUUID) {
                 GenericRailTransport backLink = CommonProxy.getTransportFromUuid(back);
                 if (backLink != null) {
-                    double[] fromHere = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1]+1, 0, 0}, 0, rotationYaw, 0);
-                    fromHere[0] += posX;
-                    fromHere[2] += posZ;
-                    double[] toHere = rotatePoint(new double[]{backLink.getHitboxPositions()[
-                            (backLink.back == this.getPersistentID())?(backLink.getHitboxPositions().length - 1):0
-                            ], 0, 0}, 0, backLink.rotationYaw, 0);
-                    toHere[0] += backLink.posX;
-                    toHere[2] += backLink.posZ;
-                    this.addVelocity(-(fromHere[0] - toHere[0]) * 0.05,0, -(fromHere[2] - toHere[2]) * 0.05);
+                    //to here
+                    vectorCache[5][0]=getHitboxPositions()[getHitboxPositions().length-1]+1;
+                    vectorCache[6] = rotatePoint(vectorCache[5], 0, rotationYaw, 0);
+                    vectorCache[6][0] += posX;
+                    vectorCache[6][2] += posZ;
+                    //from here
+                    vectorCache[5][0]=backLink.getHitboxPositions()[(backLink.back == this.getPersistentID())?(backLink.getHitboxPositions().length - 1):0];
+                    vectorCache[6] = rotatePoint(vectorCache[5], 0, backLink.rotationYaw, 0);
+                    vectorCache[6][0] += backLink.posX;
+                    vectorCache[6][2] += backLink.posZ;
+                    this.addVelocity(-(vectorCache[6][0] - vectorCache[6][0]) * 0.05,0, -(vectorCache[6][2] -vectorCache[6][2]) * 0.05);
                 }
             } else if (isCoupling) {
-                double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1] + 2, 0, 0}, 0, rotationYaw, 0);
-                frontCheck[0] +=posX;
-                frontCheck[1] +=posY;
-                frontCheck[2] +=posZ;
+                vectorCache[3][0] = getHitboxPositions()[getHitboxPositions().length-1] + 2;
+                vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
+                vectorCache[4][0] += posX;
+                vectorCache[4][1] += posY;
+                vectorCache[4][2] += posZ;
                 //TODO: this calculation could be more efficient
                 List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                        AxisAlignedBB.getBoundingBox(frontCheck[0] - 0.5d, frontCheck[1], frontCheck[2] - 0.5d,
-                                frontCheck[0] + 0.5d, frontCheck[1] + 2, frontCheck[2] +0.5d));
+                        AxisAlignedBB.getBoundingBox(vectorCache[4][0] - 0.5d, vectorCache[4][1], vectorCache[4][2] - 0.5d,
+                                vectorCache[4][0] + 0.5d, vectorCache[4][1] + 2, vectorCache[4][2] +0.5d));
 
                 if (list.size() > 0) {
                     for (Object entity : list) {

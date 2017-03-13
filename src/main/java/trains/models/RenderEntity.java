@@ -103,7 +103,7 @@ public class RenderEntity extends Render {
                     if (render.boxName.contains("wheelconnector") || render.boxName.contains("upperpiston") || render.boxName.contains("upperpistonarm") ||render.boxName.contains("simple")) {
                         simplePistons.add(new simplePiston(render));
                     }
-                    if (render.boxName.contains("blocklog")) {
+                    if (render.boxName.contains("block")) {
                         boolean isAdded =false;
                         for (blockCargo cargo : blockCargoRenders) {
                             if (cargo.name.equals(render.boxName)){
@@ -112,7 +112,7 @@ public class RenderEntity extends Render {
                             }
                         }
                         if (!isAdded){
-                            blockCargoRenders.add(new blockCargo().add(render, false));
+                            blockCargoRenders.add(new blockCargo().add(render, true));
                         }
                     }
                     if (render.boxName.contains("crate")) {
@@ -236,6 +236,7 @@ public class RenderEntity extends Render {
             }
         }
 
+
         int itteration=0;
         if (blockCargoRenders.size()>0){
             //loop for the groups of cargo
@@ -244,6 +245,8 @@ public class RenderEntity extends Render {
                 if (itteration<entity.inventory.calculatePercentageUsed(blockCargoRenders.size())) {
                     //loop through the models in the group
                     if (cargo.isBlock) {
+                        //bind the texture
+                        bindTexture(TextureMap.locationBlocksTexture);
                         for (ModelRendererTurbo block : cargo.boxRefrence) {
                             GL11.glPushMatrix();
                             //define position from model
@@ -255,11 +258,11 @@ public class RenderEntity extends Render {
                             GL11.glRotated(block.rotateAngleY * RailUtility.degreesD, 0, 1, 0);
                             GL11.glRotated(block.rotateAngleZ * RailUtility.degreesD, 0, 0, 1);
                             GL11.glScaled(block.xScale - 0.0175, block.yScale - 0.0175, block.zScale - 0.0175);
-                            field_147909_c.renderBlockAsItem(entity.inventory.getFirstBlock(itteration), entity.inventory.getFirstBlockMeta(itteration), 1f);
+                            field_147909_c.renderBlockAsItem(entity.inventory.getFirstBlock(itteration), entity.inventory.getFirstBlockMeta(itteration), 1.0f);
                             GL11.glPopMatrix();
                         }
                     } else {
-                        System.out.println("its not a block");
+                        bindTexture(texture);
                         for (ModelRendererTurbo block : cargo.boxRefrence) {
                             block.render();
                         }
@@ -348,7 +351,7 @@ public class RenderEntity extends Render {
     /**
      * <h3>advanced piston</h3>
      * this is used for pistons that require not only movement animation but also rotation.
-     * this caches a reference to the ModelRenderer as well.
+     * this caches a reference to the CubikModelRenderer as well.
      */
     private class advancedPiston{
         private ModelRendererTurbo boxRefrence = null;
