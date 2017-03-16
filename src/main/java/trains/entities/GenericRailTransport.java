@@ -159,14 +159,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 } else {
                 this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
             }
-                setRotation((float)Math.toDegrees(Math.atan2(
-                    bogie.get(bogieSize).posZ - bogie.get(0).posZ,
-                    bogie.get(bogieSize).posX - bogie.get(0).posX)),
-                    MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY)));
-
-        } else {
-            this.setRotation(p_70056_7_, p_70056_8_);
         }
+        this.setRotation(p_70056_7_, p_70056_8_);
     }
 
 
@@ -324,6 +318,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (posY < -64.0D & isDead){
             worldObj.removeEntity(this);
         }
+        System.out.println(rotationYaw + " :" + worldObj.isRemote);
 
         bogie.remove(null);
         seats.remove(null);
@@ -392,8 +387,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 //align bogies
                 for (int i = 0; i < bogie.size(); i++) {
                     vectorCache[1][0]=getBogieOffsets().get(i);
-                    vectorCache[0] = rotatePoint(vectorCache[5], 0.0f, rotationYaw, 0.0f);
-                    bogie.get(i).setPosition(vectorCache[4][0] + posX, bogie.get(i).posY, vectorCache[4][2] + posZ);
+                    vectorCache[0] = rotatePoint(vectorCache[1], rotationPitch, rotationYaw, 0.0f);
+                    bogie.get(i).setPosition(vectorCache[0][0] + posX, bogie.get(i).posY, vectorCache[0][2] + posZ);
                 }
             }
             manageLinks();

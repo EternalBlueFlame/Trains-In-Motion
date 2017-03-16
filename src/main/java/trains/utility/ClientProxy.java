@@ -105,9 +105,12 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void register() {
         //trains and rollingstock
-        for(TrainRegistry reg : TrainRegistry.listTrains()){
+        int index=0;
+        while (TrainRegistry.listTrains(index)!=null) {
+            TrainRegistry reg = TrainRegistry.listTrains(index);
             RenderingRegistry.registerEntityRenderingHandler(reg.trainClass, new RenderEntity(
                     reg.model, reg.texture, reg.bogieModels));
+            index++;
         }
         //hitboxes
         RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.multipartHitbox.class, nullRender);

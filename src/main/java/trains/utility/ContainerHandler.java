@@ -233,7 +233,9 @@ public class ContainerHandler extends Container{
      */
     private ItemStack findMatchingRecipe() {
         if (craftingTable != null) {
-            for (TrainRegistry registry : TrainRegistry.listTrains()) {
+            int index=0;
+            while (TrainRegistry.listTrains(index)!=null) {
+                TrainRegistry registry = TrainRegistry.listTrains(index);
                 int i = 0;
                 for (; i < 8; i++) {
                     if (craftingTable.inventory.getStackInSlot(i) == null) {
@@ -249,6 +251,7 @@ public class ContainerHandler extends Container{
                 if (i == 8) {
                     return new ItemStack(registry.item, 1);
                 }
+                index++;
             }
         } else {
             //TODO: normal crafting for rollingstock here

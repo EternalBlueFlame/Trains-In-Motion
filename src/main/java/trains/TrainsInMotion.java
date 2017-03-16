@@ -118,10 +118,11 @@ public class TrainsInMotion {
         //loop for registering the entities.
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", 15, TrainsInMotion.instance, 60, 1, true);
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntitySeat.class, "Seat", 16, TrainsInMotion.instance, 60, 2, true);
-        int index =17;
-        for (TrainRegistry train : TrainRegistry.listTrains()) {
-            cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(train.trainClass, train.entityWorldName, index, TrainsInMotion.instance, 60, 1, true);
-            GameRegistry.registerItem(train.item, train.item.getUnlocalizedName().substring(5));
+        int index =0;
+        while (TrainRegistry.listTrains(index)!=null) {
+            TrainRegistry registry = TrainRegistry.listTrains(index);
+            cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(registry.trainClass, registry.entityWorldName, index+17, TrainsInMotion.instance, 60, 1, true);
+            GameRegistry.registerItem(registry.item, registry.item.getUnlocalizedName().substring(5));
             index++;
         }
 

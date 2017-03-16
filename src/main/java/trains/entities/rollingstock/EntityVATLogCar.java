@@ -1,11 +1,12 @@
 package trains.entities.rollingstock;
 
 import net.minecraft.item.Item;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import trains.TrainsInMotion;
 import trains.entities.EntityRollingStockCore;
-import trains.items.rollingstock.ItemPullmansPalace;
-import trains.items.rollingstock.ItemVATLogCar;
+import trains.items.ItemTransport;
 import trains.models.tmt.Vec3d;
 import trains.registry.TrainRegistry;
 import trains.utility.LiquidManager;
@@ -23,7 +24,7 @@ public class EntityVATLogCar extends EntityRollingStockCore{
      * <h2>Basic Rollingstock Constructor</h2>
      * To make your own custom rollingstock, create a new class that is a copy of this class, in that copy, you only need to change the values of private static final variables defined here.
      * You also have to make your own item class, for that
-     * @see ItemPullmansPalace
+     * @see ItemTransport
      * lastly you have to register them in
      * @see TrainRegistry#listTrains()
      *
@@ -33,7 +34,10 @@ public class EntityVATLogCar extends EntityRollingStockCore{
      *     and it will define the name shown for all instances like items, gui, the entity name, and the texture name.
      */
     private static final LiquidManager tank = null;
-    public static final Item thisItem = new ItemVATLogCar().setUnlocalizedName("vatlogcar");
+    public static final String[] itemDescription = new String[]{
+            "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2" + StatCollector.translateToLocal("menu.item.tons"),
+            "\u00A77" + StatCollector.translateToLocal("menu.item.sizeof") +": 27" + StatCollector.translateToLocal("menu.item.slots")};
+    public static final Item thisItem = new ItemTransport(itemDescription, EntityVATLogCar.class.getConstructors()[0]).setUnlocalizedName("vatlogcar");
 
     /**
      * these basic constructors only need to have their names changed to that of this class, that is assuming your editor doesn't automatically do that.
