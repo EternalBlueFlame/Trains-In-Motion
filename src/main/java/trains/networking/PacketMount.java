@@ -42,18 +42,18 @@ public class PacketMount implements IMessage {
         @Override
         public IMessage onMessage(PacketMount message, MessageContext context) {
             GenericRailTransport transport = (GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId);
-            if (transport.riddenByEntity == null && transport.getPermissions(context.getServerHandler().playerEntity, false, false)) {
+            if (transport.riddenByEntity == null && transport.getPermissions(context.getServerHandler().playerEntity, false)) {
                 context.getServerHandler().playerEntity.mountEntity(transport);
                 return null;
             } else {
                 for (EntitySeat seat : transport.seats){
-                    if (seat.riddenByEntity == null && transport.getPermissions(context.getServerHandler().playerEntity, false, false)){
+                    if (seat.riddenByEntity == null && transport.getPermissions(context.getServerHandler().playerEntity, false)){
                         context.getServerHandler().playerEntity.mountEntity(seat);
                         return null;
                     }
                 }
             }
-            if (transport.getPermissions(context.getServerHandler().playerEntity, false, false)) {
+            if (transport.getPermissions(context.getServerHandler().playerEntity, false)) {
                 context.getServerHandler().playerEntity.addChatMessage(new ChatComponentText("There are no available seats"));
             } else {
                 context.getServerHandler().playerEntity.addChatMessage(new ChatComponentText("You don't have permission to do that."));

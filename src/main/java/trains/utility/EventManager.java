@@ -14,7 +14,6 @@ import trains.TrainsInMotion;
 import trains.entities.EntitySeat;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
-import trains.entities.rollingstock.EntityVATLogCar;
 import trains.networking.PacketKeyPress;
 import trains.networking.PacketMount;
 
@@ -76,36 +75,35 @@ public class EventManager {
         if (event.target instanceof HitboxHandler.multipartHitbox
                 && event.entity.worldObj.isRemote) {
 
-            switch (((HitboxHandler.multipartHitbox) event.target).parent.getType()){
-                case LOGCAR:{
-                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, ((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
-                    break;
-                }
-                default:{
-                    TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
-                    break;
-                }
+            if (((HitboxHandler.multipartHitbox) event.target).parent.getRiderOffsets() != null) {
+                TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
+            } else {
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, ((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
             }
 
         }
     }
 
 
-
+    /**
+     * <h2>join world</h2>
+     * This event is called when a player joins the world, we use this to display the alpha notice, and check for new mod versions, this is only displayed on the client side, but can be used for server..
+     */
     @SubscribeEvent
     public void entityJoinWorldEvent(EntityJoinWorldEvent event) {
         if (event.entity instanceof EntityPlayer && event.entity.worldObj.isRemote) {
+            //add alpha notice
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("You are currently playing an alpha pre-release of Trains In Motion."));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("For official releases, check out https://github.com/EternalBlueFlame/Trains-In-Motion/"));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Keep in mind that everything in this mod is subject to change, and report any bugs you find."));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Good luck and thanks for the assistance. - Eternal Blue Flame."));
 
-            /*
+            //use an HTTP request and parse to check for new versions of the mod from github.
             try {
                 HttpURLConnection conn = (HttpURLConnection) new URL("https://raw.githubusercontent.com/USER/PROJECT/BRANCH/version.txt").openConnection();
                 conn.setRequestMethod("GET");
                 BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
+                //read the first line of the text document, if it's not the same as the current running version, notify there is an update, then display the second line, which is intended for a download URL.
                 if (!TrainsInMotion.MOD_VERSION.equals(rd.readLine())) {
                     ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("A new version of Trains In Motion is available, check it out at:"));
                     ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText(rd.readLine()));
@@ -113,7 +111,7 @@ public class EventManager {
             } catch (Exception e) {
                 //couldn't check for new version, so just do nothing.
             }
-             */
+
         }
     }
 }

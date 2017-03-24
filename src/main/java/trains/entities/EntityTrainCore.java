@@ -3,10 +3,8 @@ package trains.entities;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.audio.ISound;
-import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import trains.networking.PacketKeyPress;
 import trains.utility.CommonProxy;
@@ -19,7 +17,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static trains.TrainsInMotion.nullUUID;
-import static trains.TrainsInMotion.proxy;
 import static trains.utility.RailUtility.rotatePoint;
 
 /**
@@ -38,6 +35,7 @@ public class EntityTrainCore extends GenericRailTransport {
     public boolean isRunning = false;
     public FuelHandler fuelHandler = new FuelHandler();
     public int accelerator =0;
+    private double[][] vectorCache = new double[4][3];
 
 
 
@@ -158,24 +156,21 @@ public class EntityTrainCore extends GenericRailTransport {
     @Override
     public void onUpdate() {
 
-        double[] move;
-        double speed;
-
         for (EntityBogie entityBogie : bogie){
             if(accelerator!=0) {
                 //acceleration is scaled down to fit the scale of the trains.
-                speed = ((accelerator / 6f) * 0.01302083f) * getAcceleration();
+                vectorCache[0][0] = ((accelerator / 6f) * 0.01302083f) * getAcceleration();
 
                 //cap speed to max.
-                if (speed > getMaxSpeed()) {
-                    speed = getMaxSpeed();
-                } else if (speed < -getMaxSpeed()) {
-                    speed = -getMaxSpeed();
+                if (vectorCache[0][0] > getMaxSpeed()) {
+                    vectorCache[0][0] = getMaxSpeed();
+                } else if (vectorCache[0][0] < -getMaxSpeed()) {
+                    vectorCache[0][0] = -getMaxSpeed();
                 }
 
 
-                move = RailUtility.rotatePoint(new double[]{speed, 0, 0}, rotationPitch, rotationYaw, 0);
-                entityBogie.addVelocity(move[0], move[1], move[2]);
+                vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], rotationPitch, rotationYaw, 0);
+                entityBogie.addVelocity(vectorCache[1][0], vectorCache[1][1], vectorCache[1][2]);
             }
 
         }
@@ -217,14 +212,13 @@ public class EntityTrainCore extends GenericRailTransport {
         if(!worldObj.isRemote) {
 
             if (front == nullUUID && isCoupling) {
-                double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[0] - 2, 0, 0}, 0, rotationYaw, 0);
-                frontCheck[0] +=posX;
-                frontCheck[1] +=posY;
-                frontCheck[2] +=posZ;
-                //TODO: this calculation could be more efficient
+                vectorCache[2] = rotatePoint(new double[]{getHitboxPositions()[0] - 2, 0, 0}, 0, rotationYaw, 0);
+                vectorCache[2][0] +=posX;
+                vectorCache[2][1] +=posY;
+                vectorCache[2][2] +=posZ;
                 List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                        AxisAlignedBB.getBoundingBox(frontCheck[0] - 0.5d, frontCheck[1], frontCheck[2] - 0.5d,
-                                frontCheck[0] + 0.5d, frontCheck[1] + 2, frontCheck[2] +0.5d));
+                        AxisAlignedBB.getBoundingBox(vectorCache[2][0] - 0.5d, vectorCache[2][1], vectorCache[2][2] - 0.5d,
+                                vectorCache[2][0] + 0.5d, vectorCache[2][1] + 2, vectorCache[2][2] +0.5d));
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
@@ -238,14 +232,13 @@ public class EntityTrainCore extends GenericRailTransport {
 
 
             if (back == nullUUID && isCoupling) {
-                double[] frontCheck = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1] + 2, 0, 0}, 0, rotationYaw, 0);
-                frontCheck[0] +=posX;
-                frontCheck[1] +=posY;
-                frontCheck[2] +=posZ;
-                //TODO: this calculation could be more efficient
+                vectorCache[3] = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1] + 2, 0, 0}, 0, rotationYaw, 0);
+                vectorCache[3][0] +=posX;
+                vectorCache[3][1] +=posY;
+                vectorCache[3][2] +=posZ;
                 List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                        AxisAlignedBB.getBoundingBox(frontCheck[0] - 0.5d, frontCheck[1], frontCheck[2] - 0.5d,
-                                frontCheck[0] + 0.5d, frontCheck[1] + 2, frontCheck[2] +0.5d));
+                        AxisAlignedBB.getBoundingBox(vectorCache[3][0] - 0.5d, vectorCache[3][1], vectorCache[3][2] - 0.5d,
+                                vectorCache[3][0] + 0.5d, vectorCache[3][1] + 2, vectorCache[3][2] +0.5d));
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
@@ -264,7 +257,6 @@ public class EntityTrainCore extends GenericRailTransport {
      * <h2>menu toggles</h2>
      * called from a packet to change the settings.
      * @see trains.networking.PacketKeyPress.Handler#onMessage(PacketKeyPress, MessageContext)
-     *
      * @see GenericRailTransport#toggleBool(int) for more info.
      */
     @Override

@@ -2,11 +2,12 @@
 // Copyright (C) 2017 Minecraft-SMP.de
 // This file is for Flan's Flying Mod Version 4.0.x+
 
-// Model: 
-// Model Creator:
+// Model:
 // Created on:12.02.2017 - 23:47:19
 // Last changed on: 12.02.2017 - 23:47:19
-
+/**
+ * @author Eternal Blue Flame
+ */
 package trains.models.bogies;
 
 import net.minecraft.client.model.ModelBase;

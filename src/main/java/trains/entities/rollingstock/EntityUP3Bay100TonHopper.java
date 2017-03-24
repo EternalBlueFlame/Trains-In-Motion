@@ -7,6 +7,7 @@ import trains.TrainsInMotion;
 import trains.entities.EntityRollingStockCore;
 import trains.items.ItemTransport;
 import trains.models.tmt.Vec3d;
+import trains.registry.TrainRegistry;
 import trains.utility.LiquidManager;
 
 import java.util.Arrays;
@@ -14,22 +15,23 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * <h1>Pullman's Palace entity</h1>
+ * <h1>Union Pacific 3-Bay 100-Ton Hopper entity</h1>
  * For more information on the overrides and functions:
  * @see trains.entities.trains.EntityBrigadelok080
  * @author Eternal Blue Flame
  */
-public class EntityPullmansPalace extends EntityRollingStockCore{
-    private static final LiquidManager tank = null;
-    private static final String[] itemDescription = new String[]{
-            "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2 " + StatCollector.translateToLocal("menu.item.tons"),
-            "\u00A77" + StatCollector.translateToLocal("menu.item.seats") +": 4 " + StatCollector.translateToLocal("menu.item.players")};
-    public static final Item thisItem = new ItemTransport(itemDescription, EntityPullmansPalace.class.getConstructors()[0]).setUnlocalizedName("pullmanspalace");
+public class EntityUP3Bay100TonHopper extends EntityRollingStockCore{
 
-    public EntityPullmansPalace(UUID owner, World world, double xPos, double yPos, double zPos) {
+    private static final LiquidManager tank = null;
+    public static final String[] itemDescription = new String[]{
+            "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2" + StatCollector.translateToLocal("menu.item.tons"),
+            "\u00A77" + StatCollector.translateToLocal("menu.item.sizeof") +": 27" + StatCollector.translateToLocal("menu.item.slots")};
+    public static final Item thisItem = new ItemTransport(itemDescription, EntityUP3Bay100TonHopper.class.getConstructors()[0]).setUnlocalizedName("hoppercar");
+
+    public EntityUP3Bay100TonHopper(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);
     }
-    public EntityPullmansPalace(World world){
+    public EntityUP3Bay100TonHopper(World world){
         super(world);
     }
 
@@ -41,32 +43,32 @@ public class EntityPullmansPalace extends EntityRollingStockCore{
      * <h2>Bogie Offset</h2>
      */
     @Override
-    public List<Double> getBogieOffsets(){return  Arrays.asList(-1.75, 1.75);}
+    public List<Double> getBogieOffsets(){return  Arrays.asList(-1.1, 1.1);}
     /**
      * <h2>Inventory Size</h2>
      */
     @Override
-    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.NULL;}
+    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.NINExTHREE;}
     /**
      * <h2>Type</h2>
      */
     @Override
-    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.PASSENGER;}
+    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.HOPPER;}
     /**
      * <h2>Rider offsets</h2>
      */
     @Override
-    public double[][] getRiderOffsets(){return new double[][]{{2.5f,1.5f, 0f},{1f,1.5f, 0f},{-1f,1.5f, 0f},{-2.5f,1.5f, 0f}};}
+    public double[][] getRiderOffsets(){return null;}
     /**
      * <h2>Hitbox offsets</h2>
      */
     @Override
-    public float[] getHitboxPositions(){return new float[]{-2.75f,-1.25f,0f,1.35f,2.75f};}
+    public float[] getHitboxPositions(){return new float[]{-1.1f,0f,1.1f};}
     /**
      * <h2>Lamp offset</h2>
      */
     @Override
-    public Vec3d getLampOffset(){return new Vec3d(0,2,0);}
+    public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
     /**
      * <h2>Smoke offset</h2>
      */
@@ -77,8 +79,7 @@ public class EntityPullmansPalace extends EntityRollingStockCore{
 
     /**
      * <h2>pre-asigned values</h2>
-     */
-    @Override
+     */    @Override
     public LiquidManager getTank(){return tank;}
     @Override
     public Item getItem(){

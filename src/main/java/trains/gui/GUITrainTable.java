@@ -23,10 +23,12 @@ public class GUITrainTable extends GuiContainer {
 
     /**
      * Draw the foreground layer for the GuiContainer (everything in front of the items)
+     * for more information on how this stuff works:
+     * @see trains.gui.train.GUITrain
      */
     protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_) {
         this.fontRendererObj.drawString(StatCollector.translateToLocal("container.traincrafting"), 28, 6, 4210752);
-        this.fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, this.ySize - 96 + 2, 4210752);
+        this.fontRendererObj.drawString(I18n.format("container.inventory"), 8, this.ySize - 96 + 2, 4210752);
     }
     /**
      * Draw the background layer for the GuiContainer (everything behind the items)

@@ -16,7 +16,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import trains.TrainsInMotion;
@@ -49,17 +48,15 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * colors define the skin colors in RGB format, because we plan to have multiple recolor points on the trains, dependant on skin, we need multiple sets of RGB values.
      * owner defines the UUID of the current owner (usually the player that spawns it)
      * bogie is the list of bogies this has.
-     * bogieXYZ is the list of known positions for the bogies, this is mostly used to keep track of where the bogies are supposed to be via NBT.
-     * motion is the vector angle that the train is facing, we only initialize it here, so we don't need to initialize it every tick.
      * isCreative defines whether or not it should actually remove the liquid/fuel item, this can be toggled from the GUI if the rider is in creative mode.
      * hitboxList and hitboxHandler manage the hitboxes the train has, this is mostly dealt with via getParts() and the hitbox functionality.
      * transportTicks is a simple tick count that allows us to manage functions that don't happen every tick, like fuel consumption in trains.
      * front and back define references to the train/rollingstock connected to the front and back, so that way we can better control links.
      * the front and back unloaded ID's are used as a failsafe in case the front or back connected entities aren't loaded yet.
      * destination is used for routing, railcraft and otherwise.
-     * riddenByEntities defines the entities riding this.
      * the inventory defines the item storage.
      * the key defines the ownership key item, this is used to allow other people access to the transport.
+     * the vectorCache is used to initialize all the vector 3's that are used to calculate everything from movement to linking, this is so we don't have to make new variable instances, saves CPU.
      * the last part is the generic entity constructor
      */
     public boolean isLocked = false;
@@ -69,7 +66,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     private UUID owner = null;
     public List<EntityBogie> bogie = new ArrayList<EntityBogie>();
     public List<EntitySeat> seats = new ArrayList<EntitySeat>();
-    public double[] motion = new double[]{0,0,0};
     public boolean isCreative = false;
     public boolean isCoupling = false;
     public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
@@ -124,13 +120,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * modify basic entity variables to give different uses/values.
      * collision and bounding box stuff just return the in-built stuff.
      * getParts returns the list of hitboxes so they can be treated as if they are part of this entity.
-     * The positionAndRotation2 override is intended to do the same as the super, except for giving a Y offset on collision, we skip that similar to EntityMinecart.
+     * The positionAndRotation2 override is intended to re-calculate the position given the client data during the client tick rather than relying on server.
      */
     @Override
-    public boolean canBePushed()
-    {
-        return false;
-    }
+    public boolean canBePushed() {return false;}
     @Override
     public World func_82194_d(){return worldObj;}
     @Override
@@ -138,9 +131,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         return HitboxHandler.AttackEvent(this,damageSource,damage);
     }
     @Override
-    public Entity[] getParts(){
-        return hitboxList.toArray(new HitboxHandler.multipartHitbox[hitboxList.size()]);
-    }
+    public Entity[] getParts(){return hitboxList.toArray(new HitboxHandler.multipartHitbox[hitboxList.size()]);}
     @Override
     public AxisAlignedBB getBoundingBox(){return boundingBox;}
     @Override
@@ -166,8 +157,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
     /**
      * <h3>add bogies</h3>
-     * this is called by the bogie on its spawn to add it to this entity's list of bogies, we only do it on client because thats the only side that seems to lose track.
+     * this is called by the bogies and seats on their spawn to add them to this entity's list of bogies and seats, we only do it on client because that's the only side that seems to lose track.
      * @see EntityBogie#readSpawnData(ByteBuf)
+     * TODO remove addbogies in alpha 3.
      */
     @SideOnly(Side.CLIENT)
     public void addbogies(EntityBogie cart){bogie.add(cart);}
@@ -287,6 +279,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
 
 
+    /**
+     * <h3>Add velocity to bogies</h3>
+     * used to add motion to every bogie at once with a more-simple call.
+     * TODO: remove this for alpha 3.
+     */
     @Override
     public void addVelocity(double velocityX, double velocityY, double velocityZ){
         //handle movement for trains, this will likely need to be different for rollingstock.
@@ -305,12 +302,16 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      *
      * defines what should be done every tick
      * used for:
-     * managing the list of bogies which are used for defining position and rotation, respawning them if they disappear.
+     * managing the list of bogies and seats, respawning them if they disappear.
      * managing speed, acceleration. and direction.
      * managing rotationYaw and rotationPitch.
-     * being sure the train is listed in the main class (for lighting management).
+     * updating rider entity positions if there is no one riding the core seat.
+     * calling on link management.
+     * @see #manageLinks()
+     * syncing the owner entity ID with client.
+     * being sure the transport is listed in the main class (for lighting management).
      * @see ClientProxy#onTick(TickEvent.ClientTickEvent)
-     *
+     * and updating the lighting block.
      */
     @Override
     public void onUpdate() {
@@ -318,7 +319,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (posY < -64.0D & isDead){
             worldObj.removeEntity(this);
         }
-        System.out.println(rotationYaw + " :" + worldObj.isRemote);
 
         bogie.remove(null);
         seats.remove(null);
@@ -329,17 +329,18 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //always be sure the bogies exist on client and server.
         if (!worldObj.isRemote && bogieSize < 1) {
             for (double pos : getBogieOffsets()) {
-                //it should never be possible for bogieXYZ to be null unless there is severe server data corruption.
                 vectorCache[1][0] = pos;
                 vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
                 EntityBogie spawnBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId());
                 worldObj.spawnEntityInWorld(spawnBogie);
                 bogie.add(spawnBogie);
             }
-            for (int i = 0; i< getRiderOffsets().length-1; i++){
-                EntitySeat seat = new EntitySeat(worldObj, posX, posY, posZ, getEntityId(), i);
-                worldObj.spawnEntityInWorld(seat);
-                seats.add(seat);
+            if (getRiderOffsets() != null) {
+                for (int i = 0; i < getRiderOffsets().length - 1; i++) {
+                    EntitySeat seat = new EntitySeat(worldObj, posX, posY, posZ, getEntityId(), i);
+                    worldObj.spawnEntityInWorld(seat);
+                    seats.add(seat);
+                }
             }
             bogieSize = bogie.size()-1;
         }
@@ -364,8 +365,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         currentBogie.minecartMove();
                     }
                 }
-            }else {
-                motion = new double[]{0d, 0d, 0d};
             }
 
             //position this
@@ -395,7 +394,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
 
         //rider updating isn't called if there's no driver/conductor, so just in case of that, we reposition the seats here too.
-        if (riddenByEntity == null) {
+        if (riddenByEntity == null && getRiderOffsets() != null) {
             for (int i = 0; i < seats.size(); i++) {
                 vectorCache[0] = rotatePoint(getRiderOffsets()[i], rotationPitch, rotationYaw, 0);
                 vectorCache[0][0] += posX;
@@ -418,7 +417,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
          * be sure the client proxy has a reference to this so the lamps can be updated, and then every other tick, attempt to update the lamp position if it's necessary.
          */
         if (bogie.size() > 1 && posX+posY+posZ != 0.0D && !isDead) {
-            if (worldObj.isRemote && !ClientProxy.carts.contains(this)) {
+            if (worldObj.isRemote && ClientProxy.EnableLights && !ClientProxy.carts.contains(this)) {
                 ClientProxy.carts.add(this);
             }
             if (lamp.Y >1 && worldObj.isRemote && transportTicks %2 ==1){
@@ -437,24 +436,25 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
     /**
      * <h2>Rider offset</h2>
-     * this runs every tick to be sure the riders are in the correct positions.
+     * this runs every tick to be sure the riders, and seats, are in the correct positions.
+     * NOTE: this only happens while there is an entity riding this, entities riding seats do not activate this function.
      */
     @Override
     public void updateRiderPosition() {
-        if (riddenByEntity != null) {
-            vectorCache[2] = rotatePoint(getRiderOffsets()[0], rotationPitch, rotationYaw, 0);
-            riddenByEntity.setPosition(vectorCache[2][0] + this.posX, vectorCache[2][1] + this.posY, vectorCache[2][2] + this.posZ);
+        if (getRiderOffsets() != null) {
+            if (riddenByEntity != null) {
+                vectorCache[2] = rotatePoint(getRiderOffsets()[0], rotationPitch, rotationYaw, 0);
+                riddenByEntity.setPosition(vectorCache[2][0] + this.posX, vectorCache[2][1] + this.posY, vectorCache[2][2] + this.posZ);
+            }
+
+            for (int i = 0; i < seats.size(); i++) {
+                vectorCache[2] = rotatePoint(getRiderOffsets()[i], rotationPitch, rotationYaw, 0);
+                vectorCache[2][0] += posX;
+                vectorCache[2][1] += posY;
+                vectorCache[2][2] += posZ;
+                seats.get(i).setPosition(vectorCache[2][0], vectorCache[2][1], vectorCache[2][2]);
+            }
         }
-
-        for (int i = 0; i < seats.size(); i++) {
-            vectorCache[2] = rotatePoint(getRiderOffsets()[i], rotationPitch, rotationYaw, 0);
-            vectorCache[2][0] += posX;
-            vectorCache[2][1] += posY;
-            vectorCache[2][2] += posZ;
-            seats.get(i).setPosition(vectorCache[2][0], vectorCache[2][1], vectorCache[2][2]);
-        }
-
-
 
     }
 
@@ -488,7 +488,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 vectorCache[4][0] += posX;
                 vectorCache[4][1] += posY;
                 vectorCache[4][2] += posZ;
-                //TODO: this calculation could be more efficient
                 List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
                         AxisAlignedBB.getBoundingBox(vectorCache[4][0] - 0.5d, vectorCache[4][1], vectorCache[4][2] - 0.5d,
                                 vectorCache[4][0] + 0.5d, vectorCache[4][1] + 2, vectorCache[4][2] +0.5d));
@@ -524,7 +523,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 vectorCache[4][0] += posX;
                 vectorCache[4][1] += posY;
                 vectorCache[4][2] += posZ;
-                //TODO: this calculation could be more efficient
                 List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
                         AxisAlignedBB.getBoundingBox(vectorCache[4][0] - 0.5d, vectorCache[4][1], vectorCache[4][2] - 0.5d,
                                 vectorCache[4][0] + 0.5d, vectorCache[4][1] + 2, vectorCache[4][2] +0.5d));
@@ -542,11 +540,15 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
 
 
+    /**
+     * <h2>Boolean switches</h2>
+     * Toggles the defined booleans, this is mostly just used for user input like key press and GUI buttons.
+     * Potentially unnecessary, but theoretically more reliable than direct modification of the variables from outside the class.
+     */
     public boolean toggleBool(int index){
         switch (index){
             case 4:{
                 brake = !brake;
-                System.out.println(brake);
                 return true;
             }case 5:{
                 lamp.isOn = !lamp.isOn;
@@ -565,8 +567,15 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         return false;
     }
 
-
-    public boolean getPermissions(EntityPlayer player, boolean driverOnly, boolean destroy) {
+    /**
+     * <h2>Permissions handler</h2>
+     * Used to check if the player has permission to do whatever it is the player is trying to do. Yes I could be more vague with that.
+     *
+     * @param player the player attenpting to interact.
+     * @param driverOnly can this action only be done by the driver/conductor?
+     * @return if the player has permission to continue
+     */
+    public boolean getPermissions(EntityPlayer player, boolean driverOnly) {
         //if this requires the player to be the driver, and they aren't, just return false before we even go any further.
         if (driverOnly && player.getEntityId() != this.riddenByEntity.getEntityId()){
             return false;
@@ -575,8 +584,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //be sure admins and owners can do whatever
         if (player.capabilities.isCreativeMode || owner == player.getUniqueID()) {
             return true;
-        } else if (destroy){
-            return false;
         }
 
         //if the key is needed, like for trains and freight

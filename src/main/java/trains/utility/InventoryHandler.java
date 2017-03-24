@@ -1,5 +1,6 @@
 package trains.utility;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -21,7 +22,7 @@ import java.util.List;
 
 /**
  * <h1>Inventory management</h1>
- * sores the inventory variables, handles a good degree of the inventory processing, and NBT management.
+ * stores the inventory variables, handles a good degree of the inventory processing, and NBT management.
  * @see ContainerHandler for the related code.
  *
  * if the inventory needs to be filtered, on entity creation call
@@ -80,7 +81,7 @@ public class InventoryHandler implements IInventory{
 
     /**
      * <h2>define filters</h2>
-     * this is called on the creation of an entity that need it's inventory filtered, or on the event that the entity's filter is set.
+     * this is called on the creation of an entity that need it's inventory filtered, or on the event that the entity's filter is set, like from the GUI.
      * whitelist as true will allow only the defined types or items. while as false will allow anything except the defined types or items.
      * types in most cases will override items because items are always checked last, if at all.
      * itemTypes.ALL is basically just ignored, this is only called when you are not going to filter by type.
@@ -97,6 +98,8 @@ public class InventoryHandler implements IInventory{
      * <h2>inventory size</h2>
      * @return the number of slots the inventory should have.
      * if it's a train we have to calculate the size based on the type and the size of inventory its supposed to have.
+     * trains get 1 extra slot by default for fuel, steam and nuclear steam get another slot, and if it can take passengers there's another slot, this is added to the base inventory size.
+     * if it's not a train or rollingstock, then just return the base amount for a crafting table.
      */
     @Override
     public int getSizeInventory() {
@@ -177,7 +180,7 @@ public class InventoryHandler implements IInventory{
     @Override
     public String getInventoryName() {
         if (host != null) {
-            return host.getItem().getUnlocalizedName();
+            return host.getItem().getUnlocalizedName() + ".storage";
         } else {
             return TrainsInMotion.MODID + ":storage";
         }
@@ -206,7 +209,7 @@ public class InventoryHandler implements IInventory{
     @Override
     public boolean isUseableByPlayer(EntityPlayer p_70300_1_) {
         if (host != null){
-            return host.getPermissions(p_70300_1_, false, false);
+            return host.getPermissions(p_70300_1_, false);
         } else {
             return blockHost != null;
         }
@@ -216,6 +219,7 @@ public class InventoryHandler implements IInventory{
      * <h2>slot limiter</h2>
      * This is supposed to see if a specific slot will take a specific item. However it's only called from slots we know are actual inventory slots.
      * Because of this we don't even need to check the slot, just the item.
+     * This is also used to filter items for specific rollingstock, that way we can use ore directory commands for things like logs, planks, ores, ingots, etc.
      */
     @Override
     public boolean isItemValidForSlot(int slot, ItemStack itemStack) {
@@ -281,6 +285,8 @@ public class InventoryHandler implements IInventory{
     /**
      * <h2>NBT functionality</h2>
      * we manage the functionality for reading and writing NBT tags of the inventory here, to simplify it in other classes.
+     * for more information
+     * @see GenericRailTransport#readSpawnData(ByteBuf)
      */
     public NBTTagCompound writeNBT(){
         NBTTagCompound nbtitems = new NBTTagCompound();
@@ -423,7 +429,7 @@ public class InventoryHandler implements IInventory{
     /**
      * <h3> combine itemstacks</h3>
      * combines multiple arrays of itemstacks into a single array,
-     * this allows us to create an array comprised of multiple sets of itemstacks
+     * this allows us to create an array comprised of multiple sets of itemstacks, since java doesn't normally allow for this behavior.
      */
     private static ArrayList<ItemStack> combineStacks(ArrayList<ItemStack> oldStacks, ArrayList<ItemStack> newStacks){
         ArrayList<ItemStack> items = new ArrayList<ItemStack>();

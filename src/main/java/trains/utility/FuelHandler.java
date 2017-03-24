@@ -26,22 +26,18 @@ public class FuelHandler implements IFuelHandler{
 	/**
 	 * <h2>Register burnables with minecraft</h2>
 	 * use getBurnTime to register a custom burnable that will work with other mods and the base game.
-	 * use getCustom to register a burnable that will only work with TiM.
-	 *TODO: get custom is not actually implemented.
      */
 	@Override
 	public int getBurnTime(ItemStack fuel) {
 		return 0;
 	}
 
-	public int getCustom(ItemStack fuel){
-		return 0;
-	}
 
 
 	/**
 	 * <h2>check if an item is a usable fuel</h2>
 	 * returns if the train can consume the fuel or not.
+	 * TiM only fuels and support for 3rd party/vanilla fuels are managed here
      */
 	public static boolean isFuel(ItemStack item, GenericRailTransport transport){
 		switch (transport.getType()){
@@ -55,6 +51,7 @@ public class FuelHandler implements IFuelHandler{
 	/**
 	 * <h2>check if an item is a usable water source item</h2>
 	 * @return if the train can add the water to the boiler or not.
+	 * TiM only water items and support for 3rd party/vanilla fuels are managed here
 	 */
 	public static boolean isWater(ItemStack item, GenericRailTransport transport){
 		switch (transport.getType()){
@@ -67,6 +64,8 @@ public class FuelHandler implements IFuelHandler{
 	/**
 	 * <h2>get liquid fuel value</h2>
 	 * @return the value in millibuckets for the item
+	 * non-liquids like redstone are managed here because all non-steam trains use a water tank to define their fuel amount.
+	 * TODO: direct use of liquids seems kind of redundant since they can't be extracted and we deal with the types ourselves, perhaps there should be a replacement will less overhead.
 	 */
 	public static int waterValue(ItemStack itemStack){
 		if (itemStack != null) {
@@ -96,7 +95,7 @@ public class FuelHandler implements IFuelHandler{
 
 	/**
 	 * <h2>Fuel management</h2>
-	 * this class manages the fuel for the train so we can keep it out of the train class to organize code bulk.
+	 * this function manages the fuel for the train so we can keep it out of the train class to organize code bulk.
 	 */
 	public void ManageFuel(EntityTrainCore cart){
 
@@ -127,10 +126,13 @@ public class FuelHandler implements IFuelHandler{
 
 				//be sure there is fuel before trying to consume it
 				if (fuel > 0) {
-					//add steam from burning to the steam tank.
-					//steam is equal to water used, minus a small percentage to compensate for impurities in the water that dont transition to steam,
-					//the amount of water used is generated from heat which is one part fuel 2 parts air, with more fuel burning more heat is created, but this only works to a point.
-					//steam beyond the max point of storage is considered to be expelled through a failsafe.
+					/*
+					* add steam from burning to the steam tank.
+					* steam is equal to water used, minus a small percentage to compensate for impurities in the water that dont transition to steam,
+					* the amount of water used is generated from heat which is one part fuel 2 parts air, with more fuel burning more heat is created, but this only works to a point.
+					* steam beyond the max point of storage is considered to be expelled through a failsafe.
+					* TODO: this and the following calculations are still incorrect
+					*/
 					int steam = Math.round((fuel*0.0025f)/ cart.getMaxFuel());
 					if (cart.getTank().drainFluid(steam,true, cart)) {
 						fuel -= 50; //a lava bucket lasts 1000 seconds, so burnables are processed at 20000*0.05 a second
@@ -168,20 +170,21 @@ public class FuelHandler implements IFuelHandler{
 			}
 			/**
 			 * <h3> Electric and maglev Fuel Management</h3>
-			 *
-			 *
+			 * this is one of the simpler fuel managements,
+			 * We simply check for if the fuel slot is valid, add fluid to the tank, and decrease the itemstack size.
+			 * After that we manage fuel consumption at a set rate based on base use and and current accelerator state
 			 */
 			case ELECTRIC: case MAGLEV: {
 				//add redstone to the fuel tank
-				if (isWater(cart.inventory.getStackInSlot(1), cart) &&
+				if (isWater(cart.inventory.getStackInSlot(0), cart) &&
 						cart.getTank().addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),true, cart) && !cart.isCreative) {
-					cart.inventory.decrStackSize(1,1);
-					cart.inventory.addItem(new ItemStack(Items.bucket));
+					cart.inventory.decrStackSize(0,1);
 				}
 				//use stored energy
 				if (cart.isRunning){
 					//electric trains run at a generally set rate which is multiplied at the square of speed.
-					fuel -= 1 + MathHelper.sqrt_float(cart.accelerator*5);
+					//TODO: this may need re-balancing to keep it realistic.
+					fuel -= 1 + MathHelper.sqrt_float(Math.copySign(cart.accelerator, 1)*5);
 				}
 				break;
 			}

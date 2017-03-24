@@ -9,8 +9,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
-import trains.TrainsInMotion;
-import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.tileentities.TileEntityStorage;
 

@@ -1,33 +1,22 @@
 package trains.models;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.*;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.particle.EntityFX;
-import net.minecraft.client.renderer.RenderBlocks;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
-import net.minecraft.init.Blocks;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
-import trains.TrainsInMotion;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
-import trains.models.tmt.*;
-import trains.registry.URIRegistry;
+import trains.models.tmt.ModelRendererTurbo;
+import trains.models.tmt.Vec2f;
+import trains.models.tmt.Vec3f;
 import trains.utility.Bogie;
 import trains.utility.ClientProxy;
 import trains.utility.HitboxHandler;
@@ -37,28 +26,34 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
-
-import static trains.TrainsInMotion.MODID;
 
 /**
- * <h2> .Java Entity Rendering</h2>
- * to be used for rendering all trains and rollingstock, along with their particle effects.
+ * <h2>Entity Rendering</h2>
+ * used for rendering all trains and rollingstock, along with their particle effects, smoke and steam as examples.
  * for the variables fed to this class:
  * @see ClientProxy#register()
+ * @author Eternal Blue Flame
  */
 public class RenderEntity extends Render {
 
     /**
      * <h2>variables</h2>
-     * model defines the model of the train.
-     * texture defines the texture used for the train
-     * bogieModel defines the model that will get re-used for bogies, this can be null.
+     * model defines the base model of the entity, this holds every piece of sub-geometry and their texture mappings.
+     * texture defines the texture used.
+     * bogieRenders defines the model that will be used for bogies, this can be null.
      * bogie texture defines the texture to use on the bogies.
-     * simple and advanced pistons are used to cache the piston boxes of the train so we can animate them properly without needing to re-parse the base models.
-     * wheels is similar to the pistons but much simpler.
-     * we define rotationvec and wheel pitch here so we don't have to re-initialize it every frame.
-     * smoke type is defined in the train registry this will decide the thickness and color of smoke that comes from the train.
+     * simple and advanced pistons are used to cache the piston geometry of the train so we can animate them properly without needing to re-parse the base models
+     *         since it's just references to already-existing data, and copies of their original positions the RAM cost is very minimal.
+     * wheels is similar to the pistons but much simpler since it doesn't need to cache the original position.
+     * BlockCargoRenders is basically the same as wheels except we store booleans of if it's a wheel, and the name string,
+     *         These are built more like a set, so multiple model parts, ones with the same name, are saved to the set rather than having a model part to every entry.
+     *         This way we can render sets at our whim rather than one by one.
+     * animationCache is used to initialize the variables used for animation vectors ahead of time rather than every frame.
+     *
+     * TODO:
+     * livery Square and liveryRect are used to display train/rollingstock livery spots, company logos as an example.
+     *         Textures will be scaled evenly to match the shape, without distorting the aspect of the image.
+     *         The livery should be defined in GenericRailTransport and saved to NBT.
      */
     private ModelBase model;
     private ResourceLocation texture;
@@ -68,10 +63,7 @@ public class RenderEntity extends Render {
     private List<wheel> wheels = new ArrayList<wheel>();
     private List<blockCargo> blockCargoRenders = new ArrayList<blockCargo>();
     private double[][] animationCache = new double[5][3];
-
-    //TODO
     private List<ModelRendererTurbo> liveriesSquare = new ArrayList<ModelRendererTurbo>();
-    private List<ModelRendererTurbo> liveriesRect = new ArrayList<ModelRendererTurbo>();
 
     private float wheelPitch=0;
     /**
@@ -88,21 +80,25 @@ public class RenderEntity extends Render {
         /**
          * <h3>model caching</h3>
          * cache individual geometry parts so we can render them properly later.
-         * we do this on initial model instance so we don't even need to check it later.
+         * we do this on initial model instance so we don't even need to check it every render frame.
          */
         if (ClientProxy.EnableAnimations){
             for (Object box : model.boxList) {
                 if (box instanceof ModelRendererTurbo) {
                     ModelRendererTurbo render = ((ModelRendererTurbo) box);
+                    //wheels
                     if (render.boxName.contains("wheel") || render.boxName.contains("axel")) {
                         wheels.add(new wheel(render));
                     }
+                    //advanced pistons
                     if (render.boxName.contains("pistonvalveconnector") || render.boxName.contains("advanced")) {
                         advancedPistons.add(new advancedPiston(render));
                     }
+                    //simple pistons and wheel connectors.
                     if (render.boxName.contains("wheelconnector") || render.boxName.contains("upperpiston") || render.boxName.contains("upperpistonarm") ||render.boxName.contains("simple")) {
                         simplePistons.add(new simplePiston(render));
                     }
+                    //block renders
                     if (render.boxName.contains("block")) {
                         boolean isAdded =false;
                         for (blockCargo cargo : blockCargoRenders) {
@@ -115,6 +111,7 @@ public class RenderEntity extends Render {
                             blockCargoRenders.add(new blockCargo().add(render, true));
                         }
                     }
+                    //crate renders
                     if (render.boxName.contains("crate")) {
                         boolean isAdded =false;
                         for (blockCargo cargo : blockCargoRenders) {
@@ -131,18 +128,21 @@ public class RenderEntity extends Render {
             }
 
 
-            //we need an entity instance to cache the bogies, so we have to do it here.
+            //bogies
             if (bogieRenders != null){
                 for (Bogie bogie : bogieRenders){
                     for (Object box : bogie.bogieModel.boxList) {
                         if (ClientProxy.EnableAnimations && box instanceof ModelRendererTurbo) {
                             ModelRendererTurbo render = ((ModelRendererTurbo) box);
+                            //wheel renders
                             if (render.boxName.contains("wheel") || render.boxName.contains("axel")) {
                                 wheels.add(new wheel(render));
                             }
+                            //advanced piston renders
                             if (render.boxName.contains("pistonvalveconnector") || render.boxName.contains("advanced")) {
                                 advancedPistons.add(new advancedPiston(render));
                             }
+                            //simple pistons and wheel connectors
                             if (render.boxName.contains("wheelconnector") || render.boxName.contains("upperpiston") || render.boxName.contains("upperpistonarm") ||render.boxName.contains("simple")) {
                                 simplePistons.add(new simplePiston(render));
                             }
@@ -153,6 +153,10 @@ public class RenderEntity extends Render {
         }
     }
 
+    /**
+     * <h3>overall texture</h3>
+     * returns the texture for this entity, required by the super but not actually used.
+     */
     public ResourceLocation getEntityTexture(Entity entity){
         return texture;
     }
@@ -160,7 +164,7 @@ public class RenderEntity extends Render {
     /**
      * <h3>base render extension</h3>
      * acts as a redirect for the base render function to our own class.
-     * This is just to do a more efficient type cast.
+     * This is just to do a more efficient type cast because we have to make the first parameter an Entity.
      */
     public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick){
         if (entity instanceof GenericRailTransport){
@@ -201,21 +205,24 @@ public class RenderEntity extends Render {
          * if there is, then calculate the vectors and apply the animations
          */
         if (ClientProxy.EnableAnimations && entity.bogie.size()>0) {
-            wheelPitch += 1;//(entity.motionX + entity.motionZ);
+            //define the rotation angle
+            wheelPitch += (entity.bogie.get(0).motionX + entity.bogie.get(0).motionZ);
             if (wheelPitch > 360 || wheelPitch <-360) {
                 wheelPitch = 0;
             }
             if (wheelPitch !=0) {
+                //if it's not 0, aka not moving, then define the new position
                 animationCache[1][0] = entity.getPistonOffset() * RailUtility.radianF;
                 animationCache[0] = RailUtility.rotatePoint(animationCache[1], Math.copySign(wheelPitch, 1), Math.copySign(wheelPitch, 1), 0);
+                //rotate wheels
                 for (wheel tempWheel : wheels) {
                     tempWheel.rotate(wheelPitch * RailUtility.radianF);
                 }
-
+                //reposition advanced pistons
                 for (advancedPiston advPiston : advancedPistons) {
                     advPiston.rotationMoveYZX((float) animationCache[0][0], (float) animationCache[0][1]);
                 }
-
+                //reposition simple pistons and wheel connectors
                 for (simplePiston basicPiston : simplePistons) {
                     basicPiston.moveYZ((float) animationCache[0][0], (float) animationCache[0][1]);
                 }
@@ -225,8 +232,9 @@ public class RenderEntity extends Render {
         /**
          * <h3>Render geometry</h3>
          * Bind the texture first, then render any geometry that is supposed to use the default texture.
-         * Next check if there are any cargo blocks, if there is, bind the block texture from minecraft and render the cargo.
-         * TODO: this is HORRIBLY inefficient. renderBlockAsItem needs to be rewritten.
+         * after that check if there are any cargo blocks to render, then render them dependant on if there is enough stuff in the inventory to merit it.
+         * In that render there is a check whether to render it as a cargo block, or use the geometry size/position/rotation to render a block similar to enderman.
+         * @see net.minecraft.client.renderer.entity.RenderEnderman#renderEquippedItems(EntityEnderman, float)
          */
         bindTexture(texture);
         for(Object cube : model.boxList){
@@ -243,9 +251,9 @@ public class RenderEntity extends Render {
             for (blockCargo cargo : blockCargoRenders) {
                 //limit loops to how much should be rendered based on inventory content
                 if (itteration<entity.inventory.calculatePercentageUsed(blockCargoRenders.size())) {
-                    //loop through the models in the group
                     if (cargo.isBlock) {
-                        //bind the texture
+                        //render a block in place of the geometry.
+                        // bind the texture
                         bindTexture(TextureMap.locationBlocksTexture);
                         for (ModelRendererTurbo block : cargo.boxRefrence) {
                             GL11.glPushMatrix();
@@ -257,11 +265,14 @@ public class RenderEntity extends Render {
                             GL11.glRotated(block.rotateAngleX * RailUtility.degreesD, 1, 0, 0);
                             GL11.glRotated(block.rotateAngleY * RailUtility.degreesD, 0, 1, 0);
                             GL11.glRotated(block.rotateAngleZ * RailUtility.degreesD, 0, 0, 1);
+                            //define scale based on the model
                             GL11.glScaled(block.xScale - 0.0175, block.yScale - 0.0175, block.zScale - 0.0175);
+                            //now actually render the block.
                             field_147909_c.renderBlockAsItem(entity.inventory.getFirstBlock(itteration), entity.inventory.getFirstBlockMeta(itteration), 1.0f);
                             GL11.glPopMatrix();
                         }
                     } else {
+                        //render the geometry normally if it's not a block.
                         bindTexture(texture);
                         for (ModelRendererTurbo block : cargo.boxRefrence) {
                             block.render();
@@ -275,17 +286,19 @@ public class RenderEntity extends Render {
 
         /**
          * <h4> render bogies</h4>
-         * in TiM here we render the bogies.
-         * we get the entity and do an instanceof check, see if it's a train or a rollingstock, then do a for loop on the bogies, and render them the same way we do trains and rollingstock.
+         * in TiM here we render the bogies. This will be removed in TC.
+         * this loops for every bogie defined in the registry for the transport, that way we can have different bogies.
          */
         if (bogieRenders != null && bogieRenders.length >0){
             for (int i=0; i<entity.getBogieOffsets().size();i++){
                 if (bogieRenders.length>i && bogieRenders[i] != null) {
+                    //bind the texture
                     bindTexture(bogieRenders[i].bogieTexture);
                     GL11.glPushMatrix();
-                    GL11.glTranslated(0, 0, entity.getBogieOffsets().get(i));
+                    //set the offset
                     animationCache[4][0] = entity.getBogieOffsets().get(i);
                     bogieRenders[i].setPositionAndRotation(RailUtility.rotatePoint(animationCache[4],entity.rotationPitch, entity.rotationYaw,0), entity);
+                    //render the geometry
                     for (Object modelBogiePart : bogieRenders[i].bogieModel.boxList) {
                         if (modelBogiePart instanceof ModelRendererTurbo) {
                             ((ModelRendererTurbo) modelBogiePart).render();
@@ -303,14 +316,18 @@ public class RenderEntity extends Render {
         /**
          * <h4>Smoke management</h4>
          * some trains, and even rollingstock will have smoke,
+         * TODO: position isn't always correct.
          */
         if (ClientProxy.EnableSmokeAndSteam) {
             float randomX;
             float randomZ;
             float colorOffset;
+            //define a random int to scale color
             Random rand = new Random();
+            //for each smoke offset, and for each value in the smoke size, render another smoke particle.
             for (float[] smoke : entity.getSmokeOffset()) {
                 for (int i = 0; i < smoke[4]; i++) {
+                    //define position
                     animationCache[3][0] = smoke[0];
                     animationCache[3][1] = smoke[1];
                     animationCache[3][2] = smoke[2];
@@ -318,23 +335,23 @@ public class RenderEntity extends Render {
                     animationCache[2][0] += entity.posX;
                     animationCache[2][1] += entity.posY;
                     animationCache[2][2] += entity.posZ;
+                    //make the particle
                     smokeFX renderSmoke = new smokeFX(Minecraft.getMinecraft().theWorld,
                             animationCache[2][0], animationCache[2][1], animationCache[2][2], 5);
+                    //set the particle speed and direction
                     randomX = (rand.nextInt(100) - 50) * 0.0001f;
                     randomZ = (rand.nextInt(100) - 50) * 0.0001f;
-                    colorOffset = (rand.nextInt(20) - 10) * 0.01f;
                     if (smoke[1] != 0) {
                         renderSmoke.setVelocity(randomX, smoke[1] * 0.0075, randomZ);
                     } else if (entity instanceof EntityTrainCore) {
-
-                        renderSmoke.setVelocity((entity.motion[0] * ((EntityTrainCore) entity).accelerator) + randomX, smoke[1], (entity.motion[2] * ((EntityTrainCore) entity).accelerator) + randomZ);
+                        renderSmoke.setVelocity((entity.bogie.get(0).motionX * ((EntityTrainCore) entity).accelerator) + randomX, smoke[1], (entity.bogie.get(0).motionZ * ((EntityTrainCore) entity).accelerator) + randomZ);
                     }
+                    //set the texture
                     renderSmoke.setParticleTextureIndex(0);
-                    if (smoke[3] > 0.55f) {
-                        renderSmoke.setRBGColorF(smoke[3] - colorOffset, smoke[3] - colorOffset, smoke[3] - colorOffset);
-                    } else {
-                        renderSmoke.setRBGColorF(smoke[3] + colorOffset, smoke[3] + colorOffset, smoke[3] + colorOffset);
-                    }
+                    //color the texture
+                    colorOffset = (rand.nextInt(20) - 10) * 0.01f;
+                    renderSmoke.setRBGColorF(smoke[3] - colorOffset, smoke[3] - colorOffset, smoke[3] - colorOffset);
+                    //now actually spawn it
                     Minecraft.getMinecraft().effectRenderer.addEffect(renderSmoke);
                 }
             }
@@ -351,9 +368,9 @@ public class RenderEntity extends Render {
     /**
      * <h3>advanced piston</h3>
      * this is used for pistons that require not only movement animation but also rotation.
-     * this caches a reference to the CubikModelRenderer as well.
      */
     private class advancedPiston{
+        //store a refrence to the original model, and it's original position
         private ModelRendererTurbo boxRefrence = null;
         private Vec3f position = null;
 
@@ -363,8 +380,7 @@ public class RenderEntity extends Render {
                 position = new Vec3f(boxToRender.rotationPointZ, boxToRender.rotationPointY, boxToRender.rotateAngleX);
             }
         }
-
-
+        //position and rotate the geometry based on the provided vector.
         public void rotationMoveYZX(float x, float y){
             boxRefrence.rotationPointY = position.y - (y*0.5f);
             boxRefrence.rotationPointZ = position.x - x;
@@ -375,7 +391,7 @@ public class RenderEntity extends Render {
 
     /**
      * <h3>wheel</h3>
-     * used to store a reference to the wheel for quick animation.
+     * used to store a reference to the wheel, and rotate it using a given radian for quick animation.
      */
     private class wheel {
         private ModelRendererTurbo boxRefrence = null;
@@ -394,7 +410,9 @@ public class RenderEntity extends Render {
     /**
      * <h3>BlockCargo</h3>
      * used to store references to logs and other similar carried cargo blocks.
-     * also stores the random rotation for the block so we can define different rotations for each block
+     * each entry of this variable works as a set, so multiple parts can be rendered, or not, from the same value.
+     * name is used to group them together, if the name strings are exactly the same they will be rendered together.
+     * isBlock defines if it should be rendered as a normal block from the inventory or part of the model.
      */
     private class blockCargo {
         public String name;
@@ -412,7 +430,7 @@ public class RenderEntity extends Render {
     /**
      * <h3>simple pistons</h3>
      * This is used for pistons that only need a movement animation.
-     * in this case we only need to cache a reference and the original position.
+     * in this case we only need to cache a reference to the geometry and the original position.
      */
     private class simplePiston {
         private ModelRendererTurbo boxRefrence = null;
@@ -434,7 +452,7 @@ public class RenderEntity extends Render {
 
     /**
      * <h3>Smoke effects</h3>
-     * this is used to render effect for smoke and steam
+     * this is used to render effect for smoke and steam, it's basically an entire entity.
      */
     private class smokeFX extends EntityFX {
         private int lifespan =0;

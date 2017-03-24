@@ -13,6 +13,7 @@ import trains.tileentities.TileEntityStorage;
  * <h1>Train crafting table block</h1>
  * @author Eternal Blue Flame
  */
+@Deprecated
 public class BlockTrainTable extends BlockContainer {
 
     /**

@@ -9,6 +9,7 @@ import trains.models.tmt.ModelRendererTurbo;
  * <h2>Cubik pro model render</h2>
  * A middleman class to convert Cubik pro models to something tmt can actually render properly.
  * Theoretically this should work with any models that use the setRotationPoint instead of defining position with addBox.
+ * @author Eternal Blue Flame
  */
 public class CubikModelRenderer extends ModelRendererTurbo {
 

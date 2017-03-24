@@ -2,7 +2,9 @@ package trains.models.rollingstock;
 //Exported java file
 //Keep in mind that you still need to fill in some blanks
 // - ZeuX
-
+/**
+ * @author Sinjin
+ */
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.entity.Entity;

@@ -32,11 +32,13 @@ public class HUDTrain extends GuiScreen {
      * @see GUITrain
      * The difference is that we override the experience bar render so that we can render the GUI alongside that, like a HUD.
      * @see GuiScreen
+     * Some IDE's may report this function is unused, but it is actually used indirectly by minecraft's event manager, for this reason the warning was supressed.
      */
     @SubscribeEvent(priority = EventPriority.NORMAL)
+    @SuppressWarnings("unused")
     public void onRenderExperienceBar(RenderGameOverlayEvent event) {
         if (game != null && game.thePlayer != null && game.thePlayer.ridingEntity instanceof EntityTrainCore) {
-            fontRendererObj.drawString(StatCollector.translateToLocal(((GenericRailTransport)game.thePlayer.ridingEntity).getItem().getUnlocalizedName()+ ".name"), 8, 6, 4210752);
+            fontRendererObj.drawString(StatCollector.translateToLocal(((GenericRailTransport)game.thePlayer.ridingEntity).getItem().getUnlocalizedName().replace("item","entity")), 8, 6, 4210752);
             //draw the gui background color
             //GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             //set the texture.

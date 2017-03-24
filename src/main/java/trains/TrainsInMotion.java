@@ -42,17 +42,24 @@ import java.util.UUID;
 @Mod(modid = TrainsInMotion.MODID, version = TrainsInMotion.MOD_VERSION, name = "Trains in Motion")
 public class TrainsInMotion {
 
+    //the ID of the mod and the version displayed in game, as well as used for version check in the version.txt file
     public static final String MODID = "tim";
-    public static final String MOD_VERSION="0.7.0.0pre-alpha";
+    public static final String MOD_VERSION="0.2.0.0 alpha";
+    //an instance of the mod TODO: i doubt this even needs to be public
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
+    //the creative tab for the mod
     public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
-    //Setup the proxy, this is used for managing some of the client and server specific features.
+    /**
+     *Setup the proxy, this is used for managing some of the client and server specific features.
+     *@see CommonProxy
+     *@see trains.utility.ClientProxy
+     */
     @SidedProxy(clientSide = "trains.utility.ClientProxy", serverSide = "trains.utility.CommonProxy")
     public static CommonProxy proxy;
 
 
-    //instance the network wrapper for each channel.
+    //instance the network wrapper for the channels. Every wrapper runs on it's own thread, so heavy traffic should go on it's own wrapper, using channels to separate packet types.
     public static SimpleNetworkWrapper keyChannel;
 
 
@@ -63,8 +70,11 @@ public class TrainsInMotion {
     public static final UUID nullUUID = new UUID(0,0);
     /**
      * <h3>enums</h3>
-     * we define enums for transport types and inventory sizes here.
-     * makes it easier to add more later on.
+     * we define enums for transport types, block types, and inventory sizes here.
+     * makes it easier to add more later on, also simplifies the code elsewhere
+     * Enums will take up perm space though, so we shouldn't put massive amounts of data here or we break java 7 compatibility.
+     *
+     * Inventory size should be thought about like it's own mini class since it has multiple values and works like a class long run.
      */
     public enum transportTypes {
         STEAM,DIESEL,HYDROGEN_DIESEL,ELECTRIC,NUCLEAR_STEAM,NUCLEAR_ELECTRIC,MAGLEV, //trains
@@ -86,6 +96,9 @@ public class TrainsInMotion {
         public int getCollumn() {
             return collumn;
         }
+    }
+    public enum blockTypes {
+        CRAFTING, CONTAINER, COSMETIC, SWITCH
     }
 
     /**
@@ -110,18 +123,22 @@ public class TrainsInMotion {
      *
      * networking we have packets for each major channel type, its more overhead overall but it will help significantly to prevent delays.
      *
+     * This could be done in pre-init but that would brake compatibility with Dragon API and a number of 3rd party mods.
      */
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         GenericRegistry.RegisterStuff();
 
-        //loop for registering the entities.
+        //loop for registering the entities. the values needed are the class, entity name, entity ID, mod instance, update range, update rate, and if it does velocity things,
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", 15, TrainsInMotion.instance, 60, 1, true);
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntitySeat.class, "Seat", 16, TrainsInMotion.instance, 60, 2, true);
         int index =0;
+        /**
+         * now we loop for every value in the train registry and registry it, when the index reaches a null value, then it will stop.
+         */
         while (TrainRegistry.listTrains(index)!=null) {
             TrainRegistry registry = TrainRegistry.listTrains(index);
-            cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(registry.trainClass, registry.entityWorldName, index+17, TrainsInMotion.instance, 60, 1, true);
+            cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(registry.trainClass, registry.item.getUnlocalizedName().replace("item","entity"), index+17, TrainsInMotion.instance, 60, 1, true);
             GameRegistry.registerItem(registry.item, registry.item.getUnlocalizedName().substring(5));
             index++;
         }
@@ -139,15 +156,9 @@ public class TrainsInMotion {
         MinecraftForge.EVENT_BUS.register(eventManager);
         FMLCommonHandler.instance().bus().register(eventManager);
 
-        //register GUI, model renders, Keybinds, and HUD
+        //register GUI, model renders, Keybinds, client only blocks, and HUD
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
         proxy.register();
-        if (event.getSide().isClient()) {
-            GenericRegistry.RegisterClientStuff();
-            HUDTrain hud = new HUDTrain();
-            FMLCommonHandler.instance().bus().register(hud);
-            MinecraftForge.EVENT_BUS.register(hud);
-        }
     }
 
 }

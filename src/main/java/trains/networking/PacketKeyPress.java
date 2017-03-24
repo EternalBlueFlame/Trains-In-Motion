@@ -5,17 +5,14 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
 import trains.entities.EntitySeat;
 import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
-import trains.entities.rollingstock.EntityVATLogCar;
 import trains.utility.CommonProxy;
 import trains.utility.EventManager;
-import trains.utility.HitboxHandler;
 
 import static trains.TrainsInMotion.nullUUID;
 
@@ -61,14 +58,23 @@ public class PacketKeyPress implements IMessage {
         @Override
         public IMessage onMessage(PacketKeyPress message, MessageContext context) {
             GenericRailTransport ridingEntity = (GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entity);
-            //Toggles,
+            /**
+             * this if check actually will stop the rest of the function and apply the correct boolean value if it's true
+             * @see GenericRailTransport#toggleBool(int)
+             * @see EntityTrainCore#toggleBool(int)
+             *
+             * if it's not one of the booleans then we do a switch on which function it is here.
+             */
             if(!ridingEntity.toggleBool(message.key)) {
-                //speed
                 switch (message.key){
+                    //speed
                     case 2:{((EntityTrainCore) ridingEntity).setAcceleration(false); break;}
                     case 3:{ ((EntityTrainCore) ridingEntity).setAcceleration(true); break;}
+                    //drop key item
                     case 12:{ridingEntity.entityDropItem(ridingEntity.key, 0); break;}
+                    //uncouple cars
                     case 13:{
+                        //front
                         if (ridingEntity.front != nullUUID){
                             if(ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.front).front){
                                 CommonProxy.getTransportFromUuid(ridingEntity.front).front =nullUUID;
@@ -76,6 +82,7 @@ public class PacketKeyPress implements IMessage {
                                 CommonProxy.getTransportFromUuid(ridingEntity.front).back =nullUUID;
                             }
                         }
+                        //back
                         if (ridingEntity.back != nullUUID){
                             if(ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.back).front){
                                 CommonProxy.getTransportFromUuid(ridingEntity.back).front =nullUUID;
@@ -83,11 +90,12 @@ public class PacketKeyPress implements IMessage {
                                 CommonProxy.getTransportFromUuid(ridingEntity.back).back =nullUUID;
                             }
                         }
+                        //double check and be sure both are null
                         ridingEntity.front = nullUUID; ridingEntity.back = nullUUID; break;}
 
                     /**
                      * <h3>Manage the inventory key press</h3>
-                     * here we have to figure out if the player is riding a seat entity or a train/rollingstock and activate the GUI accordingly.
+                     * get a reference to the player and the transport then open the GUI with those refrences.
                      */
                     case 1:{
                         EntityPlayer entityPlayer = context.getServerHandler().playerEntity;

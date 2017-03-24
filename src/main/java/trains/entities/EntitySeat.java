@@ -13,8 +13,9 @@ import net.minecraft.world.World;
 import trains.utility.RailUtility;
 
 /**
- * <h1>Bogie Core</h1>
- * this controls the behavior of the bogies in trains and rollingstock.
+ * <h1>Seat Entity</h1>
+ * A placeholder entity to serve as the seats (beyond the first one) for trains and rollingstock.
+ * in 1.9+ this class is no longer necessary.
  * @author Eternal Blue Flame
  */
 public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
@@ -44,14 +45,8 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
     }
 
     /**
-     * <h3>Core Minecart Overrides</h3>
-     * technically this is a normal minecart, which is why it works on normal tracks.
-     * @see EntityMinecart
-     *
-     * TODO: getMaxCartSpeedOnRail needs to be reworked in accordance with the max speed the rail block will give, or a fallback for if there is no rail probably something to do in
-     * @see RailUtility
-     * onUpdate is intentionally empty because we don't want the super running it's own onUpdate method. we define when to run our movement code in the train/rollingstock
-     * @see EntityTrainCore#onUpdate()
+     * <h3>Core Entity Overrides</h3>
+     * most all of this is just to either disable super functionality or change one of the variables.
      */
     @Override
     public boolean canBePushed() {
@@ -77,11 +72,15 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
     public boolean canBeCollidedWith() {
         return false;
     }
+    @Override
+    protected void readEntityFromNBT(NBTTagCompound tag) {}
+    @Override
+    protected void writeEntityToNBT(NBTTagCompound tag) {}
 
 
     /**
      * <h2>Spawn Data</h2>
-     * Small networking check to add the bogie to the host train/rollingstock. Or to remove the bogie from the world if the host doesn't exist.
+     * Small networking check to add the seat to the host train/rollingstock. Or to remove the seat from the world if the host doesn't exist.
      */
     @Override
     public void readSpawnData(ByteBuf additionalData) {
@@ -101,11 +100,6 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
     public void writeSpawnData(ByteBuf buffer) {
         buffer.writeInt(parentId);
     }
-
-    @Override
-    protected void readEntityFromNBT(NBTTagCompound tag) {}
-    @Override
-    protected void writeEntityToNBT(NBTTagCompound tag) {}
 
     /**
      * <h2>Client Movement code</h2>

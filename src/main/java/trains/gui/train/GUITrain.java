@@ -5,7 +5,6 @@ import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -25,14 +24,16 @@ import java.util.Collections;
 import static trains.TrainsInMotion.transportTypes.PASSENGER;
 
 /**
- * <h1>Train GUI</h1>
- * used to draw the GUI for trains (the menu with the inventory).
+ * <h1>Transport GUI</h1>
+ * used to draw the GUI for trains and rollingstock (the menu with the inventory).
  * @author Eternal Blue Flame
  */
 public class GUITrain extends GuiContainer {
     /**
      * <h2>variables</h2>
-     * we re-use the furnace texture so the inventory is at least partially customized by the player's texturepack.
+     * we re-use the furnace and chest textures so the inventory is at least partially customized by the player's texturepack.
+     * the transport and player are just so we have access to them beyond initialization of the GUI.
+     * the first and second tank ints are so we don't have to re-initialize them every frame.
      * guiScaler is just a more convenient method to scale, its similar to what the base game does, but with less overhead.
      */
     private static final ResourceLocation vanillaInventory = new ResourceLocation("textures/gui/container/furnace.png");
@@ -77,7 +78,6 @@ public class GUITrain extends GuiContainer {
      * this draws the lower layer, good for backgrounds and things to go behind the foreground stuff
      * things later in the function render closer to the screen
      * Textures must be bound to the render, then every texture draw after will re-use that same texture, when you want a new texture, bind a new one.
-     * Item scale is defined by: x,y,u,v,width,height
      *
      * xSize, ySize, width, and height are defined in the super
      * @see GuiContainer
@@ -300,10 +300,15 @@ public class GUITrain extends GuiContainer {
     }
 
 
-    //similar to the above but for passenger cars.
+    /**
+     * <h2>Render Passenger GUI</h2>
+     * basically the same as
+     * @see #renderTrainInventory(int, int, double, Minecraft, int, int)
+     */
     public static void renderPassengerInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
 
         int rows=0;
+        //draw the character backgrounds.
         mc.getTextureManager().bindTexture(vanillaInventory);
         //make a loop that will make a new row every 5 items
         for (int i=0;i<transport.getRiderOffsets().length; i++) {
@@ -312,7 +317,7 @@ public class GUITrain extends GuiContainer {
             }
             drawTexturedModalRect(guiLeft + 7 + (30*(i-(rows * 5))), guiTop + 30+(30*rows), 54, 51, 27, 27, 20, 20, zLevel);
         }
-        //make a new loop that does the same as above but binds the character's face rather than the inventory slot.
+        //make a new loop that does the same as above but binds the character's face rather than the inventory slot background.
         for (int i=0;i<transport.getRiderOffsets().length; i++) {
             if (i/(rows+1) >=5*(rows+1)){
                 rows++;
@@ -328,7 +333,11 @@ public class GUITrain extends GuiContainer {
 
     }
 
-    //similar to the above but for freight cars.
+    /**
+     * <h2>Render Freight GUI</h2>
+     * basically the same as
+     * @see #renderTrainInventory(int, int, double, Minecraft, int, int)
+     */
     public void renderFreightInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
         mc.getTextureManager().bindTexture(vanillaInventory);
         //draw the player inventory and toolbar background.
@@ -336,13 +345,14 @@ public class GUITrain extends GuiContainer {
         drawTexturedModalRect(guiLeft, guiTop+ 70, 0, 0, xSize, 16);
 
         switch (transport.getInventorySize()){
+            //draw inventory by rows if they are 9 wide.
             case NINExFOUR: case NINExTHREE:{
                 mc.getTextureManager().bindTexture(vanillaChest);
                 drawTexturedModalRect(guiLeft, guiTop-24, 0, 0, xSize, (transport.getInventorySize().getRow() * 18) + 17);
                 drawTexturedModalRect(guiLeft, guiTop + (transport.getInventorySize().getRow() * 17)-3, 0, 472, xSize, 16);
                 break;
             }
-
+            //otherwise draw inventory by individual slots
             default:{
                 for (int ic = 0; ic < transport.getInventorySize().getCollumn(); ic++) {
                     for (int ir = 0; ir > -transport.getInventorySize().getRow(); ir--) {
@@ -355,12 +365,10 @@ public class GUITrain extends GuiContainer {
     }
 
 
-
-
-
-
-
-
+    /**
+     * <h2>Train GUI overlay</h2>
+     * This is only used to draw the hover text for different parts of the train's GUI
+     */
     private void renderTrainOverlay(int mouseX, int mouseY){
         if ((mouseX >= guiLeft + 66 && mouseX <= guiLeft + 84 &&
                 mouseY >= guiTop + 10 && mouseY <= guiTop +60)) {

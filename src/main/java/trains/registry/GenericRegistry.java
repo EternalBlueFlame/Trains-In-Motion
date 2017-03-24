@@ -6,8 +6,8 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialLiquid;
-import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -16,11 +16,12 @@ import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
-import trains.blocks.BlockTrainTable;
+import trains.TrainsInMotion;
 import trains.blocks.LampBlock;
 import trains.blocks.Oil;
 import trains.items.Bucket;
 import trains.tileentities.TileEntityStorage;
+import trains.utility.BlockDynamic;
 
 import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
 
@@ -38,7 +39,8 @@ public class GenericRegistry {
     public static BlockFluidClassic blockFluidOil;
     public static final Item bucketOil = new Bucket(GenericRegistry.blockFluidOil).setUnlocalizedName("item.oilbucket").setContainerItem(Items.bucket);
 
-    public static BlockTrainTable trainTable = new BlockTrainTable();
+    //define the train crafting table.
+    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable",Material.wood, TrainsInMotion.blockTypes.CRAFTING);
 
     //initialize the lamp block
     public static Block lampBlock;

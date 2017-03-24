@@ -1,7 +1,11 @@
 package trains.items;
 
 import java.util.UUID;
-
+/**
+ * <h1>Ticket Item</h1>
+ * Used to allow players to board specific passenger transports.
+ * @author Eternal Blue Flame
+ */
 public class ItemTicket extends ItemKey {
 
     /**

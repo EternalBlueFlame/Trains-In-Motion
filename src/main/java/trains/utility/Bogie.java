@@ -5,6 +5,8 @@ import net.minecraft.util.ResourceLocation;
 import trains.entities.GenericRailTransport;
 
 /**
+ * <h1>New Bogie</h1>
+ * This is used to keep track of where bogies are supposed to render, and is intended to be client only.
  * @author Eternal Blue Flame
  */
 public class Bogie {

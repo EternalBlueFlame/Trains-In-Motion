@@ -18,6 +18,7 @@ import trains.entities.GenericRailTransport;
  * @author Zora No Densha
  */
 public class RailUtility {
+    //these are just so the values are calculated ahead of time, saves CPU use.
     public static final float radianF = (float) Math.PI / 180.0f;
     public static final double radianD = Math.PI / 180.0d;
     public static final double degreesD = 180.0d / Math.PI;

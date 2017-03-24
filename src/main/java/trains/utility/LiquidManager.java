@@ -12,6 +12,7 @@ import java.util.List;
 /**
  * <h1>fluid management</h1>
  * this is more of a replacement for the base game fluid management to better allow us to use multiple tanks of fluids.
+ * TODO: this should only need to be used for tanker cars, and it should only need a single tank, it's kinda redundant to use it for trains since we don't need/use types there.
  * @author Eternal Blue Flame
  */
 public class LiquidManager {
@@ -26,9 +27,10 @@ public class LiquidManager {
     /**
      * <h2>initialization</h2>
      * sets the initial values of the class.
+     * this is explained in
+     * @see trains.entities.trains.EntityBrigadelok080
      */
     public LiquidManager(int firstCapacity, int secondCapacity, Fluid[] firstList, Fluid[] secondList, boolean firstIsWhitelist, boolean secondIsWhitelist){
-        System.out.println(firstCapacity + ":" + secondCapacity + " and whitelists are" + firstCapacity + ":" + secondIsWhitelist);
         this.firstTank = new FluidTank(firstCapacity);
         this.secondTank = new FluidTank(secondCapacity);
         this.firstIsWhitelist = firstIsWhitelist;

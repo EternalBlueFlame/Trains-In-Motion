@@ -1,14 +1,14 @@
 package trains.entities;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
+
 import net.minecraft.world.World;
 
 import java.util.UUID;
 
 /**
  * <h1>Rollingstock core</h1>
- * this is the management core for all trains.
+ * this is the management core for all rollingstock.
+ * any rollingstock functionality that happens specifically from the core entity happens here.
  * @author Eternal Blue Flame
  */
 public class EntityRollingStockCore extends GenericRailTransport {
@@ -32,30 +32,6 @@ public class EntityRollingStockCore extends GenericRailTransport {
     //this constructor is for client side spawning
     public EntityRollingStockCore(World world){
         super(world);
-    }
-
-    /**
-     * <h2> Data Syncing and Saving </h2>
-     * this is explained in
-     * @see GenericRailTransport#readSpawnData(ByteBuf)
-     */
-    @Override
-    public void readSpawnData(ByteBuf additionalData) {
-    super.readSpawnData(additionalData);
-    }
-    @Override
-    public void writeSpawnData(ByteBuf buffer) {
-        super.writeSpawnData(buffer);
-    }
-    @Override
-    protected void readEntityFromNBT(NBTTagCompound tag) {
-        super.readEntityFromNBT(tag);
-
-    }
-    @Override
-    protected void writeEntityToNBT(NBTTagCompound tag) {
-        super.writeEntityToNBT(tag);
-
     }
 
 

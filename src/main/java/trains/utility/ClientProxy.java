@@ -3,6 +3,7 @@ package trains.utility;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
@@ -12,23 +13,22 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import trains.TrainsInMotion;
 import trains.entities.EntityBogie;
 import trains.entities.EntitySeat;
-import trains.entities.EntityTrainCore;
 import trains.entities.GenericRailTransport;
 import trains.gui.GUITrainTable;
+import trains.gui.HUDTrain;
 import trains.gui.train.GUITrain;
 import trains.models.RenderEntity;
 import trains.models.RenderScaledPlayer;
+import trains.registry.GenericRegistry;
 import trains.registry.TrainRegistry;
 import trains.tileentities.TileEntityStorage;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * <h1>client proxy</h1>
@@ -100,7 +100,7 @@ public class ClientProxy extends CommonProxy {
 
     /**
      * <h2>Client Register</h2>
-     * A redirect loop for registering the items in the train registry with their own textures and models, and for registering keybindings.
+     * Used for registering client only functions and redirecting registering the items in the train registry with their own textures and models.
      */
     @Override
     public void register() {
@@ -120,11 +120,18 @@ public class ClientProxy extends CommonProxy {
         RenderingRegistry.registerEntityRenderingHandler(EntitySeat.class, nullRender);
         //player scaler
         RenderingRegistry.registerEntityRenderingHandler(EntityPlayer.class, new RenderScaledPlayer());
-
+        //keybinds
         ClientRegistry.registerKeyBinding(KeyLamp);
         ClientRegistry.registerKeyBinding(KeyInventory);
         ClientRegistry.registerKeyBinding(KeyAccelerate);
         ClientRegistry.registerKeyBinding(KeyReverse);
+
+        //register client blocks, like lamps
+        GenericRegistry.RegisterClientStuff();
+        //register the transport HUD.
+        HUDTrain hud = new HUDTrain();
+        FMLCommonHandler.instance().bus().register(hud);
+        MinecraftForge.EVENT_BUS.register(hud);
 
     }
 

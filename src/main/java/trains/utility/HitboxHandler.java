@@ -16,14 +16,21 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 import trains.TrainsInMotion;
-import trains.entities.*;
+import trains.entities.EntityBogie;
+import trains.entities.EntityRollingStockCore;
+import trains.entities.EntitySeat;
+import trains.entities.GenericRailTransport;
 import trains.networking.PacketRemove;
 
 import java.util.List;
 
-import static trains.TrainsInMotion.nullUUID;
 import static trains.utility.RailUtility.rotatePoint;
 
+/**
+ * <h1>Collision and hitboxes</h1>
+ * here we mnage collision detection and hitboxes, most of this is basically halfway between a minecart and the ender dragon.
+ * @author Eternal Blue Flame
+ */
 public class HitboxHandler {
 
     /**
@@ -82,6 +89,7 @@ public class HitboxHandler {
      */
     public boolean getCollision(GenericRailTransport transport){
 
+        //Be sure the transport has hitboxes
         for (int iteration =0; iteration<transport.getHitboxPositions().length; iteration++) {
             double[] position = rotatePoint(new double[]{transport.getHitboxPositions()[iteration], 0, 0}, transport.rotationPitch, transport.rotationYaw, 0);
             if (transport.hitboxList.size() <= iteration) {
@@ -94,15 +102,20 @@ public class HitboxHandler {
         }
 
 
-        //detect collisions with blocks.
+        //detect collisions with blocks on X, Y, and Z.
         for (multipartHitbox box : transport.hitboxList){
+            //define the values as temporary variables first since it will be faster than flooring the variable every loop check
             int i = MathHelper.floor_double(box.boundingBox.minX);
             int j = MathHelper.floor_double(box.boundingBox.minY);
             int k = MathHelper.floor_double(box.boundingBox.minZ);
             int l = MathHelper.floor_double(box.boundingBox.maxX);
             int i1 = MathHelper.floor_double(box.boundingBox.maxY);
             int j1 = MathHelper.floor_double(box.boundingBox.maxZ);
-
+            /**
+             * check if the chunk exists, then loop for X, Y, and Z to check for a rail or an air block.
+             * if one isnt found return true to stop the movement.
+             * @see GenericRailTransport#onUpdate()
+             */
             if (transport.worldObj.checkChunksExist(i, j, k, l, i1, j1)) {
                 for (int k1 = i; k1 <= l; ++k1) {
                     for (int l1 = j; l1 <= i1; ++l1) {
@@ -117,7 +130,11 @@ public class HitboxHandler {
             }
 
 
-            //detect collisions with entities.
+            /**
+             * detect collision with entities.
+             * we have to create a temporary bounding box that's larger than the current so we can check just a bit past the current box, this gives collision events a bit more time to react.
+             * from there we create a list of entities in the new hitbox, and then loop through them to figure out what happens, we can't use the list directly due to concurrent modifications.
+             */
             AxisAlignedBB tempBox = box.boundingBox.copy().expand(0.35,0,0.35);
             List list = transport.worldObj.getEntitiesWithinAABBExcludingEntity(transport, tempBox);
             if (list != null && list.size()>0) {
@@ -127,10 +144,12 @@ public class HitboxHandler {
                             //if this is a rollingstock and it's a collision with a living entity like a player or a mob, decide if this should be pushed or if the entity should get run over.
                             if (transport instanceof EntityRollingStockCore && (entity instanceof EntityLiving || entity instanceof EntityPlayer)) {
                                 if (transport.bogie.get(0).motionX > 0.5 || transport.bogie.get(0).motionX < -0.5 || transport.bogie.get(0).motionZ > 0.5 || transport.bogie.get(0).motionZ < -0.5) {
+                                    //in the case of roadkill
                                     ((Entity) entity).attackEntityFrom(new EntityDamageSource("rollingstock", transport), (float) (transport.bogie.get(0).motionX + transport.bogie.get(0).motionZ) * 1000);
                                     ((Entity) entity).applyEntityCollision(transport);
                                     return false;
                                 } else {
+                                    //in the case of trying to move the rollingstock
                                     float directionZ = 0;
                                     float directionX = 0;
                                     if (((Entity) entity).posZ > transport.posZ + 0.5) {
@@ -197,8 +216,13 @@ public class HitboxHandler {
     }
 
 
+    /**
+     * <h2>Destory Entity</h2>
+     * this is called when the entity is being destroyed, so remove it, and all related parts from the world.
+     * TODO: why did i think it would be a good idea to do this from the hitbox class rather than from the transport entity itself?
+     */
     public static void destroyTransport(GenericRailTransport host){
-        for (EntityMinecart cart : host.bogie){
+        for (EntityBogie cart : host.bogie){
             cart.worldObj.removeEntity(cart);
             cart.isDead = true;
             TrainsInMotion.keyChannel.sendToServer(new PacketRemove(cart.getEntityId()));

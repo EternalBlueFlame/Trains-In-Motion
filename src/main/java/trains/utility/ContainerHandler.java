@@ -74,7 +74,7 @@ public class ContainerHandler extends Container{
                 }
             }
             //cover rollingstock
-        } else if (entityTrain != null){
+        } else {
             int slot =0;
             //transport inventory
             for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
@@ -84,18 +84,6 @@ public class ContainerHandler extends Container{
                 }
             }
         }
-        else if (isCrafting){
-            //crafting item output slot
-            this.addSlotToContainer(new SlotCrafting(iinventory.player, ((EntityTrainCore) railTransport).inventory, this.craftResult, 10, 124, 35));
-            //crafting grid.
-            for (int l = 0; l < 3; ++l) {
-                for (int i1 = 0; i1 < 3; ++i1) {
-                    this.addSlotToContainer(new craftingSlot(((EntityTrainCore) railTransport).inventory, i1 + l * 3, 30 + i1 * 18, 17 + l * 18));
-                }
-            }
-
-            onCraftMatrixChanged(craftResult);
-        }
     }
 
     /**
@@ -103,6 +91,7 @@ public class ContainerHandler extends Container{
      * works as the middleman between the client GUI and the entity on client and server.
      *
      * this mostly just runs loops to add and place all the inventory slots that will appear and can be used on client.
+     * these slots draw the item, if there is one, and the tint when the cursor hovers over the slot.
      */
     public ContainerHandler(InventoryPlayer iinventory, TileEntityStorage block, boolean isCrafting) {
         this.isCrafting = isCrafting;
@@ -160,23 +149,26 @@ public class ContainerHandler extends Container{
      */
     @Override
     public ItemStack transferStackInSlot(EntityPlayer player, int slot) {
+        //be sure the slot isn't null
         if (this.inventorySlots.size()>=slot) {
             Slot stack = (Slot) this.inventorySlots.get(slot);
             Slot tempSlot;
             if (stack.getStack() == null) {
                 return null;
             }
+            //make a copy of the stack so we can modify the original and still return it as if nothing happened.
             ItemStack returnStack = stack.getStack().copy();
+            //now modify the original itemstack
             for (int currentSlot = 0; currentSlot < this.inventorySlots.size(); currentSlot++) {
                 tempSlot = (Slot) this.inventorySlots.get(currentSlot);
                 //if the item is in the train inventory
                 if (slot > 35 || currentSlot > 35) {
-                    //if the slot is empty, just move it
+                    //if the slot is empty, just move it and return null
                     if (!tempSlot.getHasStack()) {
                         tempSlot.putStack(stack.getStack());
                         ((Slot) this.inventorySlots.get(slot)).decrStackSize(stack.getStack().stackSize);
                         return null;
-                        //if the slot contains the same item, and has room to add this stack to it, then add it
+                        //if the slot contains the same item, and has room to add this stack to it, then add it and return null
                     } else if (tempSlot.getStack().getItem().equals(stack.getStack().getItem()) &&
                             tempSlot.getStack().getMaxStackSize() > stack.getStack().stackSize + tempSlot.getStack().stackSize) {
                         tempSlot.getStack().stackSize += stack.getStack().stackSize;
@@ -185,6 +177,7 @@ public class ContainerHandler extends Container{
                     }
                 }
             }
+            //if this is a crafting GUI, then use the GUI matrix to handle it
             if (isCrafting) {
                 if (craftingTable != null) {
                     onCraftMatrixChanged(craftingTable.inventory);
@@ -192,8 +185,10 @@ public class ContainerHandler extends Container{
                     onCraftMatrixChanged(((EntityTrainCore) railTransport).inventory);
                 }
             }
+            //if the stack did not transfer, then return the original stack
             return returnStack;
         }
+        //if the slot was null, return null
         return null;
     }
 
@@ -205,11 +200,7 @@ public class ContainerHandler extends Container{
     @Override
     public boolean canInteractWith(EntityPlayer player) {
         if (railTransport != null) {
-            if (railTransport.isDead) {
-                return false;
-            } else {
-                return railTransport.getPermissions(player, railTransport instanceof EntityTrainCore, false);
-            }
+            return !railTransport.isDead && railTransport.getPermissions(player, railTransport instanceof EntityTrainCore);
         } else {
             return craftingTable != null;
         }
@@ -232,11 +223,14 @@ public class ContainerHandler extends Container{
      * the current implementation only supports shaped recipes.
      */
     private ItemStack findMatchingRecipe() {
+        //if this is for a crafting table
         if (craftingTable != null) {
             int index=0;
+            //for every train and rollingstock in the registry, check the recipe
             while (TrainRegistry.listTrains(index)!=null) {
                 TrainRegistry registry = TrainRegistry.listTrains(index);
                 int i = 0;
+                //check each item value, if one is false, set i to 20, which makes it return null
                 for (; i < 8; i++) {
                     if (craftingTable.inventory.getStackInSlot(i) == null) {
                         if (registry.recipe[i] != null) {
@@ -248,6 +242,7 @@ public class ContainerHandler extends Container{
                         }
                     }
                 }
+                //if i is 8 (remember this is a 0 system so 8 is actually 9 slots) that means the recipe was correct, so return the proper itemstack.
                 if (i == 8) {
                     return new ItemStack(registry.item, 1);
                 }
@@ -263,6 +258,7 @@ public class ContainerHandler extends Container{
     /**
      * <h2>crafting slot</h2>
      * this is a custom crafting slot to make sure that the GUI and inventory update properly.
+     * this copies vanilla behavior but forces the craft matrix change event so we can track changes.
      *
      * @author Eternal Blue Flame
      */
@@ -295,6 +291,7 @@ public class ContainerHandler extends Container{
 
         /**
          * <h2>filter items</h2>
+         * makes sure the slot will only accept what the inventory will allow.
          * This is actually handled through
          * @see InventoryHandler#isItemValidForSlot(int, ItemStack)
          * @return if the item should be allowed or blocked.
@@ -306,30 +303,30 @@ public class ContainerHandler extends Container{
     }
 
 
-
+    /**
+     * <h2>Water Filtered Slot</h2>
+     * basically exactly the same as a filtered slot but used to check for water via the fuel handler
+     * @see FuelHandler#isWater(ItemStack, GenericRailTransport)
+     */
     private class waterSlot extends Slot{
         public waterSlot(IInventory p_i1824_1_, int p_i1824_2_, int p_i1824_3_, int p_i1824_4_) {
             super(p_i1824_1_,p_i1824_2_,p_i1824_3_,p_i1824_4_);
         }
-        /**
-         * <h2>filter items</h2>
-         * @return if the item should be allowed or blocked.
-         */
         @Override
         public boolean isItemValid(ItemStack item) {
          return FuelHandler.isWater(item, railTransport);
         }
     }
 
-
+    /**
+     * <h2>Fuel Filtered Slot</h2>
+     * basically exactly the same as a filtered slot but used to check for fuel via the fuel handler
+     * @see FuelHandler#isFuel(ItemStack, GenericRailTransport)
+     */
     private class fuelSlot extends Slot{
         public fuelSlot(IInventory p_i1824_1_, int p_i1824_2_, int p_i1824_3_, int p_i1824_4_) {
             super(p_i1824_1_,p_i1824_2_,p_i1824_3_,p_i1824_4_);
         }
-        /**
-         * <h2>filter items</h2>
-         * @return if the item should be allowed or blocked.
-         */
         @Override
         public boolean isItemValid(ItemStack item) {
             return FuelHandler.isFuel(item, railTransport);
