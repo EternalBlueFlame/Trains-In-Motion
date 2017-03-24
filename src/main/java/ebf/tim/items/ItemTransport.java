@@ -10,10 +10,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 
-import java.lang.reflect.Constructor;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * <h1>Core Transport Item</h1>
@@ -23,14 +24,14 @@ import java.util.List;
 public class ItemTransport extends Item {
 
     private final String[] subtext;
-    private final Constructor<? extends GenericRailTransport> cart;
+    private final Class<? extends GenericRailTransport> cart;
 
 
-    public ItemTransport(String[] information, Constructor car) {
+    public ItemTransport(String[] information, Class<? extends GenericRailTransport> car) {
         super();
         subtext = information;
         //if we did this anywhere else it would error. why it is fine here I will never know. But I'm gonna abuse that.
-        cart =car;
+        cart = car;
         setCreativeTab(TrainsInMotion.creativeTab);
     }
 
@@ -56,7 +57,7 @@ public class ItemTransport extends Item {
     @Override
     public boolean onItemUse(ItemStack itemStack, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ, int blockSide, float pointToRayX, float pointToRayY, float pointToRayZ) {
         try {
-            if(RailUtility.placeOnRail(cart.newInstance(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D), playerEntity, worldObj, posX, posY, posZ)){
+            if(RailUtility.placeOnRail(cart.getConstructor(UUID.class, World.class, double.class, double.class, double.class).newInstance(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D), playerEntity, worldObj, posX, posY, posZ)){
                 itemStack.stackSize--;
                 if (itemStack.stackSize<=0){
                     itemStack=null;
@@ -65,7 +66,10 @@ public class ItemTransport extends Item {
             }
             return false;
         } catch (Exception e){
-            System.out.println("Failed to cast : " + cart.toString() + "to a new generic transport entity");
+        	if(DebugUtil.dev()){
+            	e.printStackTrace();
+        	}
+        	DebugUtil.log("Failed to cast : " + cart.toString() + "to a new generic transport entity");
         }
         return true;
     }

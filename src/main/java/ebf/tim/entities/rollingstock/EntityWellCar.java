@@ -23,7 +23,7 @@ public class EntityWellCar extends EntityRollingStockCore {
     public static final String[] itemDescription = new String[]{
             "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 3" + StatCollector.translateToLocal("menu.item.tons"),
             "\u00A77" + StatCollector.translateToLocal("menu.item.sizeof") +": 36" + StatCollector.translateToLocal("menu.item.slots")};
-    public static final Item thisItem = new ItemTransport(itemDescription, EntityWellCar.class.getConstructors()[0]).setUnlocalizedName("wellcar");
+    public static final Item thisItem = new ItemTransport(itemDescription, EntityWellCar.class).setUnlocalizedName("wellcar");
 
     public EntityWellCar(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);
