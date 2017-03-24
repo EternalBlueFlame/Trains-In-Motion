@@ -26,7 +26,7 @@ public class EntityUP3Bay100TonHopper extends EntityRollingStockCore {
     public static final String[] itemDescription = new String[]{
             "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2" + StatCollector.translateToLocal("menu.item.tons"),
             "\u00A77" + StatCollector.translateToLocal("menu.item.sizeof") +": 27" + StatCollector.translateToLocal("menu.item.slots")};
-    public static final Item thisItem = new ItemTransport(itemDescription, EntityUP3Bay100TonHopper.class.getConstructors()[0]).setUnlocalizedName("hoppercar");
+    public static final Item thisItem = new ItemTransport(itemDescription, EntityUP3Bay100TonHopper.class).setUnlocalizedName("hoppercar");
 
     public EntityUP3Bay100TonHopper(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);

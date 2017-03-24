@@ -81,7 +81,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public GenericRailTransport(World world){
         super(world);
     }
-    public GenericRailTransport(World world, UUID owner, double xPos, double yPos, double zPos){
+    public GenericRailTransport(UUID owner, World world, double xPos, double yPos, double zPos){
         super(world);
 
         posY = yPos;

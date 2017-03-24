@@ -58,7 +58,7 @@ public class InventoryHandler implements IInventory{
             while (items.size() < getSizeInventory()) {
                 items.add(null);
             }
-            if (host.getRiderOffsets().length >1){
+            if (host.getRiderOffsets() != null && host.getRiderOffsets().length >1){
                 items.add(null);
             }
 
@@ -108,10 +108,10 @@ public class InventoryHandler implements IInventory{
             if (host instanceof EntityTrainCore){
                 size++;
             }
-            if (host.getType()== TrainsInMotion.transportTypes.STEAM || host.getType()== TrainsInMotion.transportTypes.NUCLEAR_STEAM){
+            if (host.getType() == TrainsInMotion.transportTypes.STEAM || host.getType()== TrainsInMotion.transportTypes.NUCLEAR_STEAM){
                 size++;
             }
-            if (host.getRiderOffsets().length >1){
+            if (host.getRiderOffsets() != null && host.getRiderOffsets().length >1){
                 size++;
             }
             return size+ (host.getInventorySize().getCollumn() * host.getInventorySize().getRow());

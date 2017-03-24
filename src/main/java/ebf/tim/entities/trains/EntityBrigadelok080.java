@@ -58,7 +58,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
             "\u00A77" + StatCollector.translateToLocal("menu.item.country") + ": " + StatCollector.translateToLocal("menu.item.germany"),
             "\u00A77" + StatCollector.translateToLocal("menu.item.speed") +": 70.81km",
             "\u00A77" + StatCollector.translateToLocal("menu.item.pullingpower") +": ??? " + StatCollector.translateToLocal("menu.item.tons")};
-    public static final Item thisItem = new ItemTransport(itemDescription, EntityBrigadelok080.class.getConstructors()[0]).setUnlocalizedName("brigadelok080");
+    public static final Item thisItem = new ItemTransport(itemDescription, EntityBrigadelok080.class).setUnlocalizedName("brigadelok080");
 
     /**
      * these basic constructors only need to have their names changed to that of this class, that is assuming your editor doesn't automatically do that.
