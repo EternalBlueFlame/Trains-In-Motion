@@ -9,6 +9,11 @@ import trains.registry.GenericRegistry;
 
 import java.util.Random;
 
+/**
+ * <h1>Ore generation</h1>
+ * spawns liquids and ores in the world.
+ * @author Justice
+ */
 public class OreGen implements IWorldGenerator{
 	/**
 	 * <h2>Ore definitions</h2>

@@ -4,11 +4,18 @@ import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import trains.entities.EntityTrainCore;
+import trains.entities.GenericRailTransport;
 import trains.gui.train.GUITrain;
 import trains.registry.URIRegistry;
 
+/**
+ * <h1>Train HUD</h1>
+ * the heads up display which shows the train's stats whenever there is a player riding it.
+ * @author Eternal Blue Flame
+ */
 public class HUDTrain extends GuiScreen {
     private Minecraft game;
 
@@ -25,11 +32,13 @@ public class HUDTrain extends GuiScreen {
      * @see GUITrain
      * The difference is that we override the experience bar render so that we can render the GUI alongside that, like a HUD.
      * @see GuiScreen
+     * Some IDE's may report this function is unused, but it is actually used indirectly by minecraft's event manager, for this reason the warning was supressed.
      */
     @SubscribeEvent(priority = EventPriority.NORMAL)
+    @SuppressWarnings("unused")
     public void onRenderExperienceBar(RenderGameOverlayEvent event) {
-        if (game != null && game.thePlayer != null && game.thePlayer.ridingEntity != null && game.thePlayer.ridingEntity instanceof EntityTrainCore) {
-            fontRendererObj.drawString("Test Locomotive", 8, 6, 4210752);
+        if (game != null && game.thePlayer != null && game.thePlayer.ridingEntity instanceof EntityTrainCore) {
+            fontRendererObj.drawString(StatCollector.translateToLocal(((GenericRailTransport)game.thePlayer.ridingEntity).getItem().getUnlocalizedName().replace("item","entity")), 8, 6, 4210752);
             //draw the gui background color
             //GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             //set the texture.

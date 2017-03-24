@@ -3,6 +3,11 @@ package trains.items;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 
+/**
+ * <h1>Creative tab</h1>
+ * defines the creative tab's information.
+ * @author Eternal Blue Flame
+ */
 public class TiMTab extends CreativeTabs {
 
     /**

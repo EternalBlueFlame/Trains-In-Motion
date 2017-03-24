@@ -21,8 +21,8 @@ Date: December, 2016
 <td>
 <h2> Current Status:</h2>
 <ul>
-<li> Builds - <b id="Build">Unstable</b></li>
-<li> Revision - <b id="Revision">Unreleased</b></li>
+<li> Builds - <b id="Build">stable</b></li>
+<li> Revision - <b id="Revision"><a href="https://github.com/EternalBlueFlame/Trains-In-Motion/blob/master/Trains%20in%20Motion%20Alpha%202.0.jar"">Alpha 2, Grab it here</a></b></li>
 </ul>
 </td>
 </tr>
@@ -36,9 +36,10 @@ Date: December, 2016
 <h2>Art:</h2>
 <ul>
 <li> Models must match the Mod's Art-style.</li>
-<li> Format is limited to <b>.java</b> models only; you can use tools such as BDCraft Cubik, or even writing it manually.</li>
-<li> Model scale is <b>1.25 blocks/meters wide</b>, or <b>1/7.68 scale</b>.</li>
-<li> Textures must be in <b>.png</b> format.</li>
+<li> Format is limited to <b>.java</b> models only; you can use tools such as BDCraft Cubik, SMP Toolbox, Technie or even writing it manually.</li>
+<li> Model scale is <b>1.25 blocks/meters wide max</b>, or <b>1/7.68 scale</b>. In other words they must fit on minecart rails.</li>
+<li> Technie models are limited to 512x512 base resolution for textures.</li>
+<li> Textures must be in <b>.png</b> format. And are preferred to be at 4 times the resolution of the texture base size defined in the model.</li>
 <li> Audio must be in <b>.ogg</b> format and no more than 192kb/s.</li>
 </ul>
 </td>
@@ -73,6 +74,7 @@ Date: December, 2016
 <ul>
 <li> Unless you are the creator of the contributed content in question, you may not redistribute the Trains in Motion source or assets, including but not limited to models, pictures, and sounds.</li>
 <li> Outside of a modpack you are strictly prohibited from distributing the compiled mod in any format or medium, the only exception being the official CurseForge page of Trains in Motion (Unreleased)</li>
+<li> Trains in Motion code is heavily documented in hopes it can teach some tricks to modding, but because it's difficult to learn from copy-pasting code you are limited on how much code you can copy, for exact limitations on this, see point 1.10 in the full license.</li>
 </ul>
 </td>
 <td>

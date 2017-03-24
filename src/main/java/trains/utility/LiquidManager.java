@@ -1,6 +1,7 @@
 package trains.utility;
 
 
+import net.minecraft.entity.Entity;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
@@ -11,6 +12,8 @@ import java.util.List;
 /**
  * <h1>fluid management</h1>
  * this is more of a replacement for the base game fluid management to better allow us to use multiple tanks of fluids.
+ * TODO: this should only need to be used for tanker cars, and it should only need a single tank, it's kinda redundant to use it for trains since we don't need/use types there.
+ * @author Eternal Blue Flame
  */
 public class LiquidManager {
     private FluidTank firstTank;
@@ -24,6 +27,8 @@ public class LiquidManager {
     /**
      * <h2>initialization</h2>
      * sets the initial values of the class.
+     * this is explained in
+     * @see trains.entities.trains.EntityBrigadelok080
      */
     public LiquidManager(int firstCapacity, int secondCapacity, Fluid[] firstList, Fluid[] secondList, boolean firstIsWhitelist, boolean secondIsWhitelist){
         this.firstTank = new FluidTank(firstCapacity);
@@ -59,18 +64,20 @@ public class LiquidManager {
      * @param fluid fluid to add to the tank.
      * @param amount the amount of fluid to add.
      */
-    public boolean addFluid(Fluid fluid, int amount, boolean isFirstTank){
+    public boolean addFluid(Fluid fluid, int amount, boolean isFirstTank, Entity host){
         if (isFirstTank){
             System.out.println((firstTank.getFluidAmount() + " : "+ amount) + " : "+ firstTank.getCapacity());
             if (isFluidValid(fluid, true) && firstTank.getFluidAmount() + amount <= firstTank.getCapacity()
                 && firstTank.getFluidAmount() + amount >=0){
                 firstTank.setFluid(new FluidStack(fluid, firstTank.getFluidAmount() + amount));
+                host.getDataWatcher().updateObject(20, firstTank.getFluidAmount());
                 return true;
             }
         } else {
             if (isFluidValid(fluid, false) && secondTank.getFluidAmount() + amount <= secondTank.getCapacity()
                     && secondTank.getFluidAmount() + amount >=0){
                 secondTank.setFluid(new FluidStack(fluid, firstTank.getFluidAmount() + amount));
+                host.getDataWatcher().updateObject(21, secondTank.getFluidAmount());
                 return true;
             }
         }
@@ -82,10 +89,11 @@ public class LiquidManager {
      * attempts to drain fluid from the tank of the defined amount and type.
      * @param amount the amount of fluid to drain.
      */
-    public boolean drainFluid(int amount, boolean isFirstTank){
+    public boolean drainFluid(int amount, boolean isFirstTank, Entity host){
         if (isFirstTank){
             if (firstTank.getFluidAmount()>amount) {
                 firstTank.setFluid(new FluidStack(firstTank.getFluid(), firstTank.getFluidAmount() - amount));
+                host.getDataWatcher().updateObject(20, firstTank.getFluidAmount());
                 return true;
             } else {
                 return false;
@@ -93,6 +101,7 @@ public class LiquidManager {
         } else {
             if (secondTank.getFluidAmount()>amount) {
                 secondTank.setFluid(new FluidStack(secondTank.getFluid(), secondTank.getFluidAmount() - amount));
+                host.getDataWatcher().updateObject(21, secondTank.getFluidAmount());
                 return true;
             } else {
                 return false;

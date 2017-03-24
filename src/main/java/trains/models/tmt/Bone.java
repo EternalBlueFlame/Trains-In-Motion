@@ -210,8 +210,7 @@ public class Bone {
 	 */
 	public void resetOffset(boolean doRecursive) {
 		if(parentNode != null) {
-			positionVector = new Vec3d(0, 0, parentNode.length);
-			parentNode.setVectorRotations(positionVector);
+			parentNode.setVectorRotations(new Vec3d(0, 0, parentNode.length));
 			/*positionVector.xCoord += parentNode.positionVector.xCoord;
 			positionVector.yCoord += parentNode.positionVector.yCoord;
 			positionVector.zCoord += parentNode.positionVector.zCoord;*/
@@ -390,8 +389,8 @@ public class Bone {
 		absoluteAngles.angleX = relativeAngles.angleX;
 		absoluteAngles.angleY = relativeAngles.angleY;
 		absoluteAngles.angleZ = relativeAngles.angleZ;
-		for(int i = 0; i < childNodes.size(); i++) {
-			childNodes.get(i).setAbsoluteRotations(absoluteAngles.angleX, absoluteAngles.angleY, absoluteAngles.angleZ);
+		for(Bone node : childNodes) {
+			node.setAbsoluteRotations(absoluteAngles.angleX, absoluteAngles.angleY, absoluteAngles.angleZ);
 		}
 	}
 	
@@ -399,8 +398,8 @@ public class Bone {
 		absoluteAngles.angleX = relativeAngles.angleX + x;
 		absoluteAngles.angleY = relativeAngles.angleY + y;
 		absoluteAngles.angleZ = relativeAngles.angleZ + z;
-		for(int i = 0; i < childNodes.size(); i++) {
-			childNodes.get(i).setAbsoluteRotations(absoluteAngles.angleX, absoluteAngles.angleY, absoluteAngles.angleZ);
+		for(Bone node : childNodes) {
+			node.setAbsoluteRotations(absoluteAngles.angleX, absoluteAngles.angleY, absoluteAngles.angleZ);
 		}
 		
 	}
@@ -459,8 +458,8 @@ public class Bone {
 		positionVector = new Vec3d(offsetX, offsetY, offsetZ);
 		addVector(tempVec, positionVector);
 		setVectorRotations(tempVec);
-		for(int i = 0; i < childNodes.size(); i++) {
-			childNodes.get(i).setVectors(tempVec);
+		for(Bone node : childNodes) {
+			node.setVectors(tempVec);
 		}
 	}
 	
@@ -469,8 +468,8 @@ public class Bone {
 		Vec3d tempVec = new Vec3d(0, 0, length);
 		setVectorRotations(tempVec);
 		addVector(tempVec, vector);
-		for(int i = 0; i < childNodes.size(); i++) {
-			childNodes.get(i).setVectors(tempVec);
+		for(Bone node : childNodes) {
+			node.setVectors(tempVec);
 		}
 		
 	}
@@ -479,8 +478,7 @@ public class Bone {
 	 * Sets the current angles of the Bone to the models attached to it.
 	 */
 	public void setAnglesToModels() {
-		for(int i = 0; i < models.size(); i++) {
-			ModelRenderer currentModel = models.get(i);
+		for(ModelRenderer currentModel : models) {
 			Angle3D baseAngles = modelBaseRot.get(currentModel);
 			currentModel.rotateAngleX = baseAngles.angleX + absoluteAngles.angleX;
 			currentModel.rotateAngleY = baseAngles.angleY + absoluteAngles.angleY;
@@ -490,8 +488,8 @@ public class Bone {
 			currentModel.rotationPointZ = (float)positionVector.zCoord;
 		}
 		
-		for(int i = 0; i < childNodes.size(); i++) {
-			childNodes.get(i).setAnglesToModels();
+		for(Bone node : childNodes) {
+			node.setAnglesToModels();
 		}
 	}
 		

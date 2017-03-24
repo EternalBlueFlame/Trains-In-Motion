@@ -12,17 +12,17 @@ import java.util.Map;
 
 public class ModelPool {
 	public static ModelPoolEntry addFile(String file, Class modelClass, Map<String, TransformGroup> group, Map<String, TextureGroup> textureGroup) {
-		ModelPoolEntry entry = null;
 		if(modelMap.containsKey(file)) {
-			entry = modelMap.get(file);
+			ModelPoolEntry entry = modelMap.get(file);
 			entry.applyGroups(group, textureGroup);
 			return entry;
 		}
+		ModelPoolEntry entry = null;
 		try {
 			entry = (ModelPoolEntry)modelClass.newInstance();
 		}
 		catch(Exception e) {
-			System.out.println("A new " + entry.getClass().getName() + " could not be initialized.");
+			System.out.println("A new model class could not be initialized.");
 			System.out.println(e.getMessage());
 			return null;
 		}
@@ -49,17 +49,17 @@ public class ModelPool {
 	}
 	
     public static ModelPoolEntry addFileF(String file, Class modelClass, Map<String, TransformGroup> group, Map<String, TextureGroup> textureGroup) throws IOException{
-		ModelPoolEntry entry = null;
 		if(modelMap.containsKey(file)){
-			entry = modelMap.get(file);
+			ModelPoolEntry entry = modelMap.get(file);
 			entry.applyGroups(group, textureGroup);
 			return entry;
 		}
+		ModelPoolEntry entry = null;
 		try{
 			entry = (ModelPoolEntry)modelClass.newInstance();
 		}
 		catch(Exception e){
-			System.out.println("A new " + entry.getClass().getName() + " could not be initialized.");
+			System.out.println("A new model class could not be initialized.");
 			System.out.println(e.getMessage());
 			return null;
 		}
@@ -69,8 +69,7 @@ public class ModelPool {
 		tempfile.deleteOnExit();
 		IOUtils.copy(in, out);
 		System.out.println("RENDER: " + tempfile.getPath());
-		File modelFile = tempfile;
-		if(modelFile == null || !modelFile.exists()){
+		if(tempfile == null || !tempfile.exists()){
 			System.out.println("The model with the name " + file + " does not exist.");
 			return null;
 		}
@@ -79,7 +78,7 @@ public class ModelPool {
 		entry.name = file;
 		entry.setGroup("0");
 		entry.setTextureGroup("0");
-		entry.getModel(modelFile);
+		entry.getModel(tempfile);
 		entry.applyGroups(group, textureGroup);
 		modelMap.put(file, entry);
 		return entry;

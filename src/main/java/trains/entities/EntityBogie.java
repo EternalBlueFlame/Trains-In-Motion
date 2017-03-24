@@ -26,11 +26,17 @@ import trains.utility.RailUtility;
 /**
  * <h1>Bogie Core</h1>
  * this controls the behavior of the bogies in trains and rollingstock.
+ * @author Eternal Blue Flame
  */
+@Deprecated
 public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart, IEntityAdditionalSpawnData {
 
+    /**
+     * <h2>variables</h2>
+     * parentId is used to keep a reference to the parent train/rollingstock.
+     * the velocities are to replace the client only velocities in forge that have private access.
+     */
     private int parentId = 0;
-    private GenericRailTransport parent;
     protected double cartVelocityX =0;
     protected double cartVelocityY =0;
     protected double cartVelocityZ =0;
@@ -52,7 +58,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     public void readSpawnData(ByteBuf additionalData) {
         parentId = additionalData.readInt();
         if (parentId != 0) {
-            parent = ((GenericRailTransport) worldObj.getEntityByID(parentId));
+            GenericRailTransport parent = ((GenericRailTransport) worldObj.getEntityByID(parentId));
             if (parent != null){
                 parent.addbogies(this);
             } else {
@@ -117,7 +123,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     }
 
     /**
-     * <h3> movement management</h3>
+     * <h2> movement management</h2>
      * this is modified movement from the super class, should be more efficient, and reliable, but generally does the same thing, minus ability to collide.
      * @see EntityMinecart#onUpdate()
      * Some features are replaced using our own for compatibility with ZoraNoDensha
@@ -171,8 +177,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             }
 
         }
+        //on client we just set the position to what it is on the server
         if (worldObj.isRemote) {
             setPosition(posX, posY, posZ);
+            //on server we actually recalculate the position
         } else {
             prevPosX = posX;
             prevPosY = posY;
@@ -182,14 +190,13 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             i = MathHelper.floor_double(posY);
             int i1 = MathHelper.floor_double(posZ);
 
-            //deal with special rails
+            //deal with slopes
             if (RailUtility.isRailBlockAt(worldObj, l, i - 1, i1)) {
                 --i;
             }
             Block block = worldObj.getBlock(l, i, i1);
             if (canUseRail() && RailUtility.isRailBlockAt(block)) {
-                float railMaxSpeed = ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, l, i, i1);
-                double maxSpeed = Math.min(railMaxSpeed, getCurrentCartSpeedCapOnRail());
+                double maxSpeed = Math.min(((BlockRailBase)block).getRailMaxSpeed(worldObj, this, l, i, i1), getCurrentCartSpeedCapOnRail());
                 func_145821_a(l, i, i1, maxSpeed, getSlopeAdjustment(), block, ((BlockRailBase)block).getBasicRailMetadata(worldObj, this, l, i, i1));
 
                 if (block == Blocks.activator_rail) {
@@ -252,25 +259,17 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         motionZ = cartVelocityZ;
     }
     @Override
-    @SideOnly(Side.CLIENT)
     public void setVelocity(double x, double y, double z) {
         cartVelocityX = motionX = x;
         cartVelocityY = motionY = y;
         cartVelocityZ = motionZ = z;
     }
 
-    /**
-     * <h2>Rail Movement</h2>
-     * This is a fix for the fact there may or may not be a rider entity, this is to serve until we fully replace the functionality of this.
-     * TODO: after we get in the ZnD api, we need to check if we can replicate the entire host function with our own calls, for better/more reliable results.
-     */
-    @Deprecated
     @Override
-    protected void func_145821_a(int p_145821_1_, int p_145821_2_, int p_145821_3_, double p_145821_4_, double p_145821_6_, Block p_145821_8_, int p_145821_9_) {
-        Entity entity = riddenByEntity;
-        riddenByEntity = null;
-        super.func_145821_a(p_145821_1_, p_145821_2_, p_145821_3_, p_145821_4_, p_145821_6_, p_145821_8_, p_145821_9_);
-        riddenByEntity = entity;
+    public void addVelocity(double velocityX, double velocityY, double velocityZ){
+        //handle movement for trains, this will likely need to be different for rollingstock.
+            setVelocity(motionX + velocityX, motionY + velocityY, motionZ + velocityZ);
+            isAirBorne = true;
     }
 
 

@@ -4,8 +4,8 @@ import net.minecraft.block.Block;
 import net.minecraft.item.ItemBucket;
 
 /**
- * <h2>basic bucket item for oil</h2>
- * Courtesy of Justice
+ * <h1>bucket item for oil</h1>
+ * @author Justice
  */
 public class Bucket extends ItemBucket{
     public Bucket(Block fluid) {

@@ -1,23 +1,23 @@
 package trains.networking;
 
-import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import trains.utility.EventHandler;
+import net.minecraft.util.ChatComponentText;
+import trains.entities.EntitySeat;
+import trains.entities.GenericRailTransport;
 
+/**
+ * <h1>Mount packet</h1>
+ * This is necessary because when interacting with the hitboxes because they are client side only,
+ * @author Eternal Blue Flame
+ */
 public class PacketMount implements IMessage {
     private int entityId;
     /**
-     * <h2>Packet for mounting the entity</h2>
-     * This is necessary because when interacting with the hitboxes they are client side only,
-     * so you have to make the train make the player mount the train from server through a packet.
-     *
-     * when a entityId is pressed in
-     * @see EventHandler#onClientKeyPress(InputEvent.KeyInputEvent)
-     * it's processed by client to sent the defined action to server.
-     * The only data sent in the packet, beyond the normal overhead is a single int to define what action to do.
+     * <h2>data transfer variables</h2>
+     * stores and transfers the variable through the byte buffer.
      */
     public PacketMount() {}
     public PacketMount(int entityId) {
@@ -41,7 +41,23 @@ public class PacketMount implements IMessage {
     public static class Handler implements IMessageHandler<PacketMount, IMessage> {
         @Override
         public IMessage onMessage(PacketMount message, MessageContext context) {
-            context.getServerHandler().playerEntity.mountEntity(context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId));
+            GenericRailTransport transport = (GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId);
+            if (transport.riddenByEntity == null && transport.getPermissions(context.getServerHandler().playerEntity, false)) {
+                context.getServerHandler().playerEntity.mountEntity(transport);
+                return null;
+            } else {
+                for (EntitySeat seat : transport.seats){
+                    if (seat.riddenByEntity == null && transport.getPermissions(context.getServerHandler().playerEntity, false)){
+                        context.getServerHandler().playerEntity.mountEntity(seat);
+                        return null;
+                    }
+                }
+            }
+            if (transport.getPermissions(context.getServerHandler().playerEntity, false)) {
+                context.getServerHandler().playerEntity.addChatMessage(new ChatComponentText("There are no available seats"));
+            } else {
+                context.getServerHandler().playerEntity.addChatMessage(new ChatComponentText("You don't have permission to do that."));
+            }
             return null;
         }
     }

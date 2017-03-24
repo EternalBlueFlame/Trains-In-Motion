@@ -10,11 +10,20 @@ import net.minecraft.world.World;
 import trains.entities.EntityBogie;
 import trains.entities.GenericRailTransport;
 
-
+/**
+ * <h1>utilities</h1>
+ * used for misc utility functions
+ *
+ * @author Eternal Blue Flame
+ * @author Zora No Densha
+ */
 public class RailUtility {
+    //these are just so the values are calculated ahead of time, saves CPU use.
     public static final float radianF = (float) Math.PI / 180.0f;
     public static final double radianD = Math.PI / 180.0d;
-    public static final float degreesF = (float) (180.0d / Math.PI);
+    public static final double degreesD = 180.0d / Math.PI;
+
+
     /**
      * <h2>Vanilla Track Overrrides</h2>
      * TODO: need ZND API for ITrackBase
@@ -38,41 +47,6 @@ public class RailUtility {
      * courtesy of Zora No Densha.
      * There are version for doubles and floats.
      */
-    public static float[] rotatePoint(float[] f, float pitch, float yaw, float roll) {
-        float cos;
-        float sin;
-        float[] xyz = new float[]{f[0],f[1],f[2]};
-
-        if (pitch != 0.0F) {
-            pitch *= radianF;
-            cos = MathHelper.cos(pitch);
-            sin = MathHelper.sin(pitch);
-
-            xyz[0] = (f[1] * sin) + (f[0] * cos);
-            xyz[1] = (f[1] * cos) - (f[0] * sin);
-        }
-
-        if (yaw != 0.0F) {
-            yaw *= radianF;
-            cos = MathHelper.cos(yaw);
-            sin = MathHelper.sin(yaw);
-
-            xyz[0] = (f[0] * cos) - (f[2] * sin);
-            xyz[2] = (f[0] * sin) + (f[2] * cos);
-        }
-
-        if (roll != 0.0F) {
-            roll *=  radianF;
-            cos = MathHelper.cos(roll);
-            sin = MathHelper.sin(roll);
-
-            xyz[1] = (f[2] * cos) - (f[1] * sin);
-            xyz[2] = (f[2] * sin) + (f[1] * cos);
-        }
-
-        return xyz;
-    }
-
     public static double[] rotatePoint(double[] f, float pitch, float yaw, float roll) {
         double cos;
         double sin;
@@ -109,64 +83,62 @@ public class RailUtility {
     }
 
 
+    /**
+     * <h2>rail placement from item</h2>
+     * basic functionality to place a train or rollingstock on the rails on item use.
+     */
     public static boolean placeOnRail(GenericRailTransport entity, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ) {
 
+        //be sure there is a rail at the location
         if (RailUtility.isRailBlockAt(worldObj, posX,posY,posZ) && !worldObj.isRemote) {
-
+            //define the direction
             int playerMeta = MathHelper.floor_double((playerEntity.rotationYaw / 90.0F) + 2.5D) & 3;
-
+            //check rail axis
             if (((BlockRailBase)worldObj.getBlock(posX,posY,posZ)).getBasicRailMetadata(worldObj, null,posX,posY,posZ) == 1){
-
-                if (playerMeta == 1) {
-
+                //check player direction
+                if (playerMeta == 3) {
+                    //check if the transport can be placed in the area
                     if (!RailUtility.isRailBlockAt(worldObj, posX + MathHelper.floor_double(entity.getBogieOffsets().get(entity.getBogieOffsets().size()-1)+ 1.0D ), posY, posZ)
                             && !RailUtility.isRailBlockAt(worldObj, posX + MathHelper.floor_double(entity.getBogieOffsets().get(0)- 1.0D ), posY, posZ)) {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
-
-                    for (double offset: entity.getBogieOffsets()){
-                        entity.bogieXYZ.add(new double[]{posX + 0.5D + offset, posY, posZ + 0.5D});
-                    }
-
+                    entity.rotationYaw= 0;
+                    //spawn the entity
                     worldObj.spawnEntityInWorld(entity);
                     return true;
 
                 }
-                else if (playerMeta == 3) {
+                //same as above, but reverse direction.
+                else if (playerMeta == 1) {
 
                     if (!RailUtility.isRailBlockAt(worldObj, posX - MathHelper.floor_double(entity.getBogieOffsets().get(entity.getBogieOffsets().size()-1)+ 1.0D ), posY, posZ)
                             && !RailUtility.isRailBlockAt(worldObj, posX - MathHelper.floor_double(entity.getBogieOffsets().get(0)- 1.0D ), posY, posZ)) {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
-
-                    for (double offset: entity.getBogieOffsets()){
-                        entity.bogieXYZ.add(new double[]{posX + 0.5D - offset, posY, posZ + 0.5D});
-                    }
+                    entity.rotationYaw= 180;
 
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }
             }
+            //same as above but a different axis.
             else if (((BlockRailBase)worldObj.getBlock(posX,posY,posZ)).getBasicRailMetadata(worldObj, null,posX,posY,posZ) == 0){
 
-                if (playerMeta == 2) {
+                if (playerMeta == 0) {
 
                     if (!RailUtility.isRailBlockAt(worldObj, posX, posY, posZ + MathHelper.floor_double(entity.getBogieOffsets().get(entity.getBogieOffsets().size()-1)+ 1.0D ))
                             && !RailUtility.isRailBlockAt(worldObj, posX, posY, posZ + MathHelper.floor_double(entity.getBogieOffsets().get(0)- 1.0D ))) {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
-
-                    for (double offset: entity.getBogieOffsets()){
-                        entity.bogieXYZ.add(new double[]{posX + 0.5D, posY, posZ + 0.5D + offset});
-                    }
+                    entity.rotationYaw= 90;
 
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }
-                else if (playerMeta == 0) {
+                else if (playerMeta == 2) {
 
                     if (!RailUtility.isRailBlockAt(worldObj, posX, posY, posZ - MathHelper.floor_double(entity.getBogieOffsets().get(entity.getBogieOffsets().size()-1)+ 1.0D ))
                             && !RailUtility.isRailBlockAt(worldObj, posX, posY, posZ - MathHelper.floor_double(entity.getBogieOffsets().get(0)- 1.0D ))) {
@@ -174,10 +146,7 @@ public class RailUtility {
                         return false;
                     }
 
-                    for (double offset: entity.getBogieOffsets()){
-                        entity.bogieXYZ.add(new double[]{posX + 0.5D, posY, posZ + 0.5D - offset});
-                    }
-
+                    entity.rotationYaw= 270;
                     worldObj.spawnEntityInWorld(entity);
                     return true;
                 }

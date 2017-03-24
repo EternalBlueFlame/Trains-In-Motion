@@ -1,17 +1,28 @@
 package trains.entities;
 
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
+import trains.networking.PacketKeyPress;
+import trains.utility.CommonProxy;
 import trains.utility.FuelHandler;
-import trains.utility.InventoryHandler;
+import trains.utility.HitboxHandler;
+import trains.utility.RailUtility;
 
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.UUID;
 
+import static trains.TrainsInMotion.nullUUID;
+import static trains.utility.RailUtility.rotatePoint;
+
 /**
- * <h2> Train core</h2>
+ * <h1>Train core</h1>
  * this is the management core for all trains.
+ * @author Eternal Blue Flame
  */
 public class EntityTrainCore extends GenericRailTransport {
 
@@ -20,14 +31,11 @@ public class EntityTrainCore extends GenericRailTransport {
      * isRunning is used for non-steam based trains to define if it's actually on.
      * fuelHandler manages the items for fuel, and the fuel itself.
      * accelerator defines the speed percentage the user is attempting to apply.
-     * destination is used for routing, railcraft and otherwise.
-     * lastly the inventory defines the item storage of the train.
      */
     public boolean isRunning = false;
     public FuelHandler fuelHandler = new FuelHandler();
     public int accelerator =0;
-    public String destination ="";
-    public InventoryHandler inventory = new InventoryHandler(this);
+    private double[][] vectorCache = new double[4][3];
 
 
 
@@ -43,20 +51,7 @@ public class EntityTrainCore extends GenericRailTransport {
     * @param zPos the z position to spawn entity at, used in super's super.
     */
     public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos){
-        super(world);
-        posY = yPos;
-        posX = xPos;
-        posZ = zPos;
-
-        this.owner = owner;
-
-        setSize(1f,2);
-        this.boundingBox.minX = 0;
-        this.boundingBox.minY = 0;
-        this.boundingBox.minZ = 0;
-        this.boundingBox.maxX = 0;
-        this.boundingBox.maxY = 0;
-        this.boundingBox.maxZ = 0;
+        super(world, owner, xPos, yPos, zPos);
     }
     //this constructor is for client side spawning
     public EntityTrainCore(World world){
@@ -89,7 +84,6 @@ public class EntityTrainCore extends GenericRailTransport {
         accelerator = tag.getInteger("train.accel");
         fuelHandler.readEntityFromNBT(tag);
 
-        inventory.readNBT(tag, "items");
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
@@ -98,41 +92,59 @@ public class EntityTrainCore extends GenericRailTransport {
         tag.setInteger("train.accel", accelerator);
         fuelHandler.writeEntityToNBT(tag);
 
-        tag.setTag("items", inventory.writeNBT());
     }
 
 
     /**
-     * <h2> process train movement</h2>
-     * called by onUpdate to figure out the amount of movement to apply every tick
-     * @see #onUpdate()
-     *
-     * currently this is only intended to provide a rather static amount.
+     * <h2>Calculate drag</h2>
+     * Add more drag if there are rollingstock.
+     * if you have more than one train pulling or pushing a load, the drag should be reduced accordingly.
      */
-    @Override
-    public float processMovement(double X){
-        float speed = (float) X * 0.9f;
+    public float calculateDrag(float current, @Nullable UUID frontCheckID, @Nullable UUID backCheckID){
 
-        if (speed ==0){
-            speed = ((accelerator / 6f)*0.1f) * getAcceleration();
+        //if front and back are null then return null
+        if (frontCheckID == nullUUID && backCheckID == nullUUID) {
+            return current;
+        }
+        GenericRailTransport frontCheck = CommonProxy.getTransportFromUuid(frontCheckID);
+        GenericRailTransport backCheck = CommonProxy.getTransportFromUuid(backCheckID);
+
+        //if front is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
+        if (frontCheck instanceof EntityTrainCore){
+            current *= 1.25f;
+        } else if (frontCheck instanceof EntityRollingStockCore){
+            current *=0.9f;
+        }
+        //if back is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
+        if (backCheck instanceof EntityTrainCore){
+            current *= 1.25f;
+        } else if (backCheck instanceof EntityRollingStockCore){
+            current *=0.9f;
         }
 
-        if (accelerator!=0) {
-            //if ((getType() == TrainsInMotion.transportTypes.STEAM || getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM)) {
-            //    if (tanks.getTank(false).getFluidAmount() > tanks.getTank(false).getCapacity()*0.5f) {
-                    speed *= 1 + ((accelerator / 6f) * getAcceleration());
-            //System.out.println(speed + " : " + getMaxSpeed());
-            //    }
-            //} else if (fuelHandler.fuel>0){
-            //    speed *= 1 + ((accelerator / 6f) * getAcceleration());
-            //}
+        UUID nextFront = nullUUID;
+        UUID nextBack = nullUUID;
+        //detect if the next bogie to look at stats for is in the front or back of the front bogie
+        if (frontCheck != null) {
+            if (frontCheck.front != null & frontCheck.front != this.getPersistentID()) {
+                nextFront = frontCheck.front;
+            } else if (frontCheck.back != null & frontCheck.back != this.getPersistentID()) {
+                nextFront = frontCheck.back;
+            }
         }
+        //detect if the next bogie to look at stats for is in the front or back of the back bogie
+        if (backCheck != null) {
+            if (backCheck.front != null & backCheck.front != this.getPersistentID()) {
+                nextBack = backCheck.front;
+            } else if (backCheck.back != null & backCheck.back != this.getPersistentID()) {
+                nextBack = backCheck.back;
+            }
+        }
+        //loop again to get the next carts in the list.
+        return calculateDrag(current, nextFront, nextBack);
 
-        if (speed>getMaxSpeed()){
-           speed=getMaxSpeed();
-        }
-        return speed;
     }
+
 
     /**
      * <h2> on entity update</h2>
@@ -143,22 +155,26 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     @Override
     public void onUpdate() {
-        if (bogie.size()>0){
-            boolean collision = !hitboxHandler.getCollision(this);
-            //handle movement for trains, this will likely need to be different for rollingstock.
-            if (collision) {
-                for (EntityBogie currentBogie : bogie) {
-                    //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                    motion[0] = processMovement(currentBogie.motionX);
-                    motion[2] = processMovement(currentBogie.motionZ);
-                    motion[1] = currentBogie.motionY;
-                    currentBogie.setVelocity(motion[0], motion[1], motion[2]);
-                    currentBogie.minecartMove();
+
+        for (EntityBogie entityBogie : bogie){
+            if(accelerator!=0) {
+                //acceleration is scaled down to fit the scale of the trains.
+                vectorCache[0][0] = ((accelerator / 6f) * 0.01302083f) * getAcceleration();
+
+                //cap speed to max.
+                if (vectorCache[0][0] > getMaxSpeed()) {
+                    vectorCache[0][0] = getMaxSpeed();
+                } else if (vectorCache[0][0] < -getMaxSpeed()) {
+                    vectorCache[0][0] = -getMaxSpeed();
                 }
-            } else {
-                motion = new double[]{0d, 0d, 0d};
+
+
+                vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], rotationPitch, rotationYaw, 0);
+                entityBogie.addVelocity(vectorCache[1][0], vectorCache[1][1], vectorCache[1][2]);
             }
+
         }
+
         super.onUpdate();
 
         //simple tick management so some code does not need to be run every tick.
@@ -172,8 +188,10 @@ public class EntityTrainCore extends GenericRailTransport {
 
 
     /**
-     * <h2> acceleration</h2>
+     * <h2>acceleration</h2>
      * function called from a packet for setting the train's speed and whether or not it is reverse.
+     * @see trains.networking.PacketKeyPress.Handler#onMessage(PacketKeyPress, MessageContext)
+     * TODO: for traincraft we need to limit the accelerator to 1.
      */
     public void setAcceleration(boolean increase){
         if (increase && accelerator <6){
@@ -181,14 +199,66 @@ public class EntityTrainCore extends GenericRailTransport {
         } else if (!increase && accelerator >-6){
             accelerator--;
         }
-        if (accelerator>0 && !isReverse){
-            isReverse = false;
-        } else if (accelerator <0 && isReverse){
-            isReverse = true;
+    }
+
+
+    /**
+     * <h2>linking management</h2>
+     * this is an override to make sure rollingstock doesn't push trains
+     * @see GenericRailTransport#manageLinks()
+     */
+    @Override
+    public void manageLinks(){
+        if(!worldObj.isRemote) {
+
+            if (front == nullUUID && isCoupling) {
+                vectorCache[2] = rotatePoint(new double[]{getHitboxPositions()[0] - 2, 0, 0}, 0, rotationYaw, 0);
+                vectorCache[2][0] +=posX;
+                vectorCache[2][1] +=posY;
+                vectorCache[2][2] +=posZ;
+                List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
+                        AxisAlignedBB.getBoundingBox(vectorCache[2][0] - 0.5d, vectorCache[2][1], vectorCache[2][2] - 0.5d,
+                                vectorCache[2][0] + 0.5d, vectorCache[2][1] + 2, vectorCache[2][2] +0.5d));
+
+                if (list.size() > 0) {
+                    for (Object entity : list) {
+                        if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.multipartHitbox) entity).parent.getEntityId())).isCoupling) {
+                            front = ((HitboxHandler.multipartHitbox) entity).parent.getPersistentID();
+                            System.out.println(getEntityId() + " : train front linked : ");
+                        }
+                    }
+                }
+            }
+
+
+            if (back == nullUUID && isCoupling) {
+                vectorCache[3] = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1] + 2, 0, 0}, 0, rotationYaw, 0);
+                vectorCache[3][0] +=posX;
+                vectorCache[3][1] +=posY;
+                vectorCache[3][2] +=posZ;
+                List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
+                        AxisAlignedBB.getBoundingBox(vectorCache[3][0] - 0.5d, vectorCache[3][1], vectorCache[3][2] - 0.5d,
+                                vectorCache[3][0] + 0.5d, vectorCache[3][1] + 2, vectorCache[3][2] +0.5d));
+
+                if (list.size() > 0) {
+                    for (Object entity : list) {
+                        if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.multipartHitbox) entity).parent.getEntityId())).isCoupling) {
+                            back = ((HitboxHandler.multipartHitbox) entity).parent.getPersistentID();
+                            System.out.println(getEntityId() + " : train back linked : ");
+                        }
+                    }
+                }
+            }
         }
     }
 
 
+    /**
+     * <h2>menu toggles</h2>
+     * called from a packet to change the settings.
+     * @see trains.networking.PacketKeyPress.Handler#onMessage(PacketKeyPress, MessageContext)
+     * @see GenericRailTransport#toggleBool(int) for more info.
+     */
     @Override
     public boolean toggleBool(int index){
         if (!super.toggleBool(index)){

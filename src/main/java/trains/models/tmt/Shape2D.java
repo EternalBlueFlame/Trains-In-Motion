@@ -3,6 +3,7 @@ package trains.models.tmt;
 import net.minecraft.util.MathHelper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Shape2D {
 	public Shape2D()
@@ -12,10 +13,7 @@ public class Shape2D {
 
 	public Shape2D(Coord2D[] coordArray) {
 		coords = new ArrayList<Coord2D>();
-		
-		for(int idx = 0; idx < coordArray.length; idx++) {
-			coords.add(coordArray[idx]);
-		}
+		Collections.addAll(coords, coordArray);
 	}
 	
 	public Shape2D(ArrayList<Coord2D> coordList)

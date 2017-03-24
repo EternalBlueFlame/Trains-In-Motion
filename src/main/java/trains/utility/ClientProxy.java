@@ -3,9 +3,9 @@ package trains.utility;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -13,26 +13,35 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import trains.TrainsInMotion;
 import trains.entities.EntityBogie;
-import trains.entities.EntityTrainCore;
+import trains.entities.EntitySeat;
 import trains.entities.GenericRailTransport;
+import trains.gui.GUITrainTable;
+import trains.gui.HUDTrain;
 import trains.gui.train.GUITrain;
 import trains.models.RenderEntity;
+import trains.models.RenderScaledPlayer;
+import trains.registry.GenericRegistry;
 import trains.registry.TrainRegistry;
+import trains.tileentities.TileEntityStorage;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <h1>client proxy</h1>
+ * defines some of the more important client-only functionality that runs on the main thread of the mod.
+ * @author Eternal Blue Flame
+ */
 public class ClientProxy extends CommonProxy {
-    private static WorldClient clientWorld= null; //define this ahead of time so we dont have to instance the variable every client tick.
     public static List<GenericRailTransport> carts = new ArrayList<GenericRailTransport>();
 
     /**
      * <h3>keybinds</h3>
      * Initialize the default values for keybinds.
-     * Courtesy of Ferdinand
+     * Default values courtesy of Ferdinand
      */
     public static boolean EnableLights = true;
     public static boolean EnableSmokeAndSteam = true;
@@ -56,25 +65,24 @@ public class ClientProxy extends CommonProxy {
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         //Trains
-        if (player != null && player.ridingEntity instanceof EntityTrainCore) {
-            switch (ID) {
-                case TrainsInMotion.STEAM_GUI_ID: {
-                    return new GUITrain(player.inventory, (EntityTrainCore) player.ridingEntity);
-                }
-
-                default: {return null;}
+        if (player != null) {
+            if (player.worldObj.getEntityByID(ID) instanceof GenericRailTransport) {
+                return new GUITrain(player.inventory, (GenericRailTransport) player.worldObj.getEntityByID(ID));
+                //tile entities
+            } else if (player.worldObj.getTileEntity(x,y,z) instanceof TileEntityStorage) {
+                return new GUITrainTable(player.inventory, player.worldObj, x, y, z);
             }
-        } else {
-            //Rollingstock
-            return null;
         }
+        return null;
     }
+
     /**
      * <h2>Load config</h2>
-     * this loads the config values that will only effect server.
+     * this loads the config values that will only effect client.
      */
     @Override
     public void loadConfig(Configuration config){
+        super.loadConfig(config);
         config.addCustomCategoryComment("Quality (Client only)", "Lamps take up a lot of extra processing on client side due to forced chunk reloading");
         EnableLights = config.get(Configuration.CATEGORY_GENERAL, "EnableLamp", true).getBoolean(true);
         config.addCustomCategoryComment("Quality (Client only)", "Smoke and steam effects are more lightweight than those of normal minecraft. These shouldn't cause much lag if any, but its client only so if you wanna disable it you can.");
@@ -92,35 +100,54 @@ public class ClientProxy extends CommonProxy {
 
     /**
      * <h2>Client Register</h2>
-     * A redirect loop for registering he items in the train registry with their own textures and models, and for registering keybindings.
+     * Used for registering client only functions and redirecting registering the items in the train registry with their own textures and models.
      */
     @Override
     public void register() {
-        for(TrainRegistry reg : TrainRegistry.listTrains()){
+        //trains and rollingstock
+        int index=0;
+        while (TrainRegistry.listTrains(index)!=null) {
+            TrainRegistry reg = TrainRegistry.listTrains(index);
             RenderingRegistry.registerEntityRenderingHandler(reg.trainClass, new RenderEntity(
-                    reg.model, reg.texture,
-                    reg.bogieModel, reg.bogieTexture));
+                    reg.model, reg.texture, reg.bogieModels));
+            index++;
         }
-        RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.multipartHitbox.class, new Render() {
-            @Override
-            public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {}
-            @Override
-            protected ResourceLocation getEntityTexture(Entity p_110775_1_) {return null;}
-        });
-
-        RenderingRegistry.registerEntityRenderingHandler(EntityBogie.class, new Render() {
-            @Override
-            public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {}
-            @Override
-            protected ResourceLocation getEntityTexture(Entity p_110775_1_) {return null;}
-        });
-
+        //hitboxes
+        RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.multipartHitbox.class, nullRender);
+        //bogies
+        RenderingRegistry.registerEntityRenderingHandler(EntityBogie.class, nullRender);
+        //seats
+        RenderingRegistry.registerEntityRenderingHandler(EntitySeat.class, nullRender);
+        //player scaler
+        RenderingRegistry.registerEntityRenderingHandler(EntityPlayer.class, new RenderScaledPlayer());
+        //keybinds
         ClientRegistry.registerKeyBinding(KeyLamp);
         ClientRegistry.registerKeyBinding(KeyInventory);
         ClientRegistry.registerKeyBinding(KeyAccelerate);
         ClientRegistry.registerKeyBinding(KeyReverse);
 
+        //register client blocks, like lamps
+        GenericRegistry.RegisterClientStuff();
+        //register the transport HUD.
+        HUDTrain hud = new HUDTrain();
+        FMLCommonHandler.instance().bus().register(hud);
+        MinecraftForge.EVENT_BUS.register(hud);
+
     }
+
+    /**
+     * <h3>null render</h3>
+     * this is just a simple render that never draws anything, since its static it only ever needs to exist once, which makes it lighter on the render.
+     */
+    private static final Render nullRender = new Render() {
+        @Override
+        public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_) {}
+
+        @Override
+        protected ResourceLocation getEntityTexture(Entity p_110775_1_) {
+            return null;
+        }
+    };
 
     /**
      * <h2> Forced Dynamic Lighting </h2>
@@ -136,11 +163,10 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void onTick(TickEvent.ClientTickEvent tick) {
         if (EnableLights && tick.phase == TickEvent.Phase.END && carts.size() > 0) {
-            clientWorld = Minecraft.getMinecraft().theWorld;
-            if (clientWorld != null) {
+            if (Minecraft.getMinecraft().theWorld != null) {
                 for (GenericRailTransport cart : carts) {
                     if (cart != null) {
-                        clientWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
+                        Minecraft.getMinecraft().theWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
                     }
                 }
             }
