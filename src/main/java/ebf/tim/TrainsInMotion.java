@@ -55,7 +55,7 @@ public class TrainsInMotion {
      *@see CommonProxy
      *@see ClientProxy
      */
-    @SidedProxy(clientSide = "ClientProxy", serverSide = "CommonProxy")
+    @SidedProxy(clientSide = "ebf.tim.utility.ClientProxy", serverSide = "ebf.tim.utility.CommonProxy")
     public static CommonProxy proxy;
 
 

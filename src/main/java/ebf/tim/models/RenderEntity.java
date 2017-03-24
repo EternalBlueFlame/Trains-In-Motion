@@ -343,7 +343,7 @@ public class RenderEntity extends Render {
                     randomZ = (rand.nextInt(100) - 50) * 0.0001f;
                     if (smoke[1] != 0) {
                         renderSmoke.setVelocity(randomX, smoke[1] * 0.0075, randomZ);
-                    } else if (entity instanceof EntityTrainCore) {
+                    } else if (entity instanceof EntityTrainCore && entity.bogie.size()>0) {
                         renderSmoke.setVelocity((entity.bogie.get(0).motionX * ((EntityTrainCore) entity).accelerator) + randomX, smoke[1], (entity.bogie.get(0).motionZ * ((EntityTrainCore) entity).accelerator) + randomZ);
                     }
                     //set the texture
