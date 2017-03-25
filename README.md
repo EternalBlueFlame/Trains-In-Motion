@@ -21,8 +21,8 @@ Date: December, 2016
 <td>
 <h2> Current Status:</h2>
 <ul>
-<li> Builds - <b id="Build">stable</b></li>
-<li> Revision - <b id="Revision"><a href="https://github.com/EternalBlueFlame/Trains-In-Motion/blob/master/Trains%20in%20Motion%20Alpha%202.0.jar"">Alpha 2, Grab it here</a></b></li>
+<li> Builds - <b id="Build">stable-ish</b></li>
+<li> Revision - <b id="Revision"><a href="https://github.com/EternalBlueFlame/Trains-In-Motion/releases/tag/v0.2.0.1-Alpha"">Alpha 2.0.1, Grab it here</a></b></li>
 </ul>
 </td>
 </tr>
