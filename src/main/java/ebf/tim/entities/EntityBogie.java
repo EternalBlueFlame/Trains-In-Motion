@@ -194,8 +194,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             if (RailUtility.isRailBlockAt(worldObj, l, i - 1, i1)) {
                 --i;
             }
-            Block block = worldObj.getBlock(l, i, i1);
-            if (canUseRail() && RailUtility.isRailBlockAt(block)) {
+            if (canUseRail() && RailUtility.isRailBlockAt(worldObj, l, i, i1)) {
+                Block block = worldObj.getBlock(l, i, i1);
                 double maxSpeed = Math.min(((BlockRailBase)block).getRailMaxSpeed(worldObj, this, l, i, i1), getCurrentCartSpeedCapOnRail());
                 func_145821_a(l, i, i1, maxSpeed, getSlopeAdjustment(), block, ((BlockRailBase)block).getBasicRailMetadata(worldObj, this, l, i, i1));
 

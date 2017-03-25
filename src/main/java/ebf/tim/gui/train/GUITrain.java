@@ -91,7 +91,7 @@ public class GUITrain extends GuiContainer {
         } else if (transport != null){
             switch (transport.getType()){
                 case PASSENGER:{renderPassengerInventory(guiTop,guiLeft,this.zLevel, this.mc); break;}
-                case LOGCAR: case FREIGHT:{renderFreightInventory(guiTop,guiLeft, this.zLevel, this.mc); break;}
+                case LOGCAR: case FREIGHT: case HOPPER: case COALHOPPER: case GRAINHOPPER: {renderFreightInventory(guiTop,guiLeft, this.zLevel, this.mc); break;}
             }
         }
 

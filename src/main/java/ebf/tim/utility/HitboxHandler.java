@@ -117,8 +117,7 @@ public class HitboxHandler {
                 for (int k1 = i; k1 <= l; ++k1) {
                     for (int l1 = j; l1 <= i1; ++l1) {
                         for (int i2 = k; i2 <= j1; ++i2) {
-                            Block block = transport.worldObj.getBlock(k1, l1, i2);
-                            if (!(block instanceof BlockAir) && !RailUtility.isRailBlockAt(block)){
+                            if (!(transport.worldObj.getBlock(k1, l1, i2) instanceof BlockAir) && !RailUtility.isRailBlockAt(transport.worldObj, k1, l1, i2)){
                                 return true;
                             }
                         }

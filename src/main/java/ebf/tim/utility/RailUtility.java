@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import zoranodensha.api.structures.tracks.ITrackBase;
 
 /**
  * <h1>utilities</h1>
@@ -33,10 +34,7 @@ public class RailUtility {
      * we override some vanilla track detection so that way it's more efficient and can support rails from other mods.
      */
     public static boolean isRailBlockAt(World world, int x, int y, int z) { // Can later be substituted for BlockPos
-        return (/*world.getTileEntity(x, y, z) instanceof ITrackBase ||*/ world.getBlock(x, y, z) instanceof BlockRailBase);
-    }
-    public static boolean isRailBlockAt(Block block) { // Can later be substituted for BlockPos
-        return (/*world.getTileEntity(x, y, z) instanceof ITrackBase ||*/ block instanceof BlockRailBase);
+        return (world.getTileEntity(x, y, z) instanceof ITrackBase || world.getBlock(x, y, z) instanceof BlockRailBase);
     }
 
 

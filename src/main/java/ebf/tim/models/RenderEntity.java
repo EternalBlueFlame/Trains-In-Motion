@@ -239,7 +239,7 @@ public class RenderEntity extends Render {
         bindTexture(texture);
         for(Object cube : model.boxList){
             if (cube instanceof ModelRenderer &&
-                    !(((ModelRendererTurbo) cube).boxName).contains("blocklog") && !(((ModelRendererTurbo) cube).boxName).contains("crate")) {
+                    !(((ModelRendererTurbo) cube).boxName).contains("block") && !(((ModelRendererTurbo) cube).boxName).contains("crate")) {
                 ((ModelRenderer)cube).render(0.065f);
             }
         }
