@@ -10,12 +10,10 @@ import net.minecraft.util.ResourceLocation;
  * @author Eternal Blue Flame
  */
 public class Bogie {
-    public double[] pos = new double[]{0,0,0};
 
-    public double[] prevPos = new double[]{0,0,0};
+    public double[] prevPos = null;
 
     public float rotationYaw;
-    public float rotationPitch;
 
     public ResourceLocation bogieTexture;
     public ModelBase bogieModel;
@@ -33,27 +31,16 @@ public class Bogie {
      */
     public void setPositionAndRotation(double[] position, GenericRailTransport entity){
         //update positions
-        pos = position;
-        if(prevPos == new double[]{0,0,0}){
-            prevPos = pos;
-            rotationPitch = entity.rotationPitch;
+        if(prevPos == null){
+            prevPos = position;
             rotationYaw = entity.rotationYaw;
         } else {
             //update rotations
-            if (Math.abs(prevPos[0] - pos[0]) > 0.1) {
+            if (Math.abs(prevPos[0] - position[0]) > 0.01 || Math.abs(prevPos[1] - position[1]) > 0.01 || Math.abs(prevPos[2] - position[2]) > 0.01) {
                 rotationYaw = (float) Math.toDegrees(Math.atan2(
-                        prevPos[2] - pos[2],
-                        prevPos[0] - pos[0]));
-            } else if (Math.abs(prevPos[1] - pos[1]) > 0.1) {
-                rotationYaw = (float) Math.toDegrees(Math.atan2(
-                        prevPos[2] - pos[2],
-                        prevPos[0] - pos[0]));
-            } else if (Math.abs(prevPos[2] - pos[2]) > 0.1) {
-                rotationYaw = (float) Math.toDegrees(Math.atan2(
-                        prevPos[2] - pos[2],
-                        prevPos[0] - pos[0]));
+                        prevPos[2] - position[2],
+                        prevPos[0] - position[0]));
             }
-            rotationPitch = entity.rotationPitch;
         }
     }
 }

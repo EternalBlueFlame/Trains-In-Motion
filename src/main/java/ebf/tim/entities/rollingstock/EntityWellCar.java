@@ -40,7 +40,7 @@ public class EntityWellCar extends EntityRollingStockCore {
      * <h2>Bogie Offset</h2>
      */
     @Override
-    public List<Double> getBogieOffsets(){return  Arrays.asList(-3.25, 3.25);}
+    public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-3.25, 3.25);}
     /**
      * <h2>Inventory Size</h2>
      */

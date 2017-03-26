@@ -13,6 +13,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
@@ -328,7 +329,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         int bogieSize = bogie.size() - 1;
         //always be sure the bogies exist on client and server.
         if (!worldObj.isRemote && bogieSize < 1) {
-            for (double pos : getBogieOffsets()) {
+            for (double pos : getRenderBogieOffsets()) {
                 vectorCache[1][0] = pos;
                 vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
                 EntityBogie spawnBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId());
@@ -346,12 +347,14 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
 
         /**
+         * TODO: move debug is run before the actual use code.
          *check if the bogies exist, because they may not yet, and if they do, check if they are actually moving or colliding.
          * no point in processing movement if they aren't moving or if the train hit something.
          * if it is clear however, then we need to add velocity to the bogies based on the current state of the train's speed and fuel, and reposition the train.
          * but either way we have to position the bogies around the train, just to be sure they don't accidentally fly off at some point.
          *
          */
+        move();
         if (bogieSize>0){
 
             boolean collision = hitboxHandler.getCollision(this);
@@ -385,7 +388,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (transportTicks %2 ==0) {
                 //align bogies
                 for (int i = 0; i < bogie.size(); i++) {
-                    vectorCache[1][0]=getBogieOffsets().get(i);
+                    vectorCache[1][0]= getRenderBogieOffsets().get(i);
                     vectorCache[0] = rotatePoint(vectorCache[1], rotationPitch, rotationYaw, 0.0f);
                     bogie.get(i).setPosition(vectorCache[0][0] + posX, bogie.get(i).posY, vectorCache[0][2] + posZ);
                 }
@@ -541,6 +544,43 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
 
     /**
+     * <h2>New pathfinding</h2>
+     * the goal of this function is to serve as a new method for linear pathfinding based on direction, without a need for actual bogies.
+     * we check the point infront of us, and each subsiquent point till we reach the length in blocks per second.
+     * if all those blocks check out then we get the position of the last block in the path, and move the entity from the current point to the last from the checked areas.
+     *
+     */
+    private void move(){
+        double[] point = RailUtility.rotatePoint(new double[]{getLengthFromCenter(),0,0}, rotationPitch, rotationYaw, 0);
+        point[0] += posX;
+        point[1] += posY;
+        point[2] += posZ;
+        TileEntity tileEntity = worldObj.getTileEntity(MathHelper.floor_double(point[0]), MathHelper.floor_double(point[1]), MathHelper.floor_double(point[2]));
+        if (tileEntity != null) {
+            System.out.println("straight was correct" + tileEntity.getClass().toString());
+        } else {
+            point = RailUtility.rotatePoint(new double[]{getLengthFromCenter(),0,1}, rotationPitch, rotationYaw, 0);
+            point[0] += posX;
+            point[1] += posY;
+            point[2] += posZ;
+            tileEntity = worldObj.getTileEntity(MathHelper.floor_double(point[0]), MathHelper.floor_double(point[1]), MathHelper.floor_double(point[2]));
+            if (tileEntity != null) {
+                System.out.println("right was correct" + tileEntity.getClass().toString());
+            } else {
+                point = RailUtility.rotatePoint(new double[]{getLengthFromCenter(),0,-1}, rotationPitch, rotationYaw, 0);
+                point[0] += posX;
+                point[1] += posY;
+                point[2] += posZ;
+                tileEntity = worldObj.getTileEntity(MathHelper.floor_double(point[0]), MathHelper.floor_double(point[1]), MathHelper.floor_double(point[2]));
+                if (tileEntity != null) {
+                    System.out.println("left was correct" + tileEntity.getClass().toString());
+                }
+            }
+        }
+    }
+
+
+    /**
      * <h2>Boolean switches</h2>
      * Toggles the defined booleans, this is mostly just used for user input like key press and GUI buttons.
      * Potentially unnecessary, but theoretically more reliable than direct modification of the variables from outside the class.
@@ -607,7 +647,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
      * @see EntityBrigadelok080 for more information
      */
-    public List<Double> getBogieOffsets(){return new ArrayList<Double>();}
+    public List<Double> getRenderBogieOffsets(){return new ArrayList<Double>();}
     public TrainsInMotion.transportTypes getType(){return null;}
     public double[][] getRiderOffsets(){return new double[][]{{0,0}};}
     public float[] getHitboxPositions(){return new float[]{-1,0,1};}
@@ -617,6 +657,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
     public float getPistonOffset(){return 0;}
     public float[][] getSmokeOffset(){return new float[][]{{0,0,0,255}};}
+    public double getLengthFromCenter(){return 1d;}
 
 
     /**

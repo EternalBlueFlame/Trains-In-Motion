@@ -42,7 +42,7 @@ public class EntityPullmansPalace extends EntityRollingStockCore {
      * <h2>Bogie Offset</h2>
      */
     @Override
-    public List<Double> getBogieOffsets(){return  Arrays.asList(-1.75, 1.75);}
+    public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-1.75, 1.75);}
     /**
      * <h2>Inventory Size</h2>
      */

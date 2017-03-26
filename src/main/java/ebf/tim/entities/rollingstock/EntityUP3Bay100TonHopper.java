@@ -43,7 +43,7 @@ public class EntityUP3Bay100TonHopper extends EntityRollingStockCore {
      * <h2>Bogie Offset</h2>
      */
     @Override
-    public List<Double> getBogieOffsets(){return  Arrays.asList(-1.1, 1.1);}
+    public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-1.1, 1.1);}
     /**
      * <h2>Inventory Size</h2>
      */

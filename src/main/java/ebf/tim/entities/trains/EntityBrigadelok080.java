@@ -94,7 +94,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      * TODO: in alpha 3 this should be client only, for the bogie render only, and have a second function to get the actual offset which only needs 1 double, because the values have to be perfectly opposite.
      */
     @Override
-    public List<Double> getBogieOffsets(){return  Arrays.asList(-0.75, 0.75);}
+    public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-0.75, 0.75);}
     /**
      * <h2>Inventory Size</h2>
      * @return the size of the inventory not counting any fuel or crafting slots, those are defined by the type.

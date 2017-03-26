@@ -62,7 +62,7 @@ public class RenderEntity extends Render {
     private List<advancedPiston> advancedPistons = new ArrayList<advancedPiston>();
     private List<wheel> wheels = new ArrayList<wheel>();
     private List<blockCargo> blockCargoRenders = new ArrayList<blockCargo>();
-    private double[][] animationCache = new double[5][3];
+    private double[][] animationCache = new double[6][3];
     private List<ModelRendererTurbo> liveriesSquare = new ArrayList<ModelRendererTurbo>();
 
     private float wheelPitch=0;
@@ -194,7 +194,7 @@ public class RenderEntity extends Render {
     public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw){
     	GL11.glPushMatrix();
         //set the render position
-        GL11.glTranslated(x, y+0.175, z);
+        GL11.glTranslated(x, y+1.175, z);
         //rotate the model.
         GL11.glRotatef((-yaw) - 90, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
@@ -283,6 +283,7 @@ public class RenderEntity extends Render {
             }
         }
 
+        GL11.glPopMatrix();
 
         /**
          * <h4> render bogies</h4>
@@ -290,14 +291,17 @@ public class RenderEntity extends Render {
          * this loops for every bogie defined in the registry for the transport, that way we can have different bogies.
          */
         if (bogieRenders != null && bogieRenders.length >0){
-            for (int i=0; i<entity.getBogieOffsets().size();i++){
+            for (int i = 0; i<entity.getRenderBogieOffsets().size(); i++){
                 if (bogieRenders.length>i && bogieRenders[i] != null) {
                     //bind the texture
                     bindTexture(bogieRenders[i].bogieTexture);
                     GL11.glPushMatrix();
                     //set the offset
-                    animationCache[4][0] = entity.getBogieOffsets().get(i);
-                    bogieRenders[i].setPositionAndRotation(RailUtility.rotatePoint(animationCache[4],entity.rotationPitch, entity.rotationYaw,0), entity);
+                    double[] rotated = RailUtility.rotatePoint(new double[]{entity.getRenderBogieOffsets().get(i),0,0}, entity.rotationPitch, entity.rotationYaw,0);
+                    GL11.glTranslated(rotated[0]+x,rotated[1]+y, rotated[2]+z);
+                    //set the rotation
+                    GL11.glRotatef(bogieRenders[i].rotationYaw -270f,0,1.0f,0);
+                    bogieRenders[i].setPositionAndRotation(animationCache[5], entity);
                     //render the geometry
                     for (Object modelBogiePart : bogieRenders[i].bogieModel.boxList) {
                         if (modelBogiePart instanceof ModelRendererTurbo) {
@@ -310,7 +314,6 @@ public class RenderEntity extends Render {
         }
 
 
-        GL11.glPopMatrix();
 
 
         /**
