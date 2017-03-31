@@ -19,7 +19,7 @@ import ebf.tim.models.bogies.CMDBogie;
 import ebf.tim.models.rollingstock.PullmansPalace;
 import ebf.tim.models.rollingstock.VATLogCar;
 import ebf.tim.models.rollingstock.Well_Car;
-import ebf.tim.utility.Bogie;
+import ebf.tim.models.Bogie;
 
 /**
  * <h1>Train registry</h1>

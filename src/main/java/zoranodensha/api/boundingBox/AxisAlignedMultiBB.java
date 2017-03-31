@@ -83,7 +83,6 @@
  */
 package zoranodensha.api.boundingBox;
 
-import static zoranodensha.api.asm.EMethods.F_boundingBox;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -310,7 +309,7 @@ public class AxisAlignedMultiBB extends AxisAlignedBB {
 
 		try {
 
-			if ((boundingBox = Entity.class.getDeclaredField(F_boundingBox.toString())) != null) {
+			if ((boundingBox = Entity.class.getDeclaredField(boundingBox.toString())) != null) {
 
 				boundingBox.setAccessible(true);
 				boundingBox.set(entity, aabb);

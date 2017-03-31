@@ -354,7 +354,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
          * but either way we have to position the bogies around the train, just to be sure they don't accidentally fly off at some point.
          *
          */
-        move();
         if (bogieSize>0){
 
             boolean collision = hitboxHandler.getCollision(this);
@@ -365,7 +364,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         if (brake) {
                             currentBogie.setVelocity(currentBogie.cartVelocityX * 0.8d, currentBogie.cartVelocityY, currentBogie.cartVelocityZ * 0.8d);
                         }
-                        currentBogie.minecartMove();
+                        currentBogie.minecartMove(rotationPitch, rotationYaw);
                     }
                 }
             }
@@ -537,43 +536,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                             System.out.println(getEntityId() + " : rollingstock back linked : ");
                         }
                     }
-                }
-            }
-        }
-    }
-
-
-    /**
-     * <h2>New pathfinding</h2>
-     * the goal of this function is to serve as a new method for linear pathfinding based on direction, without a need for actual bogies.
-     * we check the point infront of us, and each subsiquent point till we reach the length in blocks per second.
-     * if all those blocks check out then we get the position of the last block in the path, and move the entity from the current point to the last from the checked areas.
-     *
-     */
-    private void move(){
-        double[] point = RailUtility.rotatePoint(new double[]{getLengthFromCenter(),0,0}, rotationPitch, rotationYaw, 0);
-        point[0] += posX;
-        point[1] += posY;
-        point[2] += posZ;
-        TileEntity tileEntity = worldObj.getTileEntity(MathHelper.floor_double(point[0]), MathHelper.floor_double(point[1]), MathHelper.floor_double(point[2]));
-        if (tileEntity != null) {
-            System.out.println("straight was correct" + tileEntity.getClass().toString());
-        } else {
-            point = RailUtility.rotatePoint(new double[]{getLengthFromCenter(),0,1}, rotationPitch, rotationYaw, 0);
-            point[0] += posX;
-            point[1] += posY;
-            point[2] += posZ;
-            tileEntity = worldObj.getTileEntity(MathHelper.floor_double(point[0]), MathHelper.floor_double(point[1]), MathHelper.floor_double(point[2]));
-            if (tileEntity != null) {
-                System.out.println("right was correct" + tileEntity.getClass().toString());
-            } else {
-                point = RailUtility.rotatePoint(new double[]{getLengthFromCenter(),0,-1}, rotationPitch, rotationYaw, 0);
-                point[0] += posX;
-                point[1] += posY;
-                point[2] += posZ;
-                tileEntity = worldObj.getTileEntity(MathHelper.floor_double(point[0]), MathHelper.floor_double(point[1]), MathHelper.floor_double(point[2]));
-                if (tileEntity != null) {
-                    System.out.println("left was correct" + tileEntity.getClass().toString());
                 }
             }
         }

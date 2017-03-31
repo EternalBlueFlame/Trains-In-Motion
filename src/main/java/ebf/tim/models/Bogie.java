@@ -1,4 +1,4 @@
-package ebf.tim.utility;
+package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
 import net.minecraft.client.model.ModelBase;
