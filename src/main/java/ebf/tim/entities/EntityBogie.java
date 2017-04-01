@@ -41,21 +41,24 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * the velocities are to replace the client only velocities in forge that have private access.
      */
     private int parentId = 0;
-    protected double cartVelocityX =0;
-    protected double cartVelocityY =0;
-    protected double cartVelocityZ =0;
-    double positionX=0;
-    double positionY=0;
-    double positionZ=0;
-    double motionProgress=0;
+    //TODO: these velocity variables may not actually be necessary...
+    private double cartVelocityX =0;
+    private double cartVelocityY =0;
+    private double cartVelocityZ =0;
+    private double positionX=0;
+    private double positionY=0;
+    private double positionZ=0;
+    private double motionProgress=0;
+    private boolean isFront=true;
 
     public EntityBogie(World world) {
         super(world);
     }
 
-    public EntityBogie(World world, double xPos, double yPos, double zPos, int parent) {
+    public EntityBogie(World world, double xPos, double yPos, double zPos, int parent, boolean front) {
         super(world,xPos, yPos, zPos);
             parentId = parent;
+            isFront = front;
     }
 
     /**
@@ -64,20 +67,20 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      */
     @Override
     public void readSpawnData(ByteBuf additionalData) {
+        isFront = additionalData.readBoolean();
         parentId = additionalData.readInt();
         if (parentId != 0) {
             GenericRailTransport parent = ((GenericRailTransport) worldObj.getEntityByID(parentId));
             if (parent != null){
-                parent.addbogies(this);
-            } else {
-                worldObj.removeEntity(this);
+                parent.setBogie(this, isFront);
+                return;
             }
-        } else {
-            worldObj.removeEntity(this);
         }
+        worldObj.removeEntity(this);
     }
     @Override
     public void writeSpawnData(ByteBuf buffer) {
+        buffer.writeBoolean(isFront);
         buffer.writeInt(parentId);
     }
 
@@ -136,13 +139,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @see EntityMinecart#onUpdate()
      * Some features are replaced using our own for compatibility with ZoraNoDensha
      * @see RailUtility
-     *
-     * TODO: Portal stuff needs to be moved into its own function in util so we can use it in train/rollingstock classes too.
-     * TODO: all checks on rails and their features need to be moved to our utility class so we can interface them with ZoraNoDensha
-     * TODO: worldObj.getEntitiesWithinAABBExcludingEntity(this, box) needs to be reworked using our own functionality that does proper class casting.
-     * @see RailUtility#isRailBlockAt(World, int, int, int)
      */
-    public void minecartMove(float yaw, float pitch)   {
+    public void minecartMove(float yaw, float pitch, boolean brake)   {
         this.setRotation(yaw, pitch);
         if (this.getRollingAmplitude() > 0) {
             this.setRollingAmplitude(this.getRollingAmplitude() - 1);
@@ -223,7 +221,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             Block block = this.worldObj.getBlock(floorX, floorY_Portal, floorZ);
 
             if (canUseRail() && RailUtility.isRailBlockAt(worldObj, floorX, floorY_Portal, floorZ)) {
-                moveBogie(floorX, floorY_Portal, floorZ, getSlopeAdjustment(), block, ((BlockRailBase)block).getBasicRailMetadata(worldObj, this, floorX, floorY_Portal, floorZ));
+                moveBogie(floorX, floorY_Portal, floorZ, getSlopeAdjustment(), block, ((BlockRailBase)block).getBasicRailMetadata(worldObj, this, floorX, floorY_Portal, floorZ), brake);
 
                 if (block == Blocks.activator_rail) {
                     this.onActivatorRailPass(floorX, floorY_Portal, floorZ, (worldObj.getBlockMetadata(floorX, floorY_Portal, floorZ) & 8) != 0);
@@ -240,10 +238,19 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
     private static final int[][][] matrix = new int[][][] {{{0, 0, -1}, {0, 0, 1}}, {{ -1, 0, 0}, {1, 0, 0}}, {{ -1, -1, 0}, {1, 0, 0}}, {{ -1, 0, 0}, {1, -1, 0}}, {{0, 0, -1}, {0, -1, 1}}, {{0, -1, -1}, {0, 0, 1}}, {{0, 0, 1}, {1, 0, 0}}, {{0, 0, 1}, { -1, 0, 0}}, {{0, 0, -1}, { -1, 0, 0}}, {{0, 0, -1}, {1, 0, 0}}};
 
-    private void moveBogie(int floorX, int floorY, int floorZ, double slopeAdjustment, Block block, int railMetadata) {
+    private void moveBogie(int floorX, int floorY, int floorZ, double slopeAdjustment, Block block, int railMetadata, boolean brake) {
         this.fallDistance = 0.0F;
         Vec3 vec3 = this.func_70489_a(this.posX, this.posY, this.posZ);
         this.posY = floorY;
+
+        if (brake){
+            this.motionX *= 0.75;
+            this.motionY *= 0.75;
+            this.motionZ *= 0.75;
+            this.cartVelocityX *= 0.75;
+            this.cartVelocityY *= 0.75;
+            this.cartVelocityZ *= 0.75;
+        }
 
         switch (railMetadata){
             case 2:{this.motionX -= slopeAdjustment; this.posY = (double)(floorY + 1); break;}
@@ -253,69 +260,50 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         }
 
         int[][] aint = matrix[railMetadata];
-        double d2 = (double)(aint[1][0] - aint[0][0]);
-        double d3 = (double)(aint[1][2] - aint[0][2]);
-        double d4 = Math.sqrt(d2 * d2 + d3 * d3);
-        double d5 = this.motionX * d2 + this.motionZ * d3;
-
-        if (d5 < 0.0D) {
-            d2 = -d2;
-            d3 = -d3;
+        double railPathX = (aint[1][0] - aint[0][0]);
+        double railPathZ = (aint[1][2] - aint[0][2]);
+        double railPathSqrt = Math.sqrt(railPathX * railPathX + railPathZ * railPathZ);
+        double motionSqrt = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+        
+        if (this.motionX * railPathX + this.motionZ * railPathZ < 0.0D) {
+            railPathX = -railPathX;
+            railPathZ = -railPathZ;
         }
-
-        double d6 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-
-        if (d6 > 2.0D) {
-            d6 = 2.0D;
+        if (motionSqrt > 2.0D) {
+            motionSqrt = 2.0D;
         }
-
-        this.motionX = d6 * d2 / d4;
-        this.motionZ = d6 * d3 / d4;
+        this.motionX = motionSqrt * railPathX / railPathSqrt;
+        this.motionZ = motionSqrt * railPathZ / railPathSqrt;
         double d7;
         double d8;
         double d9;
         double d10;
 
-        if (this.riddenByEntity != null && this.riddenByEntity instanceof EntityLivingBase) {
-            d7 = (double)((EntityLivingBase)this.riddenByEntity).moveForward;
-
-            if (d7 > 0.0D) {
-                d8 = -Math.sin((double)(this.riddenByEntity.rotationYaw * RailUtility.radianF));
-                d9 = Math.cos((double)(this.riddenByEntity.rotationYaw * RailUtility.radianF));
-                d10 = this.motionX * this.motionX + this.motionZ * this.motionZ;
-
-                if (d10 < 0.01D) {
-                    this.motionX += d8 * 0.1D;
-                    this.motionZ += d9 * 0.1D;
-                }
-            }
-        }
-
         d8 = (double)floorX + 0.5D + (double)aint[0][0] * 0.5D;
         d9 = (double)floorZ + 0.5D + (double)aint[0][2] * 0.5D;
         d10 = (double)floorX + 0.5D + (double)aint[1][0] * 0.5D;
         double d11 = (double)floorZ + 0.5D + (double)aint[1][2] * 0.5D;
-        d2 = d10 - d8;
-        d3 = d11 - d9;
+        railPathX = d10 - d8;
+        railPathZ = d11 - d9;
         double d12;
         double d13;
 
-        if (d2 == 0.0D) {
+        if (railPathX == 0.0D) {
             this.posX = (double)floorX + 0.5D;
             d7 = this.posZ - (double)floorZ;
         }
-        else if (d3 == 0.0D) {
+        else if (railPathZ == 0.0D) {
             this.posZ = (double)floorZ + 0.5D;
             d7 = this.posX - (double)floorX;
         }
         else {
             d12 = this.posX - d8;
             d13 = this.posZ - d9;
-            d7 = (d12 * d2 + d13 * d3) * 2.0D;
+            d7 = (d12 * railPathX + d13 * railPathZ) * 2.0D;
         }
 
-        this.posX = d8 + d2 * d7;
-        this.posZ = d9 + d3 * d7;
+        this.posX = d8 + railPathX * d7;
+        this.posZ = d9 + railPathZ * d7;
         this.setPosition(this.posX, this.posY + (double)this.yOffset, this.posZ);
 
         this.moveEntity(this.motionX, 0.0D, this.motionZ);
@@ -331,11 +319,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
         if (vec31 != null && vec3 != null) {
             double d14 = (vec3.yCoord - vec31.yCoord) * 0.05D;
-            d6 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
 
-            if (d6 > 0.0D) {
-                this.motionX = this.motionX / d6 * (d6 + d14);
-                this.motionZ = this.motionZ / d6 * (d6 + d14);
+            if (motionSqrt > 0.0D) {
+                this.motionX = this.motionX / motionSqrt * (motionSqrt + d14);
+                this.motionZ = this.motionZ / motionSqrt * (motionSqrt + d14);
             }
 
             this.setPosition(this.posX, vec31.yCoord, this.posZ);
@@ -345,9 +332,9 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         int i1 = MathHelper.floor_double(this.posZ);
 
         if (j1 != floorX || i1 != floorZ) {
-            d6 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-            this.motionX = d6 * (double)(j1 - floorX);
-            this.motionZ = d6 * (double)(i1 - floorZ);
+            motionSqrt = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+            this.motionX = motionSqrt * (double)(j1 - floorX);
+            this.motionZ = motionSqrt * (double)(i1 - floorZ);
         }
 
         if(shouldDoRailFunctions()) {
@@ -411,7 +398,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
     @Override
     public void addVelocity(double velocityX, double velocityY, double velocityZ){
-        //handle movement for trains, this will likely need to be different for rollingstock.
             setVelocity(motionX + velocityX, motionY + velocityY, motionZ + velocityZ);
             isAirBorne = true;
     }

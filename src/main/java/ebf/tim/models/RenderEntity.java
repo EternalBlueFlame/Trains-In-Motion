@@ -203,9 +203,9 @@ public class RenderEntity extends Render {
          * Be sure animations are enabled in user settings, then check of there is something to animate.
          * if there is, then calculate the vectors and apply the animations
          */
-        if (ClientProxy.EnableAnimations && entity.bogie.size()>0) {
+        if (ClientProxy.EnableAnimations && entity.frontBogie!=null&&entity.backBogie!=null) {
             //define the rotation angle
-            wheelPitch += (entity.bogie.get(0).motionX + entity.bogie.get(0).motionZ);
+            wheelPitch += (entity.backBogie.motionX + entity.backBogie.motionZ);
             if (wheelPitch > 360 || wheelPitch <-360) {
                 wheelPitch = 0;
             }
@@ -345,8 +345,8 @@ public class RenderEntity extends Render {
                     randomZ = (rand.nextInt(100) - 50) * 0.0001f;
                     if (smoke[1] != 0) {
                         renderSmoke.setVelocity(randomX, smoke[1] * 0.0075, randomZ);
-                    } else if (entity instanceof EntityTrainCore && entity.bogie.size()>0) {
-                        renderSmoke.setVelocity((entity.bogie.get(0).motionX * ((EntityTrainCore) entity).accelerator) + randomX, smoke[1], (entity.bogie.get(0).motionZ * ((EntityTrainCore) entity).accelerator) + randomZ);
+                    } else if (entity instanceof EntityTrainCore && entity.backBogie!=null) {
+                        renderSmoke.setVelocity((entity.backBogie.motionX * ((EntityTrainCore) entity).accelerator) + randomX, smoke[1], (entity.backBogie.motionZ * ((EntityTrainCore) entity).accelerator) + randomZ);
                     }
                     //set the texture
                     renderSmoke.setParticleTextureIndex(0);

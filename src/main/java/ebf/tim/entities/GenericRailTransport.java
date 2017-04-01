@@ -65,7 +65,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public LampHandler lamp = new LampHandler();
     public int[][] colors = new int[][]{{0,0,0},{0,0,0},{0,0,0}};
     private UUID owner = null;
-    public List<EntityBogie> bogie = new ArrayList<EntityBogie>();
+    public EntityBogie frontBogie = null;
+    public EntityBogie backBogie = null;
     public List<EntitySeat> seats = new ArrayList<EntitySeat>();
     public boolean isCreative = false;
     public boolean isCoupling = false;
@@ -141,16 +142,13 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public boolean canBeCollidedWith() {return false;}
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
-        int bogieSize = bogie.size()-1;
-        if (bogieSize>0){
-            if ((bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) != 0) {
-                setPosition(
-                        (bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D,
-                        ((bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D),
-                        (bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D);
-                } else {
-                this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
-            }
+        if (frontBogie!=null && backBogie!= null){
+            setPosition(
+                    (frontBogie.posX + backBogie.posX) * 0.5D,
+                    ((frontBogie.posY + backBogie.posY) * 0.5D),
+                    (frontBogie.posZ + backBogie.posZ) * 0.5D);
+        }else {
+            this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
         }
         this.setRotation(p_70056_7_, p_70056_8_);
     }
@@ -160,10 +158,15 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * <h3>add bogies</h3>
      * this is called by the bogies and seats on their spawn to add them to this entity's list of bogies and seats, we only do it on client because that's the only side that seems to lose track.
      * @see EntityBogie#readSpawnData(ByteBuf)
-     * TODO remove addbogies in alpha 3.
      */
     @SideOnly(Side.CLIENT)
-    public void addbogies(EntityBogie cart){bogie.add(cart);}
+    public void setBogie(EntityBogie cart, boolean isFront){
+        if(isFront){
+            frontBogie = cart;
+        } else {
+            backBogie = cart;
+        }
+    }
     @SideOnly(Side.CLIENT)
     public void addseats(EntitySeat cart){seats.add(cart);}
 
@@ -288,13 +291,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public void addVelocity(double velocityX, double velocityY, double velocityZ){
         //handle movement for trains, this will likely need to be different for rollingstock.
-            for (EntityBogie currentBogie : bogie) {
-                //motion = rotatePoint(new double[]{this.processMovement(currentBogie.motionX, currentBogie.motionZ), (float) motionY, 0.0f}, 0.0f, rotationYaw, 0.0f);
-                currentBogie.cartVelocityX = currentBogie.motionX += velocityX;
-                currentBogie.cartVelocityY = currentBogie.motionY += velocityY;
-                currentBogie.cartVelocityZ = currentBogie.motionZ += velocityZ;
-                currentBogie.isAirBorne = true;
-            }
+        if (frontBogie != null && backBogie !=null){
+            frontBogie.addVelocity(velocityX,velocityY,velocityZ);
+            backBogie.addVelocity(velocityX,velocityY,velocityZ);
+        }
     }
 
 
@@ -321,21 +321,27 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             worldObj.removeEntity(this);
         }
 
-        bogie.remove(null);
         seats.remove(null);
         hitboxList.remove(null);
 
         //be sure bogies exist
-        int bogieSize = bogie.size() - 1;
+
         //always be sure the bogies exist on client and server.
-        if (!worldObj.isRemote && bogieSize < 1) {
-            for (double pos : getRenderBogieOffsets()) {
-                vectorCache[1][0] = pos;
-                vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
-                EntityBogie spawnBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId());
-                worldObj.spawnEntityInWorld(spawnBogie);
-                bogie.add(spawnBogie);
-            }
+        if (!worldObj.isRemote && (frontBogie == null || backBogie == null)) {
+            //spawn front bogie
+            vectorCache[1][0] = getLengthFromCenter();
+            vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
+            EntityBogie spawnBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId(), true);
+            worldObj.spawnEntityInWorld(spawnBogie);
+            frontBogie = spawnBogie;
+            //spawn back bogie
+            vectorCache[1][0] = -getLengthFromCenter();
+            vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
+            EntityBogie spawnBackBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId(), false);
+            worldObj.spawnEntityInWorld(spawnBogie);
+            frontBogie = spawnBogie;
+
+
             if (getRiderOffsets() != null) {
                 for (int i = 0; i < getRiderOffsets().length - 1; i++) {
                     EntitySeat seat = new EntitySeat(worldObj, posX, posY, posZ, getEntityId(), i);
@@ -343,54 +349,44 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     seats.add(seat);
                 }
             }
-            bogieSize = bogie.size()-1;
         }
 
         /**
-         * TODO: move debug is run before the actual use code.
          *check if the bogies exist, because they may not yet, and if they do, check if they are actually moving or colliding.
          * no point in processing movement if they aren't moving or if the train hit something.
          * if it is clear however, then we need to add velocity to the bogies based on the current state of the train's speed and fuel, and reposition the train.
          * but either way we have to position the bogies around the train, just to be sure they don't accidentally fly off at some point.
          *
          */
-        if (bogieSize>0){
-
+        if (frontBogie!=null && backBogie != null){
             boolean collision = hitboxHandler.getCollision(this);
             //handle movement.
             if (!collision) {
-            for (EntityBogie currentBogie : bogie) {
-                    if (currentBogie != null) {
-                        if (brake) {
-                            currentBogie.setVelocity(currentBogie.cartVelocityX * 0.8d, currentBogie.cartVelocityY, currentBogie.cartVelocityZ * 0.8d);
-                        }
-                        currentBogie.minecartMove(rotationPitch, rotationYaw);
-                    }
-                }
+                frontBogie.minecartMove(rotationPitch, rotationYaw, brake);
+                backBogie.minecartMove(rotationPitch, rotationYaw, brake);
             }
 
             //position this
-            if ((bogie.get(bogieSize).boundingBox.minY + bogie.get(0).boundingBox.minY) != 0) {
-                setPosition(
-                        ((bogie.get(bogieSize).posX + bogie.get(0).posX) * 0.5D),
-                        ((bogie.get(bogieSize).posY + bogie.get(0).posY) * 0.5D),
-                        ((bogie.get(bogieSize).posZ + bogie.get(0).posZ) * 0.5D));
-            }
+            setPosition(
+                    ((frontBogie.posX + backBogie.posX) * 0.5D),
+                    ((frontBogie.posY + backBogie.posY) * 0.5D),
+                    ((frontBogie.posZ + backBogie.posZ) * 0.5D));
 
 
             setRotation((float)Math.toDegrees(Math.atan2(
-                    bogie.get(bogieSize).posZ - bogie.get(0).posZ,
-                    bogie.get(bogieSize).posX - bogie.get(0).posX)),
-                    MathHelper.floor_double(Math.acos(bogie.get(0).posY / bogie.get(bogieSize).posY)));
+                    frontBogie.posZ - backBogie.posZ,
+                    frontBogie.posX - backBogie.posX)),
+                    MathHelper.floor_double(Math.acos(frontBogie.posY / backBogie.posY)));
 
 
             if (transportTicks %2 ==0) {
                 //align bogies
-                for (int i = 0; i < bogie.size(); i++) {
-                    vectorCache[1][0]= getRenderBogieOffsets().get(i);
-                    vectorCache[0] = rotatePoint(vectorCache[1], rotationPitch, rotationYaw, 0.0f);
-                    bogie.get(i).setPosition(vectorCache[0][0] + posX, bogie.get(i).posY, vectorCache[0][2] + posZ);
-                }
+                vectorCache[1][0]= getLengthFromCenter();
+                vectorCache[0] = rotatePoint(vectorCache[1], rotationPitch, rotationYaw, 0.0f);
+                frontBogie.setPosition(vectorCache[0][0] + posX, frontBogie.posY, vectorCache[0][2] + posZ);
+                vectorCache[1][0]= -getLengthFromCenter();
+                vectorCache[0] = rotatePoint(vectorCache[1], rotationPitch, rotationYaw, 0.0f);
+                backBogie.setPosition(vectorCache[0][0] + posX, backBogie.posY, vectorCache[0][2] + posZ);
             }
             manageLinks();
         }
@@ -418,7 +414,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         /**
          * be sure the client proxy has a reference to this so the lamps can be updated, and then every other tick, attempt to update the lamp position if it's necessary.
          */
-        if (bogie.size() > 1 && posX+posY+posZ != 0.0D && !isDead) {
+        if (backBogie!=null && posX+posY+posZ != 0.0D && !isDead) {
             if (worldObj.isRemote && ClientProxy.EnableLights && !ClientProxy.carts.contains(this)) {
                 ClientProxy.carts.add(this);
             }

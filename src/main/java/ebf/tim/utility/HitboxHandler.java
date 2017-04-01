@@ -118,7 +118,7 @@ public class HitboxHandler {
                     for (int l1 = j; l1 <= i1; ++l1) {
                         for (int i2 = k; i2 <= j1; ++i2) {
                             if (!(transport.worldObj.getBlock(k1, l1, i2) instanceof BlockAir) && !RailUtility.isRailBlockAt(transport.worldObj, k1, l1, i2)){
-                                return true;
+                                return !(transport.worldObj.getBlock(k1, l1+1, i2) instanceof BlockAir) && !RailUtility.isRailBlockAt(transport.worldObj, k1, l1+1, i2);
                             }
                         }
                     }
@@ -139,9 +139,9 @@ public class HitboxHandler {
                         if (entity instanceof Entity) {
                             //if this is a rollingstock and it's a collision with a living entity like a player or a mob, decide if this should be pushed or if the entity should get run over.
                             if (transport instanceof EntityRollingStockCore && (entity instanceof EntityLiving || entity instanceof EntityPlayer)) {
-                                if (transport.bogie.get(0).motionX > 0.5 || transport.bogie.get(0).motionX < -0.5 || transport.bogie.get(0).motionZ > 0.5 || transport.bogie.get(0).motionZ < -0.5) {
+                                if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
                                     //in the case of roadkill
-                                    ((Entity) entity).attackEntityFrom(new EntityDamageSource("rollingstock", transport), (float) (transport.bogie.get(0).motionX + transport.bogie.get(0).motionZ) * 1000);
+                                    ((Entity) entity).attackEntityFrom(new EntityDamageSource("rollingstock", transport), (float) (transport.frontBogie.motionX + transport.frontBogie.motionZ) * 1000);
                                     ((Entity) entity).applyEntityCollision(transport);
                                     return false;
                                 } else {
@@ -166,8 +166,8 @@ public class HitboxHandler {
 
                                 //if this is a train, just decide whether or not to run them over.
                             } else if (entity instanceof EntityLiving || entity instanceof EntityPlayer &&
-                                    (transport.bogie.get(0).motionX > 0.5 || transport.bogie.get(0).motionX < -0.5 || transport.bogie.get(0).motionZ > 0.5 || transport.bogie.get(0).motionZ < -0.5)) {
-                                ((Entity) entity).attackEntityFrom(new EntityDamageSource("train", transport), (float) (transport.bogie.get(0).motionX + transport.bogie.get(0).motionZ) * 1000);
+                                    (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5)) {
+                                ((Entity) entity).attackEntityFrom(new EntityDamageSource("train", transport), (float) (transport.frontBogie.motionX + transport.frontBogie.motionZ) * 1000);
                                 ((Entity) entity).applyEntityCollision(transport);
                                 return false;
 
@@ -218,24 +218,27 @@ public class HitboxHandler {
      * TODO: why did i think it would be a good idea to do this from the hitbox class rather than from the transport entity itself?
      */
     public static void destroyTransport(GenericRailTransport host){
-        for (EntityBogie cart : host.bogie){
-            cart.worldObj.removeEntity(cart);
-            cart.isDead = true;
-            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(cart.getEntityId()));
-        }
+        host.frontBogie.isDead = true;
+        TrainsInMotion.keyChannel.sendToServer(new PacketRemove(host.frontBogie.getEntityId()));
+        host.worldObj.removeEntity(host.frontBogie);
+        host.backBogie.isDead = true;
+        TrainsInMotion.keyChannel.sendToServer(new PacketRemove(host.backBogie.getEntityId()));
+        host.worldObj.removeEntity(host.backBogie);
+
         for (EntitySeat seat : host.seats){
-            seat.worldObj.removeEntity(seat);
             seat.isDead = true;
             TrainsInMotion.keyChannel.sendToServer(new PacketRemove(seat.getEntityId()));
+            seat.worldObj.removeEntity(seat);
         }
         for (EntityDragonPart hitbox : host.hitboxList){
-            hitbox.worldObj.removeEntity(hitbox);
             hitbox.isDead = true;
             TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId()));
+            hitbox.worldObj.removeEntity(hitbox);
         }
 
         host.isDead=true;
         TrainsInMotion.keyChannel.sendToServer(new PacketRemove(host.getEntityId()));
+        host.worldObj.removeEntity(host);
     }
 
 }

@@ -156,23 +156,21 @@ public class EntityTrainCore extends GenericRailTransport {
     @Override
     public void onUpdate() {
 
-        for (EntityBogie entityBogie : bogie){
-            if(accelerator!=0) {
-                //acceleration is scaled down to fit the scale of the trains.
-                vectorCache[0][0] = ((accelerator / 6f) * 0.01302083f) * getAcceleration();
+        if(accelerator!=0) {
+            //acceleration is scaled down to fit the scale of the trains.
+            vectorCache[0][0] = ((accelerator / 6f) * 0.01302083f) * getAcceleration();
 
-                //cap speed to max.
-                if (vectorCache[0][0] > getMaxSpeed()) {
-                    vectorCache[0][0] = getMaxSpeed();
-                } else if (vectorCache[0][0] < -getMaxSpeed()) {
-                    vectorCache[0][0] = -getMaxSpeed();
-                }
-
-
-                vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], rotationPitch, rotationYaw, 0);
-                entityBogie.addVelocity(vectorCache[1][0], vectorCache[1][1], vectorCache[1][2]);
+            //cap speed to max.
+            if (vectorCache[0][0] > getMaxSpeed()) {
+                vectorCache[0][0] = getMaxSpeed();
+            } else if (vectorCache[0][0] < -getMaxSpeed()) {
+                vectorCache[0][0] = -getMaxSpeed();
             }
 
+
+            vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], rotationPitch, rotationYaw, 0);
+            frontBogie.addVelocity(vectorCache[1][0], vectorCache[1][1], vectorCache[1][2]);
+            backBogie.addVelocity(vectorCache[1][0], vectorCache[1][1], vectorCache[1][2]);
         }
 
         super.onUpdate();
