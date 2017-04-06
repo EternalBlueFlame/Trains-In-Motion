@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
@@ -167,7 +168,8 @@ public class RenderEntity extends Render {
      */
     public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick){
         if (entity instanceof GenericRailTransport){
-            doRender((GenericRailTransport) entity,x,y,z,yaw);
+
+            doRender((GenericRailTransport) entity,x,y,z, entity.prevRotationYaw + MathHelper.wrapAngleTo180_float(entity.rotationYaw - entity.prevRotationYaw)*partialTick);
         }
     }
 
@@ -195,8 +197,8 @@ public class RenderEntity extends Render {
         //set the render position
         GL11.glTranslated(x, y+0.275, z);
         //rotate the model.
-        GL11.glRotatef((-yaw) - 90, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
+        GL11.glRotatef((-yaw) + 90, 0.0f, 1.0f, 0.0f);
+        GL11.glRotatef(entity.rotationPitch-180f, 1.0f, 0.0f, 0.0f);
 
         /**
          * <h3>animations</h3>
@@ -296,10 +298,11 @@ public class RenderEntity extends Render {
                     bindTexture(bogieRenders[i].bogieTexture);
                     GL11.glPushMatrix();
                     //set the offset
-                    double[] rotated = RailUtility.rotatePoint(new double[]{entity.getRenderBogieOffsets().get(i),0,0}, entity.rotationPitch, entity.rotationYaw,0);
-                    GL11.glTranslated(rotated[0]+x,rotated[1]+y-0.8, rotated[2]+z);
+                    double[] rotated = RailUtility.rotatePoint(new double[]{entity.getRenderBogieOffsets().get(i),0.3,0}, entity.rotationPitch, entity.rotationYaw,0);
+                    GL11.glTranslated(rotated[0]+x,rotated[1]+y, rotated[2]+z);
                     //set the rotation
-                    GL11.glRotatef(bogieRenders[i].rotationYaw -270f,0,1.0f,0);
+                    GL11.glRotatef(bogieRenders[i].rotationYaw +90f,0,1.0f,0);
+                    GL11.glRotatef(entity.rotationPitch - 180f, 1.0f, 0.0f, 0.0f);
                     bogieRenders[i].setPositionAndRotation(animationCache[5], entity);
                     //render the geometry
                     for (Object modelBogiePart : bogieRenders[i].bogieModel.boxList) {

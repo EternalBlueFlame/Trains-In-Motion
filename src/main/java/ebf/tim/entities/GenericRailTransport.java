@@ -331,15 +331,13 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             //spawn front bogie
             vectorCache[1][0] = getLengthFromCenter();
             vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
-            EntityBogie spawnBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId(), true);
-            worldObj.spawnEntityInWorld(spawnBogie);
-            frontBogie = spawnBogie;
+            frontBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId(), true);
+            worldObj.spawnEntityInWorld(frontBogie);
             //spawn back bogie
             vectorCache[1][0] = -getLengthFromCenter();
             vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
-            EntityBogie spawnBackBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId(), false);
-            worldObj.spawnEntityInWorld(spawnBogie);
-            frontBogie = spawnBogie;
+            backBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId(), false);
+            worldObj.spawnEntityInWorld(backBogie);
 
 
             if (getRiderOffsets() != null) {
@@ -359,9 +357,13 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
          *
          */
         if (frontBogie!=null && backBogie != null){
-            boolean collision = hitboxHandler.getCollision(this);
             //handle movement.
-            if (!collision) {
+            if (!hitboxHandler.getCollision(this)) {
+                frontBogie.minecartMove(rotationPitch, rotationYaw, brake);
+                backBogie.minecartMove(rotationPitch, rotationYaw, brake);
+            } else {
+                frontBogie.addVelocity(-frontBogie.motionX,-frontBogie.motionY,-frontBogie.motionZ);
+                backBogie.addVelocity(-backBogie.motionX,-backBogie.motionY,-backBogie.motionZ);
                 frontBogie.minecartMove(rotationPitch, rotationYaw, brake);
                 backBogie.minecartMove(rotationPitch, rotationYaw, brake);
             }
@@ -376,7 +378,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             setRotation((float)Math.toDegrees(Math.atan2(
                     frontBogie.posZ - backBogie.posZ,
                     frontBogie.posX - backBogie.posX)),
-                    MathHelper.floor_double(Math.acos(frontBogie.posY / backBogie.posY)));
+                    MathHelper.floor_double(Math.acos(frontBogie.posY / backBogie.posY)*RailUtility.degreesD));
 
 
             if (transportTicks %2 ==0) {
@@ -478,7 +480,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     vectorCache[6] = rotatePoint(vectorCache[5], 0, frontLink.rotationYaw, 0);
                     vectorCache[6][0] += frontLink.posX;
                     vectorCache[6][2] += frontLink.posZ;
-                    this.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05,0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
+                    this.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.005,0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.005);
                 }
             } else if (isCoupling) {
                 vectorCache[3][0] = getHitboxPositions()[0]-2;
@@ -513,7 +515,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     vectorCache[6] = rotatePoint(vectorCache[5], 0, backLink.rotationYaw, 0);
                     vectorCache[6][0] += backLink.posX;
                     vectorCache[6][2] += backLink.posZ;
-                    this.addVelocity(-(vectorCache[6][0] - vectorCache[6][0]) * 0.05,0, -(vectorCache[6][2] -vectorCache[6][2]) * 0.05);
+                    this.addVelocity(-(vectorCache[6][0] - vectorCache[6][0]) * 0.005,0, -(vectorCache[6][2] -vectorCache[6][2]) * 0.005);
                 }
             } else if (isCoupling) {
                 vectorCache[3][0] = getHitboxPositions()[getHitboxPositions().length-1] + 2;
@@ -598,6 +600,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
     }
 
+    @Override
+    protected void setRotation(float p_70101_1_, float p_70101_2_) {
+        this.prevRotationYaw = this.rotationYaw = p_70101_1_;
+        this. prevRotationPitch = this.rotationPitch = p_70101_2_;
+    }
 
 
     /**

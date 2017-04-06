@@ -30,7 +30,7 @@ public class RailUtility {
      *
      * we override some vanilla track detection so that way it's more efficient and can support rails from other mods.
      */
-    public static boolean isRailBlockAt(World world, int x, int y, int z) { // Can later be substituted for BlockPos
+    public static boolean isRailBlockAt(World world, int x, int y, int z) {
         return (world.getTileEntity(x, y, z) instanceof ITrackBase || world.getBlock(x, y, z) instanceof BlockRailBase);
     }
 
