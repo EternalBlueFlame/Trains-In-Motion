@@ -197,7 +197,7 @@ public class RenderEntity extends Render {
         //set the render position
         GL11.glTranslated(x, y+0.275, z);
         //rotate the model.
-        GL11.glRotatef((-yaw) + 90, 0.0f, 1.0f, 0.0f);
+        GL11.glRotatef((-yaw), 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(entity.rotationPitch-180f, 1.0f, 0.0f, 0.0f);
 
         /**
@@ -298,10 +298,10 @@ public class RenderEntity extends Render {
                     bindTexture(bogieRenders[i].bogieTexture);
                     GL11.glPushMatrix();
                     //set the offset
-                    double[] rotated = RailUtility.rotatePoint(new double[]{entity.getRenderBogieOffsets().get(i),0.3,0}, entity.rotationPitch, entity.rotationYaw,0);
+                    double[] rotated = RailUtility.rotatePoint(new double[]{entity.getRenderBogieOffsets().get(i),0.275,0}, entity.rotationPitch, entity.rotationYaw,0);
                     GL11.glTranslated(rotated[0]+x,rotated[1]+y, rotated[2]+z);
                     //set the rotation
-                    GL11.glRotatef(bogieRenders[i].rotationYaw +90f,0,1.0f,0);
+                    GL11.glRotatef(bogieRenders[i].rotationYaw,0,1.0f,0);
                     GL11.glRotatef(entity.rotationPitch - 180f, 1.0f, 0.0f, 0.0f);
                     bogieRenders[i].setPositionAndRotation(animationCache[5], entity);
                     //render the geometry
