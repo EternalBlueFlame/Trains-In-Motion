@@ -10,6 +10,8 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.fluids.FluidRegistry;
 
@@ -141,7 +143,7 @@ public class FuelHandler implements IFuelHandler{
 					} else if (!cart.isCreative){
 						cart.worldObj.createExplosion(cart, cart.posX, cart.posY, cart.posZ, 5f, false);
 						cart.dropItem(cart.getItem(), 1);
-						HitboxHandler.destroyTransport(cart);
+						cart.attackEntityFromPart(null, new EntityDamageSource("overheat", cart),1);
 						break;
 					}
 

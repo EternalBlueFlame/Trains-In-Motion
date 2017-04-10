@@ -4,11 +4,13 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.networking.PacketRemove;
 import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -58,6 +60,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * the inventory defines the item storage.
      * the key defines the ownership key item, this is used to allow other people access to the transport.
      * the vectorCache is used to initialize all the vector 3's that are used to calculate everything from movement to linking, this is so we don't have to make new variable instances, saves CPU.
+     * health is used similar to that of EntityLiving like a mob or a player.
      * the last part is the generic entity constructor
      */
     public boolean isLocked = false;
@@ -80,6 +83,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public InventoryHandler inventory = new InventoryHandler(this);
     public ItemStack key;
     private double[][] vectorCache = new double[7][3];
+    private int health = 20;
     public GenericRailTransport(World world){
         super(world);
     }
@@ -129,10 +133,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public World func_82194_d(){return worldObj;}
     @Override
-    public boolean attackEntityFromPart(EntityDragonPart part, DamageSource damageSource, float damage){
-        return HitboxHandler.AttackEvent(this,damageSource,damage);
-    }
-    @Override
     public Entity[] getParts(){return hitboxList.toArray(new HitboxHandler.multipartHitbox[hitboxList.size()]);}
     @Override
     public AxisAlignedBB getBoundingBox(){return boundingBox;}
@@ -151,6 +151,69 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
         }
         this.setRotation(p_70056_7_, p_70056_8_);
+    }
+
+
+    /**
+     * <h2>damage and destruction</h2>
+     * attackEntityFromPart is called when one of the hitboxes of the entity has taken damage of some form.
+     * the damage done is handled manually so we can compensate for basically everything, and if health is 0 or lower, we destroy the entity part by part, leaving the main part of the entity for last.
+     */
+    @Override
+    public boolean attackEntityFromPart(EntityDragonPart part, DamageSource damageSource, float damage){
+        //if its a creative player, destroy instantly
+        if (damageSource.getEntity() instanceof EntityPlayer && ((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode && !damageSource.isProjectile()){
+            health -=20;
+            //if its reinforced and its not an explosion
+        } else if (isReinforced() && !damageSource.isProjectile() && !damageSource.isExplosion()){
+            health -=1;
+            //if it is an explosion and it's reinforced, or it's not an explosion and isn't reinforced
+        } else if ((damageSource.isExplosion() && isReinforced()) || (!isReinforced() && !damageSource.isProjectile())){
+            health -=5;
+            //if it isn't reinforced and is an explosion
+        } else if (damageSource.isExplosion() && !isReinforced()){
+            health-=20;
+        }
+        //cover overheating, or other damage to self.
+        if (damageSource.getSourceOfDamage() == this){
+            health-=20;
+        }
+
+        //on Destruction
+        if (health<1){
+            //remove bogies
+            frontBogie.isDead = true;
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(frontBogie.getEntityId()));
+            worldObj.removeEntity(frontBogie);
+            backBogie.isDead = true;
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(backBogie.getEntityId()));
+            worldObj.removeEntity(backBogie);
+            //remove seats
+            for (EntitySeat seat : seats){
+                seat.isDead = true;
+                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(seat.getEntityId()));
+                seat.worldObj.removeEntity(seat);
+            }
+            //remove hitboxes
+            for (EntityDragonPart hitbox : hitboxList){
+                hitbox.isDead = true;
+                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId()));
+                hitbox.worldObj.removeEntity(hitbox);
+            }
+            //if the damage source is an explosion, or this (from overheating as an example), we circumstantially blow up.
+            //radius is defined by whether or not it's a nuclear train, and fire spread creation is defined by whether or not it's diesel.
+            if (damageSource.getSourceOfDamage() == this || damageSource.isExplosion()){
+                worldObj.newExplosion(this, posX, posY, posZ,
+                        (this.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM || this.getType() == TrainsInMotion.transportTypes.NUCLEAR_ELECTRIC)? 6:12,
+                        this.getType() == TrainsInMotion.transportTypes.DIESEL, true);
+                //if this isn't supposed to explode, and the damage source wasn't an explosion, drop the item for this transport
+            }
+            //remove this
+            isDead=true;
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(getEntityId()));
+            worldObj.removeEntity(this);
+        }
+        return false;
     }
 
 
@@ -623,6 +686,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public float getPistonOffset(){return 0;}
     public float[][] getSmokeOffset(){return new float[][]{{0,0,0,255}};}
     public double getLengthFromCenter(){return 1d;}
+    public float getRenderScale(){return 0.0625f;}
+    public boolean isReinforced(){return false;}
 
 
     /**

@@ -26,6 +26,9 @@ import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
 import ebf.tim.utility.RailUtility;
 import zoranodensha.api.structures.tracks.ITrackBase;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <h1>Bogie Core</h1>
  * this controls the behavior of the bogies in trains and rollingstock.
@@ -48,7 +51,17 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     private double cartVelocityZ =0;
     private double motionProgress=0;
     private boolean isFront=true;
-    private static final int[][][] vanillaRailMatrix = new int[][][] {{{0, 0, -1}, {0, 0, 1}}, {{ -1, 0, 0}, {1, 0, 0}}, {{ -1, -1, 0}, {1, 0, 0}}, {{ -1, 0, 0}, {1, -1, 0}}, {{0, 0, -1}, {0, -1, 1}}, {{0, -1, -1}, {0, 0, 1}}, {{0, 0, 1}, {1, 0, 0}}, {{0, 0, 1}, { -1, 0, 0}}, {{0, 0, -1}, { -1, 0, 0}}, {{0, 0, -1}, {1, 0, 0}}};
+    private static final int[][][] vanillaRailMatrix = new int[][][] {
+            {{0, 0, -1}, {0, 0, 1}},
+            {{ -1, 0, 0}, {1, 0, 0}},
+            {{ -1, -1, 0}, {1, 0, 0}},
+            {{ -1, 0, 0}, {1, -1, 0}},
+            {{0, 0, -1}, {0, -1, 1}},
+            {{0, -1, -1}, {0, 0, 1}},
+            {{0, 0, 1}, {1, 0, 0}},
+            {{0, 0, 1}, { -1, 0, 0}},
+            {{0, 0, -1}, { -1, 0, 0}},
+            {{0, 0, -1}, {1, 0, 0}}};
 
     public EntityBogie(World world) {
         super(world);
@@ -176,11 +189,26 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 }
             }
 
+
+            //apply brake
+            if (brake){
+                this.motionX *= 0.75;
+                this.motionZ *= 0.75;
+                this.cartVelocityX *= 0.75;
+                this.cartVelocityZ *= 0.75;
+            } else { //TODO: speed booster for testing purposes
+                this.motionX *= 1.005;
+                this.motionZ *= 1.005;
+                this.cartVelocityX *= 1.005;
+                this.cartVelocityZ *= 1.005;
+            }
+
             //update on normal rails
             if (worldObj.getBlock(floorX, floorY, floorZ) instanceof BlockRailBase) {
                 Block block = this.worldObj.getBlock(floorX, floorY, floorZ);
-                moveBogie(floorX, floorY, floorZ, block, ((BlockRailBase)block).getBasicRailMetadata(worldObj, null, floorX, floorY, floorZ), brake);
+                moveBogie(this.motionX, this.motionZ, floorX, floorY, floorZ, block, ((BlockRailBase)block).getBasicRailMetadata(worldObj, null, floorX, floorY, floorZ));
 
+                this.fallDistance = 0.0F;
                 if (block == Blocks.activator_rail) {
                     this.onActivatorRailPass(floorX, floorY, floorZ, (worldObj.getBlockMetadata(floorX, floorY, floorZ) & 8) != 0);
                 }
@@ -190,21 +218,37 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 //update on falling with no rails
             }
             //idk wtf this does.
-            MinecraftForge.EVENT_BUS.post(new MinecartUpdateEvent(this, floorX, floorY, floorZ));
+            //MinecraftForge.EVENT_BUS.post(new MinecartUpdateEvent(this, floorX, floorY, floorZ));
         }
     }
 
-//todo: need to document code, need to be sure on client that the bogie has the proper Y offset. Need to rework fuel and fluid management
-    private void moveBogie(int floorX, int floorY, int floorZ, Block block, int railMetadata, boolean brake) {
-        this.fallDistance = 0.0F;
 
-        if (brake){
-            this.motionX *= 0.75;
-            this.motionZ *= 0.75;
-            this.cartVelocityX *= 0.75;
-            this.cartVelocityZ *= 0.75;
+    private void moveBogie(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, Block block, int railMetadata) {
+        double cachedMotionX = currentMotionX;
+        double cachedMotionZ = currentMotionZ;
+
+        //define the incrementation of movement, use the cache to store the real value and increment it down, and then throw it to the next loop, then use current for the clamped to calculate movement
+        if (currentMotionX>0.8){
+            currentMotionX= 0.8;
+            cachedMotionX -=0.8;
+        } else if (currentMotionX <-0.8){
+            currentMotionX =-0.8;
+            cachedMotionX +=0.8;
+        } else {
+            cachedMotionX=0;
+        }
+        if (currentMotionZ>0.8){
+            currentMotionZ= 0.8;
+            cachedMotionZ -= 0.8;
+        } else if (currentMotionZ <-0.8){
+            currentMotionZ =-0.8;
+            cachedMotionZ +=0.8;
+        } else {
+            cachedMotionZ=0;
         }
 
+
+        //add the uphill/downhill velocity
         switch (railMetadata){
             case 2:{this.motionX -= 0.0078125D; this.posY = (double)(floorY + 1); break;}
             case 3:{this.motionX += 0.0078125D; this.posY = (double)(floorY + 1); break;}
@@ -212,21 +256,34 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             case 5:{this.motionZ -= 0.0078125D; this.posY = (double)(floorY + 1); break;}
         }
 
+        //figure out the current rail's direction
         double railPathX = (vanillaRailMatrix[railMetadata][1][0] - vanillaRailMatrix[railMetadata][0][0]);
         double railPathZ = (vanillaRailMatrix[railMetadata][1][2] - vanillaRailMatrix[railMetadata][0][2]);
         double railPathSqrt = Math.sqrt(railPathX * railPathX + railPathZ * railPathZ);
-        double motionSqrt = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
 
-        if (this.motionX * railPathX + this.motionZ * railPathZ < 0.0D) {
+        //if it ends up being reverse of what it should be, inverse the motion.
+        if (currentMotionX * railPathX + currentMotionZ * railPathZ < 0.0D) {
             railPathX = -railPathX;
             railPathZ = -railPathZ;
         }
+
+        //define the motion based on the rail path for current movement, and the next, so they are in sync.
+        double motionSqrt = Math.sqrt(currentMotionX * currentMotionX + currentMotionZ * currentMotionZ);
         if (motionSqrt > 2.0D) {
             motionSqrt = 2.0D;
         }
-        this.motionX = motionSqrt * railPathX / railPathSqrt;
-        this.motionZ = motionSqrt * railPathZ / railPathSqrt;
+        currentMotionX = motionSqrt * railPathX / railPathSqrt;
+        currentMotionZ = motionSqrt * railPathZ / railPathSqrt;
 
+        //define the motion based on the rail path for current movement, and the next, so they are in sync.
+        motionSqrt = Math.sqrt(motionX * motionX +motionZ * motionZ);
+        if (motionSqrt > 2.0D) {
+            motionSqrt = 2.0D;
+        }
+        motionX = motionSqrt * railPathX / railPathSqrt;
+        motionZ = motionSqrt * railPathZ / railPathSqrt;
+
+        //define the rail path again,,, for reasons.....
         double d8 = floorX + 0.5D + vanillaRailMatrix[railMetadata][0][0] * 0.5D;
         double d9 = floorZ + 0.5D + vanillaRailMatrix[railMetadata][0][2] * 0.5D;
 
@@ -244,9 +301,9 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             d7 = ((this.posX - d8) * railPathX + (this.posZ - d9) * railPathZ) * 2.0D;
         }
 
-        this.posX = (d8 + railPathX * d7) + this.motionX;
-        this.posZ = (d9 + railPathZ * d7) + this.motionZ;
-        this.positionY += this.motionY -= 0.04D;
+        this.posX = (d8 + railPathX * d7) + currentMotionX;
+        this.posZ = (d9 + railPathZ * d7) + currentMotionZ;
+        this.positionY =motionY;
 
         if (vanillaRailMatrix[railMetadata][0][1] != 0 && MathHelper.floor_double(this.posX) - floorX == vanillaRailMatrix[railMetadata][0][0] && MathHelper.floor_double(this.posZ) - floorZ == vanillaRailMatrix[railMetadata][0][2]) {
             this.posY+=vanillaRailMatrix[railMetadata][0][1];
@@ -258,6 +315,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         if(shouldDoRailFunctions()) {
             ((BlockRailBase)block).onMinecartPass(worldObj, this, floorX, floorY, floorZ);
         }
+        if (cachedMotionX !=0 || cachedMotionZ !=0){
+            moveBogie(cachedMotionX, cachedMotionZ, floorX, floorY, floorZ, block, railMetadata);
+        }
+
     }
 
 

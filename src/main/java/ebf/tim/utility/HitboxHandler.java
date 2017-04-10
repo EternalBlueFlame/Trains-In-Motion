@@ -149,14 +149,14 @@ public class HitboxHandler {
                                     float directionZ = 0;
                                     float directionX = 0;
                                     if (((Entity) entity).posZ > transport.posZ + 0.5) {
-                                        directionZ = -0.01f;
+                                        directionZ = -0.1f;
                                     } else if (((Entity) entity).posZ < transport.posZ - 0.5) {
-                                        directionZ = 0.01f;
+                                        directionZ = 0.1f;
                                     }
                                     if (((Entity) entity).posX > transport.posX + 0.5) {
-                                        directionX = 0.01f;
+                                        directionX = 0.1f;
                                     } else if (((Entity) entity).posX < transport.posX - 0.5) {
-                                        directionX = -0.01f;
+                                        directionX = -0.1f;
                                     }
                                     double[] vec = RailUtility.rotatePoint(new double[]{directionZ, 0, directionX}, 0, Math.copySign(transport.rotationYaw, 1), 0);
                                     transport.addVelocity(vec[0], 0, vec[2]);
@@ -193,52 +193,5 @@ public class HitboxHandler {
         return false;
     }
 
-
-    /**
-     * <h2>Entity Attacked</h2>
-     * covers when a player, or anything else for that matter, hits the train.
-     * we will need to basically clone this for rollingstock.
-     * @param host the train entity that was attacked
-     * @param damageSource the thing that hit it
-     * @param damage the damage done to it, i think.
-     * @return true or false if it was actually destroyed, or its whether or not to play the player punch animation, either way its kinda trivial.
-     */
-    public static boolean AttackEvent(GenericRailTransport host, DamageSource damageSource, float damage){
-        if (damageSource.getEntity() instanceof EntityPlayer && ((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode && !damageSource.isProjectile()){
-            destroyTransport(host);
-            return true;
-        }
-        return false;
-    }
-
-
-    /**
-     * <h2>Destory Entity</h2>
-     * this is called when the entity is being destroyed, so remove it, and all related parts from the world.
-     * TODO: why did i think it would be a good idea to do this from the hitbox class rather than from the transport entity itself?
-     */
-    public static void destroyTransport(GenericRailTransport host){
-        host.frontBogie.isDead = true;
-        TrainsInMotion.keyChannel.sendToServer(new PacketRemove(host.frontBogie.getEntityId()));
-        host.worldObj.removeEntity(host.frontBogie);
-        host.backBogie.isDead = true;
-        TrainsInMotion.keyChannel.sendToServer(new PacketRemove(host.backBogie.getEntityId()));
-        host.worldObj.removeEntity(host.backBogie);
-
-        for (EntitySeat seat : host.seats){
-            seat.isDead = true;
-            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(seat.getEntityId()));
-            seat.worldObj.removeEntity(seat);
-        }
-        for (EntityDragonPart hitbox : host.hitboxList){
-            hitbox.isDead = true;
-            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId()));
-            hitbox.worldObj.removeEntity(hitbox);
-        }
-
-        host.isDead=true;
-        TrainsInMotion.keyChannel.sendToServer(new PacketRemove(host.getEntityId()));
-        host.worldObj.removeEntity(host);
-    }
 
 }

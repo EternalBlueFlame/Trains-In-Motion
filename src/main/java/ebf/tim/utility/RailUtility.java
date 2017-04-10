@@ -48,7 +48,7 @@ public class RailUtility {
         double[] xyz = new double[]{f[0],f[1],f[2]};
 
         if (pitch != 0.0F) {
-            pitch *= radianD;
+            pitch *= radianF;
             cos = Math.cos(pitch);
             sin = Math.sin(pitch);
 
@@ -57,7 +57,7 @@ public class RailUtility {
         }
 
         if (yaw != 0.0F) {
-            yaw *= radianD;
+            yaw *= radianF;
             cos = MathHelper.cos(yaw);
             sin = MathHelper.sin(yaw);
 
@@ -66,7 +66,7 @@ public class RailUtility {
         }
 
         if (roll != 0.0F) {
-            roll *=  radianD;
+            roll *=  radianF;
             cos = MathHelper.cos(roll);
             sin = MathHelper.sin(roll);
 

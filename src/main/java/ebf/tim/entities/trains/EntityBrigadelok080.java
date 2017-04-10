@@ -176,6 +176,14 @@ public class EntityBrigadelok080 extends EntityTrainCore {
         return false;
     }
 
+    /**
+     * <h2>reinforced transport</h2>
+     * this returns if this specific entity is reinforced (explosion proof and damage resistant).
+     * since this is a function it can be conditional as well, for instance if it has a specific skin.
+     */
+    @Override
+    public boolean isReinforced(){return false;}
+
 
     /**
      * <h2>pre-assigned values</h2>

@@ -241,7 +241,7 @@ public class RenderEntity extends Render {
         for(Object cube : model.boxList){
             if (cube instanceof ModelRenderer &&
                     !(((ModelRendererTurbo) cube).boxName).contains("block") && !(((ModelRendererTurbo) cube).boxName).contains("crate")) {
-                ((ModelRenderer)cube).render(0.065f);
+                ((ModelRenderer)cube).render(entity.getRenderScale());
             }
         }
 
@@ -276,7 +276,7 @@ public class RenderEntity extends Render {
                         //render the geometry normally if it's not a block.
                         bindTexture(texture);
                         for (ModelRendererTurbo block : cargo.boxRefrence) {
-                            block.render();
+                            block.render(entity.getRenderScale());
                         }
                     }
                 }
@@ -307,7 +307,7 @@ public class RenderEntity extends Render {
                     //render the geometry
                     for (Object modelBogiePart : bogieRenders[i].bogieModel.boxList) {
                         if (modelBogiePart instanceof ModelRendererTurbo) {
-                            ((ModelRendererTurbo) modelBogiePart).render();
+                            ((ModelRendererTurbo) modelBogiePart).render(entity.getRenderScale());
                         }
                     }
                     GL11.glPopMatrix();
