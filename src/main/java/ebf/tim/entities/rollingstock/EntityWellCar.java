@@ -4,7 +4,6 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityRollingStockCore;
 import ebf.tim.items.ItemTransport;
 import ebf.tim.models.tmt.Vec3d;
-import ebf.tim.utility.LiquidManager;
 import net.minecraft.item.Item;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -19,7 +18,6 @@ import java.util.UUID;
  */
 public class EntityWellCar extends EntityRollingStockCore {
 
-    private static final LiquidManager tank = null;
     public static final String[] itemDescription = new String[]{
             "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 3" + StatCollector.translateToLocal("menu.item.tons"),
             "\u00A77" + StatCollector.translateToLocal("menu.item.sizeof") +": 36" + StatCollector.translateToLocal("menu.item.slots")};
@@ -60,7 +58,7 @@ public class EntityWellCar extends EntityRollingStockCore {
      * <h2>Hitbox offsets</h2>
      */
     @Override
-    public float[] getHitboxPositions(){return new float[]{-3.35f,-2.2f,-1.1f,0f,1.1f,2.175f,3.25f};}
+    public double[] getHitboxPositions(){return new double[]{-3.35d,-2.2d,-1.1d,0d,1.1d,2.175d,3.25d};}
     /**
      * <h2>Lamp offset</h2>
      */
@@ -76,8 +74,7 @@ public class EntityWellCar extends EntityRollingStockCore {
 
     /**
      * <h2>pre-asigned values</h2>
-     */    @Override
-    public LiquidManager getTank(){return tank;}
+     */
     @Override
     public Item getItem(){
         return thisItem;

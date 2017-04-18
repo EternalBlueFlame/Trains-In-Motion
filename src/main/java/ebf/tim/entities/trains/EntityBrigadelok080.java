@@ -10,7 +10,6 @@ import ebf.tim.registry.TransportRegistry;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.FuelHandler;
 import ebf.tim.utility.LiquidManager;
-import net.minecraft.client.audio.ISound;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
@@ -40,7 +39,6 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      *     The second part is the fluid filter, this is the list of fluids to either use specifically, or never use.
      *     The third part is the blacklist/whitelist. True means it will ONLY use the fluids defined in the array, false means it will use any fluids EXCEPT the ones in the array.
      *
-     * SOUND_HORN and SOUND_RUNNING are refrences to the sound files for the train horn and running sounds.
      *
      * thisItem is the item for this train that will get registered.
      *     The String array defines the extra text added to the item description, each entry makes a new line
@@ -49,8 +47,6 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      *     The last part defines the unlocalized name, this is used for the item name, entity name, and language file entries.
      */
     private LiquidManager tank = new LiquidManager(1100,1100, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
-    private static final ResourceLocation horn = URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");
-    private static final ResourceLocation running = URIRegistry.SOUND_RUNNING.getResource("r080brigadelok.ogg");
 
     private static final String[] itemDescription = new String[]{
             "\u00A77" + StatCollector.translateToLocal("menu.item.era") +  ": " + StatCollector.translateToLocal("menu.steam"),
@@ -139,7 +135,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      * @return defines the positions for the hitboxes in blocks. 0 being the center, negative values being towards the front.
      */
     @Override
-    public float[] getHitboxPositions(){return new float[]{-1.15f,0f,1.15f};}
+    public double[] getHitboxPositions(){return new double[]{-1.15d,0d,1.15d};}
     /**
      * <h2>Lamp offset</h2>
      * @return defines the offset for the lamp in blocks.
@@ -184,6 +180,11 @@ public class EntityBrigadelok080 extends EntityTrainCore {
     @Override
     public boolean isReinforced(){return false;}
 
+    /**
+     * <h2>Fluid Tank Capacity</h2>
+     */
+    @Override
+    public int getTankCapacity(){return 1100;}
 
     /**
      * <h2>pre-assigned values</h2>
@@ -191,113 +192,17 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      * These should only need modification for advanced users, and even that's a stretch.
      */
     @Override
-    public LiquidManager getTank(){return tank;}
-    @Override
     public Item getItem(){
         return thisItem;
     }
 
     /**
-     * <h2>Train only pre-assigned values</h2>
+     * <h2>sets the resource location for sounds, like horn and the sound made for the engine running</h2>
      */
     @SideOnly(Side.CLIENT)
     @Override
-    public ISound getHorn(){
-        return new ISound() {
-            @Override
-            public ResourceLocation getPositionedSoundLocation() {
-                return horn;
-            }
-
-            @Override
-            public boolean canRepeat() {
-                return false;
-            }
-
-            @Override
-            public int getRepeatDelay() {
-                return 0;
-            }
-
-            @Override
-            public float getVolume() {
-                return 100;
-            }
-
-            @Override
-            public float getPitch() {
-                return 0;
-            }
-
-            @Override
-            public float getXPosF() {
-                return (float) posX;
-            }
-
-            @Override
-            public float getYPosF() {
-                return (float) posY;
-            }
-
-            @Override
-            public float getZPosF() {
-                return (float) posZ;
-            }
-
-            @Override
-            public AttenuationType getAttenuationType() {
-                return null;
-            }
-        };
-    }
+    public ResourceLocation getHorn(){return URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");}
     @SideOnly(Side.CLIENT)
     @Override
-    public ISound getRunning(){
-        return new ISound() {
-            @Override
-            public ResourceLocation getPositionedSoundLocation() {
-                return running;
-            }
-
-            @Override
-            public boolean canRepeat() {
-                return true;
-            }
-
-            @Override
-            public int getRepeatDelay() {
-                return 0;
-            }
-
-            @Override
-            public float getVolume() {
-                return 100;
-            }
-
-            @Override
-            public float getPitch() {
-                return 0;
-            }
-
-            @Override
-            public float getXPosF() {
-                return (float) posX;
-            }
-
-            @Override
-            public float getYPosF() {
-                return (float) posY;
-            }
-
-            @Override
-            public float getZPosF() {
-                return (float) posZ;
-            }
-
-            @Override
-            public AttenuationType getAttenuationType() {
-                return null;
-            }
-        };
-    }
+    public ResourceLocation getRunning(){return URIRegistry.SOUND_RUNNING.getResource("r080brigadelok.ogg");}
 }

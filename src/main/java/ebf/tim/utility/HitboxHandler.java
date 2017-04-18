@@ -5,10 +5,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntityRollingStockCore;
-import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.networking.PacketRemove;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -17,7 +14,6 @@ import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 
@@ -94,8 +90,9 @@ public class HitboxHandler {
                 if (transport.worldObj.isRemote) {
                     transport.worldObj.spawnEntityInWorld(transport.hitboxList.get(iteration));
                 }
+            } else {
+                transport.hitboxList.get(iteration).setLocationAndAngles(position[0] + transport.posX, position[1] + transport.posY, position[2] + transport.posZ, transport.rotationYaw, transport.rotationPitch);
             }
-            transport.hitboxList.get(iteration).setLocationAndAngles(position[0] + transport.posX, position[1] + transport.posY, position[2] + transport.posZ, 0, 0);
         }
 
 
@@ -180,8 +177,8 @@ public class HitboxHandler {
                                 //if it's an item, then check if it's valid for the slot
                             } else if ((transport.getType() == TrainsInMotion.transportTypes.HOPPER || transport.getType() == TrainsInMotion.transportTypes.COALHOPPER ||
                                     transport.getType() == TrainsInMotion.transportTypes.GRAINHOPPER) &&
-                                    entity instanceof EntityItem && transport.inventory.isItemValidForSlot(0,((EntityItem) entity).getEntityItem()) && ((EntityItem) entity).posY > transport.posY+1){
-                                transport.inventory.addItem(((EntityItem) entity).getEntityItem());
+                                    entity instanceof EntityItem && transport.isItemValidForSlot(0,((EntityItem) entity).getEntityItem()) && ((EntityItem) entity).posY > transport.posY+1){
+                                transport.addItem(((EntityItem) entity).getEntityItem());
                                 ((EntityItem) entity).worldObj.removeEntity((EntityItem)entity);
                             }
                         }

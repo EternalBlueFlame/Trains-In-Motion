@@ -5,6 +5,7 @@ import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.utility.RailUtility;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.carts.IRoutableCart;
@@ -16,18 +17,10 @@ import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
-import ebf.tim.utility.RailUtility;
 import zoranodensha.api.structures.tracks.ITrackBase;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <h1>Bogie Core</h1>
@@ -196,11 +189,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 this.motionZ *= 0.75;
                 this.cartVelocityX *= 0.75;
                 this.cartVelocityZ *= 0.75;
-            } else { //TODO: speed booster for testing purposes
-                this.motionX *= 1.005;
-                this.motionZ *= 1.005;
-                this.cartVelocityX *= 1.005;
-                this.cartVelocityZ *= 1.005;
             }
 
             //update on normal rails
@@ -325,7 +313,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             ((BlockRailBase)block).onMinecartPass(worldObj, this, floorX, floorY, floorZ);
         }
         if (cachedMotionX !=0 || cachedMotionZ !=0){
-            System.out.println("current is : " + currentMotionX + ":" + currentMotionZ + " : and cached is: " + cachedMotionX + ":" + cachedMotionZ);
 
             floorX = MathHelper.floor_double(this.posX);
             floorY = MathHelper.floor_double(this.posY);

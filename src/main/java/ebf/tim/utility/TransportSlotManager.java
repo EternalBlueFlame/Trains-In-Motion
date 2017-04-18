@@ -3,27 +3,18 @@ package ebf.tim.utility;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.registry.TransportRegistry;
-import ebf.tim.tileentities.TileEntityStorage;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.*;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
 /**
- * <h1>Container manager</h1>
- * creates the functionality for item storage and crafting.
- * @see InventoryHandler for the inventory variables.
- *
- * @author Eternal Blue Flame
+ * @author EternalBlueFlame
  */
-public class ContainerHandler extends Container{
+public class TransportSlotManager extends net.minecraft.inventory.Container {
 
     private GenericRailTransport railTransport;
-    private TileEntityStorage craftingTable;
-    public IInventory craftResult = new InventoryCraftResult();
-    private boolean isCrafting;
 
     /**
      * <h2>Server-side inventory GUI for trains and rollingstock</h2>
@@ -31,8 +22,7 @@ public class ContainerHandler extends Container{
      *
      * this mostly just runs loops to add and place all the inventory slots that will appear and can be used on client.
      */
-    public ContainerHandler(InventoryPlayer iinventory, GenericRailTransport entityTrain,boolean isCrafting) {
-        this.isCrafting = isCrafting;
+    public TransportSlotManager(InventoryPlayer iinventory, GenericRailTransport entityTrain) {
         if (entityTrain.getType() != TrainsInMotion.transportTypes.PASSENGER) {
             //player inventory
             for (int ic = 0; ic < 9; ic++) {
@@ -88,65 +78,10 @@ public class ContainerHandler extends Container{
     }
 
     /**
-     * <h2>Server-side inventory GUI for tile entities</h2>
-     * works as the middleman between the client GUI and the entity on client and server.
-     *
-     * this mostly just runs loops to add and place all the inventory slots that will appear and can be used on client.
-     * these slots draw the item, if there is one, and the tint when the cursor hovers over the slot.
-     */
-    public ContainerHandler(InventoryPlayer iinventory, TileEntityStorage block, boolean isCrafting) {
-        this.isCrafting = isCrafting;
-
-        //player inventory
-        for (int ic = 0; ic < 9; ic++) {
-            for (int ir = 0; ir < 3; ir++) {
-                addSlotToContainer(new Slot(iinventory, (((ir * 9) + ic) + 9), 8 + (ic * 18), 84 + (ir * 18)));
-            }
-        }
-        //player toolbar
-        for (int iT = 0; iT < 9; iT++) {
-            addSlotToContainer(new Slot(iinventory, iT, 8 + iT * 18, 142));
-        }
-
-        //tile entity reference
-        if (craftingTable == null) {
-            craftingTable = block;
-        }
-
-
-        if (!isCrafting) {
-            //tile entity inventory
-            int slot=0;
-            for (int ia = 0; ia > -craftingTable.getInventorySize().getRow(); ia--) {
-                for (int ib = 0; ib < craftingTable.getInventorySize().getCollumn(); ib++) {
-                    addSlotToContainer(new Slot(craftingTable, slot, 98 + (ib * 18), (ia * 18) + 44));
-                    slot++;
-                }
-            }
-        } else {
-            //tile entity's output slot
-            this.addSlotToContainer(new SlotCrafting(iinventory.player, craftingTable, this.craftResult, 10, 124, 35));
-            //tile entity's crafting grid
-            for (int l = 0; l < 3; ++l) {
-                for (int i1 = 0; i1 < 3; ++i1) {
-                    this.addSlotToContainer(new craftingSlot(craftingTable, i1 + l * 3, 30 + i1 * 18, 17 + l * 18));
-                }
-            }
-
-            onCraftMatrixChanged(craftResult);
-        }
-    }
-
-
-
-    /**
      * <h2>Inventory sorting and shift-clicking</h2>
      * sorts items from the players inventory to the entity's inventory, and the reverse.
      * This happens with shift click and during some other circumstances.
      * We manage player inventory first because we bound it first, plus it's more reliable to be the size we expected.
-     * TODO: doesn't seem to work for the crafting slot
-     * TODO: should be able to use this to define auto sorting for crafting.
-     * TODO: should be able to use this to define pipe input, either that or it has to be through ISidedInventory
      */
     @Override
     public ItemStack transferStackInSlot(EntityPlayer player, int slot) {
@@ -178,14 +113,6 @@ public class ContainerHandler extends Container{
                     }
                 }
             }
-            //if this is a crafting GUI, then use the GUI matrix to handle it
-            if (isCrafting) {
-                if (craftingTable != null) {
-                    onCraftMatrixChanged(craftingTable);
-                } else {
-                    onCraftMatrixChanged(railTransport);
-                }
-            }
             //if the stack did not transfer, then return the original stack
             return returnStack;
         }
@@ -200,83 +127,7 @@ public class ContainerHandler extends Container{
      */
     @Override
     public boolean canInteractWith(EntityPlayer player) {
-        if (railTransport != null) {
-            return !railTransport.isDead && railTransport.getPermissions(player, railTransport instanceof EntityTrainCore);
-        } else {
-            return craftingTable != null;
-        }
-    }
-
-
-    /**
-     * <h2>craft matrix updater redirect</h2>
-     * vanilla redirect for updating the craft matrix.
-     * @see ContainerHandler#findMatchingRecipe() for the actual use.
-     */
-    @Override
-    public void onCraftMatrixChanged(IInventory inventory) {
-        this.craftResult.setInventorySlotContents(9, findMatchingRecipe());
-    }
-
-    /**
-     * <h2>recipe manager</h2>
-     * manages crafting recipes, and their outputs.
-     * the current implementation only supports shaped recipes.
-     */
-    private ItemStack findMatchingRecipe() {
-        //if this is for a crafting table
-        if (craftingTable != null) {
-            int index=0;
-            //for every train and rollingstock in the registry, check the recipe
-            while (TransportRegistry.listTrains(index)!=null) {
-                TransportRegistry registry = TransportRegistry.listTrains(index);
-                int i = 0;
-                //check each item value, if one is false, set i to 20, which makes it return null
-                for (; i < 8; i++) {
-                    if (craftingTable.getStackInSlot(i) == null) {
-                        if (registry.recipe[i] != null) {
-                            i = 20;
-                        }
-                    } else {
-                        if (registry.recipe[i] != craftingTable.getStackInSlot(i).getItem()) {
-                            i = 20;
-                        }
-                    }
-                }
-                //if i is 8 (remember this is a 0 system so 8 is actually 9 slots) that means the recipe was correct, so return the proper itemstack.
-                if (i == 8) {
-                    return new ItemStack(registry.item, 1);
-                }
-                index++;
-            }
-        } else {
-            //TODO: normal crafting for rollingstock here
-        }
-        return null;
-    }
-
-
-    /**
-     * <h2>crafting slot</h2>
-     * this is a custom crafting slot to make sure that the GUI and inventory update properly.
-     * this copies vanilla behavior but forces the craft matrix change event so we can track changes.
-     *
-     * @author Eternal Blue Flame
-     */
-    private class craftingSlot extends Slot{
-        public craftingSlot(IInventory p_i1824_1_, int p_i1824_2_, int p_i1824_3_, int p_i1824_4_) {
-            super(p_i1824_1_,p_i1824_2_,p_i1824_3_,p_i1824_4_);
-        }
-        @Override
-        public void onSlotChange(ItemStack p_75220_1_, ItemStack p_75220_2_) {
-            super.onSlotChange(p_75220_1_,p_75220_2_);
-            onCraftMatrixChanged(craftResult);
-        }
-        @Override
-        public void onSlotChanged(){
-            super.onSlotChanged();
-            onCraftMatrixChanged(craftResult);
-        }
+        return !railTransport.isDead && railTransport.getPermissions(player, railTransport instanceof EntityTrainCore);
     }
 
 
@@ -315,7 +166,7 @@ public class ContainerHandler extends Container{
         }
         @Override
         public boolean isItemValid(ItemStack item) {
-         System.out.println("but is it water?" + (item.getItem() == Items.water_bucket) + "and the inventory isnt null right...? " + (railTransport.getSizeInventory()));return FuelHandler.isWater(item, railTransport);
+            return FuelHandler.isWater(item, railTransport);
         }
     }
 

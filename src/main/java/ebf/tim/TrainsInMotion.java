@@ -11,19 +11,19 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
-import ebf.tim.registry.GenericRegistry;
-import ebf.tim.registry.TransportRegistry;
-import ebf.tim.utility.ClientProxy;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
 import ebf.tim.items.TiMTab;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.networking.PacketMount;
 import ebf.tim.networking.PacketRemove;
+import ebf.tim.registry.GenericRegistry;
+import ebf.tim.registry.TransportRegistry;
+import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.EventManager;
 import ebf.tim.worldgen.OreGen;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
 
 import java.util.UUID;
 

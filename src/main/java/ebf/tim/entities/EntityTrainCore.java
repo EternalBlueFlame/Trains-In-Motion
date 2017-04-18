@@ -2,16 +2,16 @@ package ebf.tim.entities;
 
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import ebf.tim.TrainsInMotion;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.FuelHandler;
 import ebf.tim.utility.HitboxHandler;
 import ebf.tim.utility.RailUtility;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -68,14 +68,14 @@ public class EntityTrainCore extends GenericRailTransport {
     super.readSpawnData(additionalData);
         isRunning = additionalData.readBoolean();
         accelerator = additionalData.readInt();
-        fuelHandler.fuel = additionalData.readInt();
+        fuelHandler.burnableFuel = additionalData.readInt();
     }
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         super.writeSpawnData(buffer);
         buffer.writeBoolean(isRunning);
         buffer.writeInt(accelerator);
-        buffer.writeInt(fuelHandler.fuel);
+        buffer.writeInt(fuelHandler.burnableFuel);
     }
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
@@ -156,7 +156,7 @@ public class EntityTrainCore extends GenericRailTransport {
     @Override
     public void onUpdate() {
 
-        if(accelerator!=0) {
+        if(accelerator!=0 && frontBogie != null && backBogie != null) {
             //acceleration is scaled down to fit the scale of the trains.
             vectorCache[0][0] = ((accelerator / 6f) * 0.01302083f) * getAcceleration();
 
@@ -265,7 +265,8 @@ public class EntityTrainCore extends GenericRailTransport {
                     isRunning = !isRunning;
                     return true;
                 }case 9:{
-                    //Play horn
+                    //use the server-side world object to play a sound effect to all clients. the second to last value is volume, and idk what the last one is.
+                    worldObj.playSoundEffect(posX, posY, posZ, getHorn().getResourcePath(), 1, 0.5f);
                     return true;
                 }
             }
@@ -280,7 +281,7 @@ public class EntityTrainCore extends GenericRailTransport {
     public float getMaxSpeed(){return 0;}
     public int getMaxFuel(){return 100;}
     public float getAcceleration(){return 0.025f;}
-    public ISound getHorn(){return null;}
-    public ISound getRunning(){return null;}
+    public ResourceLocation getHorn(){return null;}
+    public ResourceLocation getRunning(){return null;}
 
 }

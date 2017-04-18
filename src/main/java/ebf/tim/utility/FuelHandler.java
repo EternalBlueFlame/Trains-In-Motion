@@ -2,7 +2,6 @@ package ebf.tim.utility;
 
 
 import cpw.mods.fml.common.IFuelHandler;
-import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import io.netty.buffer.ByteBuf;
@@ -10,10 +9,11 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
 
 /**
  * <h1>Fuel management for trains</h1>
@@ -23,7 +23,9 @@ import net.minecraftforge.fluids.FluidRegistry;
  */
 public class FuelHandler implements IFuelHandler{
 
-	public int fuel=0;
+	public int burnableFuel=0;
+	public int steamTank=0;
+	public int fuelTank =0;
 
 
 	/**
@@ -89,10 +91,10 @@ public class FuelHandler implements IFuelHandler{
 	 * @see GenericRailTransport#readSpawnData(ByteBuf)
 	 */
 	public void readEntityFromNBT(NBTTagCompound tag) {
-		this.fuel = tag.getInteger("fuelhandler");
+		this.burnableFuel = tag.getInteger("fuelhandler");
 	}
 	public void writeEntityToNBT(NBTTagCompound tag) {
-		tag.setInteger("fuelhandler", this.fuel);
+		tag.setInteger("fuelhandler", burnableFuel);
 
 	}
 
@@ -112,23 +114,26 @@ public class FuelHandler implements IFuelHandler{
 			 * After manage actual fuel consumption.
 			 */
 			case STEAM: {
-				if (isFuel(cart.inventory.getStackInSlot(0), cart) && fuel + TileEntityFurnace.getItemBurnTime(cart.inventory.getStackInSlot(0)) < cart.getMaxFuel()) {
+				if (isFuel(cart.getStackInSlot(0), cart) && burnableFuel + TileEntityFurnace.getItemBurnTime(cart.getStackInSlot(0)) < cart.getMaxFuel()) {
 					//if the first inventory slot contains a burnable listed in our supported burnables, then remove it and add it's value to our fuel.
-					fuel += TileEntityFurnace.getItemBurnTime(cart.inventory.getStackInSlot(0));
+					burnableFuel += TileEntityFurnace.getItemBurnTime(cart.getStackInSlot(0));
 					if (!cart.isCreative) {
-						cart.inventory.decrStackSize(0, 1);
+						cart.decrStackSize(0, 1);
 					}
 				}
 
 				//if the second slot contains a water bucket, add the contents of the water bucket to our tank and then place an empty bucket in the inventory
-				if (isWater(cart.inventory.getStackInSlot(1), cart) &&
-						cart.getTank().addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),true, cart) && !cart.isCreative) {
-					cart.inventory.decrStackSize(1,1);
-					cart.inventory.addItem(new ItemStack(Items.bucket));
+				if (isWater(cart.getStackInSlot(1), cart) &&
+						cart.fill(ForgeDirection.UNKNOWN, new FluidStack(FluidRegistry.WATER, waterValue(cart.getStackInSlot(1))), false) == waterValue(cart.getStackInSlot(1))) {
+					cart.fill(ForgeDirection.UNKNOWN, new FluidStack(FluidRegistry.WATER, waterValue(cart.getStackInSlot(1))), true);
+					if (!cart.isCreative) {
+						cart.decrStackSize(1, 1);
+						cart.addItem(new ItemStack(Items.bucket));
+					}
 				}
 
 				//be sure there is fuel before trying to consume it
-				if (fuel > 0) {
+				if (burnableFuel > 0) {
 					/*
 					* add steam from burning to the steam tank.
 					* steam is equal to water used, minus a small percentage to compensate for impurities in the water that dont transition to steam,
@@ -136,10 +141,10 @@ public class FuelHandler implements IFuelHandler{
 					* steam beyond the max point of storage is considered to be expelled through a failsafe.
 					* TODO: this and the following calculations are still incorrect
 					*/
-					int steam = Math.round((fuel*0.0025f)/ cart.getMaxFuel());
-					if (cart.getTank().drainFluid(steam,true, cart)) {
-						fuel -= 50; //a lava bucket lasts 1000 seconds, so burnables are processed at 20000*0.05 a second
-						cart.getTank().addFluid(FluidRegistry.WATER, MathHelper.floor_float(steam*0.9f), false, cart);
+					int steam = Math.round((burnableFuel*0.0025f)/ cart.getMaxFuel());
+					if (cart.drain(ForgeDirection.UNKNOWN, steam,true).amount == steam) {
+						burnableFuel -= 50; //a lava bucket lasts 1000 seconds, so burnables are processed at 20000*0.05 a second
+						steamTank += MathHelper.floor_float(steam*0.9f);
 					} else if (!cart.isCreative){
 						cart.worldObj.createExplosion(cart, cart.posX, cart.posY, cart.posZ, 5f, false);
 						cart.dropItem(cart.getItem(), 1);
@@ -148,9 +153,9 @@ public class FuelHandler implements IFuelHandler{
 					}
 
 				}
-				if (cart.getTankFluid(false) >0){
+				if (steamTank >0){
 					//steam is expelled through the pistons to push them back and forth, but even when the accelerator is off, a degree of steam is still escaping.
-					cart.getTank().drainFluid(5+(10*cart.accelerator),false, cart);
+					steamTank -=5+(10*cart.accelerator);
 				}
 
 				break;
@@ -179,16 +184,17 @@ public class FuelHandler implements IFuelHandler{
 			 */
 			case ELECTRIC: case MAGLEV: {
 				//add redstone to the fuel tank
-				if (isWater(cart.inventory.getStackInSlot(0), cart) &&
-						cart.getTank().addFluid(FluidRegistry.WATER, waterValue(cart.inventory.getStackInSlot(1)),true, cart) && !cart.isCreative) {
-					cart.inventory.decrStackSize(0,1);
+				/**
+				if (isWater(cart.getStackInSlot(0), cart) &&
+						cart.getTank().addFluid(FluidRegistry.WATER, waterValue(cart.getStackInSlot(1)),true, cart) && !cart.isCreative) {
+					cart.decrStackSize(0,1);
 				}
 				//use stored energy
 				if (cart.isRunning){
 					//electric trains run at a generally set rate which is multiplied at the square of speed.
 					//TODO: this may need re-balancing to keep it realistic.
 					fuel -= 1 + MathHelper.sqrt_float(Math.copySign(cart.accelerator, 1)*5);
-				}
+				}*/
 				break;
 			}
 			/**

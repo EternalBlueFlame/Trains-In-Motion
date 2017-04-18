@@ -37,7 +37,7 @@ public class CommonProxy implements IGuiHandler {
         //Trains
         if (player != null) {
             if (player.worldObj.getEntityByID(ID) instanceof GenericRailTransport) {
-                return new ContainerHandler(player.inventory, (GenericRailTransport) player.worldObj.getEntityByID(ID), false);
+                return new TransportSlotManager(player.inventory, (GenericRailTransport) player.worldObj.getEntityByID(ID));
                 //tile entities
             } else if (world.getTileEntity(x,y,z) instanceof TileEntityStorage){
                 return new ContainerHandler(player.inventory, (TileEntityStorage) world.getTileEntity(x,y,z), true);

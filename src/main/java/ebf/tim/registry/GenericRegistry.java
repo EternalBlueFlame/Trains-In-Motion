@@ -4,6 +4,12 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.TrainsInMotion;
+import ebf.tim.blocks.LampBlock;
+import ebf.tim.blocks.Oil;
+import ebf.tim.items.Bucket;
+import ebf.tim.tileentities.TileEntityStorage;
+import ebf.tim.utility.BlockDynamic;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -16,12 +22,6 @@ import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
-import ebf.tim.TrainsInMotion;
-import ebf.tim.blocks.LampBlock;
-import ebf.tim.blocks.Oil;
-import ebf.tim.items.Bucket;
-import ebf.tim.tileentities.TileEntityStorage;
-import ebf.tim.utility.BlockDynamic;
 
 import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
 

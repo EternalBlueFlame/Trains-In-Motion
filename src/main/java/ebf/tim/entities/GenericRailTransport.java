@@ -4,34 +4,33 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.TrainsInMotion;
+import ebf.tim.entities.trains.EntityBrigadelok080;
+import ebf.tim.items.ItemKey;
+import ebf.tim.models.tmt.Vec3d;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import ebf.tim.TrainsInMotion;
-import ebf.tim.entities.trains.EntityBrigadelok080;
-import ebf.tim.items.ItemKey;
-import ebf.tim.models.tmt.Vec3d;
+import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fluids.*;
+import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static net.minecraftforge.fluids.FluidStack.loadFluidStackFromNBT;
 import static ebf.tim.TrainsInMotion.nullUUID;
 import static ebf.tim.TrainsInMotion.proxy;
 import static ebf.tim.utility.RailUtility.rotatePoint;
@@ -41,7 +40,15 @@ import static ebf.tim.utility.RailUtility.rotatePoint;
  * this is the base for all trains and rollingstock.
  * @author Eternal Blue Flame
  */
-public class GenericRailTransport extends Entity implements IEntityAdditionalSpawnData, IEntityMultiPart{
+public class GenericRailTransport extends Entity implements IEntityAdditionalSpawnData, IEntityMultiPart, IInventory, IFluidHandler {
+
+
+    /**
+     * <h3>Ore directory support</h3>
+     * creates lists of the items by ore directory names to add support for 3rd party mods.
+     */
+    private static final ArrayList<ItemStack> logCarrier = combineStacks(combineStacks(OreDictionary.getOres("plankWood"), OreDictionary.getOres("slabWood")), OreDictionary.getOres("logWood"));
+    private static final ArrayList<ItemStack> coalCarrier = OreDictionary.getOres("coal");
 
     /**
      * <h2>variables</h2>
@@ -80,10 +87,14 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public UUID back = nullUUID;
     public int ownerID =0;
     public String destination ="";
-    public InventoryHandler inventory = new InventoryHandler(this);
     public ItemStack key;
     private double[][] vectorCache = new double[7][3];
     private int health = 20;
+    private FluidStack fluid = null;
+    private List<ItemStack> items;
+    private List<String> filter = new ArrayList<String>();
+    private boolean isWhitelist = false;
+    private boolean updateWatchers = false;
     public GenericRailTransport(World world){
         super(world);
     }
@@ -117,7 +128,15 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public void entityInit(){
         this.dataWatcher.addObject(19, 0);//owner
         this.dataWatcher.addObject(20, 0);//tankA
-        this.dataWatcher.addObject(21, 0);//TankB
+        if (getInventorySize() != TrainsInMotion.inventorySizes.NULL && items == null) {
+            items = new ArrayList<ItemStack>();
+            while (items.size() < getSizeInventory()) {
+                items.add(null);
+            }
+            if (getRiderOffsets() != null && getRiderOffsets().length > 1) {
+                items.add(null);
+            }
+        }
     }
 
 
@@ -147,6 +166,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     (frontBogie.posX + backBogie.posX) * 0.5D,
                     ((frontBogie.posY + backBogie.posY) * 0.5D),
                     (frontBogie.posZ + backBogie.posZ) * 0.5D);
+
+            setRotation((float)Math.toDegrees(Math.atan2(
+                    frontBogie.posZ - backBogie.posZ,
+                    frontBogie.posX - backBogie.posX)),
+                    MathHelper.floor_double(Math.acos(frontBogie.posY / backBogie.posY)*RailUtility.degreesD));
         }else {
             this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
         }
@@ -266,58 +290,64 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     protected void readEntityFromNBT(NBTTagCompound tag) {
         isLocked = tag.getBoolean("extended.islocked");
         lamp.isOn = tag.getBoolean("extended.lamp");
-        lamp.X = tag.getInteger("extended.lamp.x");
-        lamp.Y = tag.getInteger("extended.lamp.y");
-        lamp.Z = tag.getInteger("extended.lamp.z");
         isDead = tag.getBoolean("extended.dead");
         isCoupling = tag.getBoolean("extended.coupling");
         //load links
-        front = new UUID(tag.getLong("extended.front.most"), tag.getLong("extended.front.least"));
-        back = new UUID(tag.getLong("extended.back.most"), tag.getLong("extended.back.least"));
+        if (tag.hasKey("extended.front.most")) {
+            front = new UUID(tag.getLong("extended.front.most"), tag.getLong("extended.front.least"));
+        }
+        if (tag.hasKey("extended.back.most")) {
+            back = new UUID(tag.getLong("extended.back.most"), tag.getLong("extended.back.least"));
+        }
         //more bools
         isCreative = tag.getBoolean("extended.creative");
         brake = tag.getBoolean("extended.handbrake");
         //load owner
         owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
-//        key.readFromNBT(tag);
+        //key.readFromNBT(tag);
         //load tanks
-        if (getTank() != null) {
-            FluidStack tankA = loadFluidStackFromNBT(tag);
-            if (tankA.amount != 0) {
-                getTank().addFluid(tankA.getFluid(), tankA.amount, true, this);
-            }
-            FluidStack tankB = loadFluidStackFromNBT(tag);
-            if (tankB.amount != 0) {
-                getTank().addFluid(tankB.getFluid(), tankB.amount, false, this);
+        if (getTankCapacity() >0) {
+            fluid = FluidStack.loadFluidStackFromNBT(tag);
+            if (fluid==new FluidStack(FluidRegistry.WATER,0)){
+                fluid = null;
             }
         }
 
-        inventory.readNBT(tag, "items");
+        if (getInventorySize() != TrainsInMotion.inventorySizes.NULL) {
+            for (int i = 0; i < getSizeInventory(); i++) {
+                NBTTagCompound tagCompound = tag.getCompoundTag("item." +i);
+                if (tagCompound != null){
+                    setInventorySlotContents(i, ItemStack.loadItemStackFromNBT(tagCompound));
+                }
+            }
+            isWhitelist = tag.getBoolean("filter.whitelist");
+
+            int length = tag.getInteger("filter.length");
+            System.out.println("loaded filter length");
+            if (length > 0) {
+                for (int i = 0; i < length; i++) {
+                    filter.add(tag.getString("item." + i));
+                }
+            }
+        }
+
+        updateWatchers = true;
 
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         tag.setBoolean("extended.islocked", isLocked);
         tag.setBoolean("extended.lamp", lamp.isOn);
-        tag.setInteger("extended.lamp.x", lamp.X);
-        tag.setInteger("extended.lamp.y", lamp.Y);
-        tag.setInteger("extended.lamp.z", lamp.Z);
         tag.setBoolean("extended.dead", isDead);
         tag.setBoolean("extended.coupling", isCoupling);
         //front and back bogies
-        if (front != null){
+        if (front != null && back != TrainsInMotion.nullUUID){
             tag.setLong("extended.front.most", front.getMostSignificantBits());
             tag.setLong("extended.front.least", front.getLeastSignificantBits());
-        } else {
-            tag.setLong("extended.front.most", 0);
-            tag.setLong("extended.front.least", 0);
         }
-        if (back != null){
-            tag.setLong("extended.back.most", front.getMostSignificantBits());
-            tag.setLong("extended.back.least", front.getLeastSignificantBits());
-        } else {
-            tag.setLong("extended.back.most", 0);
-            tag.setLong("extended.back.least", 0);
+        if (back != null && back != TrainsInMotion.nullUUID){
+            tag.setLong("extended.back.most", back.getMostSignificantBits());
+            tag.setLong("extended.back.least", back.getLeastSignificantBits());
         }
         //more bools
         tag.setBoolean("extended.creative", isCreative);
@@ -325,39 +355,34 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //owner
         tag.setLong("extended.ownerm", owner.getMostSignificantBits());
         tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
-//        key.writeToNBT(tag);
+        //key.writeToNBT(tag);
 
 
         //tanks
-        if (getTank() != null) {
-            if (getTank().getTank(true).getFluid() != null) {
-                getTank().getTank(true).getFluid().writeToNBT(tag);
+        if (getTankCapacity() >0){
+            if (fluid != null) {
+                fluid.writeToNBT(tag);
             } else {
-                new FluidStack(FluidRegistry.WATER, 0).writeToNBT(tag);
-            }
-
-            if (getTank().getTank(false).getFluid() != null) {
-                getTank().getTank(false).getFluid().writeToNBT(tag);
-            } else {
-                new FluidStack(FluidRegistry.WATER, 0).writeToNBT(tag);
+                new FluidStack(FluidRegistry.WATER, 0);
             }
         }
-        tag.setTag("items", inventory.writeNBT());
-    }
+        if (getInventorySize() != TrainsInMotion.inventorySizes.NULL && items.size()>0) {
+            for (int i =0; i< getSizeInventory(); i++) {
+                if (items.get(i) != null) {
+                    tag.setTag("item." + i, items.get(i).writeToNBT(new NBTTagCompound()));
+                }
+            }
+            tag.setBoolean("filter.whitelist", isWhitelist);
 
 
-    /**
-     * <h3>Add velocity to bogies</h3>
-     * used to add motion to every bogie at once with a more-simple call.
-     * TODO: remove this for alpha 3.
-     */
-    @Override
-    public void addVelocity(double velocityX, double velocityY, double velocityZ){
-        //handle movement for trains, this will likely need to be different for rollingstock.
-        if (frontBogie != null && backBogie !=null){
-            frontBogie.addVelocity(velocityX,velocityY,velocityZ);
-            backBogie.addVelocity(velocityX,velocityY,velocityZ);
+            tag.setInteger("filter.length", filter!=null?filter.size():0);
+            if (filter != null && filter.size() > 0) {
+                for (int i = 0; i < filter.size(); i++) {
+                    tag.setString("item." + i, filter.get(i));
+                }
+            }
         }
+
     }
 
 
@@ -473,6 +498,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (player!= null) {
                 ownerID = player.getEntityId();
                 this.dataWatcher.updateObject(19,ownerID);
+            }
+            if (updateWatchers && fluid!= null){
+                dataWatcher.updateObject(20, fluid.amount);
             }
         }
 
@@ -655,7 +683,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
         //if a ticket is needed like for passenger cars
         if(isLocked && getRiderOffsets().length>1){
-            return player.inventory.hasItem(inventory.getTicketSlot().getItem());
+            return player.inventory.hasItem(getTicketSlot().getItem());
         }
 
         //all else fails, just return if this is locked.
@@ -678,32 +706,384 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public List<Double> getRenderBogieOffsets(){return new ArrayList<Double>();}
     public TrainsInMotion.transportTypes getType(){return null;}
     public double[][] getRiderOffsets(){return new double[][]{{0,0}};}
-    public float[] getHitboxPositions(){return new float[]{-1,0,1};}
+    public double[] getHitboxPositions(){return new double[]{-1,0,1};}
     public Item getItem(){return null;}
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.THREExTHREE;}
-    public LiquidManager getTank(){return null;}
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
     public float getPistonOffset(){return 0;}
     public float[][] getSmokeOffset(){return new float[][]{{0,0,0,255}};}
     public double getLengthFromCenter(){return 1d;}
     public float getRenderScale(){return 0.0625f;}
     public boolean isReinforced(){return false;}
-
-
-    /**
-     * <h2>Datawatchers</h2>
-     * Similar to packs this is used to transfer values of various things between client and server.
-     */
-
-    public int getTankFluid(boolean isFirstTank){
-        if (isFirstTank) {
-            return this.dataWatcher.getWatchableObjectInt(20);
-        } else{
-            return this.dataWatcher.getWatchableObjectInt(21);
-        }
-    }
+    public int getTankCapacity(){return 0;}
     public int getOwnerID(){
         return this.dataWatcher.getWatchableObjectInt(19);
     }
+
+
+    /**
+     * <h1>Inventory management</h1>
+     */
+
+
+    /**
+     * <h2>define filters</h2>
+     * this is called on the creation of an entity that need it's inventory filtered, or on the event that the entity's filter is set, like from the GUI.
+     * whitelist as true will allow only the defined types or items. while as false will allow anything except the defined types or items.
+     * types in most cases will override items because items are always checked last, if at all.
+     * itemTypes.ALL is basically just ignored, this is only called when you are not going to filter by type.
+     */
+    public void setFilter(boolean isWhitelist, Item[] items){
+        this.isWhitelist = isWhitelist;
+        if (items != null) {
+            filter.clear();
+            for (Item itm : items){
+                filter.add(itm.getUnlocalizedName());
+            }
+        }
+    }
+
+    /**
+     * <h2>inventory size</h2>
+     * @return the number of slots the inventory should have.
+     * if it's a train we have to calculate the size based on the type and the size of inventory its supposed to have.
+     * trains get 1 extra slot by default for fuel, steam and nuclear steam get another slot, and if it can take passengers there's another slot, this is added to the base inventory size.
+     * if it's not a train or rollingstock, then just return the base amount for a crafting table.
+     */
+    @Override
+    public int getSizeInventory() {
+        int size =0;
+        if (getType() == TrainsInMotion.transportTypes.STEAM || getType()== TrainsInMotion.transportTypes.NUCLEAR_STEAM){
+            size=2;
+        } else if(getType() == TrainsInMotion.transportTypes.DIESEL || getType() == TrainsInMotion.transportTypes.ELECTRIC || getType() == TrainsInMotion.transportTypes.NUCLEAR_ELECTRIC || getType() == TrainsInMotion.transportTypes.MAGLEV){
+            size++;
+        }
+        if (getRiderOffsets() != null && getRiderOffsets().length >1){
+            size++;
+        }
+        return size+ (getInventorySize().getCollumn() * getInventorySize().getRow());
+    }
+
+    /**
+     * <h2>get item</h2>
+     * @return the item in the requested slot
+     */
+    @Override
+    public ItemStack getStackInSlot(int slot) {
+        if (items == null || slot <0 || slot >= items.size()){
+            return null;
+        } else {
+            return items.get(slot);
+        }
+    }
+
+    /**
+     * <h2>decrease stack size</h2>
+     * @return the itemstack with the decreased size. If the decreased size is equal to or less than the current stack size it returns null.
+     */
+    @Override
+    public ItemStack decrStackSize(int slot, int stackSize) {
+        if (items!= null && getSizeInventory()>=slot && items.get(slot) != null) {
+            ItemStack itemstack;
+
+            if (items.get(slot).stackSize <= stackSize) {
+                itemstack = items.get(slot).copy();
+                items.set(slot, null);
+
+                return itemstack;
+            } else {
+                itemstack = items.get(slot).splitStack(stackSize);
+                if (items.get(slot).stackSize == 0) {
+                    items.set(slot, null);
+                }
+
+                return itemstack;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * <h2>Set slot</h2>
+     * sets the slot contents, this is a direct override so we don't have to compensate for anything.
+     */
+    @Override
+    public void setInventorySlotContents(int slot, ItemStack itemStack) {
+        if (items != null && slot >0 && slot < getSizeInventory()) {
+            items.set(slot, itemStack);
+        }
+    }
+
+    /**
+     * <h2>name and stack limit</h2>
+     * These are grouped together because they are pretty self-explanatory.
+     */
+    @Override
+    public String getInventoryName() {return getItem().getUnlocalizedName() + ".storage";}
+    @Override
+    public boolean hasCustomInventoryName() {return items != null;}
+    @Override
+    public int getInventoryStackLimit() {return items!=null?64:0;}
+
+    /**
+     * <h2>is Locked</h2>
+     * returns if the entity is locked, and if it is, if the player is the owner.
+     * This makes sure the inventory can be accessed by anyone if its unlocked and only by the owner when it is locked.
+     * if it's a tile entity, it's just another null check to be sure no one crashes.
+     */
+    @Override
+    public boolean isUseableByPlayer(EntityPlayer p_70300_1_) {return getPermissions(p_70300_1_, false);}
+
+    /**
+     * <h2>slot limiter</h2>
+     * This is supposed to see if a specific slot will take a specific item. However it's only called from slots we know are actual inventory slots.
+     * Because of this we don't even need to check the slot, just the item.
+     * This is also used to filter items for specific rollingstock, that way we can use ore directory commands for things like logs, planks, ores, ingots, etc.
+     */
+    @Override
+    public boolean isItemValidForSlot(int slot, ItemStack itemStack) {
+        //compensate for specific rollingstock
+        switch (getType()) {
+            case LOGCAR: {
+                for (ItemStack log : logCarrier) {
+                    if (log.getItem() == itemStack.getItem()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            case COALHOPPER: {
+                for (ItemStack coal : coalCarrier) {
+                    if (coal.getItem() == itemStack.getItem()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+
+        //before we even bother to try and check everything else, check if it's filtered in the first place.
+        if (itemStack == null || filter.size() == 0) {
+            return true;
+        }
+        //if we use a whitelist, only return true if the item is in the list.
+        if (isWhitelist) {
+            return filter.size() != 0 && filter.contains(itemStack.getItem().getUnlocalizedName());
+        } else {
+            //if it's a blacklist do exactly the same as above but return the opposite value.
+            return filter.size() == 0 || !filter.contains(itemStack.getItem().getUnlocalizedName());
+        }
+    }
+
+
+    /**
+     * <h2>Get Ticket Slot</h2>
+     * this just simply returns the itemstack in the ticket slot, assuming there is one.
+     */
+    public ItemStack getTicketSlot(){
+        //if it's a train with a boiler, send back slot 2.
+        if ((getType() == TrainsInMotion.transportTypes.STEAM || getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
+                getRiderOffsets().length > 1) {
+            return items.get(2);
+        } else if ((getType() == TrainsInMotion.transportTypes.DIESEL || getType() == TrainsInMotion.transportTypes.ELECTRIC || getType() == TrainsInMotion.transportTypes.NUCLEAR_ELECTRIC || getType() == TrainsInMotion.transportTypes.MAGLEV)
+                && getRiderOffsets().length > 1){
+            //if it's a train without a boiler, send back slot 1
+            return items.get(1);
+        } else if (getRiderOffsets().length > 1){
+            //if it's not a train, send back slot 0
+            return items.get(0);
+        }
+        //if it's not meant to have multiple passengers, send back null because there is no ticket slot.
+        return null;
+    }
+    /**
+     * <h2>Add item to train inventory</h2>
+     * custom function for adding items to the train's inventory.
+     * similar to a container's TransferStackInSlot function, this will automatically sort an item into the inventory.
+     * if there is no room in the inventory for the item, it will drop on the ground.
+     */
+    public void addItem(ItemStack item){
+        for (int i=1; i<getSizeInventory();i++){
+            if (i==1){
+                if (getType() == TrainsInMotion.transportTypes.STEAM || getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM){
+                    i++;
+                }
+                if (getRiderOffsets().length>1){
+                    i++;
+                }
+            }
+
+            if (getStackInSlot(i) ==null){
+                setInventorySlotContents(i, item);
+                return;
+            } else if (getStackInSlot(i).getItem() == item.getItem() &&
+                    item.stackSize + items.get(i).stackSize <= item.getMaxStackSize()){
+                setInventorySlotContents(i, new ItemStack(item.getItem(), item.stackSize + items.get(i).stackSize));
+                return;
+            }
+        }
+        dropItem(item.getItem(), item.stackSize);
+    }
+
+    /**
+     * <h2>inventory percentage count</h2>
+     * calculates percentage of inventory used then returns a value based on the intervals.
+     * for example if the inventory is half full and the intervals are 100, it returns 50. or if the intervals were 90 it would return 45.
+     */
+    public int calculatePercentageUsed(int indexes){
+        if (items == null){
+            return 0;
+        }
+        float i=0;
+        for (ItemStack item : items){
+            if (item != null && item.stackSize >0){
+                i++;
+            }
+        }
+        return i>0?MathHelper.floor_double(((i / getSizeInventory()) *indexes)+0.5):0;
+    }
+
+
+    /**
+     * <h2>get an item from inventory to render</h2>
+     * cycles through the items in the inventory and returns the first non-null item that's index is greater than the provided number.
+     * if it fails to find one it subtracts one from the index and tries again, and keeps trying until the index is negative, in which case it returns 0.
+     */
+    public ItemStack getFirstBlock(int index){
+        for (int i=0; i<getSizeInventory(); i++){
+            if (i>= index && items.get(i) != null && items.get(i).stackSize>0){
+                return items.get(i);
+            }
+        }
+        return getFirstBlock(index>0?index-1:0);
+    }
+
+    /**
+     * <h2>unused</h2>
+     * we have to initialize these values, but due to the design of the entity we don't actually use them.
+     */
+    @Override
+    public ItemStack getStackInSlotOnClosing(int p_70304_1_) {return null;}
+    @Override
+    public void markDirty() {}
+    @Override
+    public void openInventory() {}
+    @Override
+    public void closeInventory() {}
+
+
+    /**
+     * <h1>Fluid Management</h1>
+     */
+    @Override
+    public boolean canDrain(ForgeDirection from, Fluid resource){return fluid != null && fluid.amount>0 && (fluid.getFluid() == resource || resource == null);}
+
+    @Override
+    public boolean canFill(ForgeDirection from, Fluid resource){return getTankCapacity()>0 && (fluid == null || fluid.getFluid() == resource);}
+    //drain a set amount
+    @Override
+    public FluidStack drain(ForgeDirection from, int drain, boolean doDrain){
+        if (getTankCapacity() <1 || fluid == null || fluid.amount <1){
+            return null;
+        } else {
+            if (fluid.amount <= drain){
+                FluidStack toReturn = fluid.copy();
+                if (doDrain){
+                    fluid = null;
+                    this.dataWatcher.updateObject(20,0);
+                }
+                return toReturn;
+            } else {
+                FluidStack toReturn = fluid.copy();
+                toReturn.amount -= drain;
+                if (doDrain){
+                    fluid.amount -= drain;
+                    this.dataWatcher.updateObject(20,fluid.amount);
+                }
+                return toReturn;
+            }
+        }
+    }
+    //drain only if its a specific fluid
+    @Override
+    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
+        if (getTankCapacity() <1 || fluid == null || fluid.getFluid() != resource.getFluid() || fluid.amount<1){
+            return null;
+        } else {
+            if (fluid.amount <= resource.amount){
+                FluidStack toReturn = fluid.copy();
+                if (doDrain){
+                    fluid = null;
+                    this.dataWatcher.updateObject(20,0);
+                }
+                return toReturn;
+            } else {
+                FluidStack toReturn = fluid.copy();
+                toReturn.amount -= resource.amount;
+                if (doDrain){
+                    fluid.amount -= resource.amount;
+                    this.dataWatcher.updateObject(20,fluid.amount);
+                }
+                return toReturn;
+            }
+        }
+    }
+    public int getTankAmount(){
+        return fluid!=null?fluid.amount:0;
+    }
+
+    @Override
+    public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
+        if (getTankCapacity() <1 || !(fluid == null || fluid.getFluid() == resource.getFluid())){
+            return 0;
+        }
+        if (fluid == null){
+            if (resource.amount > getTankCapacity()) {
+                resource.amount = getTankCapacity();
+            }
+            if (doFill) {
+                fluid = resource;
+                this.dataWatcher.updateObject(20,fluid.amount);
+            }
+            return resource.amount;
+
+        } else if (getTankCapacity() + fluid.amount < resource.amount){
+            if (doFill){
+                fluid.amount += resource.amount;
+                this.dataWatcher.updateObject(20,fluid.amount);
+            }
+            return resource.amount;
+        } else {
+            int volume = getTankCapacity() - fluid.amount;
+            if (doFill){
+                fluid.amount += volume;
+                this.dataWatcher.updateObject(20,fluid.amount);
+            }
+            return volume;
+        }
+    }
+    @Override
+    public FluidTankInfo[] getTankInfo(ForgeDirection from){
+        return getTankCapacity()<1?null:new FluidTankInfo[]{new FluidTankInfo(fluid, getTankCapacity())};
+    }
+
+
+
+    /**
+     * <h3> combine itemstacks</h3>
+     * combines multiple arrays of itemstacks into a single array,
+     * this allows us to create an array comprised of multiple sets of itemstacks, since java doesn't normally allow for this behavior.
+     */
+    private static ArrayList<ItemStack> combineStacks(ArrayList<ItemStack> oldStacks, ArrayList<ItemStack> newStacks){
+        ArrayList<ItemStack> items = new ArrayList<ItemStack>();
+        items.addAll(oldStacks);
+        items.addAll(newStacks);
+        return items;
+    }
+
+
+
 
 }

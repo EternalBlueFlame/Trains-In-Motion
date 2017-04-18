@@ -1,13 +1,13 @@
 package ebf.tim.utility;
 
+import ebf.tim.TrainsInMotion;
+import ebf.tim.TrainsInMotion.blockTypes;
+import ebf.tim.tileentities.TileEntityStorage;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
-import ebf.tim.TrainsInMotion;
-import ebf.tim.tileentities.TileEntityStorage;
-import ebf.tim.TrainsInMotion.blockTypes;
 
 /**
  * <h1>Block core</h1>

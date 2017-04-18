@@ -6,16 +6,16 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntitySeat;
+import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.networking.PacketKeyPress;
+import ebf.tim.networking.PacketMount;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
-import ebf.tim.entities.EntityTrainCore;
-import ebf.tim.networking.PacketKeyPress;
-import ebf.tim.networking.PacketMount;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -61,6 +61,8 @@ public class EventManager {
                 } else if (ClientProxy.KeyReverse.getIsKeyPressed()) {
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3, player.ridingEntity.getEntityId()));
                     ((EntityTrainCore) player.ridingEntity).setAcceleration(false);
+                } else if (ClientProxy.KeyHorn.isPressed()){
+                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(4, player.ridingEntity.getEntityId()));
                 }
             }
         }

@@ -1,18 +1,5 @@
 package ebf.tim.models;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.client.particle.EntityFX;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.monster.EntityEnderman;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import org.lwjgl.opengl.GL11;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.tmt.ModelRendererTurbo;
@@ -21,6 +8,21 @@ import ebf.tim.models.tmt.Vec3f;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.HitboxHandler;
 import ebf.tim.utility.RailUtility;
+import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.client.particle.EntityFX;
+import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.monster.EntityEnderman;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -251,7 +253,7 @@ public class RenderEntity extends Render {
             //loop for the groups of cargo
             for (blockCargo cargo : blockCargoRenders) {
                 //limit loops to how much should be rendered based on inventory content
-                if (itteration<entity.inventory.calculatePercentageUsed(blockCargoRenders.size())) {
+                if (itteration<entity.calculatePercentageUsed(blockCargoRenders.size())) {
                     if (cargo.isBlock) {
                         //render a block in place of the geometry.
                         // bind the texture
@@ -269,7 +271,8 @@ public class RenderEntity extends Render {
                             //define scale based on the model
                             GL11.glScaled(block.xScale - 0.0175, block.yScale - 0.0175, block.zScale - 0.0175);
                             //now actually render the block.
-                            field_147909_c.renderBlockAsItem(entity.inventory.getFirstBlock(itteration), entity.inventory.getFirstBlockMeta(itteration), 1.0f);
+                            ItemStack b = entity.getFirstBlock(itteration);
+                            field_147909_c.renderBlockAsItem( Block.getBlockFromItem(b.getItem()), b.getItemDamage(), 1.0f);
                             GL11.glPopMatrix();
                         }
                     } else {
@@ -388,8 +391,8 @@ public class RenderEntity extends Render {
         //position and rotate the geometry based on the provided vector.
         public void rotationMoveYZX(float x, float y){
             boxRefrence.rotationPointY = position.y - (y*0.5f);
-            boxRefrence.rotationPointZ = position.x - x;
-            boxRefrence.rotateAngleX = position.z - (y * 0.05f);
+            boxRefrence.rotationPointX = position.x - x;
+            boxRefrence.rotateAngleZ = position.z - (y * 0.05f);
         }
     }
 
@@ -408,7 +411,7 @@ public class RenderEntity extends Render {
         }
 
         public void rotate(float radian){
-            boxRefrence.rotateAngleX = radian;
+            boxRefrence.rotateAngleZ = radian;
         }
     }
 
@@ -450,7 +453,7 @@ public class RenderEntity extends Render {
 
         public void moveYZ(float x, float y){
             boxRefrence.rotationPointY = position.y - y;
-            boxRefrence.rotationPointZ = position.x - x;
+            boxRefrence.rotationPointX = position.x - x;
         }
     }
 

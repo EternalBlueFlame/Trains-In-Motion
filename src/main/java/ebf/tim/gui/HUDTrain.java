@@ -2,14 +2,14 @@ package ebf.tim.gui;
 
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import ebf.tim.entities.EntityTrainCore;
+import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.gui.train.GUITrain;
 import ebf.tim.registry.URIRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import ebf.tim.entities.EntityTrainCore;
-import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.gui.train.GUITrain;
 
 /**
  * <h1>Train HUD</h1>

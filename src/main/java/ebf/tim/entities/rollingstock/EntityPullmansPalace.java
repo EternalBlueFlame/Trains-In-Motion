@@ -5,7 +5,6 @@ import ebf.tim.entities.EntityRollingStockCore;
 import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemTransport;
 import ebf.tim.models.tmt.Vec3d;
-import ebf.tim.utility.LiquidManager;
 import net.minecraft.item.Item;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -21,7 +20,6 @@ import java.util.UUID;
  * @author Eternal Blue Flame
  */
 public class EntityPullmansPalace extends EntityRollingStockCore {
-    private static final LiquidManager tank = null;
     private static final String[] itemDescription = new String[]{
             "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2 " + StatCollector.translateToLocal("menu.item.tons"),
             "\u00A77" + StatCollector.translateToLocal("menu.item.seats") +": 4 " + StatCollector.translateToLocal("menu.item.players")};
@@ -62,7 +60,7 @@ public class EntityPullmansPalace extends EntityRollingStockCore {
      * <h2>Hitbox offsets</h2>
      */
     @Override
-    public float[] getHitboxPositions(){return new float[]{-2.75f,-1.25f,0f,1.35f,2.75f};}
+    public double[] getHitboxPositions(){return new double[]{-2.75d,-1.25d,0d,1.35d,2.75d};}
     /**
      * <h2>Lamp offset</h2>
      */
@@ -79,8 +77,6 @@ public class EntityPullmansPalace extends EntityRollingStockCore {
     /**
      * <h2>pre-asigned values</h2>
      */
-    @Override
-    public LiquidManager getTank(){return tank;}
     @Override
     public Item getItem(){
         return thisItem;

@@ -2,16 +2,16 @@ package ebf.tim.items;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.TrainsInMotion;
+import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.registry.URIRegistry;
+import ebf.tim.utility.DebugUtil;
+import ebf.tim.utility.RailUtility;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import ebf.tim.TrainsInMotion;
-import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.utility.DebugUtil;
-import ebf.tim.utility.RailUtility;
 
 import java.util.List;
 import java.util.UUID;

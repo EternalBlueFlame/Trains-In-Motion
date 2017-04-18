@@ -1,6 +1,12 @@
 package ebf.tim.gui.train;
 
+import ebf.tim.TrainsInMotion;
+import ebf.tim.entities.EntityTrainCore;
+import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.registry.URIRegistry;
+import ebf.tim.utility.ContainerHandler;
+import ebf.tim.utility.TransportSlotManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.GuiButton;
@@ -12,16 +18,11 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
-import ebf.tim.TrainsInMotion;
-import ebf.tim.entities.EntityTrainCore;
-import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.networking.PacketKeyPress;
-import ebf.tim.utility.ContainerHandler;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import static ebf.tim.TrainsInMotion.transportTypes.PASSENGER;
+import static ebf.tim.TrainsInMotion.transportTypes.*;
 
 /**
  * <h1>Transport GUI</h1>
@@ -51,7 +52,7 @@ public class GUITrain extends GuiContainer {
      * @see ContainerHandler
      */
     public GUITrain(InventoryPlayer inventoryPlayer, GenericRailTransport entity) {
-        super(new ContainerHandler(inventoryPlayer, entity,  false));
+        super(new TransportSlotManager(inventoryPlayer, entity));
         player = inventoryPlayer.player;
         transport = entity;
     }
@@ -131,8 +132,13 @@ public class GUITrain extends GuiContainer {
     @Override
     public void drawScreen(int mouseX, int mouseY, float par3){
         super.drawScreen(mouseX, mouseY, par3);
-        firstTankFluid = transport.getTankFluid(true);
-        secondTankFluid = transport.getTankFluid(false);
+        if (transport.getType() == STEAM || transport.getType() == NUCLEAR_STEAM || transport.getType() == TANKER || transport.getType() == TENDER) {
+            firstTankFluid = transport.getDataWatcher().getWatchableObjectInt(20);
+        }
+
+        if (transport instanceof EntityTrainCore) {
+            secondTankFluid = ((EntityTrainCore) transport).fuelHandler.steamTank;
+        }
         //draw the fuel fluid tank hover text
         if (transport instanceof EntityTrainCore) {
             renderTrainOverlay(mouseX, mouseY);
@@ -286,14 +292,14 @@ public class GUITrain extends GuiContainer {
         drawTexturedModalRect(guiLeft + 66, guiTop + 10, 0, 0, 18, 50, 16, 16, zLevel);
         if (firstTankFluid>0) {
             //draw the water tank
-            int liquid = Math.abs((firstTankFluid * 50) / transport.getTank().getTank(true).getCapacity());
+            int liquid = Math.abs((firstTankFluid * 50) / transport.getTankCapacity());
             drawTexturedModalRect(guiLeft + 66, guiTop + 60 - liquid, 16,0, 18, liquid, 16, 16, zLevel);
         }
         //steam tank
         if (transport.getType() == TrainsInMotion.transportTypes.STEAM || transport.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
             drawTexturedModalRect(guiLeft + 34, guiTop+10, 0, 0, 18, 30, 16, 16, zLevel);
             if (secondTankFluid>0) {
-                int liquid3 = Math.abs((secondTankFluid * 30) / transport.getTank().getTank(false).getCapacity());
+                int liquid3 = Math.abs((secondTankFluid * 30) / transport.getTankCapacity());
                 drawTexturedModalRect(guiLeft + 34, guiTop +40 - liquid3, 32,0, 18, liquid3, 16, 16, zLevel);
             }
         }
@@ -372,13 +378,13 @@ public class GUITrain extends GuiContainer {
     private void renderTrainOverlay(int mouseX, int mouseY){
         if ((mouseX >= guiLeft + 66 && mouseX <= guiLeft + 84 &&
                 mouseY >= guiTop + 10 && mouseY <= guiTop +60)) {
-            drawHoveringText(Arrays.asList(tankType(true), firstTankFluid*0.001f + StatCollector.translateToLocal("gui.of") + transport.getTank().getTank(true).getCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
+            drawHoveringText(Arrays.asList(tankType(true), firstTankFluid*0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
         }
         //draw the steam tank hover text
         if ((transport.getType() == TrainsInMotion.transportTypes.STEAM || transport.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
                 (mouseX >= guiLeft + 34 && mouseX <= guiLeft + 52 &&
                         mouseY >= guiTop + 10 && mouseY <= guiTop +40)) {
-            drawHoveringText(Arrays.asList(tankType(false), secondTankFluid*0.001f + StatCollector.translateToLocal("gui.of") + transport.getTank().getTank(true).getCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
+            drawHoveringText(Arrays.asList(tankType(false), secondTankFluid*0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
         }
         //draw toggle button hover text
         if (mouseY > guiTop + 166 && mouseY < guiTop +184){

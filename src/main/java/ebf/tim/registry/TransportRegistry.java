@@ -4,22 +4,22 @@ package ebf.tim.registry;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.models.rollingstock.UP3Bay100TonHopper;
-import ebf.tim.models.trains.Brigadelok_080;
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
 import ebf.tim.entities.rollingstock.EntityPullmansPalace;
 import ebf.tim.entities.rollingstock.EntityUP3Bay100TonHopper;
 import ebf.tim.entities.rollingstock.EntityVATLogCar;
 import ebf.tim.entities.rollingstock.EntityWellCar;
 import ebf.tim.entities.trains.EntityBrigadelok080;
+import ebf.tim.models.Bogie;
 import ebf.tim.models.bogies.CMDBogie;
 import ebf.tim.models.rollingstock.PullmansPalace;
+import ebf.tim.models.rollingstock.UP3Bay100TonHopper;
 import ebf.tim.models.rollingstock.VATLogCar;
 import ebf.tim.models.rollingstock.Well_Car;
-import ebf.tim.models.Bogie;
+import ebf.tim.models.trains.Brigadelok_080;
+import net.minecraft.client.model.ModelBase;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * <h1>Train registry</h1>
