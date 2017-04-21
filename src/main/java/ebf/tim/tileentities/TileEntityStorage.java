@@ -12,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +23,14 @@ import java.util.List;
  */
 public class TileEntityStorage extends TileEntity implements IInventory {
 
-    private List<ItemStack> items = null;
+
+    public TileEntityStorage(){
+        for (int i=0; i< getSizeInventory(); i++){
+            items.add(null);
+        }
+    }
+
+    private List<ItemStack> items = new ArrayList<ItemStack>();
 
     /**
      * <h2>syncing</h2>
@@ -31,7 +39,7 @@ public class TileEntityStorage extends TileEntity implements IInventory {
      */
     public void readFromNBT(NBTTagCompound p_145839_1_) {
         super.readFromNBT(p_145839_1_);
-        for (int i = 0; i < items.size(); i++) {
+        for (int i = 0; i < getSizeInventory(); i++) {
             ItemStack item = ItemStack.loadItemStackFromNBT(p_145839_1_);
             if (item.stackSize != 0) {
                 setInventorySlotContents(i, item);
@@ -77,7 +85,7 @@ public class TileEntityStorage extends TileEntity implements IInventory {
      */
     @Override
     public ItemStack decrStackSize(int slot, int stackSize) {
-        if (items.size()>=slot && items.get(slot) != null) {
+        if (getSizeInventory()>=slot && items.get(slot) != null) {
             ItemStack itemstack;
 
             if (items.get(slot).stackSize <= stackSize) {

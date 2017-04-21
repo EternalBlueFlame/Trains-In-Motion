@@ -184,17 +184,17 @@ public class FuelHandler implements IFuelHandler{
 			 */
 			case ELECTRIC: case MAGLEV: {
 				//add redstone to the fuel tank
-				/**
 				if (isWater(cart.getStackInSlot(0), cart) &&
-						cart.getTank().addFluid(FluidRegistry.WATER, waterValue(cart.getStackInSlot(1)),true, cart) && !cart.isCreative) {
+						waterValue(cart.getStackInSlot(1))+ fuelTank < cart.getMaxFuel() && !cart.isCreative) {
+					fuelTank +=waterValue(cart.getStackInSlot(1));
 					cart.decrStackSize(0,1);
 				}
 				//use stored energy
 				if (cart.isRunning){
 					//electric trains run at a generally set rate which is multiplied at the square of speed.
 					//TODO: this may need re-balancing to keep it realistic.
-					fuel -= 1 + MathHelper.sqrt_float(Math.copySign(cart.accelerator, 1)*5);
-				}*/
+					fuelTank -= 1 + MathHelper.sqrt_float(Math.copySign(cart.accelerator, 1)*5);
+				}
 				break;
 			}
 			/**

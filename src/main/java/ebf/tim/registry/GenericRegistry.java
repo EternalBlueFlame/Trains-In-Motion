@@ -5,20 +5,19 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
+import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.blocks.LampBlock;
-import ebf.tim.blocks.Oil;
-import ebf.tim.items.Bucket;
 import ebf.tim.tileentities.TileEntityStorage;
-import ebf.tim.utility.BlockDynamic;
+import ebf.tim.blocks.BlockDynamic;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialLiquid;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -35,9 +34,12 @@ import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
 
 public class GenericRegistry {
     //initialize the oil
-    public static final Fluid fluidOil = new Oil("Oil").setUnlocalizedName("fluid.oil");
-    public static BlockFluidClassic blockFluidOil;
-    public static final Item bucketOil = new Bucket(GenericRegistry.blockFluidOil).setUnlocalizedName("item.oilbucket").setContainerItem(Items.bucket);
+    public static BlockTrainFluid blockFluidOil;
+    public static BlockTrainFluid blockFluidDiesel;
+    public static final Fluid fluidOil = new Fluid("Oil").setUnlocalizedName("fluid.oil").setBlock(blockFluidOil).setGaseous(false).setDensity(700);
+    public static final Fluid fluidDiesel = new Fluid("Diesel").setUnlocalizedName("fluid.diesel").setBlock(blockFluidDiesel).setGaseous(false).setDensity(500);
+    public static ItemBucket bucketOil;
+    public static ItemBucket bucketDiesel;
 
     //define the train crafting table.
     public static BlockDynamic trainTable = new BlockDynamic("blocktraintable",Material.wood, TrainsInMotion.blockTypes.CRAFTING);
@@ -56,9 +58,27 @@ public class GenericRegistry {
          * <h3>register Blocks</h3>
          */
         //register oil
+        //register fluid and it's block
         FluidRegistry.registerFluid(fluidOil);
-        blockFluidOil = new BlockFluidClassic(fluidOil, new MaterialLiquid(MapColor.blackColor));
-        GameRegistry.registerBlock(blockFluidOil, "OilBlock");
+        blockFluidOil = new BlockTrainFluid(fluidOil, new MaterialLiquid(MapColor.blackColor));
+        blockFluidOil.setBlockName("block.oil");
+        GameRegistry.registerBlock(blockFluidOil, "block.oil");
+        //register the bucket item
+        bucketOil = new ItemBucket(GenericRegistry.blockFluidOil);
+        bucketOil.setCreativeTab(TrainsInMotion.creativeTab).setUnlocalizedName("item.oilbucket").setContainerItem(Items.bucket);
+        GameRegistry.registerItem(bucketOil, "fluid.oil.bucket");
+        FluidContainerRegistry.registerFluidContainer(fluidOil, new ItemStack(bucketOil), new ItemStack(Items.bucket));
+        //register diesel
+        //register fluid and it's block
+        FluidRegistry.registerFluid(fluidDiesel);
+        blockFluidDiesel = new BlockTrainFluid(fluidDiesel, new MaterialLiquid(MapColor.dirtColor)).setFlammable(true, 1);
+        blockFluidDiesel.setBlockName("block.diesel");
+        GameRegistry.registerBlock(blockFluidDiesel, "block.diesel");
+        //register the bucket item
+        bucketDiesel = new ItemBucket(GenericRegistry.blockFluidDiesel);
+        bucketDiesel.setCreativeTab(TrainsInMotion.creativeTab).setUnlocalizedName("item.dieselbucket").setContainerItem(Items.bucket);
+        GameRegistry.registerItem(bucketDiesel, "fluid.diesel.bucket");
+        FluidContainerRegistry.registerFluidContainer(fluidDiesel, new ItemStack(bucketDiesel), new ItemStack(Items.bucket));
 
         GameRegistry.registerBlock(trainTable, "TrainTable");
         GameRegistry.registerTileEntity(TileEntityStorage.class, "StorageEntity");
@@ -67,8 +87,6 @@ public class GenericRegistry {
         /**
          * <h3>register Items</h3>
          */
-        GameRegistry.registerItem(bucketOil, "OilBucket");
-        FluidContainerRegistry.registerFluidContainer(GenericRegistry.fluidOil, new ItemStack(bucketOil), new ItemStack(Items.bucket));
     }
 
     /**
@@ -81,6 +99,9 @@ public class GenericRegistry {
         lampBlock = new LampBlock();
         GameRegistry.registerBlock(lampBlock, "lampblock");
         lampBlock.setLightLevel(1f);
+
+        //register the fluid icons
+        fluidOil.setIcons(BlockLiquid.getLiquidIcon("water_still"), BlockLiquid.getLiquidIcon("water_flow"));
     }
 
 }
