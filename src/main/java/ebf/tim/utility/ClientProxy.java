@@ -115,7 +115,7 @@ public class ClientProxy extends CommonProxy {
             index++;
         }
         //hitboxes
-        RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.multipartHitbox.class, nullRender);
+        RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.MultipartHitbox.class, nullRender);
         //bogies
         RenderingRegistry.registerEntityRenderingHandler(EntityBogie.class, nullRender);
         //seats

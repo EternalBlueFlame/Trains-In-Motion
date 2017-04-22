@@ -23,7 +23,7 @@ public class BlockTrainFluid extends BlockFluidClassic {
     @SideOnly(Side.CLIENT)
     private IIcon[] sidedTexture;
 
-    private boolean flammable;
+    private boolean flammable = false;
     private int flammability = 0;
 
     public BlockTrainFluid(Fluid fluid, Material material) {

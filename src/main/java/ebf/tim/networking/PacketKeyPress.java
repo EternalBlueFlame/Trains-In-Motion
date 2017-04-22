@@ -72,24 +72,24 @@ public class PacketKeyPress implements IMessage {
                     case 12:{ridingEntity.entityDropItem(ridingEntity.key, 0); break;}
                     //uncouple cars
                     case 13:{
-                        //front
-                        if (ridingEntity.front != TrainsInMotion.nullUUID){
-                            if(ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.front).front){
-                                CommonProxy.getTransportFromUuid(ridingEntity.front).front = TrainsInMotion.nullUUID;
-                            } else if (ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.front).back){
-                                CommonProxy.getTransportFromUuid(ridingEntity.front).back = TrainsInMotion.nullUUID;
+                        //frontLinkedTransport
+                        if (ridingEntity.frontLinkedTransport != null){
+                            if(ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.frontLinkedTransport).frontLinkedTransport){
+                                CommonProxy.getTransportFromUuid(ridingEntity.frontLinkedTransport).frontLinkedTransport = null;
+                            } else if (ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.frontLinkedTransport).backLinkedTransport){
+                                CommonProxy.getTransportFromUuid(ridingEntity.frontLinkedTransport).backLinkedTransport = null;
                             }
                         }
-                        //back
-                        if (ridingEntity.back != TrainsInMotion.nullUUID){
-                            if(ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.back).front){
-                                CommonProxy.getTransportFromUuid(ridingEntity.back).front = TrainsInMotion.nullUUID;
-                            } else if (ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.back).back){
-                                CommonProxy.getTransportFromUuid(ridingEntity.back).back = TrainsInMotion.nullUUID;
+                        //backLinkedTransport
+                        if (ridingEntity.backLinkedTransport != null){
+                            if(ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.backLinkedTransport).frontLinkedTransport){
+                                CommonProxy.getTransportFromUuid(ridingEntity.backLinkedTransport).frontLinkedTransport = null;
+                            } else if (ridingEntity.getPersistentID() == CommonProxy.getTransportFromUuid(ridingEntity.backLinkedTransport).backLinkedTransport){
+                                CommonProxy.getTransportFromUuid(ridingEntity.backLinkedTransport).backLinkedTransport = null;
                             }
                         }
                         //double check and be sure both are null
-                        ridingEntity.front = TrainsInMotion.nullUUID; ridingEntity.back = TrainsInMotion.nullUUID; break;}
+                        ridingEntity.frontLinkedTransport = null; ridingEntity.backLinkedTransport = null; break;}
 
                     /**
                      * <h3>Manage the inventory key press</h3>

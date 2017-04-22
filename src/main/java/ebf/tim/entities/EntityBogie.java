@@ -29,32 +29,26 @@ import zoranodensha.api.structures.tracks.ITrackBase;
  */
 public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart, IEntityAdditionalSpawnData {
 
-    /**
-     * <h2>variables</h2>
-     * parentId is used to keep a reference to the parent train/rollingstock.
-     * position X/Y/Z is used to smooth out the movement of the bogies on client, a previously known position to move from to current based on the client update tick.
-     * the vanillaRailMatrix is used to calculate the X/Y/Z velocity based on the direction the rail is facing, similar to how vanilla minecarts work.
-     */
+    /** used to keep a reference to the parent train/rollingstock.*/
     private int parentId = 0;
+    /**used to smooth out the movement of the bogies on client, a previously known position to move from to current based on the client update tick */
     private double positionX=0;
+    /**used to smooth out the movement of the bogies on client, a previously known position to move from to current based on the client update tick */
     private double positionY=0;
+    /**used to smooth out the movement of the bogies on client, a previously known position to move from to current based on the client update tick */
     private double positionZ=0;
+    /**client velocity used to smooth actual movement*/
     private double cartVelocityX =0;
+    /**client velocity used to smooth actual movement*/
     private double cartVelocityY =0;
+    /**client velocity used to smooth actual movement*/
     private double cartVelocityZ =0;
+    /**client velocity multiplier used to smooth actual movement*/
     private double motionProgress=0;
+    /**defines if this is the front bogie of the transport*/
     private boolean isFront=true;
-    private static final int[][][] vanillaRailMatrix = new int[][][] {
-            {{0, 0, -1}, {0, 0, 1}},
-            {{ -1, 0, 0}, {1, 0, 0}},
-            {{ -1, -1, 0}, {1, 0, 0}},
-            {{ -1, 0, 0}, {1, -1, 0}},
-            {{0, 0, -1}, {0, -1, 1}},
-            {{0, -1, -1}, {0, 0, 1}},
-            {{0, 0, 1}, {1, 0, 0}},
-            {{0, 0, 1}, { -1, 0, 0}},
-            {{0, 0, -1}, { -1, 0, 0}},
-            {{0, 0, -1}, {1, 0, 0}}};
+    /**used to calculate the X/Y/Z velocity based on the direction the rail is facing, similar to how vanilla minecarts work.*/
+    private static final int[][][] vanillaRailMatrix = new int[][][] {{{0, 0, -1}, {0, 0, 1}}, {{ -1, 0, 0}, {1, 0, 0}}, {{ -1, -1, 0}, {1, 0, 0}}, {{ -1, 0, 0}, {1, -1, 0}}, {{0, 0, -1}, {0, -1, 1}}, {{0, -1, -1}, {0, 0, 1}}, {{0, 0, 1}, {1, 0, 0}}, {{0, 0, 1}, { -1, 0, 0}}, {{0, 0, -1}, { -1, 0, 0}}, {{0, 0, -1}, {1, 0, 0}}};
 
     public EntityBogie(World world) {
         super(world);
@@ -69,10 +63,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             isFront = front;
     }
 
-    /**
-     * <h2>Spawn Data</h2>
-     * Small networking check to add the bogie to the host train/rollingstock. Or to remove the bogie from the world if the host doesn't exist.
-     */
+    /**Small networking check to add the bogie to the host train/rollingstock. Or to remove the bogie from the world if the host doesn't exist.*/
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         isFront = additionalData.readBoolean();
@@ -86,55 +77,57 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         }
         worldObj.removeEntity(this);
     }
+    /**sends the networking check on spawn/respawn so this can see if it should exist in the first place.*/
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         buffer.writeBoolean(isFront);
         buffer.writeInt(parentId);
     }
 
-    /**
-     * <h3>Core Minecart Overrides</h3>
-     * technically this is a normal minecart, which is why it works on normal tracks.
-     * @see EntityMinecart
-     *
-     * @see RailUtility
-     * onUpdate is intentionally empty because we don't want the super running it's own onUpdate method. we define when to run our movement code in the train/rollingstock
-     * @see EntityTrainCore#onUpdate()
-     */
+    /**used by the game to tell different types of minecarts from eachother, this doesnt effect us, so just use something random*/
     @Override
     public int getMinecartType() {
         return 10001;
     }
+    /**returns if the cart can make itself move*/
     @Override
     public boolean isPoweredCart() {
         return true;
     }
+    /**returns if the cart can be ridden*/
     @Override
     public boolean canBeRidden() {
         return false;
     }
+    /**if the cart can be pushed by an entity*/
     @Override
     public boolean canBePushed() {
         return false;
     }
+    /**returns if the rider can interact with this, I don't think this makes any difference given the design of the bogie*/
     @Override
     public boolean canRiderInteract() {
-        return true;
+        return false;
     }
+    /**defines the max speed the minecart can move on a rail that is not an extension of BlockRailBase*/
     @Override
     public float getMaxCartSpeedOnRail() {
-        return 5F;
+        return 1.2F;
     }
+    /**defines the update tick of the entity, in this case we rely on the transport to provide that for us, keeps things synced on the chance entities ever get individualized threads*/
     @Override
     public void onUpdate() {}
+    /**returns the bounding box, we dont process that kind of stuff for the bogie because it's only pathfinding.*/
     @Override
     public AxisAlignedBB getBoundingBox(){
         return null;
     }
+    /**returns the bounding box, we dont process that kind of stuff for the bogie because it's only pathfinding.*/
     @Override
     public AxisAlignedBB getCollisionBox(Entity collidedWith){
         return null;
     }
+    /**returns if this can be collided with, since we don't process collisions, we return false*/
     @Override
     public boolean canBeCollidedWith() {
         return false;
@@ -182,7 +175,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 }
             }
 
-
             //apply brake
             if (brake){
                 this.motionX *= 0.75;
@@ -200,17 +192,26 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 if (block == Blocks.activator_rail) {
                     this.onActivatorRailPass(floorX, floorY, floorZ, (worldObj.getBlockMetadata(floorX, floorY, floorZ) & 8) != 0);
                 }
-                //update on ZnD rails
-            } else if(worldObj.getTileEntity(floorX, floorY, floorZ) instanceof ITrackBase) {
+                //update on ZnD rails, and ones that don't extend block rail base.
+            } else {
                 super.onUpdate();
                 //update on falling with no rails
             }
-            //idk wtf this does.
-            //MinecraftForge.EVENT_BUS.post(new MinecartUpdateEvent(this, floorX, floorY, floorZ));
         }
     }
 
 
+    /**
+     * <h2>incrementally move the bogie</h2>
+     * moves the entity in increments of a quarter block, the calculations are basically the same as vanilla.
+     * The main difference is it's vastly simplified, and incremented to quarter blocks so it should be impossible to derail.
+     * @param currentMotionX the MotionX value, because this is an indirect modification it won't actually effect the real MotionX.
+     * @param currentMotionZ the MotionX value, because this is an indirect modification it won't actually effect the real MotionZ.
+     * @param floorX the floored X value of the next position.
+     * @param floorY the floored Y value of the next position.
+     * @param floorZ the floored Z value of the next position.
+     * @param block the block at the next position
+     */
     private void moveBogie(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, Block block) {
         double cachedMotionX = currentMotionX;
         double cachedMotionZ = currentMotionZ;
@@ -233,7 +234,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         } else {
             cachedMotionZ= Math.copySign(0, currentMotionZ);
         }
-
+        //get the direction of the rail from it's metadata
         int railMetadata = ((BlockRailBase)block).getBasicRailMetadata(worldObj, null, floorX, floorY, floorZ);
 
         //add the uphill/downhill velocity
@@ -243,6 +244,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             case 4:{this.motionZ += 0.0078125D; this.posY = (double)(floorY + 1); break;}
             case 5:{this.motionZ -= 0.0078125D; this.posY = (double)(floorY + 1); break;}
         }
+
+        //beginMagic();
 
         //figure out the current rail's direction
         double railPathX = (vanillaRailMatrix[railMetadata][1][0] - vanillaRailMatrix[railMetadata][0][0]);
@@ -255,7 +258,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             railPathZ = -railPathZ;
         }
 
-        //define the motion based on the rail path for current movement, and the next, so they are in sync.
+        //define the motion for current and overall based on the rail path for the relevant movement, so they are in sync.
         double motionSqrt = Math.sqrt(currentMotionX * currentMotionX + currentMotionZ * currentMotionZ);
         if (motionSqrt > 2.0D) {
             motionSqrt = 2.0D;
@@ -263,7 +266,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         currentMotionX = motionSqrt * railPathX / railPathSqrt;
         currentMotionZ = motionSqrt * railPathZ / railPathSqrt;
 
-        //define the motion based on the rail path for current movement, and the next, so they are in sync.
         motionSqrt = Math.sqrt(motionX * motionX +motionZ * motionZ);
         if (motionSqrt > 2.0D) {
             motionSqrt = 2.0D;
@@ -284,10 +286,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         //define the rail path again,,, for reasons.....
         double d8 = floorX + 0.5D + vanillaRailMatrix[railMetadata][0][0] * 0.5D;
         double d9 = floorZ + 0.5D + vanillaRailMatrix[railMetadata][0][2] * 0.5D;
-
         railPathX = (floorX + 0.5D + vanillaRailMatrix[railMetadata][1][0] * 0.5D) - d8;
         railPathZ = (floorZ + 0.5D + vanillaRailMatrix[railMetadata][1][2] * 0.5D) - d9;
 
+        //pick the bigger one
         double d7;
         if (railPathX == 0.0D) {
             this.posX = (double)floorX + 0.5D;
@@ -298,20 +300,24 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         } else {
             d7 = ((this.posX - d8) * railPathX + (this.posZ - d9) * railPathZ) * 2.0D;
         }
+        //actually set the movement
         this.posX = (d8 + railPathX * d7) + currentMotionX;
         this.posZ = (d9 + railPathZ * d7) + currentMotionZ;
         this.positionY =motionY;
-
+        //set the Y position
         if (vanillaRailMatrix[railMetadata][0][1] != 0 && MathHelper.floor_double(this.posX) - floorX == vanillaRailMatrix[railMetadata][0][0] && MathHelper.floor_double(this.posZ) - floorZ == vanillaRailMatrix[railMetadata][0][2]) {
             this.posY+=vanillaRailMatrix[railMetadata][0][1];
         }
         else if (vanillaRailMatrix[railMetadata][1][1] != 0 && MathHelper.floor_double(this.posX) - floorX == vanillaRailMatrix[railMetadata][1][0] && MathHelper.floor_double(this.posZ) - floorZ == vanillaRailMatrix[railMetadata][1][2]) {
             this.posY+=vanillaRailMatrix[railMetadata][1][1];
         }
+        //endMagic();
 
+        //do the rail functions.
         if(shouldDoRailFunctions()) {
             ((BlockRailBase)block).onMinecartPass(worldObj, this, floorX, floorY, floorZ);
         }
+        //now loop this again for the next increment of movement
         if (cachedMotionX !=0 || cachedMotionZ !=0){
 
             floorX = MathHelper.floor_double(this.posX);
@@ -332,18 +338,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
 
 
-    /**
-     * <h3>Railcraft support</h3>
-     * @see IRoutableCart
-     *
-     * doesCartMatchFilter checks if the linked train/rollingstock matches the filter for railcraft items, if the filter is null or the parent is null, return false.
-     * Otherwise, get the parent, then get the item from the parent.
-     *
-     * destination is handled in locomotive and rollingstock, here we just return null as default.
-     * filter however we will have to handle here because it is very generic.
-     *
-     * the owner for railcraft we don't handle at all, because we have our own system for that.
-     */
+    /**checks if the parent transport matches the filter for railcraft items, if the filter is null or the parent is null, return false.*/
     @Override
     public boolean doesCartMatchFilter(ItemStack stack, EntityMinecart cart) {
         if (stack == null || worldObj.getEntityByID(parentId) == null) {
@@ -353,22 +348,39 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             return cartItem != null && stack.getItem() == cartItem;
         }
     }
+    /**returns the gameprofile of the owner for railcraft.*/
     @Override
-    public GameProfile getOwner(){return null;}
+    public GameProfile getOwner(){
+        if (worldObj.getEntityByID(parentId) instanceof GenericRailTransport){
+            GenericRailTransport parent = (GenericRailTransport) worldObj.getEntityByID(parentId);
+            if (parent.getOwner() != null){
+                return parent.getOwner();
+            }
+        }
+        return null;
+    }
+    /**returns the destination of the parent for railcraft*/
     @Override
     public String getDestination() {
-        return ((EntityTrainCore) worldObj.getEntityByID(parentId)).destination;
+        if (worldObj.getEntityByID(parentId) instanceof GenericRailTransport){
+            GenericRailTransport parent = (GenericRailTransport) worldObj.getEntityByID(parentId);
+            if (parent.getOwner() != null){
+                return parent.destination;
+            }
+        }
+        return "";
     }
+    /**this is supposed to set the ticket for the railcraft destination, but we don't use that, so we return false and do nothing.*/
     @Override
     public boolean setDestination(ItemStack ticket) {
-        return true;
+        return false;
     }
 
 
     /**
      * <h2>Client Movement code</h2>
-     * this is mostly used to sync and smooth movement between client and server.
      */
+    /** mostly just used to update positioning on client*/
     @Override
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotation2(double x, double y, double z, float yaw, float pitch, int turnProgress) {
@@ -380,13 +392,14 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         motionZ = cartVelocityZ;
         motionProgress= turnProgress+2;
     }
+    /**used to set the velocity movement to the defined value*/
     @Override
     public void setVelocity(double x, double y, double z) {
         cartVelocityX = motionX = x;
         cartVelocityY = motionY = y;
         cartVelocityZ = motionZ = z;
     }
-
+    /**used to add to the current velocity movement, also sets this as airborne*/
     @Override
     public void addVelocity(double velocityX, double velocityY, double velocityZ){
             setVelocity(motionX + velocityX, motionY + velocityY, motionZ + velocityZ);

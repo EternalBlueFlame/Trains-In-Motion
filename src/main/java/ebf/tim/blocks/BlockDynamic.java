@@ -18,6 +18,7 @@ import net.minecraft.world.World;
  */
 public class BlockDynamic extends BlockContainer {
 
+    /**defines the type of tile entity that the block will spawn and manage*/
     private blockTypes type = blockTypes.CONTAINER;
 
     /**

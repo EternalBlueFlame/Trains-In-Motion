@@ -30,7 +30,7 @@ import java.util.UUID;
 
 /**
  * <h1>Main class</h1>
- * all other classes eventually lead back to this class, which manages the mod as a whole.
+ * this class, which manages the mod as a whole.
  * Build number is defined via:
  *      First number denotes entire rebuild of feature set, for instance in the case of when we move to pure 1.9 development or finish the core stuff for 1.7/1.9.
  *      Second is minor, for rebuilds of individual feature sets not intended to effect the whole, like if we were to rebuild the entire GUI system.
@@ -66,8 +66,6 @@ public class TrainsInMotion {
     //Instance the event handler, This is used for event based functionality, things like when you right-click an entity.
     public static EventManager eventManager = new EventManager();
 
-    //instance a null UUID here so we never have to create one again and can just reference this.
-    public static final UUID nullUUID = new UUID(0,0);
     /**
      * <h3>enums</h3>
      * we define enums for transport types, block types, and inventory sizes here.

@@ -509,7 +509,7 @@ public class RenderEntity extends Render {
 
             List list = this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox.addCoord(x, y, z));
             for (Object box : list){
-                if (box instanceof HitboxHandler.multipartHitbox){
+                if (box instanceof HitboxHandler.MultipartHitbox){
                     list.remove(box);
                 } else if (box instanceof GenericRailTransport){
                     list.remove(box);

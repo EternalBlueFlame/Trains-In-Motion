@@ -102,7 +102,7 @@ public class FuelHandler implements IFuelHandler{
 	 * <h2>Fuel management</h2>
 	 * this function manages the fuel for the train so we can keep it out of the train class to organize code bulk.
 	 */
-	public void ManageFuel(EntityTrainCore cart){
+	public void manageFuel(EntityTrainCore cart){
 
 		switch (cart.getType()) {
 			/**

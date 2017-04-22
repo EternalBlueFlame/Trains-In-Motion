@@ -74,13 +74,13 @@ public class EventManager {
      */
     @SubscribeEvent
     public void entityInteractEvent(EntityInteractEvent event) {
-        if (event.target instanceof HitboxHandler.multipartHitbox
+        if (event.target instanceof HitboxHandler.MultipartHitbox
                 && event.entity.worldObj.isRemote) {
 
-            if (((HitboxHandler.multipartHitbox) event.target).parent.getRiderOffsets() != null) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
+            if (((HitboxHandler.MultipartHitbox) event.target).parent.getRiderOffsets() != null) {
+                TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.MultipartHitbox) event.target).parent.getEntityId()));
             } else {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, ((HitboxHandler.multipartHitbox) event.target).parent.getEntityId()));
+                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, ((HitboxHandler.MultipartHitbox) event.target).parent.getEntityId()));
             }
 
         }

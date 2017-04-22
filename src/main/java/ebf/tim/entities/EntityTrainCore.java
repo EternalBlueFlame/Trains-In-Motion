@@ -1,8 +1,8 @@
 package ebf.tim.entities;
 
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import ebf.tim.TrainsInMotion;
 import ebf.tim.networking.PacketKeyPress;
+import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.FuelHandler;
 import ebf.tim.utility.HitboxHandler;
@@ -80,16 +80,16 @@ public class EntityTrainCore extends GenericRailTransport {
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
-        isRunning = tag.getBoolean("isrunning");
-        accelerator = tag.getInteger("train.accel");
+        isRunning = tag.getBoolean(NBTKeys.running);
+        accelerator = tag.getInteger(NBTKeys.accelerator);
         fuelHandler.readEntityFromNBT(tag);
 
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
-        tag.setBoolean("isrunning",isRunning);
-        tag.setInteger("train.accel", accelerator);
+        tag.setBoolean(NBTKeys.running,isRunning);
+        tag.setInteger(NBTKeys.accelerator, accelerator);
         fuelHandler.writeEntityToNBT(tag);
 
     }
@@ -102,42 +102,42 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     public float calculateDrag(float current, @Nullable UUID frontCheckID, @Nullable UUID backCheckID){
 
-        //if front and back are null then return null
-        if (frontCheckID == TrainsInMotion.nullUUID && backCheckID == TrainsInMotion.nullUUID) {
+        //if frontLinkedTransport and backLinkedTransport are null then return null
+        if (frontCheckID == null && backCheckID == null) {
             return current;
         }
         GenericRailTransport frontCheck = CommonProxy.getTransportFromUuid(frontCheckID);
         GenericRailTransport backCheck = CommonProxy.getTransportFromUuid(backCheckID);
 
-        //if front is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
+        //if frontLinkedTransport is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
         if (frontCheck instanceof EntityTrainCore){
             current *= 1.25f;
         } else if (frontCheck instanceof EntityRollingStockCore){
             current *=0.9f;
         }
-        //if back is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
+        //if backLinkedTransport is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
         if (backCheck instanceof EntityTrainCore){
             current *= 1.25f;
         } else if (backCheck instanceof EntityRollingStockCore){
             current *=0.9f;
         }
 
-        UUID nextFront = TrainsInMotion.nullUUID;
-        UUID nextBack = TrainsInMotion.nullUUID;
-        //detect if the next bogie to look at stats for is in the front or back of the front bogie
+        UUID nextFront = null;
+        UUID nextBack = null;
+        //detect if the next bogie to look at stats for is in the frontLinkedTransport or backLinkedTransport of the frontLinkedTransport bogie
         if (frontCheck != null) {
-            if (frontCheck.front != null & frontCheck.front != this.getPersistentID()) {
-                nextFront = frontCheck.front;
-            } else if (frontCheck.back != null & frontCheck.back != this.getPersistentID()) {
-                nextFront = frontCheck.back;
+            if (frontCheck.frontLinkedTransport != null & frontCheck.frontLinkedTransport != this.getPersistentID()) {
+                nextFront = frontCheck.frontLinkedTransport;
+            } else if (frontCheck.backLinkedTransport != null & frontCheck.backLinkedTransport != this.getPersistentID()) {
+                nextFront = frontCheck.backLinkedTransport;
             }
         }
-        //detect if the next bogie to look at stats for is in the front or back of the back bogie
+        //detect if the next bogie to look at stats for is in the frontLinkedTransport or backLinkedTransport of the backLinkedTransport bogie
         if (backCheck != null) {
-            if (backCheck.front != null & backCheck.front != this.getPersistentID()) {
-                nextBack = backCheck.front;
-            } else if (backCheck.back != null & backCheck.back != this.getPersistentID()) {
-                nextBack = backCheck.back;
+            if (backCheck.frontLinkedTransport != null & backCheck.frontLinkedTransport != this.getPersistentID()) {
+                nextBack = backCheck.frontLinkedTransport;
+            } else if (backCheck.backLinkedTransport != null & backCheck.backLinkedTransport != this.getPersistentID()) {
+                nextBack = backCheck.backLinkedTransport;
             }
         }
         //loop again to get the next carts in the list.
@@ -177,8 +177,8 @@ public class EntityTrainCore extends GenericRailTransport {
 
         //simple tick management so some code does not need to be run every tick.
         if (!worldObj.isRemote) {
-            if (transportTicks%5==1){
-                fuelHandler.ManageFuel(this);
+            if (ticksExisted%5==1){
+                fuelHandler.manageFuel(this);
             }
         }
     }
@@ -209,7 +209,7 @@ public class EntityTrainCore extends GenericRailTransport {
     public void manageLinks(){
         if(!worldObj.isRemote) {
 
-            if (front == TrainsInMotion.nullUUID && isCoupling) {
+            if (frontLinkedTransport == null && isCoupling) {
                 vectorCache[2] = rotatePoint(new double[]{getHitboxPositions()[0] - 2, 0, 0}, 0, rotationYaw, 0);
                 vectorCache[2][0] +=posX;
                 vectorCache[2][1] +=posY;
@@ -220,16 +220,16 @@ public class EntityTrainCore extends GenericRailTransport {
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.multipartHitbox) entity).parent.getEntityId())).isCoupling) {
-                            front = ((HitboxHandler.multipartHitbox) entity).parent.getPersistentID();
-                            System.out.println(getEntityId() + " : train front linked : ");
+                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).isCoupling) {
+                            frontLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
+                            System.out.println(getEntityId() + " : train frontLinkedTransport linked : ");
                         }
                     }
                 }
             }
 
 
-            if (back == TrainsInMotion.nullUUID && isCoupling) {
+            if (backLinkedTransport == null && isCoupling) {
                 vectorCache[3] = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1] + 2, 0, 0}, 0, rotationYaw, 0);
                 vectorCache[3][0] +=posX;
                 vectorCache[3][1] +=posY;
@@ -240,9 +240,9 @@ public class EntityTrainCore extends GenericRailTransport {
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.multipartHitbox) entity).parent.getEntityId())).isCoupling) {
-                            back = ((HitboxHandler.multipartHitbox) entity).parent.getPersistentID();
-                            System.out.println(getEntityId() + " : train back linked : ");
+                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).isCoupling) {
+                            backLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
+                            System.out.println(getEntityId() + " : train backLinkedTransport linked : ");
                         }
                     }
                 }

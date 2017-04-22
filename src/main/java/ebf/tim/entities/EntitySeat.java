@@ -42,36 +42,41 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
         this.seatNumber = seatNumber;
     }
 
-    /**
-     * <h3>Core Entity Overrides</h3>
-     * most all of this is just to either disable super functionality or change one of the variables.
-     */
+    /** returns if this can be pushed*/
     @Override
     public boolean canBePushed() {
         return false;
     }
+    /**returns if the rider can interact, it shouldn't be necessary, but we'll leave it true just in case*/
     @Override
     public boolean canRiderInteract() {
         return true;
     }
+    /**actually useless for this entity*/
     @Override
     public void entityInit(){}
+    /**actually useless for this entity*/
     @Override
     public void onUpdate() {}
+    /**returns the bounding box, this doesn't handle collisions, soo.. null.*/
     @Override
     public AxisAlignedBB getBoundingBox(){
         return null;
     }
+    /**returns the bounding box, this doesn't handle collisions, soo.. null.*/
     @Override
     public AxisAlignedBB getCollisionBox(Entity collidedWith){
         return null;
     }
+    /**returns if this can be collided with, but this doesn't handle collisions.*/
     @Override
     public boolean canBeCollidedWith() {
         return false;
     }
+    /**reads from NBT but this entity isn't persistent, so, don't,*/
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {}
+    /**writes to NBT but this entity isn't persistent, so, don't,*/
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {}
 

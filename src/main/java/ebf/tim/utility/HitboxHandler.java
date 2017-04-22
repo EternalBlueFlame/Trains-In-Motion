@@ -17,6 +17,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,6 +26,7 @@ import java.util.List;
  * @author Eternal Blue Flame
  */
 public class HitboxHandler {
+    public List<MultipartHitbox> hitboxList = new ArrayList<MultipartHitbox>();
 
     /**
      * <h2> basic hitbox class</h2>
@@ -33,9 +35,9 @@ public class HitboxHandler {
      * The hitboxes also need to be moved every onUpdate, for trains this is handled in
      * @see HitboxHandler#getCollision(GenericRailTransport)
      */
-    public class multipartHitbox extends EntityDragonPart{
+    public class MultipartHitbox extends EntityDragonPart{
         public GenericRailTransport parent;
-        public multipartHitbox(IEntityMultiPart host, GenericRailTransport parent, double posX, double posY , double posZ){
+        public MultipartHitbox(IEntityMultiPart host, GenericRailTransport parent, double posX, double posY , double posZ){
             super(host, "hitboxGeneric", 2,1);
             this.parent = parent;
             this.posX = posX;
@@ -85,19 +87,19 @@ public class HitboxHandler {
         //Be sure the transport has hitboxes
         for (int iteration =0; iteration<transport.getHitboxPositions().length; iteration++) {
             double[] position = RailUtility.rotatePoint(new double[]{transport.getHitboxPositions()[iteration], 0, 0}, transport.rotationPitch, transport.rotationYaw, 0);
-            if (transport.hitboxList.size() <= iteration) {
-                transport.hitboxList.add(new multipartHitbox(transport, transport, position[0] + transport.posX, position[1] + transport.posY, position[2] + transport.posZ));
+            if (hitboxList.size() <= iteration) {
+                hitboxList.add(new MultipartHitbox(transport, transport, position[0] + transport.posX, position[1] + transport.posY, position[2] + transport.posZ));
                 if (transport.worldObj.isRemote) {
-                    transport.worldObj.spawnEntityInWorld(transport.hitboxList.get(iteration));
+                    transport.worldObj.spawnEntityInWorld(hitboxList.get(iteration));
                 }
             } else {
-                transport.hitboxList.get(iteration).setLocationAndAngles(position[0] + transport.posX, position[1] + transport.posY, position[2] + transport.posZ, transport.rotationYaw, transport.rotationPitch);
+                hitboxList.get(iteration).setLocationAndAngles(position[0] + transport.posX, position[1] + transport.posY, position[2] + transport.posZ, transport.rotationYaw, transport.rotationPitch);
             }
         }
 
 
         //detect collisions with blocks on X, Y, and Z.
-        for (multipartHitbox box : transport.hitboxList){
+        for (MultipartHitbox box : hitboxList){
             //define the values as temporary variables first since it will be faster than flooring the variable every loop check
             int i = MathHelper.floor_double(box.boundingBox.minX);
             int j = MathHelper.floor_double(box.boundingBox.minY);
@@ -170,9 +172,9 @@ public class HitboxHandler {
 
                                 //if it's a hitbox, return if it's one that we should collide with or not.
                                 //we don't need to compensate for collisions on the other side because the other side is another instance of this.
-                            } else if (entity instanceof multipartHitbox) {
-                                return (transport.front == ((multipartHitbox) entity).parent.getPersistentID() ||
-                                        transport.back == ((multipartHitbox) entity).parent.getPersistentID());
+                            } else if (entity instanceof MultipartHitbox) {
+                                return (transport.frontLinkedTransport == ((MultipartHitbox) entity).parent.getPersistentID() ||
+                                        transport.backLinkedTransport == ((MultipartHitbox) entity).parent.getPersistentID());
 
                                 //if it's an item, then check if it's valid for the slot
                             } else if ((transport.getType() == TrainsInMotion.transportTypes.HOPPER || transport.getType() == TrainsInMotion.transportTypes.COALHOPPER ||

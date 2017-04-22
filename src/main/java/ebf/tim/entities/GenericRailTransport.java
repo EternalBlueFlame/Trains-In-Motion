@@ -1,5 +1,6 @@
 package ebf.tim.entities;
 
+import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
@@ -9,6 +10,7 @@ import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemKey;
 import ebf.tim.models.tmt.Vec3d;
 import ebf.tim.networking.PacketRemove;
+import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
@@ -31,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static ebf.tim.TrainsInMotion.nullUUID;
 import static ebf.tim.TrainsInMotion.proxy;
 import static ebf.tim.utility.RailUtility.rotatePoint;
 
@@ -60,9 +61,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * bogie is the list of bogies this has.
      * isCreative defines whether or not it should actually remove the liquid/fuel item, this can be toggled from the GUI if the rider is in creative mode.
      * hitboxList and hitboxHandler manage the hitboxes the train has, this is mostly dealt with via getParts() and the hitbox functionality.
-     * transportTicks is a simple tick count that allows us to manage functions that don't happen every tick, like fuel consumption in trains.
-     * front and back define references to the train/rollingstock connected to the front and back, so that way we can better control links.
-     * the front and back unloaded ID's are used as a failsafe in case the front or back connected entities aren't loaded yet.
+     * ticksExisted is a simple tick count that allows us to manage functions that don't happen every tick, like fuel consumption in trains.
+     * frontLinkedTransport and backLinkedTransport define references to the train/rollingstock connected to the frontLinkedTransport and backLinkedTransport, so that way we can better control links.
+     * the frontLinkedTransport and backLinkedTransport unloaded ID's are used as a failsafe in case the frontLinkedTransport or backLinkedTransport connected entities aren't loaded yet.
      * destination is used for routing, railcraft and otherwise.
      * the inventory defines the item storage.
      * the key defines the ownership key item, this is used to allow other people access to the transport.
@@ -80,11 +81,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public List<EntitySeat> seats = new ArrayList<EntitySeat>();
     public boolean isCreative = false;
     public boolean isCoupling = false;
-    public List<HitboxHandler.multipartHitbox> hitboxList = new ArrayList<HitboxHandler.multipartHitbox>();
     public HitboxHandler hitboxHandler = new HitboxHandler();
-    public int transportTicks =0;
-    public UUID front = nullUUID;
-    public UUID back = nullUUID;
+    public UUID frontLinkedTransport = null;
+    public UUID backLinkedTransport = null;
     public int ownerID =0;
     public String destination ="";
     public ItemStack key;
@@ -152,7 +151,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public World func_82194_d(){return worldObj;}
     @Override
-    public Entity[] getParts(){return hitboxList.toArray(new HitboxHandler.multipartHitbox[hitboxList.size()]);}
+    public Entity[] getParts(){return hitboxHandler.hitboxList.toArray(new HitboxHandler.MultipartHitbox[hitboxHandler.hitboxList.size()]);}
     @Override
     public AxisAlignedBB getBoundingBox(){return boundingBox;}
     @Override
@@ -219,7 +218,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 seat.worldObj.removeEntity(seat);
             }
             //remove hitboxes
-            for (EntityDragonPart hitbox : hitboxList){
+            for (EntityDragonPart hitbox : hitboxHandler.hitboxList){
                 hitbox.isDead = true;
                 TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId()));
                 hitbox.worldObj.removeEntity(hitbox);
@@ -288,22 +287,22 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
-        isLocked = tag.getBoolean("extended.islocked");
-        lamp.isOn = tag.getBoolean("extended.lamp");
-        isDead = tag.getBoolean("extended.dead");
-        isCoupling = tag.getBoolean("extended.coupling");
+        isLocked = tag.getBoolean(NBTKeys.locked);
+        lamp.isOn = tag.getBoolean(NBTKeys.lamp);
+        isDead = tag.getBoolean(NBTKeys.dead);
+        isCoupling = tag.getBoolean(NBTKeys.coupling);
         //load links
-        if (tag.hasKey("extended.front.most")) {
-            front = new UUID(tag.getLong("extended.front.most"), tag.getLong("extended.front.least"));
+        if (tag.hasKey(NBTKeys.frontLinkMost)) {
+            frontLinkedTransport = new UUID(tag.getLong(NBTKeys.frontLinkMost), tag.getLong(NBTKeys.frontLinkLeast));
         }
-        if (tag.hasKey("extended.back.most")) {
-            back = new UUID(tag.getLong("extended.back.most"), tag.getLong("extended.back.least"));
+        if (tag.hasKey(NBTKeys.backLinkMost)) {
+            backLinkedTransport = new UUID(tag.getLong(NBTKeys.backLinkMost), tag.getLong(NBTKeys.backLinkLeast));
         }
         //more bools
-        isCreative = tag.getBoolean("extended.creative");
-        brake = tag.getBoolean("extended.handbrake");
+        isCreative = tag.getBoolean(NBTKeys.creative);
+        brake = tag.getBoolean(NBTKeys.handbrake);
         //load owner
-        owner = new UUID(tag.getLong("extended.ownerm"),tag.getLong("extended.ownerl"));
+        owner = new UUID(tag.getLong(NBTKeys.ownerMost),tag.getLong(NBTKeys.ownerLeast));
         //key.readFromNBT(tag);
         //load tanks
         if (getTankCapacity() >0) {
@@ -315,18 +314,17 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
         if (getInventorySize() != TrainsInMotion.inventorySizes.NULL) {
             for (int i = 0; i < getSizeInventory(); i++) {
-                NBTTagCompound tagCompound = tag.getCompoundTag("item." +i);
+                NBTTagCompound tagCompound = tag.getCompoundTag(NBTKeys.inventoryItem +i);
                 if (tagCompound != null){
                     setInventorySlotContents(i, ItemStack.loadItemStackFromNBT(tagCompound));
                 }
             }
-            isWhitelist = tag.getBoolean("filter.whitelist");
+            isWhitelist = tag.getBoolean(NBTKeys.whitelist);
 
-            int length = tag.getInteger("filter.length");
-            System.out.println("loaded filter length");
+            int length = tag.getInteger(NBTKeys.filterLength);
             if (length > 0) {
                 for (int i = 0; i < length; i++) {
-                    filter.add(tag.getString("item." + i));
+                    filter.add(tag.getString(NBTKeys.filterItem + i));
                 }
             }
         }
@@ -336,25 +334,25 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
-        tag.setBoolean("extended.islocked", isLocked);
-        tag.setBoolean("extended.lamp", lamp.isOn);
-        tag.setBoolean("extended.dead", isDead);
-        tag.setBoolean("extended.coupling", isCoupling);
-        //front and back bogies
-        if (front != null && back != TrainsInMotion.nullUUID){
-            tag.setLong("extended.front.most", front.getMostSignificantBits());
-            tag.setLong("extended.front.least", front.getLeastSignificantBits());
+        tag.setBoolean(NBTKeys.locked, isLocked);
+        tag.setBoolean(NBTKeys.lamp, lamp.isOn);
+        tag.setBoolean(NBTKeys.dead, isDead);
+        tag.setBoolean(NBTKeys.coupling, isCoupling);
+        //frontLinkedTransport and backLinkedTransport bogies
+        if (frontLinkedTransport != null){
+            tag.setLong(NBTKeys.frontLinkMost, frontLinkedTransport.getMostSignificantBits());
+            tag.setLong(NBTKeys.frontLinkLeast, frontLinkedTransport.getLeastSignificantBits());
         }
-        if (back != null && back != TrainsInMotion.nullUUID){
-            tag.setLong("extended.back.most", back.getMostSignificantBits());
-            tag.setLong("extended.back.least", back.getLeastSignificantBits());
+        if (backLinkedTransport != null){
+            tag.setLong(NBTKeys.backLinkMost, backLinkedTransport.getMostSignificantBits());
+            tag.setLong(NBTKeys.backLinkLeast, backLinkedTransport.getLeastSignificantBits());
         }
         //more bools
-        tag.setBoolean("extended.creative", isCreative);
-        tag.setBoolean("extended.handbrake", brake);
+        tag.setBoolean(NBTKeys.creative, isCreative);
+        tag.setBoolean(NBTKeys.handbrake, brake);
         //owner
-        tag.setLong("extended.ownerm", owner.getMostSignificantBits());
-        tag.setLong("extended.ownerl", owner.getLeastSignificantBits());
+        tag.setLong(NBTKeys.ownerMost, owner.getMostSignificantBits());
+        tag.setLong(NBTKeys.ownerLeast, owner.getLeastSignificantBits());
         //key.writeToNBT(tag);
 
 
@@ -369,16 +367,16 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (getInventorySize() != TrainsInMotion.inventorySizes.NULL && items.size()>0) {
             for (int i =0; i< getSizeInventory(); i++) {
                 if (items.get(i) != null) {
-                    tag.setTag("item." + i, items.get(i).writeToNBT(new NBTTagCompound()));
+                    tag.setTag(NBTKeys.inventoryItem + i, items.get(i).writeToNBT(new NBTTagCompound()));
                 }
             }
-            tag.setBoolean("filter.whitelist", isWhitelist);
+            tag.setBoolean(NBTKeys.whitelist, isWhitelist);
 
 
-            tag.setInteger("filter.length", filter!=null?filter.size():0);
+            tag.setInteger(NBTKeys.filterLength, filter!=null?filter.size():0);
             if (filter != null && filter.size() > 0) {
                 for (int i = 0; i < filter.size(); i++) {
-                    tag.setString("item." + i, filter.get(i));
+                    tag.setString(NBTKeys.filterItem + i, filter.get(i));
                 }
             }
         }
@@ -410,25 +408,25 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
 
         seats.remove(null);
-        hitboxList.remove(null);
+        hitboxHandler.hitboxList.remove(null);
 
         //be sure bogies exist
 
         //always be sure the bogies exist on client and server.
         if (!worldObj.isRemote && (frontBogie == null || backBogie == null)) {
-            //spawn front bogie
+            //spawn frontLinkedTransport bogie
             vectorCache[1][0] = getLengthFromCenter();
             vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
             frontBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId(), true);
             worldObj.spawnEntityInWorld(frontBogie);
-            //spawn back bogie
+            //spawn backLinkedTransport bogie
             vectorCache[1][0] = -getLengthFromCenter();
             vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
             backBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId(), false);
             worldObj.spawnEntityInWorld(backBogie);
 
 
-            if (getRiderOffsets() != null) {
+            if (getRiderOffsets() != null && getRiderOffsets().length >1) {
                 for (int i = 0; i < getRiderOffsets().length - 1; i++) {
                     EntitySeat seat = new EntitySeat(worldObj, posX, posY, posZ, getEntityId(), i);
                     worldObj.spawnEntityInWorld(seat);
@@ -469,7 +467,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     MathHelper.floor_double(Math.acos(frontBogie.posY / backBogie.posY)*RailUtility.degreesD));
 
 
-            if (transportTicks %2 ==0) {
+            if (ticksExisted %2 ==0) {
                 //align bogies
                 vectorCache[1][0]= getLengthFromCenter();
                 vectorCache[0] = rotatePoint(vectorCache[1], rotationPitch, rotationYaw, 0.0f);
@@ -493,7 +491,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
 
         //be sure the owner entityID is currently loaded, this variable is dynamic so we don't save it to NBT.
-        if (!worldObj.isRemote && transportTicks %10==0){
+        if (!worldObj.isRemote &&ticksExisted %10==0){
             Entity player = proxy.getEntityFromUuid(owner);
             if (player!= null) {
                 ownerID = player.getEntityId();
@@ -511,16 +509,16 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (worldObj.isRemote && ClientProxy.EnableLights && !ClientProxy.carts.contains(this)) {
                 ClientProxy.carts.add(this);
             }
-            if (lamp.Y >1 && worldObj.isRemote && transportTicks %2 ==1){
+            if (lamp.Y >1 && worldObj.isRemote && ticksExisted %2 ==1){
                 vectorCache[0][0] =this.posX + getLampOffset().xCoord;
                 vectorCache[0][1] =this.posY + getLampOffset().yCoord;
                 vectorCache[0][2] =this.posZ + getLampOffset().zCoord;
                 lamp.ShouldUpdate(worldObj, RailUtility.rotatePoint(vectorCache[0], rotationPitch, rotationYaw, 0));
             }
-            if (transportTicks>20){
-                transportTicks = 1;
+            if (ticksExisted>20){
+                ticksExisted = 1;
             }
-            transportTicks++;
+            ticksExisted++;
         }
     }
 
@@ -557,9 +555,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     public void manageLinks(){
         if(!worldObj.isRemote) {
-            //manage the front link
-            if (front != nullUUID) {
-                GenericRailTransport frontLink = CommonProxy.getTransportFromUuid(front);
+            //manage the frontLinkedTransport link
+            if (frontLinkedTransport != null) {
+                GenericRailTransport frontLink = CommonProxy.getTransportFromUuid(frontLinkedTransport);
                 if (frontLink != null) {
                     //to here
                     vectorCache[3][0] = getHitboxPositions()[0]-1;
@@ -567,7 +565,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     vectorCache[4][0] += posX;
                     vectorCache[4][2] += posZ;
                     //from here
-                    vectorCache[5][0]=frontLink.getHitboxPositions()[(frontLink.back == this.getPersistentID())?(frontLink.getHitboxPositions().length - 1):0];
+                    vectorCache[5][0]=frontLink.getHitboxPositions()[(frontLink.backLinkedTransport == this.getPersistentID())?(frontLink.getHitboxPositions().length - 1):0];
                     vectorCache[6] = rotatePoint(vectorCache[5], 0, frontLink.rotationYaw, 0);
                     vectorCache[6][0] += frontLink.posX;
                     vectorCache[6][2] += frontLink.posZ;
@@ -585,16 +583,16 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.multipartHitbox) entity).parent.getEntityId())).isCoupling) {
-                            front = ((HitboxHandler.multipartHitbox) entity).parent.getPersistentID();
-                            System.out.println(getEntityId() + " : rollingstock front linked : ");
+                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).isCoupling) {
+                            frontLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
+                            System.out.println(getEntityId() + " : rollingstock frontLinkedTransport linked : ");
                         }
                     }
                 }
             }
-            //Manage the back link
-            if (back != nullUUID) {
-                GenericRailTransport backLink = CommonProxy.getTransportFromUuid(back);
+            //Manage the backLinkedTransport link
+            if (backLinkedTransport != null) {
+                GenericRailTransport backLink = CommonProxy.getTransportFromUuid(backLinkedTransport);
                 if (backLink != null) {
                     //to here
                     vectorCache[5][0]=getHitboxPositions()[getHitboxPositions().length-1]+1;
@@ -602,7 +600,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     vectorCache[6][0] += posX;
                     vectorCache[6][2] += posZ;
                     //from here
-                    vectorCache[5][0]=backLink.getHitboxPositions()[(backLink.back == this.getPersistentID())?(backLink.getHitboxPositions().length - 1):0];
+                    vectorCache[5][0]=backLink.getHitboxPositions()[(backLink.backLinkedTransport == this.getPersistentID())?(backLink.getHitboxPositions().length - 1):0];
                     vectorCache[6] = rotatePoint(vectorCache[5], 0, backLink.rotationYaw, 0);
                     vectorCache[6][0] += backLink.posX;
                     vectorCache[6][2] += backLink.posZ;
@@ -620,9 +618,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.multipartHitbox && !hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.multipartHitbox) entity).parent.getEntityId())).isCoupling) {
-                            back = ((HitboxHandler.multipartHitbox) entity).parent.getPersistentID();
-                            System.out.println(getEntityId() + " : rollingstock back linked : ");
+                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).isCoupling) {
+                            backLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
+                            System.out.println(getEntityId() + " : rollingstock backLinkedTransport linked : ");
                         }
                     }
                 }
@@ -697,6 +695,13 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         this. prevRotationPitch = this.rotationPitch = p_70101_2_;
     }
 
+
+    public GameProfile getOwner(){
+        if (ownerID != 0 && worldObj.getEntityByID(ownerID) instanceof EntityPlayer){
+            return ((EntityPlayer) worldObj.getEntityByID(ownerID)).getGameProfile();
+        }
+        return null;
+    }
 
     /**
      * <h2>Inherited variables</h2>
@@ -883,19 +888,19 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * this just simply returns the itemstack in the ticket slot, assuming there is one.
      */
     public ItemStack getTicketSlot(){
-        //if it's a train with a boiler, send back slot 2.
+        //if it's a train with a boiler, send backLinkedTransport slot 2.
         if ((getType() == TrainsInMotion.transportTypes.STEAM || getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
                 getRiderOffsets().length > 1) {
             return items.get(2);
         } else if ((getType() == TrainsInMotion.transportTypes.DIESEL || getType() == TrainsInMotion.transportTypes.ELECTRIC || getType() == TrainsInMotion.transportTypes.NUCLEAR_ELECTRIC || getType() == TrainsInMotion.transportTypes.MAGLEV)
                 && getRiderOffsets().length > 1){
-            //if it's a train without a boiler, send back slot 1
+            //if it's a train without a boiler, send backLinkedTransport slot 1
             return items.get(1);
         } else if (getRiderOffsets().length > 1){
-            //if it's not a train, send back slot 0
+            //if it's not a train, send backLinkedTransport slot 0
             return items.get(0);
         }
-        //if it's not meant to have multiple passengers, send back null because there is no ticket slot.
+        //if it's not meant to have multiple passengers, send backLinkedTransport null because there is no ticket slot.
         return null;
     }
     /**
