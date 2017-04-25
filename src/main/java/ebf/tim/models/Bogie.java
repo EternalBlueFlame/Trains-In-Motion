@@ -11,11 +11,13 @@ import net.minecraft.util.ResourceLocation;
  */
 public class Bogie {
 
+    /**the vector 3 of the previously known position.*/
     public double[] prevPos = null;
-
+    /**the current yaw rotation.*/
     public float rotationYaw;
-
+    /**the texture defined in the registration of this.*/
     public ResourceLocation bogieTexture;
+    /**the model defined in the registration of this.*/
     public ModelBase bogieModel;
 
 

@@ -12,19 +12,22 @@ import net.minecraft.client.model.ModelBase;
  * @author Eternal Blue Flame
  */
 public class CubikModelRenderer extends ModelRendererTurbo {
-
+    /**transitional value for the width of a cube*/
     private float width=0;
+    /**transitional value for the height of a cube*/
     private float height=0;
+    /**transitional value for the depth of a cube*/
     private float depth=0;
+    /**base constructor*/
     public CubikModelRenderer(ModelBase p_i1172_1_, String p_i1172_2_) {
         super(p_i1172_1_, p_i1172_2_);
     }
-
+    /**base constructor with a texture offset*/
     public CubikModelRenderer(ModelBase p_i1174_1_, int p_i1174_2_, int p_i1174_3_) {
         this(p_i1174_1_, "void");
         this.setTextureOffset(p_i1174_2_,p_i1174_3_);
     }
-
+    /**base constructor with a texture offset and box name*/
     public CubikModelRenderer(ModelBase p_i1174_1_, int p_i1174_2_, int p_i1174_3_, String name) {
         this(p_i1174_1_, name);
         this.setTextureOffset(p_i1174_2_,p_i1174_3_);
@@ -33,6 +36,7 @@ public class CubikModelRenderer extends ModelRendererTurbo {
     /**
      * <h2>add Box to the render</h2>
      * adds a box to the render with the defined values, we use the width, height, and depth to help define the center point used for rotation.
+     * we use this to convert the model from BDCraft Cubik Pro's .java format to the TMT format.
      */
     @Override
     public ModelRendererTurbo addBox(float unused1, float unused2, float unused3, float boxWidth, float boxHeight, float boxDepth) {

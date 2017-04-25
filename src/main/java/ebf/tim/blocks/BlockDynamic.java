@@ -34,8 +34,8 @@ public class BlockDynamic extends BlockContainer {
 
     /**
      * <h2>Block use</h2>
-     * Defines the functionality on block use.
-     * This is used to play the using animation on client and open the GUI on server.
+     * Called upon block activation (right click on the block.)
+     * @return whether or not to animate the arm of the character for use.
      */
     @Override
     public boolean onBlockActivated(World worldOBJ, int x, int y, int z, EntityPlayer player, int p_149727_6_, float p_149727_7_, float p_149727_8_, float p_149727_9_) {
@@ -67,7 +67,7 @@ public class BlockDynamic extends BlockContainer {
 
     /**
      * <h2>Tile entity spawner</h2>
-     * spawns the tile entity related to this block, if there isn't one already.
+     * spawns the tile entity related to this block, if there isn't one already. Called on placing the block.
      */
     public TileEntity createNewTileEntity(World worldObj, int meta){
         return new TileEntityStorage();

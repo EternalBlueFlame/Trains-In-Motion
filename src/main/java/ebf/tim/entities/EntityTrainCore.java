@@ -26,24 +26,23 @@ import static ebf.tim.utility.RailUtility.rotatePoint;
  */
 public class EntityTrainCore extends GenericRailTransport {
 
-    /**
-     * <h3>variables</h3>
-     * isRunning is used for non-steam based trains to define if it's actually on.
-     * fuelHandler manages the items for fuel, and the fuel itself.
-     * accelerator defines the speed percentage the user is attempting to apply.
-     */
+    /**used for non-steam based trains to define if it's actually on*/
     public boolean isRunning = false;
+    /**manages the items for fuel, and the fuel itself.*/
     public FuelHandler fuelHandler = new FuelHandler();
+    /**defines the speed percentage the user is attempting to apply.*/
     public int accelerator =0;
+    /**used to initialize all the vectors that are used to calculate everything from movement to linking, this is so we don't have to make new variable instances, saves CPU.*/
     private double[][] vectorCache = new double[4][3];
 
 
 
     /**
     * <h2> Base train Constructor</h2>
-    *
-    * default constructor for all trains, the first one is server only, the second is client only.
-    *
+    */
+
+    /** default constructor for all trains, server only.
+    * Usually this is the one you would reference unless you need to do something only on client.
     * @param owner the owner profile, used to define owner of the entity,
     * @param world the world to spawn the entity in, used in super's super.
     * @param xPos the x position to spawn entity at, used in super's super.
@@ -53,16 +52,22 @@ public class EntityTrainCore extends GenericRailTransport {
     public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos){
         super(owner, world, xPos, yPos, zPos);
     }
-    //this constructor is for client side spawning
+
+    /**default constructor for all trains, client only.
+     * use this if you need to do something only on client.
+     * @param world the world to spawn the entity in, used in super's super.
+     */
     public EntityTrainCore(World world){
         super(world);
     }
 
     /**
      * <h2> Data Syncing and Saving </h2>
-     * this is explained in
-     * @see GenericRailTransport#readSpawnData(ByteBuf)
+     * SpawnData is mainly used for data that has to be created on client then sent to the server, like data processed on item use.
+     * NBT is save data, which only happens on server.
      */
+
+    /**reads the data sent from client on entity spawn*/
     @Override
     public void readSpawnData(ByteBuf additionalData) {
     super.readSpawnData(additionalData);
@@ -70,6 +75,7 @@ public class EntityTrainCore extends GenericRailTransport {
         accelerator = additionalData.readInt();
         fuelHandler.burnableFuel = additionalData.readInt();
     }
+    /**sends the data to server from client*/
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         super.writeSpawnData(buffer);
@@ -77,6 +83,7 @@ public class EntityTrainCore extends GenericRailTransport {
         buffer.writeInt(accelerator);
         buffer.writeInt(fuelHandler.burnableFuel);
     }
+    /**loads the entity's save file*/
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
@@ -85,6 +92,7 @@ public class EntityTrainCore extends GenericRailTransport {
         fuelHandler.readEntityFromNBT(tag);
 
     }
+    /**saves the entity to server world*/
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
@@ -278,10 +286,15 @@ public class EntityTrainCore extends GenericRailTransport {
      * <h2>Inherited variables</h2>
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
      */
+    /**gets the max speed of the transport in blocks per second*/
     public float getMaxSpeed(){return 0;}
+    /**gets the max fuel for the train, burnables in the case of steam, RF in the case of electric, etc.*/
     public int getMaxFuel(){return 100;}
+    /**gets the acceleration rate of the train*/
     public float getAcceleration(){return 0.025f;}
+    /**gets the resource location for the horn sound*/
     public ResourceLocation getHorn(){return null;}
+    /**gets the resource location for the running/chugging sound*/
     public ResourceLocation getRunning(){return null;}
 
 }

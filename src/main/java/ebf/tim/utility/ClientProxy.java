@@ -10,7 +10,7 @@ import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.gui.GUITrainTable;
 import ebf.tim.gui.HUDTrain;
-import ebf.tim.gui.train.GUITrain;
+import ebf.tim.gui.GUITrain;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
 import ebf.tim.registry.GenericRegistry;

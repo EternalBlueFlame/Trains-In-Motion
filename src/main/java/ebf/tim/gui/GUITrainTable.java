@@ -1,6 +1,5 @@
 package ebf.tim.gui;
 
-import ebf.tim.gui.train.GUITrain;
 import ebf.tim.tileentities.TileEntityStorage;
 import ebf.tim.utility.ContainerHandler;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -22,11 +21,7 @@ public class GUITrainTable extends GuiContainer {
         super(new ContainerHandler(inventoryPlayer, (TileEntityStorage) world.getTileEntity(x,y,z), true));
     }
 
-    /**
-     * Draw the foreground layer for the GuiContainer (everything in front of the items)
-     * for more information on how this stuff works:
-     * @see GUITrain
-     */
+
     protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_) {
         this.fontRendererObj.drawString(StatCollector.translateToLocal("container.traincrafting"), 28, 6, 4210752);
         this.fontRendererObj.drawString(I18n.format("container.inventory"), 8, this.ySize - 96 + 2, 4210752);

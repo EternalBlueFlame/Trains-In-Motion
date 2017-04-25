@@ -11,6 +11,7 @@
 
 package ebf.tim.models.rollingstock;
 
+import ebf.tim.models.RenderEntity;
 import ebf.tim.models.tmt.ModelRendererTurbo;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.entity.Entity;
@@ -38,7 +39,7 @@ public class PullmansPalace extends ModelBase
 		pullmanspalaceModel[13] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 14
 		pullmanspalaceModel[14] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 15
 		pullmanspalaceModel[15] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 19
-		pullmanspalaceModel[16] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, "wheel"); // Wheel 8
+		pullmanspalaceModel[16] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 8
 		pullmanspalaceModel[17] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 78
 		pullmanspalaceModel[18] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 79
 		pullmanspalaceModel[19] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 80
@@ -58,7 +59,7 @@ public class PullmansPalace extends ModelBase
 		pullmanspalaceModel[33] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 80
 		pullmanspalaceModel[34] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 82
 		pullmanspalaceModel[35] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 83
-		pullmanspalaceModel[36] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, "wheel"); // Wheel 7
+		pullmanspalaceModel[36] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 7
 		pullmanspalaceModel[37] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 69
 		pullmanspalaceModel[38] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 70
 		pullmanspalaceModel[39] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 71
@@ -68,24 +69,24 @@ public class PullmansPalace extends ModelBase
 		pullmanspalaceModel[43] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 75
 		pullmanspalaceModel[44] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 76
 		pullmanspalaceModel[45] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 77
-		pullmanspalaceModel[46] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, "wheel"); // Wheel 6
-		pullmanspalaceModel[47] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, "wheel"); // Wheel 5
+		pullmanspalaceModel[46] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 6
+		pullmanspalaceModel[47] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 5
 		pullmanspalaceModel[48] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 80
 		pullmanspalaceModel[49] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 81
 		pullmanspalaceModel[50] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 82
 		pullmanspalaceModel[51] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 83
 		pullmanspalaceModel[52] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 84
 		pullmanspalaceModel[53] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 85
-		pullmanspalaceModel[54] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, "wheel"); // Wheel 3
-		pullmanspalaceModel[55] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, "wheel"); // Wheel 4
+		pullmanspalaceModel[54] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 3
+		pullmanspalaceModel[55] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 4
 		pullmanspalaceModel[56] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 88
 		pullmanspalaceModel[57] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 89
 		pullmanspalaceModel[58] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 90
 		pullmanspalaceModel[59] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 91
 		pullmanspalaceModel[60] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 92
 		pullmanspalaceModel[61] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 93
-		pullmanspalaceModel[62] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, "wheel"); // Wheel 1
-		pullmanspalaceModel[63] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, "wheel"); // Wheel 2
+		pullmanspalaceModel[62] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 1
+		pullmanspalaceModel[63] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 2
 		pullmanspalaceModel[64] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 96
 		pullmanspalaceModel[65] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 97
 		pullmanspalaceModel[66] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY); // Box 98

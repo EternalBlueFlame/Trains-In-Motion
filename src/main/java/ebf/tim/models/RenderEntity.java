@@ -40,36 +40,50 @@ public class RenderEntity extends Render {
 
     /**
      * <h2>variables</h2>
-     * model defines the base model of the entity, this holds every piece of sub-geometry and their texture mappings.
-     * texture defines the texture used.
-     * bogieRenders defines the model that will be used for bogies, this can be null.
-     * bogie texture defines the texture to use on the bogies.
-     * simple and advanced pistons are used to cache the piston geometry of the train so we can animate them properly without needing to re-parse the base models
-     *         since it's just references to already-existing data, and copies of their original positions the RAM cost is very minimal.
-     * wheels is similar to the pistons but much simpler since it doesn't need to cache the original position.
-     * BlockCargoRenders is basically the same as wheels except we store booleans of if it's a wheel, and the name string,
-     *         These are built more like a set, so multiple model parts, ones with the same name, are saved to the set rather than having a model part to every entry.
-     *         This way we can render sets at our whim rather than one by one.
-     * animationCache is used to initialize the variables used for animation vectors ahead of time rather than every frame.
-     *
-     * TODO:
-     * livery Square and liveryRect are used to display train/rollingstock livery spots, company logos as an example.
-     *         Textures will be scaled evenly to match the shape, without distorting the aspect of the image.
-     *         The livery should be defined in GenericRailTransport and saved to NBT.
      */
-    private ModelBase model;
-    private ResourceLocation texture;
-    private Bogie[] bogieRenders;
-    private List<simplePiston> simplePistons = new ArrayList<simplePiston>();
-    private List<advancedPiston> advancedPistons = new ArrayList<advancedPiston>();
-    private List<wheel> wheels = new ArrayList<wheel>();
-    private List<blockCargo> blockCargoRenders = new ArrayList<blockCargo>();
-    private double[][] animationCache = new double[6][3];
-    private List<ModelRendererTurbo> liveriesSquare = new ArrayList<ModelRendererTurbo>();
+    /**tag for simple pistons, ones that move in a simple circle.*/
+    public static final String tagSimplePiston = "simplepiston";
+    /**tag for advanced pistons, ones that rotate and move in a simple circle.*/
+    public static final String tagAdvancedPiston = "advancedpiston";
+    /**tag for wheels, axles, and other geometry that just spins.*/
+    public static final String tagSimpleRotate = "simplerotate";
+    /**tag for all the cargo to render as a block, similar to what enderman does.
+     * NOTE: this supports grouping, parts with the same exact name will represent the same percentage of inventory used.
+     * NOTE 2: order is defined in the model geometry order, not by name, so be sure they are organized properly in your editor.
+     * EXAMPLE: (tagRenderBlockCargo + "myblock5") and (tagRenderBlockCargo + "myblock2")
+     * what is shown in the example will be two separate groups, each representing half the inventory, with 5 actually being the first because it was defined first.*/
+    public static final String tagRenderBlockCargo = "renderblock";
+    /**tag for all the cargo to render from the model, but as representation of inventory use.
+     * NOTE: this supports grouping, parts with the same exact name will represent the same percentage of inventory used.
+     * NOTE 2: order is defined in the model geometry order, not by name, so be sure they are organized properly in your editor.
+     * EXAMPLE: (tagRenderModelCargo + "myblock5") and (tagRenderModelCargo + "myblock2")
+     * what is shown in the example will be two separate groups, each representing half the inventory, with 5 actually being the first because it was defined first.*/
+    public static final String tagRenderModelCargo = "rendercrate";
 
+    /**the base model of the entity, this holds every piece of sub-geometry and their texture mappings*/
+    private ModelBase model;
+    /**texture used by the base model*/
+    private ResourceLocation texture;
+    /**the models, textures, and other data for each bogie to render*/
+    private Bogie[] bogieRenders;
+    /**a cached list of all the simple pistons, ones that move in a simple circle.*/
+    private List<simplePiston> simplePistons = new ArrayList<simplePiston>();
+    /**a cached list of all the advanced pistons, ones that rotate and move in a simple circle.*/
+    private List<advancedPiston> advancedPistons = new ArrayList<advancedPiston>();
+    /**a cached list of all the wheels, and other geometry that just spins.*/
+    private List<wheel> wheels = new ArrayList<wheel>();
+    /**a cached list of all the cargo blocks.*/
+    private List<blockCargo> blockCargoRenders = new ArrayList<blockCargo>();
+    /**a cached list of all the vectors used, so we don't have to re-initialize them every frame.*/
+    private double[][] animationCache = new double[6][3];
+    /**a cached list of all the cubes intended to display liveries.*/
+    private List<ModelRendererTurbo> liveriesSquare = new ArrayList<ModelRendererTurbo>();
+    /**the value to rotate the geometry with.*/
     private float wheelPitch=0;
     /**
      * <h3>class constructor</h3>
+     * instances the render, and caches the geometry tagged for runtime modification (like animation and block renders)
+     * caching here means we don't even need to check it every render frame.
      * @param modelLoad the model class to render.
      * @param textureLoad the texture ResourceLocation to apply to the model.
      * @param bogieRenders the model and texture class to render for the bogies, if null then no bogies will not be rendered. null indexes are allowed as well.
@@ -79,29 +93,24 @@ public class RenderEntity extends Render {
         texture = textureLoad;
         this.bogieRenders = bogieRenders;
 
-        /**
-         * <h3>model caching</h3>
-         * cache individual geometry parts so we can render them properly later.
-         * we do this on initial model instance so we don't even need to check it every render frame.
-         */
         if (ClientProxy.EnableAnimations){
             for (Object box : model.boxList) {
                 if (box instanceof ModelRendererTurbo) {
                     ModelRendererTurbo render = ((ModelRendererTurbo) box);
                     //wheels
-                    if (render.boxName.contains("wheel") || render.boxName.contains("axel")) {
+                    if (render.boxName.contains(tagSimpleRotate)) {
                         wheels.add(new wheel(render));
                     }
                     //advanced pistons
-                    if (render.boxName.contains("pistonvalveconnector") || render.boxName.contains("advanced")) {
+                    if (render.boxName.contains(tagAdvancedPiston)) {
                         advancedPistons.add(new advancedPiston(render));
                     }
                     //simple pistons and wheel connectors.
-                    if (render.boxName.contains("wheelconnector") || render.boxName.contains("upperpiston") || render.boxName.contains("upperpistonarm") ||render.boxName.contains("simple")) {
+                    if (render.boxName.contains(tagSimplePiston)) {
                         simplePistons.add(new simplePiston(render));
                     }
                     //block renders
-                    if (render.boxName.contains("block")) {
+                    if (render.boxName.contains(tagRenderBlockCargo)) {
                         boolean isAdded =false;
                         for (blockCargo cargo : blockCargoRenders) {
                             if (cargo.name.equals(render.boxName)){
@@ -114,7 +123,7 @@ public class RenderEntity extends Render {
                         }
                     }
                     //crate renders
-                    if (render.boxName.contains("crate")) {
+                    if (render.boxName.contains(tagRenderModelCargo)) {
                         boolean isAdded =false;
                         for (blockCargo cargo : blockCargoRenders) {
                             if (cargo.name.equals(render.boxName)){
@@ -137,15 +146,15 @@ public class RenderEntity extends Render {
                         if (ClientProxy.EnableAnimations && box instanceof ModelRendererTurbo) {
                             ModelRendererTurbo render = ((ModelRendererTurbo) box);
                             //wheel renders
-                            if (render.boxName.contains("wheel") || render.boxName.contains("axel")) {
+                            if (render.boxName.contains(tagSimpleRotate)) {
                                 wheels.add(new wheel(render));
                             }
                             //advanced piston renders
-                            if (render.boxName.contains("pistonvalveconnector") || render.boxName.contains("advanced")) {
+                            if (render.boxName.contains(tagAdvancedPiston)) {
                                 advancedPistons.add(new advancedPiston(render));
                             }
                             //simple pistons and wheel connectors
-                            if (render.boxName.contains("wheelconnector") || render.boxName.contains("upperpiston") || render.boxName.contains("upperpistonarm") ||render.boxName.contains("simple")) {
+                            if (render.boxName.contains(tagSimplePiston)) {
                                 simplePistons.add(new simplePiston(render));
                             }
                         }
@@ -242,7 +251,7 @@ public class RenderEntity extends Render {
         bindTexture(texture);
         for(Object cube : model.boxList){
             if (cube instanceof ModelRenderer &&
-                    !(((ModelRendererTurbo) cube).boxName).contains("block") && !(((ModelRendererTurbo) cube).boxName).contains("crate")) {
+                    !(((ModelRendererTurbo) cube).boxName).contains(tagRenderBlockCargo) && !(((ModelRendererTurbo) cube).boxName).contains(tagRenderModelCargo)) {
                 ((ModelRenderer)cube).render(entity.getRenderScale());
             }
         }
@@ -503,72 +512,54 @@ public class RenderEntity extends Render {
         public void moveEntity(double x, double y, double z) {
             this.ySize *= 0.4F;
 
-            double d6 = x;
-            double d7 = y;
-            double d8 = z;
+            double oldX = x;
+            double oldY = y;
+            double oldZ = z;
 
             List list = this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox.addCoord(x, y, z));
             for (Object box : list){
-                if (box instanceof HitboxHandler.MultipartHitbox){
-                    list.remove(box);
-                } else if (box instanceof GenericRailTransport){
-                    list.remove(box);
+                if (!(box instanceof HitboxHandler.MultipartHitbox) && !(box instanceof GenericRailTransport)){
+                    y = ((AxisAlignedBB)box).calculateYOffset(this.boundingBox, y);
+                    x = ((AxisAlignedBB)box).calculateYOffset(this.boundingBox, x);
+                    z = ((AxisAlignedBB)box).calculateYOffset(this.boundingBox, z);
                 }
             }
 
-            for (Object obj: list) {
-                y = ((AxisAlignedBB)obj).calculateYOffset(this.boundingBox, y);
-            }
+            this.boundingBox.offset(x, y, z);
 
-            this.boundingBox.offset(0.0D, y, 0.0D);
-
-            if (d7 != y) {
+            if (oldY != y) {
                 z = 0.0D;
                 y = 0.0D;
                 x = 0.0D;
             }
 
-            int j;
-
-            for (j = 0; j < list.size(); ++j) {
-                x = ((AxisAlignedBB)list.get(j)).calculateXOffset(this.boundingBox, x);
-            }
-
-            this.boundingBox.offset(x, 0.0D, 0.0D);
-
-            if (d6 != x) {
+            if (oldX != x) {
                 z = 0.0D;
                 y = 0.0D;
                 x = 0.0D;
             }
 
-            for (j = 0; j < list.size(); ++j) {
-                z = ((AxisAlignedBB)list.get(j)).calculateZOffset(this.boundingBox, z);
-            }
-
-            this.boundingBox.offset(0.0D, 0.0D, z);
-
-            if (d8 != z) {
+            if (oldZ != z) {
                 z = 0.0D;
                 y = 0.0D;
                 x = 0.0D;
             }
 
             this.posX = (this.boundingBox.minX + this.boundingBox.maxX) / 2.0D;
-            this.posY = this.boundingBox.minY + (double)this.yOffset - (double)this.ySize;
+            this.posY = this.boundingBox.maxY - (double)this.ySize;
             this.posZ = (this.boundingBox.minZ + this.boundingBox.maxZ) / 2.0D;
 
-            if (d6 != x) {
+            if (oldX != x) {
                 this.motionX = this.motionX*-0.75d;
             }
 
-            if (d7 != y) {
+            if (oldY != y) {
                 this.motionY = -this.motionY * 0.25d;
                 this.motionZ *=-2.5d;
                 this.motionX *=-2.5d;
             }
 
-            if (d8 != z) {
+            if (oldZ != z) {
                 this.motionZ = this.motionZ*-0.75d;
             }
         }

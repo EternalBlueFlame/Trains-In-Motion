@@ -1,4 +1,4 @@
-package ebf.tim.gui.train;
+package ebf.tim.gui;
 
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
@@ -30,19 +30,20 @@ import static ebf.tim.TrainsInMotion.transportTypes.*;
  * @author Eternal Blue Flame
  */
 public class GUITrain extends GuiContainer {
-    /**
-     * <h2>variables</h2>
-     * we re-use the furnace and chest textures so the inventory is at least partially customized by the player's texturepack.
-     * the transport and player are just so we have access to them beyond initialization of the GUI.
-     * the first and second tank ints are so we don't have to re-initialize them every frame.
-     * guiScaler is just a more convenient method to scale, its similar to what the base game does, but with less overhead.
-     */
+
+    /**a reference to the resource location of the vanilla furnace texture, this also gets overridden by texturepacks*/
     private static final ResourceLocation vanillaInventory = new ResourceLocation("textures/gui/container/furnace.png");
+    /**a reference to the resource location of the vanilla chest texture, this also gets overridden by texturepacks*/
     private static final ResourceLocation vanillaChest = new ResourceLocation("textures/gui/container/generic_54.png");
+    /**a reference to the host entity that this GUI is for.*/
     private static GenericRailTransport transport;
+    /**a reference to the player that opened the GUI.*/
     private EntityPlayer player;
+    /**a cached value for the first fluid tank (fuel, water, etc).*/
     private int firstTankFluid;
+    /**a cached value for the second fuel tank, only used for steam currently*/
     private int secondTankFluid;
+    /**the amount to scale the GUI by, same as vanilla*/
     private static final float guiScaler = 0.00390625F;
 
     /**
@@ -57,15 +58,7 @@ public class GUITrain extends GuiContainer {
         transport = entity;
     }
 
-    /**
-     * <h2>GUI foreground layer</h2>
-     * this draws the topmost layer, closest to screen.
-     * things later in the function render closer to the screen
-     *
-     * StatCollector.translateToLocal is used for translation, this is usually defined in minecraft itself.
-     * xSize and ySize are defined in the super
-     * @see GuiContainer
-     */
+
     @Override
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
         fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), 8, -18, 4210752);
@@ -194,7 +187,7 @@ public class GUITrain extends GuiContainer {
 
     /**
      * <h2>button overrides</h2>
-     * here we define the overrides for the buttons.
+     * here we define the overrides for the button functionality.
      */
     @Override
     public void actionPerformed(GuiButton button) {
@@ -311,7 +304,7 @@ public class GUITrain extends GuiContainer {
      * basically the same as
      * @see #renderTrainInventory(int, int, double, Minecraft, int, int)
      */
-    public static void renderPassengerInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
+    private static void renderPassengerInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
 
         int rows=0;
         //draw the character backgrounds.
@@ -344,7 +337,7 @@ public class GUITrain extends GuiContainer {
      * basically the same as
      * @see #renderTrainInventory(int, int, double, Minecraft, int, int)
      */
-    public void renderFreightInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
+    private void renderFreightInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
         mc.getTextureManager().bindTexture(vanillaInventory);
         //draw the player inventory and toolbar background.
         drawTexturedModalRect(guiLeft, guiTop+ 72, 0, 72, 176, 176, 176, 176, zLevel);

@@ -19,11 +19,12 @@ import net.minecraftforge.fluids.Fluid;
  * @author Eternal Blue Flame
  */
 public class BlockTrainFluid extends BlockFluidClassic {
-
+    /**the texture for the block, the first value is the top and bottom, the second is for the sides.*/
     @SideOnly(Side.CLIENT)
     private IIcon[] sidedTexture;
-
+    /**returns if this is flammable*/
     private boolean flammable = false;
+    /**returns the flammability of this*/
     private int flammability = 0;
 
     public BlockTrainFluid(Fluid fluid, Material material) {
@@ -32,7 +33,7 @@ public class BlockTrainFluid extends BlockFluidClassic {
 
     /**
      * <h3>define texture</h3>
-     * uses the sidedTexture to define the texture for the block
+     * uses the sidedTexture to define the texture for the block.
      */
     @Override
     public IIcon getIcon(int side, int meta) {
@@ -44,12 +45,12 @@ public class BlockTrainFluid extends BlockFluidClassic {
 
     /**
      * <h3>Register iicon</h3>
-     * fom my vague understanding this is another way of registering the texture for the block
+     * used to register the icon for the block.
      */
     @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister iconRegister) {
-        this.sidedTexture = new IIcon[]{iconRegister.registerIcon(fluidName), iconRegister.registerIcon("_flow")};
+        this.sidedTexture = new IIcon[]{iconRegister.registerIcon(fluidName), iconRegister.registerIcon(fluidName +"_flow")};
     }
 
     /**

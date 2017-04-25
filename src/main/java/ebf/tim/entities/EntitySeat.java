@@ -23,10 +23,16 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
      * parentId is used to keep a reference to the parent train/rollingstock.
      * the velocities are to replace the client only velocities in forge that have private access.
      */
+    /**used to keep a reference to the parent train/rollingstock.*/
     public int parentId = 0;
+    /**used to define which index the seat is supposed to be at
+     * TODO: might actually be useless. */
     private int seatNumber =0;
+    /**used to replace the client only velocity in forge that have private access.*/
     protected double cartVelocityX =0;
+    /**used to replace the client only velocity in forge that have private access.*/
     protected double cartVelocityY =0;
+    /**used to replace the client only velocity in forge that have private access.*/
     protected double cartVelocityZ =0;
 
     public EntitySeat(World world) {

@@ -6,7 +6,6 @@ import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
-import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemKey;
 import ebf.tim.models.tmt.Vec3d;
 import ebf.tim.networking.PacketRemove;
@@ -48,52 +47,62 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * <h3>Ore directory support</h3>
      * creates lists of the items by ore directory names to add support for 3rd party mods.
      */
+    /**collects all the wood planks, slabs, and logs in the ore directory*/
     private static final ArrayList<ItemStack> logCarrier = combineStacks(combineStacks(OreDictionary.getOres("plankWood"), OreDictionary.getOres("slabWood")), OreDictionary.getOres("logWood"));
+    /**collects all the coal in in the ore directory*/
     private static final ArrayList<ItemStack> coalCarrier = OreDictionary.getOres("coal");
 
     /**
      * <h2>variables</h2>
-     * isLocked is for if the owner has locked it.
-     * Brake defines if the handbrake is on.
-     * lamp is used for the lamp, assuming this has one.
-     * colors define the skin colors in RGB format, because we plan to have multiple recolor points on the trains, dependant on skin, we need multiple sets of RGB values.
-     * owner defines the UUID of the current owner (usually the player that spawns it)
-     * bogie is the list of bogies this has.
-     * isCreative defines whether or not it should actually remove the liquid/fuel item, this can be toggled from the GUI if the rider is in creative mode.
-     * hitboxList and hitboxHandler manage the hitboxes the train has, this is mostly dealt with via getParts() and the hitbox functionality.
-     * ticksExisted is a simple tick count that allows us to manage functions that don't happen every tick, like fuel consumption in trains.
-     * frontLinkedTransport and backLinkedTransport define references to the train/rollingstock connected to the frontLinkedTransport and backLinkedTransport, so that way we can better control links.
-     * the frontLinkedTransport and backLinkedTransport unloaded ID's are used as a failsafe in case the frontLinkedTransport or backLinkedTransport connected entities aren't loaded yet.
-     * destination is used for routing, railcraft and otherwise.
-     * the inventory defines the item storage.
-     * the key defines the ownership key item, this is used to allow other people access to the transport.
-     * the vectorCache is used to initialize all the vector 3's that are used to calculate everything from movement to linking, this is so we don't have to make new variable instances, saves CPU.
-     * health is used similar to that of EntityLiving like a mob or a player.
-     * the last part is the generic entity constructor
      */
+    /**if the owner has locked this.*/
     public boolean isLocked = false;
+    /**if the handbrake is on.*/
     public boolean brake = false;
+    /**defines the lamp, and it's management*/
     public LampHandler lamp = new LampHandler();
+    /**defines the colors, the outer array is for each different color, and the inner int[] is for the RGB color*/
     public int[][] colors = new int[][]{{0,0,0},{0,0,0},{0,0,0}};
+    /**the server-sided persistent UUID of the owner*/
     private UUID owner = null;
+    /**the front entity bogie*/
     public EntityBogie frontBogie = null;
+    /**the back entity bogie*/
     public EntityBogie backBogie = null;
+    /**the list of seat entities*/
     public List<EntitySeat> seats = new ArrayList<EntitySeat>();
+    /**whether or not this should consume fuel and be able to derail.*/
     public boolean isCreative = false;
+    /**whether or not to check for cars to link to*/
     public boolean isCoupling = false;
+    /**the list of hitboxes and the class that manages them*/
     public HitboxHandler hitboxHandler = new HitboxHandler();
+    /**the server-sided persistent UUID of the transport linked to the front of this,*/
     public UUID frontLinkedTransport = null;
+    /**the server-sided persistent UUID of the transport linked to the back of this,*/
     public UUID backLinkedTransport = null;
+    /**the ID of the owner*/
     public int ownerID =0;
+    /**the destination for routing*/
     public String destination ="";
+    /**the key item for the entity*/
     public ItemStack key;
+    /**used to initialize a laege number of variables that are used to calculate everything from movement to linking.
+     * this is so we don't have to initialize each of these variables every tick, saves CPU.*/
     private double[][] vectorCache = new double[7][3];
+    /**the health of the entity, similar to that of EntityLiving*/
     private int health = 20;
-    private FluidStack fluid = null;
+    /**the fluidTank tank*/
+    private FluidStack fluidTank = null;
+    /**the list of items used for the inventory and crafting slots.*/
     private List<ItemStack> items;
+    /**the lst of unlocalized names for the filter*/
     private List<String> filter = new ArrayList<String>();
+    /**whether the filter should only take the items in the list (whitelist), or whether it should take anything but the items in the list (blacklist).*/
     private boolean isWhitelist = false;
+    /**whether or not this needs to update the datawatchers*/
     private boolean updateWatchers = false;
+
     public GenericRailTransport(World world){
         super(world);
     }
@@ -103,25 +112,14 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         posY = yPos;
         posX = xPos;
         posZ = zPos;
-
         this.owner = owner;
-
         key = new ItemStack(new ItemKey(owner, getItem().getUnlocalizedName()));
-
-        setSize(1f,2);
-        this.boundingBox.minX = 0;
-        this.boundingBox.minY = 0;
-        this.boundingBox.minZ = 0;
-        this.boundingBox.maxX = 0;
-        this.boundingBox.maxY = 0;
-        this.boundingBox.maxZ = 0;
     }
-
 
     /**
      * <h2>Entity initialization</h2>
      * Entity init runs right before the first tick.
-     * This is useful for registering the datawatchers before we actually use them.
+     * This is useful for registering the datawatchers and inventory before we actually use them.
      */
     @Override
     public void entityInit(){
@@ -142,22 +140,26 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**
      * <h2>base entity overrides</h2>
      * modify basic entity variables to give different uses/values.
-     * collision and bounding box stuff just return the in-built stuff.
-     * getParts returns the list of hitboxes so they can be treated as if they are part of this entity.
-     * The positionAndRotation2 override is intended to re-calculate the position given the client data during the client tick rather than relying on server.
      */
+     /**returns if the player can push this, we actually use our own systems for this, so we return false*/
     @Override
     public boolean canBePushed() {return false;}
+    /**returns the world object for IEntityMultipart*/
     @Override
     public World func_82194_d(){return worldObj;}
+    /**returns the hitboxes of the entity as an array rather than a list*/
     @Override
     public Entity[] getParts(){return hitboxHandler.hitboxList.toArray(new HitboxHandler.MultipartHitbox[hitboxHandler.hitboxList.size()]);}
+    /**returns the hitbox of this entity, we dont need that so return null*/
     @Override
-    public AxisAlignedBB getBoundingBox(){return boundingBox;}
+    public AxisAlignedBB getBoundingBox(){return null;}
+    /**returns the hitbox of this entity, we dont need that so return null*/
     @Override
-    public AxisAlignedBB getCollisionBox(Entity collidedWith){return boundingBox;}
+    public AxisAlignedBB getCollisionBox(Entity collidedWith){return null;}
+    /**returns if this can be collided with, we don't use this so return false*/
     @Override
     public boolean canBeCollidedWith() {return false;}
+    /**client only positioning of the transport, this should help to smooth the movement*/
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
         if (frontBogie!=null && backBogie!= null){
@@ -241,10 +243,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
 
     /**
-     * <h3>add bogies</h3>
-     * this is called by the bogies and seats on their spawn to add them to this entity's list of bogies and seats, we only do it on client because that's the only side that seems to lose track.
-     * @see EntityBogie#readSpawnData(ByteBuf)
+     * <h3>add bogies and seats</h3>
      */
+
+     /** this is called by the bogies on their spawn to add them to this entity's list of bogies, we only do it on client because that's the only side that seems to lose track.
+     * @see EntityBogie#readSpawnData(ByteBuf)*/
     @SideOnly(Side.CLIENT)
     public void setBogie(EntityBogie cart, boolean isFront){
         if(isFront){
@@ -253,18 +256,18 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             backBogie = cart;
         }
     }
+    /** this is called by the seats and seats on their spawn to add them to this entity's list of seats, we only do it on client because that's the only side that seems to lose track.
+     * @see EntitySeat#readSpawnData(ByteBuf)*/
     @SideOnly(Side.CLIENT)
     public void addseats(EntitySeat cart){seats.add(cart);}
 
     /**
      * <h2> Data Syncing and Saving </h2>
-     *
-     * used for syncing the spawn data with client and server(SpawnData), and saving/loading information from world (NBT)
-     * @see IEntityAdditionalSpawnData
-     * @see NBTTagCompound
-     * the spawn data will make sure variables that don't usually sync on spawn, like from the item, get synced.
-     * the NBT will make sure that variables save to the world so it will be there next time you load the world up.
+     * SpawnData is mainly used for data that has to be created on client then sent to the server, like data processed on item use.
+     * NBT is save data, which only happens on server.
      */
+
+    /**reads the data sent from client on entity spawn*/
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         brake = additionalData.readBoolean();
@@ -275,6 +278,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         key = new ItemStack(new ItemKey(owner, getItem().getUnlocalizedName()));
         rotationYaw = additionalData.readFloat();
     }
+    /**sends the data to server from client*/
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         buffer.writeBoolean(brake);
@@ -285,6 +289,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         buffer.writeLong(owner.getLeastSignificantBits());
         buffer.writeFloat(rotationYaw);
     }
+    /**loads the entity's save file*/
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         isLocked = tag.getBoolean(NBTKeys.locked);
@@ -306,9 +311,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //key.readFromNBT(tag);
         //load tanks
         if (getTankCapacity() >0) {
-            fluid = FluidStack.loadFluidStackFromNBT(tag);
-            if (fluid==new FluidStack(FluidRegistry.WATER,0)){
-                fluid = null;
+            fluidTank = FluidStack.loadFluidStackFromNBT(tag);
+            if (fluidTank ==new FluidStack(FluidRegistry.WATER,0)){
+                fluidTank = null;
             }
         }
 
@@ -332,6 +337,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         updateWatchers = true;
 
     }
+    /**saves the entity to server world*/
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         tag.setBoolean(NBTKeys.locked, isLocked);
@@ -358,8 +364,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
         //tanks
         if (getTankCapacity() >0){
-            if (fluid != null) {
-                fluid.writeToNBT(tag);
+            if (fluidTank != null) {
+                fluidTank.writeToNBT(tag);
             } else {
                 new FluidStack(FluidRegistry.WATER, 0);
             }
@@ -497,8 +503,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 ownerID = player.getEntityId();
                 this.dataWatcher.updateObject(19,ownerID);
             }
-            if (updateWatchers && fluid!= null){
-                dataWatcher.updateObject(20, fluid.amount);
+            if (updateWatchers && fluidTank != null){
+                dataWatcher.updateObject(20, fluidTank.amount);
             }
         }
 
@@ -515,10 +521,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 vectorCache[0][2] =this.posZ + getLampOffset().zCoord;
                 lamp.ShouldUpdate(worldObj, RailUtility.rotatePoint(vectorCache[0], rotationPitch, rotationYaw, 0));
             }
-            if (ticksExisted>20){
-                ticksExisted = 1;
-            }
-            ticksExisted++;
         }
     }
 
@@ -706,30 +708,45 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**
      * <h2>Inherited variables</h2>
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
-     * @see EntityBrigadelok080 for more information
      */
+    /**returns the lengths from center that represent the offset each bogie should render at*/
     public List<Double> getRenderBogieOffsets(){return new ArrayList<Double>();}
+    /**returns the type of transport, for a list of options:
+     * @see TrainsInMotion.transportTypes */
     public TrainsInMotion.transportTypes getType(){return null;}
-    public double[][] getRiderOffsets(){return new double[][]{{0,0}};}
+    /**returns the rider offsets, each of the outer arrays represents a new rider seat,
+     * the first value of the double[] inside that represents length from center in blocks.
+     * the second represents height offset in blocks
+     * the third value is for the horizontal offset*/
+    public double[][] getRiderOffsets(){return new double[][]{{0,0,0}};}
+    /**returns the positions for the hitbox, they are defined by length from center.*/
     public double[] getHitboxPositions(){return new double[]{-1,0,1};}
+    /**returns the item of the transport, this should be a static value in the transport's class.*/
     public Item getItem(){return null;}
+    /**defines the size of the inventory, not counting any special slots like for fuel.
+     * @see TrainsInMotion.inventorySizes*/
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.THREExTHREE;}
+    /**defines the offset for the lamp in X/Y/Z*/
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
+    /**defines the radius in microblocks that the pistons animate*/
     public float getPistonOffset(){return 0;}
+    /**defines smoke positions, the outer array defines each new smoke point, the inner arrays define the X/Y/Z*/
     public float[][] getSmokeOffset(){return new float[][]{{0,0,0,255}};}
+    /**defines the length from center of the transport, thus is used for the motion calculation*/
     public double getLengthFromCenter(){return 1d;}
+    /**defines the render scale, minecraft's default is 0.0625*/
     public float getRenderScale(){return 0.0625f;}
+    /**defines if the transport is explosion resistant*/
     public boolean isReinforced(){return false;}
+    /**defines the capacity of the fluidTank tank*/
     public int getTankCapacity(){return 0;}
-    public int getOwnerID(){
-        return this.dataWatcher.getWatchableObjectInt(19);
-    }
+    /**defines the ID of the owner*/
+    public int getOwnerID(){return this.dataWatcher.getWatchableObjectInt(19);}
 
 
     /**
      * <h1>Inventory management</h1>
      */
-
 
     /**
      * <h2>define filters</h2>
@@ -840,12 +857,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public boolean isUseableByPlayer(EntityPlayer p_70300_1_) {return getPermissions(p_70300_1_, false);}
 
-    /**
-     * <h2>slot limiter</h2>
-     * This is supposed to see if a specific slot will take a specific item. However it's only called from slots we know are actual inventory slots.
-     * Because of this we don't even need to check the slot, just the item.
-     * This is also used to filter items for specific rollingstock, that way we can use ore directory commands for things like logs, planks, ores, ingots, etc.
-     */
     @Override
     public boolean isItemValidForSlot(int slot, ItemStack itemStack) {
         //compensate for specific rollingstock
@@ -969,12 +980,15 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * <h2>unused</h2>
      * we have to initialize these values, but due to the design of the entity we don't actually use them.
      */
+    /**normally used to drop the inventory content when the GUI is closed, but we don't do that.*/
     @Override
     public ItemStack getStackInSlotOnClosing(int p_70304_1_) {return null;}
     @Override
     public void markDirty() {}
+    /**called when the inventory GUI is opened*/
     @Override
     public void openInventory() {}
+    /**called when the inventory GUI is closed*/
     @Override
     public void closeInventory() {}
 
@@ -982,96 +996,99 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**
      * <h1>Fluid Management</h1>
      */
+    /**Returns true if the given fluid can be extracted.*/
     @Override
-    public boolean canDrain(ForgeDirection from, Fluid resource){return fluid != null && fluid.amount>0 && (fluid.getFluid() == resource || resource == null);}
-
+    public boolean canDrain(ForgeDirection from, Fluid resource){return fluidTank != null && fluidTank.amount>0 && (fluidTank.getFluid() == resource || resource == null);}
+    /**Returns true if the given fluid can be inserted into the fluid tank.*/
     @Override
-    public boolean canFill(ForgeDirection from, Fluid resource){return getTankCapacity()>0 && (fluid == null || fluid.getFluid() == resource);}
+    public boolean canFill(ForgeDirection from, Fluid resource){return getTankCapacity()>0 && (fluidTank == null || fluidTank.getFluid() == resource);}
     //drain a set amount
     @Override
     public FluidStack drain(ForgeDirection from, int drain, boolean doDrain){
-        if (getTankCapacity() <1 || fluid == null || fluid.amount <1){
+        if (getTankCapacity() <1 || fluidTank == null || fluidTank.amount <1){
             return null;
         } else {
-            if (fluid.amount <= drain){
-                FluidStack toReturn = fluid.copy();
+            if (fluidTank.amount <= drain){
+                FluidStack toReturn = fluidTank.copy();
                 if (doDrain){
-                    fluid = null;
+                    fluidTank = null;
                     this.dataWatcher.updateObject(20,0);
                 }
                 return toReturn;
             } else {
-                FluidStack toReturn = fluid.copy();
+                FluidStack toReturn = fluidTank.copy();
                 toReturn.amount -= drain;
                 if (doDrain){
-                    fluid.amount -= drain;
-                    this.dataWatcher.updateObject(20,fluid.amount);
+                    fluidTank.amount -= drain;
+                    this.dataWatcher.updateObject(20, fluidTank.amount);
                 }
                 return toReturn;
             }
         }
     }
-    //drain only if its a specific fluid
+    //drain only if its a specific fluidTank
     @Override
     public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
-        if (getTankCapacity() <1 || fluid == null || fluid.getFluid() != resource.getFluid() || fluid.amount<1){
+        if (getTankCapacity() <1 || fluidTank == null || fluidTank.getFluid() != resource.getFluid() || fluidTank.amount<1){
             return null;
         } else {
-            if (fluid.amount <= resource.amount){
-                FluidStack toReturn = fluid.copy();
+            if (fluidTank.amount <= resource.amount){
+                FluidStack toReturn = fluidTank.copy();
                 if (doDrain){
-                    fluid = null;
+                    fluidTank = null;
                     this.dataWatcher.updateObject(20,0);
                 }
                 return toReturn;
             } else {
-                FluidStack toReturn = fluid.copy();
+                FluidStack toReturn = fluidTank.copy();
                 toReturn.amount -= resource.amount;
                 if (doDrain){
-                    fluid.amount -= resource.amount;
-                    this.dataWatcher.updateObject(20,fluid.amount);
+                    fluidTank.amount -= resource.amount;
+                    this.dataWatcher.updateObject(20, fluidTank.amount);
                 }
                 return toReturn;
             }
         }
     }
+    /**returns the amount of fluid in the tank. 0 if the tank is null*/
     public int getTankAmount(){
-        return fluid!=null?fluid.amount:0;
+        return fluidTank !=null? fluidTank.amount:0;
     }
 
     @Override
     public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
-        if (getTankCapacity() <1 || !(fluid == null || fluid.getFluid() == resource.getFluid())){
+        if (getTankCapacity() <1 || !(fluidTank == null || fluidTank.getFluid() == resource.getFluid())){
             return 0;
         }
-        if (fluid == null){
+        if (fluidTank == null){
             if (resource.amount > getTankCapacity()) {
                 resource.amount = getTankCapacity();
             }
             if (doFill) {
-                fluid = resource;
-                this.dataWatcher.updateObject(20,fluid.amount);
+                fluidTank = resource;
+                this.dataWatcher.updateObject(20, fluidTank.amount);
             }
             return resource.amount;
 
-        } else if (getTankCapacity() + fluid.amount < resource.amount){
+        } else if (getTankCapacity() + fluidTank.amount < resource.amount){
             if (doFill){
-                fluid.amount += resource.amount;
-                this.dataWatcher.updateObject(20,fluid.amount);
+                fluidTank.amount += resource.amount;
+                this.dataWatcher.updateObject(20, fluidTank.amount);
             }
             return resource.amount;
         } else {
-            int volume = getTankCapacity() - fluid.amount;
+            int volume = getTankCapacity() - fluidTank.amount;
             if (doFill){
-                fluid.amount += volume;
-                this.dataWatcher.updateObject(20,fluid.amount);
+                fluidTank.amount += volume;
+                this.dataWatcher.updateObject(20, fluidTank.amount);
             }
             return volume;
         }
     }
+    /**returns the list of fluid tanks and their capacity.*/
     @Override
     public FluidTankInfo[] getTankInfo(ForgeDirection from){
-        return getTankCapacity()<1?null:new FluidTankInfo[]{new FluidTankInfo(fluid, getTankCapacity())};
+        return getTankCapacity()<1?null:new FluidTankInfo[]{new FluidTankInfo(fluidTank, getTankCapacity())};
     }
 
 

@@ -11,6 +11,7 @@
 
 package ebf.tim.models.rollingstock;
 
+import ebf.tim.models.RenderEntity;
 import ebf.tim.models.tmt.ModelRendererTurbo;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.entity.Entity;
@@ -19,6 +20,12 @@ public class VATLogCar extends ModelBase
 {
 	private static final int textureX = 256;
 	private static final int textureY = 64;
+
+	private static final String cargo1 = RenderEntity.tagRenderBlockCargo + "1";
+	private static final String cargo2 = RenderEntity.tagRenderBlockCargo + "2";
+	private static final String cargo3 = RenderEntity.tagRenderBlockCargo + "3";
+	private static final String cargo4 = RenderEntity.tagRenderBlockCargo + "4";
+	private static final String cargo5 = RenderEntity.tagRenderBlockCargo + "5";
 
 	public VATLogCar()
 	{
@@ -39,36 +46,36 @@ public class VATLogCar extends ModelBase
 		vatlogcarModel[13] = new ModelRendererTurbo(this, 25, 25, textureX, textureY); // Box 16
 		vatlogcarModel[14] = new ModelRendererTurbo(this, 33, 25, textureX, textureY); // Box 17
 		vatlogcarModel[15] = new ModelRendererTurbo(this, 41, 25, textureX, textureY); // Box 18
-		vatlogcarModel[16] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog1"); // logblock 1
-		vatlogcarModel[17] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog2"); // logblock 2
-		vatlogcarModel[18] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog2"); // logblock 2
-		vatlogcarModel[19] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog1"); // logblock 1
-		vatlogcarModel[20] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog2"); // logblock 2
-		vatlogcarModel[21] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog1"); // logblock 1
-		vatlogcarModel[22] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog1"); // logblock 1
-		vatlogcarModel[23] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog2"); // logblock 2
-		vatlogcarModel[24] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog2"); // logblock 2
-		vatlogcarModel[25] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog1"); // logblock 1
-		vatlogcarModel[26] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog1"); // logblock 1
-		vatlogcarModel[27] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog2"); // logblock 2
-		vatlogcarModel[28] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog3"); // logblock 3
-		vatlogcarModel[29] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog4"); // logblock 4
-		vatlogcarModel[30] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog3"); // logblock 3
-		vatlogcarModel[31] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog4"); // logblock 4
-		vatlogcarModel[32] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog3"); // logblock 3
-		vatlogcarModel[33] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog4"); // logblock 4
-		vatlogcarModel[34] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog4"); // logblock 4
-		vatlogcarModel[35] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog3"); // logblock 3
-		vatlogcarModel[36] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog3"); // logblock 3
-		vatlogcarModel[37] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog4"); // logblock 4
-		vatlogcarModel[38] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog4"); // logblock 4
-		vatlogcarModel[39] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog3"); // logblock 3
-		vatlogcarModel[40] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog5"); // logblock 5
-		vatlogcarModel[41] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog5"); // logblock 5
-		vatlogcarModel[42] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog5"); // logblock 5
-		vatlogcarModel[43] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog5"); // logblock 5
-		vatlogcarModel[44] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog5"); // logblock 5
-		vatlogcarModel[45] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, "blocklog5"); // logblock 5
+		vatlogcarModel[16] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo1); // logblock 1
+		vatlogcarModel[17] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo2); // logblock 2
+		vatlogcarModel[18] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo2); // logblock 2
+		vatlogcarModel[19] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo1); // logblock 1
+		vatlogcarModel[20] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo2); // logblock 2
+		vatlogcarModel[21] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo1); // logblock 1
+		vatlogcarModel[22] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo1); // logblock 1
+		vatlogcarModel[23] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo2); // logblock 2
+		vatlogcarModel[24] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo2); // logblock 2
+		vatlogcarModel[25] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo1); // logblock 1
+		vatlogcarModel[26] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo1); // logblock 1
+		vatlogcarModel[27] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo2); // logblock 2
+		vatlogcarModel[28] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo3); // logblock 3
+		vatlogcarModel[29] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo4); // logblock 4
+		vatlogcarModel[30] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo3); // logblock 3
+		vatlogcarModel[31] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo4); // logblock 4
+		vatlogcarModel[32] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo3); // logblock 3
+		vatlogcarModel[33] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo4); // logblock 4
+		vatlogcarModel[34] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo4); // logblock 4
+		vatlogcarModel[35] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo3); // logblock 3
+		vatlogcarModel[36] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo3); // logblock 3
+		vatlogcarModel[37] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo4); // logblock 4
+		vatlogcarModel[38] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo4); // logblock 4
+		vatlogcarModel[39] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo3); // logblock 3
+		vatlogcarModel[40] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo5); // logblock 5
+		vatlogcarModel[41] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo5); // logblock 5
+		vatlogcarModel[42] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo5); // logblock 5
+		vatlogcarModel[43] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo5); // logblock 5
+		vatlogcarModel[44] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo5); // logblock 5
+		vatlogcarModel[45] = new ModelRendererTurbo(this, 73, 25, textureX, textureY, cargo5); // logblock 5
 
 		vatlogcarModel[0].addBox(0F, 0F, 0F, 44, 2, 18, 0F); // Box 0
 		vatlogcarModel[0].setRotationPoint(-22F, -2F, -9F);

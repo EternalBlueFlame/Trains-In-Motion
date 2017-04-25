@@ -31,19 +31,13 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
     /** used to keep a reference to the parent train/rollingstock.*/
     private int parentId = 0;
-    /**used to smooth out the movement of the bogies on client, a previously known position to move from to current based on the client update tick */
-    private double positionX=0;
-    /**used to smooth out the movement of the bogies on client, a previously known position to move from to current based on the client update tick */
-    private double positionY=0;
-    /**used to smooth out the movement of the bogies on client, a previously known position to move from to current based on the client update tick */
-    private double positionZ=0;
-    /**client velocity used to smooth actual movement*/
+    /**client velocity used to smooth actual movement, this is a replacement for the vanilla velocity variables which have private access.*/
     private double cartVelocityX =0;
-    /**client velocity used to smooth actual movement*/
+    /**client velocity used to smooth actual movement, this is a replacement for the vanilla velocity variables which have private access.*/
     private double cartVelocityY =0;
-    /**client velocity used to smooth actual movement*/
+    /**client velocity used to smooth actual movement, this is a replacement for the vanilla velocity variables which have private access.*/
     private double cartVelocityZ =0;
-    /**client velocity multiplier used to smooth actual movement*/
+    /**client velocity multiplier used to smooth actual movement, this is a replacement for the vanilla turnProgress which has private access.*/
     private double motionProgress=0;
     /**defines if this is the front bogie of the transport*/
     private boolean isFront=true;
@@ -54,6 +48,11 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         super(world);
     }
 
+    /**
+     * used to initialize the entity
+     * @param parent The EntityID of the parent entity (Must extend GenericRailTransport).
+     * @param front whether or not this is the front bogie.
+     */
     public EntityBogie(World world, double xPos, double yPos, double zPos, int parent, boolean front) {
         super(world);
         posX = xPos;
@@ -151,9 +150,9 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         //client only, update position
         if (this.worldObj.isRemote) {
             if (motionProgress > 0) {
-                this.posX += (positionX - this.posX) / motionProgress;
-                this.posY += (((positionY - this.posY) + yOffset) / motionProgress);
-                this.posZ += (positionZ - this.posZ) / motionProgress;
+                this.posX += (prevPosX - this.posX) / motionProgress;
+                this.posY += (((prevPosY - this.posY) + yOffset) / motionProgress);
+                this.posZ += (prevPosZ - this.posZ) / motionProgress;
                 --motionProgress;
             }
         }
@@ -303,7 +302,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         //actually set the movement
         this.posX = (d8 + railPathX * d7) + currentMotionX;
         this.posZ = (d9 + railPathZ * d7) + currentMotionZ;
-        this.positionY =motionY;
+        this.prevPosY =motionY;
         //set the Y position
         if (vanillaRailMatrix[railMetadata][0][1] != 0 && MathHelper.floor_double(this.posX) - floorX == vanillaRailMatrix[railMetadata][0][0] && MathHelper.floor_double(this.posZ) - floorZ == vanillaRailMatrix[railMetadata][0][2]) {
             this.posY+=vanillaRailMatrix[railMetadata][0][1];
@@ -336,6 +335,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
     }
 
+
+    /**
+     * <h1>Railcraft Functionality</h1>
+     */
 
 
     /**checks if the parent transport matches the filter for railcraft items, if the filter is null or the parent is null, return false.*/
@@ -380,19 +383,20 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     /**
      * <h2>Client Movement code</h2>
      */
-    /** mostly just used to update positioning on client*/
+
+    /**used to update positioning on client, and update the velocity multiplier*/
     @Override
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotation2(double x, double y, double z, float yaw, float pitch, int turnProgress) {
-        positionX = x;
-        positionY = y;
-        positionZ = z;
+        prevPosX = x;
+        prevPosY = y;
+        prevPosZ = z;
         motionX = cartVelocityX;
         motionY = cartVelocityY;
         motionZ = cartVelocityZ;
         motionProgress= turnProgress+2;
     }
-    /**used to set the velocity movement to the defined value*/
+
     @Override
     public void setVelocity(double x, double y, double z) {
         cartVelocityX = motionX = x;
@@ -405,7 +409,13 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             setVelocity(motionX + velocityX, motionY + velocityY, motionZ + velocityZ);
             isAirBorne = true;
     }
-
+    /**override of the super method just so we can set the position without updating the hitbox, because we don't need to.*/
+    @Override
+    public void setPosition(double x, double y, double z) {
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+    }
 
 
 }
