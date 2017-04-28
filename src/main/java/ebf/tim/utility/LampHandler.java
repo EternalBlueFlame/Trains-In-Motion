@@ -1,7 +1,7 @@
 package ebf.tim.utility;
 
 import cpw.mods.fml.common.gameevent.TickEvent;
-import ebf.tim.entities.EntityTrainCore;
+import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.registry.GenericRegistry;
 import net.minecraft.block.BlockAir;
 import net.minecraft.nbt.NBTTagCompound;
@@ -14,10 +14,15 @@ import net.minecraft.world.World;
 * @author Eternal Blue Flame
 */
 public class LampHandler {
+    /**the last known X position of the lamp*/
     public int X;
+    /**the last known Y position of the lamp*/
     public int Y;
+    /**the last known Z position of the lamp*/
     public int Z;
+    /**if the lamp should even function in the first place*/
     public boolean isOn;
+    /**a check used to see if an update to the lamp position is even necessary, why update a position that isn't moving?*/
     private boolean shouldUpdate = true;
 
     /**
@@ -25,10 +30,10 @@ public class LampHandler {
      * the check function for whether or not to update here.
      *
      * this us used by
-     * @see EntityTrainCore#onUpdate()
+     * @see GenericRailTransport#onUpdate()
      * @see ClientProxy#onTick(TickEvent.ClientTickEvent)
      * The data for this is saved to NBT in the entity
-     * @see EntityTrainCore#writeToNBT(NBTTagCompound)
+     * @see GenericRailTransport#writeToNBT(NBTTagCompound)
      *
      * @param worldObj the world to place the lamp.
      * @param position defines the position to move the lamp to.

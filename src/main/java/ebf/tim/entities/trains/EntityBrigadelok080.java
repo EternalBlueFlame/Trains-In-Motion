@@ -9,7 +9,6 @@ import ebf.tim.models.tmt.Vec3d;
 import ebf.tim.registry.TransportRegistry;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.FuelHandler;
-import ebf.tim.utility.LiquidManager;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
@@ -46,7 +45,6 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      *     @see #EntityBrigadelok080(UUID, World, double, double, double)
      *     The last part defines the unlocalized name, this is used for the item name, entity name, and language file entries.
      */
-    private LiquidManager tank = new LiquidManager(1100,1100, new Fluid[]{FluidRegistry.WATER},new Fluid[]{FluidRegistry.WATER},true,true);
 
     private static final String[] itemDescription = new String[]{
             "\u00A77" + StatCollector.translateToLocal("menu.item.era") +  ": " + StatCollector.translateToLocal("menu.steam"),
@@ -185,6 +183,16 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      */
     @Override
     public int getTankCapacity(){return 1100;}
+
+    /**
+     * <h2>fluid filter</h2>
+     * defines what fluids can and can't be stored in the tank.
+     * for instance if you have a wooden tanker car, you can deny fluids that are fire sources (like lava).
+     */
+    @Override
+    public boolean filterFluids(Fluid fluid){
+        return fluid== FluidRegistry.WATER;
+    }
 
     /**
      * <h2>pre-assigned values</h2>

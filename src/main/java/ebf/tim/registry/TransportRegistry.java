@@ -7,14 +7,12 @@ import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.entities.rollingstock.EntityPullmansPalace;
 import ebf.tim.entities.rollingstock.EntityUP3Bay100TonHopper;
 import ebf.tim.entities.rollingstock.EntityVATLogCar;
-import ebf.tim.entities.rollingstock.EntityWellCar;
 import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.bogies.CMDBogie;
 import ebf.tim.models.rollingstock.PullmansPalace;
 import ebf.tim.models.rollingstock.UP3Bay100TonHopper;
 import ebf.tim.models.rollingstock.VATLogCar;
-import ebf.tim.models.rollingstock.Well_Car;
 import ebf.tim.models.trains.Brigadelok_080;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.init.Items;
@@ -109,19 +107,12 @@ public class TransportRegistry {
                     new Item[]{Items.apple,null,null,null,null,null,null,null,null,null}
             );}
 
-            //Well Car
-            case 3:{return new TransportRegistry(EntityWellCar.class, EntityWellCar.thisItem,
-                    new Well_Car(), URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("well_car.png"),
-                    new Bogie[]{},
-                    new Item[]{Items.iron_ingot,null,null,null,null,null,null,null,null,null}
-            );}
-
             /**
              * <h3>Hopper Rollingstock registry entries</h3>
              */
 
             //Union Pacific 3 Bay 100 Ton Hopper Car.
-            case 4:{return new TransportRegistry(EntityUP3Bay100TonHopper.class, EntityUP3Bay100TonHopper.thisItem,
+            case 3:{return new TransportRegistry(EntityUP3Bay100TonHopper.class, EntityUP3Bay100TonHopper.thisItem,
                     new UP3Bay100TonHopper(), URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png"),
                     new Bogie[]{new Bogie(URIRegistry.TEXTURE_GENERIC.getResource("null.png"), new CMDBogie()), new Bogie(URIRegistry.TEXTURE_GENERIC.getResource("null.png"), new CMDBogie())},
                     new Item[]{Items.bucket,null,null,null,null,null,null,null,null,null}

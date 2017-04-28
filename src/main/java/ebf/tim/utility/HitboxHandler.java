@@ -8,11 +8,9 @@ import ebf.tim.entities.EntityRollingStockCore;
 import ebf.tim.entities.GenericRailTransport;
 import net.minecraft.block.BlockAir;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
@@ -22,10 +20,12 @@ import java.util.List;
 
 /**
  * <h1>Collision and hitboxes</h1>
- * here we mnage collision detection and hitboxes, most of this is basically halfway between a minecart and the ender dragon.
+ * here we manage collision detection and hitboxes, most of this is basically halfway between a minecart and the ender dragon.
  * @author Eternal Blue Flame
  */
 public class HitboxHandler {
+
+    /**the list of multipart hitboxes used for collision detection*/
     public List<MultipartHitbox> hitboxList = new ArrayList<MultipartHitbox>();
 
     /**
@@ -36,7 +36,9 @@ public class HitboxHandler {
      * @see HitboxHandler#getCollision(GenericRailTransport)
      */
     public class MultipartHitbox extends EntityDragonPart{
+        /**reference to the parent entity of this hitbox*/
         public GenericRailTransport parent;
+        /**initializer for entity hitbox*/
         public MultipartHitbox(IEntityMultiPart host, GenericRailTransport parent, double posX, double posY , double posZ){
             super(host, "hitboxGeneric", 2,1);
             this.parent = parent;
@@ -59,9 +61,10 @@ public class HitboxHandler {
         public AxisAlignedBB getCollisionBox(Entity collidedWith){
                 return boundingBox;
         }
+        /**checks if this hitbox should still exist or not*/
         @Override
         public void onUpdate(){
-            if (parent == null|| worldObj.getEntityByID(parent.getEntityId()) == null){
+            if (parent == null){
                 worldObj.removeEntity(this);
             }
         }
@@ -69,10 +72,11 @@ public class HitboxHandler {
         public boolean canBeCollidedWith() {
             return true;
         }
+        /**this function is supposed to update position without updating the bounding box position,
+         * but since all we use in the first place is a bounding box, we use it as a redirect to the other method*/
         @SideOnly(Side.CLIENT)
         public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
             this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
-            this.setRotation(p_70056_7_, p_70056_8_);
         }
 
     }
@@ -134,9 +138,11 @@ public class HitboxHandler {
             List list = transport.worldObj.getEntitiesWithinAABBExcludingEntity(transport, tempBox);
             if (list != null && list.size()>0) {
                 for (Object entity: list) {
+                    //if it's a bogie, continue to the next itteration.
                     if (entity instanceof EntityBogie) {
                         continue;
                     }
+                    /**if it's an item, check if we should add it to the inventory, maybe do it, and continue to the next itteration*/
                     if (entity instanceof EntityItem){
                             if((transport.getType() == TrainsInMotion.transportTypes.HOPPER || transport.getType() == TrainsInMotion.transportTypes.COALHOPPER ||
                             transport.getType() == TrainsInMotion.transportTypes.GRAINHOPPER) &&
@@ -146,7 +152,7 @@ public class HitboxHandler {
                         }
                         continue;
                     }
-
+                    /**if it's another multipart hitbox, check if it's something we are supposed to collide with, and maybe continue to the next itteration*/
                     if (entity instanceof MultipartHitbox) {
                         if(!hitboxList.contains(entity) && (transport.frontLinkedID != ((MultipartHitbox) entity).parent.getEntityId() ||
                                 transport.backLinkedTransport != ((MultipartHitbox) entity).parent.getPersistentID())) {
@@ -154,7 +160,7 @@ public class HitboxHandler {
                         }
                         continue;
                     }
-
+                    /**if the parent is an Entity Rollingstock, and the other checks were false, we now need to check if we roadkill the entity, or get pushed by it.*/
                     if (transport instanceof EntityRollingStockCore) {
                         if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
                             //in the case of roadkill
@@ -180,7 +186,7 @@ public class HitboxHandler {
                             ((Entity) entity).applyEntityCollision(transport);
                         }
 
-                        //if this is a train, just decide whether or not to run them over.
+                        /**however if this was n entity Train Core, we just have to figure out if we should roadkill it.*/
                     } else if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
                         ((Entity) entity).attackEntityFrom(new EntityDamageSource("train", transport), (float) (transport.frontBogie.motionX + transport.frontBogie.motionZ) * 1000);
                         ((Entity) entity).applyEntityCollision(transport);
@@ -188,7 +194,7 @@ public class HitboxHandler {
                 }
             }
         }
-        //returning true stops the train, false lets it move.
+        //returning true stops the transport, false lets it move.
         return false;
     }
 

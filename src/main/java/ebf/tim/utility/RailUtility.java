@@ -3,6 +3,7 @@ package ebf.tim.utility;
 
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.GenericRailTransport;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
@@ -18,17 +19,18 @@ import zoranodensha.api.structures.tracks.ITrackBase;
  * @author Zora No Densha
  */
 public class RailUtility {
-    //these are just so the values are calculated ahead of time, saves CPU use.
+    /**converts a degrees float to radians*/
     public static final float radianF = (float) Math.PI / 180.0f;
+    /**converts a degrees double to radians*/
     public static final double radianD = Math.PI / 180.0d;
+    /**converts a radians double to degrees*/
     public static final double degreesD = 180.0d / Math.PI;
 
 
     /**
-     * <h2>Vanilla Track Overrrides</h2>
-     * @see EntityBogie#minecartMove()
-     *
-     * we override some vanilla track detection so that way it's more efficient and can support rails from other mods.
+     * <h2>Vanilla Track  detection Overrrides</h2>
+     * a modified version of vanilla track detection so that way it's more efficient and can support rails from other mods.
+     * @see EntityBogie#moveBogie(double, double, int, int, int, Block)
      */
     public static boolean isRailBlockAt(World world, int x, int y, int z) {
         return (world.getTileEntity(x, y, z) instanceof ITrackBase || world.getBlock(x, y, z) instanceof BlockRailBase);
@@ -46,7 +48,7 @@ public class RailUtility {
         double cos;
         double sin;
         double[] xyz = new double[]{f[0],f[1],f[2]};
-
+        //rotate pitch
         if (pitch != 0.0F) {
             pitch *= radianF;
             cos = Math.cos(pitch);
@@ -55,7 +57,7 @@ public class RailUtility {
             xyz[0] = (f[1] * sin) + (f[0] * cos);
             xyz[1] = (f[1] * cos) - (f[0] * sin);
         }
-
+        //rotate yaw
         if (yaw != 0.0F) {
             yaw *= radianF;
             cos = MathHelper.cos(yaw);
@@ -64,7 +66,7 @@ public class RailUtility {
             xyz[0] = (f[0] * cos) - (f[2] * sin);
             xyz[2] = (f[0] * sin) + (f[2] * cos);
         }
-
+        //rotate roll
         if (roll != 0.0F) {
             roll *=  radianF;
             cos = MathHelper.cos(roll);

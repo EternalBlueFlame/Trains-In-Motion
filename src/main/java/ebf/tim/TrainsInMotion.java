@@ -25,8 +25,6 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 
-import java.util.UUID;
-
 
 /**
  * <h1>Main class</h1>
@@ -42,13 +40,14 @@ import java.util.UUID;
 @Mod(modid = TrainsInMotion.MODID, version = TrainsInMotion.MOD_VERSION, name = "Trains in Motion")
 public class TrainsInMotion {
 
-    //the ID of the mod and the version displayed in game, as well as used for version check in the version.txt file
+    /**the ID of the mod and the version displayed in game, as well as used for version check in the version.txt file*/
     public static final String MODID = "tim";
-    public static final String MOD_VERSION="0.2.0.1 alpha";
-    //an instance of the mod TODO: i doubt this even needs to be public
+    /**the version identifier of the mod*/
+    public static final String MOD_VERSION="0.2.5.0 alpha";
+    /**an instance of the mod*/
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
-    //the creative tab for the mod
+    /**the creative tab for the mod*/
     public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
     /**
      *Setup the proxy, this is used for managing some of the client and server specific features.
@@ -59,42 +58,48 @@ public class TrainsInMotion {
     public static CommonProxy proxy;
 
 
-    //instance the network wrapper for the channels. Every wrapper runs on it's own thread, so heavy traffic should go on it's own wrapper, using channels to separate packet types.
+    /**instance the network wrapper for the channels.
+     * Every wrapper runs on it's own thread, so heavy traffic should go on it's own wrapper, using channels to separate packet types.*/
     public static SimpleNetworkWrapper keyChannel;
 
 
-    //Instance the event handler, This is used for event based functionality, things like when you right-click an entity.
+    /**Instance the event handler, This is used for event based functionality, things like when you right-click an entity.*/
     public static EventManager eventManager = new EventManager();
 
     /**
      * <h3>enums</h3>
-     * we define enums for transport types, block types, and inventory sizes here.
-     * makes it easier to add more later on, also simplifies the code elsewhere
-     * Enums will take up perm space though, so we shouldn't put massive amounts of data here or we break java 7 compatibility.
      *
-     * Inventory size should be thought about like it's own mini class since it has multiple values and works like a class long run.
      */
+
+     /**define the transport types*/
     public enum transportTypes {
         STEAM,DIESEL,HYDROGEN_DIESEL,ELECTRIC,NUCLEAR_STEAM,NUCLEAR_ELECTRIC,MAGLEV, //trains
         PASSENGER, FREIGHT, HOPPER, TANKER, WORKCAR, //generic rollingstock
         LOGCAR, RAILCAR, FREEZERCAR, LAVATANKER, GRAINHOPPER, COALHOPPER, //specific cargo rollingstock
-        TENDER, JUKEBOX, TRACKBUILDER //specialized Rollingstock
+        TENDER, JUKEBOX, TRACKBUILDER; //specialized Rollingstock
+
+         public boolean isTrain(){
+             return this == STEAM || this == DIESEL || this == HYDROGEN_DIESEL || this == ELECTRIC ||
+                     this == NUCLEAR_STEAM || this == NUCLEAR_ELECTRIC || this == MAGLEV;
+         }
     }
+    /**define the inventory size values, this lets us get values to define rows and columns rather than just overall size.*/
     public enum inventorySizes{NULL(0,0),
         TWOxTWO(2,2), TWOxTHREE(3,2), THREExTHREE(3,3), THREExFOUR(4,3), FOURxFOUR(4,4), FOURxFIVE(5,4), FIVExFIVE(5,5), FIVExSIX(6,5), SIXxSIX(6,6), NINExTHREE(3,9), NINExFOUR(4,9);
         private int row;
-        private int collumn;
-        inventorySizes(int row, int collumn){
+        private int column;
+        inventorySizes(int row, int column){
             this.row = row;
-            this.collumn = collumn;
+            this.column = column;
         }
         public int getRow() {
             return row;
         }
         public int getColumn() {
-            return collumn;
+            return column;
         }
     }
+    /**defines the type of block, so that way our generic block classes can change the functionality without needing a bunch of different classes.*/
     public enum blockTypes {
         CRAFTING, CONTAINER, COSMETIC, SWITCH
     }
@@ -103,14 +108,15 @@ public class TrainsInMotion {
      * <h2>load config</h2>
      * we use the pre-init to load the config file.
      * Most of the configs are decided by the proxy, no need to setup controls on the server.
-     * any generic settings that effect both come after proxy.loadConfig.
      */
+    @SuppressWarnings("unused")
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
 
         config.load();
         proxy.loadConfig(config);
+        //settings that effect client and server here.
         config.save();
     }
 
@@ -131,9 +137,7 @@ public class TrainsInMotion {
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", 15, TrainsInMotion.instance, 60, 1, true);
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntitySeat.class, "Seat", 16, TrainsInMotion.instance, 60, 2, true);
         int index =0;
-        /**
-         * now we loop for every value in the train registry and registry it, when the index reaches a null value, then it will stop.
-         */
+        ///now we loop for every value in the train registry and registry it, when the index reaches a null value, then it will stop.
         while (TransportRegistry.listTrains(index)!=null) {
             TransportRegistry registry = TransportRegistry.listTrains(index);
             cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(registry.trainClass, registry.item.getUnlocalizedName().replace("item","entity"), index+17, TrainsInMotion.instance, 60, 1, true);

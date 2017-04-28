@@ -3,12 +3,8 @@ package ebf.tim.utility;
 
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.registry.NBTKeys;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;

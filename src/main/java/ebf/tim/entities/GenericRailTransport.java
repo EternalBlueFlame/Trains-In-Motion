@@ -100,10 +100,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     private FluidStack fluidTank = null;
     /**the list of items used for the inventory and crafting slots.*/
     private List<ItemStack> items;
-    /**the lst of unlocalized names for the filter*/
-    private List<String> filter = new ArrayList<String>();
-    /**whether the filter should only take the items in the list (whitelist), or whether it should take anything but the items in the list (blacklist).*/
-    private boolean isWhitelist = false;
+    /**the lst of unlocalized names for the itemFilter*/
+    private List<String> itemFilter = new ArrayList<String>();
+    /**whether the itemFilter should only take the items in the list (whitelist), or whether it should take anything but the items in the list (blacklist).*/
+    private boolean itemIsWhitelist = false;
     /**whether or not this needs to update the datawatchers*/
     public boolean updateWatchers = false;
     /**the RF battery for rollingstock.*/
@@ -332,12 +332,12 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     setInventorySlotContents(i, ItemStack.loadItemStackFromNBT(tagCompound));
                 }
             }
-            isWhitelist = tag.getBoolean(NBTKeys.whitelist);
+            itemIsWhitelist = tag.getBoolean(NBTKeys.whitelist);
 
             int length = tag.getInteger(NBTKeys.filterLength);
             if (length > 0) {
                 for (int i = 0; i < length; i++) {
-                    filter.add(tag.getString(NBTKeys.filterItem + i));
+                    itemFilter.add(tag.getString(NBTKeys.filterItem + i));
                 }
             }
         }
@@ -384,13 +384,13 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     tag.setTag(NBTKeys.inventoryItem + i, items.get(i).writeToNBT(new NBTTagCompound()));
                 }
             }
-            tag.setBoolean(NBTKeys.whitelist, isWhitelist);
+            tag.setBoolean(NBTKeys.whitelist, itemIsWhitelist);
 
 
-            tag.setInteger(NBTKeys.filterLength, filter!=null?filter.size():0);
-            if (filter != null && filter.size() > 0) {
-                for (int i = 0; i < filter.size(); i++) {
-                    tag.setString(NBTKeys.filterItem + i, filter.get(i));
+            tag.setInteger(NBTKeys.filterLength, itemFilter !=null? itemFilter.size():0);
+            if (itemFilter != null && itemFilter.size() > 0) {
+                for (int i = 0; i < itemFilter.size(); i++) {
+                    tag.setString(NBTKeys.filterItem + i, itemFilter.get(i));
                 }
             }
         }
@@ -837,17 +837,17 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
     /**
      * <h2>define filters</h2>
-     * this is called on the creation of an entity that need it's inventory filtered, or on the event that the entity's filter is set, like from the GUI.
+     * this is called on the creation of an entity that need it's inventory filtered, or on the event that the entity's itemFilter is set, like from the GUI.
      * whitelist as true will allow only the defined types or items. while as false will allow anything except the defined types or items.
      * types in most cases will override items because items are always checked last, if at all.
-     * itemTypes.ALL is basically just ignored, this is only called when you are not going to filter by type.
+     * itemTypes.ALL is basically just ignored, this is only called when you are not going to itemFilter by type.
      */
     public void setFilter(boolean isWhitelist, Item[] items){
-        this.isWhitelist = isWhitelist;
+        this.itemIsWhitelist = isWhitelist;
         if (items != null) {
-            filter.clear();
+            itemFilter.clear();
             for (Item itm : items){
-                filter.add(itm.getUnlocalizedName());
+                itemFilter.add(itm.getUnlocalizedName());
             }
         }
     }
@@ -968,15 +968,15 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
 
         //before we even bother to try and check everything else, check if it's filtered in the first place.
-        if (itemStack == null || filter.size() == 0) {
+        if (itemStack == null || itemFilter.size() == 0) {
             return true;
         }
         //if we use a whitelist, only return true if the item is in the list.
-        if (isWhitelist) {
-            return filter.size() != 0 && filter.contains(itemStack.getItem().getUnlocalizedName());
+        if (itemIsWhitelist) {
+            return itemFilter.size() != 0 && itemFilter.contains(itemStack.getItem().getUnlocalizedName());
         } else {
             //if it's a blacklist do exactly the same as above but return the opposite value.
-            return filter.size() == 0 || !filter.contains(itemStack.getItem().getUnlocalizedName());
+            return itemFilter.size() == 0 || !itemFilter.contains(itemStack.getItem().getUnlocalizedName());
         }
     }
 
@@ -1088,53 +1088,36 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public boolean canDrain(ForgeDirection from, Fluid resource){return fluidTank != null && fluidTank.amount>0 && (fluidTank.getFluid() == resource || resource == null);}
     /**Returns true if the given fluid can be inserted into the fluid tank.*/
     @Override
-    public boolean canFill(ForgeDirection from, Fluid resource){return getTankCapacity()>0 && (fluidTank == null || fluidTank.getFluid() == resource);}
-    //drain a set amount
+    public boolean canFill(ForgeDirection from, Fluid resource){return getTankCapacity()>0 && (fluidTank == null || fluidTank.getFluid() != resource);}
+    //attenpt to drain a set amount
     @Override
     public FluidStack drain(ForgeDirection from, int drain, boolean doDrain){
         if (getTankCapacity() <1 || fluidTank == null || fluidTank.amount <1){
             return null;
         } else {
-            if (fluidTank.amount <= drain){
-                FluidStack toReturn = fluidTank.copy();
-                if (doDrain){
+            int amountToDrain = getTankAmount() < drain?getTankAmount():drain;
+            if (doDrain){
+                if (amountToDrain == getTankAmount()) {
                     fluidTank = null;
-                    this.dataWatcher.updateObject(20,0);
-                }
-                return toReturn;
-            } else {
-                FluidStack toReturn = fluidTank.copy();
-                toReturn.amount -= drain;
-                if (doDrain){
-                    fluidTank.amount -= drain;
+                    this.dataWatcher.updateObject(20, 0);
+                } else {
+                    fluidTank.amount -= amountToDrain;
                     this.dataWatcher.updateObject(20, fluidTank.amount);
                 }
-                return toReturn;
             }
+            return new FluidStack(fluidTank.getFluid(), amountToDrain);
         }
     }
-    //drain only if its a specific fluidTank
+
+    /**drain with a fluidStack, this is mostly a redirect to
+     * @see #drain(ForgeDirection, int, boolean) but with added filtering for fluid type.
+     */
     @Override
     public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
         if (getTankCapacity() <1 || fluidTank == null || fluidTank.getFluid() != resource.getFluid() || fluidTank.amount<1){
             return null;
         } else {
-            if (fluidTank.amount <= resource.amount){
-                FluidStack toReturn = fluidTank.copy();
-                if (doDrain){
-                    fluidTank = null;
-                    this.dataWatcher.updateObject(20,0);
-                }
-                return toReturn;
-            } else {
-                FluidStack toReturn = fluidTank.copy();
-                toReturn.amount -= resource.amount;
-                if (doDrain){
-                    fluidTank.amount -= resource.amount;
-                    this.dataWatcher.updateObject(20, fluidTank.amount);
-                }
-                return toReturn;
-            }
+            return drain(from, resource.amount,doDrain);
         }
     }
     /**returns the amount of fluid in the tank. 0 if the tank is null*/
@@ -1142,35 +1125,31 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         return fluidTank !=null? fluidTank.amount:0;
     }
 
+    /**checks if the fluid can be put into the tank, and if doFill is true, will actually attempt to add the fluid to the tank.
+     * @return the amount of fluid that was or could be put into the tank.*/
     @Override
     public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
-        if (getTankCapacity() <1 || !(fluidTank == null || fluidTank.getFluid() == resource.getFluid())){
+        //if the tank has no capacity, or the filter prevents this fluid, or the fluid in the tank already isn't the same.
+        if (getTankCapacity() <1 || filterFluids(resource.getFluid()) || (fluidTank != null && fluidTank.getFluid() != resource.getFluid())){
             return 0;
         }
+        int amountToFill;
+        //if the tank is null, figure out how much fluid to add based on tank capacity.
         if (fluidTank == null){
-            if (resource.amount > getTankCapacity()) {
-                resource.amount = getTankCapacity();
-            }
+            amountToFill = getTankCapacity() < resource.amount?getTankCapacity():resource.amount;
             if (doFill) {
-                fluidTank = resource;
+                fluidTank = new FluidStack(resource.getFluid(), amountToFill);
                 this.dataWatcher.updateObject(20, fluidTank.amount);
             }
-            return resource.amount;
-
-        } else if (getTankCapacity() + fluidTank.amount < resource.amount){
-            if (doFill){
-                fluidTank.amount += resource.amount;
-                this.dataWatcher.updateObject(20, fluidTank.amount);
-            }
-            return resource.amount;
+            //if the tank isn't null, we also have to check the amount already in the tank
         } else {
-            int volume = getTankCapacity() - fluidTank.amount;
+            amountToFill = getTankCapacity() -getTankAmount() < resource.amount?getTankCapacity()-getTankAmount():resource.amount;
             if (doFill){
-                fluidTank.amount += volume;
+                fluidTank.amount += amountToFill;
                 this.dataWatcher.updateObject(20, fluidTank.amount);
             }
-            return volume;
         }
+        return amountToFill;
     }
     /**returns the list of fluid tanks and their capacity.*/
     @Override
@@ -1178,6 +1157,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         return getTankCapacity()<1?null:new FluidTankInfo[]{new FluidTankInfo(fluidTank, getTankCapacity())};
     }
 
+    /**filters the fluids use this to define what fluids to allow in the tank*/
+    public boolean filterFluids(Fluid fluid){
+        return true;
+    }
 
 
     /**
