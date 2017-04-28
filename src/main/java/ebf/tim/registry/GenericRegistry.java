@@ -34,17 +34,24 @@ import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
 
 public class GenericRegistry {
     //initialize the oil
+    /**the oil fluid block*/
     public static BlockTrainFluid blockFluidOil;
+    /**the diesel fluid block*/
     public static BlockTrainFluid blockFluidDiesel;
+    /**the oil fluid*/
     public static final Fluid fluidOil = new Fluid("Oil").setUnlocalizedName("fluid.oil").setBlock(blockFluidOil).setGaseous(false).setDensity(700);
+    /**the diesel fluid*/
     public static final Fluid fluidDiesel = new Fluid("Diesel").setUnlocalizedName("fluid.diesel").setBlock(blockFluidDiesel).setGaseous(false).setDensity(500);
+    /**the oil bucket*/
     public static ItemBucket bucketOil;
+    /**the diesel bucket*/
     public static ItemBucket bucketDiesel;
 
-    //define the train crafting table.
+    /**the crafting table for trains*/
     public static BlockDynamic trainTable = new BlockDynamic("blocktraintable",Material.wood, TrainsInMotion.blockTypes.CRAFTING);
 
-    //initialize the lamp block
+    /**the client only lamp block*/
+    @SideOnly(Side.CLIENT)
     public static Block lampBlock;
 
 
@@ -54,39 +61,30 @@ public class GenericRegistry {
      * @see TrainsInMotion#init(FMLInitializationEvent)
      */
     public static void RegisterStuff(){
-        /**
-         * <h3>register Blocks</h3>
-         */
-        //register oil
-        //register fluid and it's block
+        //register fluids
         FluidRegistry.registerFluid(fluidOil);
+        FluidRegistry.registerFluid(fluidDiesel);
+        //register fluid blocks
         blockFluidOil = new BlockTrainFluid(fluidOil, new MaterialLiquid(MapColor.blackColor));
         blockFluidOil.setBlockName("block.oil");
         GameRegistry.registerBlock(blockFluidOil, "block.oil");
-        //register the bucket item
+        blockFluidDiesel = new BlockTrainFluid(fluidDiesel, new MaterialLiquid(MapColor.dirtColor)).setFlammable(true, 1);
+        blockFluidDiesel.setBlockName("block.diesel");
+        GameRegistry.registerBlock(blockFluidDiesel, "block.diesel");
+        //register the buckets
         bucketOil = new ItemBucket(GenericRegistry.blockFluidOil);
         bucketOil.setCreativeTab(TrainsInMotion.creativeTab).setUnlocalizedName("item.oilbucket").setContainerItem(Items.bucket);
         GameRegistry.registerItem(bucketOil, "fluid.oil.bucket");
         FluidContainerRegistry.registerFluidContainer(fluidOil, new ItemStack(bucketOil), new ItemStack(Items.bucket));
-        //register diesel
-        //register fluid and it's block
-        FluidRegistry.registerFluid(fluidDiesel);
-        blockFluidDiesel = new BlockTrainFluid(fluidDiesel, new MaterialLiquid(MapColor.dirtColor)).setFlammable(true, 1);
-        blockFluidDiesel.setBlockName("block.diesel");
-        GameRegistry.registerBlock(blockFluidDiesel, "block.diesel");
-        //register the bucket item
         bucketDiesel = new ItemBucket(GenericRegistry.blockFluidDiesel);
         bucketDiesel.setCreativeTab(TrainsInMotion.creativeTab).setUnlocalizedName("item.dieselbucket").setContainerItem(Items.bucket);
         GameRegistry.registerItem(bucketDiesel, "fluid.diesel.bucket");
         FluidContainerRegistry.registerFluidContainer(fluidDiesel, new ItemStack(bucketDiesel), new ItemStack(Items.bucket));
 
+        //register the train crafting table
         GameRegistry.registerBlock(trainTable, "TrainTable");
         GameRegistry.registerTileEntity(TileEntityStorage.class, "StorageEntity");
         addRecipe(new ItemStack(trainTable, 1),  "WWW", "WIW", "WWW", 'W', Blocks.planks, 'I', Items.iron_ingot);
-
-        /**
-         * <h3>register Items</h3>
-         */
     }
 
     /**

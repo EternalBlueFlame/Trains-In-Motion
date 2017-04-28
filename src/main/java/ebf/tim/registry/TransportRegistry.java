@@ -23,8 +23,8 @@ import net.minecraft.util.ResourceLocation;
 
 /**
  * <h1>Train registry</h1>
- * this class lists all the trains and rollingstock provided by this mod.
- * If you need a reference to one of those, you have to call it from this class.
+ * this class lists the data necessary to register trains and rollingstock.
+ * this is not intended to be a way to get specific trains from the mod. (use the unlocalized entity name, or a class instanceof check)
  * @author Eternal Blue Flame
  */
 public class TransportRegistry {
@@ -33,11 +33,17 @@ public class TransportRegistry {
      * because we define our own variable type for registering trains and rollingstock unlike the other registries, we have to define that and the variables here.
      * This all can mostly be ignored unless we're modifying how we registry trains.
      */
+    /**the class for the entity*/
     public Class<? extends GenericRailTransport> trainClass;
+    /**the main model for the entity*/
     public ModelBase model;
+    /**the texture for the main model for the entity*/
     public ResourceLocation texture;
+    /**the egg item for the entity*/
     public Item item;
+    /**the crafting recipe for the egg item*/
     public Item[] recipe;
+    /**the array of bogie models for the entity, consists of the model and it's texture. this can be null.*/
     public Bogie[] bogieModels;
 
     public TransportRegistry(Class<? extends GenericRailTransport> trainClass, Item item,

@@ -15,19 +15,19 @@ import net.minecraft.item.ItemStack;
  * @author Eternal Blue Flame
  */
 public class PacketRemove implements IMessage {
+    /**the entity ID to define what entity to use the function on*/
     private int entityId;
-    /**
-     * <h2>data transfer variables</h2>
-     * stores and transfers the variable through the byte buffer.
-     */
+
     public PacketRemove() {}
     public PacketRemove(int entityId) {
         this.entityId = entityId;
     }
+    /**reads the packet on server to get the variables from the Byte Buffer*/
     @Override
     public void fromBytes(ByteBuf bbuf) {
         entityId = bbuf.readInt();
     }
+    /**puts the variables into a Byte Buffer so they can be sent to server*/
     @Override
     public void toBytes(ByteBuf bbuf) {
         bbuf.writeInt(entityId);
@@ -36,17 +36,15 @@ public class PacketRemove implements IMessage {
     /**
      * <h2>packet handler</h2>
      * handles the packet when received by server
-     * First it has to check if it was actually received by the proper entity, because if not, it crashes.
-     * then check if the entity is correct and the entityId matches a valid entityId for a function.
      */
     public static class Handler implements IMessageHandler<PacketRemove, IMessage> {
         @Override
         public IMessage onMessage(PacketRemove message, MessageContext context) {
+            //First it has to check if it was actually received by the proper entity, because if not, it crashes.
             Entity entity = context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId);
-            if (entity != null && message.entityId!=0) {
-                if (entity instanceof GenericRailTransport){
-                    entity.worldObj.spawnEntityInWorld(new EntityItem(entity.worldObj, entity.posX, entity.posY, entity.posZ, new ItemStack(((GenericRailTransport) entity).getItem(),1)));
-                }
+            //if the entity was an instance of Generic Rail Transport, then spawn it's item and remove it from world.
+            if (entity instanceof GenericRailTransport) {
+                entity.worldObj.spawnEntityInWorld(new EntityItem(entity.worldObj, entity.posX, entity.posY, entity.posZ, new ItemStack(((GenericRailTransport) entity).getItem(),1)));
                 context.getServerHandler().playerEntity.worldObj.removeEntity(entity);
             }
             return null;

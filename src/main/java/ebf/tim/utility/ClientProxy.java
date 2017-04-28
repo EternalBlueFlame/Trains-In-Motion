@@ -2,9 +2,13 @@ package ebf.tim.utility;
 
 
 import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import ebf.tim.TrainsInMotion;
+import ebf.tim.blocks.BlockDynamic;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.GenericRailTransport;
@@ -13,19 +17,27 @@ import ebf.tim.gui.HUDTrain;
 import ebf.tim.gui.GUITrain;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
+import ebf.tim.models.tmt.ModelRendererTurbo;
+import ebf.tim.models.trains.Brigadelok_080;
 import ebf.tim.registry.GenericRegistry;
 import ebf.tim.registry.TransportRegistry;
+import ebf.tim.registry.URIRegistry;
 import ebf.tim.tileentities.TileEntityStorage;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,13 +55,21 @@ public class ClientProxy extends CommonProxy {
      * Initialize the default values for keybinds.
      * Default values courtesy of Ferdinand
      */
+    /**whether or not lights should be enabled*/
     public static boolean EnableLights = true;
+    /**whether or not smoke and steam should be enabled*/
     public static boolean EnableSmokeAndSteam = true;
+    /**whether or not animations should be enabled*/
     public static boolean EnableAnimations = true;
+    /**the keybind for the lamp toggle*/
     public static KeyBinding KeyLamp = new KeyBinding("Lamp Toggle", 38, "Trains in Motion");
+    /**the keybind for the horn/whistle*/
     public static KeyBinding KeyHorn = new KeyBinding("Use Horn/Whistle", 35, "Trains in Motion");
+    /**the keybind for opening the inventory*/
     public static KeyBinding KeyInventory = new KeyBinding("Open Train/rollingstock GUI", 23, "Trains in Motion");
+    /**the keybind for acceleration*/
     public static KeyBinding KeyAccelerate = new KeyBinding("Train Acceleration", 19, "Trains in Motion");//R
+    /**the keybind for deceleration/reverse*/
     public static KeyBinding KeyReverse = new KeyBinding("Train Deceleration/Reverse", 33, "Trains in Motion");//F
 
     /**
@@ -65,8 +85,8 @@ public class ClientProxy extends CommonProxy {
      */
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        //Trains
         if (player != null) {
+            //Trains
             if (player.worldObj.getEntityByID(ID) instanceof GenericRailTransport) {
                 return new GUITrain(player.inventory, (GenericRailTransport) player.worldObj.getEntityByID(ID));
                 //tile entities
@@ -122,6 +142,51 @@ public class ClientProxy extends CommonProxy {
         RenderingRegistry.registerEntityRenderingHandler(EntitySeat.class, nullRender);
         //player scaler
         RenderingRegistry.registerEntityRenderingHandler(EntityPlayer.class, new RenderScaledPlayer());
+/*
+        //block render registration function
+        RenderingRegistry.registerBlockHandler(
+                //combined block renders
+                new ISimpleBlockRenderingHandler() {
+                    //rendering from inventory
+                    @Override
+                    public void renderInventoryBlock(Block block, int metadata, int modelId, RenderBlocks renderer) {
+                        //use the block parameter to figure out which model and texture to use, and the RenderBlocks to define how to render it.
+                        //probably best to use GL calls to render the 3 visible sides like a normal block
+                    }
+                    //render block in world
+                    @Override
+                    public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer) {
+                        //pretty much the same as above, but x/y/z is provided outside the RenderBlocks, this new x/y/z also has positioning based on the camera, so you wanna use them.
+                        if (block instanceof BlockDynamic) { //Block dynamic is my own block class, an extension of one from forge, good for instanceof checks.
+                            GL11.glPushMatrix();//start a render segment, this way we can end it and be sure the render modifications don't bleed to other renders
+                            GL11.glTranslated(x, y, z);//set the position
+                            switch (block.getUnlocalizedName()) {//switch on the unlocalized name, i use that class as a wrapper for most blocks, so i gotta figure out which.
+                                case "someBlockURI" : {
+                                    Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.TEXTURE_BLOCK.getResource("myTileEntity.png"));
+                                    private static final ModelBase.render(null, 0, 0, 0, 0, 0, 0.065f);//in the case of a TMT/Flans model, the last variable is render scale, default of 0.065. everything else is never used.
+                                }
+                            }
+                            GL11.glPopMatrix();//End the GL segment,
+                            return true;
+                        }
+
+                        return false;
+                    }
+                    //you can use the modelId of the block to define whether or not you wanna render it in 3d from the inventory, 3d render should only be used for actual blocks, not blocks with models.
+                    @Override
+                    public boolean shouldRender3DInInventory(int modelId) {
+                        return false;
+                    }
+                    //just a simple ID so you can set different sets of block renders and not have them conflict
+                    @Override
+                    public int getRenderId() {
+                        return 0;
+                    }
+        });
+*/
+
+
+
         //keybinds
         ClientRegistry.registerKeyBinding(KeyLamp);
         ClientRegistry.registerKeyBinding(KeyInventory);
@@ -162,7 +227,7 @@ public class ClientProxy extends CommonProxy {
      *
      * @param tick the client tick event from the main thread
      */
-    @Override
+    @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent tick) {
         if (EnableLights && tick.phase == TickEvent.Phase.END && carts.size() > 0) {
             if (Minecraft.getMinecraft().theWorld != null) {

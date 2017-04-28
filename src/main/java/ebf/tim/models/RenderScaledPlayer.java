@@ -8,7 +8,7 @@ import org.lwjgl.opengl.GL11;
 
 /**
  * <h2>Player render modification</h2>
- * In the case of a player riding one of our entities, we scale down the player model to fit better.
+ * In the case of a player riding one of our entities, we scale down the player model to 75* of normal size so it fits better.
  * @author Eternal Blue Flame
  */
 public class RenderScaledPlayer extends RenderPlayer {

@@ -7,24 +7,24 @@ import net.minecraft.client.model.ModelBase;
 
 /**
  * <h2>Techne model render</h2>
- * A middleman class to convert Techns models to something tmt can actually render properly.
- * Theoretically this should work with any models that use the setRotationPoint instead of defining position with addBox.
+ * A middleman class to convert Techne models to something tmt can actually render properly.
  */
 public class TechneModelRenderer extends ModelRendererTurbo {
-
-    public TechneModelRenderer(ModelBase p_i1172_1_, String p_i1172_2_) {
-        super(p_i1172_1_, p_i1172_2_);
-        this.setTextureSize(512,512);
+    private static final int staticTextureSize =512;
+    /**define the part with no texture offset, but using a static texture size of 512x512 and a defined name.*/
+    public TechneModelRenderer(ModelBase modelBase, String name) {
+        super(modelBase, name);
+        this.setTextureSize(staticTextureSize,staticTextureSize);
     }
-
-    public TechneModelRenderer(ModelBase p_i1174_1_, int p_i1174_2_, int p_i1174_3_) {
-        this(p_i1174_1_, "void");
-        this.setTextureOffset(p_i1174_2_,p_i1174_3_);
+    /**define the part with a texture offset, but using a static name and texture size of 512x512*/
+    public TechneModelRenderer(ModelBase modelBase, int textureOffsetX, int textureOffsetY) {
+        this(modelBase, "void");
+        this.setTextureOffset(textureOffsetX,textureOffsetY);
     }
-
-    public TechneModelRenderer(ModelBase p_i1174_1_, int p_i1174_2_, int p_i1174_3_, String name) {
-        this(p_i1174_1_, name);
-        this.setTextureOffset(p_i1174_2_,p_i1174_3_);
+    /**define the part with all data.*/
+    public TechneModelRenderer(ModelBase modelBase, int textureOffsetX, int textureOffsetY, String name) {
+        this(modelBase, name);
+        this.setTextureOffset(textureOffsetX,textureOffsetY);
     }
 
     /**

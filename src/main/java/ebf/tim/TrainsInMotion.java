@@ -91,7 +91,7 @@ public class TrainsInMotion {
         public int getRow() {
             return row;
         }
-        public int getCollumn() {
+        public int getColumn() {
             return collumn;
         }
     }

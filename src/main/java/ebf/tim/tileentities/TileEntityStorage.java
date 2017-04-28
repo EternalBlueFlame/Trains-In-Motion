@@ -2,9 +2,7 @@ package ebf.tim.tileentities;
 
 
 import ebf.tim.TrainsInMotion;
-import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.utility.ContainerHandler;
-import io.netty.buffer.ByteBuf;
+import ebf.tim.utility.TileEntitySlotManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
@@ -18,7 +16,7 @@ import java.util.List;
 /**
  * <h1>Tile Entity storage container</h1>
  * this is a tile entity for storage, similar to the game's chest, but due to the advanced container class of this mod it can be used for anything from chests to crafting tables.
- * @see ContainerHandler
+ * @see TileEntitySlotManager
  * @author Eternal Blue Flame
  */
 public class TileEntityStorage extends TileEntity implements IInventory {
@@ -29,14 +27,13 @@ public class TileEntityStorage extends TileEntity implements IInventory {
             items.add(null);
         }
     }
-
+    /**the list of item stacks in the inventory*/
     private List<ItemStack> items = new ArrayList<ItemStack>();
 
     /**
-     * <h2>syncing</h2>
-     * syncs data between client and server, also saves the data, for more info:
-     * @see GenericRailTransport#readSpawnData(ByteBuf)
+     * <h2>Syncing</h2>
      */
+    /**loads the tile entity's save file*/
     public void readFromNBT(NBTTagCompound p_145839_1_) {
         super.readFromNBT(p_145839_1_);
         for (int i = 0; i < getSizeInventory(); i++) {
@@ -46,7 +43,7 @@ public class TileEntityStorage extends TileEntity implements IInventory {
             }
         }
     }
-
+    /**saves the tile entity to server world*/
     public void writeToNBT(NBTTagCompound p_145841_1_) {
         super.writeToNBT(p_145841_1_);
         for (ItemStack stack : items) {
@@ -58,18 +55,15 @@ public class TileEntityStorage extends TileEntity implements IInventory {
         }
     }
     /**
-     * <h2>inventory size</h2>
-     * @return the number of slots the inventory should have.
-     * We do this once for normal and again for this mod's specific size type.
+     * <h2>inventory management</h2>
      */
+    /**gets the number of slots the inventory should have based on the actual inventory size defined by getInventorySize().*/
     @Override
-    public int getSizeInventory() {return 9;}
+    public int getSizeInventory() {return getInventorySize().getColumn() * getInventorySize().getRow();}
+    /**the actual inventory size, in rows and columns */
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.THREExTHREE;}
 
-    /**
-     * <h2>get item</h2>
-     * @return the item in the requested slot
-     */
+
     @Override
     public ItemStack getStackInSlot(int slot) {
         if (slot <0 || slot >= getSizeInventory()){
@@ -79,10 +73,7 @@ public class TileEntityStorage extends TileEntity implements IInventory {
         }
     }
 
-    /**
-     * <h2>decrease stack size</h2>
-     * @return the itemstack with the decreased size. If the decreased size is equal to or less than the current stack size it returns null.
-     */
+
     @Override
     public ItemStack decrStackSize(int slot, int stackSize) {
         if (getSizeInventory()>=slot && items.get(slot) != null) {
@@ -106,10 +97,7 @@ public class TileEntityStorage extends TileEntity implements IInventory {
         }
     }
 
-    /**
-     * <h2>Set slot</h2>
-     * sets the slot contents, this is a direct override so we don't have to compensate for anything.
-     */
+
     @Override
     public void setInventorySlotContents(int p_70299_1_, ItemStack p_70299_2_) {
         if (p_70299_1_>=0 && p_70299_1_ < items.size()) {
@@ -117,10 +105,7 @@ public class TileEntityStorage extends TileEntity implements IInventory {
         }
     }
 
-    /**
-     * <h2>name and stack limit</h2>
-     * These are grouped together because they are pretty self-explanatory.
-     */
+
     @Override
     public String getInventoryName() {return TrainsInMotion.MODID + ":storage";}
 
@@ -130,12 +115,14 @@ public class TileEntityStorage extends TileEntity implements IInventory {
     }
     @Override
     public int getInventoryStackLimit() {return 64;}
+    /**checks if the player can interact with this container, usually used for a check if it's already in use or not*/
     @Override
     public boolean isUseableByPlayer(EntityPlayer p_70300_1_) {return true;}
 
     /**
      * <h2>slot limiter</h2>
-     * This is supposed to see if a specific slot will take a specific item. However it's only called from slots we know are actual inventory slots, which we put filters on there.
+     * This is supposed to see if a specific slot will take a specific item. However it's only called from slots we know are actual inventory slots,
+     * which we put filters on there.
      * Because of this we don't even need to check the slot, just the item.
      */
     @Override
@@ -145,12 +132,14 @@ public class TileEntityStorage extends TileEntity implements IInventory {
      * <h2>unused</h2>
      * we have to initialize these values, but due to the design of the entity we don't actually use them.
      */
+    /**for running functionality when opening the inventory, such as setting it as in use.*/
+    @Override
+    public void openInventory() {}
+    /**for running functionality when closing the inventory, such as setting it as not in use.*/
+    @Override
+    public void closeInventory() {}
     @Override
     public ItemStack getStackInSlotOnClosing(int p_70304_1_) {return null;}
     @Override
     public void markDirty() {}
-    @Override
-    public void openInventory() {}
-    @Override
-    public void closeInventory() {}
 }

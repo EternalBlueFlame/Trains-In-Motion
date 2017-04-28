@@ -1,6 +1,7 @@
 package ebf.tim.entities;
 
 import com.mojang.authlib.GameProfile;
+import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
@@ -32,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static ebf.tim.TrainsInMotion.proxy;
 import static ebf.tim.utility.RailUtility.rotatePoint;
 
 /**
@@ -79,8 +79,12 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public HitboxHandler hitboxHandler = new HitboxHandler();
     /**the server-sided persistent UUID of the transport linked to the front of this,*/
     public UUID frontLinkedTransport = null;
+    /**the id of the rollingstock linked to the front*/
+    public int frontLinkedID =0;
     /**the server-sided persistent UUID of the transport linked to the back of this,*/
     public UUID backLinkedTransport = null;
+    /**the id of the rollingstock linked to the back*/
+    public int backLinkedID =0;
     /**the ID of the owner*/
     public int ownerID =0;
     /**the destination for routing*/
@@ -101,7 +105,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**whether the filter should only take the items in the list (whitelist), or whether it should take anything but the items in the list (blacklist).*/
     private boolean isWhitelist = false;
     /**whether or not this needs to update the datawatchers*/
-    private boolean updateWatchers = false;
+    public boolean updateWatchers = false;
+    /**the RF battery for rollingstock.*/
+    public int battery=0;
 
     public GenericRailTransport(World world){
         super(world);
@@ -125,6 +131,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public void entityInit(){
         this.dataWatcher.addObject(19, 0);//owner
         this.dataWatcher.addObject(20, 0);//tankA
+        this.dataWatcher.addObject(21, 0);//front linked transport
+        this.dataWatcher.addObject(22, 0);//back linked transport
         if (getInventorySize() != TrainsInMotion.inventorySizes.NULL && items == null) {
             items = new ArrayList<ItemStack>();
             while (items.size() < getSizeInventory()) {
@@ -498,7 +506,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
         //be sure the owner entityID is currently loaded, this variable is dynamic so we don't save it to NBT.
         if (!worldObj.isRemote &&ticksExisted %10==0){
-            Entity player = proxy.getEntityFromUuid(owner);
+            Entity player = CommonProxy.getEntityFromUuid(owner);
             if (player!= null) {
                 ownerID = player.getEntityId();
                 this.dataWatcher.updateObject(19,ownerID);
@@ -506,6 +514,13 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (updateWatchers && fluidTank != null){
                 dataWatcher.updateObject(20, fluidTank.amount);
             }
+            //sync the linked transports with client, and on server, easier to use an ID than a UUID.
+            Entity linkedTransport = CommonProxy.getEntityFromUuid(frontLinkedTransport);
+            this.dataWatcher.updateObject(21, linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0);
+            frontLinkedID = linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0;
+            linkedTransport = CommonProxy.getEntityFromUuid(backLinkedTransport);
+            this.dataWatcher.updateObject(22,linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0);
+            backLinkedID = linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0;
         }
 
         /**
@@ -559,20 +574,23 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if(!worldObj.isRemote) {
             //manage the frontLinkedTransport link
             if (frontLinkedTransport != null) {
-                GenericRailTransport frontLink = CommonProxy.getTransportFromUuid(frontLinkedTransport);
-                if (frontLink != null) {
+                Entity frontLink = worldObj.getEntityByID(frontLinkedID);
+                if (frontLink instanceof GenericRailTransport) {
                     //to here
                     vectorCache[3][0] = getHitboxPositions()[0]-1;
                     vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
                     vectorCache[4][0] += posX;
                     vectorCache[4][2] += posZ;
                     //from here
-                    vectorCache[5][0]=frontLink.getHitboxPositions()[(frontLink.backLinkedTransport == this.getPersistentID())?(frontLink.getHitboxPositions().length - 1):0];
+                    vectorCache[5][0]=((GenericRailTransport)frontLink).getHitboxPositions()[
+                            (((GenericRailTransport)frontLink).backLinkedTransport == this.getPersistentID())?(((GenericRailTransport)frontLink).getHitboxPositions().length - 1):0
+                            ];
                     vectorCache[6] = rotatePoint(vectorCache[5], 0, frontLink.rotationYaw, 0);
                     vectorCache[6][0] += frontLink.posX;
                     vectorCache[6][2] += frontLink.posZ;
                     this.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.005,0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.005);
                 }
+                //manage coupling
             } else if (isCoupling) {
                 vectorCache[3][0] = getHitboxPositions()[0]-2;
                 vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
@@ -588,26 +606,30 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).isCoupling) {
                             frontLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
                             System.out.println(getEntityId() + " : rollingstock frontLinkedTransport linked : ");
+                            updateWatchers = true;
                         }
                     }
                 }
             }
             //Manage the backLinkedTransport link
             if (backLinkedTransport != null) {
-                GenericRailTransport backLink = CommonProxy.getTransportFromUuid(backLinkedTransport);
-                if (backLink != null) {
+                Entity backLink = worldObj.getEntityByID(backLinkedID);
+                if (backLink instanceof GenericRailTransport) {
                     //to here
                     vectorCache[5][0]=getHitboxPositions()[getHitboxPositions().length-1]+1;
                     vectorCache[6] = rotatePoint(vectorCache[5], 0, rotationYaw, 0);
                     vectorCache[6][0] += posX;
                     vectorCache[6][2] += posZ;
                     //from here
-                    vectorCache[5][0]=backLink.getHitboxPositions()[(backLink.backLinkedTransport == this.getPersistentID())?(backLink.getHitboxPositions().length - 1):0];
+                    vectorCache[5][0]=((GenericRailTransport)backLink).getHitboxPositions()[
+                            (((GenericRailTransport)backLink).backLinkedTransport == this.getPersistentID())?(((GenericRailTransport)backLink).getHitboxPositions().length - 1):0
+                            ];
                     vectorCache[6] = rotatePoint(vectorCache[5], 0, backLink.rotationYaw, 0);
                     vectorCache[6][0] += backLink.posX;
                     vectorCache[6][2] += backLink.posZ;
                     this.addVelocity(-(vectorCache[6][0] - vectorCache[6][0]) * 0.005,0, -(vectorCache[6][2] -vectorCache[6][2]) * 0.005);
                 }
+                //manage coupling
             } else if (isCoupling) {
                 vectorCache[3][0] = getHitboxPositions()[getHitboxPositions().length-1] + 2;
                 vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
@@ -623,6 +645,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).isCoupling) {
                             backLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
                             System.out.println(getEntityId() + " : rollingstock backLinkedTransport linked : ");
+                            updateWatchers = true;
                         }
                     }
                 }
@@ -632,26 +655,88 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
 
     /**
-     * <h2>Boolean switches</h2>
-     * Toggles the defined booleans, this is mostly just used for user input like key press and GUI buttons.
-     * Potentially unnecessary, but theoretically more reliable than direct modification of the variables from outside the class.
+     * <h2>RF storage transfer</h2>
+     * this is used to figure out how much RF this transport can take from another transport.
+     * this is intended for rollingstock that can store power for an electric train.
+     * @return the amount of RF this can accept
      */
-    public boolean toggleBool(int index){
-        switch (index){
-            case 4:{
+    public int RequestPower(){
+        if(getRFCapacity() - battery >20){
+            return 20;
+        } else if (getRFCapacity() - battery >0){
+            return getRFCapacity() - battery;
+        }
+        return 0;
+    }
+
+    /**
+     * <h2>Packet use</h2>
+     * used to run functionality on server defined by a key press on the client.
+     * sent to server by
+     * @see ebf.tim.networking.PacketKeyPress
+     * through
+     * @see EventManager#onClientKeyPress(InputEvent.KeyInputEvent)
+     */
+    public boolean ProcessPacket(int functionID){
+        switch (functionID){
+            case 4:{ //Toggle brake
                 brake = !brake;
                 return true;
-            }case 5:{
+            }case 5:{ //Toggle lamp
                 lamp.isOn = !lamp.isOn;
                 return true;
-            }case 6:{
+            }case 6:{ //Toggle locked
                 isLocked = ! isLocked;
                 return true;
-            }case 7:{
+            }case 7:{ //Toggle coupling
                 isCoupling = !isCoupling;
                 return true;
-            }case 10:{
+            }case 10:{ //Toggle transport creative mode
                 isCreative = !isCreative;
+                return true;
+            }case 12:{ //drop key to transport
+                entityDropItem(key, 1);
+                return true;
+            }case 13:{ //unlink transports
+                Entity transport = null;
+                //frontLinkedTransport
+                if (frontLinkedTransport != null){
+                    transport = worldObj.getEntityByID(frontLinkedID);
+                    if (transport instanceof GenericRailTransport){
+                        Entity transportTemp = worldObj.getEntityByID(frontLinkedID);
+                        if (transportTemp instanceof GenericRailTransport && transport.getEntityId() == transportTemp.getEntityId()){
+                            ((GenericRailTransport) transportTemp).frontLinkedTransport = null;
+                            ((GenericRailTransport) transportTemp).updateWatchers = true;
+                        }
+                        transportTemp = worldObj.getEntityByID(backLinkedID);
+                        if (transportTemp instanceof GenericRailTransport && transport.getEntityId() == transportTemp.getEntityId()){
+                            ((GenericRailTransport) transportTemp).backLinkedTransport = null;
+                            ((GenericRailTransport) transportTemp).updateWatchers = true;
+                        }
+                        ((GenericRailTransport) transport).frontLinkedTransport = null;
+                        ((GenericRailTransport) transport).updateWatchers = true;
+                    }
+                }
+                //backLinkedTransport
+                if (backLinkedTransport != null){
+                    transport = worldObj.getEntityByID(backLinkedID);
+                    if (transport instanceof GenericRailTransport){
+                        Entity transportTemp = worldObj.getEntityByID(frontLinkedID);
+                        if (transportTemp instanceof GenericRailTransport && transport.getEntityId() == transportTemp.getEntityId()){
+                            ((GenericRailTransport) transportTemp).frontLinkedTransport = null;
+                            ((GenericRailTransport) transportTemp).updateWatchers = true;
+                        }
+                        transportTemp = worldObj.getEntityByID(backLinkedID);
+                        if (transportTemp instanceof GenericRailTransport && transport.getEntityId() == transportTemp.getEntityId()){
+                            ((GenericRailTransport) transportTemp).backLinkedTransport = null;
+                            ((GenericRailTransport) transportTemp).updateWatchers = true;
+                        }
+                        ((GenericRailTransport) transport).backLinkedTransport = null;
+                        ((GenericRailTransport) transport).updateWatchers = true;
+                    }
+                }
+                //double check and be sure both are null
+                frontLinkedTransport = null; backLinkedTransport = null;
                 return true;
             }
         }
@@ -740,6 +825,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public boolean isReinforced(){return false;}
     /**defines the capacity of the fluidTank tank*/
     public int getTankCapacity(){return 0;}
+    /**defines the capacity of the RF storage, intended for electric rollingstock that store power for the train.*/
+    public int getRFCapacity(){return 0;}
     /**defines the ID of the owner*/
     public int getOwnerID(){return this.dataWatcher.getWatchableObjectInt(19);}
 
@@ -783,7 +870,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (getRiderOffsets() != null && getRiderOffsets().length >1){
             size++;
         }
-        return size+ (getInventorySize().getCollumn() * getInventorySize().getRow());
+        return size+ (getInventorySize().getColumn() * getInventorySize().getRow());
     }
 
     /**

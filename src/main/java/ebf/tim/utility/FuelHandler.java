@@ -1,11 +1,12 @@
 package ebf.tim.utility;
 
 
-import cpw.mods.fml.common.IFuelHandler;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.registry.NBTKeys;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityFurnace;
@@ -21,23 +22,12 @@ import net.minecraftforge.fluids.FluidStack;
  *
  * @author Eternal Blue Flame
  */
-public class FuelHandler implements IFuelHandler{
+public class FuelHandler{
 
-	public int burnableFuel=0;
+	/**the main fuel variable used by most trains*/
+	public int fuel =0;
+	/**the steam tank, used for steam and nuclear steam trains*/
 	public int steamTank=0;
-	public int fuelTank =0;
-
-
-	/**
-	 * <h2>Register burnables with minecraft</h2>
-	 * use getBurnTime to register a custom burnable that will work with other mods and the base game.
-     */
-	@Override
-	public int getBurnTime(ItemStack fuel) {
-		return 0;
-	}
-
-
 
 	/**
 	 * <h2>check if an item is a usable fuel</h2>
@@ -57,6 +47,7 @@ public class FuelHandler implements IFuelHandler{
 	 * <h2>check if an item is a usable water source item</h2>
 	 * @return if the train can add the water to the boiler or not.
 	 * TiM only water items and support for 3rd party/vanilla fuels are managed here
+	 * TODO: need support for 3rd party water items that contain dynamic amounts.
 	 */
 	public static boolean isWater(ItemStack item, GenericRailTransport transport){
 		switch (transport.getType()){
@@ -67,12 +58,12 @@ public class FuelHandler implements IFuelHandler{
 	}
 
 	/**
-	 * <h2>get liquid fuel value</h2>
-	 * @return the value in millibuckets for the item
+	 * <h2>get value from Item</h2>
+	 * this is intended to get a value from items that normally don't have one, for instance the fuel value of redstone, or the mb of water in a bucket.
+	 * @return the value int for the item
 	 * non-liquids like redstone are managed here because all non-steam trains use a water tank to define their fuel amount.
-	 * TODO: direct use of liquids seems kind of redundant since they can't be extracted and we deal with the types ourselves, perhaps there should be a replacement will less overhead.
 	 */
-	public static int waterValue(ItemStack itemStack){
+	public static int getValue(ItemStack itemStack){
 		if (itemStack != null) {
 			if (itemStack.getItem() == Items.water_bucket) {
 				return 1000;
@@ -85,18 +76,6 @@ public class FuelHandler implements IFuelHandler{
 		return 0;
 	}
 
-	/**
-	 * <h2> Data Syncing and Saving </h2>
-	 * this is explained in
-	 * @see GenericRailTransport#readSpawnData(ByteBuf)
-	 */
-	public void readEntityFromNBT(NBTTagCompound tag) {
-		this.burnableFuel = tag.getInteger("fuelhandler");
-	}
-	public void writeEntityToNBT(NBTTagCompound tag) {
-		tag.setInteger("fuelhandler", burnableFuel);
-
-	}
 
 	/**
 	 * <h2>Fuel management</h2>
@@ -109,23 +88,20 @@ public class FuelHandler implements IFuelHandler{
 			 * <h3> Steam Fuel Management</h3>
 			 *
 			 *
-			 * first manage fuel slots for water buckets and burnables.
-			 * TileEntityFurnace.getItemBurnTime will tell us how much fuel the item gives, assuming it is a valid fuel item
-			 * After manage actual fuel consumption.
 			 */
 			case STEAM: {
-				if (isFuel(cart.getStackInSlot(0), cart) && burnableFuel + TileEntityFurnace.getItemBurnTime(cart.getStackInSlot(0)) < cart.getMaxFuel()) {
-					//if the first inventory slot contains a burnable listed in our supported burnables, then remove it and add it's value to our fuel.
-					burnableFuel += TileEntityFurnace.getItemBurnTime(cart.getStackInSlot(0));
+				//consume the burnable, if the first slot contains one. we use getItemBurnTime to detect if it's a burnable and get it's value, this allows for support of 3rd party mods.
+				if (isFuel(cart.getStackInSlot(0), cart) && fuel + TileEntityFurnace.getItemBurnTime(cart.getStackInSlot(0)) < cart.getMaxFuel()) {
+					fuel += TileEntityFurnace.getItemBurnTime(cart.getStackInSlot(0));
 					if (!cart.isCreative) {
 						cart.decrStackSize(0, 1);
 					}
 				}
 
-				//if the second slot contains a water bucket, add the contents of the water bucket to our tank and then place an empty bucket in the inventory
+				//consume the water, if the second slot contains a water bucket, also places an empty bucket in inventory
 				if (isWater(cart.getStackInSlot(1), cart) &&
-						cart.fill(ForgeDirection.UNKNOWN, new FluidStack(FluidRegistry.WATER, waterValue(cart.getStackInSlot(1))), false) == waterValue(cart.getStackInSlot(1))) {
-					cart.fill(ForgeDirection.UNKNOWN, new FluidStack(FluidRegistry.WATER, waterValue(cart.getStackInSlot(1))), true);
+						cart.fill(ForgeDirection.UNKNOWN, new FluidStack(FluidRegistry.WATER, getValue(cart.getStackInSlot(1))), false) == getValue(cart.getStackInSlot(1))) {
+					cart.fill(ForgeDirection.UNKNOWN, new FluidStack(FluidRegistry.WATER, getValue(cart.getStackInSlot(1))), true);
 					if (!cart.isCreative) {
 						cart.decrStackSize(1, 1);
 						cart.addItem(new ItemStack(Items.bucket));
@@ -133,17 +109,18 @@ public class FuelHandler implements IFuelHandler{
 				}
 
 				//be sure there is fuel before trying to consume it
-				if (burnableFuel > 0) {
+				if (fuel > 0) {
 					/*
 					* add steam from burning to the steam tank.
-					* steam is equal to water used, minus a small percentage to compensate for impurities in the water that dont transition to steam,
+					* steam is equal to water used, minus a small percentage to compensate for impurities in the water that don't transition to steam,
 					* the amount of water used is generated from heat which is one part fuel 2 parts air, with more fuel burning more heat is created, but this only works to a point.
 					* steam beyond the max point of storage is considered to be expelled through a failsafe.
 					* TODO: this and the following calculations are still incorrect
+					* NOTE: in TiM we need to remember steam and fluid are housed in the same tank, and calculate based on that. should also throw in calcium buildup for non-distilled water. TC however isn't so advanced
 					*/
-					int steam = Math.round((burnableFuel*0.0025f)/ cart.getMaxFuel());
+					int steam = Math.round((fuel *0.0025f)/ cart.getTankAmount());
 					if (cart.drain(ForgeDirection.UNKNOWN, steam,true).amount == steam) {
-						burnableFuel -= 50; //a lava bucket lasts 1000 seconds, so burnables are processed at 20000*0.05 a second
+						fuel -= 50; //a lava bucket lasts 1000 seconds, so burnables are processed at 20000*0.05 a second
 						steamTank += MathHelper.floor_float(steam*0.9f);
 					} else if (!cart.isCreative){
 						cart.worldObj.createExplosion(cart, cart.posX, cart.posY, cart.posZ, 5f, false);
@@ -178,22 +155,22 @@ public class FuelHandler implements IFuelHandler{
 			}
 			/**
 			 * <h3> Electric and maglev Fuel Management</h3>
-			 * this is one of the simpler fuel managements,
-			 * We simply check for if the fuel slot is valid, add fluid to the tank, and decrease the itemstack size.
-			 * After that we manage fuel consumption at a set rate based on base use and and current accelerator state
+			 *
+			 *
 			 */
 			case ELECTRIC: case MAGLEV: {
 				//add redstone to the fuel tank
 				if (isWater(cart.getStackInSlot(0), cart) &&
-						waterValue(cart.getStackInSlot(1))+ fuelTank < cart.getMaxFuel() && !cart.isCreative) {
-					fuelTank +=waterValue(cart.getStackInSlot(1));
+						getValue(cart.getStackInSlot(1))+ fuel < cart.getMaxFuel() && !cart.isCreative) {
+					fuel +=getValue(cart.getStackInSlot(1));
 					cart.decrStackSize(0,1);
 				}
+
 				//use stored energy
 				if (cart.isRunning){
 					//electric trains run at a generally set rate which is multiplied at the square of speed.
 					//TODO: this may need re-balancing to keep it realistic.
-					fuelTank -= 1 + MathHelper.sqrt_float(Math.copySign(cart.accelerator, 1)*5);
+					fuel -= 1 + MathHelper.sqrt_float(Math.copySign(cart.accelerator, 1)*5);
 				}
 				break;
 			}

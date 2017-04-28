@@ -5,7 +5,7 @@ import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.registry.URIRegistry;
-import ebf.tim.utility.ContainerHandler;
+import ebf.tim.utility.TileEntitySlotManager;
 import ebf.tim.utility.TransportSlotManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -50,7 +50,7 @@ public class GUITrain extends GuiContainer {
      * <h2>GUI initialization</h2>
      * instances the container for the inventory and passes it to the server side management
      * also puts the entity to a variable that can be accessed on client.
-     * @see ContainerHandler
+     * @see TileEntitySlotManager
      */
     public GUITrain(InventoryPlayer inventoryPlayer, GenericRailTransport entity) {
         super(new TransportSlotManager(inventoryPlayer, entity));
@@ -272,7 +272,7 @@ public class GUITrain extends GuiContainer {
 
         //transport inventory
         for (int ic = 0; ic < transport.getInventorySize().getRow(); ic++) {
-            for (int ir = 0; ir > -transport.getInventorySize().getCollumn(); ir--) {
+            for (int ir = 0; ir > -transport.getInventorySize().getColumn(); ir--) {
                 drawTexturedModalRect( guiLeft + 97 + (ic * 18), guiTop +43 + (ir * 18), 54, 51, 18, 18, 20, 20, zLevel);
             }
         }
@@ -353,7 +353,7 @@ public class GUITrain extends GuiContainer {
             }
             //otherwise draw inventory by individual slots
             default:{
-                for (int ic = 0; ic < transport.getInventorySize().getCollumn(); ic++) {
+                for (int ic = 0; ic < transport.getInventorySize().getColumn(); ic++) {
                     for (int ir = 0; ir > -transport.getInventorySize().getRow(); ir--) {
                         drawTexturedModalRect( guiLeft + 8 + (ic * 18), guiTop +43 + (ir * 18), 54, 51, 18, 18, 20, 20, zLevel);
                     }

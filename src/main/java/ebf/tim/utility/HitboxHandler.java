@@ -148,7 +148,7 @@ public class HitboxHandler {
                     }
 
                     if (entity instanceof MultipartHitbox) {
-                        if(!hitboxList.contains(entity) && (transport.frontLinkedTransport != ((MultipartHitbox) entity).parent.getPersistentID() ||
+                        if(!hitboxList.contains(entity) && (transport.frontLinkedID != ((MultipartHitbox) entity).parent.getEntityId() ||
                                 transport.backLinkedTransport != ((MultipartHitbox) entity).parent.getPersistentID())) {
                             return true;
                         }

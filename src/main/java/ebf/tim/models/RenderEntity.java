@@ -174,8 +174,8 @@ public class RenderEntity extends Render {
 
     /**
      * <h3>base render extension</h3>
-     * acts as a redirect for the base render function to our own class.
-     * This is just to do a more efficient type cast because we have to make the first parameter an Entity.
+     * acts as a redirect for the base render function to our own function.
+     * This is just to do typecasting and a few calculations beforehand so we only need to do them once per render.
      */
     public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick){
         if (entity instanceof GenericRailTransport){
@@ -384,11 +384,12 @@ public class RenderEntity extends Render {
 
     /**
      * <h3>advanced piston</h3>
-     * this is used for pistons that require not only movement animation but also rotation.
+     * this is used for pistons that require not only movement animation but also rotation. such as piston valve connectors on larger steam trains.
      */
     private class advancedPiston{
-        //store a refrence to the original model, and it's original position
+        /**a reference to the geometry we will modify in this sub-class*/
         private ModelRendererTurbo boxRefrence = null;
+        /**a cache of the original position so we can animate it properly*/
         private Vec3f position = null;
 
         public advancedPiston(ModelRendererTurbo boxToRender){
@@ -397,11 +398,11 @@ public class RenderEntity extends Render {
                 position = new Vec3f(boxToRender.rotationPointZ, boxToRender.rotationPointY, boxToRender.rotateAngleX);
             }
         }
-        //position and rotate the geometry based on the provided vector.
-        public void rotationMoveYZX(float x, float y){
-            boxRefrence.rotationPointY = position.y - (y*0.5f);
+        /**position and rotate the geometry based on the provided vector.*/
+        public void rotationMoveYZX(float x, float z){
+            boxRefrence.rotationPointY = position.y - (z*0.5f);
             boxRefrence.rotationPointX = position.x - x;
-            boxRefrence.rotateAngleZ = position.z - (y * 0.05f);
+            boxRefrence.rotateAngleZ = position.z - (z * 0.05f);
         }
     }
 
@@ -411,6 +412,7 @@ public class RenderEntity extends Render {
      * used to store a reference to the wheel, and rotate it using a given radian for quick animation.
      */
     private class wheel {
+        /**a reference to the geometry we will modify in this sub-class*/
         private ModelRendererTurbo boxRefrence = null;
 
         public wheel(ModelRendererTurbo boxToRender){
@@ -418,7 +420,7 @@ public class RenderEntity extends Render {
                 boxRefrence = boxToRender;
             }
         }
-
+        /**a simple rotate function to spin the geomtry on the Z axis.*/
         public void rotate(float radian){
             boxRefrence.rotateAngleZ = radian;
         }
@@ -426,14 +428,14 @@ public class RenderEntity extends Render {
 
     /**
      * <h3>BlockCargo</h3>
-     * used to store references to logs and other similar carried cargo blocks.
-     * each entry of this variable works as a set, so multiple parts can be rendered, or not, from the same value.
-     * name is used to group them together, if the name strings are exactly the same they will be rendered together.
-     * isBlock defines if it should be rendered as a normal block from the inventory or part of the model.
+     * used to store references to dynamically loading cargo such as rendered blocks, or pre-defined geometry to represent stored goods.
      */
     private class blockCargo {
+        /**used to group cargo geometry together, if the name strings are exactly the same they will be rendered together.*/
         public String name;
+        /**if it should be rendered as a normal block from the inventory, similar to enderman, or part of the model*/
         public boolean isBlock;
+        /**a reference to the geometry we will modify in this sub-class*/
         private List<ModelRendererTurbo> boxRefrence = new ArrayList<ModelRendererTurbo>();
 
         public blockCargo add(ModelRendererTurbo boxToRender, boolean block){
@@ -446,11 +448,12 @@ public class RenderEntity extends Render {
 
     /**
      * <h3>simple pistons</h3>
-     * This is used for pistons that only need a movement animation.
-     * in this case we only need to cache a reference to the geometry and the original position.
+     * This is used for pistons that only need a movement animation, like wheel connector rods..
      */
     private class simplePiston {
+        /**a reference to the geometry we will modify in this sub-class*/
         private ModelRendererTurbo boxRefrence = null;
+        /**a cache of the original position so we can animate it properly*/
         private Vec2f position = null;
 
         public simplePiston(ModelRendererTurbo boxToRender){
@@ -459,7 +462,7 @@ public class RenderEntity extends Render {
                 position = new Vec2f(boxToRender.rotationPointZ, boxToRender.rotationPointY);
             }
         }
-
+        /**position and rotate the geometry based on the provided vector.*/
         public void moveYZ(float x, float y){
             boxRefrence.rotationPointY = position.y - y;
             boxRefrence.rotationPointX = position.x - x;
@@ -482,40 +485,33 @@ public class RenderEntity extends Render {
 
         @Override
         public void onUpdate(){
+            /**check if this should still exist or not*/
             if (this.particleAge++ >= this.lifespan) {
                 this.setDead();
             }
-
+            /**clamp motion*/
             if (motionX>0.02d){
                 motionX=0.02d;
             } else if (motionX<-0.02d){
                 motionX=-0.02d;
             }
-
             if (motionZ>0.02d){
                 motionZ=0.02d;
             } else if (motionZ<-0.02d){
                 motionZ=-0.02d;
             }
 
-            this.prevPosX = this.posX;
-            this.prevPosY = this.posY;
-            this.prevPosZ = this.posZ;
-
             this.moveEntity(this.motionX, this.motionY, this.motionZ);
-
-            this.motionX *= 0.99d;
-            this.motionZ *= 0.99d;
         }
 
         @Override
         public void moveEntity(double x, double y, double z) {
-            this.ySize *= 0.4F;
 
             double oldX = x;
             double oldY = y;
             double oldZ = z;
 
+            /**get collisions and modify x/y/z based on them.*/
             List list = this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox.addCoord(x, y, z));
             for (Object box : list){
                 if (!(box instanceof HitboxHandler.MultipartHitbox) && !(box instanceof GenericRailTransport)){
@@ -524,31 +520,13 @@ public class RenderEntity extends Render {
                     z = ((AxisAlignedBB)box).calculateYOffset(this.boundingBox, z);
                 }
             }
-
+            /**offset the bounding box, and then move the entity*/
             this.boundingBox.offset(x, y, z);
+            this.posX += x;
+            this.posY += y;
+            this.posZ += z;
 
-            if (oldY != y) {
-                z = 0.0D;
-                y = 0.0D;
-                x = 0.0D;
-            }
-
-            if (oldX != x) {
-                z = 0.0D;
-                y = 0.0D;
-                x = 0.0D;
-            }
-
-            if (oldZ != z) {
-                z = 0.0D;
-                y = 0.0D;
-                x = 0.0D;
-            }
-
-            this.posX = (this.boundingBox.minX + this.boundingBox.maxX) / 2.0D;
-            this.posY = this.boundingBox.maxY - (double)this.ySize;
-            this.posZ = (this.boundingBox.minZ + this.boundingBox.maxZ) / 2.0D;
-
+            /**modify the motion value for the next movement tick based in the collisions from this tick.*/
             if (oldX != x) {
                 this.motionX = this.motionX*-0.75d;
             }
@@ -562,6 +540,11 @@ public class RenderEntity extends Render {
             if (oldZ != z) {
                 this.motionZ = this.motionZ*-0.75d;
             }
+
+            /**now slow all vector movement over time, kinda like drag*/
+            this.motionX *= 0.99d;
+            this.motionZ *= 0.99d;
+            this.motionZ *= 0.9d;
         }
 
 

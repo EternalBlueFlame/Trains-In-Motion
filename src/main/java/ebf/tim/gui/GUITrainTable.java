@@ -1,7 +1,7 @@
 package ebf.tim.gui;
 
 import ebf.tim.tileentities.TileEntityStorage;
-import ebf.tim.utility.ContainerHandler;
+import ebf.tim.utility.TileEntitySlotManager;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -18,7 +18,7 @@ public class GUITrainTable extends GuiContainer {
     private static final ResourceLocation craftingTableGuiTextures = new ResourceLocation("textures/gui/container/crafting_table.png");
 
     public GUITrainTable(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
-        super(new ContainerHandler(inventoryPlayer, (TileEntityStorage) world.getTileEntity(x,y,z), true));
+        super(new TileEntitySlotManager(inventoryPlayer, (TileEntityStorage) world.getTileEntity(x,y,z)));
     }
 
 

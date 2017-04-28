@@ -1,7 +1,5 @@
 package ebf.tim.entities;
 
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.FuelHandler;
@@ -73,7 +71,7 @@ public class EntityTrainCore extends GenericRailTransport {
     super.readSpawnData(additionalData);
         isRunning = additionalData.readBoolean();
         accelerator = additionalData.readInt();
-        fuelHandler.burnableFuel = additionalData.readInt();
+        fuelHandler.fuel = additionalData.readInt();
     }
     /**sends the data to server from client*/
     @Override
@@ -81,7 +79,7 @@ public class EntityTrainCore extends GenericRailTransport {
         super.writeSpawnData(buffer);
         buffer.writeBoolean(isRunning);
         buffer.writeInt(accelerator);
-        buffer.writeInt(fuelHandler.burnableFuel);
+        buffer.writeInt(fuelHandler.fuel);
     }
     /**loads the entity's save file*/
     @Override
@@ -89,7 +87,8 @@ public class EntityTrainCore extends GenericRailTransport {
         super.readEntityFromNBT(tag);
         isRunning = tag.getBoolean(NBTKeys.running);
         accelerator = tag.getInteger(NBTKeys.accelerator);
-        fuelHandler.readEntityFromNBT(tag);
+        this.fuelHandler.fuel = tag.getInteger(NBTKeys.transportFuel);
+        this.fuelHandler.steamTank = tag.getInteger(NBTKeys.transportSteam);
 
     }
     /**saves the entity to server world*/
@@ -98,10 +97,17 @@ public class EntityTrainCore extends GenericRailTransport {
         super.writeEntityToNBT(tag);
         tag.setBoolean(NBTKeys.running,isRunning);
         tag.setInteger(NBTKeys.accelerator, accelerator);
-        fuelHandler.writeEntityToNBT(tag);
+        tag.setInteger(NBTKeys.transportFuel, fuelHandler.fuel);
+        tag.setInteger(NBTKeys.transportSteam, fuelHandler.steamTank);
 
     }
 
+    @Override
+    public void entityInit(){
+        super.entityInit();
+        this.dataWatcher.addObject(18, 0);//accelerator
+        this.updateWatchers = true;
+    }
 
     /**
      * <h2>Calculate drag</h2>
@@ -114,8 +120,8 @@ public class EntityTrainCore extends GenericRailTransport {
         if (frontCheckID == null && backCheckID == null) {
             return current;
         }
-        GenericRailTransport frontCheck = CommonProxy.getTransportFromUuid(frontCheckID);
-        GenericRailTransport backCheck = CommonProxy.getTransportFromUuid(backCheckID);
+        GenericRailTransport frontCheck = (GenericRailTransport) CommonProxy.getEntityFromUuid(frontCheckID);
+        GenericRailTransport backCheck = (GenericRailTransport) CommonProxy.getEntityFromUuid(backCheckID);
 
         //if frontLinkedTransport is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
         if (frontCheck instanceof EntityTrainCore){
@@ -181,6 +187,9 @@ public class EntityTrainCore extends GenericRailTransport {
             backBogie.addVelocity(vectorCache[1][0], vectorCache[1][1], vectorCache[1][2]);
         }
 
+        if (updateWatchers){
+            this.dataWatcher.updateObject(18, accelerator);
+        }
         super.onUpdate();
 
         //simple tick management so some code does not need to be run every tick.
@@ -190,23 +199,6 @@ public class EntityTrainCore extends GenericRailTransport {
             }
         }
     }
-
-
-
-    /**
-     * <h2>acceleration</h2>
-     * function called from a packet for setting the train's speed and whether or not it is reverse.
-     * @see PacketKeyPress.Handler#onMessage(PacketKeyPress, MessageContext)
-     * TODO: for traincraft we need to limit the accelerator to 1.
-     */
-    public void setAcceleration(boolean increase){
-        if (increase && accelerator <6){
-            accelerator++;
-        } else if (!increase && accelerator >-6){
-            accelerator--;
-        }
-    }
-
 
     /**
      * <h2>linking management</h2>
@@ -259,23 +251,29 @@ public class EntityTrainCore extends GenericRailTransport {
     }
 
 
-    /**
-     * <h2>menu toggles</h2>
-     * called from a packet to change the settings.
-     * @see PacketKeyPress.Handler#onMessage(PacketKeyPress, MessageContext)
-     * @see GenericRailTransport#toggleBool(int) for more info.
-     */
     @Override
-    public boolean toggleBool(int index){
-        if (!super.toggleBool(index)){
-            switch (index){
-                case 8:{
+    public boolean ProcessPacket(int functionID){
+        if (!super.ProcessPacket(functionID)){
+            switch (functionID){
+                case 8:{ //toggle ignition
                     isRunning = !isRunning;
                     return true;
-                }case 9:{
-                    //use the server-side world object to play a sound effect to all clients. the second to last value is volume, and idk what the last one is.
+                }case 9:{ //plays a sound on all clients within hearing distance
+                    //the second to last value is volume, and idk what the last one is.
                     worldObj.playSoundEffect(posX, posY, posZ, getHorn().getResourcePath(), 1, 0.5f);
                     return true;
+                }case 2:{ //decrease speed
+                    if (accelerator >-6) {
+                        accelerator--;
+                        updateWatchers = true;
+                        return true;
+                    }
+                }case 3:{ //increase speed
+                    if (accelerator <6) {
+                        accelerator++;
+                        updateWatchers = true;
+                        return true;
+                    }
                 }
             }
         }

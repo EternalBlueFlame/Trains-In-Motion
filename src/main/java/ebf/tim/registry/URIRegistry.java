@@ -12,22 +12,34 @@ import static ebf.tim.TrainsInMotion.MODID;
  * @author Eternal Blue Flame
  */
 public enum URIRegistry {
-
+    /**used for non-vanilla GUI textures*/
     GUI_PREFIX("textures/gui/"),
+    /**used for train textures*/
     MODEL_TRAIN_TEXTURE("textures/train"),
+    /**used for icons*/
     ITEM_TRANSPORT_ICON("item/transport/"),
+    /**used for rollingstock textures*/
     MODEL_ROLLINGSTOCK_TEXTURE("textures/rollingstock/"),
+    /**used for rail textures*/
     MODEL_RAIL_TEXTURE("textures/rail/"),
+    /**used for block textures*/
     MODEL_BLOCK_TEXTURE("textures/block/"),
+    /**used for textures that have nothing to do with GUI, icons, or models, good for particle effects and such*/
     TEXTURE_GENERIC("textures/generic/"),
-    TEXTURE_BLOCK("textures/block/"),
+    /**used for horn/whistle sounds*/
     SOUND_HORN("audio/horns/"),
+    /**used for running sounds, like a diesel's engine or steam train's 'chug' noise*/
     SOUND_RUNNING("audio/running/");
 
         private String value;
         URIRegistry(String value) {this.value = value;}
         public String getValue(){return value;}
 
+    /**
+     * <h2>get URI Resource Location</h2>
+     * returns a Resource location for a texture or sound based on the URI and provided filename.
+     * filename must include format, for example: .png or .ogg
+     */
     public ResourceLocation getResource(String fileName){
             return new ResourceLocation(MODID, value + fileName);
     }

@@ -57,10 +57,8 @@ public class EventManager {
                 //for speed change
                 if (ClientProxy.KeyAccelerate.isPressed()) {
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2, player.ridingEntity.getEntityId()));
-                    ((EntityTrainCore) player.ridingEntity).setAcceleration(true);
                 } else if (ClientProxy.KeyReverse.getIsKeyPressed()) {
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3, player.ridingEntity.getEntityId()));
-                    ((EntityTrainCore) player.ridingEntity).setAcceleration(false);
                 } else if (ClientProxy.KeyHorn.isPressed()){
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(4, player.ridingEntity.getEntityId()));
                 }
@@ -70,15 +68,19 @@ public class EventManager {
 
     /**
      * <h2>Entity Interaction</h2>
-     * this event manages when the player tries to interact with the train/rollingstock to ride it or use an item on it.
+     * this client event manages when the player tries to interact with the transport to ride it, or use an item on it.
      */
     @SubscribeEvent
+    @SuppressWarnings("unused")
     public void entityInteractEvent(EntityInteractEvent event) {
-        if (event.target instanceof HitboxHandler.MultipartHitbox
-                && event.entity.worldObj.isRemote) {
+        //be sure the target is a transport hitbox
+        if (event.target instanceof HitboxHandler.MultipartHitbox && event.entity.worldObj.isRemote) {
 
+            //TODO: if(event.entityPlayer.getHeldItem() instanceof stakeItem) {do linking/unlinking stuff;}
+            //if the rider offsets weren't null, try and mount
             if (((HitboxHandler.MultipartHitbox) event.target).parent.getRiderOffsets() != null) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.MultipartHitbox) event.target).parent.getEntityId()));
+                //if they were null, try and open the inventory
             } else {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, ((HitboxHandler.MultipartHitbox) event.target).parent.getEntityId()));
             }
@@ -92,18 +94,21 @@ public class EventManager {
      * This event is called when a player joins the world, we use this to display the alpha notice, and check for new mod versions, this is only displayed on the client side, but can be used for server..
      */
     @SubscribeEvent
+    @SuppressWarnings("unused")
     public void entityJoinWorldEvent(EntityJoinWorldEvent event) {
         if (event.entity instanceof EntityPlayer && event.entity.worldObj.isRemote) {
             //add alpha notice
-            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("You are currently playing an alpha pre-release of Trains In Motion."));
+            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("You are currently playing an alpha release of Trains In Motion."));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("For official releases, check out https://github.com/EternalBlueFlame/Trains-In-Motion/"));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Keep in mind that everything in this mod is subject to change, and report any bugs you find."));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Good luck and thanks for the assistance. - Eternal Blue Flame."));
 
             //use an HTTP request and parse to check for new versions of the mod from github.
             try {
+                //make an HTTP connection to the version text file, and set the type as get.
                 HttpURLConnection conn = (HttpURLConnection) new URL("https://raw.githubusercontent.com/USER/PROJECT/BRANCH/version.txt").openConnection();
                 conn.setRequestMethod("GET");
+                //use the HTTP connection as an input stream to actually get the file, then put it into a buffered reader.
                 BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 //read the first line of the text document, if it's not the same as the current running version, notify there is an update, then display the second line, which is intended for a download URL.
                 if (!TrainsInMotion.MOD_VERSION.equals(rd.readLine())) {
@@ -111,7 +116,7 @@ public class EventManager {
                     ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText(rd.readLine()));
                 }
             } catch (Exception e) {
-                //couldn't check for new version, so just do nothing.
+                //couldn't check for new version, most likely because there's no internet, so just do nothing.
             }
 
         }
