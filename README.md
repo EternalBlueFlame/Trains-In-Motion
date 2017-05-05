@@ -22,7 +22,7 @@ Date: December, 2016
 <h2> Current Status:</h2>
 <ul>
 <li> Builds - <b id="Build">stable-ish</b></li>
-<li> Revision - <b id="Revision"><a href="https://github.com/EternalBlueFlame/Trains-In-Motion/releases/tag/v0.2.0.1-Alpha"">Alpha 2.0.1, Grab it here</a></b></li>
+<li> Revision - <b id="Revision"><a href="https://github.com/EternalBlueFlame/Trains-In-Motion/releases/">Alpha 0.2.5, Grab it here</a></b></li>
 </ul>
 </td>
 </tr>
@@ -39,7 +39,7 @@ Date: December, 2016
 <li> Format is limited to <b>.java</b> models only; you can use tools such as BDCraft Cubik, SMP Toolbox, Technie or even writing it manually.</li>
 <li> Model scale is <b>1.25 blocks/meters wide max</b>, or <b>1/7.68 scale</b>. In other words they must fit on minecart rails.</li>
 <li> Technie models are limited to 512x512 base resolution for textures.</li>
-<li> Textures must be in <b>.png</b> format. And are preferred to be at 4 times the resolution of the texture base size defined in the model.</li>
+<li> Textures must be in <b>.png</b> format. And are preferred to be at 4 times the resolution of the texture base size defined in the model. (this is 4096x4096 in most cases)</li>
 <li> Audio must be in <b>.ogg</b> format and no more than 192kb/s.</li>
 </ul>
 </td>
