@@ -17,11 +17,13 @@ import ebf.tim.networking.PacketMount;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.GenericRegistry;
 import ebf.tim.registry.TransportRegistry;
+import ebf.tim.utility.ChunkHandler;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.EventManager;
 import ebf.tim.worldgen.OreGen;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 
@@ -55,8 +57,7 @@ public class TrainsInMotion {
      *@see ClientProxy
      */
     @SidedProxy(clientSide = "ebf.tim.utility.ClientProxy", serverSide = "ebf.tim.utility.CommonProxy")
-    public static CommonProxy proxy;
-
+    private static CommonProxy proxy;
 
     /**instance the network wrapper for the channels.
      * Every wrapper runs on it's own thread, so heavy traffic should go on it's own wrapper, using channels to separate packet types.*/
@@ -64,7 +65,10 @@ public class TrainsInMotion {
 
 
     /**Instance the event handler, This is used for event based functionality, things like when you right-click an entity.*/
-    public static EventManager eventManager = new EventManager();
+    private static EventManager eventManager = new EventManager();
+
+    /**Instance a new chunk handler, this class manages chunk loading events and functionality.*/
+    private static ChunkHandler chunkHandler = new ChunkHandler();
 
     /**
      * <h3>enums</h3>
@@ -118,6 +122,8 @@ public class TrainsInMotion {
         proxy.loadConfig(config);
         //settings that effect client and server here.
         config.save();
+        ForgeChunkManager.setForcedChunkLoadingCallback(TrainsInMotion.instance, chunkHandler);
+        MinecraftForge.EVENT_BUS.register(chunkHandler);
     }
 
     /**

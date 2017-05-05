@@ -24,11 +24,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.oredict.OreDictionary;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -108,6 +111,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public boolean updateWatchers = false;
     /**the RF battery for rollingstock.*/
     public int battery=0;
+    /**the ticket that gives the entity permission to load chunks.*/
+    private ForgeChunkManager.Ticket chunkTicket;
+    /**a cached list of the loaded chunks*/
+    public List<ChunkCoordIntPair> chunkLocations = new ArrayList<>();
 
     public GenericRailTransport(World world){
         super(world);
@@ -421,6 +428,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             worldObj.removeEntity(this);
         }
 
+        if(this.chunkTicket == null) {
+            this.requestTicket();
+        }
+
         seats.remove(null);
         hitboxHandler.hitboxList.remove(null);
 
@@ -506,6 +517,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
         //be sure the owner entityID is currently loaded, this variable is dynamic so we don't save it to NBT.
         if (!worldObj.isRemote &&ticksExisted %10==0){
+            @Nullable
             Entity player = CommonProxy.getEntityFromUuid(owner);
             if (player!= null) {
                 ownerID = player.getEntityId();
@@ -1175,7 +1187,24 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         return items;
     }
 
+    /*
+     * <h3> chunk management</h3>
+     * small chunk management for the entity, most all of it is handled in
+     * @see ChunkHandler
+     */
 
+    /**@return the chunk ticket of this entity*/
+    public ForgeChunkManager.Ticket getChunkTicket(){return chunkTicket;}
+    /**sets the chunk ticket of this entity to the one provided.*/
+    public void setChunkTicket(ForgeChunkManager.Ticket ticket){chunkTicket = ticket;}
 
+    /**attempts to get a ticket for chunkloading, sets the ticket's values*/
+    private void requestTicket() {
+        ForgeChunkManager.Ticket ticket = ForgeChunkManager.requestTicket(TrainsInMotion.instance, worldObj , ForgeChunkManager.Type.ENTITY);
+        if(ticket != null) {
+            ticket.bindEntity(this);
+            setChunkTicket(ticket);
+        }
+    }
 
 }

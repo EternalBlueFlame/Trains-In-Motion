@@ -5,6 +5,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntityRollingStockCore;
+import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import net.minecraft.block.BlockAir;
 import net.minecraft.entity.Entity;
@@ -93,9 +94,7 @@ public class HitboxHandler {
             double[] position = RailUtility.rotatePoint(new double[]{transport.getHitboxPositions()[iteration], 0, 0}, transport.rotationPitch, transport.rotationYaw, 0);
             if (hitboxList.size() <= iteration) {
                 hitboxList.add(new MultipartHitbox(transport, transport, position[0] + transport.posX, position[1] + transport.posY, position[2] + transport.posZ));
-                if (!transport.worldObj.isRemote) {
-                    transport.worldObj.spawnEntityInWorld(hitboxList.get(iteration));
-                }
+                transport.worldObj.spawnEntityInWorld(hitboxList.get(iteration));
             } else {
                 hitboxList.get(iteration).setLocationAndAngles(position[0] + transport.posX, position[1] + transport.posY, position[2] + transport.posZ, transport.rotationYaw, transport.rotationPitch);
             }
@@ -165,7 +164,9 @@ public class HitboxHandler {
                         if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
                             //in the case of roadkill
                             ((Entity) entity).attackEntityFrom(new EntityDamageSource("rollingstock", transport), (float) (transport.frontBogie.motionX + transport.frontBogie.motionZ) * 1000);
-                            ((Entity) entity).applyEntityCollision(transport);
+                            if (((EntityRollingStockCore) transport).worldObj.isRemote) {
+                                ((Entity) entity).applyEntityCollision(transport);
+                            }
                         } else {
                             //in the case of trying to move the rollingstock
                             float directionZ = 0;
@@ -189,7 +190,9 @@ public class HitboxHandler {
                         /**however if this was n entity Train Core, we just have to figure out if we should roadkill it.*/
                     } else if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
                         ((Entity) entity).attackEntityFrom(new EntityDamageSource("train", transport), (float) (transport.frontBogie.motionX + transport.frontBogie.motionZ) * 1000);
-                        ((Entity) entity).applyEntityCollision(transport);
+                        if (((EntityTrainCore) transport).worldObj.isRemote) {
+                            ((Entity) entity).applyEntityCollision(transport);
+                        }
                     }
                 }
             }
