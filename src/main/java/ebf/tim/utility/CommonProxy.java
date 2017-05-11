@@ -2,8 +2,6 @@ package ebf.tim.utility;
 
 
 import cpw.mods.fml.common.network.IGuiHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.tileentities.TileEntityStorage;
 import net.minecraft.entity.Entity;
@@ -59,7 +57,6 @@ public class CommonProxy implements IGuiHandler {
      * We can't use a foreach loop, if we do it will very often throw a java.util.ConcurrentModificationException
      */
     @Nullable
-    @SideOnly(Side.SERVER)
     public static Entity getEntityFromUuid(UUID uuid) {
         //loop for dimensions, even ones from mods.
         for (int w=0; w < MinecraftServer.getServer().worldServers.length; w++) {

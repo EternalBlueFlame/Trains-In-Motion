@@ -3,6 +3,7 @@ package ebf.tim.gui;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.TileEntitySlotManager;
@@ -11,7 +12,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -106,13 +106,12 @@ public class GUITrain extends GuiContainer {
      * @param scaleV defines the X Y size of the texture part used
      */
     public static void drawTexturedModalRect(int posX, int posY, int posU, int posV, int width, int height, int scaleU, int scaleV, double zLevel) {
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV(posX, posY + height, zLevel, posU * guiScaler, (posV + scaleV) * guiScaler);
-        tessellator.addVertexWithUV(posX + width, posY + height, zLevel, (posU + scaleU) * guiScaler, (posV + scaleV) * guiScaler);
-        tessellator.addVertexWithUV(posX + width, posY, zLevel, (posU + scaleU) * guiScaler, posV * guiScaler);
-        tessellator.addVertexWithUV(posX, posY, zLevel, posU * guiScaler, posV * guiScaler);
-        tessellator.draw();
+        Tessellator.getInstance().startDrawingQuads();
+        Tessellator.getInstance().addVertexWithUV(posX, posY + height, zLevel, posU * guiScaler, (posV + scaleV) * guiScaler);
+        Tessellator.getInstance().addVertexWithUV(posX + width, posY + height, zLevel, (posU + scaleU) * guiScaler, (posV + scaleV) * guiScaler);
+        Tessellator.getInstance().addVertexWithUV(posX + width, posY, zLevel, (posU + scaleU) * guiScaler, posV * guiScaler);
+        Tessellator.getInstance().addVertexWithUV(posX, posY, zLevel, posU * guiScaler, posV * guiScaler);
+        Tessellator.getInstance().draw();
     }
 
 

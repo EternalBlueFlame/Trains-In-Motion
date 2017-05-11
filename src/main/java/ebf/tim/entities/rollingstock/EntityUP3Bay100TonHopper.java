@@ -67,11 +67,6 @@ public class EntityUP3Bay100TonHopper extends EntityRollingStockCore {
      */
     @Override
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
-    /**
-     * <h2>Smoke offset</h2>
-     */
-    @Override
-    public float[][] getSmokeOffset(){return new float[][]{};}
 
 
 

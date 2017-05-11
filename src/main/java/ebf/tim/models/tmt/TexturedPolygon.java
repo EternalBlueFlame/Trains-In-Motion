@@ -10,7 +10,7 @@ public class TexturedPolygon extends TexturedQuad {
 	public TexturedPolygon(PositionTextureVertex apositionTexturevertex[]) {
 		super(apositionTexturevertex);
 		invertNormal = false;
-		normals = new float[0];
+		normals = new int[0];
 		iNormals = new ArrayList<Vec3d>();
     }
 	
@@ -21,7 +21,7 @@ public class TexturedPolygon extends TexturedQuad {
 	
 	public void setNormals(float x, float y, float z)
 	{
-		normals = new float[] {x, y, z};
+		normals = new int[] {(int)x, (int)y, (int)z};
 	}
 	
 	public void setNormals(ArrayList<Vec3d> vec)
@@ -52,9 +52,9 @@ public class TexturedPolygon extends TexturedQuad {
 		        Vec3d Vec3d2 = new Vec3d(Vec3d1.crossProduct(Vec3d).normalize());
 		
 		        if(invertNormal) {
-		            tessellator.setNormal(-(float)Vec3d2.xCoord, -(float)Vec3d2.yCoord, -(float)Vec3d2.zCoord);
+		            tessellator.setNormal((int)-Vec3d2.xCoord, (int)-Vec3d2.yCoord, (int)-Vec3d2.zCoord);
 		        } else {
-		            tessellator.setNormal((float)Vec3d2.xCoord, (float)Vec3d2.yCoord, (float)Vec3d2.zCoord);
+		            tessellator.setNormal((int)Vec3d2.xCoord, (int)Vec3d2.yCoord, (int)Vec3d2.zCoord);
 		        }
 	        } else {
 	        	return;
@@ -67,18 +67,18 @@ public class TexturedPolygon extends TexturedQuad {
 			}
             if(i < iNormals.size()) {
             	if(invertNormal) {
-            		tessellator.setNormal(-(float)iNormals.get(i).xCoord, -(float)iNormals.get(i).yCoord, -(float)iNormals.get(i).zCoord);
+            		tessellator.setNormal((int)-iNormals.get(i).xCoord, (int)-iNormals.get(i).yCoord, (int)-iNormals.get(i).zCoord);
             	} else {
-            		tessellator.setNormal((float)iNormals.get(i).xCoord, (float)iNormals.get(i).yCoord, (float)iNormals.get(i).zCoord);
+            		tessellator.setNormal((int)iNormals.get(i).xCoord, (int)iNormals.get(i).yCoord, (int)iNormals.get(i).zCoord);
             	}
             }
-            tessellator.addVertexWithUV((float)positionTexturevertex.vector3D.xCoord * f, (float)positionTexturevertex.vector3D.yCoord * f, (float)positionTexturevertex.vector3D.zCoord * f, positionTexturevertex.texturePositionX, positionTexturevertex.texturePositionY);
+            tessellator.addVertexWithUV(positionTexturevertex.vector3D.xCoord * f, positionTexturevertex.vector3D.yCoord * f, positionTexturevertex.vector3D.zCoord * f, (float)positionTexturevertex.texturePositionX, (float)positionTexturevertex.texturePositionY);
         }
 
         tessellator.draw();
     }
 
     private boolean invertNormal;
-    private float[] normals;
+    private int[] normals;
     private ArrayList<Vec3d> iNormals;
 }

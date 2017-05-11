@@ -6,7 +6,6 @@ import net.minecraft.client.renderer.GLAllocation;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
@@ -15,9 +14,9 @@ import java.util.Arrays;
 public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 	
 	private static ByteBuffer bbuf = GLAllocation.createDirectByteBuffer(0x200000 * 4);
-	private int rbs = 0, verts = 0, c, rbi = 0, dm, n;
+	private int rbs = 0, verts = 0, rbi = 0, dm, n;
 	private boolean ht = false, in = false, drawing = false, hc = false;
-	public static Tessellator INSTANCE = new Tessellator();
+	private static Tessellator INSTANCE = new Tessellator();
 	private static FloatBuffer fbuf = bbuf.asFloatBuffer();
 	private static IntBuffer ibuf = bbuf.asIntBuffer();
 	private double u, v, w, x_o, y_o, z_o;
@@ -97,7 +96,7 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 		}
 		if(ht){
 			rb[rbi + 3] = Float.floatToRawIntBits((float)u); rb[rbi + 4] = Float.floatToRawIntBits((float)v);
-			rb[rbi + 5] = Float.floatToRawIntBits(0.0F); rb[rbi + 6] = Float.floatToRawIntBits((float)w);
+			rb[rbi + 5] = 0; rb[rbi + 6] = Float.floatToRawIntBits((float)w);
 		}
 		if(in){rb[rbi + 8] = n;}
 		rb[rbi] = Float.floatToRawIntBits((float)(par1 + x_o));
@@ -113,11 +112,14 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 	public void addVertexWithUVW(double i, double j, double k, double l, double m, double n){
 		this.setTextureUVW(l, m, n); this.addVertex(i, j, k);
 	}
-	
+
 	public void setNormal(float x, float y, float z){
+		setNormal((int)x, (int)y, (int)z);
+	}
+	
+	public void setNormal(int x, int y, int z){
 		in = true;
-		byte b0 = (byte)((int)(x * 127.0F)); byte b1 = (byte)((int)(y * 127.0F)); byte b2 = (byte)((int)(z * 127.0F));
-		n = b0 & 255 | (b1 & 255) << 8 | (b2 & 255) << 16;
+		n = ((x * 127)) & 255 | (((y * 127)) & 255) << 8 | (((z * 127)) & 255) << 16;
 	}
 	
 	public void setTextureUV(double i, double j){
@@ -143,12 +145,6 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 	public void setColorRGBA(int i, int j, int k, int l){
 		if(i > 255){i = 255;} if(j > 255){j = 255;} if(k > 255){k = 255;} if(l > 255){l = 255;}
 		if(i < 0){i = 0;} if(j < 0){j = 0;} if(k < 0){k = 0;} if (l < 0){l = 0;}
-		if(ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN){
-			this.c = l << 24 | k << 16 | j << 8 | i;
-		}
-		else{
-			this.c = i << 24 | j << 16 | k << 8 | l;
-		}
 		hc = true;
     }
 

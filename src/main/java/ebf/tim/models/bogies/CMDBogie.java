@@ -10,7 +10,7 @@
  */
 package ebf.tim.models.bogies;
 
-import ebf.tim.models.RenderEntity;
+import ebf.tim.models.StaticModelAnimator;
 import ebf.tim.models.tmt.ModelRendererTurbo;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.entity.Entity;
@@ -22,16 +22,16 @@ public class CMDBogie extends ModelBase
 	public CMDBogie()
 	{
 		cmdbogieModel = new ModelRendererTurbo[13];
-		cmdbogieModel[0] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 5
-		cmdbogieModel[1] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 8
-		cmdbogieModel[2] = new ModelRendererTurbo(this, 10, 1, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 7
-		cmdbogieModel[3] = new ModelRendererTurbo(this, 10, 1, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 6
-		cmdbogieModel[4] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Axel 1
-		cmdbogieModel[5] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 4
-		cmdbogieModel[6] = new ModelRendererTurbo(this, 10, 1, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 3
-		cmdbogieModel[7] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Axel 2
-		cmdbogieModel[8] = new ModelRendererTurbo(this, 10, 1, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 2
-		cmdbogieModel[9] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel 1
+		cmdbogieModel[0] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel 5
+		cmdbogieModel[1] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel 8
+		cmdbogieModel[2] = new ModelRendererTurbo(this, 10, 1, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel 7
+		cmdbogieModel[3] = new ModelRendererTurbo(this, 10, 1, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel 6
+		cmdbogieModel[4] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Axel 1
+		cmdbogieModel[5] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel 4
+		cmdbogieModel[6] = new ModelRendererTurbo(this, 10, 1, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel 3
+		cmdbogieModel[7] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Axel 2
+		cmdbogieModel[8] = new ModelRendererTurbo(this, 10, 1, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel 2
+		cmdbogieModel[9] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel 1
 		cmdbogieModel[10] = new ModelRendererTurbo(this, 2, 12, textureXY, textureXY); // Box 10
 		cmdbogieModel[11] = new ModelRendererTurbo(this, 6, 14, textureXY, textureXY); // Box 11
 		cmdbogieModel[12] = new ModelRendererTurbo(this, 6, 11, textureXY, textureXY); // Box 12

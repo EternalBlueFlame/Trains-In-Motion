@@ -67,11 +67,6 @@ public class EntityVATLogCar extends EntityRollingStockCore {
      */
     @Override
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
-    /**
-     * <h2>Smoke offset</h2>
-     */
-    @Override
-    public float[][] getSmokeOffset(){return new float[][]{};}
 
     /**
      * <h2>pre-asigned values</h2>

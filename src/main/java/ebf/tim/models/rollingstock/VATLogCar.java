@@ -11,7 +11,7 @@
 
 package ebf.tim.models.rollingstock;
 
-import ebf.tim.models.RenderEntity;
+import ebf.tim.models.GroupedModelRender;
 import ebf.tim.models.tmt.ModelRendererTurbo;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.entity.Entity;
@@ -21,11 +21,11 @@ public class VATLogCar extends ModelBase
 	private static final int textureX = 256;
 	private static final int textureY = 64;
 
-	private static final String cargo1 = RenderEntity.tagRenderBlockCargo + "1";
-	private static final String cargo2 = RenderEntity.tagRenderBlockCargo + "2";
-	private static final String cargo3 = RenderEntity.tagRenderBlockCargo + "3";
-	private static final String cargo4 = RenderEntity.tagRenderBlockCargo + "4";
-	private static final String cargo5 = RenderEntity.tagRenderBlockCargo + "5";
+	private static final String cargo1 = GroupedModelRender.tagRenderBlockCargo + "1";
+	private static final String cargo2 = GroupedModelRender.tagRenderBlockCargo + "2";
+	private static final String cargo3 = GroupedModelRender.tagRenderBlockCargo + "3";
+	private static final String cargo4 = GroupedModelRender.tagRenderBlockCargo + "4";
+	private static final String cargo5 = GroupedModelRender.tagRenderBlockCargo + "5";
 
 	public VATLogCar()
 	{

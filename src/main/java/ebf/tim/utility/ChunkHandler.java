@@ -9,7 +9,8 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.event.entity.EntityEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <h1>Chunk management</h1>

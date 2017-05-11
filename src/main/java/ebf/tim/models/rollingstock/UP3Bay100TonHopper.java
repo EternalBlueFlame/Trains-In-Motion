@@ -11,7 +11,7 @@
 
 package ebf.tim.models.rollingstock;
 
-import ebf.tim.models.RenderEntity;
+import ebf.tim.models.GroupedModelRender;
 import ebf.tim.models.tmt.ModelRendererTurbo;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.entity.Entity;
@@ -20,9 +20,9 @@ public class UP3Bay100TonHopper extends ModelBase {
 	private static final int textureX = 256;
 	private static final int textureY = 128;
 
-	private static final String cargo1 = RenderEntity.tagRenderModelCargo + "1";
-	private static final String cargo2 = RenderEntity.tagRenderModelCargo + "2";
-	private static final String cargo3 = RenderEntity.tagRenderModelCargo + "3";
+	private static final String cargo1 = GroupedModelRender.tagRenderModelCargo + "1";
+	private static final String cargo2 = GroupedModelRender.tagRenderModelCargo + "2";
+	private static final String cargo3 = GroupedModelRender.tagRenderModelCargo + "3";
 
 	public UP3Bay100TonHopper() {
 		up3bay100tonhopperModel = new ModelRendererTurbo[166];

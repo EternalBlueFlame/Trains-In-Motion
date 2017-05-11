@@ -9,7 +9,7 @@
 
 package ebf.tim.models.trains;
 
-import ebf.tim.models.RenderEntity;
+import ebf.tim.models.StaticModelAnimator;
 import ebf.tim.models.tmt.ModelRendererTurbo;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.entity.Entity;
@@ -59,10 +59,10 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[35] = new ModelRendererTurbo(this, 57, 49, textureXY, textureXY); // Box 36
 		brigadelok_080Model[36] = new ModelRendererTurbo(this, 81, 49, textureXY, textureXY); // Box 37
 		brigadelok_080Model[37] = new ModelRendererTurbo(this, 185, 17, textureXY, textureXY); // Box 38
-		brigadelok_080Model[38] = new ModelRendererTurbo(this, 129, 81, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Axel
-		brigadelok_080Model[39] = new ModelRendererTurbo(this, 113, 89, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Axel 2
-		brigadelok_080Model[40] = new ModelRendererTurbo(this, 217, 89, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Axel 3
-		brigadelok_080Model[41] = new ModelRendererTurbo(this, 81, 97, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Axel 4
+		brigadelok_080Model[38] = new ModelRendererTurbo(this, 129, 81, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Axel
+		brigadelok_080Model[39] = new ModelRendererTurbo(this, 113, 89, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Axel 2
+		brigadelok_080Model[40] = new ModelRendererTurbo(this, 217, 89, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Axel 3
+		brigadelok_080Model[41] = new ModelRendererTurbo(this, 81, 97, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Axel 4
 		brigadelok_080Model[42] = new ModelRendererTurbo(this, 41, 105, textureXY, textureXY); // Box 43
 		brigadelok_080Model[43] = new ModelRendererTurbo(this, 193, 105, textureXY, textureXY); // Box 44
 		brigadelok_080Model[44] = new ModelRendererTurbo(this, 1, 113, textureXY, textureXY); // Box 45
@@ -107,26 +107,26 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[83] = new ModelRendererTurbo(this, 65, 129, textureXY, textureXY); // Box 89
 		brigadelok_080Model[84] = new ModelRendererTurbo(this, 201, 49, textureXY, textureXY); // Box 90
 		brigadelok_080Model[85] = new ModelRendererTurbo(this, 249, 49, textureXY, textureXY); // Box 91
-		brigadelok_080Model[86] = new ModelRendererTurbo(this, 73, 129, textureXY, textureXY, RenderEntity.tagSimplePiston); // WheelConnectorPiston
-		brigadelok_080Model[87] = new ModelRendererTurbo(this, 121, 129, textureXY, textureXY, RenderEntity.tagAdvancedPiston); // PistonValveConnector
-		brigadelok_080Model[88] = new ModelRendererTurbo(this, 161, 129, textureXY, textureXY, RenderEntity.tagSimplePiston); // UpperPistonValveConnector
-		brigadelok_080Model[89] = new ModelRendererTurbo(this, 217, 129, textureXY, textureXY, RenderEntity.tagSimplePiston); // UpperPiston
-		brigadelok_080Model[90] = new ModelRendererTurbo(this, 201, 57, textureXY, textureXY, RenderEntity.tagSimplePiston); // UpperPistonArm
-		brigadelok_080Model[91] = new ModelRendererTurbo(this, 25, 137, textureXY, textureXY, RenderEntity.tagSimplePiston); // WheelConnectorPiston
-		brigadelok_080Model[92] = new ModelRendererTurbo(this, 73, 137, textureXY, textureXY, RenderEntity.tagAdvancedPiston); // PistonValveConnector
-		brigadelok_080Model[93] = new ModelRendererTurbo(this, 113, 137, textureXY, textureXY, RenderEntity.tagSimplePiston); // UpperPistonValveConnector
-		brigadelok_080Model[94] = new ModelRendererTurbo(this, 249, 57, textureXY, textureXY, RenderEntity.tagSimplePiston); // UpperPistonArm
-		brigadelok_080Model[95] = new ModelRendererTurbo(this, 137, 137, textureXY, textureXY, RenderEntity.tagSimplePiston); // UpperPiston
+		brigadelok_080Model[86] = new ModelRendererTurbo(this, 73, 129, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // WheelConnectorPiston
+		brigadelok_080Model[87] = new ModelRendererTurbo(this, 121, 129, textureXY, textureXY, StaticModelAnimator.tagAdvancedPiston); // PistonValveConnector
+		brigadelok_080Model[88] = new ModelRendererTurbo(this, 161, 129, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // UpperPistonValveConnector
+		brigadelok_080Model[89] = new ModelRendererTurbo(this, 217, 129, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // UpperPiston
+		brigadelok_080Model[90] = new ModelRendererTurbo(this, 201, 57, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // UpperPistonArm
+		brigadelok_080Model[91] = new ModelRendererTurbo(this, 25, 137, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // WheelConnectorPiston
+		brigadelok_080Model[92] = new ModelRendererTurbo(this, 73, 137, textureXY, textureXY, StaticModelAnimator.tagAdvancedPiston); // PistonValveConnector
+		brigadelok_080Model[93] = new ModelRendererTurbo(this, 113, 137, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // UpperPistonValveConnector
+		brigadelok_080Model[94] = new ModelRendererTurbo(this, 249, 57, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // UpperPistonArm
+		brigadelok_080Model[95] = new ModelRendererTurbo(this, 137, 137, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // UpperPiston
 		brigadelok_080Model[96] = new ModelRendererTurbo(this, 161, 65, textureXY, textureXY); // Box 102
 		brigadelok_080Model[97] = new ModelRendererTurbo(this, 201, 65, textureXY, textureXY); // Box 103
-		brigadelok_080Model[98] = new ModelRendererTurbo(this, 185, 129, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel
-		brigadelok_080Model[99] = new ModelRendererTurbo(this, 241, 129, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel
-		brigadelok_080Model[100] = new ModelRendererTurbo(this, 161, 137, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel
-		brigadelok_080Model[101] = new ModelRendererTurbo(this, 177, 137, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel
-		brigadelok_080Model[102] = new ModelRendererTurbo(this, 193, 137, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel
-		brigadelok_080Model[103] = new ModelRendererTurbo(this, 209, 137, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel
-		brigadelok_080Model[104] = new ModelRendererTurbo(this, 225, 137, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel
-		brigadelok_080Model[105] = new ModelRendererTurbo(this, 241, 137, textureXY, textureXY, RenderEntity.tagSimpleRotate); // Wheel
+		brigadelok_080Model[98] = new ModelRendererTurbo(this, 185, 129, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel
+		brigadelok_080Model[99] = new ModelRendererTurbo(this, 241, 129, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel
+		brigadelok_080Model[100] = new ModelRendererTurbo(this, 161, 137, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel
+		brigadelok_080Model[101] = new ModelRendererTurbo(this, 177, 137, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel
+		brigadelok_080Model[102] = new ModelRendererTurbo(this, 193, 137, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel
+		brigadelok_080Model[103] = new ModelRendererTurbo(this, 209, 137, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel
+		brigadelok_080Model[104] = new ModelRendererTurbo(this, 225, 137, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel
+		brigadelok_080Model[105] = new ModelRendererTurbo(this, 241, 137, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // Wheel
 
 		brigadelok_080Model[0].addBox(0F, 0F, 0F, 32, 10, 3, 0F); // Box 0
 		brigadelok_080Model[0].setRotationPoint(-24F, -7F, -1.5F);

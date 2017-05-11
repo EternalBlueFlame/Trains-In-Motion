@@ -8,6 +8,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.items.ItemKey;
+import ebf.tim.models.ParticleFX;
 import ebf.tim.models.tmt.Vec3d;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.NBTKeys;
@@ -46,7 +47,7 @@ import static ebf.tim.utility.RailUtility.rotatePoint;
 public class GenericRailTransport extends Entity implements IEntityAdditionalSpawnData, IEntityMultiPart, IInventory, IFluidHandler {
 
 
-    /**
+    /*
      * <h3>Ore directory support</h3>
      * creates lists of the items by ore directory names to add support for 3rd party mods.
      */
@@ -55,7 +56,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**collects all the coal in in the ore directory*/
     private static final ArrayList<ItemStack> coalCarrier = OreDictionary.getOres("coal");
 
-    /**
+    /*
      * <h2>variables</h2>
      */
     /**if the owner has locked this.*/
@@ -96,7 +97,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public ItemStack key;
     /**used to initialize a laege number of variables that are used to calculate everything from movement to linking.
      * this is so we don't have to initialize each of these variables every tick, saves CPU.*/
-    private double[][] vectorCache = new double[7][3];
+    private double[][] vectorCache = new double[9][3];
     /**the health of the entity, similar to that of EntityLiving*/
     private int health = 20;
     /**the fluidTank tank*/
@@ -115,6 +116,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     private ForgeChunkManager.Ticket chunkTicket;
     /**a cached list of the loaded chunks*/
     public List<ChunkCoordIntPair> chunkLocations = new ArrayList<>();
+    /**a list of the particles the transport is managing*/
+    public List<ParticleFX> particles = new ArrayList<>();
 
     public GenericRailTransport(World world){
         super(world);
@@ -152,7 +155,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
 
 
-    /**
+    /*
      * <h2>base entity overrides</h2>
      * modify basic entity variables to give different uses/values.
      */
@@ -257,7 +260,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
 
 
-    /**
+    /*
      * <h3>add bogies and seats</h3>
      */
 
@@ -276,7 +279,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @SideOnly(Side.CLIENT)
     public void addseats(EntitySeat cart){seats.add(cart);}
 
-    /**
+    /*
      * <h2> Data Syncing and Saving </h2>
      * SpawnData is mainly used for data that has to be created on client then sent to the server, like data processed on item use.
      * NBT is save data, which only happens on server.
@@ -460,7 +463,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
         }
 
-        /**
+        /*
          *check if the bogies exist, because they may not yet, and if they do, check if they are actually moving or colliding.
          * no point in processing movement if they aren't moving or if the train hit something.
          * if it is clear however, then we need to add velocity to the bogies based on the current state of the train's speed and fuel, and reposition the train.
@@ -535,18 +538,44 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             backLinkedID = linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0;
         }
 
-        /**
+        /*
          * be sure the client proxy has a reference to this so the lamps can be updated, and then every other tick, attempt to update the lamp position if it's necessary.
          */
-        if (backBogie!=null && posX+posY+posZ != 0.0D && !isDead) {
-            if (worldObj.isRemote && ClientProxy.EnableLights && !ClientProxy.carts.contains(this)) {
+        if (backBogie!=null && !isDead && worldObj.isRemote) {
+            if (ClientProxy.EnableLights && !ClientProxy.carts.contains(this)) {
                 ClientProxy.carts.add(this);
             }
-            if (lamp.Y >1 && worldObj.isRemote && ticksExisted %2 ==1){
+            if (lamp.Y >1 && ticksExisted %2 ==1){
                 vectorCache[0][0] =this.posX + getLampOffset().xCoord;
                 vectorCache[0][1] =this.posY + getLampOffset().yCoord;
                 vectorCache[0][2] =this.posZ + getLampOffset().zCoord;
                 lamp.ShouldUpdate(worldObj, RailUtility.rotatePoint(vectorCache[0], rotationPitch, rotationYaw, 0));
+            }
+
+            //update the particles here rather than on render tick, it's not as smooth, but close enough and far less CPU use.
+            if (ClientProxy.EnableSmokeAndSteam) {
+                int itteration = 0;
+                int maxSpawnThisTick = 0;
+                for (float[] smoke : getSmokeOffset()) {
+                    for (int i = 0; i < smoke[4]; i++) {
+                        //define the position
+                        vectorCache[7][0] = smoke[0];
+                        vectorCache[7][1] = smoke[1];
+                        vectorCache[7][2] = smoke[2];
+                        vectorCache[8] = RailUtility.rotatePoint(vectorCache[7], rotationPitch, rotationYaw, 0);
+                        //we only want to spawn at most 5 particles per tick.
+                        //this helps make them spawn more evenly rather than all at once. It also helps prevent a lot of lag.
+                        if (particles.size() <= itteration && maxSpawnThisTick < 5) {
+                            particles.add(new ParticleFX(posZ, posY, posX, smoke[3], vectorCache[8],
+                                    backBogie.motionX + (rand.nextInt(40) - 20) * 0.001f, smoke[1] * 0.05, backBogie.motionZ + (rand.nextInt(40) - 20) * 0.001f));
+                            maxSpawnThisTick++;
+                        } else if (maxSpawnThisTick == 0) {
+                            //if the particles have finished spawning in, move them.
+                            particles.get(itteration).onUpdate(this, posX, posY, posZ);
+                        }
+                        itteration++;
+                    }
+                }
             }
         }
     }
@@ -802,7 +831,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         return null;
     }
 
-    /**
+    /*
      * <h2>Inherited variables</h2>
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
      */
@@ -828,7 +857,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**defines the radius in microblocks that the pistons animate*/
     public float getPistonOffset(){return 0;}
     /**defines smoke positions, the outer array defines each new smoke point, the inner arrays define the X/Y/Z*/
-    public float[][] getSmokeOffset(){return new float[][]{{0,0,0,255}};}
+    public float[][] getSmokeOffset(){return new float[0][0];}
     /**defines the length from center of the transport, thus is used for the motion calculation*/
     public double getLengthFromCenter(){return 1d;}
     /**defines the render scale, minecraft's default is 0.0625*/
@@ -843,7 +872,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public int getOwnerID(){return this.dataWatcher.getWatchableObjectInt(19);}
 
 
-    /**
+    /*
      * <h1>Inventory management</h1>
      */
 
@@ -1075,7 +1104,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         return getFirstBlock(index>0?index-1:0);
     }
 
-    /**
+    /*
      * <h2>unused</h2>
      * we have to initialize these values, but due to the design of the entity we don't actually use them.
      */
@@ -1092,7 +1121,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public void closeInventory() {}
 
 
-    /**
+    /*
      * <h1>Fluid Management</h1>
      */
     /**Returns true if the given fluid can be extracted.*/

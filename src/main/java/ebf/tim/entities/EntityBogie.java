@@ -165,8 +165,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             int floorY = MathHelper.floor_double(this.posY);
             int floorZ = MathHelper.floor_double(this.posZ);
             //compensate for y offsets based on current position, just in case the movement is too steep.
-            if (!RailUtility.isRailBlockAt(this.worldObj, floorX, floorY, floorZ)) {
-                if (RailUtility.isRailBlockAt(this.worldObj, floorX, floorY - 1, floorZ)) {
+            if (!BlockRailBase.func_150049_b_(this.worldObj, floorX, floorY, floorZ)) {
+                if (BlockRailBase.func_150049_b_(this.worldObj, floorX, floorY - 1, floorZ)) {
                     --floorY;
                 } else if (worldObj.getBlock(floorX, floorY, floorZ) instanceof BlockAir && worldObj.getBlock(floorX, floorY-1, floorZ) instanceof BlockAir && posY>-64){
                     posY-=0.1D;

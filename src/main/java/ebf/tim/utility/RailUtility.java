@@ -21,8 +21,6 @@ import zoranodensha.api.structures.tracks.ITrackBase;
 public class RailUtility {
     /**converts a degrees float to radians*/
     public static final float radianF = (float) Math.PI / 180.0f;
-    /**converts a degrees double to radians*/
-    public static final double radianD = Math.PI / 180.0d;
     /**converts a radians double to degrees*/
     public static final double degreesD = 180.0d / Math.PI;
 

@@ -66,11 +66,6 @@ public class EntityPullmansPalace extends EntityRollingStockCore {
      */
     @Override
     public Vec3d getLampOffset(){return new Vec3d(0,2,0);}
-    /**
-     * <h2>Smoke offset</h2>
-     */
-    @Override
-    public float[][] getSmokeOffset(){return new float[][]{};}
 
 
 
