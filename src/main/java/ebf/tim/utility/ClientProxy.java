@@ -9,14 +9,14 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.gui.GUITrain;
+import ebf.tim.gui.GUITransport;
 import ebf.tim.gui.GUITrainTable;
 import ebf.tim.gui.HUDTrain;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
 import ebf.tim.registry.GenericRegistry;
 import ebf.tim.registry.TransportRegistry;
-import ebf.tim.tileentities.TileEntityStorage;
+import ebf.tim.blocks.TileEntityStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.settings.KeyBinding;
@@ -77,7 +77,7 @@ public class ClientProxy extends CommonProxy {
         if (player != null) {
             //Trains
             if (player.worldObj.getEntityByID(ID) instanceof GenericRailTransport) {
-                return new GUITrain(player.inventory, (GenericRailTransport) player.worldObj.getEntityByID(ID));
+                return new GUITransport(player.inventory, (GenericRailTransport) player.worldObj.getEntityByID(ID));
                 //tile entities
             } else if (player.worldObj.getTileEntity(x,y,z) instanceof TileEntityStorage) {
                 return new GUITrainTable(player.inventory, player.worldObj, x, y, z);

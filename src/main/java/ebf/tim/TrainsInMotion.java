@@ -21,7 +21,7 @@ import ebf.tim.utility.ChunkHandler;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.EventManager;
-import ebf.tim.worldgen.OreGen;
+import ebf.tim.blocks.OreGen;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;

@@ -1,6 +1,6 @@
 package ebf.tim.gui;
 
-import ebf.tim.tileentities.TileEntityStorage;
+import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.utility.TileEntitySlotManager;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;

@@ -8,7 +8,7 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.BlockDynamic;
 import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.blocks.LampBlock;
-import ebf.tim.tileentities.TileEntityStorage;
+import ebf.tim.blocks.TileEntityStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.MapColor;

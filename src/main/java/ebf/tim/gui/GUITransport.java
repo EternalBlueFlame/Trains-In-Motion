@@ -29,7 +29,7 @@ import static ebf.tim.TrainsInMotion.transportTypes.*;
  * used to draw the GUI for trains and rollingstock (the menu with the inventory).
  * @author Eternal Blue Flame
  */
-public class GUITrain extends GuiContainer {
+public class GUITransport extends GuiContainer {
 
     /**a reference to the resource location of the vanilla furnace texture, this also gets overridden by texturepacks*/
     private static final ResourceLocation vanillaInventory = new ResourceLocation("textures/gui/container/furnace.png");
@@ -52,7 +52,7 @@ public class GUITrain extends GuiContainer {
      * also puts the entity to a variable that can be accessed on client.
      * @see TileEntitySlotManager
      */
-    public GUITrain(InventoryPlayer inventoryPlayer, GenericRailTransport entity) {
+    public GUITransport(InventoryPlayer inventoryPlayer, GenericRailTransport entity) {
         super(new TransportSlotManager(inventoryPlayer, entity));
         player = inventoryPlayer.player;
         transport = entity;

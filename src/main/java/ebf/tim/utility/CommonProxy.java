@@ -3,7 +3,7 @@ package ebf.tim.utility;
 
 import cpw.mods.fml.common.network.IGuiHandler;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.tileentities.TileEntityStorage;
+import ebf.tim.blocks.TileEntityStorage;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;

@@ -1,4 +1,4 @@
-package ebf.tim.worldgen;
+package ebf.tim.blocks;
 
 import cpw.mods.fml.common.IWorldGenerator;
 import ebf.tim.registry.GenericRegistry;

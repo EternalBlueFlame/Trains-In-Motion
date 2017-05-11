@@ -1,7 +1,7 @@
 package ebf.tim.utility;
 
 import ebf.tim.registry.TransportRegistry;
-import ebf.tim.tileentities.TileEntityStorage;
+import ebf.tim.blocks.TileEntityStorage;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;

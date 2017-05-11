@@ -8,6 +8,7 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.gui.GUITransport;
 import ebf.tim.utility.EventManager;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -71,7 +72,7 @@ public class PacketKeyPress implements IMessage {
                         transport = message.entity;
                     }
                     /** now open the GUI, we handle the GUI though
-                     * @see ebf.tim.gui.GUITrain
+                     * @see GUITransport
                      */
                     entityPlayer.openGui(TrainsInMotion.instance, transport, entityPlayer.worldObj,
                             MathHelper.floor_double(transportEntity.posX), MathHelper.floor_double(transportEntity.posY),

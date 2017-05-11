@@ -1,4 +1,4 @@
-package ebf.tim.tileentities;
+package ebf.tim.blocks;
 
 
 import ebf.tim.TrainsInMotion;

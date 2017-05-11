@@ -28,7 +28,7 @@ public class HUDTrain extends GuiScreen {
     /**
      * <h2>Loco HUD</h2>
      * similar to the GUI, this will draw a HUD for the train when someone is in it.
-     * @see GUITrain
+     * @see GUITransport
      * The difference is that we override the experience bar render so that we can render the GUI alongside that, like a HUD.
      * @see GuiScreen
      * Some IDE's may report this function is unused, but it is actually used indirectly by minecraft's event manager, for this reason the warning was supressed.
