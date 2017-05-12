@@ -59,7 +59,15 @@ public class PacketKeyPress implements IMessage {
     public static class Handler implements IMessageHandler<PacketKeyPress, IMessage> {
         @Override
         public IMessage onMessage(PacketKeyPress message, MessageContext context) {
-            GenericRailTransport transportEntity = (GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entity);
+            GenericRailTransport transportEntity;
+            if (context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entity) instanceof GenericRailTransport){
+                transportEntity = (GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entity);
+            } else if (context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entity) instanceof EntitySeat){
+                transportEntity = (GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(
+                        ((EntitySeat)context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entity)).parentId);
+            } else {
+                return null;
+            }
             //process the packet on the entity, and if we still gotta do something here, then manage GUI
             if(!transportEntity.ProcessPacket(message.key) && message.key ==1) {
                 EntityPlayer entityPlayer = context.getServerHandler().playerEntity;

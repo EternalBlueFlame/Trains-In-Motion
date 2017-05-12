@@ -3,7 +3,6 @@ package ebf.tim.gui;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.TileEntitySlotManager;
@@ -12,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -61,9 +61,9 @@ public class GUITransport extends GuiContainer {
 
     @Override
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
-        fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), 8, -18, 4210752);
+        fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30, 4210752);
         if (transport.getType() != PASSENGER) {
-            fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 8, 74, 4210752);
+            fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 110, -30, 4210752);
         }
     }
 
@@ -80,12 +80,13 @@ public class GUITransport extends GuiContainer {
     protected void drawGuiContainerBackgroundLayer(float par1, int mouseX, int mouseY) {
         //draw the gui background color
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        if (transport instanceof EntityTrainCore){
-            renderTrainInventory(guiTop,guiLeft,this.zLevel, this.mc, firstTankFluid, secondTankFluid);
+        if (transport.getType().isTrain()){
+            renderTrainInventory(guiTop,guiLeft, this.mc, firstTankFluid, secondTankFluid);
         } else if (transport != null){
             switch (transport.getType()){
-                case PASSENGER:{renderPassengerInventory(guiTop,guiLeft,this.zLevel, this.mc); break;}
-                case LOGCAR: case FREIGHT: case HOPPER: case COALHOPPER: case GRAINHOPPER: {renderFreightInventory(guiTop,guiLeft, this.zLevel, this.mc); break;}
+                case PASSENGER:{renderPassengerInventory(guiTop,guiLeft, this.mc); break;}
+                case LOGCAR: case FREIGHT: case HOPPER: case COALHOPPER: case GRAINHOPPER: {renderFreightInventory(guiTop,guiLeft, this.mc); break;}
+                case TANKER:{renderTankerInventory(guiTop,guiLeft, this.zLevel, this.mc);break;}
             }
         }
 
@@ -105,13 +106,21 @@ public class GUITransport extends GuiContainer {
      * @param scaleU defines the X size of the texture part used
      * @param scaleV defines the X Y size of the texture part used
      */
-    public static void drawTexturedModalRect(int posX, int posY, int posU, int posV, int width, int height, int scaleU, int scaleV, double zLevel) {
-        Tessellator.getInstance().startDrawingQuads();
-        Tessellator.getInstance().addVertexWithUV(posX, posY + height, zLevel, posU * guiScaler, (posV + scaleV) * guiScaler);
-        Tessellator.getInstance().addVertexWithUV(posX + width, posY + height, zLevel, (posU + scaleU) * guiScaler, (posV + scaleV) * guiScaler);
-        Tessellator.getInstance().addVertexWithUV(posX + width, posY, zLevel, (posU + scaleU) * guiScaler, posV * guiScaler);
-        Tessellator.getInstance().addVertexWithUV(posX, posY, zLevel, posU * guiScaler, posV * guiScaler);
-        Tessellator.getInstance().draw();
+    public static void drawTexturedRect(int posX, int posY, int posU, int posV, int width, int height, int scaleU, int scaleV) {
+        Tessellator.instance.startDrawingQuads();
+        Tessellator.instance.addVertexWithUV(posX, posY + height, 0, posU * guiScaler, (posV + scaleV) * guiScaler);
+        Tessellator.instance.addVertexWithUV(posX + width, posY + height, 0, (posU + scaleU) * guiScaler, (posV + scaleV) * guiScaler);
+        Tessellator.instance.addVertexWithUV(posX + width, posY, 0, (posU + scaleU) * guiScaler, posV * guiScaler);
+        Tessellator.instance.addVertexWithUV(posX, posY, 0, posU * guiScaler, posV * guiScaler);
+        Tessellator.instance.draw();
+    }
+    public static void drawTexturedRect(int posX, int posY, int posU, int posV, int width, int height) {
+        Tessellator.instance.startDrawingQuads();
+        Tessellator.instance.addVertexWithUV(posX, posY + height, 0, posU * guiScaler, (posV + height) * guiScaler);
+        Tessellator.instance.addVertexWithUV(posX + width, posY + height, 0, (posU + width) * guiScaler, (posV + height) * guiScaler);
+        Tessellator.instance.addVertexWithUV(posX + width, posY, 0, (posU + width) * guiScaler, posV * guiScaler);
+        Tessellator.instance.addVertexWithUV(posX, posY, 0, posU * guiScaler, posV * guiScaler);
+        Tessellator.instance.draw();
     }
 
 
@@ -223,18 +232,10 @@ public class GUITransport extends GuiContainer {
                     return StatCollector.translateToLocal("menu.item.steam") + ":";
                 }
             }
-            case DIESEL:{
-                return StatCollector.translateToLocal("gui.diesel") + ":";
-            }
-            case ELECTRIC: case MAGLEV:{
-                return StatCollector.translateToLocal("gui.rf") + ":";
-            }
-            case HYDROGEN_DIESEL:{
-                return StatCollector.translateToLocal("gui.hydrogencell") + ":";
-            }
-            case NUCLEAR_ELECTRIC:{
-                return StatCollector.translateToLocal("gui.coolant") + ":";
-            }
+            case DIESEL:{return StatCollector.translateToLocal("gui.diesel") + ":";}
+            case ELECTRIC: case MAGLEV:{return StatCollector.translateToLocal("gui.rf") + ":";}
+            case HYDROGEN_DIESEL:{return StatCollector.translateToLocal("gui.hydrogencell") + ":";}
+            case NUCLEAR_ELECTRIC:{return StatCollector.translateToLocal("gui.coolant") + ":";}
             default:{return "";}
         }
     }
@@ -246,53 +247,48 @@ public class GUITransport extends GuiContainer {
      * we make this a static function for efficiency, so we have to make the function call feed the super's variables in.
      * @param guiTop the guiTop variable defined in the super.
      * @param guiLeft the guiLeft variable defined in the super.
-     * @param zLevel the zLevel variable defined in the super.
      * @param mc the minecraft instance defined in the super.
      * @param firstTankFluid the first fluid variable defined in the initial draw screen function of this class.
      * @param secondTankFluid the second fluid variable defined in the initial draw screen function of this class.
      */
-    public static void renderTrainInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc, int firstTankFluid, int secondTankFluid){
+    private void renderTrainInventory(int guiTop, int guiLeft,Minecraft mc, int firstTankFluid, int secondTankFluid){
         //main background TODO disabled until we actually have an image for it.
         //draw the background
-        //drawTexturedModalRect((width - xSize) / 2, (height - ySize) / 2, 0, 0, xSize, ySize);
-
+        //drawTexturedRect((width - xSize) / 2, (height - ySize) / 2, 0, 0, xSize, ySize);
 
         //bind the inventory image which we use the slot images and inventory image from.
         mc.getTextureManager().bindTexture(vanillaInventory);
         //icon for fuel
-        drawTexturedModalRect(guiLeft + 7, guiTop + 25, 54, 51, 18, 18, 20, 20, zLevel);
+        drawTexturedRect(guiLeft*2-13, guiTop + 11, 54, 51, 18, 18, 20, 20);
         //icon for furnace
-        drawTexturedModalRect(guiLeft + 7, guiTop + 25, 54, 51, 18, 18, 20, 20, zLevel);
+        drawTexturedRect(guiLeft*2-13, guiTop + 11, 54, 51, 18, 18, 20, 20);
 
         //slot for fuel
-        drawTexturedModalRect(guiLeft + 7, guiTop + 52, 54, 51, 18, 18, 20, 20, zLevel);
+        drawTexturedRect(guiLeft*2-13, guiTop + 40, 54, 51, 18, 18, 20, 20);
         //slot for water
-        drawTexturedModalRect(guiLeft + 34, guiTop + 52, 54, 51, 18, 18, 20, 20, zLevel);
+        drawTexturedRect(guiLeft*2+22, guiTop + 40, 54, 51, 18, 18, 20, 20);
 
-        //transport inventory
-        for (int ic = 0; ic < transport.getInventorySize().getRow(); ic++) {
-            for (int ir = 0; ir > -transport.getInventorySize().getColumn(); ir--) {
-                drawTexturedModalRect( guiLeft + 97 + (ic * 18), guiTop +43 + (ir * 18), 54, 51, 18, 18, 20, 20, zLevel);
-            }
-        }
         //draw the player inventory and toolbar background.
-        drawTexturedModalRect(guiLeft, guiTop+ 82, 0, 82, 176, 176, 176, 176, zLevel);
+        drawTexturedRect(guiLeft*2-20, guiTop+ 78, 0, 78, 176, 176);
+        drawTexturedRect(guiLeft*2-20, guiTop+ 74, 0, 0, 176, 6);
 
         //draw the tanks
-        mc.renderEngine.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
+        mc.getTextureManager().bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
         //liquid fuel tank
-        drawTexturedModalRect(guiLeft + 66, guiTop + 10, 0, 0, 18, 50, 16, 16, zLevel);
-        if (firstTankFluid>0) {
+        drawTexturedRect(guiLeft*2 + 80, guiTop - 4, 0, 0, 18, 64, 16, 16);
+        if (transport.getTankAmount()>0) {
             //draw the water tank
-            int liquid = Math.abs((firstTankFluid * 50) / transport.getTankCapacity());
-            drawTexturedModalRect(guiLeft + 66, guiTop + 60 - liquid, 16,0, 18, liquid, 16, 16, zLevel);
+            int liquid = Math.abs((transport.getTankAmount() * 64) / transport.getTankCapacity());
+            drawTexturedRect(guiLeft*2+ 80, guiTop + 60 - liquid, 16,0, 18, liquid, 16, 16);
         }
         //steam tank
         if (transport.getType() == TrainsInMotion.transportTypes.STEAM || transport.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
-            drawTexturedModalRect(guiLeft + 34, guiTop+10, 0, 0, 18, 30, 16, 16, zLevel);
+            drawTexturedRect(guiLeft*2 + 50, guiTop-4, 0, 0, 18, 30, 16, 16);
+            drawTexturedRect(guiLeft*2 + 110, guiTop-4, 0, 0, 18, 30, 16, 16);
             if (secondTankFluid>0) {
                 int liquid3 = Math.abs((secondTankFluid * 30) / transport.getTankCapacity());
-                drawTexturedModalRect(guiLeft + 34, guiTop +40 - liquid3, 32,0, 18, liquid3, 16, 16, zLevel);
+                drawTexturedRect(guiLeft*2 + 50, guiTop +40 - liquid3, 32,0, 18, liquid3, 16, 16);
+                drawTexturedRect(guiLeft*2 + 110, guiTop +40 - liquid3, 32,0, 18, liquid3, 16, 16);
             }
         }
     }
@@ -301,9 +297,8 @@ public class GUITransport extends GuiContainer {
     /**
      * <h2>Render Passenger GUI</h2>
      * basically the same as
-     * @see #renderTrainInventory(int, int, double, Minecraft, int, int)
      */
-    private static void renderPassengerInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
+    private void renderPassengerInventory(int guiTop, int guiLeft, Minecraft mc){
 
         int rows=0;
         //draw the character backgrounds.
@@ -313,7 +308,7 @@ public class GUITransport extends GuiContainer {
             if (i/(rows+1) >=5*(rows+1)){
                 rows++;
             }
-            drawTexturedModalRect(guiLeft + 7 + (30*(i-(rows * 5))), guiTop + 30+(30*rows), 54, 51, 27, 27, 20, 20, zLevel);
+            drawTexturedRect(guiLeft + 7 + (30*(i-(rows * 5))), guiTop + 30+(30*rows), 54, 51, 27, 27, 20, 20);
         }
         //make a new loop that does the same as above but binds the character's face rather than the inventory slot background.
         for (int i=0;i<transport.getRiderOffsets().length; i++) {
@@ -322,10 +317,10 @@ public class GUITransport extends GuiContainer {
             }
             if (i==0 && transport.riddenByEntity instanceof AbstractClientPlayer){
                 mc.getTextureManager().bindTexture(((AbstractClientPlayer) transport.riddenByEntity).getLocationSkin());
-                drawTexturedModalRect(guiLeft + 10 + (30*(i-(rows * 5))), guiTop + 32+(30*rows), 30, 70, 22, 22, 36, 56, zLevel);
+                drawTexturedRect(guiLeft + 10 + (30*(i-(rows * 5))), guiTop + 32+(30*rows), 30, 70, 22, 22, 36, 56);
             } else if (i>0 && transport.seats.get(i-1).riddenByEntity instanceof AbstractClientPlayer){
                 mc.getTextureManager().bindTexture(((AbstractClientPlayer) transport.seats.get(i-1).riddenByEntity).getLocationSkin());
-                drawTexturedModalRect(guiLeft + 10 + (30*(i-(rows * 5))), guiTop + 32+(30*rows), 30, 70, 22, 22, 36, 56, zLevel);
+                drawTexturedRect(guiLeft + 10 + (30*(i-(rows * 5))), guiTop + 32+(30*rows), 30, 70, 22, 22, 36, 56);
             }
         }
 
@@ -333,32 +328,23 @@ public class GUITransport extends GuiContainer {
 
     /**
      * <h2>Render Freight GUI</h2>
-     * basically the same as
-     * @see #renderTrainInventory(int, int, double, Minecraft, int, int)
+     * NOTE: this is only designed for inventory sized with 9 columns.
      */
-    private void renderFreightInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
-        mc.getTextureManager().bindTexture(vanillaInventory);
+    private void renderFreightInventory(int guiTop, int guiLeft, Minecraft mc){
+        mc.getTextureManager().bindTexture(vanillaChest);
         //draw the player inventory and toolbar background.
-        drawTexturedModalRect(guiLeft, guiTop+ 72, 0, 72, 176, 176, 176, 176, zLevel);
-        drawTexturedModalRect(guiLeft, guiTop+ 70, 0, 0, xSize, 16);
+        if (transport.getInventorySize().getRow()<6){
+            drawTexturedRect(guiLeft, guiTop*2+40-(transport.getInventorySize().getRow()*18)-17, 0, 0, this.xSize, transport.getInventorySize().getRow() * 18 + 17);
+            drawTexturedRect(guiLeft,  guiTop*2+40, 0, 126, this.xSize, 96);
+        } else {
+            drawTexturedRect(20, 0, 0, 0, this.xSize, 17);//top
+            for(int i=0; i<(transport.getInventorySize().getRow()*18); i++){
+                drawTexturedRect(20, i*18+17, 0, 17, this.xSize, 18);
+            }
+            drawTexturedRect(20,(transport.getInventorySize().getRow()*18)*18+17, 0, 215, this.xSize, 8);//bottom
 
-        switch (transport.getInventorySize()){
-            //draw inventory by rows if they are 9 wide.
-            case NINExFOUR: case NINExTHREE:{
-                mc.getTextureManager().bindTexture(vanillaChest);
-                drawTexturedModalRect(guiLeft, guiTop-24, 0, 0, xSize, (transport.getInventorySize().getRow() * 18) + 17);
-                drawTexturedModalRect(guiLeft, guiTop + (transport.getInventorySize().getRow() * 17)-3, 0, 472, xSize, 16);
-                break;
-            }
-            //otherwise draw inventory by individual slots
-            default:{
-                for (int ic = 0; ic < transport.getInventorySize().getColumn(); ic++) {
-                    for (int ir = 0; ir > -transport.getInventorySize().getRow(); ir--) {
-                        drawTexturedModalRect( guiLeft + 8 + (ic * 18), guiTop +43 + (ir * 18), 54, 51, 18, 18, 20, 20, zLevel);
-                    }
-                }
-                break;
-            }
+            drawTexturedRect(guiLeft*2-20, 0, 0, 0, this.xSize,  16);//top
+            drawTexturedRect(guiLeft*2-20,   4, 0, 126, this.xSize, 96);//actual inventory
         }
     }
 
@@ -399,8 +385,18 @@ public class GUITransport extends GuiContainer {
     }
 
 
+    /**
+     * <h2>Render Freight GUI</h2>
+     * basically the same as
+     */
+    private void renderTankerInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
+        mc.getTextureManager().bindTexture(vanillaInventory);
+        //draw the player inventory and toolbar background.
+        drawTexturedRect(guiLeft, guiTop+ 72, 0, 72, 176, 176, 176, 176);
+        drawTexturedRect(guiLeft, guiTop+ 70, 0, 0, xSize, 16,20,20);
 
-
+        drawTexturedRect( guiLeft + 8 + 18, guiTop +43 + 18, 54, 51, 18, 18, 20, 20);
+    }
 
 
 

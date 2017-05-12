@@ -89,7 +89,9 @@ public class TrainsInMotion {
     }
     /**define the inventory size values, this lets us get values to define rows and columns rather than just overall size.*/
     public enum inventorySizes{NULL(0,0),
-        TWOxTWO(2,2), TWOxTHREE(3,2), THREExTHREE(3,3), THREExFOUR(4,3), FOURxFOUR(4,4), FOURxFIVE(5,4), FIVExFIVE(5,5), FIVExSIX(6,5), SIXxSIX(6,6), NINExTHREE(3,9), NINExFOUR(4,9);
+        TWOxTWO(2,2), TWOxTHREE(3,2), THREExTHREE(3,3), THREExFOUR(4,3), FOURxFOUR(4,4), FOURxFIVE(5,4), FIVExFIVE(5,5), FIVExSIX(6,5), SIXxSIX(6,6),
+        FREIGHT_ONExNINE(1,9), FREIGHT_TWOxNINE(2,9), FREIGHT_THREExNINE(3,9), FREIGHT_FOURxNINE(4,9), FREIGHT_FIVExNINE(5,9), FREIGHT_SIXxNINE(6,9)
+        , FREIGHT_SEVENxNINE(7,9), FREIGHT_EIGHTxNINE(8,9), FREIGHT_NINExNINE(9,9), FREIGHT_TENxNINE(10,9), FREIGHT_ELEVENxNINE(11,9);
         private int row;
         private int column;
         inventorySizes(int row, int column){
