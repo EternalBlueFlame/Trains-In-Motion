@@ -140,31 +140,66 @@ public class GUITransport extends GuiContainer {
     @Override
     public void drawScreen(int mouseX, int mouseY, float par3){
         super.drawScreen(mouseX, mouseY, par3);
-        if (transport.getType() == STEAM || transport.getType() == NUCLEAR_STEAM || transport.getType() == TANKER || transport.getType() == TENDER) {
+        if (transport.getType() == STEAM || transport.getType() == NUCLEAR_STEAM || transport.getType().isTanker() || transport.getType() == TENDER) {
             firstTankFluid = transport.getDataWatcher().getWatchableObjectInt(20);
         }
-
         if (transport instanceof EntityTrainCore) {
             secondTankFluid = ((EntityTrainCore) transport).fuelHandler.steamTank;
         }
-        //draw the fuel fluid tank hover text
-        if (transport instanceof EntityTrainCore) {
-            renderTrainOverlay(mouseX, mouseY);
-        }
 
-        //generic buttons will render to the left. specific buttons defined in the overlay are to the right.
-        if (mouseY > guiTop + 166 && mouseY < guiTop +184) {
-            if (player.getEntityId() == transport.getOwnerID() && mouseX > guiLeft && mouseX < guiLeft + 18) {
+        if (!(transport instanceof EntityTrainCore) && transport.getInventorySize().getRow()<6) {
+            if (mouseY > guiTop + 174 && mouseY < guiTop + 192) {
+                if (player.getEntityId() == transport.getOwnerID() && mouseX > guiLeft+62 && mouseX < guiLeft + 80) {
+                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.dropkey")), mouseX, mouseY, fontRendererObj);
+                } else if (mouseX > guiLeft +26 && mouseX < guiLeft + 44) {
+                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.locked." + transport.isLocked)), mouseX, mouseY, fontRendererObj);
+                } else if (mouseX > guiLeft + 44 && mouseX < guiLeft + 62) {
+                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.coupler." + transport.isCoupling)), mouseX, mouseY, fontRendererObj);
+                } else if (player.getEntityId() == transport.getOwnerID() && mouseX > guiLeft && mouseX < guiLeft + 18) {
+                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.unlink")), mouseX, mouseY, fontRendererObj);
+                } else if (mouseX > guiLeft + 256 && mouseX < guiLeft + 274){
+                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.lamp")  + ((transport.lamp.isOn)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
+                }
+            }
+        } else if (mouseY > guiTop + 166 && mouseY < guiTop + 184) {
+            if (player.getEntityId() == transport.getOwnerID() && mouseX > guiLeft+166 && mouseX < guiLeft + 184) {
                 drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.dropkey")), mouseX, mouseY, fontRendererObj);
-            } else if (mouseX > guiLeft +18 && mouseX < guiLeft + 36) {
+            } else if (mouseX > guiLeft +130 && mouseX < guiLeft + 148) {
                 drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.locked." + transport.isLocked)), mouseX, mouseY, fontRendererObj);
-            } else if (mouseX > guiLeft + 36 && mouseX < guiLeft + 54) {
+            } else if (mouseX > guiLeft + 148 && mouseX < guiLeft + 166) {
                 drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.coupler." + transport.isCoupling)), mouseX, mouseY, fontRendererObj);
-            } else if (mouseX > guiLeft + 54 && mouseX < guiLeft + 72) {
+            } else if (player.getEntityId() == transport.getOwnerID() && mouseX > guiLeft+112 && mouseX < guiLeft + 130) {
                 drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.unlink")), mouseX, mouseY, fontRendererObj);
+            } else if (transport.getLampOffset().yCoord>1 && mouseX > guiLeft+238 && mouseX < guiLeft + 256) {
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.lamp") + ((transport.brake)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
+            }
+
+            if (transport instanceof EntityTrainCore){
+                if (player.capabilities.isCreativeMode && mouseX > guiLeft + 184 && mouseX < guiLeft + 202) {
+                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.creativemode") + ((transport.brake)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
+                } else if (transport.getType() != TrainsInMotion.transportTypes.STEAM && mouseX > guiLeft + 202 && mouseX < guiLeft + 220){
+                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.trainisrunning")  + ((((EntityTrainCore)transport).isRunning)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
+                } else if (mouseX > guiLeft + 220 && mouseX < guiLeft + 238) {
+                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.brake")  + ((transport.brake)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
+                } else if (mouseX > guiLeft + 256 && mouseX < guiLeft + 274){
+                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.horn") ), mouseX, mouseY, fontRendererObj);
+                } /*else if(mouseX > guiLeft + 162 && mouseX < guiLeft + 180) {
+                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.map") ), mouseX, mouseY, fontRendererObj);
+                drawHoveringText(Collections.singletonList("Open Map"), mouseX, mouseY, fontRendererObj);
+            }*/
             }
         }
-
+        if (transport instanceof EntityTrainCore) {
+            if ((mouseX >= guiLeft + 210 && mouseX <= guiLeft + 226 && mouseY >= guiTop - 14 && mouseY <= guiTop + 50)) {
+                drawHoveringText(Arrays.asList(tankType(true), firstTankFluid * 0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity() * 0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
+            }
+            //draw the steam tank hover text
+            if ((transport.getType() == TrainsInMotion.transportTypes.STEAM || transport.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
+                    (mouseY >= guiTop - 14 && mouseY <= guiTop + 20) &&
+                    ((mouseX >= guiLeft + 178 && mouseX <= guiLeft + 196)  || (mouseX >= guiLeft + 240 && mouseX <= guiLeft + 258))) {
+                drawHoveringText(Arrays.asList(tankType(false), secondTankFluid * 0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity() * 0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
+            }
+        }
     }
 
 
@@ -179,20 +214,22 @@ public class GUITransport extends GuiContainer {
         if (!(transport instanceof EntityTrainCore) && transport.getInventorySize().getRow()<6) {
             //generic to all
             if (player.getEntityId() == transport.getOwnerID()) {
-                this.buttonList.add(new GuiButton(8, guiLeft, guiTop + 166, 18, 18, ""));
+                this.buttonList.add(new GuiButton(8, guiLeft+8, guiTop + 174, 18, 18, ""));
+                this.buttonList.add(new GuiButton(9, guiLeft + 62, guiTop + 174, 18, 18, ""));
             }
             this.buttonList.add(new GuiButton(2, guiLeft + 26, guiTop + 174, 18, 18, ""));
             this.buttonList.add(new GuiButton(3, guiLeft + 44, guiTop + 174, 18, 18, ""));
-            this.buttonList.add(new GuiButton(9, guiLeft + 62, guiTop + 174, 18, 18, ""));
         } else {
             //generic to all
             if (player.getEntityId() == transport.getOwnerID()) {
                 this.buttonList.add(new GuiButton(8, guiLeft+112, guiTop + 166, 18, 18, ""));
+                this.buttonList.add(new GuiButton(9, guiLeft + 166, guiTop + 166, 18, 18, ""));
             }
             this.buttonList.add(new GuiButton(2, guiLeft + 130, guiTop + 166, 18, 18, ""));
             this.buttonList.add(new GuiButton(3, guiLeft + 148, guiTop + 166, 18, 18, ""));
-            this.buttonList.add(new GuiButton(9, guiLeft + 166, guiTop + 166, 18, 18, ""));
-
+            if (transport.getLampOffset().yCoord>1) {
+                this.buttonList.add(new GuiButton(1, guiLeft + 238, guiTop + 166, 18, 18, ""));
+            }
             //train specific
             if (transport instanceof EntityTrainCore) {
                 if (player.capabilities.isCreativeMode) {
@@ -202,7 +239,6 @@ public class GUITransport extends GuiContainer {
                     this.buttonList.add(new GuiButton(6, guiLeft + 202, guiTop + 166, 18, 18, ""));
                 }
                 this.buttonList.add(new GuiButton(0, guiLeft + 220, guiTop + 166, 18, 18, ""));
-                this.buttonList.add(new GuiButton(1, guiLeft + 238, guiTop + 166, 18, 18, ""));
                 this.buttonList.add(new GuiButton(4, guiLeft + 256, guiTop + 166, 18, 18, ""));
 
             }
@@ -230,8 +266,8 @@ public class GUITransport extends GuiContainer {
                 ((EntityTrainCore)transport).isRunning = !((EntityTrainCore)transport).isRunning; break;}
             case 7:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(11, transport.getEntityId()));
                 transport.isCreative = !transport.isCreative; break;}
-            case 8:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(13, transport.getEntityId())); break;}
-            case 9:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(12, transport.getEntityId())) ; break;}
+            case 8:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(13, transport.getEntityId())); break;}//unlink
+            case 9:{TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(12, transport.getEntityId())) ; break;}//drop key item
         }
     }
 
@@ -313,8 +349,8 @@ public class GUITransport extends GuiContainer {
             drawTexturedRect(guiLeft + 240, guiTop-14, 0, 0, 18, 30, 16, 16);
             if (secondTankFluid>0) {
                 int liquid3 = Math.abs((secondTankFluid * 30) / transport.getTankCapacity());
-                drawTexturedRect(guiLeft+178, guiTop +50 - liquid3, 32,0, 18, liquid3, 16, 16);
-                drawTexturedRect(guiLeft+240, guiTop +50 - liquid3, 32,0, 18, liquid3, 16, 16);
+                drawTexturedRect(guiLeft+178, guiTop +24 - liquid3, 32,0, 18, liquid3, 16, 16);
+                drawTexturedRect(guiLeft+240, guiTop +24 - liquid3, 32,0, 18, liquid3, 16, 16);
             }
         }
     }
@@ -372,42 +408,6 @@ public class GUITransport extends GuiContainer {
 
             drawTexturedRect(guiLeft+105, guiTop+64, 0, 0, this.xSize,  16);//top
             drawTexturedRect(guiLeft+105,   guiTop+70, 0, 126, this.xSize, 96);//actual inventory
-        }
-    }
-
-
-    /**
-     * <h2>Train GUI overlay</h2>
-     * This is only used to draw the hover text for different parts of the train's GUI
-     */
-    private void renderTrainOverlay(int mouseX, int mouseY){
-        if ((mouseX >= guiLeft + 66 && mouseX <= guiLeft + 84 &&
-                mouseY >= guiTop + 10 && mouseY <= guiTop +60)) {
-            drawHoveringText(Arrays.asList(tankType(true), firstTankFluid*0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
-        }
-        //draw the steam tank hover text
-        if ((transport.getType() == TrainsInMotion.transportTypes.STEAM || transport.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
-                (mouseX >= guiLeft + 34 && mouseX <= guiLeft + 52 &&
-                        mouseY >= guiTop + 10 && mouseY <= guiTop +40)) {
-            drawHoveringText(Arrays.asList(tankType(false), secondTankFluid*0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity()*0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
-        }
-        //draw toggle button hover text
-        if (mouseY > guiTop + 166 && mouseY < guiTop +184){
-            if (player.capabilities.isCreativeMode &&
-                    mouseX > guiLeft + 72 && mouseX < guiLeft + 90) {
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.creativemode") + ((transport.brake)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
-            } else if (transport.getType() != TrainsInMotion.transportTypes.STEAM && mouseX > guiLeft + 90 && mouseX < guiLeft + 108){
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.trainisrunning")  + ((((EntityTrainCore)transport).isRunning)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
-            } else if (mouseX > guiLeft + 108 && mouseX < guiLeft + 126) {
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.brake")  + ((transport.brake)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
-            } else if (mouseX > guiLeft + 126 && mouseX < guiLeft + 144){
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.lamp")  + ((transport.lamp.isOn)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
-            } else if (mouseX > guiLeft + 144 && mouseX < guiLeft + 162){
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.horn") ), mouseX, mouseY, fontRendererObj);
-            } /*else if(mouseX > guiLeft + 162 && mouseX < guiLeft + 180) {
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.map") ), mouseX, mouseY, fontRendererObj);
-                drawHoveringText(Collections.singletonList("Open Map"), mouseX, mouseY, fontRendererObj);
-            }*/
         }
     }
 
