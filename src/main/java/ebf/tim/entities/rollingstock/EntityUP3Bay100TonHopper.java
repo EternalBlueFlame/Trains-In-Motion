@@ -46,7 +46,7 @@ public class EntityUP3Bay100TonHopper extends EntityRollingStockCore {
      * <h2>Inventory Size</h2>
      */
     @Override
-    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.FREIGHT_THREExNINE;}
+    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.FREIGHT_THREE;}
     /**
      * <h2>Type</h2>
      */

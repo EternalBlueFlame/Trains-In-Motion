@@ -59,9 +59,9 @@ public class TileEntityStorage extends TileEntity implements IInventory {
      */
     /**gets the number of slots the inventory should have based on the actual inventory size defined by getInventorySize().*/
     @Override
-    public int getSizeInventory() {return getInventorySize().getColumn() * getInventorySize().getRow();}
+    public int getSizeInventory() {return 9 * getInventorySize().getRow();}
     /**the actual inventory size, in rows and columns */
-    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.THREExTHREE;}
+    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.CRAFTING;}
 
 
     @Override

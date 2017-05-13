@@ -851,7 +851,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public Item getItem(){return null;}
     /**defines the size of the inventory, not counting any special slots like for fuel.
      * @see TrainsInMotion.inventorySizes*/
-    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.THREExTHREE;}
+    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.FREIGHT_ONE;}
     /**defines the offset for the lamp in X/Y/Z*/
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
     /**defines the radius in microblocks that the pistons animate*/
@@ -911,7 +911,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (getRiderOffsets() != null && getRiderOffsets().length >1){
             size++;
         }
-        return size+ (getInventorySize().getColumn() * getInventorySize().getRow());
+        return size+ (9 * getInventorySize().getRow());
     }
 
     /**

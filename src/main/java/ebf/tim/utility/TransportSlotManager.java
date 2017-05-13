@@ -27,12 +27,20 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
             //player inventory
             for (int ic = 0; ic < 9; ic++) {
                 for (int ir = 0; ir < 3; ir++) {
-                    addSlotToContainer(new Slot(iinventory, (((ir * 9) + ic) + 9), 8 + (ic * 18), 84 + (ir * 18)));
+                    if(entityTrain instanceof EntityTrainCore || entityTrain.getInventorySize().getRow()>5) {
+                        addSlotToContainer(new Slot(iinventory, (((ir * 9) + ic) + 9), 113 + (ic * 18), 84 + (ir * 18)));
+                    } else {
+                        addSlotToContainer(new Slot(iinventory, (((ir * 9) + ic) + 9), 8 + (ic * 18), 91 + (ir * 18)));
+                    }
                 }
             }
             //player toolbar
             for (int iT = 0; iT < 9; iT++) {
-                addSlotToContainer(new Slot(iinventory, iT, 8 + iT * 18, 142));
+                if(entityTrain instanceof EntityTrainCore || entityTrain.getInventorySize().getRow()>5) {
+                    addSlotToContainer(new Slot(iinventory, iT, 113 + (iT * 18), 142));
+                } else {
+                    addSlotToContainer(new Slot(iinventory, iT, 8 + (iT * 18), 149));
+                }
             }
         }
 
@@ -42,37 +50,32 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         }
 
 
+        int slot=0;
         //cover trains
         if (entityTrain instanceof EntityTrainCore) {
+            slot++;
             //define the transport's inventory size
-            int slot=1;
             if (entityTrain.getType() == TrainsInMotion.transportTypes.STEAM || entityTrain.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM){
                 slot=2;
             }
             //fuel slot
-            addSlotToContainer(new fuelSlot(railTransport, 0, 8, 53));
+            addSlotToContainer(new fuelSlot(railTransport, 0, 114, 32));
             if (slot == 2) {
                 //water slot
-                addSlotToContainer(new waterSlot( railTransport, 1, 35, 53));
+                addSlotToContainer(new waterSlot( railTransport, 1, 150, 32));
             }
-
-
-            //transport inventory
-            for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
-                for (int ib = 0; ib < entityTrain.getInventorySize().getColumn(); ib++) {
-                    addSlotToContainer(new filteredSlot(railTransport, slot, 98 + (ib * 18), (ia * 18) + 44));
-                    slot++;
+        }
+        int yCenter = (int)((11-entityTrain.getInventorySize().getRow())*0.5f)*18;
+        //transport inventory
+        for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
+            for (int ib = 0; ib < 9; ib++) {
+                if(entityTrain instanceof EntityTrainCore || entityTrain.getInventorySize().getRow()>5) {
+                    addSlotToContainer(new filteredSlot(railTransport, slot, -97 + (ib * 18), (ia * 18)+(yCenter)-19));
+                } else {
+                    addSlotToContainer(new filteredSlot(railTransport, slot, 8 + (ib * 18), 60 + (ia * 18)));
                 }
-            }
-            //cover rollingstock
-        } else {
-            int slot =0;
-            //transport inventory
-            for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
-                for (int ib = 0; ib < entityTrain.getInventorySize().getColumn(); ib++) {
-                    addSlotToContainer(new filteredSlot(railTransport, slot, 8 + (ib * 18), (ia * 18) + 48));
-                    slot++;
-                }
+
+                slot++;
             }
         }
     }

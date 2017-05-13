@@ -61,9 +61,16 @@ public class GUITransport extends GuiContainer {
 
     @Override
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
-        fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30, 4210752);
-        if (transport.getType() != PASSENGER) {
-            fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 110, -30, 4210752);
+        int yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
+        if (transport instanceof EntityTrainCore) {
+            fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 4210752);
+            fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 110, 72, 4210752);
+        } else if (transport.getType() != PASSENGER && transport.getInventorySize().getRow()>5) {
+            fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 4210752);
+            fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 110, 70, 4210752);
+        } else if (transport.getType() != PASSENGER){
+            fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), 8, 66-(transport.getInventorySize().getRow()*18), 4210752);
+            fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 8, 80, 4210752);
         }
     }
 
@@ -169,26 +176,35 @@ public class GUITransport extends GuiContainer {
     @Override
     public void initGui() {
         super.initGui();
-        //generic to all
-        if (player.getEntityId() == transport.getOwnerID()) {
-            this.buttonList.add(new GuiButton(8, guiLeft, guiTop + 166, 18, 18, ""));
-        }
-        this.buttonList.add(new GuiButton(2, guiLeft+ 18, guiTop + 166, 18, 18,""));
-        this.buttonList.add(new GuiButton(3, guiLeft+ 36, guiTop + 166, 18, 18,""));
-        this.buttonList.add(new GuiButton(9, guiLeft+ 54, guiTop + 166, 18, 18,""));
-
-        //train specific
-        if (transport instanceof EntityTrainCore) {
-            if (player.capabilities.isCreativeMode) {
-                this.buttonList.add(new GuiButton(7, guiLeft + 72, guiTop + 166, 18, 18, ""));
+        if (!(transport instanceof EntityTrainCore) && transport.getInventorySize().getRow()<6) {
+            //generic to all
+            if (player.getEntityId() == transport.getOwnerID()) {
+                this.buttonList.add(new GuiButton(8, guiLeft, guiTop + 166, 18, 18, ""));
             }
-            this.buttonList.add(new GuiButton(0, guiLeft + 108, guiTop + 166, 18, 18, ""));
-            this.buttonList.add(new GuiButton(1, guiLeft + 126, guiTop + 166, 18, 18, ""));
-            this.buttonList.add(new GuiButton(4, guiLeft + 144, guiTop + 166, 18, 18, ""));
+            this.buttonList.add(new GuiButton(2, guiLeft + 26, guiTop + 174, 18, 18, ""));
+            this.buttonList.add(new GuiButton(3, guiLeft + 44, guiTop + 174, 18, 18, ""));
+            this.buttonList.add(new GuiButton(9, guiLeft + 62, guiTop + 174, 18, 18, ""));
+        } else {
+            //generic to all
+            if (player.getEntityId() == transport.getOwnerID()) {
+                this.buttonList.add(new GuiButton(8, guiLeft+112, guiTop + 166, 18, 18, ""));
+            }
+            this.buttonList.add(new GuiButton(2, guiLeft + 130, guiTop + 166, 18, 18, ""));
+            this.buttonList.add(new GuiButton(3, guiLeft + 148, guiTop + 166, 18, 18, ""));
+            this.buttonList.add(new GuiButton(9, guiLeft + 166, guiTop + 166, 18, 18, ""));
 
-            if (transport.getType() != TrainsInMotion.transportTypes.STEAM) {
-                this.buttonList.add(new GuiButton(6, guiLeft + 90, guiTop + 166, 18, 18, ""));
-                //this.buttonList.add(new GuiButton(5, guiLeft + 162, guiTop + 166, 18, 18, ""));
+            //train specific
+            if (transport instanceof EntityTrainCore) {
+                if (player.capabilities.isCreativeMode) {
+                    this.buttonList.add(new GuiButton(7, guiLeft + 184, guiTop + 166, 18, 18, ""));
+                }
+                if (transport.getType() != TrainsInMotion.transportTypes.STEAM) {
+                    this.buttonList.add(new GuiButton(6, guiLeft + 202, guiTop + 166, 18, 18, ""));
+                }
+                this.buttonList.add(new GuiButton(0, guiLeft + 220, guiTop + 166, 18, 18, ""));
+                this.buttonList.add(new GuiButton(1, guiLeft + 238, guiTop + 166, 18, 18, ""));
+                this.buttonList.add(new GuiButton(4, guiLeft + 256, guiTop + 166, 18, 18, ""));
+
             }
         }
     }
@@ -258,37 +274,47 @@ public class GUITransport extends GuiContainer {
 
         //bind the inventory image which we use the slot images and inventory image from.
         mc.getTextureManager().bindTexture(vanillaInventory);
-        //icon for fuel
-        drawTexturedRect(guiLeft*2-13, guiTop + 11, 54, 51, 18, 18, 20, 20);
+        //icon for furnace fuel
+        drawTexturedRect(guiLeft+112, guiTop + 1, 54, 51, 18, 18, 20, 20);
         //icon for furnace
-        drawTexturedRect(guiLeft*2-13, guiTop + 11, 54, 51, 18, 18, 20, 20);
+        drawTexturedRect(guiLeft+112, guiTop + 1, 54, 51, 18, 18, 20, 20);
 
         //slot for fuel
-        drawTexturedRect(guiLeft*2-13, guiTop + 40, 54, 51, 18, 18, 20, 20);
+        drawTexturedRect(guiLeft+112, guiTop + 30, 54, 51, 18, 18, 20, 20);
         //slot for water
-        drawTexturedRect(guiLeft*2+22, guiTop + 40, 54, 51, 18, 18, 20, 20);
+        drawTexturedRect(guiLeft+148, guiTop + 30, 54, 51, 18, 18, 20, 20);
 
         //draw the player inventory and toolbar background.
-        drawTexturedRect(guiLeft*2-20, guiTop+ 78, 0, 78, 176, 176);
-        drawTexturedRect(guiLeft*2-20, guiTop+ 74, 0, 0, 176, 6);
+        drawTexturedRect(guiLeft+105, guiTop+ 74, 0, 74, 176, 100);
+        drawTexturedRect(guiLeft+105, guiTop+ 68, 0, 0, 176, 6);
+
+        int yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
+        mc.getTextureManager().bindTexture(vanillaChest);
+        drawTexturedRect(guiLeft-105, guiTop-37+yCenter, 0, 0, this.xSize, 17);//top
+        for(int i=0; i<transport.getInventorySize().getRow(); i++){
+            drawTexturedRect(guiLeft-105, i*18+ (guiTop-20)+yCenter, 0, 17, this.xSize, 18);
+        }
+        drawTexturedRect(guiLeft-105,(transport.getInventorySize().getRow())*18+ (guiTop-20)+yCenter, 0, 215, this.xSize, 8);//bottom
+
+
 
         //draw the tanks
         mc.getTextureManager().bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
         //liquid fuel tank
-        drawTexturedRect(guiLeft*2 + 80, guiTop - 4, 0, 0, 18, 64, 16, 16);
+        drawTexturedRect(guiLeft + 210, guiTop - 14, 0, 0, 18, 64, 16, 16);
         if (transport.getTankAmount()>0) {
             //draw the water tank
             int liquid = Math.abs((transport.getTankAmount() * 64) / transport.getTankCapacity());
-            drawTexturedRect(guiLeft*2+ 80, guiTop + 60 - liquid, 16,0, 18, liquid, 16, 16);
+            drawTexturedRect(guiLeft+ 210, guiTop + 50 - liquid, 16,0, 18, liquid, 16, 16);
         }
         //steam tank
         if (transport.getType() == TrainsInMotion.transportTypes.STEAM || transport.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
-            drawTexturedRect(guiLeft*2 + 50, guiTop-4, 0, 0, 18, 30, 16, 16);
-            drawTexturedRect(guiLeft*2 + 110, guiTop-4, 0, 0, 18, 30, 16, 16);
+            drawTexturedRect(guiLeft + 178, guiTop-14, 0, 0, 18, 30, 16, 16);
+            drawTexturedRect(guiLeft + 240, guiTop-14, 0, 0, 18, 30, 16, 16);
             if (secondTankFluid>0) {
                 int liquid3 = Math.abs((secondTankFluid * 30) / transport.getTankCapacity());
-                drawTexturedRect(guiLeft*2 + 50, guiTop +40 - liquid3, 32,0, 18, liquid3, 16, 16);
-                drawTexturedRect(guiLeft*2 + 110, guiTop +40 - liquid3, 32,0, 18, liquid3, 16, 16);
+                drawTexturedRect(guiLeft+178, guiTop +50 - liquid3, 32,0, 18, liquid3, 16, 16);
+                drawTexturedRect(guiLeft+240, guiTop +50 - liquid3, 32,0, 18, liquid3, 16, 16);
             }
         }
     }
@@ -334,17 +360,18 @@ public class GUITransport extends GuiContainer {
         mc.getTextureManager().bindTexture(vanillaChest);
         //draw the player inventory and toolbar background.
         if (transport.getInventorySize().getRow()<6){
-            drawTexturedRect(guiLeft, guiTop*2+40-(transport.getInventorySize().getRow()*18)-17, 0, 0, this.xSize, transport.getInventorySize().getRow() * 18 + 17);
-            drawTexturedRect(guiLeft,  guiTop*2+40, 0, 126, this.xSize, 96);
+            drawTexturedRect(guiLeft, guiTop+77-(transport.getInventorySize().getRow()*18)-17, 0, 0, this.xSize, transport.getInventorySize().getRow() * 18 + 17);
+            drawTexturedRect(guiLeft,  guiTop+77, 0, 126, this.xSize, 96);
         } else {
-            drawTexturedRect(20, 0, 0, 0, this.xSize, 17);//top
-            for(int i=0; i<(transport.getInventorySize().getRow()*18); i++){
-                drawTexturedRect(20, i*18+17, 0, 17, this.xSize, 18);
+            int yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
+            drawTexturedRect(guiLeft-105, guiTop-37+yCenter, 0, 0, this.xSize, 17);//top
+            for(int i=0; i<transport.getInventorySize().getRow(); i++){
+                drawTexturedRect(guiLeft-105, i*18+ (guiTop-20)+yCenter, 0, 17, this.xSize, 18);
             }
-            drawTexturedRect(20,(transport.getInventorySize().getRow()*18)*18+17, 0, 215, this.xSize, 8);//bottom
+            drawTexturedRect(guiLeft-105,(transport.getInventorySize().getRow())*18+ (guiTop-20)+yCenter, 0, 215, this.xSize, 8);//bottom
 
-            drawTexturedRect(guiLeft*2-20, 0, 0, 0, this.xSize,  16);//top
-            drawTexturedRect(guiLeft*2-20,   4, 0, 126, this.xSize, 96);//actual inventory
+            drawTexturedRect(guiLeft+105, guiTop+64, 0, 0, this.xSize,  16);//top
+            drawTexturedRect(guiLeft+105,   guiTop+70, 0, 126, this.xSize, 96);//actual inventory
         }
     }
 

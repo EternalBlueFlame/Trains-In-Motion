@@ -78,31 +78,31 @@ public class TrainsInMotion {
      /**define the transport types*/
     public enum transportTypes {
         STEAM,DIESEL,HYDROGEN_DIESEL,ELECTRIC,NUCLEAR_STEAM,NUCLEAR_ELECTRIC,MAGLEV, //trains
-        PASSENGER, FREIGHT, HOPPER, TANKER, WORKCAR, //generic rollingstock
-        LOGCAR, RAILCAR, FREEZERCAR, LAVATANKER, GRAINHOPPER, COALHOPPER, //specific cargo rollingstock
-        TENDER, JUKEBOX, TRACKBUILDER; //specialized Rollingstock
+        PASSENGER, FREIGHT, HOPPER, TANKER, WORKCAR, SLUG, B_UNIT, //generic rollingstock
+        LOGCAR, RAILCAR, FREEZERCAR, LAVATANKER, GRAINHOPPER, COALHOPPER, OILCAR, //specific cargo rollingstock
+        FUELTANKER, TENDER, ELECTRIC_TENDER, JUKEBOX, TRACKBUILDER; //specialized Rollingstock
 
          public boolean isTrain(){
              return this == STEAM || this == DIESEL || this == HYDROGEN_DIESEL || this == ELECTRIC ||
-                     this == NUCLEAR_STEAM || this == NUCLEAR_ELECTRIC || this == MAGLEV;
+                     this == NUCLEAR_STEAM || this == NUCLEAR_ELECTRIC || this == MAGLEV || this == B_UNIT;
+         }
+         public boolean isHopper(){
+             return this == HOPPER || this == GRAINHOPPER || this == COALHOPPER;
+         }
+         public boolean isTanker(){
+             return this == TANKER || this == LAVATANKER || this == OILCAR || this == FUELTANKER;
          }
     }
     /**define the inventory size values, this lets us get values to define rows and columns rather than just overall size.*/
-    public enum inventorySizes{NULL(0,0),
-        TWOxTWO(2,2), TWOxTHREE(3,2), THREExTHREE(3,3), THREExFOUR(4,3), FOURxFOUR(4,4), FOURxFIVE(5,4), FIVExFIVE(5,5), FIVExSIX(6,5), SIXxSIX(6,6),
-        FREIGHT_ONExNINE(1,9), FREIGHT_TWOxNINE(2,9), FREIGHT_THREExNINE(3,9), FREIGHT_FOURxNINE(4,9), FREIGHT_FIVExNINE(5,9), FREIGHT_SIXxNINE(6,9)
-        , FREIGHT_SEVENxNINE(7,9), FREIGHT_EIGHTxNINE(8,9), FREIGHT_NINExNINE(9,9), FREIGHT_TENxNINE(10,9), FREIGHT_ELEVENxNINE(11,9);
+    public enum inventorySizes{NULL(0), CRAFTING(1),
+        FREIGHT_ONE(1), FREIGHT_TWO(2), FREIGHT_THREE(3), FREIGHT_FOUR(4), FREIGHT_FIVE(5), FREIGHT_SIX(6),
+        FREIGHT_SEVEN(7), FREIGHT_EIGHT(8), FREIGHT_NINE(9), FREIGHT_TEN(10), FREIGHT_ELEVEN(11);
         private int row;
-        private int column;
-        inventorySizes(int row, int column){
+        inventorySizes(int row){
             this.row = row;
-            this.column = column;
         }
         public int getRow() {
             return row;
-        }
-        public int getColumn() {
-            return column;
         }
     }
     /**defines the type of block, so that way our generic block classes can change the functionality without needing a bunch of different classes.*/
