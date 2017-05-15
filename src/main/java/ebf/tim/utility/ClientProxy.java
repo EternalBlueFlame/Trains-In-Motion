@@ -50,6 +50,8 @@ public class ClientProxy extends CommonProxy {
     public static boolean EnableSmokeAndSteam = true;
     /**whether or not animations should be enabled*/
     public static boolean EnableAnimations = true;
+    /**whether or not to use the 3D rails*/
+    public static boolean Enable3DRails = true;
     /**the keybind for the lamp toggle*/
     public static KeyBinding KeyLamp = new KeyBinding("Lamp Toggle", 38, "Trains in Motion");
     /**the keybind for the horn/whistle*/
@@ -99,6 +101,8 @@ public class ClientProxy extends CommonProxy {
         EnableSmokeAndSteam = config.get(Configuration.CATEGORY_GENERAL, "EnableSmokeAndSteam", true).getBoolean(true);
         config.addCustomCategoryComment("Quality (Client only)", "Animations are calculated by vector positioning and rotation every frame. These shouldn't cause much lag if any, but its client only so if you wanna disable it you can.");
         EnableAnimations = config.get(Configuration.CATEGORY_GENERAL, "EnableAnimations", true).getBoolean(true);
+        config.addCustomCategoryComment("Quality (Client only)", "Overrides the render of vanilla rails to make them use a more detailed 3D render which supports more detailed switches and diagonals.");
+        Enable3DRails = config.get(Configuration.CATEGORY_GENERAL, "Enable3DRails", false).getBoolean(false);
 
         config.addCustomCategoryComment("Keybinds (Client only)", "accepted values can be set from in-game, or defined using the key code values from: http://minecraft.gamepedia.com/Key_codes");
 

@@ -13,7 +13,7 @@ package ebf.tim.models.rollingstock;
 
 import ebf.tim.models.GroupedModelRender;
 import ebf.tim.models.tmt.ModelRendererTurbo;
-import net.minecraft.client.model.ModelBase;
+import ebf.tim.models.tmt.ModelBase;
 import net.minecraft.entity.Entity;
 
 public class VATLogCar extends ModelBase
@@ -31,14 +31,14 @@ public class VATLogCar extends ModelBase
 	{
 		vatlogcarModel = new ModelRendererTurbo[46];
 		vatlogcarModel[0] = new ModelRendererTurbo(this, 1, 1, textureX, textureY); // Box 0
-		vatlogcarModel[1] = new ModelRendererTurbo(this, 129, 1, textureX, textureY); // Box 1
+		vatlogcarModel[1] = new ModelRendererTurbo(this, 129, 2, textureX, textureY); // Box 1
 		vatlogcarModel[2] = new ModelRendererTurbo(this, 1, 1, textureX, textureY); // Box 5
-		vatlogcarModel[3] = new ModelRendererTurbo(this, 248, 2, textureX, textureY); // Box 6
+		vatlogcarModel[3] = new ModelRendererTurbo(this, 248, 1, textureX, textureY); // Box 6
 		vatlogcarModel[4] = new ModelRendererTurbo(this, 113, 1, textureX, textureY); // Box 7
 		vatlogcarModel[5] = new ModelRendererTurbo(this, 121, 1, textureX, textureY); // Box 8
 		vatlogcarModel[6] = new ModelRendererTurbo(this, 129, 1, textureX, textureY); // Box 9
 		vatlogcarModel[7] = new ModelRendererTurbo(this, 137, 1, textureX, textureY); // Box 10
-		vatlogcarModel[8] = new ModelRendererTurbo(this, 239, 2, textureX, textureY); // Box 11
+		vatlogcarModel[8] = new ModelRendererTurbo(this, 239, 1, textureX, textureY); // Box 11
 		vatlogcarModel[9] = new ModelRendererTurbo(this, 9, 1, textureX, textureY); // Box 12
 		vatlogcarModel[10] = new ModelRendererTurbo(this, 1, 25, textureX, textureY); // Box 13
 		vatlogcarModel[11] = new ModelRendererTurbo(this, 49, 25, textureX, textureY); // Box 14

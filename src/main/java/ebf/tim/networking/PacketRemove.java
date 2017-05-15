@@ -3,7 +3,9 @@ package ebf.tim.networking;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.utility.HitboxHandler;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -45,6 +47,11 @@ public class PacketRemove implements IMessage {
             //if the entity was an instance of Generic Rail Transport, then spawn it's item and remove it from world.
             if (entity instanceof GenericRailTransport) {
                 entity.worldObj.spawnEntityInWorld(new EntityItem(entity.worldObj, entity.posX, entity.posY, entity.posZ, new ItemStack(((GenericRailTransport) entity).getItem(),1)));
+                for(HitboxHandler.MultipartHitbox hitbox : ((GenericRailTransport) entity).hitboxHandler.hitboxList) {
+                    context.getServerHandler().playerEntity.worldObj.removeEntity(hitbox);
+                }
+                context.getServerHandler().playerEntity.worldObj.removeEntity(((GenericRailTransport) entity).backBogie);
+                context.getServerHandler().playerEntity.worldObj.removeEntity(((GenericRailTransport) entity).frontBogie);
                 context.getServerHandler().playerEntity.worldObj.removeEntity(entity);
             }
             return null;

@@ -4,12 +4,14 @@ package ebf.tim.registry;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.entities.rollingstock.EntityGTAX13000GallonTanker;
 import ebf.tim.entities.rollingstock.EntityPullmansPalace;
 import ebf.tim.entities.rollingstock.EntityUP3Bay100TonHopper;
 import ebf.tim.entities.rollingstock.EntityVATLogCar;
 import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.bogies.CMDBogie;
+import ebf.tim.models.rollingstock.ModelGATX1300GallonTanker;
 import ebf.tim.models.rollingstock.PullmansPalace;
 import ebf.tim.models.rollingstock.UP3Bay100TonHopper;
 import ebf.tim.models.rollingstock.VATLogCar;
@@ -26,7 +28,7 @@ import net.minecraft.util.ResourceLocation;
  * @author Eternal Blue Flame
  */
 public class TransportRegistry {
-    /**
+    /*
      * <h2>registry Constructor</h2>
      * because we define our own variable type for registering trains and rollingstock unlike the other registries, we have to define that and the variables here.
      * This all can mostly be ignored unless we're modifying how we registry trains.
@@ -54,6 +56,9 @@ public class TransportRegistry {
         this.recipe = recipe;
     }
 
+    /**returns a CMD Bogie with the default texture, just to simplify some code*/
+    private static Bogie GenericCMDBogie(){return new Bogie(URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("CMDBogie.png "), new CMDBogie());}
+
     /**
      * <h2>Train register function</h2>
      * called by the main class to register the trains and rollingstock
@@ -67,7 +72,7 @@ public class TransportRegistry {
 
         switch (index){
 
-            /**
+            /*
              * <h3>Train registry entries</h3>
              */
 
@@ -82,41 +87,69 @@ public class TransportRegistry {
                     //the bogies for the entity (The V.A.T Log Car is a better example of this)
                     new Bogie[]{},
                     //the recipe to craft the item
-                    new Item[]{Items.coal,null,null,null,null,null,null,null,null,null}
+                    new Item[]{
+                            Items.coal,null,null,
+                            null,null,null,
+                            null,null,null}
             );}
 
-            /**
+            /*
              * <h3>Passenger Rollingstock registry entries</h3>
              */
 
             //pullman's palace
             case 1:{return new TransportRegistry(EntityPullmansPalace.class, EntityPullmansPalace.thisItem,
-                    new PullmansPalace(), URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png"),
+                    new PullmansPalace(), URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png"),
                     new Bogie[]{},
-                    new Item[]{Items.sugar,null,null,null,null,null,null,null,null,null}
+                    new Item[]{
+                    Items.sugar,null,null,
+                            null,null,null,
+                            null,null,null}
             );}
 
-            /**
+            /*
              * <h3>Freight Rollingstock registry entries</h3>
              */
 
             //V.A.T Log Car
             case 2:{return new TransportRegistry(EntityVATLogCar.class, EntityVATLogCar.thisItem,
-                    new VATLogCar(), URIRegistry.TEXTURE_GENERIC.getResource("null.png"),
-                    new Bogie[]{new Bogie(URIRegistry.TEXTURE_GENERIC.getResource("null.png"), new CMDBogie()), new Bogie(URIRegistry.TEXTURE_GENERIC.getResource("null.png"), new CMDBogie())},
-                    new Item[]{Items.apple,null,null,null,null,null,null,null,null,null}
+                    new VATLogCar(), URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("VATLogCar.png"),
+                    new Bogie[]{GenericCMDBogie(), GenericCMDBogie()},
+                    new Item[]{
+                    Items.apple,null,null,
+                            null,null,null,
+                            null,null,null}
             );}
 
-            /**
+            /*
              * <h3>Hopper Rollingstock registry entries</h3>
              */
 
             //Union Pacific 3 Bay 100 Ton Hopper Car.
             case 3:{return new TransportRegistry(EntityUP3Bay100TonHopper.class, EntityUP3Bay100TonHopper.thisItem,
-                    new UP3Bay100TonHopper(), URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png"),
-                    new Bogie[]{new Bogie(URIRegistry.TEXTURE_GENERIC.getResource("null.png"), new CMDBogie()), new Bogie(URIRegistry.TEXTURE_GENERIC.getResource("null.png"), new CMDBogie())},
-                    new Item[]{Items.bucket,null,null,null,null,null,null,null,null,null}
+                    new UP3Bay100TonHopper(), URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("UP3Bay100-TonOpenHopper.png"),
+                    new Bogie[]{GenericCMDBogie(), GenericCMDBogie()},
+                    new Item[]{
+                    Items.bucket,null,null,
+                            null,null,null,
+                            null,null,null}
             );}
+
+
+            /*
+             * <h3>Tanker Rollingstock registry entries</h3>
+             */
+
+            //GATX 13000 Gallon Tanker
+            case 4:{return new TransportRegistry(EntityGTAX13000GallonTanker.class, EntityGTAX13000GallonTanker.thisItem,
+                    new ModelGATX1300GallonTanker(), URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("GATX13000GallonTanker.png"),
+                    new Bogie[]{GenericCMDBogie(), GenericCMDBogie()},
+                    new Item[]{
+                    Items.bucket,null,null,
+                            null,null,null,
+                            null,null,null}
+            );}
+
 
 
             //return null, end of list.
@@ -126,7 +159,5 @@ public class TransportRegistry {
         }
 
     }
-
-
 
 }

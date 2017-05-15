@@ -329,8 +329,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //key.readFromNBT(tag);
         //load tanks
         if (getTankCapacity() >0) {
-            fluidTank = FluidStack.loadFluidStackFromNBT(tag);
-            if (fluidTank ==new FluidStack(FluidRegistry.WATER,0)){
+            if(tag.hasKey("FluidName")) {
+                fluidTank = FluidStack.loadFluidStackFromNBT(tag);
+            } else {
                 fluidTank = null;
             }
         }
@@ -353,6 +354,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
 
         updateWatchers = true;
+
+
+        hitboxHandler = new HitboxHandler();
 
     }
     /**saves the entity to server world*/
@@ -384,8 +388,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (getTankCapacity() >0){
             if (fluidTank != null) {
                 fluidTank.writeToNBT(tag);
-            } else {
-                new FluidStack(FluidRegistry.WATER, 0);
             }
         }
         if (getInventorySize() != TrainsInMotion.inventorySizes.NULL && items.size()>0) {
@@ -441,7 +443,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //be sure bogies exist
 
         //always be sure the bogies exist on client and server.
-        if (!worldObj.isRemote && (frontBogie == null || backBogie == null)) {
+        if (!worldObj.isRemote && (frontBogie == null || backBogie == null || ticksExisted ==0)) {
             //spawn frontLinkedTransport bogie
             vectorCache[1][0] = getLengthFromCenter();
             vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);

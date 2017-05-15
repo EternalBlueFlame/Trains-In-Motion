@@ -45,6 +45,8 @@ public class GUITransport extends GuiContainer {
     private int secondTankFluid;
     /**the amount to scale the GUI by, same as vanilla*/
     private static final float guiScaler = 0.00390625F;
+    /**the center position for the inventory render*/
+    private int yCenter=0;
 
     /**
      * <h2>GUI initialization</h2>
@@ -61,13 +63,15 @@ public class GUITransport extends GuiContainer {
 
     @Override
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
-        int yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
+        //draw the text for trains
         if (transport instanceof EntityTrainCore) {
             fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 4210752);
             fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 110, 72, 4210752);
+            //draw the text for transports with large inventories
         } else if (transport.getType() != PASSENGER && transport.getInventorySize().getRow()>5) {
             fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 4210752);
             fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 110, 70, 4210752);
+            //draw the text for everything but the passenger car
         } else if (transport.getType() != PASSENGER){
             fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), 8, 66-(transport.getInventorySize().getRow()*18), 4210752);
             fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 8, 80, 4210752);
@@ -211,10 +215,11 @@ public class GUITransport extends GuiContainer {
     @Override
     public void initGui() {
         super.initGui();
+        yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
         if (!(transport instanceof EntityTrainCore) && transport.getInventorySize().getRow()<6) {
             //generic to all
             if (player.getEntityId() == transport.getOwnerID()) {
-                this.buttonList.add(new GuiButton(8, guiLeft+8, guiTop + 174, 18, 18, ""));
+                this.buttonList.add(new GuiButton(8, guiLeft + 8, guiTop + 174, 18, 18, ""));
                 this.buttonList.add(new GuiButton(9, guiLeft + 62, guiTop + 174, 18, 18, ""));
             }
             this.buttonList.add(new GuiButton(2, guiLeft + 26, guiTop + 174, 18, 18, ""));
@@ -324,7 +329,6 @@ public class GUITransport extends GuiContainer {
         drawTexturedRect(guiLeft+105, guiTop+ 74, 0, 74, 176, 100);
         drawTexturedRect(guiLeft+105, guiTop+ 68, 0, 0, 176, 6);
 
-        int yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
         mc.getTextureManager().bindTexture(vanillaChest);
         drawTexturedRect(guiLeft-105, guiTop-37+yCenter, 0, 0, this.xSize, 17);//top
         for(int i=0; i<transport.getInventorySize().getRow(); i++){
@@ -399,7 +403,6 @@ public class GUITransport extends GuiContainer {
             drawTexturedRect(guiLeft, guiTop+77-(transport.getInventorySize().getRow()*18)-17, 0, 0, this.xSize, transport.getInventorySize().getRow() * 18 + 17);
             drawTexturedRect(guiLeft,  guiTop+77, 0, 126, this.xSize, 96);
         } else {
-            int yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
             drawTexturedRect(guiLeft-105, guiTop-37+yCenter, 0, 0, this.xSize, 17);//top
             for(int i=0; i<transport.getInventorySize().getRow(); i++){
                 drawTexturedRect(guiLeft-105, i*18+ (guiTop-20)+yCenter, 0, 17, this.xSize, 18);

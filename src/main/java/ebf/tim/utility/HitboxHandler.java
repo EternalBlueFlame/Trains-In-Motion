@@ -92,7 +92,7 @@ public class HitboxHandler {
         //Be sure the transport has hitboxes
         for (int iteration =0; iteration<transport.getHitboxPositions().length; iteration++) {
             double[] position = RailUtility.rotatePoint(new double[]{transport.getHitboxPositions()[iteration], 0, 0}, transport.rotationPitch, transport.rotationYaw, 0);
-            if (hitboxList.size() <= iteration) {
+            if (hitboxList.size() <= iteration || transport.ticksExisted ==0) {
                 hitboxList.add(new MultipartHitbox(transport, transport, position[0] + transport.posX, position[1] + transport.posY, position[2] + transport.posZ));
                 transport.worldObj.spawnEntityInWorld(hitboxList.get(iteration));
             } else {

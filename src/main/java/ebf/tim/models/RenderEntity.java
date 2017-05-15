@@ -5,7 +5,6 @@ import ebf.tim.models.tmt.ModelRendererTurbo;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
@@ -53,6 +52,9 @@ public class RenderEntity extends Render {
     private float wheelPitch=0;
 
     private ResourceLocation boundTexture;
+
+    private static final float vanillaRailOffset = 0.34f;
+    private static final float railOffset3D = 0.5f;
 
     /**
      * <h3>class constructor</h3>
@@ -150,7 +152,7 @@ public class RenderEntity extends Render {
     public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw){
         GL11.glPushMatrix();
         //set the render position
-        GL11.glTranslated(x, y+0.275, z);
+        GL11.glTranslated(x, y+ (ClientProxy.Enable3DRails? railOffset3D :vanillaRailOffset) + (entity.getRenderScale()-0.0625f)*10, z);
         //rotate the model.
         GL11.glRotatef(-yaw, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(entity.rotationPitch-180f, 1.0f, 0.0f, 0.0f);
@@ -187,8 +189,8 @@ public class RenderEntity extends Render {
         boundTexture = null;
         bindTexture(texture);
         for(Object cube : model.boxList){
-            if (cube instanceof ModelRenderer && !(GroupedModelRender.canAdd((ModelRendererTurbo) cube))) {
-                ((ModelRenderer)cube).render(entity.getRenderScale());
+            if (cube instanceof ModelRendererTurbo && !(GroupedModelRender.canAdd((ModelRendererTurbo) cube))) {
+                ((ModelRendererTurbo)cube).render(entity.getRenderScale());
             }
         }
 
@@ -219,8 +221,9 @@ public class RenderEntity extends Render {
                     bindTexture(bogieRenders[i].bogieTexture);
                     GL11.glPushMatrix();
                     //set the offset
-                    animationCache[6][0]=entity.getRenderBogieOffsets().get(i);
-                    animationCache[7] = RailUtility.rotatePoint(new double[]{entity.getRenderBogieOffsets().get(i),0.275,0}, entity.rotationPitch, entity.rotationYaw,0);
+                    animationCache[6][0]=entity.getRenderBogieOffsets().get(i) + Math.copySign((entity.getRenderScale()-0.0625f)*26, entity.getRenderBogieOffsets().get(i));
+                    animationCache[6][1] = (ClientProxy.Enable3DRails? railOffset3D :vanillaRailOffset);
+                    animationCache[7] = RailUtility.rotatePoint(animationCache[6], entity.rotationPitch, entity.rotationYaw,0);
                     GL11.glTranslated(animationCache[7][0]+x,animationCache[7][1]+y, animationCache[7][2]+z);
                     bogieRenders[i].setPositionAndRotation(animationCache[5], entity);
                     //set the rotation
@@ -229,7 +232,7 @@ public class RenderEntity extends Render {
                     //render the geometry
                     for (Object modelBogiePart : bogieRenders[i].bogieModel.boxList) {
                         if (modelBogiePart instanceof ModelRendererTurbo) {
-                            ((ModelRendererTurbo) modelBogiePart).render(entity.getRenderScale());
+                            ((ModelRendererTurbo) modelBogiePart).render(0.065f);
                         }
                     }
                     GL11.glPopMatrix();
