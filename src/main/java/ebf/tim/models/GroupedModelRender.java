@@ -1,6 +1,8 @@
 package ebf.tim.models;
 
+import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.tmt.ModelRendererTurbo;
+import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
@@ -32,9 +34,15 @@ public class GroupedModelRender {
      * EXAMPLE: (tagRenderModelCargo + "myblock5") and (tagRenderModelCargo + "myblock2")
      * what is shown in the example will be two separate groups, each representing half the inventory, with 5 actually being the first because it was defined first.*/
     public static final String tagRenderModelCargo = "rendercrate";
+    /**tag for geometry that scales the Y size to represent inventory use. Renders using the block texture.*/
+    public static final String tagBlockScaleInventory = "scaleblockinventory";
+    /**tag for geometry that scales the Y size to represent inventory use. renders using the model's texture.*/
+    public static final String tagScaleInventory = "scaleinventory";
 
     /**if it should be rendered as a normal block from the inventory, similar to enderman, or part of the model*/
     private boolean isBlock;
+    /**if it should be rendered as a normal block from the inventory, similar to enderman, or part of the model*/
+    private boolean isScaled;
     /**a reference to the geometry we will modify in this sub-class*/
     private List<ModelRendererTurbo> boxRefrence = new ArrayList<ModelRendererTurbo>();
 
@@ -44,9 +52,10 @@ public class GroupedModelRender {
      * @param block if the geometry scale should be used to render a block rather than the actual geometry
      * @return returns this instance of GroupedModelRender
      */
-    public GroupedModelRender add(ModelRendererTurbo boxToRender, boolean block){
+    public GroupedModelRender add(ModelRendererTurbo boxToRender, boolean block, boolean scaled){
         boxRefrence.add(boxToRender);
         isBlock = block;
+        isScaled = scaled;
         return this;
     }
 
@@ -56,7 +65,8 @@ public class GroupedModelRender {
      * @return if the box refrence can be added
      */
     public static boolean canAdd(ModelRendererTurbo modelReference){
-        return (modelReference.boxName.contains(tagRenderModelCargo) || modelReference.boxName.contains(tagRenderBlockCargo));
+        return ClientProxy.EnableAnimations && (modelReference.boxName.contains(tagRenderModelCargo) || modelReference.boxName.contains(tagRenderBlockCargo) ||  modelReference.boxName.contains(tagScaleInventory)
+        ||  modelReference.boxName.contains(tagBlockScaleInventory));
     }
 
     /**
@@ -65,7 +75,16 @@ public class GroupedModelRender {
      * @return if the box is supposed to be rendered as a block or as part of the model.
      */
     public static boolean isBlock(ModelRendererTurbo modelReference){
-        return (modelReference.boxName.contains(tagRenderBlockCargo) || modelReference.boxName.contains(tagRenderBlockCargo));
+        return (modelReference.boxName.contains(tagRenderBlockCargo) || modelReference.boxName.contains(tagBlockScaleInventory));
+    }
+
+    /**
+     * to add more allowed types extend this function and add more circumstances before calling super.
+     * @param modelReference the geometry to check
+     * @return if the box is supposed to be scaled with the percentage of inventory used.
+     */
+    public static boolean isScaled(ModelRendererTurbo modelReference){
+        return (modelReference.boxName.contains(tagScaleInventory) || modelReference.boxName.contains(tagBlockScaleInventory));
     }
 
     /**
@@ -76,8 +95,17 @@ public class GroupedModelRender {
      * @param render the render class used for binding the texture.
      * @param entityRenderScale the scale to render at.
      */
-    public void doRender(RenderBlocks field_147909_c, ItemStack blockStack, RenderEntity render, float entityRenderScale){
+    public void doRender(RenderBlocks field_147909_c, ItemStack blockStack, RenderEntity render, float entityRenderScale, GenericRailTransport transport){
         if (isBlock) {
+            GL11.glPushMatrix();
+            if(isScaled){
+                float yScale = transport.calculatePercentageUsed(100)*0.01f;
+                if (yScale == 0) {
+                    GL11.glPopMatrix();
+                    return;
+                }
+                GL11.glScaled(1,transport.calculatePercentageUsed(100)*0.01f,1);
+            }
             //render a block in place of the geometry.
             // bind the texture
             render.bindTexture(TextureMap.locationBlocksTexture);
@@ -97,6 +125,7 @@ public class GroupedModelRender {
                 field_147909_c.renderBlockAsItem( Block.getBlockFromItem(blockStack.getItem()), blockStack.getItemDamage(), 1.0f);
                 GL11.glPopMatrix();
             }
+            GL11.glPopMatrix();
         } else {
             //render the geometry normally if it's not a block.
             render.bindTexture(render.getEntityTexture(null));

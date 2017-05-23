@@ -6,17 +6,17 @@ import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.gui.GUITransport;
 import ebf.tim.gui.GUITrainTable;
+import ebf.tim.gui.GUITransport;
 import ebf.tim.gui.HUDTrain;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
 import ebf.tim.registry.GenericRegistry;
 import ebf.tim.registry.TransportRegistry;
-import ebf.tim.blocks.TileEntityStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.settings.KeyBinding;
@@ -39,7 +39,7 @@ import java.util.List;
 public class ClientProxy extends CommonProxy {
     public static List<GenericRailTransport> carts = new ArrayList<GenericRailTransport>();
 
-    /**
+    /*
      * <h3>keybinds</h3>
      * Initialize the default values for keybinds.
      * Default values courtesy of Ferdinand

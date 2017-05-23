@@ -85,6 +85,10 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
     /**writes to NBT but this entity isn't persistent, so, don't,*/
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {}
+    @Override
+    public boolean writeToNBTOptional(NBTTagCompound tagCompound){return false;}
+    @Override
+    public boolean writeMountToNBT(NBTTagCompound tagCompound){return false;}
 
 
     /**
@@ -105,6 +109,14 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
             worldObj.removeEntity(this);
         }
     }
+
+    @Override
+    public void updateRiderPosition() {
+        if (this.riddenByEntity != null) {
+            this.riddenByEntity.setPosition(this.posX, this.posY, this.posZ);
+        }
+    }
+
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         buffer.writeInt(parentId);

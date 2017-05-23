@@ -17,6 +17,7 @@ import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -130,6 +131,16 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     public boolean canBeCollidedWith() {
         return false;
     }
+    /**disables reading from NBT*/
+    @Override
+    public void readFromNBT(NBTTagCompound tag){}
+    /**disables writing to NBT, which kills the entity on game end.*/
+    @Override
+    public void writeToNBT(NBTTagCompound tag){}
+    @Override
+    public boolean writeToNBTOptional(NBTTagCompound tagCompound){return false;}
+    @Override
+    public boolean writeMountToNBT(NBTTagCompound tagCompound){return false;}
 
     /**
      * <h2> movement management</h2>

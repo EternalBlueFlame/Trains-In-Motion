@@ -23,7 +23,8 @@ import java.util.*;
  * polygons.
  * @author GaryCXJk
  * @license http://fexcraft.net/license?id=tmt
- *
+ * <br /><br />
+ * This version of TMT has been modified by Eternal Blue Flame and does not reflect the quality or features of the original version.
  */
 public class ModelRendererTurbo extends ModelRenderer {
 	public ModelRendererTurbo(ModelBase modelbase, String s) {
@@ -1649,19 +1650,19 @@ public class ModelRendererTurbo extends ModelRenderer {
             compileLegacyDisplayList(worldScale);
         } else {
     		Collection<TextureGroup> textures = textureGroup.values();
-    		
+
     		Iterator<TextureGroup> itr = textures.iterator();
     		displayListArray = new int[textureGroup.size()];
     		for(int i = 0; itr.hasNext(); i++) {
     			displayListArray[i] = GLAllocation.generateDisplayLists(1);
     			GL11.glNewList(displayListArray[i], 4864);
     			Tessellator tessellator = Tessellator.getInstance();
-    			
+
     			TextureGroup usedGroup = itr.next();
     			for(int j = 0; j < usedGroup.poly.size(); j++) {
     				usedGroup.poly.get(j).draw(tessellator, worldScale);
     			}
-    			
+
     			GL11.glEndList();
     		}
     	}

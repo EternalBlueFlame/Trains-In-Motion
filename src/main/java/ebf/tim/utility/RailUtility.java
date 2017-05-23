@@ -6,10 +6,14 @@ import ebf.tim.entities.GenericRailTransport;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.oredict.OreDictionary;
 import zoranodensha.api.structures.tracks.ITrackBase;
+
+import java.util.LinkedList;
 
 /**
  * <h1>utilities</h1>
@@ -152,5 +156,49 @@ public class RailUtility {
         return false;
     }
 
+
+    /*
+     *<h2> Ore Dictionary</h2>
+     * we use HashMaps to collect ore directory data because even though it takes longer to collect the data, it's far more efficient to see if an entry exists than a list.
+     * TODO: maybe have a post-init function to collect the ore directory data?
+     */
+
+
+    private static LinkedList<String> OREDICT_PLANK = null;
+    private static LinkedList<String> OREDICT_LOG = null;
+    private static LinkedList<String> OREDICT_COAL = null;
+
+    public static boolean isLog(ItemStack i){
+        if (OREDICT_LOG == null){
+            OREDICT_LOG = new LinkedList<>();
+            for (ItemStack item: OreDictionary.getOres("logWood")) {
+                OREDICT_LOG.add(i.getUnlocalizedName());
+            }
+        }
+        return OREDICT_LOG.contains(i.getUnlocalizedName());
+    }
+
+    public static boolean isPlank(ItemStack i){
+        if (OREDICT_PLANK == null){
+            OREDICT_PLANK = new LinkedList<>();
+            for (ItemStack item: OreDictionary.getOres("plankWood")) {
+                OREDICT_PLANK.add(i.getUnlocalizedName());
+            }
+            for (ItemStack item: OreDictionary.getOres("slabWood")) {
+                OREDICT_PLANK.add(i.getUnlocalizedName());
+            }
+        }
+        return OREDICT_PLANK.contains(i.getUnlocalizedName());
+    }
+
+    public static boolean isCoal(ItemStack i){
+        if (OREDICT_COAL == null){
+            OREDICT_COAL = new LinkedList<>();
+            for (ItemStack item: OreDictionary.getOres("coal")) {
+                OREDICT_COAL.add(i.getUnlocalizedName());
+            }
+        }
+        return OREDICT_COAL.contains(i.getUnlocalizedName());
+    }
 
 }

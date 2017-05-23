@@ -1,6 +1,5 @@
 package ebf.tim.models;
 
-import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.tmt.Tessellator;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
@@ -174,45 +173,46 @@ public class ParticleFX {
         GL11.glPushMatrix();
         //disabling texturing of GL will do some weird stuff.
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        Tessellator.getInstance().startDrawingQuads();
+        Tessellator tessellator = Tessellator.getInstance();
+        tessellator.startDrawingQuads();
         //set the color with the tint.
         GL11.glColor3f((((entity.color >> 16 & 0xFF)/255.0F) - entity.colorTint),
                 (((entity.color >> 8 & 0xFF)/255.0F) - entity.colorTint),
                 (((entity.color & 0xFF)/255.0F) - entity.colorTint));
         //set the position
-        Tessellator.getInstance().setTranslation(posX - entity.posX, posY - entity.posY, posZ - entity.posZ);
+        tessellator.setTranslation(posX - entity.posX, posY - entity.posY, posZ - entity.posZ);
         //now actually render the sides.
-        Tessellator.getInstance().setNormal(0, 0, -1);
-        Tessellator.getInstance().addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.minZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.maxX, entity.boundingBox.maxY, entity.boundingBox.minZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.minZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.minX, entity.boundingBox.minY, entity.boundingBox.minZ);
-        Tessellator.getInstance().setNormal(0, 0, 1);
-        Tessellator.getInstance().addVertex(entity.boundingBox.minX, entity.boundingBox.minY, entity.boundingBox.maxZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.maxZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.maxX, entity.boundingBox.maxY, entity.boundingBox.maxZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.maxZ);
-        Tessellator.getInstance().setNormal(0, -1, 0);
-        Tessellator.getInstance().addVertex(entity.boundingBox.minX, entity.boundingBox.minY, entity.boundingBox.minZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.minZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.maxZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.minX, entity.boundingBox.minY, entity.boundingBox.maxZ);
-        Tessellator.getInstance().setNormal(0, 1, 0);
-        Tessellator.getInstance().addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.maxZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.maxX, entity.boundingBox.maxY, entity.boundingBox.maxZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.maxX, entity.boundingBox.maxY, entity.boundingBox.minZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.minZ);
-        Tessellator.getInstance().setNormal(-1, 0, 0);
-        Tessellator.getInstance().addVertex(entity.boundingBox.minX, entity.boundingBox.minY, entity.boundingBox.maxZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.maxZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.minZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.minX, entity.boundingBox.minY, entity.boundingBox.minZ);
-        Tessellator.getInstance().setNormal(1, 0, 0);
-        Tessellator.getInstance().addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.minZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.maxX, entity.boundingBox.maxY, entity.boundingBox.minZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.maxX, entity.boundingBox.maxY, entity.boundingBox.maxZ);
-        Tessellator.getInstance().addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.maxZ);
-        Tessellator.getInstance().draw();
+        tessellator.setNormal(0, 0, -1);
+        tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.minZ);
+        tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.maxY, entity.boundingBox.minZ);
+        tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.minZ);
+        tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.minY, entity.boundingBox.minZ);
+        tessellator.setNormal(0, 0, 1);
+        tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.minY, entity.boundingBox.maxZ);
+        tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.maxZ);
+        tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.maxY, entity.boundingBox.maxZ);
+        tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.maxZ);
+        tessellator.setNormal(0, -1, 0);
+        tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.minY, entity.boundingBox.minZ);
+        tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.minZ);
+        tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.maxZ);
+        tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.minY, entity.boundingBox.maxZ);
+        tessellator.setNormal(0, 1, 0);
+        tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.maxZ);
+        tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.maxY, entity.boundingBox.maxZ);
+        tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.maxY, entity.boundingBox.minZ);
+        tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.minZ);
+        tessellator.setNormal(-1, 0, 0);
+        tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.minY, entity.boundingBox.maxZ);
+        tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.maxZ);
+        tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.minZ);
+        tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.minY, entity.boundingBox.minZ);
+        tessellator.setNormal(1, 0, 0);
+        tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.minZ);
+        tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.maxY, entity.boundingBox.minZ);
+        tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.maxY, entity.boundingBox.maxZ);
+        tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.maxZ);
+        tessellator.draw();
         //before we end this be sure to re-enabling texturing for other things.
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glPopMatrix();

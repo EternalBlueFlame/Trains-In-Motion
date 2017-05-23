@@ -195,6 +195,15 @@ public class EntityBrigadelok080 extends EntityTrainCore {
     }
 
     /**
+     * <h2>fuel management</h2>
+     * defines how the transport manages fuel, both in consuming items, and in managing the fuel.
+     */
+    @Override
+    public void manageFuel(){
+        fuelHandler.manageSteam(this);
+    }
+
+    /**
      * <h2>pre-assigned values</h2>
      * These return values are defined from the top of the class.
      * These should only need modification for advanced users, and even that's a stretch.

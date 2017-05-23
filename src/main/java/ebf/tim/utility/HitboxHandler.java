@@ -2,7 +2,6 @@ package ebf.tim.utility;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntityRollingStockCore;
 import ebf.tim.entities.EntityTrainCore;
@@ -12,12 +11,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * <h1>Collision and hitboxes</h1>
@@ -64,11 +65,7 @@ public class HitboxHandler {
         }
         /**checks if this hitbox should still exist or not*/
         @Override
-        public void onUpdate(){
-            if (parent == null){
-                worldObj.removeEntity(this);
-            }
-        }
+        public void onUpdate(){}
         @Override
         public boolean canBeCollidedWith() {
             return true;
@@ -79,6 +76,16 @@ public class HitboxHandler {
         public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
             this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
         }
+        /**disables reading from NBT*/
+        @Override
+        public void readFromNBT(NBTTagCompound tag){}
+        /**disables writing to NBT, which kills the entity on game end.*/
+        @Override
+        public void writeToNBT(NBTTagCompound tag){}
+        @Override
+        public boolean writeToNBTOptional(NBTTagCompound tagCompound){return false;}
+        @Override
+        public boolean writeMountToNBT(NBTTagCompound tagCompound){return false;}
 
     }
 
@@ -100,27 +107,37 @@ public class HitboxHandler {
             }
         }
 
+        //initialize the variables before the loop to save some CPU
+        int k1;
+        int l1;
+        int i2;
+        int l;
+        int i1;
+        int j1;
+        List list;
+        AxisAlignedBB tempBox;
+        double[][] vectorCache = new double[2][3];
 
         //detect collisions with blocks on X, Y, and Z.
         for (MultipartHitbox box : hitboxList){
             //define the values as temporary variables first since it will be faster than flooring the variable every loop check
-            int i = MathHelper.floor_double(box.boundingBox.minX);
-            int j = MathHelper.floor_double(box.boundingBox.minY);
-            int k = MathHelper.floor_double(box.boundingBox.minZ);
-            int l = MathHelper.floor_double(box.boundingBox.maxX);
-            int i1 = MathHelper.floor_double(box.boundingBox.maxY);
-            int j1 = MathHelper.floor_double(box.boundingBox.maxZ);
-            /**
+            k1 = MathHelper.floor_double(box.boundingBox.minX);
+            l1 = MathHelper.floor_double(box.boundingBox.minY);
+            i2 = MathHelper.floor_double(box.boundingBox.minZ);
+            l = MathHelper.floor_double(box.boundingBox.maxX);
+            i1 = MathHelper.floor_double(box.boundingBox.maxY);
+            j1 = MathHelper.floor_double(box.boundingBox.maxZ);
+            /*
              * check if the chunk exists, then loop for X, Y, and Z to check for a rail or an air block.
              * if one isnt found return true to stop the movement.
              * @see GenericRailTransport#onUpdate()
              */
-            if (transport.worldObj.checkChunksExist(i, j, k, l, i1, j1)) {
-                for (int k1 = i; k1 <= l; ++k1) {
-                    for (int l1 = j; l1 <= i1; ++l1) {
-                        for (int i2 = k; i2 <= j1; ++i2) {
+            if (transport.worldObj.checkChunksExist(k1, l1, i2, l, i1, j1)) {
+                for (; k1 <= l; ++k1) {
+                    for (; l1 <= i1; ++l1) {
+                        for (; i2 <= j1; ++i2) {
                             if (!(transport.worldObj.getBlock(k1, l1, i2) instanceof BlockAir) && !RailUtility.isRailBlockAt(transport.worldObj, k1, l1, i2)){
-                                return !(transport.worldObj.getBlock(k1, l1+1, i2) instanceof BlockAir) && !RailUtility.isRailBlockAt(transport.worldObj, k1, l1+1, i2);
+                                return true;
                             }
                         }
                     }
@@ -128,38 +145,55 @@ public class HitboxHandler {
             }
 
 
-            /**
+            /*
              * detect collision with entities.
              * we have to create a temporary bounding box that's larger than the current so we can check just a bit past the current box, this gives collision events a bit more time to react.
              * from there we create a list of entities in the new hitbox, and then loop through them to figure out what happens, we can't use the list directly due to concurrent modifications.
              */
-            AxisAlignedBB tempBox = box.boundingBox.copy().expand(0.35,0,0.35);
-            List list = transport.worldObj.getEntitiesWithinAABBExcludingEntity(transport, tempBox);
+            tempBox = box.boundingBox.copy().expand(0.35,0,0.35);
+            list = transport.worldObj.getEntitiesWithinAABBExcludingEntity(transport, tempBox);
             if (list != null && list.size()>0) {
                 for (Object entity: list) {
                     //if it's a bogie, continue to the next itteration.
                     if (entity instanceof EntityBogie) {
                         continue;
                     }
-                    /**if it's an item, check if we should add it to the inventory, maybe do it, and continue to the next itteration*/
+                    /*if it's an item, check if we should add it to the inventory, maybe do it, and continue to the next itteration*/
                     if (entity instanceof EntityItem){
-                            if((transport.getType() == TrainsInMotion.transportTypes.HOPPER || transport.getType() == TrainsInMotion.transportTypes.COALHOPPER ||
-                            transport.getType() == TrainsInMotion.transportTypes.GRAINHOPPER) &&
+                            if(transport.getType().isHopper() &&
                             transport.isItemValidForSlot(0,((EntityItem) entity).getEntityItem()) && ((EntityItem) entity).posY > transport.posY+1){
                             transport.addItem(((EntityItem) entity).getEntityItem());
                             ((EntityItem) entity).worldObj.removeEntity((EntityItem) entity);
                         }
                         continue;
                     }
-                    /**if it's another multipart hitbox, check if it's something we are supposed to collide with, and maybe continue to the next itteration*/
+                    /*if it's another multipart hitbox, check if it's something we are supposed to collide with, and maybe continue to the next itteration*/
                     if (entity instanceof MultipartHitbox) {
                         if(!hitboxList.contains(entity) && (transport.frontLinkedID != ((MultipartHitbox) entity).parent.getEntityId() ||
                                 transport.backLinkedTransport != ((MultipartHitbox) entity).parent.getPersistentID())) {
-                            return true;
+                            //in the case of trying to move the rollingstock
+                            if (((Entity) entity).posZ > transport.posZ + 0.5) {
+                                vectorCache[0][0] = -0.01f;
+                                vectorCache[0][2] =0;
+                            } else if (((Entity) entity).posZ < transport.posZ - 0.5) {
+                                vectorCache[0][0] = 0.01f;
+                                vectorCache[0][2] =0;
+                            }
+                            if (((Entity) entity).posX > transport.posX + 0.5) {
+                                vectorCache[0][2] = 0.01f;
+                                vectorCache[0][0] =0;
+                            } else if (((Entity) entity).posX < transport.posX - 0.5) {
+                                vectorCache[0][2] = -0.01f;
+                                vectorCache[0][0] =0;
+                            }
+                            vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], 0, Math.copySign(transport.rotationYaw, 1), 0);
+                            transport.frontBogie.addVelocity(vectorCache[1][0], 0, vectorCache[1][2]);
+                            transport.backBogie.addVelocity(vectorCache[1][0], 0, vectorCache[1][2]);
+                            ((Entity) entity).applyEntityCollision(transport);
                         }
                         continue;
                     }
-                    /**if the parent is an Entity Rollingstock, and the other checks were false, we now need to check if we roadkill the entity, or get pushed by it.*/
+                    /*if the parent is an Entity Rollingstock, and the other checks were false, we now need to check if we roadkill the entity, or get pushed by it.*/
                     if (transport instanceof EntityRollingStockCore) {
                         if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
                             //in the case of roadkill
@@ -169,30 +203,36 @@ public class HitboxHandler {
                             }
                         } else {
                             //in the case of trying to move the rollingstock
-                            float directionZ = 0;
-                            float directionX = 0;
                             if (((Entity) entity).posZ > transport.posZ + 0.5) {
-                                directionZ = -0.1f;
+                                vectorCache[0][0] = -0.05f;
+                                vectorCache[0][2] =0;
                             } else if (((Entity) entity).posZ < transport.posZ - 0.5) {
-                                directionZ = 0.1f;
+                                vectorCache[0][0] = 0.05f;
+                                vectorCache[0][2] =0;
                             }
                             if (((Entity) entity).posX > transport.posX + 0.5) {
-                                directionX = 0.1f;
+                                vectorCache[0][2] = 0.05f;
+                                vectorCache[0][0] =0;
                             } else if (((Entity) entity).posX < transport.posX - 0.5) {
-                                directionX = -0.1f;
+                                vectorCache[0][2] = -0.05f;
+                                vectorCache[0][0] =0;
                             }
-                            double[] vec = RailUtility.rotatePoint(new double[]{directionZ, 0, directionX}, 0, Math.copySign(transport.rotationYaw, 1), 0);
-                            transport.frontBogie.addVelocity(vec[0], 0, vec[2]);
-                            transport.backBogie.addVelocity(vec[0], 0, vec[2]);
+                            vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], 0, Math.copySign(transport.rotationYaw, 1), 0);
+                            transport.frontBogie.addVelocity(vectorCache[1][0], 0, vectorCache[1][2]);
+                            transport.backBogie.addVelocity(vectorCache[1][0], 0, vectorCache[1][2]);
                             ((Entity) entity).applyEntityCollision(transport);
                         }
 
-                        /**however if this was n entity Train Core, we just have to figure out if we should roadkill it.*/
+                        /*however if this was n entity Train Core, we just have to figure out if we should roadkill it.*/
                     } else if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
                         ((Entity) entity).attackEntityFrom(new EntityDamageSource("train", transport), (float) (transport.frontBogie.motionX + transport.frontBogie.motionZ) * 1000);
                         if (((EntityTrainCore) transport).worldObj.isRemote) {
                             ((Entity) entity).applyEntityCollision(transport);
                         }
+                    } else {
+                        double[] pos = RailUtility.rotatePoint(new Random().nextBoolean()?new double[]{0.05,0,0}:new double[]{0,0,0.05}, 0,transport.rotationYaw,0);
+                        ((Entity) entity).addVelocity(pos[0], -0.5, pos[2]);
+                        ((Entity) entity).applyEntityCollision(transport);
                     }
                 }
             }

@@ -9,19 +9,20 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
+import ebf.tim.blocks.OreGen;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.items.TiMTab;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.networking.PacketMount;
 import ebf.tim.networking.PacketRemove;
+import ebf.tim.networking.PacketRespawn;
 import ebf.tim.registry.GenericRegistry;
 import ebf.tim.registry.TransportRegistry;
 import ebf.tim.utility.ChunkHandler;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.EventManager;
-import ebf.tim.blocks.OreGen;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -159,6 +160,7 @@ public class TrainsInMotion {
         TrainsInMotion.keyChannel.registerMessage(PacketKeyPress.Handler.class, PacketKeyPress.class, 1, Side.SERVER);
         TrainsInMotion.keyChannel.registerMessage(PacketMount.Handler.class, PacketMount.class, 2, Side.SERVER);
         TrainsInMotion.keyChannel.registerMessage(PacketRemove.Handler.class, PacketRemove.class, 3, Side.SERVER);
+        TrainsInMotion.keyChannel.registerMessage(PacketRespawn.Handler.class, PacketRespawn.class, 4, Side.SERVER);
 
         //register the worldgen
         GameRegistry.registerWorldGenerator(new OreGen(), 0);

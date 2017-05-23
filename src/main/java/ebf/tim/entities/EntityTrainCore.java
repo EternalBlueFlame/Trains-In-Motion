@@ -1,5 +1,6 @@
 package ebf.tim.entities;
 
+import ebf.tim.TrainsInMotion;
 import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.FuelHandler;
@@ -175,10 +176,11 @@ public class EntityTrainCore extends GenericRailTransport {
             vectorCache[0][0] = ((accelerator / 6f) * 0.01302083f) * getAcceleration();
 
             //cap speed to max.
-            if (vectorCache[0][0] > getMaxSpeed()) {
-                vectorCache[0][0] = getMaxSpeed();
-            } else if (vectorCache[0][0] < -getMaxSpeed()) {
-                vectorCache[0][0] = -getMaxSpeed();
+            if (frontBogie.motionX+ frontBogie.motionZ > getMaxSpeed() || frontBogie.motionX+ frontBogie.motionZ <-getMaxSpeed() ||
+                    !((getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM || getType() == TrainsInMotion.transportTypes.STEAM) && fuelHandler.steamTank> getTankCapacity()*0.25)//check for steam fuel
+                    || !(getType() == TrainsInMotion.transportTypes.ELECTRIC && getTankAmount()<1)//check for electric fuel
+                    ) {
+                vectorCache[0][0] = 0;
             }
 
 
@@ -191,13 +193,6 @@ public class EntityTrainCore extends GenericRailTransport {
             this.dataWatcher.updateObject(18, accelerator);
         }
         super.onUpdate();
-
-        //simple tick management so some code does not need to be run every tick.
-        if (!worldObj.isRemote) {
-            if (ticksExisted%5==1){
-                fuelHandler.manageFuel(this);
-            }
-        }
     }
 
     /**

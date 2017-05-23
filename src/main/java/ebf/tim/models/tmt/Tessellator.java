@@ -42,6 +42,7 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 	public int draw(){
 		if(drawing){
 			drawing = false; int o = 0;
+			GL11.glPushMatrix();
 			while (o < verts){
 				int vtc = Math.min(verts - o, 0x200000 >> 5);
 				ibuf.clear(); ibuf.put(rb, o * 10, vtc * 10); bbuf.position(0); bbuf.limit(vtc * 40); o += vtc;
@@ -79,6 +80,7 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 				rbs = 0; rb = null;
 			}
 			reset();
+			GL11.glPopMatrix();
 		}
 		return 0;
 	}

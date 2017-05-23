@@ -5,6 +5,7 @@ import ebf.tim.entities.EntityRollingStockCore;
 import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemTransport;
 import ebf.tim.models.tmt.Vec3d;
+import ebf.tim.utility.FuelHandler;
 import net.minecraft.item.Item;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -38,7 +39,7 @@ public class EntityGTAX13000GallonTanker extends EntityRollingStockCore {
      */
 
     @Override
-    public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-2D, 2D);}
+    public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-2.4D, 2.4D);}
     @Override
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.NULL;}
     @Override
@@ -46,7 +47,7 @@ public class EntityGTAX13000GallonTanker extends EntityRollingStockCore {
     @Override
     public double[][] getRiderOffsets(){return null;}
     @Override
-    public double[] getHitboxPositions(){return new double[]{-2d,-1d,0d,1d,2d};}
+    public double[] getHitboxPositions(){return new double[]{-2.75d,-1.35d,0d,1.35d,2.75d};}
     @Override
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
     @Override
@@ -55,4 +56,8 @@ public class EntityGTAX13000GallonTanker extends EntityRollingStockCore {
     }
     @Override
     public int getTankCapacity(){return 13400;}
+    @Override
+    public void manageFuel(){
+        FuelHandler.manageTanker(this);
+    }
 }

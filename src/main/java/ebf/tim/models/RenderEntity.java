@@ -83,12 +83,12 @@ public class RenderEntity extends Render {
                         isAdded =false;
                         for (GroupedModelRender cargo : blockCargoRenders) {
                             if (cargo.getGroupName().equals(render.boxName)){
-                                cargo.add(render, GroupedModelRender.isBlock(render));
+                                cargo.add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render));
                                 isAdded= true;break;
                             }
                         }
                         if (!isAdded){
-                            blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render)));
+                            blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render)));
                         }
                     }
                 }
@@ -112,7 +112,7 @@ public class RenderEntity extends Render {
     /**
      * <h3>overall texture</h3>
      * returns the texture for this entity, required by the super, we use it so we have access to the texture from outside this class, for example
-     * @see GroupedModelRender#doRender(RenderBlocks, ItemStack, RenderEntity, float)
+     * @see GroupedModelRender#doRender(RenderBlocks, ItemStack, RenderEntity, float, GenericRailTransport)
      */
     public ResourceLocation getEntityTexture(Entity entity){
         return texture;
@@ -190,7 +190,7 @@ public class RenderEntity extends Render {
         bindTexture(texture);
         for(Object cube : model.boxList){
             if (cube instanceof ModelRendererTurbo && !(GroupedModelRender.canAdd((ModelRendererTurbo) cube))) {
-                ((ModelRendererTurbo)cube).render(entity.getRenderScale());
+                ((ModelRendererTurbo)cube).render();
             }
         }
 
@@ -200,7 +200,7 @@ public class RenderEntity extends Render {
         for (GroupedModelRender cargo : blockCargoRenders) {
 
             if (itteration<entity.calculatePercentageUsed(blockCargoRenders.size())) {
-                cargo.doRender(field_147909_c, entity.getFirstBlock(itteration), this, entity.getRenderScale());
+                cargo.doRender(field_147909_c, entity.getFirstBlock(itteration), this, entity.getRenderScale(), entity);
                 itteration++;
             } else {
                 break;
@@ -232,7 +232,7 @@ public class RenderEntity extends Render {
                     //render the geometry
                     for (Object modelBogiePart : bogieRenders[i].bogieModel.boxList) {
                         if (modelBogiePart instanceof ModelRendererTurbo) {
-                            ((ModelRendererTurbo) modelBogiePart).render(0.065f);
+                            ((ModelRendererTurbo) modelBogiePart).render();
                         }
                     }
                     GL11.glPopMatrix();

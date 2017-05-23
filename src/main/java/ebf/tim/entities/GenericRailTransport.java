@@ -11,6 +11,7 @@ import ebf.tim.items.ItemKey;
 import ebf.tim.models.ParticleFX;
 import ebf.tim.models.tmt.Vec3d;
 import ebf.tim.networking.PacketRemove;
+import ebf.tim.networking.PacketRespawn;
 import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
@@ -20,6 +21,7 @@ import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
@@ -29,8 +31,10 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.*;
-import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fluids.IFluidHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -45,16 +49,6 @@ import static ebf.tim.utility.RailUtility.rotatePoint;
  * @author Eternal Blue Flame
  */
 public class GenericRailTransport extends Entity implements IEntityAdditionalSpawnData, IEntityMultiPart, IInventory, IFluidHandler {
-
-
-    /*
-     * <h3>Ore directory support</h3>
-     * creates lists of the items by ore directory names to add support for 3rd party mods.
-     */
-    /**collects all the wood planks, slabs, and logs in the ore directory*/
-    private static final ArrayList<ItemStack> logCarrier = combineStacks(combineStacks(OreDictionary.getOres("plankWood"), OreDictionary.getOres("slabWood")), OreDictionary.getOres("logWood"));
-    /**collects all the coal in in the ore directory*/
-    private static final ArrayList<ItemStack> coalCarrier = OreDictionary.getOres("coal");
 
     /*
      * <h2>variables</h2>
@@ -110,6 +104,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     private boolean itemIsWhitelist = false;
     /**whether or not this needs to update the datawatchers*/
     public boolean updateWatchers = false;
+    /**set by a packet from client when the transport needs to force respawn bogies and hitboxes*/
+    public boolean respawnParts = true;
     /**the RF battery for rollingstock.*/
     public int battery=0;
     /**the ticket that gives the entity permission to load chunks.*/
@@ -143,7 +139,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         this.dataWatcher.addObject(20, 0);//tankA
         this.dataWatcher.addObject(21, 0);//front linked transport
         this.dataWatcher.addObject(22, 0);//back linked transport
-        if (getInventorySize() != TrainsInMotion.inventorySizes.NULL && items == null) {
+        if (getSizeInventory()>0 && items == null) {
             items = new ArrayList<ItemStack>();
             while (items.size() < getSizeInventory()) {
                 items.add(null);
@@ -204,6 +200,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     @Override
     public boolean attackEntityFromPart(EntityDragonPart part, DamageSource damageSource, float damage){
+        return attackEntityFrom(damageSource, damage);
+    }
+    @Override
+    public boolean attackEntityFrom(DamageSource damageSource, float p_70097_2_){
         //if its a creative player, destroy instantly
         if (damageSource.getEntity() instanceof EntityPlayer && ((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode && !damageSource.isProjectile()){
             health -=20;
@@ -336,7 +336,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
         }
 
-        if (getInventorySize() != TrainsInMotion.inventorySizes.NULL) {
+        if (getSizeInventory()>0) {
             for (int i = 0; i < getSizeInventory(); i++) {
                 NBTTagCompound tagCompound = tag.getCompoundTag(NBTKeys.inventoryItem +i);
                 if (tagCompound != null){
@@ -354,10 +354,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
 
         updateWatchers = true;
-
-
-        hitboxHandler = new HitboxHandler();
-
     }
     /**saves the entity to server world*/
     @Override
@@ -390,7 +386,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 fluidTank.writeToNBT(tag);
             }
         }
-        if (getInventorySize() != TrainsInMotion.inventorySizes.NULL && items.size()>0) {
+        if (getSizeInventory()>0 && items.size()>0) {
             for (int i =0; i< getSizeInventory(); i++) {
                 if (items.get(i) != null) {
                     tag.setTag(NBTKeys.inventoryItem + i, items.get(i).writeToNBT(new NBTTagCompound()));
@@ -437,13 +433,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             this.requestTicket();
         }
 
-        seats.remove(null);
-        hitboxHandler.hitboxList.remove(null);
-
         //be sure bogies exist
 
         //always be sure the bogies exist on client and server.
-        if (!worldObj.isRemote && (frontBogie == null || backBogie == null || ticksExisted ==0)) {
+        if (!worldObj.isRemote && (frontBogie == null || backBogie == null || respawnParts)) {
             //spawn frontLinkedTransport bogie
             vectorCache[1][0] = getLengthFromCenter();
             vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
@@ -456,7 +449,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             worldObj.spawnEntityInWorld(backBogie);
 
 
-            if (getRiderOffsets() != null && getRiderOffsets().length >1) {
+            if (getRiderOffsets() != null && getRiderOffsets().length >1 && seats.size()<getRiderOffsets().length) {
                 for (int i = 0; i < getRiderOffsets().length - 1; i++) {
                     EntitySeat seat = new EntitySeat(worldObj, posX, posY, posZ, getEntityId(), i);
                     worldObj.spawnEntityInWorld(seat);
@@ -507,6 +500,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 backBogie.setPosition(vectorCache[0][0] + posX, backBogie.posY, vectorCache[0][2] + posZ);
             }
             manageLinks();
+        } else if (worldObj.isRemote && ticksExisted>1) {
+            TrainsInMotion.keyChannel.sendToServer(new PacketRespawn(this.getEntityId()));
         }
 
         //rider updating isn't called if there's no driver/conductor, so just in case of that, we reposition the seats here too.
@@ -521,7 +516,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
 
         //be sure the owner entityID is currently loaded, this variable is dynamic so we don't save it to NBT.
-        if (!worldObj.isRemote &&ticksExisted %10==0){
+        if (!worldObj.isRemote &&ticksExisted %5==0){
+
+            manageFuel();
+
             @Nullable
             Entity player = CommonProxy.getEntityFromUuid(owner);
             if (player!= null) {
@@ -872,6 +870,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public int getRFCapacity(){return 0;}
     /**defines the ID of the owner*/
     public int getOwnerID(){return this.dataWatcher.getWatchableObjectInt(19);}
+    /**this function allows individual trains and rollingstock to implement custom fuel consumption and management
+     * @see FuelHandler#manageSteam(EntityTrainCore) */
+    public void manageFuel(){}
 
 
     /*
@@ -905,15 +906,18 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public int getSizeInventory() {
         int size =0;
-        if (getType() == TrainsInMotion.transportTypes.STEAM || getType()== TrainsInMotion.transportTypes.NUCLEAR_STEAM){
-            size=2;
-        } else if(getType() == TrainsInMotion.transportTypes.DIESEL || getType() == TrainsInMotion.transportTypes.ELECTRIC || getType() == TrainsInMotion.transportTypes.NUCLEAR_ELECTRIC || getType() == TrainsInMotion.transportTypes.MAGLEV){
-            size++;
+        switch (getType()){
+            case NUCLEAR_STEAM: case STEAM:case TANKER:{
+                size=2;
+            }
+            case DIESEL:case ELECTRIC:case NUCLEAR_ELECTRIC:case MAGLEV:case TENDER:{
+                size=1;
+            }
         }
         if (getRiderOffsets() != null && getRiderOffsets().length >1){
             size++;
         }
-        return size+ (9 * getInventorySize().getRow());
+        return 1+ size+ (9 * getInventorySize().getRow());
     }
 
     /**
@@ -962,7 +966,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     @Override
     public void setInventorySlotContents(int slot, ItemStack itemStack) {
-        if (items != null && slot >0 && slot < getSizeInventory()) {
+        if (items != null && slot >=0 && slot <= getSizeInventory()) {
             items.set(slot, itemStack);
         }
     }
@@ -992,20 +996,13 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //compensate for specific rollingstock
         switch (getType()) {
             case LOGCAR: {
-                for (ItemStack log : logCarrier) {
-                    if (log.getItem() == itemStack.getItem()) {
-                        return true;
-                    }
-                }
-                return false;
+                return RailUtility.isLog(itemStack) || RailUtility.isPlank(itemStack);
             }
             case COALHOPPER: {
-                for (ItemStack coal : coalCarrier) {
-                    if (coal.getItem() == itemStack.getItem()) {
-                        return true;
-                    }
-                }
-                return false;
+                return RailUtility.isCoal(itemStack);
+            }
+            case TANKER: {
+                return itemStack.getItem() instanceof ItemBucket;
             }
         }
 
@@ -1056,7 +1053,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 if (getType() == TrainsInMotion.transportTypes.STEAM || getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM){
                     i++;
                 }
-                if (getRiderOffsets().length>1){
+                if (getRiderOffsets() != null && getRiderOffsets().length>1){
                     i++;
                 }
             }
@@ -1142,10 +1139,10 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             if (doDrain){
                 if (amountToDrain == getTankAmount()) {
                     fluidTank = null;
-                    this.dataWatcher.updateObject(20, 0);
+                    updateWatchers=true;
                 } else {
                     fluidTank.amount -= amountToDrain;
-                    this.dataWatcher.updateObject(20, fluidTank.amount);
+                    updateWatchers=true;
                 }
             }
             return new FluidStack(fluidTank.getFluid(), amountToDrain);
@@ -1165,7 +1162,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     }
     /**returns the amount of fluid in the tank. 0 if the tank is null*/
     public int getTankAmount(){
-        return fluidTank !=null? fluidTank.amount:0;
+        if(worldObj.isRemote){
+            return this.dataWatcher.getWatchableObjectInt(20);
+        } else {
+            return fluidTank != null ? fluidTank.amount : 0;
+        }
     }
 
     /**checks if the fluid can be put into the tank, and if doFill is true, will actually attempt to add the fluid to the tank.
@@ -1173,7 +1174,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     @Override
     public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
         //if the tank has no capacity, or the filter prevents this fluid, or the fluid in the tank already isn't the same.
-        if (getTankCapacity() <1 || filterFluids(resource.getFluid()) || (fluidTank != null && fluidTank.getFluid() != resource.getFluid())){
+        if (getTankCapacity() <1 || !filterFluids(resource.getFluid()) || (fluidTank != null && fluidTank.getFluid() != resource.getFluid())){
             return 0;
         }
         int amountToFill;
@@ -1182,14 +1183,14 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             amountToFill = getTankCapacity() < resource.amount?getTankCapacity():resource.amount;
             if (doFill) {
                 fluidTank = new FluidStack(resource.getFluid(), amountToFill);
-                this.dataWatcher.updateObject(20, fluidTank.amount);
+                updateWatchers=true;
             }
             //if the tank isn't null, we also have to check the amount already in the tank
         } else {
             amountToFill = getTankCapacity() -getTankAmount() < resource.amount?getTankCapacity()-getTankAmount():resource.amount;
             if (doFill){
                 fluidTank.amount += amountToFill;
-                this.dataWatcher.updateObject(20, fluidTank.amount);
+                updateWatchers=true;
             }
         }
         return amountToFill;
@@ -1205,18 +1206,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         return true;
     }
 
-
-    /**
-     * <h3> combine itemstacks</h3>
-     * combines multiple arrays of itemstacks into a single array,
-     * this allows us to create an array comprised of multiple sets of itemstacks, since java doesn't normally allow for this behavior.
-     */
-    private static ArrayList<ItemStack> combineStacks(ArrayList<ItemStack> oldStacks, ArrayList<ItemStack> newStacks){
-        ArrayList<ItemStack> items = new ArrayList<ItemStack>();
-        items.addAll(oldStacks);
-        items.addAll(newStacks);
-        return items;
-    }
 
     /*
      * <h3> chunk management</h3>

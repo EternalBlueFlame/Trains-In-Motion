@@ -3,6 +3,7 @@ package ebf.tim.gui;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.TileEntitySlotManager;
@@ -11,7 +12,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -22,7 +22,7 @@ import org.lwjgl.opengl.GL11;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static ebf.tim.TrainsInMotion.transportTypes.*;
+import static ebf.tim.TrainsInMotion.transportTypes.PASSENGER;
 
 /**
  * <h1>Transport GUI</h1>
@@ -90,6 +90,7 @@ public class GUITransport extends GuiContainer {
     @Override
     protected void drawGuiContainerBackgroundLayer(float par1, int mouseX, int mouseY) {
         //draw the gui background color
+        GL11.glPushMatrix();
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         if (transport.getType().isTrain()){
             renderTrainInventory(guiTop,guiLeft, this.mc, firstTankFluid, secondTankFluid);
@@ -97,41 +98,11 @@ public class GUITransport extends GuiContainer {
             switch (transport.getType()){
                 case PASSENGER:{renderPassengerInventory(guiTop,guiLeft, this.mc); break;}
                 case LOGCAR: case FREIGHT: case HOPPER: case COALHOPPER: case GRAINHOPPER: {renderFreightInventory(guiTop,guiLeft, this.mc); break;}
-                case TANKER:{renderTankerInventory(guiTop,guiLeft, this.zLevel, this.mc);break;}
+                case TANKER:{renderTankerInventory(guiTop,guiLeft, this.mc);break;}
             }
         }
+        GL11.glPopMatrix();
 
-
-    }
-
-    /**
-     * <h2>Draw Texture</h2>
-     * This replaces the base class and allows us to draw textures that are stretched to the shape defined in a more efficient manner.
-     * NOTE: all textures must be divisible by 256x256
-     * @param posX the X position on screen to draw at.
-     * @param posY the Y position on screen to draw at.
-     * @param posU the X position of the texture to start from.
-     * @param posV the Y position of the texture to start from.
-     * @param width the width of the box.
-     * @param height the height of the box.
-     * @param scaleU defines the X size of the texture part used
-     * @param scaleV defines the X Y size of the texture part used
-     */
-    public static void drawTexturedRect(int posX, int posY, int posU, int posV, int width, int height, int scaleU, int scaleV) {
-        Tessellator.instance.startDrawingQuads();
-        Tessellator.instance.addVertexWithUV(posX, posY + height, 0, posU * guiScaler, (posV + scaleV) * guiScaler);
-        Tessellator.instance.addVertexWithUV(posX + width, posY + height, 0, (posU + scaleU) * guiScaler, (posV + scaleV) * guiScaler);
-        Tessellator.instance.addVertexWithUV(posX + width, posY, 0, (posU + scaleU) * guiScaler, posV * guiScaler);
-        Tessellator.instance.addVertexWithUV(posX, posY, 0, posU * guiScaler, posV * guiScaler);
-        Tessellator.instance.draw();
-    }
-    public static void drawTexturedRect(int posX, int posY, int posU, int posV, int width, int height) {
-        Tessellator.instance.startDrawingQuads();
-        Tessellator.instance.addVertexWithUV(posX, posY + height, 0, posU * guiScaler, (posV + height) * guiScaler);
-        Tessellator.instance.addVertexWithUV(posX + width, posY + height, 0, (posU + width) * guiScaler, (posV + height) * guiScaler);
-        Tessellator.instance.addVertexWithUV(posX + width, posY, 0, (posU + width) * guiScaler, posV * guiScaler);
-        Tessellator.instance.addVertexWithUV(posX, posY, 0, posU * guiScaler, posV * guiScaler);
-        Tessellator.instance.draw();
     }
 
 
@@ -143,57 +114,15 @@ public class GUITransport extends GuiContainer {
      */
     @Override
     public void drawScreen(int mouseX, int mouseY, float par3){
-        super.drawScreen(mouseX, mouseY, par3);
-        if (transport.getType() == STEAM || transport.getType() == NUCLEAR_STEAM || transport.getType().isTanker() || transport.getType() == TENDER) {
+        super.drawScreen(mouseX, mouseY, par3);//should be useless with new buttons
+
+
+        if (transport.getTankCapacity()>0) {
             firstTankFluid = transport.getDataWatcher().getWatchableObjectInt(20);
         }
         if (transport instanceof EntityTrainCore) {
             secondTankFluid = ((EntityTrainCore) transport).fuelHandler.steamTank;
-        }
 
-        if (!(transport instanceof EntityTrainCore) && transport.getInventorySize().getRow()<6) {
-            if (mouseY > guiTop + 174 && mouseY < guiTop + 192) {
-                if (player.getEntityId() == transport.getOwnerID() && mouseX > guiLeft+62 && mouseX < guiLeft + 80) {
-                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.dropkey")), mouseX, mouseY, fontRendererObj);
-                } else if (mouseX > guiLeft +26 && mouseX < guiLeft + 44) {
-                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.locked." + transport.isLocked)), mouseX, mouseY, fontRendererObj);
-                } else if (mouseX > guiLeft + 44 && mouseX < guiLeft + 62) {
-                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.coupler." + transport.isCoupling)), mouseX, mouseY, fontRendererObj);
-                } else if (player.getEntityId() == transport.getOwnerID() && mouseX > guiLeft && mouseX < guiLeft + 18) {
-                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.unlink")), mouseX, mouseY, fontRendererObj);
-                } else if (mouseX > guiLeft + 256 && mouseX < guiLeft + 274){
-                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.lamp")  + ((transport.lamp.isOn)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
-                }
-            }
-        } else if (mouseY > guiTop + 166 && mouseY < guiTop + 184) {
-            if (player.getEntityId() == transport.getOwnerID() && mouseX > guiLeft+166 && mouseX < guiLeft + 184) {
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.dropkey")), mouseX, mouseY, fontRendererObj);
-            } else if (mouseX > guiLeft +130 && mouseX < guiLeft + 148) {
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.locked." + transport.isLocked)), mouseX, mouseY, fontRendererObj);
-            } else if (mouseX > guiLeft + 148 && mouseX < guiLeft + 166) {
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.coupler." + transport.isCoupling)), mouseX, mouseY, fontRendererObj);
-            } else if (player.getEntityId() == transport.getOwnerID() && mouseX > guiLeft+112 && mouseX < guiLeft + 130) {
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.unlink")), mouseX, mouseY, fontRendererObj);
-            } else if (transport.getLampOffset().yCoord>1 && mouseX > guiLeft+238 && mouseX < guiLeft + 256) {
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.lamp") + ((transport.brake)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
-            }
-
-            if (transport instanceof EntityTrainCore){
-                if (player.capabilities.isCreativeMode && mouseX > guiLeft + 184 && mouseX < guiLeft + 202) {
-                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.creativemode") + ((transport.brake)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
-                } else if (transport.getType() != TrainsInMotion.transportTypes.STEAM && mouseX > guiLeft + 202 && mouseX < guiLeft + 220){
-                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.trainisrunning")  + ((((EntityTrainCore)transport).isRunning)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
-                } else if (mouseX > guiLeft + 220 && mouseX < guiLeft + 238) {
-                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.brake")  + ((transport.brake)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))), mouseX, mouseY, fontRendererObj);
-                } else if (mouseX > guiLeft + 256 && mouseX < guiLeft + 274){
-                    drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.horn") ), mouseX, mouseY, fontRendererObj);
-                } /*else if(mouseX > guiLeft + 162 && mouseX < guiLeft + 180) {
-                drawHoveringText(Collections.singletonList(StatCollector.translateToLocal("gui.map") ), mouseX, mouseY, fontRendererObj);
-                drawHoveringText(Collections.singletonList("Open Map"), mouseX, mouseY, fontRendererObj);
-            }*/
-            }
-        }
-        if (transport instanceof EntityTrainCore) {
             if ((mouseX >= guiLeft + 210 && mouseX <= guiLeft + 226 && mouseY >= guiTop - 14 && mouseY <= guiTop + 50)) {
                 drawHoveringText(Arrays.asList(tankType(true), firstTankFluid * 0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity() * 0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
             }
@@ -204,6 +133,15 @@ public class GUITransport extends GuiContainer {
                 drawHoveringText(Arrays.asList(tankType(false), secondTankFluid * 0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity() * 0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
             }
         }
+
+        //draw the hover text for the buttons.
+        for (Object o : buttonList){
+            if(((GUIButton)o).getMouseHover()) {
+                drawHoveringText(Collections.singletonList(((GUIButton)o).displayString), mouseX, mouseY, mc.fontRenderer);
+            }
+        }
+
+
     }
 
 
@@ -219,32 +157,32 @@ public class GUITransport extends GuiContainer {
         if (!(transport instanceof EntityTrainCore) && transport.getInventorySize().getRow()<6) {
             //generic to all
             if (player.getEntityId() == transport.getOwnerID()) {
-                this.buttonList.add(new GuiButton(8, guiLeft + 8, guiTop + 174, 18, 18, ""));
-                this.buttonList.add(new GuiButton(9, guiLeft + 62, guiTop + 174, 18, 18, ""));
+                this.buttonList.add(new GUIButton(8, guiLeft + 8, guiTop + 174, 18, 18, StatCollector.translateToLocal("gui.unlink")));
+                this.buttonList.add(new GUIButton(9, guiLeft + 62, guiTop + 174, 18, 18, StatCollector.translateToLocal("gui.dropkey")));
             }
-            this.buttonList.add(new GuiButton(2, guiLeft + 26, guiTop + 174, 18, 18, ""));
-            this.buttonList.add(new GuiButton(3, guiLeft + 44, guiTop + 174, 18, 18, ""));
+            this.buttonList.add(new GUIButton(2, guiLeft + 26, guiTop + 174, 18, 18, StatCollector.translateToLocal("gui.locked." + transport.isLocked)));
+            this.buttonList.add(new GUIButton(3, guiLeft + 44, guiTop + 174, 18, 18, StatCollector.translateToLocal("gui.coupler." + transport.isCoupling)));
         } else {
             //generic to all
             if (player.getEntityId() == transport.getOwnerID()) {
-                this.buttonList.add(new GuiButton(8, guiLeft+112, guiTop + 166, 18, 18, ""));
-                this.buttonList.add(new GuiButton(9, guiLeft + 166, guiTop + 166, 18, 18, ""));
+                this.buttonList.add(new GUIButton(8, guiLeft+112, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.unlink")));
+                this.buttonList.add(new GUIButton(9, guiLeft + 166, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.dropkey")));
             }
-            this.buttonList.add(new GuiButton(2, guiLeft + 130, guiTop + 166, 18, 18, ""));
-            this.buttonList.add(new GuiButton(3, guiLeft + 148, guiTop + 166, 18, 18, ""));
+            this.buttonList.add(new GUIButton(2, guiLeft + 130, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.locked." + transport.isLocked)));
+            this.buttonList.add(new GUIButton(3, guiLeft + 148, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.coupler." + transport.isCoupling)));
             if (transport.getLampOffset().yCoord>1) {
-                this.buttonList.add(new GuiButton(1, guiLeft + 238, guiTop + 166, 18, 18, ""));
+                this.buttonList.add(new GUIButton(1, guiLeft + 238, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.lamp")  + ((transport.lamp.isOn)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))));
             }
             //train specific
             if (transport instanceof EntityTrainCore) {
                 if (player.capabilities.isCreativeMode) {
-                    this.buttonList.add(new GuiButton(7, guiLeft + 184, guiTop + 166, 18, 18, ""));
+                    this.buttonList.add(new GUIButton(7, guiLeft + 184, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.creativemode") + ((transport.brake)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))));
                 }
                 if (transport.getType() != TrainsInMotion.transportTypes.STEAM) {
-                    this.buttonList.add(new GuiButton(6, guiLeft + 202, guiTop + 166, 18, 18, ""));
+                    this.buttonList.add(new GUIButton(6, guiLeft + 202, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.trainisrunning")  + ((((EntityTrainCore)transport).isRunning)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))));
                 }
-                this.buttonList.add(new GuiButton(0, guiLeft + 220, guiTop + 166, 18, 18, ""));
-                this.buttonList.add(new GuiButton(4, guiLeft + 256, guiTop + 166, 18, 18, ""));
+                this.buttonList.add(new GUIButton(0, guiLeft + 220, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.brake")  + ((transport.brake)?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))));
+                this.buttonList.add(new GUIButton(4, guiLeft + 256, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.horn")));
 
             }
         }
@@ -316,14 +254,14 @@ public class GUITransport extends GuiContainer {
         //bind the inventory image which we use the slot images and inventory image from.
         mc.getTextureManager().bindTexture(vanillaInventory);
         //icon for furnace fuel
-        drawTexturedRect(guiLeft+112, guiTop + 1, 54, 51, 18, 18, 20, 20);
+        drawTexturedRect(guiLeft+112, guiTop + 1, 54, 51, 20, 20);
         //icon for furnace
-        drawTexturedRect(guiLeft+112, guiTop + 1, 54, 51, 18, 18, 20, 20);
+        drawTexturedRect(guiLeft+112, guiTop + 1, 54, 51, 20, 20);
 
         //slot for fuel
-        drawTexturedRect(guiLeft+112, guiTop + 30, 54, 51, 18, 18, 20, 20);
+        drawTexturedRect(guiLeft+112, guiTop + 30, 54, 51, 20, 20);
         //slot for water
-        drawTexturedRect(guiLeft+148, guiTop + 30, 54, 51, 18, 18, 20, 20);
+        drawTexturedRect(guiLeft+148, guiTop + 30, 54, 51, 20, 20);
 
         //draw the player inventory and toolbar background.
         drawTexturedRect(guiLeft+105, guiTop+ 74, 0, 74, 176, 100);
@@ -401,7 +339,7 @@ public class GUITransport extends GuiContainer {
         //draw the player inventory and toolbar background.
         if (transport.getInventorySize().getRow()<6){
             drawTexturedRect(guiLeft, guiTop+77-(transport.getInventorySize().getRow()*18)-17, 0, 0, this.xSize, transport.getInventorySize().getRow() * 18 + 17);
-            drawTexturedRect(guiLeft,  guiTop+77, 0, 126, this.xSize, 96);
+            drawTexturedRect(guiLeft, guiTop+77, 0, 126, this.xSize, 96);
         } else {
             drawTexturedRect(guiLeft-105, guiTop-37+yCenter, 0, 0, this.xSize, 17);//top
             for(int i=0; i<transport.getInventorySize().getRow(); i++){
@@ -416,18 +354,64 @@ public class GUITransport extends GuiContainer {
 
 
     /**
-     * <h2>Render Freight GUI</h2>
+     * <h2>Render Tanker GUI</h2>
      * basically the same as
      */
-    private void renderTankerInventory(int guiTop, int guiLeft, double zLevel, Minecraft mc){
-        mc.getTextureManager().bindTexture(vanillaInventory);
+    private void renderTankerInventory(int guiTop, int guiLeft, Minecraft mc){
         //draw the player inventory and toolbar background.
-        drawTexturedRect(guiLeft, guiTop+ 72, 0, 72, 176, 176, 176, 176);
-        drawTexturedRect(guiLeft, guiTop+ 70, 0, 0, xSize, 16,20,20);
+        mc.getTextureManager().bindTexture(vanillaChest);
+        drawTexturedRect(guiLeft, guiTop+ 79, 0, 128, xSize, 94);
+        drawTexturedRect(guiLeft, guiTop+ 76, 0, 0, xSize, 8);
 
-        drawTexturedRect( guiLeft + 8 + 18, guiTop +43 + 18, 54, 51, 18, 18, 20, 20);
+        mc.getTextureManager().bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
+        drawTexturedRect(guiLeft+28, guiTop, 0, 0, 100, 64, 16, 16);
+        if (transport.getTankAmount()>0) {
+            //draw the water tank
+            int liquid = Math.abs((transport.getTankAmount() * 64) / transport.getTankCapacity());
+            drawTexturedRect(guiLeft+ 28, guiTop + 64 - liquid, 16,0, 100, liquid, 16, 16);
+        }
+
+        mc.getTextureManager().bindTexture(vanillaInventory);
+        drawTexturedRect(guiLeft+70, guiTop - 30, 54, 51, 20,20);
+        drawTexturedRect(guiLeft+150, guiTop + 44, 54, 51, 20,20);
     }
 
+
+
+
+
+
+    /**
+     * <h2>Draw Texture</h2>
+     * This replaces the base class and allows us to draw textures that are stretched to the shape defined in a more efficient manner.
+     * NOTE: all textures must be divisible by 256x256
+     * @param posX the X position on screen to draw at.
+     * @param posY the Y position on screen to draw at.
+     * @param posU the X position of the texture to start from.
+     * @param posV the Y position of the texture to start from.
+     * @param width the width of the box.
+     * @param height the height of the box.
+     * @param scaleU defines the X size of the texture part used
+     * @param scaleV defines the X Y size of the texture part used
+     */
+    public static void drawTexturedRect(int posX, int posY, int posU, int posV, int width, int height, int scaleU, int scaleV) {
+        Tessellator tessellator = Tessellator.getInstance();
+        tessellator.startDrawingQuads();
+        tessellator.addVertexWithUV(posX, posY + height, 0, posU * guiScaler, (posV + scaleV) * guiScaler);
+        tessellator.addVertexWithUV(posX + width, posY + height, 0, (posU + scaleU) * guiScaler, (posV + scaleV) * guiScaler);
+        tessellator.addVertexWithUV(posX + width, posY, 0, (posU + scaleU) * guiScaler, posV * guiScaler);
+        tessellator.addVertexWithUV(posX, posY, 0, posU * guiScaler, posV * guiScaler);
+        tessellator.draw();
+    }
+    public static void drawTexturedRect(int posX, int posY, int posU, int posV, int width, int height) {
+        Tessellator tessellator = Tessellator.getInstance();
+        tessellator.startDrawingQuads();
+        tessellator.addVertexWithUV(posX, posY + height, 0, posU * guiScaler, (posV + height) * guiScaler);
+        tessellator.addVertexWithUV(posX + width, posY + height, 0, (posU + width) * guiScaler, (posV + height) * guiScaler);
+        tessellator.addVertexWithUV(posX + width, posY, 0, (posU + width) * guiScaler, posV * guiScaler);
+        tessellator.addVertexWithUV(posX, posY, 0, posU * guiScaler, posV * guiScaler);
+        tessellator.draw();
+    }
 
 
 }

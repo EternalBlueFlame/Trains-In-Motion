@@ -54,30 +54,38 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         //cover trains
         if (entityTrain instanceof EntityTrainCore) {
             slot++;
-            //define the transport's inventory size
-            if (entityTrain.getType() == TrainsInMotion.transportTypes.STEAM || entityTrain.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM){
-                slot=2;
-            }
             //fuel slot
             addSlotToContainer(new fuelSlot(railTransport, 0, 114, 32));
-            if (slot == 2) {
-                //water slot
-                addSlotToContainer(new waterSlot( railTransport, 1, 150, 32));
-            }
         }
-        int yCenter = (int)((11-entityTrain.getInventorySize().getRow())*0.5f)*18;
-        //transport inventory
-        for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
-            for (int ib = 0; ib < 9; ib++) {
-                if(entityTrain instanceof EntityTrainCore || entityTrain.getInventorySize().getRow()>5) {
-                    addSlotToContainer(new filteredSlot(railTransport, slot, -97 + (ib * 18), (ia * 18)+(yCenter)-19));
-                } else {
-                    addSlotToContainer(new filteredSlot(railTransport, slot, 8 + (ib * 18), 60 + (ia * 18)));
-                }
 
-                slot++;
+        switch (entityTrain.getType()){
+            case TANKER:{
+                addSlotToContainer(new waterSlot(railTransport, 0, 72, -28));
+                addSlotToContainer(new filteredSlot(railTransport, 1, 152, 46));
+                break;
+            }
+            case STEAM:case NUCLEAR_STEAM:{
+                addSlotToContainer(new waterSlot( railTransport, 1, 150, 32));
+                slot=2;
+                break;
             }
         }
+        if (railTransport.getInventorySize().getRow()>0) {
+            int yCenter = (int) ((11 - entityTrain.getInventorySize().getRow()) * 0.5f) * 18;
+            //transport inventory
+            for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
+                for (int ib = 0; ib < 9; ib++) {
+                    if (entityTrain instanceof EntityTrainCore || entityTrain.getInventorySize().getRow() > 5) {
+                        addSlotToContainer(new filteredSlot(railTransport, slot, -97 + (ib * 18), (ia * 18) + (yCenter) - 19));
+                    } else {
+                        addSlotToContainer(new filteredSlot(railTransport, slot, 8 + (ib * 18), 60 + (ia * 18)));
+                    }
+
+                    slot++;
+                }
+            }
+        }
+
     }
 
     /**
