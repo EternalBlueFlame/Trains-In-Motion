@@ -1,6 +1,7 @@
 package ebf.tim.utility;
 
 
+import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import net.minecraft.init.Blocks;
@@ -12,8 +13,12 @@ import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+
+import static ebf.tim.TrainsInMotion.transportTypes.ELECTRIC;
+import static ebf.tim.TrainsInMotion.transportTypes.MAGLEV;
 
 /**
  * <h1>Fuel management for trains</h1>
@@ -46,50 +51,44 @@ public class FuelHandler{
 	 * <h2>check if an item is a usable water source item</h2>
 	 * @return if the train can add the water to the boiler or not.
 	 * TiM only water items and support for 3rd party/vanilla fuels are managed here
-	 * TODO: need support for 3rd party water items that contain dynamic amounts.
 	 */
-	public static boolean isWater(ItemStack item, GenericRailTransport transport){
+	public static FluidStack isUseableFluid(ItemStack itemStack, GenericRailTransport transport){
 		switch (transport.getType()){
-            case NUCLEAR_STEAM:{/*compensate for coolant*/}
-            //cover water
-            case TANKER:{return item != null && item.getItem() instanceof ItemBucket;}
-            default: {return item != null && item.getItem() == Items.water_bucket;}
-		}
-	}
-
-	/**
-	 * <h2>get value from Item</h2>
-	 * this is intended to get a value from items that normally don't have one, for instance the fuel value of redstone, or the mb of water in a bucket.
-	 * @return the value int for the item
-	 * non-liquids like redstone are managed here because all non-steam trains use a water tank to define their fuel amount.
-	 */
-	public static int getValue(ItemStack itemStack){
-		if (itemStack != null) {
-			if (itemStack.getItem() == Items.water_bucket) {
-				return 1000;
-			} else if (itemStack.getItem() == Items.redstone){
-				return 250;
-			} else if (itemStack.getItem() == Item.getItemFromBlock(Blocks.redstone_block)){
-				return 2250;
+			case MAGLEV:case ELECTRIC:{
+				if (itemStack.getItem() == Items.redstone){
+					return new FluidStack(FluidRegistry.WATER, 250);
+				} else if (itemStack.getItem() == Item.getItemFromBlock(Blocks.redstone_block)){
+					return new FluidStack(FluidRegistry.WATER,2250);
+				}else{
+					//TODO:cofh get rf from item
+				}
+				return null;
 			}
-
+			case NUCLEAR_STEAM:{/*compensate for coolant*/}
+			case STEAM:{
+				//return the fluidstack only if it's water.
+				return FluidContainerRegistry.getFluidForFilledItem(itemStack)!= null && FluidContainerRegistry.getFluidForFilledItem(itemStack).getFluidID() == FluidRegistry.WATER.getID()?FluidContainerRegistry.getFluidForFilledItem(itemStack):null;
+			}
+			default:{
+				return FluidContainerRegistry.getFluidForFilledItem(itemStack);
+			}
 		}
-
-		return 0;
 	}
+
 
 	public void manageSteam(EntityTrainCore train){
 		//manage solid fuel
 		if (isFuel(train.getStackInSlot(0), train) && fuel + TileEntityFurnace.getItemBurnTime(train.getStackInSlot(0)) < train.getMaxFuel()) {
 			fuel += TileEntityFurnace.getItemBurnTime(train.getStackInSlot(0));
-			if (!train.isCreative) {
+			if (!train.getBoolean(3)) {
 				train.decrStackSize(0, 1);
 			}
 		}
-		if (isWater(train.getStackInSlot(1), train) &&
-				train.fill(ForgeDirection.UNKNOWN, new FluidStack(FluidRegistry.WATER, getValue(train.getStackInSlot(1))), false) == getValue(train.getStackInSlot(1))) {
-			train.fill(ForgeDirection.UNKNOWN, new FluidStack(FluidRegistry.WATER, getValue(train.getStackInSlot(1))), true);
-			if (!train.isCreative) {
+		//if there's a fluid item in the slot and the train can consume the entire thing
+		if (train.getStackInSlot(1) != null &&
+				train.fill(null, isUseableFluid(train.getStackInSlot(1), train), false) >= FluidContainerRegistry.getFluidForFilledItem(train.getStackInSlot(1)).amount) {
+			train.fill(null, isUseableFluid(train.getStackInSlot(1), train), true);
+			if (!train.getBoolean(3)) {
 				train.decrStackSize(1, 1);
 				train.addItem(new ItemStack(Items.bucket));
 			}
@@ -104,20 +103,34 @@ public class FuelHandler{
 					* steam beyond the max point of storage is considered to be expelled through a failsafe.
 					* NOTE: in TiM we need to remember steam and fluid are housed in the same tank, and calculate based on that. should also throw in calcium buildup for non-distilled water. TC however isn't so advanced
 					*/
-			int steam = Math.round((fuel *0.0025f)/ train.getTankAmount());
-			if (train.drain(ForgeDirection.UNKNOWN, steam,true).amount == steam) {
-				fuel -= 50; //a lava bucket lasts 1000 seconds, so burnables are processed at 20000*0.05 a second
-				steamTank += MathHelper.floor_float(steam*0.9f);
-			} else if (!train.isCreative){
+			int steam = Math.round(
+					(fuel*0.00075f) * //calculate heat from fuel
+							(train.getTankAmount()*0.005f) //calculate surface area of water
+			);
+			if (train.drain(null, steam,true)!= null) {
+				fuel -= 10*train.getEfficiency(); //a lava bucket lasts 1000 seconds, so burnables are processed at 20000*0.05 a second
+				steamTank +=steam;
+
+				if(steamTank>train.getTankCapacity()){//in TiM it needs to be  > getTankCapacity-getTankAmount.
+					steamTank= train.getTankCapacity();
+				}
+
+			} else if (!train.getBoolean(3)){
 				train.worldObj.createExplosion(train, train.posX, train.posY, train.posZ, 5f, false);
 				train.dropItem(train.getItem(), 1);
-				train.attackEntityFromPart(null, new EntityDamageSource("overheat", train),1);
+				train.attackEntityFromPart(null, new EntityDamageSource("overheat", train),100);
 			}
 
+		} else if (fuel <0){
+			fuel=0;
 		}
+
 		if (steamTank >0){
+			train.setBoolean(6, true);
 			//steam is expelled through the pistons to push them back and forth, but even when the accelerator is off, a degree of steam is still escaping.
-			steamTank -=5+(10*train.accelerator);
+			steamTank -=(5*train.getEfficiency())*((train.accelerator)*train.getEfficiency());
+		} else {
+			train.setBoolean(6, false);
 		}
 	}
 
@@ -125,26 +138,30 @@ public class FuelHandler{
 
 	public void manageElectric(EntityTrainCore train){
 		//add redstone to the fuel tank
-		if (isWater(train.getStackInSlot(0), train) && getValue(train.getStackInSlot(1))+ fuel < train.getMaxFuel() && !train.isCreative) {
-			fuel +=getValue(train.getStackInSlot(1));
+		if (train.fill(null, isUseableFluid(train.getStackInSlot(1), train), false)>0 && !train.getBoolean(3)) {
+			train.fill(null, isUseableFluid(train.getStackInSlot(1), train), true);
 			train.decrStackSize(0,1);
 		}
 
 		//use stored energy
-		if (train.isRunning){
+		if (train.getBoolean(6)){
 			//electric trains run at a generally set rate which is multiplied at the square of speed.
-			//TODO: this may need re-balancing to keep it realistic.
-			fuel -= 1 + MathHelper.sqrt_float(Math.copySign(train.accelerator, 1)*5);
+			if (train.drain(null, MathHelper.floor_double((5*train.getEfficiency()) + Math.copySign(train.accelerator, 1)*(15*train.getEfficiency())), false)!= null){
+				train.drain(null, MathHelper.floor_double((5*train.getEfficiency()) + Math.copySign(train.accelerator, 1)*(15*train.getEfficiency())), true);
+			} else {
+				train.setBoolean(6, false);
+			}
 		}
 	}
 
 
 	public static void manageTanker(GenericRailTransport transport){
 		//consume the water, if the second slot contains a water bucket, also places an empty bucket in inventory
-		if (FuelHandler.isWater(transport.getStackInSlot(0), transport) && transport.getTankCapacity() - (FuelHandler.getValue(transport.getStackInSlot(0)) + transport.getTankAmount())>0) {
-			transport.fill(ForgeDirection.UNKNOWN, new FluidStack(FluidRegistry.WATER, FuelHandler.getValue(transport.getStackInSlot(0))), true);
-			if (!transport.isCreative) {
-				transport.decrStackSize(0, 1);
+		if (transport.getStackInSlot(1) != null &&
+				transport.fill(null, isUseableFluid(transport.getStackInSlot(1), transport), false) >= FluidContainerRegistry.getFluidForFilledItem(transport.getStackInSlot(1)).amount) {
+			transport.fill(null, isUseableFluid(transport.getStackInSlot(1), transport), true);
+			if (!transport.getBoolean(3)) {
+				transport.decrStackSize(1, 1);
 				transport.addItem(new ItemStack(Items.bucket));
 			}
 		}

@@ -47,7 +47,7 @@ public class EventManager {
             //for lamp
             if (ClientProxy.KeyLamp.isPressed() ) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0, player.ridingEntity.getEntityId()));
-                ((GenericRailTransport) player.ridingEntity).lamp.isOn = ! ((EntityTrainCore) player.ridingEntity).lamp.isOn;
+                ((GenericRailTransport) player.ridingEntity).setBoolean(2, ! ((GenericRailTransport) player.ridingEntity).getBoolean(2));
             }
             //for inventory
             if (ClientProxy.KeyInventory.isPressed()) {

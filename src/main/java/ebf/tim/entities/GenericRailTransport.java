@@ -38,6 +38,7 @@ import net.minecraftforge.fluids.IFluidHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,10 +54,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /*
      * <h2>variables</h2>
      */
-    /**if the owner has locked this.*/
-    public boolean isLocked = false;
-    /**if the handbrake is on.*/
-    public boolean brake = false;
     /**defines the lamp, and it's management*/
     public LampHandler lamp = new LampHandler();
     /**defines the colors, the outer array is for each different color, and the inner int[] is for the RGB color*/
@@ -68,11 +65,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**the back entity bogie*/
     public EntityBogie backBogie = null;
     /**the list of seat entities*/
-    public List<EntitySeat> seats = new ArrayList<EntitySeat>();
-    /**whether or not this should consume fuel and be able to derail.*/
-    public boolean isCreative = false;
-    /**whether or not to check for cars to link to*/
-    public boolean isCoupling = false;
+    public List<EntitySeat> seats = new ArrayList<>();
     /**the list of hitboxes and the class that manages them*/
     public HitboxHandler hitboxHandler = new HitboxHandler();
     /**the server-sided persistent UUID of the transport linked to the front of this,*/
@@ -99,9 +92,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**the list of items used for the inventory and crafting slots.*/
     private List<ItemStack> items;
     /**the lst of unlocalized names for the itemFilter*/
-    private List<String> itemFilter = new ArrayList<String>();
-    /**whether the itemFilter should only take the items in the list (whitelist), or whether it should take anything but the items in the list (blacklist).*/
-    private boolean itemIsWhitelist = false;
+    private List<String> itemFilter = new ArrayList<>();
     /**whether or not this needs to update the datawatchers*/
     public boolean updateWatchers = false;
     /**set by a packet from client when the transport needs to force respawn bogies and hitboxes*/
@@ -114,6 +105,35 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public List<ChunkCoordIntPair> chunkLocations = new ArrayList<>();
     /**a list of the particles the transport is managing*/
     public List<ParticleFX> particles = new ArrayList<>();
+    /**the array of booleans, defined as bits
+     * 0- brake: defines the brake
+     * 1- locked: defines if transport is locked to owner and key holders
+     * 2- lamp: defines if lamp is on
+     * 3- creative: defines if the transport should consume fuels and be able to derail.
+     * 4- coupling: defines if the transport is looking to couple with other transports.
+     * 5- inventory whitelist: defines if the inventory is a whitelist
+     * 6- running: defines if te transport is running (usually only on trains).
+     * 7-15 are unused.
+     * for use see
+     * @see #getBoolean(int)
+     * @see #setBoolean(int, boolean)
+     */
+    private BitSet bools = new BitSet(16);
+
+    public boolean getBoolean(int index){
+        if(worldObj.isRemote) {
+            return BitSet.valueOf(new long[]{this.dataWatcher.getWatchableObjectInt(18)}).get(index);
+        } else {
+            return bools.get(index);
+        }
+    }
+
+    @SideOnly(Side.SERVER)
+    public void setBoolean(int index, boolean value){
+        bools.set(index, value);
+        updateWatchers = true;
+    }
+
 
     public GenericRailTransport(World world){
         super(world);
@@ -245,12 +265,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
             //if the damage source is an explosion, or this (from overheating as an example), we circumstantially blow up.
             //radius is defined by whether or not it's a nuclear train, and fire spread creation is defined by whether or not it's diesel.
-            if (damageSource.getSourceOfDamage() == this || damageSource.isExplosion()){
-                worldObj.newExplosion(this, posX, posY, posZ,
-                        (this.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM || this.getType() == TrainsInMotion.transportTypes.NUCLEAR_ELECTRIC)? 6:12,
-                        this.getType() == TrainsInMotion.transportTypes.DIESEL, true);
-                //if this isn't supposed to explode, and the damage source wasn't an explosion, drop the item for this transport
-            }
+
             //remove this
             isDead=true;
             TrainsInMotion.keyChannel.sendToServer(new PacketRemove(getEntityId()));
@@ -288,10 +303,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**reads the data sent from client on entity spawn*/
     @Override
     public void readSpawnData(ByteBuf additionalData) {
-        brake = additionalData.readBoolean();
-        isCoupling = additionalData.readBoolean();
-        isCreative = additionalData.readBoolean();
-        lamp.isOn = additionalData.readBoolean();
+        bools.set(0,16,false);
+
         owner = new UUID(additionalData.readLong(), additionalData.readLong());
         key = new ItemStack(new ItemKey(owner, getItem().getUnlocalizedName()));
         rotationYaw = additionalData.readFloat();
@@ -299,10 +312,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**sends the data to server from client*/
     @Override
     public void writeSpawnData(ByteBuf buffer) {
-        buffer.writeBoolean(brake);
-        buffer.writeBoolean(isCoupling);
-        buffer.writeBoolean(isCreative);
-        buffer.writeBoolean(lamp.isOn);
         buffer.writeLong(owner.getMostSignificantBits());
         buffer.writeLong(owner.getLeastSignificantBits());
         buffer.writeFloat(rotationYaw);
@@ -310,10 +319,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**loads the entity's save file*/
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
-        isLocked = tag.getBoolean(NBTKeys.locked);
-        lamp.isOn = tag.getBoolean(NBTKeys.lamp);
+        bools =  BitSet.valueOf(new long[]{tag.getInteger("booleans")});
         isDead = tag.getBoolean(NBTKeys.dead);
-        isCoupling = tag.getBoolean(NBTKeys.coupling);
         //load links
         if (tag.hasKey(NBTKeys.frontLinkMost)) {
             frontLinkedTransport = new UUID(tag.getLong(NBTKeys.frontLinkMost), tag.getLong(NBTKeys.frontLinkLeast));
@@ -321,9 +328,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (tag.hasKey(NBTKeys.backLinkMost)) {
             backLinkedTransport = new UUID(tag.getLong(NBTKeys.backLinkMost), tag.getLong(NBTKeys.backLinkLeast));
         }
-        //more bools
-        isCreative = tag.getBoolean(NBTKeys.creative);
-        brake = tag.getBoolean(NBTKeys.handbrake);
         //load owner
         owner = new UUID(tag.getLong(NBTKeys.ownerMost),tag.getLong(NBTKeys.ownerLeast));
         //key.readFromNBT(tag);
@@ -343,7 +347,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     setInventorySlotContents(i, ItemStack.loadItemStackFromNBT(tagCompound));
                 }
             }
-            itemIsWhitelist = tag.getBoolean(NBTKeys.whitelist);
 
             int length = tag.getInteger(NBTKeys.filterLength);
             if (length > 0) {
@@ -358,10 +361,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**saves the entity to server world*/
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
-        tag.setBoolean(NBTKeys.locked, isLocked);
-        tag.setBoolean(NBTKeys.lamp, lamp.isOn);
+        tag.setInteger("booleans", (int)bools.toLongArray()[0]);
         tag.setBoolean(NBTKeys.dead, isDead);
-        tag.setBoolean(NBTKeys.coupling, isCoupling);
         //frontLinkedTransport and backLinkedTransport bogies
         if (frontLinkedTransport != null){
             tag.setLong(NBTKeys.frontLinkMost, frontLinkedTransport.getMostSignificantBits());
@@ -371,9 +372,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             tag.setLong(NBTKeys.backLinkMost, backLinkedTransport.getMostSignificantBits());
             tag.setLong(NBTKeys.backLinkLeast, backLinkedTransport.getLeastSignificantBits());
         }
-        //more bools
-        tag.setBoolean(NBTKeys.creative, isCreative);
-        tag.setBoolean(NBTKeys.handbrake, brake);
         //owner
         tag.setLong(NBTKeys.ownerMost, owner.getMostSignificantBits());
         tag.setLong(NBTKeys.ownerLeast, owner.getLeastSignificantBits());
@@ -392,7 +390,6 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     tag.setTag(NBTKeys.inventoryItem + i, items.get(i).writeToNBT(new NBTTagCompound()));
                 }
             }
-            tag.setBoolean(NBTKeys.whitelist, itemIsWhitelist);
 
 
             tag.setInteger(NBTKeys.filterLength, itemFilter !=null? itemFilter.size():0);
@@ -468,13 +465,13 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (frontBogie!=null && backBogie != null){
             //handle movement.
             if (!hitboxHandler.getCollision(this)) {
-                frontBogie.minecartMove(rotationPitch, rotationYaw, brake);
-                backBogie.minecartMove(rotationPitch, rotationYaw, brake);
+                frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(0));
+                backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(0));
             } else {
                 frontBogie.addVelocity(-frontBogie.motionX,-frontBogie.motionY,-frontBogie.motionZ);
                 backBogie.addVelocity(-backBogie.motionX,-backBogie.motionY,-backBogie.motionZ);
-                frontBogie.minecartMove(rotationPitch, rotationYaw, brake);
-                backBogie.minecartMove(rotationPitch, rotationYaw, brake);
+                frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(0));
+                backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(0));
             }
 
             //position this
@@ -524,18 +521,22 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             Entity player = CommonProxy.getEntityFromUuid(owner);
             if (player!= null) {
                 ownerID = player.getEntityId();
-                this.dataWatcher.updateObject(19,ownerID);
-            }
-            if (updateWatchers && fluidTank != null){
-                dataWatcher.updateObject(20, fluidTank.amount);
             }
             //sync the linked transports with client, and on server, easier to use an ID than a UUID.
             Entity linkedTransport = CommonProxy.getEntityFromUuid(frontLinkedTransport);
-            this.dataWatcher.updateObject(21, linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0);
             frontLinkedID = linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0;
             linkedTransport = CommonProxy.getEntityFromUuid(backLinkedTransport);
-            this.dataWatcher.updateObject(22,linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0);
             backLinkedID = linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0;
+
+            if(updateWatchers){
+                if (fluidTank != null){
+                    dataWatcher.updateObject(20, fluidTank.amount);
+                }
+                this.dataWatcher.updateObject(19,ownerID);
+                this.dataWatcher.updateObject(18, (int)bools.toLongArray()[0]);
+                this.dataWatcher.updateObject(21, linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0);
+                this.dataWatcher.updateObject(22,linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0);
+            }
         }
 
         /*
@@ -632,7 +633,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     this.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.005,0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.005);
                 }
                 //manage coupling
-            } else if (isCoupling) {
+            } else if (getBoolean(4)) {
                 vectorCache[3][0] = getHitboxPositions()[0]-2;
                 vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
                 vectorCache[4][0] += posX;
@@ -644,7 +645,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).isCoupling) {
+                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).getBoolean(4)) {
                             frontLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
                             System.out.println(getEntityId() + " : rollingstock frontLinkedTransport linked : ");
                             updateWatchers = true;
@@ -671,7 +672,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     this.addVelocity(-(vectorCache[6][0] - vectorCache[6][0]) * 0.005,0, -(vectorCache[6][2] -vectorCache[6][2]) * 0.005);
                 }
                 //manage coupling
-            } else if (isCoupling) {
+            } else if (getBoolean(4)) {
                 vectorCache[3][0] = getHitboxPositions()[getHitboxPositions().length-1] + 2;
                 vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
                 vectorCache[4][0] += posX;
@@ -683,7 +684,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).isCoupling) {
+                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).getBoolean(4)) {
                             backLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
                             System.out.println(getEntityId() + " : rollingstock backLinkedTransport linked : ");
                             updateWatchers = true;
@@ -721,25 +722,25 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     public boolean ProcessPacket(int functionID){
         switch (functionID){
             case 4:{ //Toggle brake
-                brake = !brake;
+                setBoolean(0, !bools.get(0));
                 return true;
             }case 5:{ //Toggle lamp
-                lamp.isOn = !lamp.isOn;
+                setBoolean(2, !bools.get(2));
                 return true;
             }case 6:{ //Toggle locked
-                isLocked = ! isLocked;
+                setBoolean(1, !bools.get(1));
                 return true;
             }case 7:{ //Toggle coupling
-                isCoupling = !isCoupling;
+                setBoolean(4, !bools.get(4));
                 return true;
             }case 10:{ //Toggle transport creative mode
-                isCreative = !isCreative;
+                setBoolean(3, !bools.get(3));
                 return true;
             }case 12:{ //drop key to transport
                 entityDropItem(key, 1);
                 return true;
             }case 13:{ //unlink transports
-                Entity transport = null;
+                Entity transport;
                 //frontLinkedTransport
                 if (frontLinkedTransport != null){
                     transport = worldObj.getEntityByID(frontLinkedID);
@@ -804,16 +805,16 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         }
 
         //if the key is needed, like for trains and freight
-        if (isLocked && player.inventory.hasItem(key.getItem())) {
+        if (getBoolean(1) && player.inventory.hasItem(key.getItem())) {
             return true;
         }
         //if a ticket is needed like for passenger cars
-        if(isLocked && getRiderOffsets().length>1){
+        if(getBoolean(1) && getRiderOffsets().length>1){
             return player.inventory.hasItem(getTicketSlot().getItem());
         }
 
         //all else fails, just return if this is locked.
-        return !isLocked;
+        return !getBoolean(1);
 
     }
 
@@ -887,7 +888,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * itemTypes.ALL is basically just ignored, this is only called when you are not going to itemFilter by type.
      */
     public void setFilter(boolean isWhitelist, Item[] items){
-        this.itemIsWhitelist = isWhitelist;
+        setBoolean(5, isWhitelist);
         if (items != null) {
             itemFilter.clear();
             for (Item itm : items){
@@ -1012,7 +1013,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             return true;
         }
         //if we use a whitelist, only return true if the item is in the list.
-        if (itemIsWhitelist) {
+        if (getBoolean(5)) {
             return itemFilter.size() != 0 && itemFilter.contains(itemStack.getItem().getUnlocalizedName());
         } else {
             //if it's a blacklist do exactly the same as above but return the opposite value.
@@ -1125,14 +1126,14 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      */
     /**Returns true if the given fluid can be extracted.*/
     @Override
-    public boolean canDrain(ForgeDirection from, Fluid resource){return fluidTank != null && fluidTank.amount>0 && (fluidTank.getFluid() == resource || resource == null);}
+    public boolean canDrain(@Nullable ForgeDirection from, Fluid resource){return fluidTank != null && getTankAmount()>0 && (fluidTank.getFluid() == resource || resource == null);}
     /**Returns true if the given fluid can be inserted into the fluid tank.*/
     @Override
-    public boolean canFill(ForgeDirection from, Fluid resource){return getTankCapacity()>0 && (fluidTank == null || fluidTank.getFluid() != resource);}
-    //attenpt to drain a set amount
+    public boolean canFill(@Nullable ForgeDirection from, Fluid resource){return getTankCapacity()>0 && resource!=null && (fluidTank == null || fluidTank.getFluid() == resource);}
+    //attempt to drain a set amount
     @Override
-    public FluidStack drain(ForgeDirection from, int drain, boolean doDrain){
-        if (getTankCapacity() <1 || fluidTank == null || fluidTank.amount <1){
+    public FluidStack drain(@Nullable ForgeDirection from, int drain, boolean doDrain){
+        if (!canDrain(null,null)){
             return null;
         } else {
             int amountToDrain = getTankAmount() < drain?getTankAmount():drain;
@@ -1145,7 +1146,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                     updateWatchers=true;
                 }
             }
-            return new FluidStack(fluidTank.getFluid(), amountToDrain);
+            return fluidTank!=null?new FluidStack(fluidTank.getFluid(), amountToDrain):null;
         }
     }
 
@@ -1153,12 +1154,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * @see #drain(ForgeDirection, int, boolean) but with added filtering for fluid type.
      */
     @Override
-    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
-        if (getTankCapacity() <1 || fluidTank == null || fluidTank.getFluid() != resource.getFluid() || fluidTank.amount<1){
-            return null;
-        } else {
-            return drain(from, resource.amount,doDrain);
-        }
+    public FluidStack drain(@Nullable ForgeDirection from, FluidStack resource, boolean doDrain){
+        return drain(from, resource.amount,doDrain);
     }
     /**returns the amount of fluid in the tank. 0 if the tank is null*/
     public int getTankAmount(){
@@ -1172,9 +1169,9 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /**checks if the fluid can be put into the tank, and if doFill is true, will actually attempt to add the fluid to the tank.
      * @return the amount of fluid that was or could be put into the tank.*/
     @Override
-    public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
+    public int fill(@Nullable ForgeDirection from, FluidStack resource, boolean doFill){
         //if the tank has no capacity, or the filter prevents this fluid, or the fluid in the tank already isn't the same.
-        if (getTankCapacity() <1 || !filterFluids(resource.getFluid()) || (fluidTank != null && fluidTank.getFluid() != resource.getFluid())){
+        if (resource==null || !canFill(null, resource.getFluid())){
             return 0;
         }
         int amountToFill;

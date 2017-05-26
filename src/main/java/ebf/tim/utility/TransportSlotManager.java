@@ -169,7 +169,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     /**
      * <h2>Water Filtered Slot</h2>
      * basically exactly the same as a filtered slot but used to check for water via the fuel handler
-     * @see FuelHandler#isWater(ItemStack, GenericRailTransport)
+     * @see FuelHandler#isUseableFluid(ItemStack, GenericRailTransport)
      */
     private class waterSlot extends Slot{
         public waterSlot(IInventory p_i1824_1_, int p_i1824_2_, int p_i1824_3_, int p_i1824_4_) {
@@ -177,7 +177,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         }
         @Override
         public boolean isItemValid(ItemStack item) {
-            return FuelHandler.isWater(item, railTransport);
+            return FuelHandler.isUseableFluid(item, railTransport) != null;
         }
     }
 

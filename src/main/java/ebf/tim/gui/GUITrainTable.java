@@ -30,8 +30,10 @@ public class GUITrainTable extends GuiContainer {
      * Draw the background layer for the GuiContainer (everything behind the items)
      */
     protected void drawGuiContainerBackgroundLayer(float p_146976_1_, int p_146976_2_, int p_146976_3_) {
+        GL11.glPushMatrix();
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(craftingTableGuiTextures);
         this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, this.xSize, this.ySize);
+        GL11.glPopMatrix();
     }
 }

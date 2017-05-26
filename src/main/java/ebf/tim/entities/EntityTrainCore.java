@@ -25,8 +25,6 @@ import static ebf.tim.utility.RailUtility.rotatePoint;
  */
 public class EntityTrainCore extends GenericRailTransport {
 
-    /**used for non-steam based trains to define if it's actually on*/
-    public boolean isRunning = false;
     /**manages the items for fuel, and the fuel itself.*/
     public FuelHandler fuelHandler = new FuelHandler();
     /**defines the speed percentage the user is attempting to apply.*/
@@ -70,7 +68,6 @@ public class EntityTrainCore extends GenericRailTransport {
     @Override
     public void readSpawnData(ByteBuf additionalData) {
     super.readSpawnData(additionalData);
-        isRunning = additionalData.readBoolean();
         accelerator = additionalData.readInt();
         fuelHandler.fuel = additionalData.readInt();
     }
@@ -78,7 +75,6 @@ public class EntityTrainCore extends GenericRailTransport {
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         super.writeSpawnData(buffer);
-        buffer.writeBoolean(isRunning);
         buffer.writeInt(accelerator);
         buffer.writeInt(fuelHandler.fuel);
     }
@@ -86,7 +82,6 @@ public class EntityTrainCore extends GenericRailTransport {
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
-        isRunning = tag.getBoolean(NBTKeys.running);
         accelerator = tag.getInteger(NBTKeys.accelerator);
         this.fuelHandler.fuel = tag.getInteger(NBTKeys.transportFuel);
         this.fuelHandler.steamTank = tag.getInteger(NBTKeys.transportSteam);
@@ -96,7 +91,6 @@ public class EntityTrainCore extends GenericRailTransport {
     @Override
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
-        tag.setBoolean(NBTKeys.running,isRunning);
         tag.setInteger(NBTKeys.accelerator, accelerator);
         tag.setInteger(NBTKeys.transportFuel, fuelHandler.fuel);
         tag.setInteger(NBTKeys.transportSteam, fuelHandler.steamTank);
@@ -204,7 +198,7 @@ public class EntityTrainCore extends GenericRailTransport {
     public void manageLinks(){
         if(!worldObj.isRemote) {
 
-            if (frontLinkedTransport == null && isCoupling) {
+            if (frontLinkedTransport == null && getBoolean(4)) {
                 vectorCache[2] = rotatePoint(new double[]{getHitboxPositions()[0] - 2, 0, 0}, 0, rotationYaw, 0);
                 vectorCache[2][0] +=posX;
                 vectorCache[2][1] +=posY;
@@ -215,7 +209,7 @@ public class EntityTrainCore extends GenericRailTransport {
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).isCoupling) {
+                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).getBoolean(4)) {
                             frontLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
                             System.out.println(getEntityId() + " : train frontLinkedTransport linked : ");
                         }
@@ -224,7 +218,7 @@ public class EntityTrainCore extends GenericRailTransport {
             }
 
 
-            if (backLinkedTransport == null && isCoupling) {
+            if (backLinkedTransport == null && getBoolean(4)) {
                 vectorCache[3] = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1] + 2, 0, 0}, 0, rotationYaw, 0);
                 vectorCache[3][0] +=posX;
                 vectorCache[3][1] +=posY;
@@ -235,7 +229,7 @@ public class EntityTrainCore extends GenericRailTransport {
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).isCoupling) {
+                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).getBoolean(4)) {
                             backLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
                             System.out.println(getEntityId() + " : train backLinkedTransport linked : ");
                         }
@@ -251,7 +245,7 @@ public class EntityTrainCore extends GenericRailTransport {
         if (!super.ProcessPacket(functionID)){
             switch (functionID){
                 case 8:{ //toggle ignition
-                    isRunning = !isRunning;
+                    setBoolean(6, !getBoolean(6));
                     return true;
                 }case 9:{ //plays a sound on all clients within hearing distance
                     //the second to last value is volume, and idk what the last one is.
@@ -289,5 +283,7 @@ public class EntityTrainCore extends GenericRailTransport {
     public ResourceLocation getHorn(){return null;}
     /**gets the resource location for the running/chugging sound*/
     public ResourceLocation getRunning(){return null;}
+    /**gets the multiplication of fuel consumption, 1 is normal, 2 would be double, 1.5 would be halfway between the two, etc.*/
+    public float getEfficiency(){return 1;}
 
 }

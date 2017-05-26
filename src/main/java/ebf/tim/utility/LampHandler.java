@@ -20,8 +20,6 @@ public class LampHandler {
     public int Y;
     /**the last known Z position of the lamp*/
     public int Z;
-    /**if the lamp should even function in the first place*/
-    public boolean isOn;
     /**a check used to see if an update to the lamp position is even necessary, why update a position that isn't moving?*/
     private boolean shouldUpdate = true;
 
