@@ -13,9 +13,11 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -190,8 +192,8 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      * for instance if you have a wooden tanker car, you can deny fluids that are fire sources (like lava).
      */
     @Override
-    public boolean filterFluids(Fluid fluid){
-        return fluid== FluidRegistry.WATER;
+    public boolean canFill(@Nullable ForgeDirection from, Fluid resource){
+        return resource== FluidRegistry.WATER && super.canFill(from, resource);
     }
 
     /**

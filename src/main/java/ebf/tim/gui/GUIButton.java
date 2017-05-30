@@ -1,9 +1,15 @@
 package ebf.tim.gui;
 
+import ebf.tim.entities.EntityTrainCore;
+import ebf.tim.entities.GenericRailTransport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * <h2>Gui Button</h2>
@@ -15,8 +21,8 @@ import org.lwjgl.opengl.GL11;
 public class GUIButton extends GuiButton {
 
 
-    public GUIButton(int p_i1021_1_, int p_i1021_2_, int p_i1021_3_, int p_i1021_4_, int p_i1021_5_, String p_i1021_6_) {
-        super(p_i1021_1_,p_i1021_2_,p_i1021_3_,p_i1021_4_,p_i1021_5_,p_i1021_6_);
+    public GUIButton(int p_i1021_1_, int p_i1021_2_, int p_i1021_3_, int p_i1021_4_, int p_i1021_5_, String textID) {
+        super(p_i1021_1_,p_i1021_2_,p_i1021_3_,p_i1021_4_,p_i1021_5_,textID);
     }
 
     public int getHoverState(boolean p_146114_1_) {
@@ -38,12 +44,27 @@ public class GUIButton extends GuiButton {
             this.drawTexturedModalRect(this.xPosition + this.width / 2, this.yPosition, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
             this.mouseDragged(p_146112_1_, mouseX, mouseY);
             GL11.glPopMatrix();
-
-
         }
     }
 
     public boolean getMouseHover(){
         return field_146123_n;
     }
+
+    public List getDisplayString(GenericRailTransport transport){
+        switch (displayString){
+            case "unlink": {return Collections.singletonList(StatCollector.translateToLocal("gui.unlink"));}
+            case "dropkey": {return Collections.singletonList(StatCollector.translateToLocal("gui.dropkey"));}
+            case "locked": {return Collections.singletonList(StatCollector.translateToLocal("gui.locked." + transport.getBoolean(GenericRailTransport.boolValues.LOCKED)));}
+            case "coupler": {return Collections.singletonList(StatCollector.translateToLocal("gui.coupler." + transport.getBoolean(GenericRailTransport.boolValues.COUPLING)));}
+            case "lamp": {return Collections.singletonList(StatCollector.translateToLocal("gui.lamp")  + ((transport.getBoolean(GenericRailTransport.boolValues.LAMP))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off")));}
+            case "creative":{return Collections.singletonList(StatCollector.translateToLocal("gui.creativemode") + ((transport.getBoolean(GenericRailTransport.boolValues.CREATIVE))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off")));}
+            case "running":{return Collections.singletonList(StatCollector.translateToLocal("gui.trainisrunning")  + ((transport.getBoolean(GenericRailTransport.boolValues.RUNNING))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off")));}
+            case "brake": {return Collections.singletonList(StatCollector.translateToLocal("gui.brake")  + ((transport.getBoolean(GenericRailTransport.boolValues.BRAKE))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off")));}
+            case "horn": {return Collections.singletonList(StatCollector.translateToLocal("gui.horn"));}
+
+            default: {return Collections.singletonList("Missing Statement");}
+        }
+    }
+
 }

@@ -34,7 +34,7 @@ public class EntityTrainCore extends GenericRailTransport {
 
 
 
-    /**
+    /*
     * <h2> Base train Constructor</h2>
     */
 
@@ -119,16 +119,16 @@ public class EntityTrainCore extends GenericRailTransport {
         GenericRailTransport backCheck = (GenericRailTransport) CommonProxy.getEntityFromUuid(backCheckID);
 
         //if frontLinkedTransport is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
-        if (frontCheck instanceof EntityTrainCore){
-            current *= 1.25f;
-        } else if (frontCheck instanceof EntityRollingStockCore){
-            current *=0.9f;
+        if (frontCheck instanceof EntityTrainCore && frontCheck.getBoolean(boolValues.RUNNING)){
+            current += ((accelerator / 6f) * 0.01302083f) *(((EntityTrainCore) frontCheck).getAcceleration()*0.5f);
+        } else if (frontCheck != null && frontCheck.weightTons() !=0){
+            current *=(0.01302083f * frontCheck.weightTons());
         }
         //if backLinkedTransport is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
-        if (backCheck instanceof EntityTrainCore){
-            current *= 1.25f;
-        } else if (backCheck instanceof EntityRollingStockCore){
-            current *=0.9f;
+        if (backCheck instanceof EntityTrainCore && backCheck.getBoolean(boolValues.RUNNING)){
+            current += ((accelerator / 6f) * 0.01302083f) *(((EntityTrainCore) backCheck).getAcceleration()*0.5f);
+        } else if (backCheck != null && backCheck.weightTons() !=0){
+            current *=(0.01302083f * backCheck.weightTons());
         }
 
         UUID nextFront = null;
@@ -167,7 +167,7 @@ public class EntityTrainCore extends GenericRailTransport {
 
         if(accelerator!=0 && frontBogie != null && backBogie != null) {
             //acceleration is scaled down to fit the scale of the trains.
-            vectorCache[0][0] = ((accelerator / 6f) * 0.01302083f) * getAcceleration();
+            vectorCache[0][0] = calculateDrag(((accelerator / 6f) * 0.01302083f) * getAcceleration(), frontLinkedTransport, backLinkedTransport);
 
             //cap speed to max.
             if (frontBogie.motionX+ frontBogie.motionZ > getMaxSpeed() || frontBogie.motionX+ frontBogie.motionZ <-getMaxSpeed() ||
@@ -198,7 +198,7 @@ public class EntityTrainCore extends GenericRailTransport {
     public void manageLinks(){
         if(!worldObj.isRemote) {
 
-            if (frontLinkedTransport == null && getBoolean(4)) {
+            if (frontLinkedTransport == null && getBoolean(boolValues.COUPLING)) {
                 vectorCache[2] = rotatePoint(new double[]{getHitboxPositions()[0] - 2, 0, 0}, 0, rotationYaw, 0);
                 vectorCache[2][0] +=posX;
                 vectorCache[2][1] +=posY;
@@ -209,7 +209,7 @@ public class EntityTrainCore extends GenericRailTransport {
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).getBoolean(4)) {
+                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).getBoolean(boolValues.COUPLING)) {
                             frontLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
                             System.out.println(getEntityId() + " : train frontLinkedTransport linked : ");
                         }
@@ -218,7 +218,7 @@ public class EntityTrainCore extends GenericRailTransport {
             }
 
 
-            if (backLinkedTransport == null && getBoolean(4)) {
+            if (backLinkedTransport == null && getBoolean(boolValues.COUPLING)) {
                 vectorCache[3] = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1] + 2, 0, 0}, 0, rotationYaw, 0);
                 vectorCache[3][0] +=posX;
                 vectorCache[3][1] +=posY;
@@ -229,7 +229,7 @@ public class EntityTrainCore extends GenericRailTransport {
 
                 if (list.size() > 0) {
                     for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).getBoolean(4)) {
+                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).getBoolean(boolValues.COUPLING)) {
                             backLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
                             System.out.println(getEntityId() + " : train backLinkedTransport linked : ");
                         }
@@ -245,7 +245,7 @@ public class EntityTrainCore extends GenericRailTransport {
         if (!super.ProcessPacket(functionID)){
             switch (functionID){
                 case 8:{ //toggle ignition
-                    setBoolean(6, !getBoolean(6));
+                    setBoolean(boolValues.RUNNING, !getBoolean(boolValues.RUNNING));
                     return true;
                 }case 9:{ //plays a sound on all clients within hearing distance
                     //the second to last value is volume, and idk what the last one is.
@@ -269,7 +269,7 @@ public class EntityTrainCore extends GenericRailTransport {
         return false;
     }
 
-    /**
+    /*
      * <h2>Inherited variables</h2>
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
      */

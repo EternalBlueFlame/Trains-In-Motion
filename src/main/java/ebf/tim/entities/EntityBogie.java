@@ -27,7 +27,7 @@ import net.minecraft.world.World;
  * this controls the behavior of the bogies in trains and rollingstock.
  * @author Eternal Blue Flame
  */
-public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart, IEntityAdditionalSpawnData {
+public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart {
 
     /** used to keep a reference to the parent train/rollingstock.*/
     private int parentId = 0;
@@ -58,31 +58,9 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         posX = xPos;
         posY = yPos;
         posZ = zPos;
-            parentId = parent;
-            isFront = front;
+        parentId = parent;
+        isFront = front;
     }
-
-    /**Small networking check to add the bogie to the host train/rollingstock. Or to remove the bogie from the world if the host doesn't exist.*/
-    @Override
-    public void readSpawnData(ByteBuf additionalData) {
-        isFront = additionalData.readBoolean();
-        parentId = additionalData.readInt();
-        if (parentId != 0) {
-            GenericRailTransport parent = ((GenericRailTransport) worldObj.getEntityByID(parentId));
-            if (parent != null){
-                parent.setBogie(this, isFront);
-                return;
-            }
-        }
-        worldObj.removeEntity(this);
-    }
-    /**sends the networking check on spawn/respawn so this can see if it should exist in the first place.*/
-    @Override
-    public void writeSpawnData(ByteBuf buffer) {
-        buffer.writeBoolean(isFront);
-        buffer.writeInt(parentId);
-    }
-
     /**used by the game to tell different types of minecarts from eachother, this doesnt effect us, so just use something random*/
     @Override
     public int getMinecartType() {
@@ -153,7 +131,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         //define the yaw from the super
         this.setRotation(yaw, pitch);
         //be sure to remove this if the parent is null, or in a different castle, I mean world.
-        if (worldObj.getEntityByID(parentId) == null){
+        if (ticksExisted %5 ==0 && worldObj.getEntityByID(parentId) == null){
             worldObj.removeEntity(this);
         }
 
@@ -186,10 +164,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
             //apply brake
             if (brake){
-                this.motionX *= 0.75;
-                this.motionZ *= 0.75;
-                this.cartVelocityX *= 0.75;
-                this.cartVelocityZ *= 0.75;
+                setVelocity(motionX *0.75, motionY, motionZ*0.75);
             }
 
             //update on normal rails
@@ -279,8 +254,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         if (motionSqrt > 2.0D) {
             motionSqrt = 2.0D;
         }
-        motionX = motionSqrt * railPathX / railPathSqrt;
-        motionZ = motionSqrt * railPathZ / railPathSqrt;
+        setVelocity(motionSqrt * railPathX / railPathSqrt, motionY, motionSqrt * railPathZ / railPathSqrt);
 
         if (cachedMotionX !=0 || cachedMotionZ !=0) {
             //define the motion based on the rail path for current movement, and the next, so they are in sync.

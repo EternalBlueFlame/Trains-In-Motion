@@ -10,8 +10,8 @@
 package ebf.tim.models.trains;
 
 import ebf.tim.models.StaticModelAnimator;
-import ebf.tim.models.tmt.ModelRendererTurbo;
 import ebf.tim.models.tmt.ModelBase;
+import ebf.tim.models.tmt.ModelRendererTurbo;
 import net.minecraft.entity.Entity;
 
 public class Brigadelok_080 extends ModelBase

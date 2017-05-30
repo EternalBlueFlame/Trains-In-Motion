@@ -1,24 +1,21 @@
 package ebf.tim.utility;
 
 
-import ebf.tim.TrainsInMotion;
+import cofh.api.energy.EnergyStorage;
+import cofh.api.energy.IEnergyContainerItem;
+import cofh.api.energy.ItemEnergyContainer;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
-
-import static ebf.tim.TrainsInMotion.transportTypes.ELECTRIC;
-import static ebf.tim.TrainsInMotion.transportTypes.MAGLEV;
 
 /**
  * <h1>Fuel management for trains</h1>
@@ -32,6 +29,7 @@ public class FuelHandler{
 	public int fuel =0;
 	/**the steam tank, used for steam and nuclear steam trains*/
 	public int steamTank=0;
+	public Item lastFuelConsumed = null;
 
 	/**
 	 * <h2>check if an item is a usable fuel</h2>
@@ -59,8 +57,8 @@ public class FuelHandler{
 					return new FluidStack(FluidRegistry.WATER, 250);
 				} else if (itemStack.getItem() == Item.getItemFromBlock(Blocks.redstone_block)){
 					return new FluidStack(FluidRegistry.WATER,2250);
-				}else{
-					//TODO:cofh get rf from item
+				}else if (itemStack.getItem() instanceof IEnergyContainerItem){
+					return new FluidStack(FluidRegistry.WATER, ((IEnergyContainerItem) itemStack.getItem()).extractEnergy(itemStack, 250, false));
 				}
 				return null;
 			}
@@ -80,7 +78,8 @@ public class FuelHandler{
 		//manage solid fuel
 		if (isFuel(train.getStackInSlot(0), train) && fuel + TileEntityFurnace.getItemBurnTime(train.getStackInSlot(0)) < train.getMaxFuel()) {
 			fuel += TileEntityFurnace.getItemBurnTime(train.getStackInSlot(0));
-			if (!train.getBoolean(3)) {
+			lastFuelConsumed = train.getStackInSlot(0).getItem();
+			if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
 				train.decrStackSize(0, 1);
 			}
 		}
@@ -88,7 +87,7 @@ public class FuelHandler{
 		if (train.getStackInSlot(1) != null &&
 				train.fill(null, isUseableFluid(train.getStackInSlot(1), train), false) >= FluidContainerRegistry.getFluidForFilledItem(train.getStackInSlot(1)).amount) {
 			train.fill(null, isUseableFluid(train.getStackInSlot(1), train), true);
-			if (!train.getBoolean(3)) {
+			if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
 				train.decrStackSize(1, 1);
 				train.addItem(new ItemStack(Items.bucket));
 			}
@@ -115,7 +114,7 @@ public class FuelHandler{
 					steamTank= train.getTankCapacity();
 				}
 
-			} else if (!train.getBoolean(3)){
+			} else if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)){
 				train.worldObj.createExplosion(train, train.posX, train.posY, train.posZ, 5f, false);
 				train.dropItem(train.getItem(), 1);
 				train.attackEntityFromPart(null, new EntityDamageSource("overheat", train),100);
@@ -126,11 +125,11 @@ public class FuelHandler{
 		}
 
 		if (steamTank >0){
-			train.setBoolean(6, true);
+			train.setBoolean(GenericRailTransport.boolValues.RUNNING, true);
 			//steam is expelled through the pistons to push them back and forth, but even when the accelerator is off, a degree of steam is still escaping.
 			steamTank -=(5*train.getEfficiency())*((train.accelerator)*train.getEfficiency());
 		} else {
-			train.setBoolean(6, false);
+			train.setBoolean(GenericRailTransport.boolValues.RUNNING, false);
 		}
 	}
 
@@ -138,18 +137,21 @@ public class FuelHandler{
 
 	public void manageElectric(EntityTrainCore train){
 		//add redstone to the fuel tank
-		if (train.fill(null, isUseableFluid(train.getStackInSlot(1), train), false)>0 && !train.getBoolean(3)) {
+		if (train.fill(null, isUseableFluid(train.getStackInSlot(1), train), false)>0) {
 			train.fill(null, isUseableFluid(train.getStackInSlot(1), train), true);
-			train.decrStackSize(0,1);
+			lastFuelConsumed = train.getStackInSlot(0).getItem();
+			if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
+				train.decrStackSize(0, 1);
+			}
 		}
 
 		//use stored energy
-		if (train.getBoolean(6)){
+		if (train.getBoolean(GenericRailTransport.boolValues.RUNNING)){
 			//electric trains run at a generally set rate which is multiplied at the square of speed.
 			if (train.drain(null, MathHelper.floor_double((5*train.getEfficiency()) + Math.copySign(train.accelerator, 1)*(15*train.getEfficiency())), false)!= null){
 				train.drain(null, MathHelper.floor_double((5*train.getEfficiency()) + Math.copySign(train.accelerator, 1)*(15*train.getEfficiency())), true);
 			} else {
-				train.setBoolean(6, false);
+				train.setBoolean(GenericRailTransport.boolValues.RUNNING, false);
 			}
 		}
 	}
@@ -160,7 +162,7 @@ public class FuelHandler{
 		if (transport.getStackInSlot(1) != null &&
 				transport.fill(null, isUseableFluid(transport.getStackInSlot(1), transport), false) >= FluidContainerRegistry.getFluidForFilledItem(transport.getStackInSlot(1)).amount) {
 			transport.fill(null, isUseableFluid(transport.getStackInSlot(1), transport), true);
-			if (!transport.getBoolean(3)) {
+			if (!transport.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
 				transport.decrStackSize(1, 1);
 				transport.addItem(new ItemStack(Items.bucket));
 			}

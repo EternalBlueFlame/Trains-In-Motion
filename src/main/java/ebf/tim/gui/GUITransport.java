@@ -131,7 +131,7 @@ public class GUITransport extends GuiContainer {
         //draw the hover text for the buttons.
         for (Object o : buttonList){
             if(((GUIButton)o).getMouseHover()) {
-                drawHoveringText(Collections.singletonList(((GUIButton)o).displayString), mouseX, mouseY, mc.fontRenderer);
+                drawHoveringText(((GUIButton)o).getDisplayString(transport), mouseX, mouseY, mc.fontRenderer);
             }
         }
 
@@ -151,32 +151,32 @@ public class GUITransport extends GuiContainer {
         if (!(transport instanceof EntityTrainCore) && transport.getInventorySize().getRow()<6) {
             //generic to all
             if (player.getEntityId() == transport.getOwnerID()) {
-                this.buttonList.add(new GUIButton(13, guiLeft + 8, guiTop + 174, 18, 18, StatCollector.translateToLocal("gui.unlink")));
-                this.buttonList.add(new GUIButton(12, guiLeft + 62, guiTop + 174, 18, 18, StatCollector.translateToLocal("gui.dropkey")));
+                this.buttonList.add(new GUIButton(13, guiLeft + 8, guiTop + 174, 18, 18, "unlink"));
+                this.buttonList.add(new GUIButton(12, guiLeft + 62, guiTop + 174, 18, 18, "dropkey"));
             }
-            this.buttonList.add(new GUIButton(6, guiLeft + 26, guiTop + 174, 18, 18, StatCollector.translateToLocal("gui.locked." + transport.getBoolean(1))));
-            this.buttonList.add(new GUIButton(7, guiLeft + 44, guiTop + 174, 18, 18, StatCollector.translateToLocal("gui.coupler." + transport.getBoolean(4))));
+            this.buttonList.add(new GUIButton(6, guiLeft + 26, guiTop + 174, 18, 18, "locked"));
+            this.buttonList.add(new GUIButton(7, guiLeft + 44, guiTop + 174, 18, 18, "coupler"));
         } else {
             //generic to all
             if (player.getEntityId() == transport.getOwnerID()) {
-                this.buttonList.add(new GUIButton(13, guiLeft+112, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.unlink")));
-                this.buttonList.add(new GUIButton(12, guiLeft + 166, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.dropkey")));
+                this.buttonList.add(new GUIButton(13, guiLeft+112, guiTop + 166, 18, 18, "unlink"));
+                this.buttonList.add(new GUIButton(12, guiLeft + 166, guiTop + 166, 18, 18, "dropkey"));
             }
-            this.buttonList.add(new GUIButton(6, guiLeft + 130, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.locked." + transport.getBoolean(1))));
-            this.buttonList.add(new GUIButton(7, guiLeft + 148, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.coupler." + transport.getBoolean(4))));
+            this.buttonList.add(new GUIButton(6, guiLeft + 130, guiTop + 166, 18, 18, "locked"));
+            this.buttonList.add(new GUIButton(7, guiLeft + 148, guiTop + 166, 18, 18, "coupler"));
             if (transport.getLampOffset().yCoord>1) {
-                this.buttonList.add(new GUIButton(5, guiLeft + 238, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.lamp")  + ((transport.getBoolean(2))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))));
+                this.buttonList.add(new GUIButton(5, guiLeft + 238, guiTop + 166, 18, 18, "lamp"));
             }
             //train specific
             if (transport instanceof EntityTrainCore) {
                 if (player.capabilities.isCreativeMode) {
-                    this.buttonList.add(new GUIButton(11, guiLeft + 184, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.creativemode") + ((transport.getBoolean(0))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))));
+                    this.buttonList.add(new GUIButton(11, guiLeft + 184, guiTop + 166, 18, 18, "creative"));
                 }
                 if (transport.getType() != TrainsInMotion.transportTypes.STEAM) {
-                    this.buttonList.add(new GUIButton(10, guiLeft + 202, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.trainisrunning")  + ((((EntityTrainCore)transport).getBoolean(6))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))));
+                    this.buttonList.add(new GUIButton(10, guiLeft + 202, guiTop + 166, 18, 18, "running"));
                 }
-                this.buttonList.add(new GUIButton(4, guiLeft + 220, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.brake")  + ((transport.getBoolean(0))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off"))));
-                this.buttonList.add(new GUIButton(8, guiLeft + 256, guiTop + 166, 18, 18, StatCollector.translateToLocal("gui.horn")));
+                this.buttonList.add(new GUIButton(4, guiLeft + 220, guiTop + 166, 18, 18, "brake"));
+                this.buttonList.add(new GUIButton(8, guiLeft + 256, guiTop + 166, 18, 18, "horn"));
 
             }
         }
@@ -208,7 +208,7 @@ public class GUITransport extends GuiContainer {
             case ELECTRIC: case MAGLEV:{return StatCollector.translateToLocal("gui.rf") + ":";}
             case HYDROGEN_DIESEL:{return StatCollector.translateToLocal("gui.hydrogencell") + ":";}
             case NUCLEAR_ELECTRIC:{return StatCollector.translateToLocal("gui.coolant") + ":";}
-            default:{return "";}
+            default:{return "Unknown Tank";}
         }
     }
 

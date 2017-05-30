@@ -42,6 +42,8 @@ public class NBTKeys {
     public static final String ownerMost = "extended.owner.most";
     /**the least significant bits for the owner in GenericRailTransport*/
     public static final String ownerLeast = "extended.owner.least";
+    /**the length of the filter items in GenericRailTransport*/
+    public static final String bools = "extended.bools.";
 
     //lists
     /**the list of inventory items in GenericRailTransport*/
@@ -57,5 +59,12 @@ public class NBTKeys {
     public static final String transportFuel = "fuel.main";
     /**the storage for steam in FuelHandler, only used for steam and nuclear steam trains*/
     public static final String transportSteam = "fuel.steam";
+
+
+    //positions
+    public static final String frontBogieX = "extended.front.x";
+    public static final String frontBogieZ = "extended.front.z";
+    public static final String backBogieX = "extended.back.x";
+    public static final String backBogieZ = "extended.back.z";
 
 }

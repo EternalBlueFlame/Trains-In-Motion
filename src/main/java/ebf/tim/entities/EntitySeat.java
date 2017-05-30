@@ -16,7 +16,7 @@ import net.minecraft.world.World;
  * in 1.9+ this class is no longer necessary.
  * @author Eternal Blue Flame
  */
-public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
+public class EntitySeat extends Entity {
 
     /**
      * <h2>variables</h2>
@@ -63,7 +63,11 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
     public void entityInit(){}
     /**actually useless for this entity*/
     @Override
-    public void onUpdate() {}
+    public void onUpdate() {
+        if(ticksExisted %5 ==0 && worldObj.getEntityByID(parentId) instanceof GenericRailTransport){
+            worldObj.removeEntity(this);
+        }
+    }
     /**returns the bounding box, this doesn't handle collisions, soo.. null.*/
     @Override
     public AxisAlignedBB getBoundingBox(){
@@ -90,36 +94,11 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
     @Override
     public boolean writeMountToNBT(NBTTagCompound tagCompound){return false;}
 
-
-    /**
-     * <h2>Spawn Data</h2>
-     * Small networking check to add the seat to the host train/rollingstock. Or to remove the seat from the world if the host doesn't exist.
-     */
-    @Override
-    public void readSpawnData(ByteBuf additionalData) {
-        parentId = additionalData.readInt();
-        if (parentId != 0) {
-            GenericRailTransport parent = ((GenericRailTransport) worldObj.getEntityByID(parentId));
-            if (parent != null){
-                parent.addseats(this);
-            } else {
-                worldObj.removeEntity(this);
-            }
-        } else {
-            worldObj.removeEntity(this);
-        }
-    }
-
     @Override
     public void updateRiderPosition() {
         if (this.riddenByEntity != null) {
             this.riddenByEntity.setPosition(this.posX, this.posY, this.posZ);
         }
-    }
-
-    @Override
-    public void writeSpawnData(ByteBuf buffer) {
-        buffer.writeInt(parentId);
     }
 
     /**

@@ -2,10 +2,7 @@ package ebf.tim.utility;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ebf.tim.entities.EntityBogie;
-import ebf.tim.entities.EntityRollingStockCore;
-import ebf.tim.entities.EntityTrainCore;
-import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.entities.*;
 import net.minecraft.block.BlockAir;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
@@ -154,8 +151,9 @@ public class HitboxHandler {
             list = transport.worldObj.getEntitiesWithinAABBExcludingEntity(transport, tempBox);
             if (list != null && list.size()>0) {
                 for (Object entity: list) {
-                    //if it's a bogie, continue to the next itteration.
-                    if (entity instanceof EntityBogie) {
+                    //if it's something we don't collide with, skip to next iteration.
+                    if (entity instanceof EntityBogie || entity instanceof GenericRailTransport ||
+                            ((Entity) entity).ridingEntity instanceof EntitySeat || ((Entity) entity).ridingEntity instanceof GenericRailTransport || hitboxList.contains(entity)) {
                         continue;
                     }
                     /*if it's an item, check if we should add it to the inventory, maybe do it, and continue to the next itteration*/
@@ -164,32 +162,6 @@ public class HitboxHandler {
                             transport.isItemValidForSlot(0,((EntityItem) entity).getEntityItem()) && ((EntityItem) entity).posY > transport.posY+1){
                             transport.addItem(((EntityItem) entity).getEntityItem());
                             ((EntityItem) entity).worldObj.removeEntity((EntityItem) entity);
-                        }
-                        continue;
-                    }
-                    /*if it's another multipart hitbox, check if it's something we are supposed to collide with, and maybe continue to the next itteration*/
-                    if (entity instanceof MultipartHitbox) {
-                        if(!hitboxList.contains(entity) && (transport.frontLinkedID != ((MultipartHitbox) entity).parent.getEntityId() ||
-                                transport.backLinkedTransport != ((MultipartHitbox) entity).parent.getPersistentID())) {
-                            //in the case of trying to move the rollingstock
-                            if (((Entity) entity).posZ > transport.posZ + 0.5) {
-                                vectorCache[0][0] = -0.01f;
-                                vectorCache[0][2] =0;
-                            } else if (((Entity) entity).posZ < transport.posZ - 0.5) {
-                                vectorCache[0][0] = 0.01f;
-                                vectorCache[0][2] =0;
-                            }
-                            if (((Entity) entity).posX > transport.posX + 0.5) {
-                                vectorCache[0][2] = 0.01f;
-                                vectorCache[0][0] =0;
-                            } else if (((Entity) entity).posX < transport.posX - 0.5) {
-                                vectorCache[0][2] = -0.01f;
-                                vectorCache[0][0] =0;
-                            }
-                            vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], 0, Math.copySign(transport.rotationYaw, 1), 0);
-                            transport.frontBogie.addVelocity(vectorCache[1][0], 0, vectorCache[1][2]);
-                            transport.backBogie.addVelocity(vectorCache[1][0], 0, vectorCache[1][2]);
-                            ((Entity) entity).applyEntityCollision(transport);
                         }
                         continue;
                     }
@@ -224,14 +196,17 @@ public class HitboxHandler {
                         }
 
                         /*however if this was n entity Train Core, we just have to figure out if we should roadkill it.*/
-                    } else if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
-                        ((Entity) entity).attackEntityFrom(new EntityDamageSource("train", transport), (float) (transport.frontBogie.motionX + transport.frontBogie.motionZ) * 1000);
+                    } else if (transport.frontVelocityX > 0.5 || transport.frontVelocityX < -0.5 || transport.frontVelocityZ > 0.5 || transport.frontVelocityZ < -0.5) {
+                        ((Entity) entity).attackEntityFrom(new EntityDamageSource("train", transport), (float) (transport.frontVelocityX + transport.frontVelocityZ) * 1000);
                         if (((EntityTrainCore) transport).worldObj.isRemote) {
                             ((Entity) entity).applyEntityCollision(transport);
                         }
                     } else {
-                        double[] pos = RailUtility.rotatePoint(new Random().nextBoolean()?new double[]{0.05,0,0}:new double[]{0,0,0.05}, 0,transport.rotationYaw,0);
-                        ((Entity) entity).addVelocity(pos[0], -0.5, pos[2]);
+                        boolean bool = new Random().nextBoolean();
+                        vectorCache[0][0] = bool?0.05:0;
+                        vectorCache[0][2] = bool?0:0.05;
+                        vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], 0,transport.rotationYaw,0);
+                        ((Entity) entity).addVelocity(vectorCache[0][0], -0.5, vectorCache[0][2]);
                         ((Entity) entity).applyEntityCollision(transport);
                     }
                 }
