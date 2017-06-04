@@ -24,6 +24,8 @@ public class ParticleFX {
     public float posY;
     /*the Z position of the particle*/
     public float posZ;
+    /*returns if the particle should render or not*/
+    public boolean shouldRender = false;
     /*the spawn offset of the particle*/
     private final double[] offset;
     /*the color to render the particle as*/
@@ -90,12 +92,12 @@ public class ParticleFX {
      * call this from the host's onUpdate to update the position of the particle.
      * @param host the host entity to get the world object from.
      */
-    public void onUpdate(Entity host, double x, double y, double z){
+    public void onUpdate(Entity host, double x, double y, double z, boolean hostIsRunning){
         posX = (float) x;
         posY = (float) y;
         posZ = (float) z;
         //if the lifespan is out we reset the information, as if we just spawned a new particle.
-        if (this.ticksExisted > this.lifespan) {
+        if (hostIsRunning && this.ticksExisted > this.lifespan) {
             colorTint = (rand.nextInt(60) - 30)* 0.005f;
             lifespan = rand.nextInt(60) +100;
             ticksExisted =0;
@@ -103,19 +105,38 @@ public class ParticleFX {
             motionX = originMotionX;
             motionY = originMotionY;
             motionZ = originMotionZ;
+            shouldRender = true;
+        } else if (this.ticksExisted > this.lifespan) {
+            //if the transport isn't running and this has finished it's movement, set it' position to the transport and set that it shouldn't render.
+            this.boundingBox.setBounds(posX, posY, posZ , posX,  posY, posZ);
+            shouldRender = false;
+            return;
         }
 
         //set the old motion values so we can compare them later.
         oldX = motionX;
         oldY = motionY;
         oldZ = motionZ;
+        //instance a bounding box variable now so we won't have to cast as much later.
+        AxisAlignedBB box;
 
         list = host.worldObj.getCollidingBoundingBoxes(host, this.boundingBox.addCoord(motionX, motionY, motionZ));
+        //iterate the list and check for collisions
+        for (Object obj : list) {
+            box = ((AxisAlignedBB) obj);
+            if (motionY <0.001 || motionY >-0.001) {
+                motionY = box.calculateYOffset(this.boundingBox, motionY);
+            }
+            if (motionX <0.0001 || motionX >-0.0001) {
+                motionX = box.calculateXOffset(this.boundingBox, motionX);
+            }
+            if (motionZ <0.0001 || motionZ >-0.0001) {
+                motionZ = box.calculateZOffset(this.boundingBox, motionZ);
+            }
+        }
+
         //check for collisions on the Y vector and apply movement accordingly, also always keep it attempting to float up.
         if (motionY <0.001 || motionY >-0.001) {
-            for (Object obj : list) {
-                motionY = ((AxisAlignedBB) obj).calculateYOffset(this.boundingBox, motionY);
-            }
             this.boundingBox.offset(0.0D, motionY, 0.0D);
 
             if (oldY != motionY) {
@@ -132,9 +153,6 @@ public class ParticleFX {
 
         //check for collisions on the x axis.
         if (motionX <0.0001 || motionX >-0.0001) {
-            for (Object obj : list) {
-                motionX = ((AxisAlignedBB) obj).calculateXOffset(this.boundingBox, motionX);
-            }
             this.boundingBox.offset(motionX, 0.0D, 0.0D);
             if (oldX != motionX) {
                 motionX = this.motionX*0.75d;
@@ -144,9 +162,6 @@ public class ParticleFX {
 
         //check for collisions on the Z axis.
         if (motionZ <0.0001 || motionZ >-0.0001) {
-            for (Object obj : list) {
-                motionZ = ((AxisAlignedBB) obj).calculateZOffset(this.boundingBox, motionZ);
-            }
             this.boundingBox.offset(0.0D, 0.0D, motionZ);
             if (oldZ != motionZ) {
                 motionZ = this.motionZ*0.75d;
@@ -167,7 +182,7 @@ public class ParticleFX {
      * @param posZ the z position of the renderer
      */
     public static void doRender(ParticleFX entity, double posX, double posY, double posZ) {
-        if(entity.ticksExisted==0){
+        if(entity.ticksExisted==0 || !entity.shouldRender){
             return;
         }
         GL11.glPushMatrix();

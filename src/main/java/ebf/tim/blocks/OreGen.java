@@ -1,7 +1,7 @@
 package ebf.tim.blocks;
 
 import cpw.mods.fml.common.IWorldGenerator;
-import ebf.tim.registry.GenericRegistry;
+import ebf.tim.utility.CommonProxy;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -25,7 +25,7 @@ public class OreGen implements IWorldGenerator{
 	public void generate(Random random, int chunkX, int chunkZ, World world, IChunkProvider chunkGenerator, IChunkProvider chunkProvider) {
 		if (world.provider.dimensionId ==0) {
 			for (int i = 0; i < 3; i++) {
-				new WorldGenMinable(GenericRegistry.blockFluidOil, 4 + random.nextInt(30 - 4), Blocks.stone).generate(world, random, chunkX * 16 + random.nextInt(16), random.nextInt(27) + 3, chunkZ * 16 + random.nextInt(16));
+				new WorldGenMinable(CommonProxy.blockFluidOil, 4 + random.nextInt(30 - 4), Blocks.stone).generate(world, random, chunkX * 16 + random.nextInt(16), random.nextInt(27) + 3, chunkZ * 16 + random.nextInt(16));
 			}
 		}
 	}

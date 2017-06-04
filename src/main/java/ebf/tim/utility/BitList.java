@@ -10,7 +10,7 @@ import java.util.List;
  * @author Eternal Blue Flame
  */
 public class BitList {
-    private boolean[] bits = new boolean[]{false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
+    private boolean[] bits = new boolean[16];
 
     /*get a value in the array, index must be between 0 and 15*/
     public boolean get(int index){

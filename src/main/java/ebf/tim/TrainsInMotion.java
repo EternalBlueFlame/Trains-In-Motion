@@ -16,7 +16,6 @@ import ebf.tim.items.TiMTab;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.networking.PacketMount;
 import ebf.tim.networking.PacketRemove;
-import ebf.tim.registry.GenericRegistry;
 import ebf.tim.registry.TransportRegistry;
 import ebf.tim.utility.ChunkHandler;
 import ebf.tim.utility.ClientProxy;
@@ -139,7 +138,6 @@ public class TrainsInMotion {
      */
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        GenericRegistry.RegisterStuff();
 
         //loop for registering the entities. the values needed are the class, entity name, entity ID, mod instance, update range, update rate, and if it does velocity things,
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", 15, TrainsInMotion.instance, 60, 1, true);

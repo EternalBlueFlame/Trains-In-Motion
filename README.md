@@ -37,9 +37,9 @@ Date: December, 2016
 <ul>
 <li> Models must match the Mod's Art-style.</li>
 <li> Format is limited to <b>.java</b> models only; you can use tools such as BDCraft Cubik, SMP Toolbox, Technie or even writing it manually.</li>
-<li> Model scale is <b>1.25 blocks/meters wide max</b>, or <b>1/7.68 scale</b>. In other words they must fit on minecart rails.</li>
-<li> Technie models are limited to 512x512 base resolution for textures.</li>
-<li> Textures must be in <b>.png</b> format. And are preferred to be at 4 times the resolution of the texture base size defined in the model. (this is 4096x4096 in most cases)</li>
+<li> Model scale is <b>0.75 meters, or, 12 microblocks, wide for the wheel base</b>, In other words they must fit on minecart rails. It is reccomended the body should be 1.25+ meters, or, 20 microblocks, wide.</li>
+<li> Technie models are limited to 512x512 base resolution for textures, reguardless of if you actually need that much space.</li>
+<li> Textures must be in <b>.png</b> format. And are preferred to be at 4 times the resolution of the texture base size defined in the model (this is 4096x4096 in most cases).</li>
 <li> Audio must be in <b>.ogg</b> format and no more than 192kb/s.</li>
 </ul>
 </td>

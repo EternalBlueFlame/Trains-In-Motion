@@ -6,6 +6,9 @@ import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.common.registry.GameRegistry;
+import ebf.tim.blocks.BlockRailOverride;
+import ebf.tim.blocks.LampBlock;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
@@ -15,18 +18,25 @@ import ebf.tim.gui.GUITransport;
 import ebf.tim.gui.HUDTrain;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
-import ebf.tim.registry.GenericRegistry;
+import ebf.tim.models.rails.ModelRailCurveVerySmall;
+import ebf.tim.models.rails.ModelRailStraight;
 import ebf.tim.registry.TransportRegistry;
+import ebf.tim.registry.URIRegistry;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,12 +123,22 @@ public class ClientProxy extends CommonProxy {
         KeyReverse.setKeyCode(config.getInt("ReverseKeybind", "Keybinds", 33, 0, 0, ""));
     }
 
+    /**the client only lamp block*/
+    public static Block lampBlock= new LampBlock();
+
     /**
      * <h2>Client Register</h2>
      * Used for registering client only functions and redirecting registering the items in the train registry with their own textures and models.
      */
     @Override
     public void register() {
+        super.register();
+        GameRegistry.registerBlock(lampBlock, "lampblock");
+        lampBlock.setLightLevel(1f);
+
+        //register the fluid icons
+        fluidOil.setIcons(BlockLiquid.getLiquidIcon("water_still"), BlockLiquid.getLiquidIcon("water_flow"));
+
         //trains and rollingstock
         int index=0;
         while (TransportRegistry.listTrains(index)!=null) {
@@ -135,48 +155,66 @@ public class ClientProxy extends CommonProxy {
         RenderingRegistry.registerEntityRenderingHandler(EntitySeat.class, nullRender);
         //player scaler
         RenderingRegistry.registerEntityRenderingHandler(EntityPlayer.class, new RenderScaledPlayer());
-/*
-        //block render registration function
-        RenderingRegistry.registerBlockHandler(
-                //combined block renders
-                new ISimpleBlockRenderingHandler() {
-                    //rendering from inventory
-                    @Override
-                    public void renderInventoryBlock(Block block, int metadata, int modelId, RenderBlocks renderer) {
-                        //use the block parameter to figure out which model and texture to use, and the RenderBlocks to define how to render it.
-                        //probably best to use GL calls to render the 3 visible sides like a normal block
-                    }
-                    //render block in world
-                    @Override
-                    public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer) {
-                        //pretty much the same as above, but x/y/z is provided outside the RenderBlocks, this new x/y/z also has positioning based on the camera, so you wanna use them.
-                        if (block instanceof BlockDynamic) { //Block dynamic is my own block class, an extension of one from forge, good for instanceof checks.
-                            GL11.glPushMatrix();//start a render segment, this way we can end it and be sure the render modifications don't bleed to other renders
-                            GL11.glTranslated(x, y, z);//set the position
-                            switch (block.getUnlocalizedName()) {//switch on the unlocalized name, i use that class as a wrapper for most blocks, so i gotta figure out which.
-                                case "someBlockURI" : {
-                                    Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.TEXTURE_BLOCK.getResource("myTileEntity.png"));
-                                    private static final ModelBase.render(null, 0, 0, 0, 0, 0, 0.065f);//in the case of a TMT/Flans model, the last variable is render scale, default of 0.065. everything else is never used.
-                                }
-                            }
-                            GL11.glPopMatrix();//End the GL segment,
-                            return true;
-                        }
 
-                        return false;
+
+
+        //GameRegistry.registerBlock(new BlockRailOverride(), Item);
+        ClientRegistry.bindTileEntitySpecialRenderer(BlockRailOverride.renderTileEntity.class, new TileEntitySpecialRenderer() {
+            @Override
+            public void renderTileEntityAt(TileEntity p_147500_1_, double p_147500_2_, double p_147500_4_, double p_147500_6_, float p_147500_8_) {
+                GL11.glPushMatrix();
+                GL11.glTranslated(p_147500_2_+0.5,p_147500_4_+0.3, p_147500_6_+0.5);
+                GL11.glScaled(1,0.5,1);
+                switch (p_147500_1_.getBlockMetadata()){
+                    //straight
+                    case 1:{
+                        GL11.glRotatef(180, 1, 0, 0);
+                        Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailStraight.png"));
+                        railStraightModel.render(null,0,0,0,0,0,0);
+                        break;
                     }
-                    //you can use the modelId of the block to define whether or not you wanna render it in 3d from the inventory, 3d render should only be used for actual blocks, not blocks with models.
-                    @Override
-                    public boolean shouldRender3DInInventory(int modelId) {
-                        return false;
+                    case 0:{
+                        GL11.glRotatef(180, 1, 0, 1f);
+                        Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailStraight.png"));
+                        railStraightModel.render(null,0,0,0,0,0,0);
+                        break;
                     }
-                    //just a simple ID so you can set different sets of block renders and not have them conflict
-                    @Override
-                    public int getRenderId() {
-                        return 0;
+                    //curves
+                        //TODO: model is upsidedown i think...
+                    case 6:{
+                        GL11.glRotatef(180, 1, 0, 0);
+                        GL11.glRotatef(270, 0, 1, 0);
+                        Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailCurveVerySmall.png"));
+                        railCurveModel.render(null,0,0,0,0,0,0);
+                        break;
                     }
+                    case 7:{
+                        GL11.glRotatef(180, 1, 0, 0);
+                        Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailCurveVerySmall.png"));
+                        railCurveModel.render(null,0,0,0,0,0,0);
+                        break;
+                    }
+                    case 8:{
+                        GL11.glRotatef(180, 1, 0, 0);
+                        GL11.glRotatef(90, 0, 1, 0);
+                        Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailCurveVerySmall.png"));
+                        railCurveModel.render(null,0,0,0,0,0,0);
+                        break;
+                    }
+                    case 9:{
+                        GL11.glRotatef(180, 1, 0, 0);
+                        GL11.glRotatef(180, 0, 1, 0);
+                        Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailCurveVerySmall.png"));
+                        railCurveModel.render(null,0,0,0,0,0,0);
+                        break;
+                    }
+
+                }
+
+                GL11.glPopMatrix();
+            }
         });
-*/
+
 
 
 
@@ -186,14 +224,16 @@ public class ClientProxy extends CommonProxy {
         ClientRegistry.registerKeyBinding(KeyAccelerate);
         ClientRegistry.registerKeyBinding(KeyReverse);
 
-        //register client blocks, like lamps
-        GenericRegistry.RegisterClientStuff();
         //register the transport HUD.
         HUDTrain hud = new HUDTrain();
         FMLCommonHandler.instance().bus().register(hud);
         MinecraftForge.EVENT_BUS.register(hud);
 
     }
+
+
+    private static final ModelRailStraight railStraightModel = new ModelRailStraight();
+    private static final ModelRailCurveVerySmall railCurveModel = new ModelRailCurveVerySmall();
 
     /**
      * <h3>null render</h3>

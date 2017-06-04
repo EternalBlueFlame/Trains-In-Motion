@@ -16,7 +16,7 @@ import net.minecraft.world.World;
  * in 1.9+ this class is no longer necessary.
  * @author Eternal Blue Flame
  */
-public class EntitySeat extends Entity {
+public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
 
     /**
      * <h2>variables</h2>
@@ -25,8 +25,7 @@ public class EntitySeat extends Entity {
      */
     /**used to keep a reference to the parent train/rollingstock.*/
     public int parentId = 0;
-    /**used to define which index the seat is supposed to be at
-     * TODO: might actually be useless. */
+    /**used to define which index the seat is supposed to be at*/
     private int seatNumber =0;
     /**used to replace the client only velocity in forge that have private access.*/
     protected double cartVelocityX =0;
@@ -64,9 +63,15 @@ public class EntitySeat extends Entity {
     /**actually useless for this entity*/
     @Override
     public void onUpdate() {
-        if(ticksExisted %5 ==0 && worldObj.getEntityByID(parentId) instanceof GenericRailTransport){
+        if (worldObj.getEntityByID(parentId) instanceof GenericRailTransport) {
+            if(worldObj.isRemote) {
+                ((GenericRailTransport) worldObj.getEntityByID(parentId)).setseats(this, seatNumber);
+            }
+        } else {
             worldObj.removeEntity(this);
         }
+
+
     }
     /**returns the bounding box, this doesn't handle collisions, soo.. null.*/
     @Override
@@ -94,12 +99,29 @@ public class EntitySeat extends Entity {
     @Override
     public boolean writeMountToNBT(NBTTagCompound tagCompound){return false;}
 
+
+    /**
+     * <h2>Spawn Data</h2>
+     * Small networking check to add the seat to the host train/rollingstock. Or to remove the seat from the world if the host doesn't exist.
+     */
+    @Override
+    public void readSpawnData(ByteBuf additionalData) {
+        parentId = additionalData.readInt();
+        seatNumber = additionalData.readInt();
+    }
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        buffer.writeInt(parentId);
+        buffer.writeInt(seatNumber);
+    }
+
     @Override
     public void updateRiderPosition() {
         if (this.riddenByEntity != null) {
             this.riddenByEntity.setPosition(this.posX, this.posY, this.posZ);
         }
     }
+
 
     /**
      * <h2>Client Movement code</h2>

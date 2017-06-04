@@ -12,8 +12,8 @@
 package ebf.tim.models.rollingstock;
 
 import ebf.tim.models.GroupedModelRender;
-import ebf.tim.models.tmt.ModelRendererTurbo;
 import ebf.tim.models.tmt.ModelBase;
+import ebf.tim.models.tmt.ModelRendererTurbo;
 import net.minecraft.entity.Entity;
 
 public class UP3Bay100TonHopper extends ModelBase {

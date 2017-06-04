@@ -2,7 +2,6 @@ package ebf.tim.utility;
 
 import cpw.mods.fml.common.gameevent.TickEvent;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.registry.GenericRegistry;
 import net.minecraft.block.BlockAir;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
@@ -55,7 +54,7 @@ public class LampHandler {
             Z = MathHelper.floor_double(position[2]);
             //create the block.
             if (worldObj.getBlock(X,Y,Z) instanceof BlockAir) {
-                worldObj.setBlock(X,Y,Z, GenericRegistry.lampBlock);
+                worldObj.setBlock(X,Y,Z, ClientProxy.lampBlock);
             }
             shouldUpdate = false;
 

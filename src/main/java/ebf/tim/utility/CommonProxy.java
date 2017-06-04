@@ -2,16 +2,33 @@ package ebf.tim.utility;
 
 
 import cpw.mods.fml.common.network.IGuiHandler;
+import cpw.mods.fml.common.registry.GameRegistry;
+import ebf.tim.TrainsInMotion;
+import ebf.tim.blocks.BlockDynamic;
+import ebf.tim.blocks.BlockRailOverride;
+import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.GenericRailTransport;
+import net.minecraft.block.material.MapColor;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialLiquid;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemBucket;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidContainerRegistry;
+import net.minecraftforge.fluids.FluidRegistry;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
+
+import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
 
 
 /**
@@ -83,10 +100,63 @@ public class CommonProxy implements IGuiHandler {
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {return null;}
 
+
+    /*
+     * <h1> registration </h1>
+     */
+
+    //initialize the oil
+    /**the oil fluid block*/
+    public static BlockTrainFluid blockFluidOil;
+    /**the diesel fluid block*/
+    public static BlockTrainFluid blockFluidDiesel;
+    /**the oil fluid*/
+    public static final Fluid fluidOil = new Fluid("Oil").setUnlocalizedName("fluid.oil").setBlock(blockFluidOil).setGaseous(false).setDensity(700);
+    /**the diesel fluid*/
+    public static final Fluid fluidDiesel = new Fluid("Diesel").setUnlocalizedName("fluid.diesel").setBlock(blockFluidDiesel).setGaseous(false).setDensity(500);
+    /**the oil bucket*/
+    public static ItemBucket bucketOil;
+    /**the diesel bucket*/
+    public static ItemBucket bucketDiesel;
+
+    /**the crafting table for trains*/
+    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", Material.wood, TrainsInMotion.blockTypes.CRAFTING);
+
+    public static BlockRailOverride railBlock = new BlockRailOverride();
     /**
      * <h2>Server Register</h2>
      * Used for registering server only functions.
      * Also serves as a placeholder for the client function, which is actually used, so we don't get a missing function error.
      */
-    public void register() {}
+    public void register() {
+
+        //register fluids
+        FluidRegistry.registerFluid(fluidOil);
+        FluidRegistry.registerFluid(fluidDiesel);
+        //register fluid blocks
+        blockFluidOil = new BlockTrainFluid(fluidOil, new MaterialLiquid(MapColor.blackColor));
+        blockFluidOil.setBlockName("block.oil");
+        GameRegistry.registerBlock(blockFluidOil, "block.oil");
+        blockFluidDiesel = new BlockTrainFluid(fluidDiesel, new MaterialLiquid(MapColor.dirtColor)).setFlammable(true, 1);
+        blockFluidDiesel.setBlockName("block.diesel");
+        GameRegistry.registerBlock(blockFluidDiesel, "block.diesel");
+        //register the buckets
+        bucketOil = new ItemBucket(blockFluidOil);
+        bucketOil.setCreativeTab(TrainsInMotion.creativeTab).setUnlocalizedName("item.oilbucket").setContainerItem(Items.bucket);
+        GameRegistry.registerItem(bucketOil, "fluid.oil.bucket");
+        FluidContainerRegistry.registerFluidContainer(fluidOil, new ItemStack(bucketOil), new ItemStack(Items.bucket));
+        bucketDiesel = new ItemBucket(blockFluidDiesel);
+        bucketDiesel.setCreativeTab(TrainsInMotion.creativeTab).setUnlocalizedName("item.dieselbucket").setContainerItem(Items.bucket);
+        GameRegistry.registerItem(bucketDiesel, "fluid.diesel.bucket");
+        FluidContainerRegistry.registerFluidContainer(fluidDiesel, new ItemStack(bucketDiesel), new ItemStack(Items.bucket));
+
+        //register the train crafting table
+        GameRegistry.registerBlock(trainTable, "TrainTable");
+        GameRegistry.registerTileEntity(TileEntityStorage.class, "StorageEntity");
+        addRecipe(new ItemStack(trainTable, 1),  "WWW", "WIW", "WWW", 'W', Blocks.planks, 'I', Items.iron_ingot);
+
+        railBlock.setCreativeTab(TrainsInMotion.creativeTab);
+        GameRegistry.registerBlock(railBlock, "TiMRail");
+        addRecipe(new ItemStack(railBlock, 1),  "I I", "IWI", "IWI", 'W', Blocks.planks, 'I', Items.iron_ingot);
+    }
 }

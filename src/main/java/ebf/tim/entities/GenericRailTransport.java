@@ -260,7 +260,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             TrainsInMotion.keyChannel.sendToServer(new PacketRemove(backBogie.getEntityId()));
             worldObj.removeEntity(backBogie);
             //remove seats
-            for (EntitySeat seat : seats){
+            for (EntitySeat seat : seats) {
                 seat.isDead = true;
                 TrainsInMotion.keyChannel.sendToServer(new PacketRemove(seat.getEntityId()));
                 seat.worldObj.removeEntity(seat);
@@ -289,7 +289,24 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
     /** this is called by the seats and seats on their spawn to add them to this entity's list of seats, we only do it on client because that's the only side that seems to lose track.
      * @see EntitySeat#readSpawnData(ByteBuf)*/
     @SideOnly(Side.CLIENT)
-    public void addseats(EntitySeat cart){seats.add(cart);}
+    public void setseats(EntitySeat seat, int seatNumber){
+        if (seats.size() > seatNumber) {
+            seats.add(seat);
+        } else {
+            seats.set(seatNumber, seat);
+        }
+    }
+
+    /** this is called by the bogies on their spawn to add them to this entity's list of bogies, we only do it on client because that's the only side that seems to lose track.
+     * @see EntityBogie#readSpawnData(ByteBuf)*/
+    @SideOnly(Side.CLIENT)
+    public void setBogie(EntityBogie cart, boolean isFront){
+        if(isFront){
+            frontBogie = cart;
+        } else {
+            backBogie = cart;
+        }
+    }
 
     /*
      * <h2> Data Syncing and Saving </h2>
@@ -439,7 +456,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         //be sure bogies exist
 
         //always be sure the bogies exist on client and server.
-        if (frontBogie == null || backBogie == null) {
+        if (!worldObj.isRemote && (frontBogie == null || backBogie == null)) {
             //spawn frontLinkedTransport bogie
             vectorCache[1][0] = getLengthFromCenter();
             vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
@@ -473,13 +490,13 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
         if (frontBogie!=null && backBogie != null){
             //handle movement.
             if (!hitboxHandler.getCollision(this)) {
-                frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE));
-                backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE));
+                frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain());
+                backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain());
             } else {
                 frontBogie.addVelocity(-frontBogie.motionX,-frontBogie.motionY,-frontBogie.motionZ);
                 backBogie.addVelocity(-backBogie.motionX,-backBogie.motionY,-backBogie.motionZ);
-                frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE));
-                backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE));
+                frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain());
+                backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain());
             }
             frontVelocityX = frontBogie.motionX;
             frontVelocityZ = frontBogie.motionZ;
@@ -564,7 +581,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
             }
 
             //update the particles here rather than on render tick, it's not as smooth, but close enough and far less CPU use.
-            if (ClientProxy.EnableSmokeAndSteam && getBoolean(boolValues.RUNNING)) {
+            if (ClientProxy.EnableSmokeAndSteam) {
                 int itteration = 0;
                 int maxSpawnThisTick = 0;
                 for (float[] smoke : getSmokeOffset()) {
@@ -576,13 +593,13 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                         vectorCache[8] = RailUtility.rotatePoint(vectorCache[7], rotationPitch, rotationYaw, 0);
                         //we only want to spawn at most 5 particles per tick.
                         //this helps make them spawn more evenly rather than all at once. It also helps prevent a lot of lag.
-                        if (particles.size() <= itteration && maxSpawnThisTick < 5) {
+                        if (getBoolean(boolValues.RUNNING) && particles.size() <= itteration && maxSpawnThisTick < 5) {
                             particles.add(new ParticleFX(posZ, posY, posX, smoke[3], vectorCache[8],
                                     backBogie.motionX + (rand.nextInt(40) - 20) * 0.001f, smoke[1] * 0.05, backBogie.motionZ + (rand.nextInt(40) - 20) * 0.001f));
                             maxSpawnThisTick++;
                         } else if (maxSpawnThisTick == 0) {
                             //if the particles have finished spawning in, move them.
-                            particles.get(itteration).onUpdate(this, posX, posY, posZ);
+                            particles.get(itteration).onUpdate(this, posX, posY, posZ, getBoolean(boolValues.RUNNING));
                         }
                         itteration++;
                     }

@@ -27,7 +27,7 @@ import net.minecraft.world.World;
  * this controls the behavior of the bogies in trains and rollingstock.
  * @author Eternal Blue Flame
  */
-public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart {
+public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableCart, IEntityAdditionalSpawnData {
 
     /** used to keep a reference to the parent train/rollingstock.*/
     private int parentId = 0;
@@ -61,6 +61,20 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         parentId = parent;
         isFront = front;
     }
+
+    /**Small networking check to add the bogie to the host train/rollingstock. Or to remove the bogie from the world if the host doesn't exist.*/
+    @Override
+    public void readSpawnData(ByteBuf additionalData) {
+        isFront = additionalData.readBoolean();
+        parentId = additionalData.readInt();
+    }
+    /**sends the networking check on spawn/respawn so this can see if it should exist in the first place.*/
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        buffer.writeBoolean(isFront);
+        buffer.writeInt(parentId);
+    }
+
     /**used by the game to tell different types of minecarts from eachother, this doesnt effect us, so just use something random*/
     @Override
     public int getMinecartType() {
@@ -93,16 +107,15 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     }
     /**defines the update tick of the entity, in this case we rely on the transport to provide that for us, keeps things synced on the chance entities ever get individualized threads*/
     @Override
-    public void onUpdate() {}
-    /**returns the bounding box, we dont process that kind of stuff for the bogie because it's only pathfinding.*/
-    @Override
-    public AxisAlignedBB getBoundingBox(){
-        return null;
-    }
-    /**returns the bounding box, we dont process that kind of stuff for the bogie because it's only pathfinding.*/
-    @Override
-    public AxisAlignedBB getCollisionBox(Entity collidedWith){
-        return null;
+    public void onUpdate() {
+        //be sure to remove this if the parent is null, or in a different castle, I mean world.
+        if (worldObj.getEntityByID(parentId) instanceof GenericRailTransport){
+            if (worldObj.isRemote) {
+                ((GenericRailTransport) worldObj.getEntityByID(parentId)).setBogie(this, isFront);
+            }
+        } else {
+            worldObj.removeEntity(this);
+        }
     }
     /**returns if this can be collided with, since we don't process collisions, we return false*/
     @Override
@@ -127,13 +140,9 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * Some features are replaced using our own for compatibility with ZoraNoDensha
      * @see RailUtility
      */
-    public void minecartMove(float yaw, float pitch, boolean brake)   {
+    public void minecartMove(float yaw, float pitch, boolean brake, boolean isRunning, boolean isTrain)   {
         //define the yaw from the super
         this.setRotation(yaw, pitch);
-        //be sure to remove this if the parent is null, or in a different castle, I mean world.
-        if (ticksExisted %5 ==0 && worldObj.getEntityByID(parentId) == null){
-            worldObj.removeEntity(this);
-        }
 
         //client only, update position
         if (this.worldObj.isRemote) {
@@ -164,7 +173,35 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
             //apply brake
             if (brake){
-                setVelocity(motionX *0.75, motionY, motionZ*0.75);
+                if (motionX <0.1 && motionX >-0.1){
+                    motionX =0;
+                    this.cartVelocityX =0;
+                } else {
+                    this.motionX *= 0.75;
+                    this.cartVelocityX *= 0.75;
+                }
+                if (motionZ <0.1 && motionZ >-0.1){
+                    motionZ =0;
+                    this.cartVelocityZ =0;
+                } else {
+                    this.motionZ *= 0.75;
+                    this.cartVelocityZ *= 0.75;
+                }
+            } else if (isRunning && !isTrain){
+                if (motionX <0.05 && motionX >-0.05){
+                    motionX =0;
+                    this.cartVelocityX =0;
+                } else {
+                    this.motionX *= 0.75;
+                    this.cartVelocityX *= 0.75;
+                }
+                if (motionZ <0.05 && motionZ >-0.05){
+                    motionZ =0;
+                    this.cartVelocityZ =0;
+                } else {
+                    this.motionZ *= 0.75;
+                    this.cartVelocityZ *= 0.75;
+                }
             }
 
             //update on normal rails
@@ -179,7 +216,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 //update on ZnD rails, and ones that don't extend block rail base.
             } else {
                 super.onUpdate();
-                //update on falling with no rails
             }
         }
     }
@@ -254,7 +290,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         if (motionSqrt > 2.0D) {
             motionSqrt = 2.0D;
         }
-        setVelocity(motionSqrt * railPathX / railPathSqrt, motionY, motionSqrt * railPathZ / railPathSqrt);
+        motionX = motionSqrt * railPathX / railPathSqrt;
+        motionZ = motionSqrt * railPathZ / railPathSqrt;
 
         if (cachedMotionX !=0 || cachedMotionZ !=0) {
             //define the motion based on the rail path for current movement, and the next, so they are in sync.
