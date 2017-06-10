@@ -1,6 +1,8 @@
 package ebf.tim.models.tmt;
 
-
+/**
+ * Converts ModelBase use to ModelRendererTurbo.
+ */
 public class ModelBase extends net.minecraft.client.model.ModelBase {
 
 	public ModelRendererTurbo base[] = new ModelRendererTurbo[0];

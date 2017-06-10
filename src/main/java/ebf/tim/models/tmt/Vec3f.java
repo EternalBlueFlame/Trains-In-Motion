@@ -1,7 +1,7 @@
 package ebf.tim.models.tmt;
 
 /**
- *
+ * basically the same as Vec3D, but a float. Usually used for storing rotations.
  * @author Ferdinand
  */
 

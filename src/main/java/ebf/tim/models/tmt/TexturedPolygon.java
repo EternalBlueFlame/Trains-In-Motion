@@ -6,12 +6,12 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 
+/**
+ * An extension of TexturedQuad that adds support for more shapes beyond simple quads.
+ */
 public class TexturedPolygon extends TexturedQuad {
 	public TexturedPolygon(PositionTextureVertex apositionTexturevertex[]) {
 		super(apositionTexturevertex);
-		invertNormal = false;
-		normals = new int[0];
-		iNormals = new ArrayList<Vec3d>();
     }
 	
 	public void setInvertNormal(boolean isSet)
@@ -19,12 +19,12 @@ public class TexturedPolygon extends TexturedQuad {
 		invertNormal = isSet;
 	}
 	
-	public void setNormals(float x, float y, float z)
+	public void setNormals(int x, int y, int z)
 	{
-		normals = new int[] {(int)x, (int)y, (int)z};
+		normals = new int[] {x, y, z};
 	}
 	
-	public void setNormals(ArrayList<Vec3d> vec)
+	public void setNormals(ArrayList<int[]> vec)
 	{
 		iNormals = vec;
 	}
@@ -45,12 +45,10 @@ public class TexturedPolygon extends TexturedQuad {
 	        	} else {
 	        		tessellator.setNormal(normals[0], normals[1], normals[2]);
 	        	}
-	        } else
-	        if(vertexPositions.length >= 3) {
-		        Vec3d Vec3d = new Vec3d(vertexPositions[1].vector3D.subtract(vertexPositions[0].vector3D));
-		        Vec3d Vec3d1 = new Vec3d(vertexPositions[1].vector3D.subtract(vertexPositions[2].vector3D));
-		        Vec3d Vec3d2 = new Vec3d(Vec3d1.crossProduct(Vec3d).normalize());
-		
+	        } else if(vertexPositions.length > 3) {
+		        Vec3d Vec3d2 = new Vec3d(vertexPositions[1].vector3D.subtract(vertexPositions[2].vector3D)
+						.crossProduct(vertexPositions[1].vector3D.subtract(vertexPositions[0].vector3D)).normalize());
+
 		        if(invertNormal) {
 		            tessellator.setNormal((int)-Vec3d2.xCoord, (int)-Vec3d2.yCoord, (int)-Vec3d2.zCoord);
 		        } else {
@@ -67,9 +65,9 @@ public class TexturedPolygon extends TexturedQuad {
 			}
             if(i < iNormals.size()) {
             	if(invertNormal) {
-            		tessellator.setNormal((int)-iNormals.get(i).xCoord, (int)-iNormals.get(i).yCoord, (int)-iNormals.get(i).zCoord);
+            		tessellator.setNormal(-iNormals.get(i)[0],-iNormals.get(i)[1],-iNormals.get(i)[2]);
             	} else {
-            		tessellator.setNormal((int)iNormals.get(i).xCoord, (int)iNormals.get(i).yCoord, (int)iNormals.get(i).zCoord);
+            		tessellator.setNormal(iNormals.get(i)[0], iNormals.get(i)[1], iNormals.get(i)[2]);
             	}
             }
             tessellator.addVertexWithUV(positionTexturevertex.vector3D.xCoord * f, positionTexturevertex.vector3D.yCoord * f, positionTexturevertex.vector3D.zCoord * f, (float)positionTexturevertex.texturePositionX, (float)positionTexturevertex.texturePositionY);
@@ -78,7 +76,10 @@ public class TexturedPolygon extends TexturedQuad {
         tessellator.draw();
     }
 
-    private boolean invertNormal;
-    private int[] normals;
-    private ArrayList<Vec3d> iNormals;
+    private boolean invertNormal = false;
+    private int[] normals = new int[0];
+    public int[] vertices;
+    public float texturePositionX;
+	public float texturePositionY;
+    private ArrayList<int[]> iNormals = new ArrayList<>();
 }

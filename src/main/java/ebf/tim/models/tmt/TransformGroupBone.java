@@ -8,7 +8,7 @@ import net.minecraft.util.MathHelper;
  * @author GaryCXJk
  *
  */
-public class TransformGroupBone extends TransformGroup {
+public class TransformGroupBone {
 	public TransformGroupBone(Bone bone, double wght) {
 		baseVector = bone.getPosition();
 		baseAngle = bone.getAbsoluteAngle();

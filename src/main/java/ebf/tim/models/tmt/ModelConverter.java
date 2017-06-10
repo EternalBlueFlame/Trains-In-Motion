@@ -1,5 +1,8 @@
 package ebf.tim.models.tmt;
 
+/**
+ * Converts flans models to our version of ModelRendererTurbo, which doesn't use the sme animation methods.
+ */
 public class ModelConverter extends ModelBase {
 	
 	public ModelRendererTurbo bodyModel[] = new ModelRendererTurbo[0];

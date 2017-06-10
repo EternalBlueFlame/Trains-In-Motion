@@ -4,9 +4,12 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Stores the list of models loaded from config files such as OBJ.
+ */
 public class ModelPool {
 	
-    public static ModelPoolEntry addFile(String file, Map<String, TransformGroup> group, Map<String, TextureGroup> textureGroup){
+    public static ModelPoolEntry addFile(String file, Map<String, TransformGroupBone> group, Map<String, TextureGroup> textureGroup){
 		if(modelMap.containsKey(file)){
 			ModelPoolEntry entry = modelMap.get(file);
 			entry.applyGroups(group, textureGroup);

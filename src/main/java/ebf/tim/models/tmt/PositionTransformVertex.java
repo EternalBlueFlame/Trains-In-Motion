@@ -4,6 +4,9 @@ import net.minecraft.client.model.PositionTextureVertex;
 
 import java.util.ArrayList;
 
+/**
+ * an extension to PositionTextureVertex that adds support for the neutral vector.
+ */
 public class PositionTransformVertex extends PositionTextureVertex {
 	public PositionTransformVertex(double x, double y, double z, float u, float v) {
 		this(new Vec3d(x, y, z), u, v);
@@ -29,14 +32,14 @@ public class PositionTransformVertex extends PositionTextureVertex {
 			return;
 		}
 		double weight = 0D;
-		for(TransformGroup transform : transformGroups) {
+		for(TransformGroupBone transform : transformGroups) {
 			weight += transform.getWeight();
 		}
 		vector3D.xCoord = 0;
 		vector3D.yCoord = 0;
 		vector3D.zCoord = 0;
 
-		for(TransformGroup transform : transformGroups) {
+		for(TransformGroupBone transform : transformGroups) {
 			double cWeight = transform.getWeight() / weight;
 			Vec3d vector = transform.doTransformation(this);
 			
@@ -46,17 +49,17 @@ public class PositionTransformVertex extends PositionTextureVertex {
 		}
 	}
 	
-	public void addGroup(TransformGroup group)
+	public void addGroup(TransformGroupBone group)
 	{
 		transformGroups.add(group);
 	}
 	
-	public void removeGroup(TransformGroup group)
+	public void removeGroup(TransformGroupBone group)
 	{
 		transformGroups.remove(group);
 	}
 		
 	public Vec3d neutralVector;
-	public ArrayList<TransformGroup> transformGroups = new ArrayList<TransformGroup>();
+	public ArrayList<TransformGroupBone> transformGroups = new ArrayList<TransformGroupBone>();
 	
 }

@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * Used by the Model Pool to load models from config files such as OBJ.
+ */
 public class ModelPoolEntry {
 	
     /**
@@ -52,7 +55,7 @@ public class ModelPoolEntry {
     	texture = textures.get(groupName);
     }
     
-    protected void applyGroups(Map<String, TransformGroup> groupsMap, Map<String, TextureGroup> texturesMap) {
+    protected void applyGroups(Map<String, TransformGroupBone> groupsMap, Map<String, TextureGroup> texturesMap) {
     	
     	Iterator<String> groupsItr = groups.keySet().iterator();
     	Iterator<String> texturesItr = textures.keySet().iterator();
@@ -93,6 +96,10 @@ public class ModelPoolEntry {
 	}
 
 
+	/**
+	 * Loads an OBJ model from file and converts it to ModelRendererTurbo
+	 * @param file the path and name of the model file
+	 */
 	public void getModelFromObj(File file) {
 		try {
 			BufferedReader in = new BufferedReader(new FileReader(file));
@@ -101,7 +108,7 @@ public class ModelPoolEntry {
 
 			ArrayList<PositionTransformVertex> verts = new ArrayList<PositionTransformVertex>();
 			ArrayList<float[]> uvs = new ArrayList<float[]>();
-			ArrayList<float[]> normals = new ArrayList<float[]>();
+			ArrayList<int[]> normals = new ArrayList<int[]>();
 			ArrayList<TexturedPolygon> face = new ArrayList<TexturedPolygon>();
 
 			while((s = in.readLine()) != null) {
@@ -145,31 +152,31 @@ public class ModelPoolEntry {
 				} else if(s.startsWith("vn ")) {
 					//Normals
 					s = s.substring(s.indexOf(" ") + 1).trim();
-					float[] v = new float[3];
+					int[] v = new int[3];
 					for(int i = 0; i < 3; i++) {
 						int ind = s.indexOf(" ");
-						v[i] = (ind > -1)?Float.parseFloat(s.substring(0, ind)):Float.parseFloat(s);
+						v[i] = (ind > -1)?Integer.parseInt(s.substring(0, ind)):Integer.parseInt(s);
 
 						s = s.substring(s.indexOf(" ") + 1).trim();
 					}
 
-					float flt = v[2];
+					int flt = v[2];
 					v[2] = v[1];
 					v[1] = flt;
 
-					normals.add(new float[] {v[0], v[1], v[2]});
+					normals.add(new int[]{v[0], v[1], v[2]});
 				} else if(s.startsWith("f ")) {
 					//faces
 					s = s.substring(s.indexOf(" ") + 1).trim();
 					ArrayList<PositionTextureVertex> v = new ArrayList<PositionTextureVertex>();
 					String s1;
 					int finalPhase = 0;
-					float[] normal = new float[] {0F, 0F, 0F};
-					ArrayList<Vec3d> iNormal = new ArrayList<Vec3d>();
+					int[] normal = new int[] {0, 0, 0};
+					ArrayList<int[]> iNormal = new ArrayList<>();
 					while(finalPhase < 1) {
 						int vInt;
 						float[] curUV;
-						float[] curNormals;
+						int[] curNormals;
 						int ind = s.indexOf(" ");
 						s1 = s;
 						if(ind > -1) {
@@ -191,14 +198,14 @@ public class ModelPoolEntry {
 							} else {
 								vnInt = Integer.parseInt(f[0]) - 1;
 							}
-							curNormals = (normals.size() > vnInt)?normals.get(vnInt):new float[]{0, 0, 0};
+							curNormals = (normals.size() > vnInt)?normals.get(vnInt):new int[]{0, 0, 0};
 						} else {
 							vInt = Integer.parseInt(s1) - 1;
 							curUV = (uvs.size() > vInt)?uvs.get(vInt):new float[]{0, 0};
-							curNormals = (normals.size() > vInt)?normals.get(vInt):new float[]{0, 0, 0};
+							curNormals = (normals.size() > vInt)?normals.get(vInt):new int[]{0, 0, 0};
 						}
 
-						iNormal.add(new Vec3d(curNormals[0], curNormals[1], curNormals[2]));
+						iNormal.add(new int[]{curNormals[0], curNormals[1], curNormals[2]});
 
 						normal[0]+= curNormals[0];
 						normal[1]+= curNormals[1];

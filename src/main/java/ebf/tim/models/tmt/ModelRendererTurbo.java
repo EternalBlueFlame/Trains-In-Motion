@@ -13,33 +13,43 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.*;
 /**
- * An extension to the CubikModelRenderer class. It basically is a copy to CubikModelRenderer,
- * however, it contains various new methods to make your models.
+ * An extension to the ModelRenderer class that contains various new methods to make your models.
  * <br /><br />
  * Since the ModelRendererTurbo class gets loaded during startup, the models made
  * can be very complex. This is why I can afford to add, for example, Wavefont OBJ
- * support or have the addSprite method, methods that add a lot of vertices and
- * polygons.
+ * support or have the addSprite method, methods that add a lot of vertices and polygons.
  * @author GaryCXJk
  * @license http://fexcraft.net/license?id=tmt
  * <br /><br />
- * This version of TMT has been modified by Eternal Blue Flame and does not reflect the quality or features of the original version.
+ * This version of TMT has been heavily modified by Eternal Blue Flame and does not reflect the quality or features of any other version.
  * Models made for other versions of TMT may not work with this version, and models made for this version may not work in other versions.
+ * Shape3D is not supported in this version, use Shape Boxes instead.
+ * The shape's name is used by the Model Animators for various functionality, there are specific pre-defined names to use for said features
+ * @see ebf.tim.models.StaticModelAnimator
+ * @see ebf.tim.models.GroupedModelRender
  */
 public class ModelRendererTurbo extends ModelRenderer {
 
 
-    /**converts a radians double to degrees*/
+    /**converts a radians float to degrees */
     public static final float degreesF = (float) (180.0d / Math.PI);
 
 
+    /**
+     * Creates a new ModelRenderTurbo object with a defined name.
+     * @param modelbase
+     * @param s the name of the shape
+     */
 	public ModelRendererTurbo(ModelBase modelbase, String s) {
 		super(modelbase, s);
         transformGroup.put("0", new TransformGroupBone(new Bone(0, 0, 0, 0), 1D));
         textureGroup.put("0", new TextureGroup());
         currentTextureGroup = textureGroup.get("0");
 	}
-	
+    /**
+     * Creates a new ModelRenderTurbo object with no defined name.
+     * @param modelbase
+     */
 	public ModelRendererTurbo(ModelBase modelbase)
 	{
 		this(modelbase, "");
@@ -1135,7 +1145,7 @@ public class ModelRendererTurbo extends ModelRenderer {
      * Gets the current transformation group.
      * @return the current PositionTransformGroup.
      */
-    public TransformGroup getGroup()
+    public TransformGroupBone getGroup()
     {
     	return currentGroup;
     }
@@ -1144,7 +1154,7 @@ public class ModelRendererTurbo extends ModelRenderer {
      * Gets the transformation group with a given group name.
      * @return the current PositionTransformGroup.
      */
-    public TransformGroup getGroup(String groupName) {
+    public TransformGroupBone getGroup(String groupName) {
     	if(!transformGroup.containsKey(groupName)) {
             return null;
         }
@@ -1318,9 +1328,9 @@ public class ModelRendererTurbo extends ModelRenderer {
     private boolean compiled = false;
     private int displayList = 0;
     private int displayListArray[];
-    private Map<String, TransformGroup> transformGroup = new HashMap<String, TransformGroup>();
+    private Map<String, TransformGroupBone> transformGroup = new HashMap<String, TransformGroupBone>();
     private Map<String, TextureGroup> textureGroup = new HashMap<String, TextureGroup>();
-    private TransformGroup currentGroup;
+    private TransformGroupBone currentGroup;
     private TextureGroup currentTextureGroup;
     public boolean mirror = false;
     public boolean flip = false;

@@ -118,7 +118,7 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 	public void setNormal(float x, float y, float z){
 		setNormal((int)x, (int)y, (int)z);
 	}
-	
+
 	public void setNormal(int x, int y, int z){
 		in = true;
 		n = ((x * 127)) & 255 | (((y * 127)) & 255) << 8 | (((z * 127)) & 255) << 16;
