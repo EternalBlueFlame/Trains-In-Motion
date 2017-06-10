@@ -16,17 +16,9 @@ public class TextureGroup {
 		poly.add(quad);
 	}
 
-	public void loadTexture()
-	{
-		loadTexture(-1);
-	}
-	
-	public void loadTexture(int defaultTexture) {
+	public void loadTexture() {
 		if(!texture.equals("")) {
 			Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation("", texture));
-		}
-		else if(defaultTexture > -1) {
-			Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation("", ""));
 		}
 	}
 	

@@ -69,16 +69,16 @@ import java.util.Map;
  * the following code. It's not a complete code, but you'll get the basics.
  * <br /><br />
  * <pre>
- * skeletonHead.relativeAngles.angleY = f3 / 57.29578F;
- * skeletonHead.relativeAngles.angleX = f4 / 57.29578F;
- * skeletonArmRight.relativeAngles.angleX = MathHelper.cos(f * 0.6662F + 3.141593F) * 2.0F * f1 * 0.5F;
- * skeletonArmRight.relativeAngles.angleZ = 0.0F;
- * skeletonArmLeft.relativeAngles.angleX = MathHelper.cos(f * 0.6662F) * 2.0F * f1 * 0.5F;
- * skeletonArmLeft.relativeAngles.angleZ = 0.0F;
- * skeletonLegRight.relativeAngles.angleX = MathHelper.cos(f * 0.6662F) * 1.4F * f1;
- * skeletonLegRight.relativeAngles.angleY = 0.0F;
- * skeletonLegLeft.relativeAngles.angleX = MathHelper.cos(f * 0.6662F + 3.141593F) * 1.4F * f1;
- * skeletonLegLeft.relativeAngles.angleY = 0.0F;
+ * skeletonHead.relativeAngles.yCoord = f3 / 57.29578F;
+ * skeletonHead.relativeAngles.xCoord = f4 / 57.29578F;
+ * skeletonArmRight.relativeAngles.xCoord = MathHelper.cos(f * 0.6662F + 3.141593F) * 2.0F * f1 * 0.5F;
+ * skeletonArmRight.relativeAngles.zCoord = 0.0F;
+ * skeletonArmLeft.relativeAngles.xCoord = MathHelper.cos(f * 0.6662F) * 2.0F * f1 * 0.5F;
+ * skeletonArmLeft.relativeAngles.zCoord = 0.0F;
+ * skeletonLegRight.relativeAngles.xCoord = MathHelper.cos(f * 0.6662F) * 1.4F * f1;
+ * skeletonLegRight.relativeAngles.yCoord = 0.0F;
+ * skeletonLegLeft.relativeAngles.xCoord = MathHelper.cos(f * 0.6662F + 3.141593F) * 1.4F * f1;
+ * skeletonLegLeft.relativeAngles.yCoord = 0.0F;
  * </pre>
  * <br /><br />
  * Finally, in the render method, you could use the following code.
@@ -105,19 +105,8 @@ public class Bone {
 	 * @param l the length of the bone
 	 */
 	public Bone(float x, float y, float z, float l) {
-		neutralAngles = new Angle3D(x, y, z);
-		relativeAngles = new Angle3D(0, 0, 0);
-		absoluteAngles = new Angle3D(0, 0, 0);
-		positionVector = new Vec3d(0, 0, 0);
+		neutralAngles = new Vec3f(x,y,z);
 		length = l;
-		childNodes = new ArrayList<Bone>();
-		models = new ArrayList<ModelRenderer>();
-		modelBaseRot = new HashMap<ModelRenderer, Angle3D>();
-		parentNode = null;
-		offsetX = 0;
-		offsetY = 0;
-		offsetZ = 0;
-		positionVector = new Vec3d(0, 0, 0);
 	}
 	
 	/**
@@ -163,14 +152,15 @@ public class Bone {
 	 * @param parent the parent Bone node this Bone is attached to
 	 */
 	public void attachBone(Bone parent) {
-		if(parentNode != null)
+		if(parentNode != null) {
 			detachBone();
+		}
 		parentNode = parent;
 		parent.addChildBone(this);
 		offsetX = parent.offsetX;
 		offsetY = parent.offsetY;
 		offsetZ = parent.offsetZ;
-		resetOffset();
+		resetOffset(false);
 	}
 	
 	/**
@@ -196,29 +186,20 @@ public class Bone {
 		resetOffset(true);
 		return new Vec3d(x, y, z);
 	}
-	
+
 	/**
 	 * Resets the offset.
-	 */
-	public void resetOffset() {
-		resetOffset(false);
-	}
-	
-	/**
-	 * Resets the offset.
+	 * ETERNAL'S NOTE: resetOffset(false) is the same as the now removed resetOffset().
 	 * @param doRecursive
 	 */
 	public void resetOffset(boolean doRecursive) {
 		if(parentNode != null) {
 			parentNode.setVectorRotations(new Vec3d(0, 0, parentNode.length));
-			/*positionVector.xCoord += parentNode.positionVector.xCoord;
-			positionVector.yCoord += parentNode.positionVector.yCoord;
-			positionVector.zCoord += parentNode.positionVector.zCoord;*/
 			positionVector.add(parentNode.positionVector);
 		}
 		if(doRecursive && !childNodes.isEmpty()) {
-			for(int index = 0; index < childNodes.size(); index++) {
-				childNodes.get(index).resetOffset(doRecursive);
+			for(Bone child : childNodes) {
+				child.resetOffset(true);
 			}
 		}
 	}
@@ -231,9 +212,9 @@ public class Bone {
 	 * @param z the z-rotation of the bone
 	 */
 	public void setNeutralRotation(float x, float y, float z) {
-		neutralAngles.angleX = x;
-		neutralAngles.angleY = y;
-		neutralAngles.angleZ = z;
+		neutralAngles.xCoord = x;
+		neutralAngles.yCoord = y;
+		neutralAngles.zCoord = z;
 	}
 	
 	/**
@@ -241,11 +222,7 @@ public class Bone {
 	 * @return the root parent Bone.
 	 */
 	public Bone getRootParent() {
-		if(parentNode == null) {
-			return this;
-		} else {
-			return parentNode.getRootParent();
-		}
+		return parentNode == null?this:parentNode.getRootParent();
 	}
 	
 	/**
@@ -265,7 +242,7 @@ public class Bone {
 	 * @param inherit whether the model should inherit the Bone's base rotations
 	 */
 	public void addModel(ModelRenderer model, boolean inherit) {
-		addModel(model, 0F, 0F, 0F, inherit);
+		addModel(model, 0F, 0F, 0F, inherit, false);
 	}
 	
 	/**
@@ -289,7 +266,7 @@ public class Bone {
 	 * @param z the base z-rotation
 	 */
 	public void addModel(ModelRenderer model, float x, float y, float z) {
-		addModel(model, x, y, z, false);
+		addModel(model, x, y, z, false, false);
 	}
 	
 	/**
@@ -318,12 +295,12 @@ public class Bone {
 	 */		
 	public void addModel(ModelRenderer model, float x, float y, float z, boolean inherit, boolean isUpright) {
 		if(inherit) {
-			x += neutralAngles.angleX + (isUpright ? (float)Math.PI / 2 : 0);
-			y += neutralAngles.angleY;
-			z += neutralAngles.angleZ;
+			x += neutralAngles.xCoord + (isUpright ? (float)Math.PI / 2 : 0);
+			y += neutralAngles.yCoord;
+			z += neutralAngles.zCoord;
 		}
 		models.add(model);
-		modelBaseRot.put(model, new Angle3D(x, y, z));
+		modelBaseRot.put(model, new Vec3f(x, y, z));
 	}
 	
 	/**
@@ -343,8 +320,8 @@ public class Bone {
 	 * This must be called after using the prepareDraw method.
 	 * @return an Angle3D object which holds the current angles of the current node.
 	 */
-	public Angle3D getAbsoluteAngle() {
-		return new Angle3D(absoluteAngles.angleX, absoluteAngles.angleY, absoluteAngles.angleZ);
+	public Vec3f getAbsoluteAngle() {
+		return absoluteAngles;
 	}
 	
 	/**
@@ -353,7 +330,7 @@ public class Bone {
 	 * @return a vector containing the current position relative to the origin.
 	 */
 	public Vec3d getPosition() {
-		return new Vec3d(positionVector.xCoord, positionVector.yCoord, positionVector.zCoord);
+		return positionVector;
 	}
 	
 	protected void addChildBone(Bone bone) {
@@ -380,84 +357,62 @@ public class Bone {
 	 * @param z
 	 */
 	public void setRotations(float x, float y, float z) {
-		relativeAngles.angleX = x;
-		relativeAngles.angleY = y;
-		relativeAngles.angleZ = z;
+		relativeAngles.xCoord = x;
+		relativeAngles.yCoord = y;
+		relativeAngles.zCoord = z;
 	}
 	
 	protected void setAbsoluteRotations() {
-		absoluteAngles.angleX = relativeAngles.angleX;
-		absoluteAngles.angleY = relativeAngles.angleY;
-		absoluteAngles.angleZ = relativeAngles.angleZ;
+		absoluteAngles.zCoord = relativeAngles.xCoord;
+		absoluteAngles.yCoord = relativeAngles.yCoord;
+		absoluteAngles.zCoord = relativeAngles.zCoord;
 		for(Bone node : childNodes) {
-			node.setAbsoluteRotations(absoluteAngles.angleX, absoluteAngles.angleY, absoluteAngles.angleZ);
+			node.setAbsoluteRotations(absoluteAngles.zCoord, absoluteAngles.yCoord, absoluteAngles.zCoord);
 		}
 	}
 	
 	protected void setAbsoluteRotations(float x, float y, float z) {
-		absoluteAngles.angleX = relativeAngles.angleX + x;
-		absoluteAngles.angleY = relativeAngles.angleY + y;
-		absoluteAngles.angleZ = relativeAngles.angleZ + z;
+		absoluteAngles.zCoord = relativeAngles.xCoord + x;
+		absoluteAngles.yCoord = relativeAngles.yCoord + y;
+		absoluteAngles.zCoord = relativeAngles.zCoord + z;
 		for(Bone node : childNodes) {
-			node.setAbsoluteRotations(absoluteAngles.angleX, absoluteAngles.angleY, absoluteAngles.angleZ);
+			node.setAbsoluteRotations(absoluteAngles.zCoord, absoluteAngles.yCoord, absoluteAngles.zCoord);
 		}
 		
 	}
 	
-	protected void setVectorRotations(Vec3d vector) {
-		float x = neutralAngles.angleX + absoluteAngles.angleX;
-		float y = neutralAngles.angleY + absoluteAngles.angleY;
-		float z = neutralAngles.angleZ + absoluteAngles.angleZ;
-		setVectorRotations(vector, x, y, z);
+	protected Vec3d setVectorRotations(Vec3d vector) {
+		return setVectorRotations(vector,
+				neutralAngles.xCoord + absoluteAngles.zCoord,
+				neutralAngles.yCoord + absoluteAngles.yCoord,
+				neutralAngles.zCoord + absoluteAngles.zCoord);
 	}
 	
-	protected void setVectorRotations(Vec3d vector, float xRot, float yRot, float zRot) {
-		float x = xRot;
-		float y = yRot;
-		float z = zRot;
-        float xC = MathHelper.cos(x);
-        float xS = MathHelper.sin(x);
-        float yC = MathHelper.cos(y);
-        float yS = MathHelper.sin(y);
-        float zC = MathHelper.cos(z);
-        float zS = MathHelper.sin(z);
-        
-        double xVec = vector.xCoord;
-        double yVec = vector.yCoord;
-        double zVec = vector.zCoord;
-        
+	protected Vec3d setVectorRotations(Vec3d vector, float xRot, float yRot, float zRot) {
+        float xC = MathHelper.cos(xRot);
+        float yC = MathHelper.cos(yRot);
+        float zC = MathHelper.cos(zRot);
+
         // rotation around x
-		double xy = xC*yVec - xS*zVec;
-		double xz = xC*zVec + xS*yVec;
+		double xy = xC*vector.yCoord - xC*vector.zCoord;
+		double xz = xC*vector.zCoord + xC*vector.yCoord;
 		// rotation around y
-		double yz = yC*xz - yS*xVec;
-		double yx = yC*xVec + yS*xz;
+		double yx = yC*vector.xCoord + yC*xz;
 		// rotation around z
-		double zx = zC*yx - zS*xy;
-		double zy = zC*xy + zS*yx;
+
 		
-		xVec = zx;
-		yVec = zy;
-		zVec = yz;
-		
-        /*vector.xCoord = xVec;
-        vector.yCoord = yVec;
-        vector.zCoord = zVec;*/
-		vector = new Vec3d(xVec, yVec, zVec);
+        vector.xCoord = zC*yx - zC*xy;
+        vector.yCoord = zC*xy + zC*yx;
+        vector.zCoord = yC*xz - yC*vector.xCoord;
+		return vector;
 	}
 
-	protected void addVector(Vec3d destVec, Vec3d srcVec) {
-		destVec.add(srcVec);
-		/*destVec.xCoord += srcVec.xCoord;
-		destVec.yCoord += srcVec.yCoord;
-		destVec.zCoord += srcVec.zCoord;*/
-	}
 
 	protected void setVectors() {
 		Vec3d tempVec = new Vec3d(0, 0, length);
 		positionVector = new Vec3d(offsetX, offsetY, offsetZ);
-		addVector(tempVec, positionVector);
-		setVectorRotations(tempVec);
+		tempVec.add(positionVector);
+		tempVec = setVectorRotations(tempVec);
 		for(Bone node : childNodes) {
 			node.setVectors(tempVec);
 		}
@@ -466,8 +421,8 @@ public class Bone {
 	protected void setVectors(Vec3d vector) {
 		positionVector = vector;
 		Vec3d tempVec = new Vec3d(0, 0, length);
-		setVectorRotations(tempVec);
-		addVector(tempVec, vector);
+		tempVec = setVectorRotations(tempVec);
+		tempVec.add(vector);
 		for(Bone node : childNodes) {
 			node.setVectors(tempVec);
 		}
@@ -479,10 +434,10 @@ public class Bone {
 	 */
 	public void setAnglesToModels() {
 		for(ModelRenderer currentModel : models) {
-			Angle3D baseAngles = modelBaseRot.get(currentModel);
-			currentModel.rotateAngleX = baseAngles.angleX + absoluteAngles.angleX;
-			currentModel.rotateAngleY = baseAngles.angleY + absoluteAngles.angleY;
-			currentModel.rotateAngleZ = baseAngles.angleZ + absoluteAngles.angleZ;
+			Vec3f baseAngles = modelBaseRot.get(currentModel);
+			currentModel.rotateAngleX = baseAngles.xCoord + absoluteAngles.zCoord;
+			currentModel.rotateAngleY = baseAngles.yCoord + absoluteAngles.yCoord;
+			currentModel.rotateAngleZ = baseAngles.zCoord + absoluteAngles.zCoord;
 			currentModel.rotationPointX = (float)positionVector.xCoord;
 			currentModel.rotationPointY = (float)positionVector.yCoord;
 			currentModel.rotationPointZ = (float)positionVector.zCoord;
@@ -492,17 +447,18 @@ public class Bone {
 			node.setAnglesToModels();
 		}
 	}
-		
-	protected Angle3D neutralAngles;
-	public Angle3D relativeAngles;
-	protected Angle3D absoluteAngles;
-	private Vec3d positionVector;
+
+	protected Vec3f neutralAngles;
+	public Vec3f relativeAngles = new Vec3f(0, 0, 0);
+	private Vec3f absoluteAngles = new Vec3f(0, 0, 0);
+	private Vec3d positionVector = new Vec3d(0, 0, 0);
 	private float length;
-	private Bone parentNode;
-	protected ArrayList<Bone> childNodes;
-	private ArrayList<ModelRenderer> models;
-	private Map<ModelRenderer, Angle3D> modelBaseRot;
-	private float offsetX;
-	private float offsetY;
-	private float offsetZ;
+	private Bone parentNode = null;
+	protected ArrayList<Bone> childNodes = new ArrayList<Bone>();
+	private ArrayList<ModelRenderer> models = new ArrayList<ModelRenderer>();
+	private Map<ModelRenderer, Vec3f> modelBaseRot = new HashMap<ModelRenderer, Vec3f>();
+	private float offsetX = 0;
+	private float offsetY = 0;
+	private float offsetZ = 0;
+
 }

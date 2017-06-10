@@ -4,22 +4,22 @@ package ebf.tim.models.tmt;
  *
  * @author Ferdinand
  */
+
 public class Vec3f {
-    
-    public float x;
-    public float y;
-    public float z;
-    
+
+    public float xCoord;
+    public float yCoord;
+    public float zCoord;
+
     public Vec3f(){
-        x = 0;
-        y = 0;
-        z = 0;
+        xCoord = 0;
+        yCoord = 0;
+        zCoord = 0;
     }
-    
+
     public Vec3f(float f, float g, float h){
-        x = f;
-        y = g;
-        z = h;
+        xCoord = f;
+        yCoord = g;
+        zCoord = h;
     }
-    
 }

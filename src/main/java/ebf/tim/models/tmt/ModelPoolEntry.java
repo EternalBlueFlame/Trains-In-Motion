@@ -1,31 +1,16 @@
 package ebf.tim.models.tmt;
 
+import net.minecraft.client.model.PositionTextureVertex;
+import net.minecraft.util.MathHelper;
+
+import java.io.BufferedReader;
 import java.io.File;
-import java.util.Collection;
+import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
-public abstract class ModelPoolEntry {
-	public File checkValidPath(String path) {
-		File file = null;
-		
-		for(int index = 0; index < fileExtensions.length && (file == null || !file.exists()); index++) {
-			String absPath = path;
-			
-			if(!path.endsWith("." + fileExtensions[index])) {
-				absPath += "." + fileExtensions[index];
-			}
-			
-			file = new File(absPath);
-		}
-		if(file == null || !file.exists()) {
-			return null;
-		}
-		return file;
-	}
-	
-	public abstract void getModel(File file);
+public class ModelPoolEntry {
 	
     /**
      * Sets the current transformation group. The transformation group is used
@@ -68,11 +53,9 @@ public abstract class ModelPoolEntry {
     }
     
     protected void applyGroups(Map<String, TransformGroup> groupsMap, Map<String, TextureGroup> texturesMap) {
-    	Set<String> groupsCol = groups.keySet();
-    	Collection<String> texturesCol = textures.keySet();
     	
-    	Iterator<String> groupsItr = groupsCol.iterator();
-    	Iterator<String> texturesItr = texturesCol.iterator();
+    	Iterator<String> groupsItr = groups.keySet().iterator();
+    	Iterator<String> texturesItr = textures.keySet().iterator();
     	
     	while(groupsItr.hasNext()) {
     		int nameIdx = 0;
@@ -104,5 +87,171 @@ public abstract class ModelPoolEntry {
 	public Map<String, TextureGroup> textures;
 	protected TransformGroupBone group;
 	protected TextureGroup texture;
-	protected String[] fileExtensions;
+
+
+	public ModelPoolEntry() {
+	}
+
+
+	public void getModelFromObj(File file) {
+		try {
+			BufferedReader in = new BufferedReader(new FileReader(file));
+
+			String s;
+
+			ArrayList<PositionTransformVertex> verts = new ArrayList<PositionTransformVertex>();
+			ArrayList<float[]> uvs = new ArrayList<float[]>();
+			ArrayList<float[]> normals = new ArrayList<float[]>();
+			ArrayList<TexturedPolygon> face = new ArrayList<TexturedPolygon>();
+
+			while((s = in.readLine()) != null) {
+				s = s.contains("#")?s.substring(0, s.indexOf("#")).trim():s.trim();
+
+				if(s.equals("")) {
+					continue;
+				}
+
+				if(s.startsWith("g ")) {
+					//Groups
+					setTextureGroup(s.substring(s.indexOf(" ") + 1).trim());
+				}else if(s.startsWith("v ")) {
+					//Vertexes
+					s = s.substring(s.indexOf(" ") + 1).trim();
+					float[] v = new float[3];
+					for(int i = 0; i < 3; i++) {
+						int ind = s.indexOf(" ");
+						v[i] = (ind > -1)?Float.parseFloat(s.substring(0, ind)):Float.parseFloat(s);
+
+						s = s.substring(s.indexOf(" ") + 1).trim();
+					}
+
+					float flt = v[2];
+					v[2] = -v[1];
+					v[1] = flt;
+
+					verts.add(new PositionTransformVertex(v[0], v[1], v[2], 0, 0));
+				} else if(s.startsWith("vt ")) {
+					//UVs
+					s = s.substring(s.indexOf(" ") + 1).trim();
+					float[] v = new float[2];
+					for(int i = 0; i < 2; i++) {
+						int ind = s.indexOf(" ");
+						v[i] = (ind > -1)?Float.parseFloat(s.substring(0, ind)): Float.parseFloat(s);
+
+						s = s.substring(s.indexOf(" ") + 1).trim();
+					}
+
+					uvs.add(new float[] {v[0], 1F - v[1]});
+				} else if(s.startsWith("vn ")) {
+					//Normals
+					s = s.substring(s.indexOf(" ") + 1).trim();
+					float[] v = new float[3];
+					for(int i = 0; i < 3; i++) {
+						int ind = s.indexOf(" ");
+						v[i] = (ind > -1)?Float.parseFloat(s.substring(0, ind)):Float.parseFloat(s);
+
+						s = s.substring(s.indexOf(" ") + 1).trim();
+					}
+
+					float flt = v[2];
+					v[2] = v[1];
+					v[1] = flt;
+
+					normals.add(new float[] {v[0], v[1], v[2]});
+				} else if(s.startsWith("f ")) {
+					//faces
+					s = s.substring(s.indexOf(" ") + 1).trim();
+					ArrayList<PositionTextureVertex> v = new ArrayList<PositionTextureVertex>();
+					String s1;
+					int finalPhase = 0;
+					float[] normal = new float[] {0F, 0F, 0F};
+					ArrayList<Vec3d> iNormal = new ArrayList<Vec3d>();
+					while(finalPhase < 1) {
+						int vInt;
+						float[] curUV;
+						float[] curNormals;
+						int ind = s.indexOf(" ");
+						s1 = s;
+						if(ind > -1) {
+							s1 = s.substring(0, ind);
+						}
+						if(s1.contains("/")) {
+							String[] f = s1.split("/");
+							vInt = Integer.parseInt(f[0]) - 1;
+							if(f[1].equals("")) {
+								f[1] = f[0];
+							}
+							curUV = (uvs.size() > Integer.parseInt(f[1]) - 1)?uvs.get(Integer.parseInt(f[1]) - 1):new float[]{0, 0};
+							int vnInt = 0;
+							if(f.length == 3) {
+								if(f[2].equals("")) {
+									f[2] = f[0];
+								}
+								vnInt = Integer.parseInt(f[2]) - 1;
+							} else {
+								vnInt = Integer.parseInt(f[0]) - 1;
+							}
+							curNormals = (normals.size() > vnInt)?normals.get(vnInt):new float[]{0, 0, 0};
+						} else {
+							vInt = Integer.parseInt(s1) - 1;
+							curUV = (uvs.size() > vInt)?uvs.get(vInt):new float[]{0, 0};
+							curNormals = (normals.size() > vInt)?normals.get(vInt):new float[]{0, 0, 0};
+						}
+
+						iNormal.add(new Vec3d(curNormals[0], curNormals[1], curNormals[2]));
+
+						normal[0]+= curNormals[0];
+						normal[1]+= curNormals[1];
+						normal[2]+= curNormals[2];
+
+						if(vInt < verts.size()) {
+							v.add(verts.get(vInt).setTexturePosition(curUV[0], curUV[1]));
+							if(verts.get(vInt) != null) {
+								verts.get(vInt).addGroup(group);
+							}
+						}
+						if(ind > -1) {
+							s = s.substring(s.indexOf(" ") + 1).trim();
+						} else {
+							finalPhase++;
+						}
+					}
+
+					float d = MathHelper.sqrt_float(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+
+					normal[0]/= d;
+					normal[1]/= d;
+					normal[2]/= d;
+
+					PositionTextureVertex[] vToArr = new PositionTextureVertex[v.size()];
+
+					for(int i = 0; i < v.size(); i++) {
+						vToArr[i] = v.get(i);
+					}
+
+					TexturedPolygon poly = new TexturedPolygon(vToArr);
+					poly.setNormals(normal[0], normal[1], normal[2]);
+					poly.setNormals(iNormal);
+
+					face.add(poly);
+					texture.addPoly(poly);
+				}
+			}
+
+			vertices = new PositionTransformVertex[verts.size()];
+			for(int i = 0; i < verts.size(); i++) {
+				vertices[i] = verts.get(i);
+			}
+			faces = new TexturedPolygon[face.size()];
+			for(int i = 0; i < face.size(); i++) {
+				faces[i] = face.get(i);
+			}
+			in.close();
+		}
+		catch(Throwable e) {
+			e.printStackTrace();
+		}
+	}
+
+
 }

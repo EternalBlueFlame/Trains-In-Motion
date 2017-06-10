@@ -5,17 +5,13 @@ import net.minecraft.client.model.PositionTextureVertex;
 import java.util.ArrayList;
 
 public class PositionTransformVertex extends PositionTextureVertex {
-	public PositionTransformVertex(float x, float y, float z, float u, float v) {
-		this(new Vec3d((double)x, (double)y, (double)z), u, v);
+	public PositionTransformVertex(double x, double y, double z, float u, float v) {
+		this(new Vec3d(x, y, z), u, v);
 	}
 	
 	public PositionTransformVertex(PositionTextureVertex vertex, float u, float v) {
 		super(vertex, u, v);
-		if(vertex instanceof PositionTransformVertex) {
-			neutralVector = ((PositionTransformVertex) vertex).neutralVector;
-		} else {
-			neutralVector = new Vec3d(vertex.vector3D.xCoord, vertex.vector3D.yCoord, vertex.vector3D.zCoord);
-		}
+		neutralVector = (vertex instanceof PositionTransformVertex)?((PositionTransformVertex) vertex).neutralVector:new Vec3d(vertex.vector3D.xCoord, vertex.vector3D.yCoord, vertex.vector3D.zCoord);
 	}
 	
 	public PositionTransformVertex(PositionTextureVertex vertex) {
@@ -24,14 +20,11 @@ public class PositionTransformVertex extends PositionTextureVertex {
 	
 	public PositionTransformVertex(Vec3d vector, float u, float v) {
 		super(vector, u, v);
-		neutralVector = new Vec3d(vector.xCoord, vector.yCoord, vector.zCoord);
+		neutralVector = vector;
 	}
 	
 	public void setTransformation() {
 		if(transformGroups.size() == 0) {
-			/*vector3D.xCoord = neutralVector.xCoord;
-			vector3D.yCoord = neutralVector.yCoord;
-			vector3D.zCoord = neutralVector.zCoord;*/
 			vector3D = neutralVector;
 			return;
 		}
@@ -39,19 +32,17 @@ public class PositionTransformVertex extends PositionTextureVertex {
 		for(TransformGroup transform : transformGroups) {
 			weight += transform.getWeight();
 		}
-		/*vector3D.xCoord = 0;
+		vector3D.xCoord = 0;
 		vector3D.yCoord = 0;
-		vector3D.zCoord = 0;*/
-		vector3D = new Vec3d(0, 0, 0);
+		vector3D.zCoord = 0;
 
 		for(TransformGroup transform : transformGroups) {
 			double cWeight = transform.getWeight() / weight;
 			Vec3d vector = transform.doTransformation(this);
 			
-			/*vector3D.xCoord += cWeight * vector.xCoord;
+			vector3D.xCoord += cWeight * vector.xCoord;
 			vector3D.yCoord += cWeight * vector.yCoord;
-			vector3D.zCoord += cWeight * vector.zCoord;*/
-			vector3D.addVector(cWeight * vector.xCoord, cWeight * vector.yCoord, cWeight * vector.zCoord);
+			vector3D.zCoord += cWeight * vector.zCoord;
 		}
 	}
 	

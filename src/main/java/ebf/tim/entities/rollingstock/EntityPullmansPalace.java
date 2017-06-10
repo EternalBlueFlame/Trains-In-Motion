@@ -55,7 +55,7 @@ public class EntityPullmansPalace extends EntityRollingStockCore {
      * <h2>Rider offsets</h2>
      */
     @Override
-    public double[][] getRiderOffsets(){return new double[][]{{2.5f,1.5f, 0f},{1f,1.5f, 0f},{-1f,1.5f, 0f},{-2.5f,1.5f, 0f}};}
+    public double[][] getRiderOffsets(){return new double[][]{{2.5f,1.5f, 0f},{1f,0.5f, 0f},{-1f,0.5f, 0f},{-2.5f,0.5f, 0f}};}
     /**
      * <h2>Hitbox offsets</h2>
      */

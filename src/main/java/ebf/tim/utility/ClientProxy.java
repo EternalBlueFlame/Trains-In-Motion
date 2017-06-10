@@ -163,7 +163,7 @@ public class ClientProxy extends CommonProxy {
             @Override
             public void renderTileEntityAt(TileEntity p_147500_1_, double p_147500_2_, double p_147500_4_, double p_147500_6_, float p_147500_8_) {
                 GL11.glPushMatrix();
-                GL11.glTranslated(p_147500_2_+0.5,p_147500_4_+0.3, p_147500_6_+0.5);
+                GL11.glTranslated(p_147500_2_+0.5,p_147500_4_+0.325, p_147500_6_+0.5);
                 GL11.glScaled(1,0.5,1);
                 switch (p_147500_1_.getBlockMetadata()){
                     //straight
@@ -205,7 +205,7 @@ public class ClientProxy extends CommonProxy {
                         GL11.glRotatef(180, 1, 0, 0);
                         GL11.glRotatef(180, 0, 1, 0);
                         Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailCurveVerySmall.png"));
-                        railCurveModel.render(null,0,0,0,0,0,0);
+                        railCurveModel.render(null,0,0,0,0,0, 0);
                         break;
                     }
 
