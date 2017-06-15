@@ -113,12 +113,12 @@ public class GroupedModelRender {
                 GL11.glPushMatrix();
                 //define position from model
                 GL11.glTranslated(((block.offsetX + block.rotationPointX) / 16),
-                        ((block.offsetY + block.rotationPointY) / 16),
-                        ((block.offsetZ + block.rotationPointZ) / 16));
+                        ((block.offsetY + block.rotationPointY) / 16) -0.06,
+                        ((block.offsetZ + block.rotationPointZ) / 16) +0.06);
                 //define the rotation from the model
                 GL11.glRotated(block.rotateAngleX * RailUtility.degreesD, 1, 0, 0);
                 GL11.glRotated(block.rotateAngleY * RailUtility.degreesD, 0, 1, 0);
-                GL11.glRotated(block.rotateAngleZ * RailUtility.degreesD, 0, 0, 1);
+                GL11.glRotated((block.rotateAngleZ * RailUtility.degreesD)+90, 0, 0, 1);
                 //define scale based on the model
                 GL11.glScaled(block.xScale - 0.0175, block.yScale - 0.0175, block.zScale - 0.0175);
                 //now actually render the block.

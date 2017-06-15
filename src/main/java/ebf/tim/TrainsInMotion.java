@@ -44,7 +44,7 @@ public class TrainsInMotion {
     /**the ID of the mod and the version displayed in game, as well as used for version check in the version.txt file*/
     public static final String MODID = "tim";
     /**the version identifier of the mod*/
-    public static final String MOD_VERSION="0.2.5.0 alpha";
+    public static final String MOD_VERSION="0.2.6.0 alpha";
     /**an instance of the mod*/
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;

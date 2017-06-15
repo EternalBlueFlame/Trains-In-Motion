@@ -12,8 +12,8 @@
 package ebf.tim.models.rollingstock;
 
 import ebf.tim.models.StaticModelAnimator;
-import ebf.tim.models.tmt.ModelRendererTurbo;
 import ebf.tim.models.tmt.ModelBase;
+import ebf.tim.models.tmt.ModelRendererTurbo;
 import net.minecraft.entity.Entity;
 
 public class PullmansPalace extends ModelBase
