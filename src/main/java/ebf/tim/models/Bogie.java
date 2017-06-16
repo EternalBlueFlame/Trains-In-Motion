@@ -1,7 +1,9 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.utility.RailUtility;
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -19,6 +21,7 @@ public class Bogie {
     public final ResourceLocation bogieTexture;
     /**the model defined in the registration of this.*/
     public final ModelBase bogieModel;
+    int updateTicks=0;
 
 
     public Bogie(ResourceLocation texture, ModelBase model){
@@ -31,18 +34,21 @@ public class Bogie {
      * updates the positions of the model, and then uses that data to set the rotations.
      * @param entity the GenericRailTransport to get the pitch from.
      */
-    public void setPositionAndRotation(double[] position, GenericRailTransport entity){
+    public void setPositionAndRotation(GenericRailTransport entity, double offset){
+        updateTicks ++;
         //update positions
         if(prevPos == null){
-            prevPos = position;
+            prevPos = RailUtility.rotatePoint(new double[]{offset,0,0}, 0, entity.rotationYaw,0);
+            prevPos[0] += entity.posX;
+            prevPos[2] += entity.posZ;
             rotationYaw = entity.rotationYaw;
-        } else {
-            //update rotations
-            if (Math.abs(prevPos[0] - position[0]) > 0.01 || Math.abs(prevPos[1] - position[1]) > 0.01 || Math.abs(prevPos[2] - position[2]) > 0.01) {
-                rotationYaw = (float) Math.toDegrees(Math.atan2(
-                        prevPos[2] - position[2],
-                        prevPos[0] - position[0]));
-            }
+        } else if (updateTicks %4 ==0) {
+            double[] position = RailUtility.rotatePoint(new double[]{offset,0,0}, 0, entity.rotationYaw,0);
+            position[0] += entity.posX;
+            position[2] += entity.posZ;
+            rotationYaw = (float) Math.toDegrees(Math.atan2(position[2] - prevPos[2], position[0] - prevPos[0]));
+            prevPos = position;
+            updateTicks =0;
         }
     }
 }

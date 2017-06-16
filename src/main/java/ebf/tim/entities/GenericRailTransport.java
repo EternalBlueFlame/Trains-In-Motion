@@ -17,6 +17,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
@@ -47,7 +48,7 @@ import static ebf.tim.utility.RailUtility.rotatePoint;
  * this is the base for all trains and rollingstock.
  * @author Eternal Blue Flame
  */
-public class GenericRailTransport extends Entity implements IEntityAdditionalSpawnData, IEntityMultiPart, IInventory, IFluidHandler {
+public class GenericRailTransport extends EntityMinecart implements IEntityAdditionalSpawnData, IEntityMultiPart, IInventory, IFluidHandler {
 
     /*
      * <h2>variables</h2>
@@ -176,6 +177,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                 items.add(null);
             }
         }
+        setSize(1.5f,0.5f);
     }
 
 
@@ -186,6 +188,8 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      /**returns if the player can push this, we actually use our own systems for this, so we return false*/
     @Override
     public boolean canBePushed() {return false;}
+    @Override
+    public int getMinecartType(){return 10002;}
     /**returns the world object for IEntityMultipart*/
     @Override
     public World func_82194_d(){return worldObj;}
@@ -290,7 +294,7 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
      * @see EntitySeat#readSpawnData(ByteBuf)*/
     @SideOnly(Side.CLIENT)
     public void setseats(EntitySeat seat, int seatNumber){
-        if (seats.size() > seatNumber) {
+        if (seats.size() <= seatNumber) {
             seats.add(seat);
         } else {
             seats.set(seatNumber, seat);
@@ -597,9 +601,11 @@ public class GenericRailTransport extends Entity implements IEntityAdditionalSpa
                             particles.add(new ParticleFX(posZ, posY, posX, smoke[3], vectorCache[8],
                                     backBogie.motionX + (rand.nextInt(40) - 20) * 0.001f, smoke[1] * 0.05, backBogie.motionZ + (rand.nextInt(40) - 20) * 0.001f));
                             maxSpawnThisTick++;
-                        } else if (maxSpawnThisTick == 0) {
+                        } else if (maxSpawnThisTick == 0 && particles.size() > itteration) {
                             //if the particles have finished spawning in, move them.
-                            particles.get(itteration).onUpdate(this, posX, posY, posZ, getBoolean(boolValues.RUNNING));
+                            particles.get(itteration)
+                                    .onUpdate(this, posX, posY, posZ,
+                                            getBoolean(boolValues.RUNNING));
                         }
                         itteration++;
                     }

@@ -4,6 +4,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.entities.*;
 import net.minecraft.block.BlockAir;
+import net.minecraft.block.BlockGrass;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityMultiPart;
@@ -139,7 +140,9 @@ public class HitboxHandler {
                     for (; k1 <= l; ++k1) {
                         for (; l1 <= i1; ++l1) {
                             for (; i2 <= j1; ++i2) {
-                                if (!(transport.worldObj.getBlock(k1, l1, i2) instanceof BlockAir) && !RailUtility.isRailBlockAt(transport.worldObj, k1, l1, i2)) {
+                                if (((!(transport.worldObj.getBlock(k1, l1, i2) instanceof BlockAir) && !(transport.worldObj.getBlock(k1, l1, i2) instanceof BlockGrass))||
+                                        transport.worldObj.getBlock(k1,l1,i2).getUnlocalizedName().contains("residual.heat"))//railcraft residual heat support
+                                        && !RailUtility.isRailBlockAt(transport.worldObj, k1, l1, i2)) {
                                     return true;
                                 }
                             }

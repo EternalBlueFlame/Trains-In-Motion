@@ -7,7 +7,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 /**
- * Created by JakeD on 6/1/2017.
+ * @author Eternal Blue Flame
  */
 public class BlockRailOverride extends BlockRail implements ITileEntityProvider {
 
@@ -35,7 +35,7 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
 
     public class renderTileEntity extends TileEntity{
         @Override
-        public boolean canUpdate(){return false;}
+        public boolean canUpdate(){return true;}
 
     }
 }

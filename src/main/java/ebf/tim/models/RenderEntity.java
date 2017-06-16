@@ -45,7 +45,7 @@ public class RenderEntity extends Render {
      * @see GroupedModelRender*/
     private List<GroupedModelRender> blockCargoRenders = new ArrayList<GroupedModelRender>();
     /**a cached list of all the vectors used, so we don't have to re-initialize them every frame.*/
-    private double[][] animationCache = new double[8][3];
+    private double[][] animationCache = new double[4][3];
     /**a cached list of all the cubes intended to display liveries.*/
     private List<ModelRendererTurbo> liveriesSquare = new ArrayList<ModelRendererTurbo>();
     /**the value to rotate the geometry with.*/
@@ -53,8 +53,7 @@ public class RenderEntity extends Render {
 
     private ResourceLocation boundTexture;
 
-    private static final float vanillaRailOffset = 0.34f;
-    private static final float railOffset3D = 0.5f;
+    private static final float RailOffset = 0.34f;
 
     /**
      * <h3>class constructor</h3>
@@ -100,8 +99,7 @@ public class RenderEntity extends Render {
                 for (Bogie bogie : bogieRenders){
                     for (Object box : bogie.bogieModel.boxList) {
                         if (box instanceof ModelRendererTurbo) {
-                            ModelRendererTurbo render = ((ModelRendererTurbo) box);
-                            animatedPart.add(new StaticModelAnimator(render));
+                            animatedPart.add(new StaticModelAnimator(((ModelRendererTurbo) box)));
                         }
                     }
                 }
@@ -152,7 +150,7 @@ public class RenderEntity extends Render {
     public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw){
         GL11.glPushMatrix();
         //set the render position
-        GL11.glTranslated(x, y+ (ClientProxy.Enable3DRails? railOffset3D :vanillaRailOffset) + (entity.getRenderScale()-0.0625f)*10, z);
+        GL11.glTranslated(x, y+ RailOffset + (entity.getRenderScale()-0.0625f)*10, z);
         //rotate the model.
         GL11.glRotatef(-yaw, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(entity.rotationPitch-180f, 1.0f, 0.0f, 0.0f);
@@ -221,13 +219,13 @@ public class RenderEntity extends Render {
                     bindTexture(bogieRenders[i].bogieTexture);
                     GL11.glPushMatrix();
                     //set the offset
-                    animationCache[6][0]=entity.getRenderBogieOffsets().get(i) + Math.copySign((entity.getRenderScale()-0.0625f)*26, entity.getRenderBogieOffsets().get(i));
-                    animationCache[6][1] = (ClientProxy.Enable3DRails? railOffset3D :vanillaRailOffset);
-                    animationCache[7] = RailUtility.rotatePoint(animationCache[6], entity.rotationPitch, entity.rotationYaw,0);
-                    GL11.glTranslated(animationCache[7][0]+x,animationCache[7][1]+y, animationCache[7][2]+z);
-                    bogieRenders[i].setPositionAndRotation(animationCache[5], entity);
+                    animationCache[2][0]=entity.getRenderBogieOffsets().get(i) + Math.copySign((entity.getRenderScale()-0.0625f)*26, entity.getRenderBogieOffsets().get(i));
+                    animationCache[2][1] = RailOffset;
+                    animationCache[3] = RailUtility.rotatePoint(animationCache[2], entity.rotationPitch, entity.rotationYaw,0);
+                    GL11.glTranslated(animationCache[3][0]+x,animationCache[3][1]+y, animationCache[3][2]+z);
+                    bogieRenders[i].setPositionAndRotation(entity, entity.getRenderBogieOffsets().get(i));
                     //set the rotation
-                    GL11.glRotatef(bogieRenders[i].rotationYaw,0,1.0f,0);
+                    GL11.glRotatef(-bogieRenders[i].rotationYaw,0,1.0f,0);
                     GL11.glRotatef(entity.rotationPitch - 180f, 1.0f, 0.0f, 0.0f);
                     //render the geometry
                     for (Object modelBogiePart : bogieRenders[i].bogieModel.boxList) {
