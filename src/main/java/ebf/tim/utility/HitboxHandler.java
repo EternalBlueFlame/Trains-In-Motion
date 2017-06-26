@@ -3,6 +3,7 @@ package ebf.tim.utility;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.entities.*;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.block.BlockGrass;
 import net.minecraft.entity.Entity;
@@ -93,6 +94,9 @@ public class HitboxHandler {
         @Override
         public boolean writeMountToNBT(NBTTagCompound tagCompound){return false;}
 
+        public boolean isFirst(){return parent.hitboxHandler.hitboxList.get(0) == this;}
+        public boolean isLast(){return parent.hitboxHandler.hitboxList.get(parent.hitboxHandler.hitboxList.size()-1) == this;}
+
     }
 
 
@@ -115,40 +119,35 @@ public class HitboxHandler {
         int k1;
         int l1;
         int i2;
-        int l;
-        int i1;
-        int j1;
         List list;
         Entity entity;
         double[][] vectorCache = new double[2][3];
 
         //detect collisions with blocks on X, Y, and Z.
         for (MultipartHitbox box : hitboxList) {
-                //define the values as temporary variables first since it will be faster than flooring the variable every loop check
-                k1 = MathHelper.floor_double(box.boundingBox.minX);
-                l1 = MathHelper.floor_double(box.boundingBox.minY);
-                i2 = MathHelper.floor_double(box.boundingBox.minZ);
-                l = MathHelper.floor_double(box.boundingBox.maxX);
-                i1 = MathHelper.floor_double(box.boundingBox.maxY);
-                j1 = MathHelper.floor_double(box.boundingBox.maxZ);
+            //define the values as temporary variables first since it will be faster than flooring the variable every loop check
+            k1 = MathHelper.floor_double(box.boundingBox.minX);
+            l1 = MathHelper.floor_double(box.boundingBox.minY);
+            i2 = MathHelper.floor_double(box.boundingBox.minZ);
             /*
              * check if the chunk exists, then loop for X, Y, and Z to check for a rail or an air block.
              * if one isnt found return true to stop the movement.
              * @see GenericRailTransport#onUpdate()
              */
-                if (transport.worldObj.checkChunksExist(k1, l1, i2, l, i1, j1)) {
-                    for (; k1 <= l; ++k1) {
-                        for (; l1 <= i1; ++l1) {
-                            for (; i2 <= j1; ++i2) {
-                                if (((!(transport.worldObj.getBlock(k1, l1, i2) instanceof BlockAir) && !(transport.worldObj.getBlock(k1, l1, i2) instanceof BlockGrass))||
-                                        transport.worldObj.getBlock(k1,l1,i2).getUnlocalizedName().contains("residual.heat"))//railcraft residual heat support
-                                        && !RailUtility.isRailBlockAt(transport.worldObj, k1, l1, i2)) {
-                                    return true;
-                                }
+            if (transport.worldObj.checkChunksExist(k1, l1, i2, MathHelper.floor_double(box.boundingBox.maxX), MathHelper.floor_double(box.boundingBox.maxY), MathHelper.floor_double(box.boundingBox.maxZ))) {
+                for (; k1 <= box.boundingBox.maxX; ++k1) {
+                    for (; l1 <= box.boundingBox.maxY; ++l1) {
+                        for (; i2 <= box.boundingBox.maxZ; ++i2) {
+                            Block b1 = transport.worldObj.getBlock(k1, l1, i2);
+                            if (b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2) != null && b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2).intersectsWith(box.getBoundingBox())){
+                                return b1.getBlockBoundsMaxX() + b1.getBlockBoundsMaxY() + b1.getBlockBoundsMaxZ() !=0;
                             }
                         }
                     }
                 }
+            }
+
+
             /*
              * detect collision with entities.
              * we have to create a temporary bounding box that's larger than the current so we can check just a bit past the current box, this gives collision events a bit more time to react.
@@ -179,6 +178,35 @@ public class HitboxHandler {
                     }
                     /*if the parent is an Entity Rollingstock, and the other checks were false, we now need to check if we roadkill the entity, or get pushed by it.*/
                     if (transport instanceof EntityRollingStockCore) {
+                        if(entity instanceof HitboxHandler.MultipartHitbox){
+                            //check for front coupling if this is the front hitbox
+                            if (box.isFirst() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT) && box.parent.frontLinkedID == null){
+                                //check if we're linking to the front of the other
+                                if (((MultipartHitbox) entity).isFirst() && ((MultipartHitbox) entity).parent.frontLinkedID == null){
+                                    box.parent.frontLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
+                                    ((MultipartHitbox) entity).parent.frontLinkedTransport = box.parent.getPersistentID();
+                                    System.out.println("front front linked");
+                                    //check if we're linking to the back of the other.
+                                } else if (((MultipartHitbox) entity).isLast() && ((MultipartHitbox) entity).parent.backLinkedID == null){
+                                    box.parent.frontLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
+                                    ((MultipartHitbox) entity).parent.backLinkedTransport = box.parent.getPersistentID();
+                                    System.out.println("front back linked");
+                                }
+
+                                //otherwise check for back coupling if this is the back hitbox
+                            } else if (box.isLast() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK) && box.parent.backLinkedID == null){
+                                if (((MultipartHitbox) entity).isFirst() && ((MultipartHitbox) entity).parent.frontLinkedID == null){
+                                    box.parent.backLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
+                                    ((MultipartHitbox) entity).parent.frontLinkedTransport = box.parent.getPersistentID();
+                                    System.out.println("back front linked");
+                                    //check if we're linking to the back of the other.
+                                } else if (((MultipartHitbox) entity).isLast() && ((MultipartHitbox) entity).parent.backLinkedID == null){
+                                    box.parent.backLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
+                                    ((MultipartHitbox) entity).parent.backLinkedTransport = box.parent.getPersistentID();
+                                    System.out.println("back back linked");
+                                }
+                            }
+                        }
                         if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
                             //in the case of roadkill
                             entity.attackEntityFrom(new EntityDamageSource("rollingstock", transport), (float) (transport.frontBogie.motionX + transport.frontBogie.motionZ) * 1000);

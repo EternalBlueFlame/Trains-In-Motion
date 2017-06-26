@@ -1,8 +1,8 @@
 package ebf.tim.models;
 
 
+import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.ModelRendererTurbo;
-import net.minecraft.client.model.ModelBase;
 
 
 /**

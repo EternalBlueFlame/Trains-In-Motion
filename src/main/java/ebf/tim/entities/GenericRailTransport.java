@@ -70,11 +70,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**the server-sided persistent UUID of the transport linked to the front of this,*/
     public UUID frontLinkedTransport = null;
     /**the id of the rollingstock linked to the front*/
-    public int frontLinkedID =0;
+    public Integer frontLinkedID =null;
     /**the server-sided persistent UUID of the transport linked to the back of this,*/
     public UUID backLinkedTransport = null;
     /**the id of the rollingstock linked to the back*/
-    public int backLinkedID =0;
+    public Integer backLinkedID = null;
     /**the ID of the owner*/
     public int ownerID =0;
     /**the destination for routing*/
@@ -124,7 +124,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * @see #setBoolean(boolValues, boolean)
      */
     private BitList bools = new BitList();
-    public enum boolValues{BRAKE(0), LOCKED(1), LAMP(2), CREATIVE(3), COUPLING(4), WHITELIST(5), RUNNING(6);
+    public enum boolValues{BRAKE(0), LOCKED(1), LAMP(2), CREATIVE(3), COUPLINGFRONT(4), COUPLINGBACK(4), WHITELIST(6), RUNNING(7);
         public int index;
         boolValues(int index){this.index = index;}
     }
@@ -494,13 +494,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         if (frontBogie!=null && backBogie != null){
             //handle movement.
             if (!hitboxHandler.getCollision(this)) {
-                frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain());
-                backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain());
+                frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons());
+                backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons());
             } else {
                 frontBogie.addVelocity(-frontBogie.motionX,-frontBogie.motionY,-frontBogie.motionZ);
                 backBogie.addVelocity(-backBogie.motionX,-backBogie.motionY,-backBogie.motionZ);
-                frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain());
-                backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain());
+                frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons());
+                backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons());
             }
             frontVelocityX = frontBogie.motionX;
             frontVelocityZ = frontBogie.motionZ;
@@ -544,7 +544,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         }
 
         //be sure the owner entityID is currently loaded, this variable is dynamic so we don't save it to NBT.
-        if (!worldObj.isRemote &&ticksExisted %5==0){
+        if (!worldObj.isRemote &&ticksExisted %10==0){
 
             manageFuel();
 
@@ -555,9 +555,15 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
             //sync the linked transports with client, and on server, easier to use an ID than a UUID.
             Entity linkedTransport = CommonProxy.getEntityFromUuid(frontLinkedTransport);
-            frontLinkedID = linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0;
+            if (linkedTransport instanceof GenericRailTransport && (frontLinkedID == null || linkedTransport.getEntityId() != frontLinkedID)) {
+                frontLinkedID = linkedTransport.getEntityId();
+                updateWatchers = true;
+            }
             linkedTransport = CommonProxy.getEntityFromUuid(backLinkedTransport);
-            backLinkedID = linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0;
+            if (linkedTransport instanceof GenericRailTransport && (backLinkedID == null || linkedTransport.getEntityId() != backLinkedID)) {
+                backLinkedID = linkedTransport.getEntityId();
+                updateWatchers = true;
+            }
 
             if(updateWatchers){
                 if (fluidTank != null){
@@ -646,9 +652,10 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * If coupling is on then it will check sides without linked transports for anything to link to.
      */
     public void manageLinks() {
+
         if (!worldObj.isRemote) {
             //manage the frontLinkedTransport link
-            if (frontLinkedTransport != null) {
+            if (frontLinkedID != null) {
                 Entity frontLink = worldObj.getEntityByID(frontLinkedID);
                 if (frontLink instanceof GenericRailTransport) {
                     //to here
@@ -663,31 +670,12 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                     vectorCache[6] = rotatePoint(vectorCache[5], 0, frontLink.rotationYaw, 0);
                     vectorCache[6][0] += frontLink.posX;
                     vectorCache[6][2] += frontLink.posZ;
-                    this.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.005, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.005);
-                }
-                //manage coupling
-            } else if (getBoolean(boolValues.COUPLING)) {
-                vectorCache[3][0] = getHitboxPositions()[0] - 2;
-                vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
-                vectorCache[4][0] += posX;
-                vectorCache[4][1] += posY;
-                vectorCache[4][2] += posZ;
-                List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                        AxisAlignedBB.getBoundingBox(vectorCache[4][0] - 0.5d, vectorCache[4][1], vectorCache[4][2] - 0.5d,
-                                vectorCache[4][0] + 0.5d, vectorCache[4][1] + 2, vectorCache[4][2] + 0.5d));
-
-                if (list.size() > 0) {
-                    for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport) worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).getBoolean(boolValues.COUPLING)) {
-                            frontLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
-                            System.out.println(getEntityId() + " : rollingstock frontLinkedTransport linked : ");
-                            updateWatchers = true;
-                        }
-                    }
+                    frontBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.005, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.005);
+                    backBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.005, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.005);
                 }
             }
             //Manage the backLinkedTransport link
-            if (backLinkedTransport != null) {
+            if (backLinkedID != null) {
                 Entity backLink = worldObj.getEntityByID(backLinkedID);
                 if (backLink instanceof GenericRailTransport) {
                     //to here
@@ -702,27 +690,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                     vectorCache[6] = rotatePoint(vectorCache[5], 0, backLink.rotationYaw, 0);
                     vectorCache[6][0] += backLink.posX;
                     vectorCache[6][2] += backLink.posZ;
-                    this.addVelocity(-(vectorCache[6][0] - vectorCache[6][0]) * 0.005, 0, -(vectorCache[6][2] - vectorCache[6][2]) * 0.005);
-                }
-                //manage coupling
-            } else if (getBoolean(boolValues.COUPLING)) {
-                vectorCache[3][0] = getHitboxPositions()[getHitboxPositions().length - 1] + 2;
-                vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
-                vectorCache[4][0] += posX;
-                vectorCache[4][1] += posY;
-                vectorCache[4][2] += posZ;
-                List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                        AxisAlignedBB.getBoundingBox(vectorCache[4][0] - 0.5d, vectorCache[4][1], vectorCache[4][2] - 0.5d,
-                                vectorCache[4][0] + 0.5d, vectorCache[4][1] + 2, vectorCache[4][2] + 0.5d));
-
-                if (list.size() > 0) {
-                    for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport) worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).getBoolean(boolValues.COUPLING)) {
-                            backLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
-                            System.out.println(getEntityId() + " : rollingstock backLinkedTransport linked : ");
-                            updateWatchers = true;
-                        }
-                    }
+                    frontBogie.addVelocity(-(vectorCache[6][0] - vectorCache[6][0]) * 0.005, 0, -(vectorCache[6][2] - vectorCache[6][2]) * 0.005);
+                    backBogie.addVelocity(-(vectorCache[6][0] - vectorCache[6][0]) * 0.005, 0, -(vectorCache[6][2] - vectorCache[6][2]) * 0.005);
                 }
             }
         }
@@ -764,7 +733,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 setBoolean(boolValues.LOCKED, !bools.get(1));
                 return true;
             }case 7:{ //Toggle coupling
-                setBoolean(boolValues.COUPLING, !bools.get(4));
+                boolean toset = !bools.get(4);
+                setBoolean(boolValues.COUPLINGFRONT, toset);
+                setBoolean(boolValues.COUPLINGBACK, toset);
                 return true;
             }case 10:{ //Toggle transport creative mode
                 setBoolean(boolValues.CREATIVE, !bools.get(3));
@@ -775,7 +746,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }case 13:{ //unlink transports
                 Entity transport;
                 //frontLinkedTransport
-                if (frontLinkedTransport != null){
+                if (frontLinkedID != null){
                     transport = worldObj.getEntityByID(frontLinkedID);
                     if (transport instanceof GenericRailTransport){
                         Entity transportTemp = worldObj.getEntityByID(frontLinkedID);
@@ -793,7 +764,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                     }
                 }
                 //backLinkedTransport
-                if (backLinkedTransport != null){
+                if (backLinkedID != null){
                     transport = worldObj.getEntityByID(backLinkedID);
                     if (transport instanceof GenericRailTransport){
                         Entity transportTemp = worldObj.getEntityByID(frontLinkedID);
@@ -907,7 +878,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**this function allows individual trains and rollingstock to implement custom fuel consumption and management
      * @see FuelHandler#manageSteam(EntityTrainCore) */
     public void manageFuel(){}
-    /**defines the weight of the transport, can't be 0*/
+    /**defines the weight of the transport, can't be less than 1, or more than 850
+     * todo: placeholder math till proper torque calculations are in that support weight dynamically*/
     public float weightTons(){return 1;}
 
 

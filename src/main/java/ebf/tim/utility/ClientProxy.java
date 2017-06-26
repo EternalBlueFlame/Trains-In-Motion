@@ -19,6 +19,7 @@ import ebf.tim.gui.HUDTrain;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
 import ebf.tim.models.rails.ModelRailCurveVerySmall;
+import ebf.tim.models.rails.ModelRailSlope;
 import ebf.tim.models.rails.ModelRailStraight;
 import ebf.tim.registry.TransportRegistry;
 import ebf.tim.registry.URIRegistry;
@@ -159,61 +160,7 @@ public class ClientProxy extends CommonProxy {
 
 
         //GameRegistry.registerBlock(new BlockRailOverride(), Item);
-        ClientRegistry.bindTileEntitySpecialRenderer(BlockRailOverride.renderTileEntity.class, new TileEntitySpecialRenderer() {
-            @Override
-            public void renderTileEntityAt(TileEntity p_147500_1_, double p_147500_2_, double p_147500_4_, double p_147500_6_, float p_147500_8_) {
-                GL11.glPushMatrix();
-                GL11.glTranslated(p_147500_2_+0.5,p_147500_4_+0.325, p_147500_6_+0.5);
-                GL11.glScaled(1,0.5,1);
-                switch (p_147500_1_.getBlockMetadata()){
-                    //straight
-                    case 1:{
-                        GL11.glRotatef(180, 1, 0, 0);
-                        Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailStraight.png"));
-                        railStraightModel.render(null,0,0,0,0,0,0);
-                        break;
-                    }
-                    case 0:{
-                        GL11.glRotatef(180, 1, 0, 1f);
-                        Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailStraight.png"));
-                        railStraightModel.render(null,0,0,0,0,0,0);
-                        break;
-                    }
-                    //curves
-                        //TODO: model is upsidedown i think...
-                    case 6:{
-                        GL11.glRotatef(180, 1, 0, 0);
-                        GL11.glRotatef(270, 0, 1, 0);
-                        Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailCurveVerySmall.png"));
-                        railCurveModel.render(null,0,0,0,0,0,0);
-                        break;
-                    }
-                    case 7:{
-                        GL11.glRotatef(180, 1, 0, 0);
-                        Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailCurveVerySmall.png"));
-                        railCurveModel.render(null,0,0,0,0,0,0);
-                        break;
-                    }
-                    case 8:{
-                        GL11.glRotatef(180, 1, 0, 0);
-                        GL11.glRotatef(90, 0, 1, 0);
-                        Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailCurveVerySmall.png"));
-                        railCurveModel.render(null,0,0,0,0,0,0);
-                        break;
-                    }
-                    case 9:{
-                        GL11.glRotatef(180, 1, 0, 0);
-                        GL11.glRotatef(180, 0, 1, 0);
-                        Minecraft.getMinecraft().getTextureManager().bindTexture(URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailCurveVerySmall.png"));
-                        railCurveModel.render(null,0,0,0,0,0, 0);
-                        break;
-                    }
-
-                }
-
-                GL11.glPopMatrix();
-            }
-        });
+        ClientRegistry.bindTileEntitySpecialRenderer(BlockRailOverride.renderTileEntity.class, specialRenderer);
 
 
 
@@ -231,9 +178,16 @@ public class ClientProxy extends CommonProxy {
 
     }
 
+    public static final TileEntitySpecialRenderer specialRenderer = new TileEntitySpecialRenderer() {
+        @Override
+        public void renderTileEntityAt(TileEntity tileEntity, double x, double y, double z, float p_147500_8_) {
+            ((BlockRailOverride.renderTileEntity) tileEntity).render(x,y,z);
+        }
 
-    private static final ModelRailStraight railStraightModel = new ModelRailStraight();
-    private static final ModelRailCurveVerySmall railCurveModel = new ModelRailCurveVerySmall();
+        @Override
+        protected void bindTexture(ResourceLocation p_147499_1_){}
+    };
+
 
     /**
      * <h3>null render</h3>

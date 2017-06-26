@@ -2,14 +2,13 @@ package ebf.tim.models.tmt;
 
 import ebf.tim.models.RenderEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.model.PositionTextureVertex;
 import net.minecraft.client.model.TexturedQuad;
 import net.minecraft.client.renderer.GLAllocation;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GLContext;
 
 import java.util.*;
 /**
@@ -33,7 +32,6 @@ public class ModelRendererTurbo extends ModelRenderer {
 
     /**converts a radians float to degrees */
     public static final float degreesF = (float) (180.0d / Math.PI);
-
 
     /**
      * Creates a new ModelRenderTurbo object with a defined name.
@@ -275,11 +273,10 @@ public class ModelRendererTurbo extends ModelRenderer {
         yScale = h * 0.065f;
         zScale = d * 0.065f;
 
-        
         float x1 = x + w + expansion;
         float y1 = y + h + expansion;
         float z1 = z + d + expansion;
-        
+
         x -= expansion;
         y -= expansion;
         z -= expansion;
@@ -288,7 +285,7 @@ public class ModelRendererTurbo extends ModelRenderer {
             x1 = x;
             x = xTemp;
         }
-        
+
         float[][] v = {{x, y, z}, {x1, y, z}, {x1, y1, z}, {x, y1, z}, {x, y, z1}, {x1, y, z1}, {x1, y1, z1}, {x, y1, z1}};
         addRectShape(v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7], w, h, d);
     }
@@ -659,313 +656,6 @@ public class ModelRendererTurbo extends ModelRenderer {
     }
     
     /**
-     * Adds a spherical shape.
-     * @param x
-     * @param y
-     * @param z
-     * @param r
-     * @param segs
-     * @param rings
-     * @param textureW
-     * @param textureH
-     */
-    public void addSphere(float x, float y, float z, float r, int segs, int rings, int textureW, int textureH) {
-    	if(segs < 3) {
-            segs = 3;
-        }
-    	rings++;
-    	PositionTextureVertex[] tempVerts = new PositionTextureVertex[segs * (rings - 1) + 2];
-    	TexturedPolygon[] poly = new TexturedPolygon[segs * rings];
-    	    	
-    	tempVerts[0] = new PositionTextureVertex(x, y - r, z, 0, 0);
-    	tempVerts[tempVerts.length - 1] = new PositionTextureVertex(x, y + r, z, 0, 0);
-
-    	float texW = textureW / textureWidth - 2F * (1.0F / (textureWidth * 10.0F));
-    	float texH = textureH / textureHeight - 2F * (1.0F / (textureHeight * 10.0F));
-    	float segW = texW / segs;
-    	float segH = texH / rings;
-    	float startU = textureOffsetX / textureWidth;
-    	float startV = textureOffsetY / textureHeight;
-    	    	
-    	int currentFace = 0;
-    	
-    	for(int j = 1; j < rings; j++) {
-    		for(int i = 0; i < segs; i++) {
-    			float yWidth = MathHelper.cos(-pi / 2 + (pi / rings) * j);
-    			float yHeight = MathHelper.sin(-pi / 2 + (pi / rings) * j);
-    			int curVert = 1 + i + segs * (j - 1);
-    			tempVerts[curVert] = new PositionTextureVertex(x + (MathHelper.sin((pi / segs) * i * 2F + pi) * yWidth) * r,
-                        y + yHeight * r, z + (-MathHelper.cos((pi / segs) * i * 2F + pi) * yWidth) * r, 0, 0);
-    			if(i > 0) {
-	    			poly[currentFace] = (j == 1)?
-                        new TexturedPolygon(new PositionTextureVertex[]{
-                            tempVerts[curVert].setTexturePosition(startU + segW * i, startV + segH * j),
-                            tempVerts[curVert - 1].setTexturePosition(startU + segW * (i - 1), startV + segH * j),
-                            tempVerts[0].setTexturePosition(startU + segW * (i - 1), startV),
-                            tempVerts[0].setTexturePosition(startU + segW + segW * i, startV)
-                        }):
-                        new TexturedPolygon(new PositionTextureVertex[]{
-                                tempVerts[curVert].setTexturePosition(startU + segW * i, startV + segH * j),
-                                tempVerts[curVert - 1].setTexturePosition(startU + segW * (i - 1), startV + segH * j),
-                                tempVerts[curVert - 1 - segs].setTexturePosition(startU + segW * (i - 1), startV + segH * (j - 1)),
-                                tempVerts[curVert - segs].setTexturePosition(startU + segW * i, startV + segH * (j - 1))
-                        });
-	    			currentFace++;
-    			}
-    		}
-
-   			poly[currentFace] = new TexturedPolygon((j ==1)? new PositionTextureVertex[]{
-                    tempVerts[1].setTexturePosition(startU + segW * segs, startV + segH * j),
-                    tempVerts[segs].setTexturePosition(startU + segW * (segs - 1), startV + segH * j),
-                    tempVerts[0].setTexturePosition(startU + segW * (segs - 1), startV),
-                    tempVerts[0].setTexturePosition(startU + segW * segs, startV)
-            }:new PositionTextureVertex[]{
-                    tempVerts[1 + segs * (j - 1)].setTexturePosition(startU + texW, startV + segH * j),
-                    tempVerts[segs * (j - 1) + segs].setTexturePosition(startU + texW - segW, startV + segH * j),
-                    tempVerts[segs * (j - 1)].setTexturePosition(startU + texW - segW, startV + segH * (j - 1)),
-                    tempVerts[1 + segs * (j - 1) - segs].setTexturePosition(startU + texW, startV + segH * (j - 1)),
-            });
-   			currentFace++;
-    	}
-		for(int i = 0; i < segs; i++) {
-			PositionTextureVertex[] verts = new PositionTextureVertex[3];
-			int curVert = tempVerts.length - (segs + 1);
-			verts[0] = tempVerts[tempVerts.length - 1].setTexturePosition(startU + segW * (i + 0.5F), startV + texH);
-			verts[1] = tempVerts[curVert + i].setTexturePosition(startU + segW * i, startV + texH - segH);
-			verts[2] = tempVerts[curVert + ((i + 1) % segs)].setTexturePosition(startU + segW * (i + 1), startV + texH - segH);
-			poly[currentFace] = new TexturedPolygon(verts);
-			currentFace++;
-		}
-		
-		copyTo(tempVerts, poly);
-    }
-    
-    /**
-     * Adds a cone.
-     * @param x the x-position of the base
-     * @param y the y-position of the base
-     * @param z the z-position of the base
-     * @param radius the radius of the cylinder
-     * @param length the length of the cylinder
-     * @param segments the amount of segments the cylinder is made of
-     */
-    public void addCone(float x, float y, float z, float radius, float length, int segments) {
-    	addCone(x, y, z, radius, length, segments, 1F);
-    }
-    
-    /**
-     * Adds a cone.
-     * 
-     * baseScale cannot be zero. If it is, it will automatically be set to 1F.
-     * 
-     * @param x the x-position of the base
-     * @param y the y-position of the base
-     * @param z the z-position of the base
-     * @param radius the radius of the cylinder
-     * @param length the length of the cylinder
-     * @param segments the amount of segments the cylinder is made of
-     * @param baseScale the scaling of the base. Can be negative.
-     */
-    public void addCone(float x, float y, float z, float radius, float length, int segments, float baseScale) {
-    	addCone(x, y, z, radius, length, segments, baseScale, MR_TOP);
-    }
-    
-    /**
-     * Adds a cone.
-     * 
-     * baseScale cannot be zero. If it is, it will automatically be set to 1F.
-     * 
-     * Setting the baseDirection to either MR_LEFT, MR_BOTTOM or MR_BACK will result in
-     * the top being placed at the (x,y,z).
-     * 
-     * @param x the x-position of the base
-     * @param y the y-position of the base
-     * @param z the z-position of the base
-     * @param radius the radius of the cylinder
-     * @param length the length of the cylinder
-     * @param segments the amount of segments the cylinder is made of
-     * @param baseScale the scaling of the base. Can be negative.
-     * @param baseDirection the direction it faces
-     */    
-    public void addCone(float x, float y, float z, float radius, float length, int segments, float baseScale, int baseDirection) {
-    	addCone(x, y, z, radius, length, segments, baseScale, baseDirection, (int)Math.floor(radius * 2F), (int)Math.floor(radius * 2F));
-    }
-    
-    /**
-     * Adds a cone.
-     * 
-     * baseScale cannot be zero. If it is, it will automatically be set to 1F.
-     * 
-     * Setting the baseDirection to either MR_LEFT, MR_BOTTOM or MR_BACK will result in
-     * the top being placed at the (x,y,z).
-     * 
-     * The textures for the sides are placed next to each other.
-     * 
-     * @param x the x-position of the base
-     * @param y the y-position of the base
-     * @param z the z-position of the base
-     * @param radius the radius of the cylinder
-     * @param length the length of the cylinder
-     * @param segments the amount of segments the cylinder is made of
-     * @param baseScale the scaling of the base. Can be negative.
-     * @param baseDirection the direction it faces
-     * @param textureCircleDiameterW the diameter width of the circle on the texture
-     * @param textureCircleDiameterH the diameter height of the circle on the texture
-     */
-    public void addCone(float x, float y, float z, float radius, float length, int segments, float baseScale, int baseDirection, int textureCircleDiameterW, int textureCircleDiameterH) {
-    	addCylinder(x, y, z, radius, length, segments, baseScale, 0.0F, baseDirection, textureCircleDiameterW, textureCircleDiameterH, 1);
-    }
-    
-    /**
-     * Adds a cylinder.
-     * @param x the x-position of the base
-     * @param y the y-position of the base
-     * @param z the z-position of the base
-     * @param radius the radius of the cylinder
-     * @param length the length of the cylinder
-     * @param segments the amount of segments the cylinder is made of
-     */
-    public void addCylinder(float x, float y, float z, float radius, float length, int segments) {
-    	addCylinder(x, y, z, radius, length, segments, 1F, 1F);
-    }
-    
-    /**
-     * Adds a cylinder.
-     * 
-     * You can make cones by either setting baseScale or topScale to zero. Setting both
-     * to zero will set the baseScale to 1F.
-     * 
-     * @param x the x-position of the base
-     * @param y the y-position of the base
-     * @param z the z-position of the base
-     * @param radius the radius of the cylinder
-     * @param length the length of the cylinder
-     * @param segments the amount of segments the cylinder is made of
-     * @param baseScale the scaling of the base. Can be negative.
-     * @param topScale the scaling of the top. Can be negative.
-     */
-    public void addCylinder(float x, float y, float z, float radius, float length, int segments, float baseScale, float topScale) {
-    	addCylinder(x, y, z, radius, length, segments, baseScale, topScale, MR_TOP);
-    }
-    
-    /**
-     * Adds a cylinder.
-     * 
-     * You can make cones by either setting baseScale or topScale to zero. Setting both
-     * to zero will set the baseScale to 1F.
-     * 
-     * Setting the baseDirection to either MR_LEFT, MR_BOTTOM or MR_BACK will result in
-     * the top being placed at the (x,y,z).
-     * 
-     * @param x the x-position of the base
-     * @param y the y-position of the base
-     * @param z the z-position of the base
-     * @param radius the radius of the cylinder
-     * @param length the length of the cylinder
-     * @param segments the amount of segments the cylinder is made of
-     * @param baseScale the scaling of the base. Can be negative.
-     * @param topScale the scaling of the top. Can be negative.
-     * @param baseDirection the direction it faces
-     */    
-    public void addCylinder(float x, float y, float z, float radius, float length, int segments, float baseScale, float topScale, int baseDirection) {
-    	addCylinder(x, y, z, radius, length, segments, baseScale, topScale, baseDirection, (int)Math.floor(radius * 2F), (int)Math.floor(radius * 2F), (int)Math.floor(length));
-    }
-    
-    /**
-     * Adds a cylinder.
-     * 
-     * You can make cones by either setting baseScale or topScale to zero. Setting both
-     * to zero will set the baseScale to 1F.
-     * 
-     * Setting the baseDirection to either MR_LEFT, MR_BOTTOM or MR_BACK will result in
-     * the top being placed at the (x,y,z).
-     * 
-     * The textures for the base and top are placed next to each other, while the body
-     * will be placed below the circles.
-     * 
-     * @param x the x-position of the base
-     * @param y the y-position of the base
-     * @param z the z-position of the base
-     * @param radius the radius of the cylinder
-     * @param length the length of the cylinder
-     * @param segments the amount of segments the cylinder is made of
-     * @param baseScale the scaling of the base. Can be negative.
-     * @param topScale the scaling of the top. Can be negative.
-     * @param baseDirection the direction it faces
-     * @param textureCircleDiameterW the diameter width of the circle on the texture
-     * @param textureCircleDiameterH the diameter height of the circle on the texture
-     * @param textureH the height of the texture of the body
-     */
-    public void addCylinder(float x, float y, float z, float radius, float length, int segments, float baseScale, float topScale, int baseDirection, int textureCircleDiameterW, int textureCircleDiameterH, int textureH) {
-    	boolean dirTop = (baseDirection == MR_TOP || baseDirection == MR_BOTTOM);
-    	boolean dirSide = (baseDirection == MR_RIGHT || baseDirection == MR_LEFT);
-    	boolean dirFront = (baseDirection == MR_FRONT || baseDirection == MR_BACK);
-    	boolean dirMirror = (baseDirection == MR_LEFT || baseDirection == MR_BOTTOM || baseDirection == MR_BACK);
-    	
-    	boolean coneBase = (baseScale == 0);
-    	boolean coneTop = (topScale == 0);
-    	
-    	if(coneBase && coneTop) {
-    		baseScale = 1F;
-    		coneBase = false;
-    	}
-    	
-    	PositionTextureVertex[] tempVerts = new PositionTextureVertex[segments * (coneBase || coneTop ? 1 : 2) + 2];
-    	TexturedPolygon[] poly = new TexturedPolygon[segments * (coneBase || coneTop ? 2 : 3)];
-    	
-    	float xLength = (dirSide ? length : 0);
-    	float yLength = (dirTop ? length : 0);
-    	float zLength = (dirFront ? length : 0);
-    	
-    	float xStart = (dirMirror ? x + xLength : x);
-    	float yStart = (dirMirror ? y + yLength : y);
-    	float zStart = (dirMirror ? z + zLength : z);
-    	float xEnd = (!dirMirror ? x + xLength : x);
-    	float yEnd = (!dirMirror ? y + yLength : y);
-    	float zEnd = (!dirMirror ? z + zLength : z);
-    	
-    	tempVerts[0] = new PositionTextureVertex(xStart, yStart, zStart, 0, 0);
-    	tempVerts[tempVerts.length - 1] = new PositionTextureVertex(xEnd, yEnd, zEnd, 0, 0);
-
-    	float sCur = (coneBase ? topScale : baseScale);
-    	for(int repeat = 0; repeat < (coneBase || coneTop ? 1 : 2); repeat++) {
-    		for(int index = 0; index < segments; index++) {
-    			float xSize = (mirror ^ dirMirror ? -1 : 1) * MathHelper.sin((pi / segments) * index * 2F + pi) * radius * sCur;
-    			float zSize = -MathHelper.cos((pi / segments) * index * 2F + pi) * radius * sCur;
-
-    			tempVerts[1 + index + repeat * segments] = new PositionTextureVertex(xStart + (!dirSide ? xSize : 0), yStart + (!dirTop ? zSize : 0),zStart + (dirSide ? xSize : (dirTop ? zSize : 0)), 0, 0 );
-    		}
-    	}
-  	
-    	float uScale = 1.0F / textureWidth;
-    	float vScale = 1.0F / textureHeight;
-    	float uOffset = uScale / 20.0F;
-    	float vOffset = vScale / 20.0F;
-    	float uCircle = textureCircleDiameterW * uScale;
-    	float vCircle = textureCircleDiameterH * vScale;
-    	float uStart = textureOffsetX * uScale;
-    	float vStart = textureOffsetY * vScale;
-
-    	for(int index = 0; index < segments; index++) {
-    		int index2 = (index + 1) % segments;
-
-    		poly[poly.length - segments + index]  = new TexturedPolygon(new PositionTextureVertex[]{
-                    tempVerts[tempVerts.length - 1].setTexturePosition(uStart + 1.5F * uCircle, vStart + 0.5F * vCircle),
-                    tempVerts[tempVerts.length - 2 - index].setTexturePosition(
-                            uStart + 1.5F * uCircle + (MathHelper.sin((pi / segments) * index2 * 2F + (!dirTop ? 0 : pi)) * (0.5F * uCircle - 2F * uOffset))
-                            , vStart + 0.5F * vCircle + (MathHelper.cos((pi / segments) * index2 * 2F + (!dirTop ? 0 : pi)) * (0.5F * vCircle - 2F * vOffset))),
-                    tempVerts[tempVerts.length - (1 + segments) + ((segments - index) % segments)].setTexturePosition(
-                            uStart + 1.5F * uCircle + (MathHelper.sin((pi / segments) * index * 2F + (!dirTop ? 0 : pi)) * (0.5F * uCircle - 2F * uOffset)),
-                            vStart + 0.5F * vCircle + (MathHelper.cos((pi / segments) * index * 2F + (!dirTop ? 0 : pi)) * (0.5F * vCircle - 2F * vOffset)))
-            });
-    		if(mirror ^ flip) {
-                poly[poly.length - segments + index].flipFace();
-            }
-    	}
-    	copyTo(tempVerts, poly);
-    }
-    
-    /**
      * Adds a Waveform .obj file as a model. Model files use the entire texture file.
      * @param file the location of the .obj file. The location is relative to the base directories,
      * which are either resources/models or resources/mods/models.
@@ -1149,72 +839,6 @@ public class ModelRendererTurbo extends ModelRenderer {
     {
     	return currentGroup;
     }
-    
-    /**
-     * Gets the transformation group with a given group name.
-     * @return the current PositionTransformGroup.
-     */
-    public TransformGroupBone getGroup(String groupName) {
-    	if(!transformGroup.containsKey(groupName)) {
-            return null;
-        }
-    	return transformGroup.get(groupName);
-    }
-    
-    /**
-     * Sets the current texture group, which is used to switch the
-     * textures on a per-model base. Do note that any model that is
-     * rendered afterwards will use the same texture. To counter it,
-     * set a default texture, either at initialization or before
-     * rendering.
-     * @param groupName The name of the texture group. If the texture
-     * group doesn't exist, it creates a new group automatically.
-     */
-    public void setTextureGroup(String groupName) {
-    	if(!textureGroup.containsKey(groupName)) {
-    		textureGroup.put(groupName, new TextureGroup());
-    	}
-    	currentTextureGroup = textureGroup.get(groupName);
-    }
-    
-    /**
-     * Gets the current texture group.
-     * @return a TextureGroup object.
-     */
-    public TextureGroup getTextureGroup()
-    {
-    	return currentTextureGroup;
-    }
-    
-    /**
-     * Gets the texture group with the given name.
-     * @param groupName the name of the texture group to return
-     * @return a TextureGroup object.
-     */
-    public TextureGroup getTextureGroup(String groupName) {
-        return textureGroup.containsKey(groupName)?textureGroup.get(groupName):null;
-    }
-    
-    /**
-     * Sets the texture of the current texture group.
-     * @param s the filename
-     */
-    public void setGroupTexture(String s)
-    {
-    	currentTextureGroup.texture = s;
-    }
-    
-    /**
-     * Sets the default texture. When left as an empty string,
-     * it will use the texture that has been set previously.
-     * Note that this will also move on to other rendered models
-     * of the same entity.
-     * @param s the filename
-     */
-    public void setDefaultTexture(String s)
-    {
-    	defaultTexture = s;
-    }
 
     /**
      * Render's the shape with the default world scale
@@ -1222,7 +846,11 @@ public class ModelRendererTurbo extends ModelRenderer {
     public void render(){
     	render(0.0625F, false);
     }
-    
+
+    public void render(float worldScale){
+        render(worldScale, false);
+    }
+
     /**
      * Renders the shape.
      * @param worldScale the scale of the shape. Usually is 0.0625.
@@ -1235,26 +863,20 @@ public class ModelRendererTurbo extends ModelRenderer {
         }
         if(!compiled) {
             compileDisplayList(worldScale);
+            return;
         }
         GL11.glPushMatrix();
         GL11.glTranslatef(rotationPointX * worldScale, rotationPointY * worldScale, rotationPointZ * worldScale);
-        //GL11.glRotatef(rotateAngleZ * degreesF, 0.0F, 0.0F, 1.0F);
-        //GL11.glRotatef(-rotateAngleY * degreesF, 0.0F, 1.0F, 0.0F);
 
         if(invertYZ){
-                GL11.glRotatef(rotateAngleZ * degreesF, 0.0F, 0.0F, 1.0F);
-                GL11.glRotatef(-rotateAngleY * degreesF, 0.0F, 1.0F, 0.0F);
+            GL11.glRotatef(rotateAngleZ * degreesF, 0.0F, 0.0F, 1.0F);
+            GL11.glRotatef(-rotateAngleY * degreesF, 0.0F, 1.0F, 0.0F);
         } else{
-                GL11.glRotatef(-rotateAngleY * degreesF, 0.0F, 1.0F, 0.0F);
-                GL11.glRotatef(rotateAngleZ * degreesF, 0.0F, 0.0F, 1.0F);
+            GL11.glRotatef(-rotateAngleY * degreesF, 0.0F, 1.0F, 0.0F);
+            GL11.glRotatef(rotateAngleZ * degreesF, 0.0F, 0.0F, 1.0F);
         }
         GL11.glRotatef(rotateAngleX * degreesF, 1.0F, 0.0F, 0.0F);
         callDisplayList();
-        if(childModels != null) {
-            for(ModelRenderer model : childModels) {
-                model.render(worldScale);
-            }
-        }
         GL11.glPopMatrix();
     }
 
@@ -1266,59 +888,31 @@ public class ModelRendererTurbo extends ModelRenderer {
         render(worldScale);
     }
 
-    public void postRender(float worldScale) {
-        return;
-    }
+    public void postRender(float worldScale) {}
     
     private void callDisplayList() {
-    	if(useLegacyCompiler) {
+        for(int displayList : displayListArray){
             GL11.glCallList(displayList);
-        } else {
-
-    		Iterator<TextureGroup> itr = textureGroup.values().iterator();
-    		for(int i = 0; itr.hasNext(); i++) {
-                itr.next().loadTexture();
-    			GL11.glCallList(displayListArray[i]);
-    			if(!defaultTexture.equals("")) {
-                    Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation("", defaultTexture));
-                }
-    		}
-    	}
+        }
     }
 
     private void compileDisplayList(float worldScale) {
-    	if(useLegacyCompiler) {
-            compileLegacyDisplayList(worldScale);
-        } else {
+        Iterator<TextureGroup> itr = textureGroup.values().iterator();
+        displayListArray = new int[textureGroup.size()];
+        for(int i = 0; itr.hasNext(); i++) {
+            displayListArray[i] = GLAllocation.generateDisplayLists(1);
+            GL11.glNewList(displayListArray[i], GL11.GL_COMPILE);
+            Tessellator tessellator = Tessellator.getInstance();
 
-    		Iterator<TextureGroup> itr = textureGroup.values().iterator();
-    		displayListArray = new int[textureGroup.size()];
-    		for(int i = 0; itr.hasNext(); i++) {
-    			displayListArray[i] = GLAllocation.generateDisplayLists(1);
-    			GL11.glNewList(displayListArray[i], GL11.GL_COMPILE);
-    			Tessellator tessellator = Tessellator.getInstance();
+            TextureGroup usedGroup = itr.next();
+            for(TexturedPolygon poly : usedGroup.poly) {
+                poly.draw(tessellator, worldScale);
+            }
 
-    			TextureGroup usedGroup = itr.next();
-    			for(TexturedPolygon poly : usedGroup.poly) {
-    				poly.draw(tessellator, worldScale);
-    			}
-
-    			GL11.glEndList();
-    		}
-    	}
-
-        compiled = true;
-    }
-    
-    private void compileLegacyDisplayList(float worldScale) {
-        displayList = GLAllocation.generateDisplayLists(1);
-        GL11.glNewList(displayList, GL11.GL_COMPILE);
-        Tessellator tessellator = Tessellator.getInstance();
-        for(TexturedPolygon face : faces) {
-            face.draw(tessellator, worldScale);
+            GL11.glEndList();
         }
 
-        GL11.glEndList();
+        compiled = true;
     }
 
     private PositionTextureVertex vertices[] = new PositionTextureVertex[0];
@@ -1326,7 +920,6 @@ public class ModelRendererTurbo extends ModelRenderer {
     private int textureOffsetX;
     private int textureOffsetY;
     private boolean compiled = false;
-    private int displayList = 0;
     private int displayListArray[];
     private Map<String, TransformGroupBone> transformGroup = new HashMap<String, TransformGroupBone>();
     private Map<String, TextureGroup> textureGroup = new HashMap<String, TextureGroup>();
@@ -1337,13 +930,9 @@ public class ModelRendererTurbo extends ModelRenderer {
     public boolean showModel = true;
     //ETERNAL EDIT: removed field_1402_i, use ShowModel instead.
     //ETERNAL EDIT: removed forcedRecompile, just use compiled
-    public boolean useLegacyCompiler = false;
-    public List<ModelRenderer> childModels = new ArrayList<ModelRenderer>();
     public float xScale;
     public float yScale;
     public float zScale;
-    
-    private String defaultTexture = "";
     
     public static final int MR_FRONT = 0;
     public static final int MR_BACK = 1;

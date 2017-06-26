@@ -70,7 +70,7 @@ public class ModelPoolEntry {
     		}
     		groupsMap.put(currentGroup, groups.get(groupKey));
     	}
-    	
+
     	while(texturesItr.hasNext()) {
     		int nameIdx = 0;
     		String groupKey = texturesItr.next();
@@ -237,7 +237,6 @@ public class ModelPoolEntry {
 					}
 
 					TexturedPolygon poly = new TexturedPolygon(vToArr);
-					poly.setNormals(normal[0], normal[1], normal[2]);
 					poly.setNormals(iNormal);
 
 					face.add(poly);

@@ -7,72 +7,57 @@
  */
 package ebf.tim.models.rails;
 
+import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.ModelRendererTurbo;
-import net.minecraft.client.model.ModelBase;
 import net.minecraft.entity.Entity;
 
 public class ModelRailStraight extends ModelBase
 {
-	private static final int textureX = 256;
+	private static final int textureX = 128;
 	private static final int textureY = 32;
 
 	public ModelRailStraight()
 	{
-		railstraightModel = new ModelRendererTurbo[10];
-		railstraightModel[0] = new ModelRendererTurbo(this, 1, 1, textureX, textureY); // Box 0
-		railstraightModel[1] = new ModelRendererTurbo(this, 41, 1, textureX, textureY); // Box 1
-		railstraightModel[2] = new ModelRendererTurbo(this, 81, 1, textureX, textureY); // Box 2
-		railstraightModel[3] = new ModelRendererTurbo(this, 121, 1, textureX, textureY); // Box 3
-		railstraightModel[4] = new ModelRendererTurbo(this, 145, 1, textureX, textureY); // Box 4
-		railstraightModel[5] = new ModelRendererTurbo(this, 185, 1, textureX, textureY); // Box 5
-		railstraightModel[6] = new ModelRendererTurbo(this, 145, 9, textureX, textureY); // Box 6
-		railstraightModel[7] = new ModelRendererTurbo(this, 185, 9, textureX, textureY); // Box 7
-		railstraightModel[8] = new ModelRendererTurbo(this, 153, 17, textureX, textureY); // Box 8
-		railstraightModel[9] = new ModelRendererTurbo(this, 193, 17, textureX, textureY); // Box 9
+		baseModel = new ModelRendererTurbo[10];
+		baseModel[0] = new ModelRendererTurbo(this, 20, 10, textureX, textureY); // Box 0
+		baseModel[1] = new ModelRendererTurbo(this, 39, 6, textureX, textureY); // Box 1
+		baseModel[2] = new ModelRendererTurbo(this, 58, 2, textureX, textureY); // Box 2
+		baseModel[3] = new ModelRendererTurbo(this, 1, 14, textureX, textureY); // Box 3
+		baseModel[4] = new ModelRendererTurbo(this, 53, 29, textureX, textureY); // Box 4
+		baseModel[5] = new ModelRendererTurbo(this, 53, 26, textureX, textureY); // Box 5
+		baseModel[6] = new ModelRendererTurbo(this, 1, 7, textureX, textureY); // Box 6
+		baseModel[7] = new ModelRendererTurbo(this, 1, 7, textureX, textureY); // Box 7
+		baseModel[8] = new ModelRendererTurbo(this, 35, 2, textureX, textureY); // Box 8
+		baseModel[9] = new ModelRendererTurbo(this, 1, 3, textureX, textureY); // Box 9
 
-		railstraightModel[0].addBox(0F, 0F, -7F, 2, 2, 14, 0F); // Box 0
-		railstraightModel[0].setRotationPoint(1F, 8F, 0F);
+		baseModel[0].addBox(0F, 0F, -7F, 2, 2, 14, 0F); // Box 0
+		baseModel[0].setRotationPoint(1F, 8F, 0F);
 
-		railstraightModel[1].addBox(0F, 0F, -7F, 2, 2, 14, 0F); // Box 1
-		railstraightModel[1].setRotationPoint(-3F, 8F, 0F);
+		baseModel[1].addBox(0F, 0F, -7F, 2, 2, 14, 0F); // Box 1
+		baseModel[1].setRotationPoint(-3F, 8F, 0F);
 
-		railstraightModel[2].addBox(0F, 0F, -7F, 2, 2, 14, 0F); // Box 2
-		railstraightModel[2].setRotationPoint(-7F, 8F, 0F);
+		baseModel[2].addBox(0F, 0F, -7F, 2, 2, 14, 0F); // Box 2
+		baseModel[2].setRotationPoint(-7F, 8F, 0F);
 
-		railstraightModel[3].addBox(0F, 0F, -7F, 2, 2, 14, 0F); // Box 3
-		railstraightModel[3].setRotationPoint(5F, 8F, 0F);
+		baseModel[3].addBox(0F, 0F, -7F, 2, 2, 14, 0F); // Box 3
+		baseModel[3].setRotationPoint(5F, 8F, 0F);
 
-		railstraightModel[4].addBox(-8F, 0F, 0F, 16, 1, 2, 0F); // Box 4
-		railstraightModel[4].setRotationPoint(0F, 7F, -6F);
+		baseModel[4].addBox(-8F, 0F, 0F, 16, 1, 2, 0F); // Box 4
+		baseModel[4].setRotationPoint(0F, 7F, -6F);
 
-		railstraightModel[5].addBox(-8F, 0F, 0F, 16, 1, 2, 0F); // Box 5
-		railstraightModel[5].setRotationPoint(0F, 7F, 4F);
+		baseModel[5].addBox(-8F, 0F, 0F, 16, 1, 2, 0F); // Box 5
+		baseModel[5].setRotationPoint(0F, 7F, 4F);
 
-		railstraightModel[6].addBox(-8F, 0F, 0F, 16, 1, 1, 0F); // Box 6
-		railstraightModel[6].setRotationPoint(0F, 6F, -5.5F);
+		baseModel[6].addBox(-8F, 0F, 0F, 16, 1, 1, 0F); // Box 6
+		baseModel[6].setRotationPoint(0F, 6F, -5.5F);
 
-		railstraightModel[7].addBox(-8F, 0F, 0F, 16, 1, 1, 0F); // Box 7
-		railstraightModel[7].setRotationPoint(0F, 6F, 4.5F);
+		baseModel[7].addBox(-8F, 0F, 0F, 16, 1, 1, 0F); // Box 7
+		baseModel[7].setRotationPoint(0F, 6F, 4.5F);
 
-		railstraightModel[8].addBox(-8F, 0F, 0F, 16, 1, 2, 0F); // Box 8
-		railstraightModel[8].setRotationPoint(0F, 5F, 4F);
+		baseModel[8].addBox(-8F, 0F, 0F, 16, 1, 2, 0F); // Box 8
+		baseModel[8].setRotationPoint(0F, 5F, 4F);
 
-		railstraightModel[9].addBox(-8F, 0F, 0F, 16, 1, 2, 0F); // Box 9
-		railstraightModel[9].setRotationPoint(0F, 5F, -6F);
+		baseModel[9].addBox(-8F, 0F, 0F, 16, 1, 2, 0F); // Box 9
+		baseModel[9].setRotationPoint(0F, 5F, -6F);
 	}
-
-	@Override
-	public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5)
-	{
-		for(int i = 0; i < 10; i++)
-		{
-			railstraightModel[i].render();
-		}
-	}
-
-	public void setRotationAngles(float f, float f1, float f2, float f3, float f4, float f5)
-	{
-	}
-
-	public static ModelRendererTurbo railstraightModel[];
 }

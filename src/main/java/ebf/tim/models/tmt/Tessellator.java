@@ -2,17 +2,23 @@ package ebf.tim.models.tmt;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.texture.ITextureObject;
+import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 import java.util.Arrays;
 
 @SideOnly(Side.CLIENT)
-public class Tessellator extends net.minecraft.client.renderer.Tessellator{
-	
+public class Tessellator {
+
 	private static ByteBuffer bbuf = GLAllocation.createDirectByteBuffer(0x200000 * 4);
 	private int rbs = 0, verts = 0, rbi = 0, dm, n;
 	private boolean ht = false, in = false, drawing = false, hc = false;
@@ -21,15 +27,15 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 	private static IntBuffer ibuf = bbuf.asIntBuffer();
 	private double u, v, w, x_o, y_o, z_o;
 	private int[] rb;
-	
+
 	public static Tessellator getInstance(){
 		return INSTANCE;
 	}
-	
+
 	public Tessellator(){
 
 	}
-	
+
 	public void startDrawing(int i){
 		if(!drawing){
 			drawing = true; dm = i;
@@ -37,8 +43,7 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 			reset();
 		}
 	}
-	
-	@Override
+
 	public int draw(){
 		if(drawing){
 			drawing = false; int o = 0;
@@ -64,17 +69,8 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 				fbuf.position(0);
 				GL11.glVertexPointer(3, 40, fbuf);
 				GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
+				GL11.glDisable(GL11.GL_LIGHTING);
 				GL11.glDrawArrays(dm, 0, vtc);
-				GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
-				if(ht){
-					GL11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-				}
-				if(hc){
-                    GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
-                }
-				if(in){
-					GL11.glDisableClientState(GL11.GL_NORMAL_ARRAY);
-				}
 			}
 			if(rbs > 0x20000 && rbi < (rbs << 3)){
 				rbs = 0; rb = null;
@@ -84,13 +80,13 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 		}
 		return 0;
 	}
-	
+
 	private void reset(){
 		verts = rbi = 0;
-		
+
 		bbuf.clear();
 	}
-	
+
 	public void addVertex(double par1, double par3, double par5){
 		if(rbi >= rbs - 40) {
 			if(rbs == 0){rbs = 0x10000; rb = new int[rbs];}
@@ -106,11 +102,11 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 		rb[rbi + 2] = Float.floatToRawIntBits((float)(par5 + z_o));
 		rbi += 10; verts++;
 	}
-	
+
 	public void addVertexWithUV(double i, double j, double k, double l, double m){
 		this.setTextureUV(l, m); this.addVertex(i, j, k);
 	}
-	
+
 	public void addVertexWithUVW(double i, double j, double k, double l, double m, double n){
 		this.setTextureUVW(l, m, n); this.addVertex(i, j, k);
 	}
@@ -123,19 +119,19 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 		in = true;
 		n = ((x * 127)) & 255 | (((y * 127)) & 255) << 8 | (((z * 127)) & 255) << 16;
 	}
-	
+
 	public void setTextureUV(double i, double j){
 		this.ht = true; this.u = i; this.v = j; this.w = 1.0D;
 	}
-	
+
 	public void setTextureUVW(double i, double j, double k){
 		this.ht = true; this.u = i; this.v = j; this.w = k;
 	}
-	
+
 	public void setTranslation(double x, double y, double z){
 		x_o = x; y_o = y; z_o = z;
 	}
-	
+
 	public void addTranslation(float x, float y, float z){
 		x_o += x; y_o += y; z_o += z;
 	}
@@ -143,7 +139,7 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 	public void setColorRGBAf(float f, float g, float h, float i) {
 		this.setColorRGBA((int)(f * 255.0F), (int)(g * 255.0F), (int)(h * 255.0F), (int)(i));
 	}
-	
+
 	public void setColorRGBA(int i, int j, int k, int l){
 		if(i > 255){i = 255;} if(j > 255){j = 255;} if(k > 255){k = 255;} if(l > 255){l = 255;}
 		if(i < 0){i = 0;} if(j < 0){j = 0;} if(k < 0){k = 0;} if (l < 0){l = 0;}
@@ -152,6 +148,18 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 
 	public void disableColor() {
 		hc = false;
+	}
+
+	public static void bindTexture(ResourceLocation textureURI) {
+		if (Minecraft.getMinecraft().getTextureManager().getTexture(textureURI) == null || GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)!= Minecraft.getMinecraft().getTextureManager().getTexture(textureURI).getGlTextureId()) {
+		ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
+
+		if (object == null) {
+			object =  new SimpleTexture(textureURI);
+			Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI,object);
+		}
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, object.getGlTextureId());
+		}
 	}
 	
 }

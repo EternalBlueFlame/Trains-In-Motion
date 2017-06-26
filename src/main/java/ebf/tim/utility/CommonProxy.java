@@ -157,6 +157,7 @@ public class CommonProxy implements IGuiHandler {
 
         railBlock.setCreativeTab(TrainsInMotion.creativeTab);
         GameRegistry.registerBlock(railBlock, "TiMRail");
+        GameRegistry.registerTileEntity(BlockRailOverride.renderTileEntity.class, "TiMRailEntity");
         addRecipe(new ItemStack(railBlock, 1),  "I I", "IWI", "IWI", 'W', Blocks.planks, 'I', Items.iron_ingot);
     }
 }

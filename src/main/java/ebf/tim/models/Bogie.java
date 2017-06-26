@@ -1,9 +1,8 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.utility.RailUtility;
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -22,6 +21,7 @@ public class Bogie {
     /**the model defined in the registration of this.*/
     public final ModelBase bogieModel;
     int updateTicks=0;
+    private double[] offset = new double[]{0,0,0};
 
 
     public Bogie(ResourceLocation texture, ModelBase model){
@@ -34,18 +34,23 @@ public class Bogie {
      * updates the positions of the model, and then uses that data to set the rotations.
      * @param entity the GenericRailTransport to get the pitch from.
      */
-    public void setPositionAndRotation(GenericRailTransport entity, double offset){
+    public void setPositionAndRotation(GenericRailTransport entity, double distance){
         updateTicks ++;
         //update positions
+        offset[0] = distance;
         if(prevPos == null){
-            prevPos = RailUtility.rotatePoint(new double[]{offset,0,0}, 0, entity.rotationYaw,0);
+            prevPos = RailUtility.rotatePoint(offset, 0, entity.rotationYaw,0);
             prevPos[0] += entity.posX;
             prevPos[2] += entity.posZ;
             rotationYaw = entity.rotationYaw;
         } else if (updateTicks %4 ==0) {
-            double[] position = RailUtility.rotatePoint(new double[]{offset,0,0}, 0, entity.rotationYaw,0);
+            double[] position = RailUtility.rotatePoint(offset, 0, entity.rotationYaw,0);
             position[0] += entity.posX;
             position[2] += entity.posZ;
+            //don't update if we aren't moving fast enough.
+            if ((position[0] - prevPos[0] <0.01 && position[0] - prevPos[0] >-0.01) && (position[2] - prevPos[2] <0.01 && position[2] - prevPos[2] >-0.01)){
+                return;
+            }
             rotationYaw = (float) Math.toDegrees(Math.atan2(position[2] - prevPos[2], position[0] - prevPos[0]));
             prevPos = position;
             updateTicks =0;

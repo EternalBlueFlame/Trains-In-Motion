@@ -43,6 +43,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     private boolean isFront=true;
     /**used to calculate the X/Y/Z velocity based on the direction the rail is facing, similar to how vanilla minecarts work.*/
     private static final int[][][] vanillaRailMatrix = new int[][][] {{{0, 0, -1}, {0, 0, 1}}, {{ -1, 0, 0}, {1, 0, 0}}, {{ -1, -1, 0}, {1, 0, 0}}, {{ -1, 0, 0}, {1, -1, 0}}, {{0, 0, -1}, {0, -1, 1}}, {{0, -1, -1}, {0, 0, 1}}, {{0, 0, 1}, {1, 0, 0}}, {{0, 0, 1}, { -1, 0, 0}}, {{0, 0, -1}, { -1, 0, 0}}, {{0, 0, -1}, {1, 0, 0}}};
+    /**used to see if we should spawn vanilla hitboxes for normal movement, adds compatibility to ZnD, also used for derailed movement*/
+    private boolean updateVanilla = false;
 
     public EntityBogie(World world) {
         super(world);
@@ -120,7 +122,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     /**returns if this can be collided with, since we don't process collisions, we return false*/
     @Override
     public boolean canBeCollidedWith() {
-        return false;
+        return true;
     }
     /**disables reading from NBT*/
     @Override
@@ -140,7 +142,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * Some features are replaced using our own for compatibility with ZoraNoDensha
      * @see RailUtility
      */
-    public void minecartMove(float yaw, float pitch, boolean brake, boolean isRunning, boolean isTrain)   {
+    public void minecartMove(float yaw, float pitch, boolean brake, boolean isRunning, boolean isTrain, float weight)   {
         //define the yaw from the super
         this.setRotation(yaw, pitch);
 
@@ -173,39 +175,40 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
             //apply brake
             if (brake){
-                if (motionX <0.1 && motionX >-0.1){
+                if (motionX <0.01 && motionX >-0.01){
                     motionX =0;
                     this.cartVelocityX =0;
                 } else {
-                    this.motionX *= 0.75;
-                    this.cartVelocityX *= 0.75;
+                    this.motionX *= 0.75-(weight*0.00075);
+                    this.cartVelocityX *= 0.75-(weight*0.00075);
                 }
-                if (motionZ <0.1 && motionZ >-0.1){
+                if (motionZ <0.01 && motionZ >-0.01){
                     motionZ =0;
                     this.cartVelocityZ =0;
                 } else {
-                    this.motionZ *= 0.75;
-                    this.cartVelocityZ *= 0.75;
+                    this.motionZ *= 0.75-(weight*0.00075);
+                    this.cartVelocityZ *= 0.75-(weight*0.00075);
                 }
-            } else if (isRunning && !isTrain){
-                if (motionX <0.05 && motionX >-0.05){
+            } else if ((!isRunning && isTrain) || !isTrain){
+                if (motionX <0.005 && motionX >-0.005){
                     motionX =0;
                     this.cartVelocityX =0;
                 } else {
-                    this.motionX *= 0.75;
-                    this.cartVelocityX *= 0.75;
+                    this.motionX *= 0.9-(weight*0.001);
+                    this.cartVelocityX *= 0.9-(weight*0.001);
                 }
-                if (motionZ <0.05 && motionZ >-0.05){
+                if (motionZ <0.005 && motionZ >-0.005){
                     motionZ =0;
                     this.cartVelocityZ =0;
                 } else {
-                    this.motionZ *= 0.75;
-                    this.cartVelocityZ *= 0.75;
+                    this.motionZ *= 0.9-(weight*0.001);
+                    this.cartVelocityZ *= 0.9-(weight*0.001);
                 }
             }
 
             //update on normal rails
             if (worldObj.getBlock(floorX, floorY, floorZ) instanceof BlockRailBase) {
+                updateVanilla = false;
                 Block block = this.worldObj.getBlock(floorX, floorY, floorZ);
                 moveBogie(this.motionX, this.motionZ, floorX, floorY, floorZ, block);
 
@@ -215,6 +218,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 }
                 //update on ZnD rails, and ones that don't extend block rail base.
             } else {
+                updateVanilla = true;
                 super.onUpdate();
             }
         }
@@ -303,7 +307,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             cachedMotionZ = motionSqrt * railPathZ / railPathSqrt;
         }
 
-        //define the rail path again,,, for reasons.....
+        //define the rail path again, for reasons.....
         double d8 = floorX + 0.5D + vanillaRailMatrix[railMetadata][0][0] * 0.5D;
         double d9 = floorZ + 0.5D + vanillaRailMatrix[railMetadata][0][2] * 0.5D;
         railPathX = (floorX + 0.5D + vanillaRailMatrix[railMetadata][1][0] * 0.5D) - d8;

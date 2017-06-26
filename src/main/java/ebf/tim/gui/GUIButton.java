@@ -56,7 +56,7 @@ public class GUIButton extends GuiButton {
             case "unlink": {return Collections.singletonList(StatCollector.translateToLocal("gui.unlink"));}
             case "dropkey": {return Collections.singletonList(StatCollector.translateToLocal("gui.dropkey"));}
             case "locked": {return Collections.singletonList(StatCollector.translateToLocal("gui.locked." + transport.getBoolean(GenericRailTransport.boolValues.LOCKED)));}
-            case "coupler": {return Collections.singletonList(StatCollector.translateToLocal("gui.coupler." + transport.getBoolean(GenericRailTransport.boolValues.COUPLING)));}
+            case "coupler": {return Collections.singletonList(StatCollector.translateToLocal("gui.coupler." + transport.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT)));}
             case "lamp": {return Collections.singletonList(StatCollector.translateToLocal("gui.lamp")  + ((transport.getBoolean(GenericRailTransport.boolValues.LAMP))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off")));}
             case "creative":{return Collections.singletonList(StatCollector.translateToLocal("gui.creativemode") + ((transport.getBoolean(GenericRailTransport.boolValues.CREATIVE))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off")));}
             case "running":{return Collections.singletonList(StatCollector.translateToLocal("gui.trainisrunning")  + ((transport.getBoolean(GenericRailTransport.boolValues.RUNNING))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off")));}

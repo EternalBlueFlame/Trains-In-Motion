@@ -189,7 +189,7 @@ public class ParticleFX {
         //disabling texturing of GL will do some weird stuff.
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         Tessellator tessellator = Tessellator.getInstance();
-        tessellator.startDrawingQuads();
+        tessellator.startDrawing(GL11.GL_QUADS);
         //set the color with the tint.
         GL11.glColor3f((((entity.color >> 16 & 0xFF)/255.0F) - entity.colorTint),
                 (((entity.color >> 8 & 0xFF)/255.0F) - entity.colorTint),

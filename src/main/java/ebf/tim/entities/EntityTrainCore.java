@@ -196,47 +196,6 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     @Override
     public void manageLinks(){
-        if(!worldObj.isRemote) {
-
-            if (frontLinkedTransport == null && getBoolean(boolValues.COUPLING)) {
-                vectorCache[2] = rotatePoint(new double[]{getHitboxPositions()[0] - 2, 0, 0}, 0, rotationYaw, 0);
-                vectorCache[2][0] +=posX;
-                vectorCache[2][1] +=posY;
-                vectorCache[2][2] +=posZ;
-                List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                        AxisAlignedBB.getBoundingBox(vectorCache[2][0] - 0.5d, vectorCache[2][1], vectorCache[2][2] - 0.5d,
-                                vectorCache[2][0] + 0.5d, vectorCache[2][1] + 2, vectorCache[2][2] +0.5d));
-
-                if (list.size() > 0) {
-                    for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).getBoolean(boolValues.COUPLING)) {
-                            frontLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
-                            System.out.println(getEntityId() + " : train frontLinkedTransport linked : ");
-                        }
-                    }
-                }
-            }
-
-
-            if (backLinkedTransport == null && getBoolean(boolValues.COUPLING)) {
-                vectorCache[3] = rotatePoint(new double[]{getHitboxPositions()[getHitboxPositions().length-1] + 2, 0, 0}, 0, rotationYaw, 0);
-                vectorCache[3][0] +=posX;
-                vectorCache[3][1] +=posY;
-                vectorCache[3][2] +=posZ;
-                List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                        AxisAlignedBB.getBoundingBox(vectorCache[3][0] - 0.5d, vectorCache[3][1], vectorCache[3][2] - 0.5d,
-                                vectorCache[3][0] + 0.5d, vectorCache[3][1] + 2, vectorCache[3][2] +0.5d));
-
-                if (list.size() > 0) {
-                    for (Object entity : list) {
-                        if (entity instanceof HitboxHandler.MultipartHitbox && !hitboxHandler.hitboxList.contains(entity) && ((GenericRailTransport)worldObj.getEntityByID(((HitboxHandler.MultipartHitbox) entity).parent.getEntityId())).getBoolean(boolValues.COUPLING)) {
-                            backLinkedTransport = ((HitboxHandler.MultipartHitbox) entity).parent.getPersistentID();
-                            System.out.println(getEntityId() + " : train backLinkedTransport linked : ");
-                        }
-                    }
-                }
-            }
-        }
     }
 
 
