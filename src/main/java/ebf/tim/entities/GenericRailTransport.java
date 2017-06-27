@@ -14,6 +14,7 @@ import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
@@ -24,9 +25,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.*;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -110,6 +110,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public double backVelocityZ=0;
     /**a list of the particles the transport is managing*/
     public List<ParticleFX> particles = new ArrayList<>();
+    /**Used to be sure we only say once that the transport has been derailed*/
+    private boolean displayDerail = false;
     /**the array of booleans, defined as bits
      * 0- brake: defines the brake
      * 1- locked: defines if transport is locked to owner and key holders
@@ -124,7 +126,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * @see #setBoolean(boolValues, boolean)
      */
     private BitList bools = new BitList();
-    public enum boolValues{BRAKE(0), LOCKED(1), LAMP(2), CREATIVE(3), COUPLINGFRONT(4), COUPLINGBACK(4), WHITELIST(6), RUNNING(7);
+    public enum boolValues{BRAKE(0), LOCKED(1), LAMP(2), CREATIVE(3), COUPLINGFRONT(4), COUPLINGBACK(4), WHITELIST(6), RUNNING(7), DERAILED(8);
         public int index;
         boolValues(int index){this.index = index;}
     }
@@ -138,8 +140,10 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     }
 
     public void setBoolean(boolValues var, boolean value){
-        bools.set(var.index, value);
-        updateWatchers = true;
+        if (getBoolean(var) != value) {
+            bools.set(var.index, value);
+            updateWatchers = true;
+        }
     }
 
 
@@ -490,17 +494,18 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
          * if it is clear however, then we need to add velocity to the bogies based on the current state of the train's speed and fuel, and reposition the train.
          * but either way we have to position the bogies around the train, just to be sure they don't accidentally fly off at some point.
          *
+         * this stops updating if the transport derails. Why update positions of something that doesn't move? We compensate for first tick to be sure hitboxes, bogies, etc, spawn on join.
          */
-        if (frontBogie!=null && backBogie != null){
+        if (frontBogie!=null && backBogie != null && (!getBoolean(boolValues.DERAILED) || ticksExisted==1)){
             //handle movement.
             if (!hitboxHandler.getCollision(this)) {
-                frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons());
-                backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons());
+                setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons()));
+                setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons()));
             } else {
                 frontBogie.addVelocity(-frontBogie.motionX,-frontBogie.motionY,-frontBogie.motionZ);
                 backBogie.addVelocity(-backBogie.motionX,-backBogie.motionY,-backBogie.motionZ);
-                frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons());
-                backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons());
+                setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons()));
+                setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons()));
             }
             frontVelocityX = frontBogie.motionX;
             frontVelocityZ = frontBogie.motionZ;
@@ -565,6 +570,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 updateWatchers = true;
             }
 
+            if (getBoolean(boolValues.DERAILED) && !displayDerail){
+                MinecraftServer.getServer().addChatMessage(new ChatComponentText(getOwner().getName()+"'s " + StatCollector.translateToLocal(getItem().getUnlocalizedName()) + " has derailed!"));
+                displayDerail = true;
+            }
+
             if(updateWatchers){
                 if (fluidTank != null){
                     dataWatcher.updateObject(20, fluidTank.amount);
@@ -605,13 +615,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                         //this helps make them spawn more evenly rather than all at once. It also helps prevent a lot of lag.
                         if (getBoolean(boolValues.RUNNING) && particles.size() <= itteration && maxSpawnThisTick < 5) {
                             particles.add(new ParticleFX(posZ, posY, posX, smoke[3], vectorCache[8],
-                                    backBogie.motionX + (rand.nextInt(40) - 20) * 0.001f, smoke[1] * 0.05, backBogie.motionZ + (rand.nextInt(40) - 20) * 0.001f));
+                                    backBogie.motionX + (rand.nextInt(40) - 20) * 0.001f,
+                                    smoke[1] * 0.05,
+                                    backBogie.motionZ + (rand.nextInt(40) - 20) * 0.001f));
                             maxSpawnThisTick++;
                         } else if (maxSpawnThisTick == 0 && particles.size() > itteration) {
                             //if the particles have finished spawning in, move them.
-                            particles.get(itteration)
-                                    .onUpdate(this, posX, posY, posZ,
-                                            getBoolean(boolValues.RUNNING));
+                            particles.get(itteration).onUpdate(this, posX, posY, posZ, getBoolean(boolValues.RUNNING));
                         }
                         itteration++;
                     }

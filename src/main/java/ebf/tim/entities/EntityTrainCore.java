@@ -195,8 +195,7 @@ public class EntityTrainCore extends GenericRailTransport {
      * @see GenericRailTransport#manageLinks()
      */
     @Override
-    public void manageLinks(){
-    }
+    public void manageLinks(){}
 
 
     @Override

@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,12 +51,12 @@ public class ModelPoolEntry {
      */
     protected void setTextureGroup(String groupName) {
     	if(textures.size() == 0 || !textures.containsKey(groupName)) {
-    		textures.put(groupName, new TextureGroup());
+    		textures.put(groupName, new ArrayList<TexturedPolygon>());
     	}
     	texture = textures.get(groupName);
     }
     
-    protected void applyGroups(Map<String, TransformGroupBone> groupsMap, Map<String, TextureGroup> texturesMap) {
+    protected void applyGroups(Map<String, TransformGroupBone> groupsMap, Map<String, List<TexturedPolygon>> texturesMap) {
     	
     	Iterator<String> groupsItr = groups.keySet().iterator();
     	Iterator<String> texturesItr = textures.keySet().iterator();
@@ -87,9 +88,9 @@ public class ModelPoolEntry {
 	public PositionTransformVertex[] vertices;
 	public TexturedPolygon[] faces;
 	public Map<String, TransformGroupBone> groups;
-	public Map<String, TextureGroup> textures;
+	public Map<String, List<TexturedPolygon>> textures;
 	protected TransformGroupBone group;
-	protected TextureGroup texture;
+	protected List<TexturedPolygon> texture = new ArrayList<TexturedPolygon>();
 
 
 	public ModelPoolEntry() {
@@ -240,7 +241,7 @@ public class ModelPoolEntry {
 					poly.setNormals(iNormal);
 
 					face.add(poly);
-					texture.addPoly(poly);
+					texture.add(poly);
 				}
 			}
 

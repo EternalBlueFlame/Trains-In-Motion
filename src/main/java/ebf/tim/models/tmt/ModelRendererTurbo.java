@@ -41,7 +41,7 @@ public class ModelRendererTurbo extends ModelRenderer {
 	public ModelRendererTurbo(ModelBase modelbase, String s) {
 		super(modelbase, s);
         transformGroup.put("0", new TransformGroupBone(new Bone(0, 0, 0, 0), 1D));
-        textureGroup.put("0", new TextureGroup());
+        textureGroup.put("0", new ArrayList<TexturedPolygon>());
         currentTextureGroup = textureGroup.get("0");
 	}
     /**
@@ -787,7 +787,7 @@ public class ModelRendererTurbo extends ModelRenderer {
         for(int idx = 0; idx < poly.length; idx++) {
         	faces[faces.length - poly.length + idx] = poly[idx];
         	if(copyGroup)
-        		currentTextureGroup.addPoly(poly[idx]);
+        		currentTextureGroup.add(poly[idx]);
         }
     }
     
@@ -897,15 +897,15 @@ public class ModelRendererTurbo extends ModelRenderer {
     }
 
     private void compileDisplayList(float worldScale) {
-        Iterator<TextureGroup> itr = textureGroup.values().iterator();
+        Iterator<List<TexturedPolygon>> itr = textureGroup.values().iterator();
         displayListArray = new int[textureGroup.size()];
         for(int i = 0; itr.hasNext(); i++) {
             displayListArray[i] = GLAllocation.generateDisplayLists(1);
             GL11.glNewList(displayListArray[i], GL11.GL_COMPILE);
             Tessellator tessellator = Tessellator.getInstance();
 
-            TextureGroup usedGroup = itr.next();
-            for(TexturedPolygon poly : usedGroup.poly) {
+            List<TexturedPolygon> usedGroup = itr.next();
+            for(TexturedPolygon poly : usedGroup) {
                 poly.draw(tessellator, worldScale);
             }
 
@@ -922,9 +922,9 @@ public class ModelRendererTurbo extends ModelRenderer {
     private boolean compiled = false;
     private int displayListArray[];
     private Map<String, TransformGroupBone> transformGroup = new HashMap<String, TransformGroupBone>();
-    private Map<String, TextureGroup> textureGroup = new HashMap<String, TextureGroup>();
+    private Map<String, List<TexturedPolygon>> textureGroup = new HashMap<String, List<TexturedPolygon>>();
     private TransformGroupBone currentGroup;
-    private TextureGroup currentTextureGroup;
+    private List<TexturedPolygon> currentTextureGroup;
     public boolean mirror = false;
     public boolean flip = false;
     public boolean showModel = true;

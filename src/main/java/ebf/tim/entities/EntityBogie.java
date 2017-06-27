@@ -21,6 +21,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import zoranodensha.api.structures.tracks.ITrackBase;
 
 /**
  * <h1>Bogie Core</h1>
@@ -43,8 +44,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     private boolean isFront=true;
     /**used to calculate the X/Y/Z velocity based on the direction the rail is facing, similar to how vanilla minecarts work.*/
     private static final int[][][] vanillaRailMatrix = new int[][][] {{{0, 0, -1}, {0, 0, 1}}, {{ -1, 0, 0}, {1, 0, 0}}, {{ -1, -1, 0}, {1, 0, 0}}, {{ -1, 0, 0}, {1, -1, 0}}, {{0, 0, -1}, {0, -1, 1}}, {{0, -1, -1}, {0, 0, 1}}, {{0, 0, 1}, {1, 0, 0}}, {{0, 0, 1}, { -1, 0, 0}}, {{0, 0, -1}, { -1, 0, 0}}, {{0, 0, -1}, {1, 0, 0}}};
-    /**used to see if we should spawn vanilla hitboxes for normal movement, adds compatibility to ZnD, also used for derailed movement*/
-    private boolean updateVanilla = false;
 
     public EntityBogie(World world) {
         super(world);
@@ -141,8 +140,9 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @see EntityMinecart#onUpdate()
      * Some features are replaced using our own for compatibility with ZoraNoDensha
      * @see RailUtility
+     * returns true or false depending on whether or not it derails from having no rail.
      */
-    public void minecartMove(float yaw, float pitch, boolean brake, boolean isRunning, boolean isTrain, float weight)   {
+    public boolean minecartMove(float yaw, float pitch, boolean brake, boolean isRunning, boolean isTrain, float weight)   {
         //define the yaw from the super
         this.setRotation(yaw, pitch);
 
@@ -208,20 +208,16 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
             //update on normal rails
             if (worldObj.getBlock(floorX, floorY, floorZ) instanceof BlockRailBase) {
-                updateVanilla = false;
-                Block block = this.worldObj.getBlock(floorX, floorY, floorZ);
-                moveBogie(this.motionX, this.motionZ, floorX, floorY, floorZ, block);
-
-                this.fallDistance = 0.0F;
-                if (block == Blocks.activator_rail) {
-                    this.onActivatorRailPass(floorX, floorY, floorZ, (worldObj.getBlockMetadata(floorX, floorY, floorZ) & 8) != 0);
-                }
+                moveBogie(this.motionX, this.motionZ, floorX, floorY, floorZ, (BlockRailBase) this.worldObj.getBlock(floorX, floorY, floorZ));
                 //update on ZnD rails, and ones that don't extend block rail base.
+            } else if (worldObj.getBlock(floorX, floorY, floorZ) instanceof ITrackBase) {
+                //update position for ZnD rails.
+                moveBogieZnD(this.motionX, this.motionZ, floorX, floorY, floorZ, (ITrackBase) this.worldObj.getBlock(floorX, floorY, floorZ));
             } else {
-                updateVanilla = true;
-                super.onUpdate();
+                return true;
             }
         }
+        return false;
     }
 
 
@@ -236,7 +232,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @param floorZ the floored Z value of the next position.
      * @param block the block at the next position
      */
-    private void moveBogie(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, Block block) {
+    private void moveBogie(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, BlockRailBase block) {
         double cachedMotionX = currentMotionX;
         double cachedMotionZ = currentMotionZ;
         //define the incrementation of movement, use the cache to store the real value and increment it down, and then throw it to the next loop, then use current for the clamped to calculate movement'
@@ -259,7 +255,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             cachedMotionZ= Math.copySign(0, currentMotionZ);
         }
         //get the direction of the rail from it's metadata
-        int railMetadata = ((BlockRailBase)block).getBasicRailMetadata(worldObj, null, floorX, floorY, floorZ);
+        int railMetadata = block.getBasicRailMetadata(worldObj, null, floorX, floorY, floorZ);
 
         //add the uphill/downhill velocity
         switch (railMetadata){
@@ -339,7 +335,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
         //do the rail functions.
         if(shouldDoRailFunctions()) {
-            ((BlockRailBase)block).onMinecartPass(worldObj, this, floorX, floorY, floorZ);
+            block.onMinecartPass(worldObj, this, floorX, floorY, floorZ);
+        }
+        if (block == Blocks.activator_rail) {
+            this.onActivatorRailPass(floorX, floorY, floorZ, (worldObj.getBlockMetadata(floorX, floorY, floorZ) & 8) != 0);
         }
         //now loop this again for the next increment of movement
         if (cachedMotionX !=0 || cachedMotionZ !=0){
@@ -347,21 +346,23 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             floorX = MathHelper.floor_double(this.posX);
             floorY = MathHelper.floor_double(this.posY);
             floorZ = MathHelper.floor_double(this.posZ);
-            block = this.worldObj.getBlock(floorX, floorY, floorZ);
-            if (block instanceof BlockRailBase) {
-                moveBogie(cachedMotionX, cachedMotionZ, floorX, floorY, floorZ, block);
-
-                this.fallDistance = 0.0F;
-                if (block == Blocks.activator_rail) {
-                    this.onActivatorRailPass(floorX, floorY, floorZ, (worldObj.getBlockMetadata(floorX, floorY, floorZ) & 8) != 0);
-                }
+            Block blockNew = this.worldObj.getBlock(floorX, floorY, floorZ);
+            if (blockNew instanceof BlockRailBase) {
+                moveBogie(cachedMotionX, cachedMotionZ, floorX, floorY, floorZ, (BlockRailBase) blockNew);
             }
         }
-
     }
 
 
-    /**
+
+    private void moveBogieZnD(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, ITrackBase track){
+        System.out.println(track.getDirectionOfSection().toString() + ":::" + track.getOrientation());
+    }
+
+
+
+
+    /*
      * <h1>Railcraft Functionality</h1>
      */
 
@@ -405,7 +406,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     }
 
 
-    /**
+    /*
      * <h2>Client Movement code</h2>
      */
 

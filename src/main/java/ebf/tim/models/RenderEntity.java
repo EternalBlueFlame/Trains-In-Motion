@@ -162,7 +162,7 @@ public class RenderEntity extends Render {
          */
         if (ClientProxy.EnableAnimations && entity.frontBogie!=null&&entity.backBogie!=null) {
             //define the rotation angle
-            wheelPitch -= (float)(entity.backBogie.motionX * entity.backBogie.motionX + entity.backBogie.motionZ * entity.backBogie.motionZ)*20;
+            wheelPitch += (float)(entity.backBogie.motionX * entity.backBogie.motionX + entity.backBogie.motionZ * entity.backBogie.motionZ)*20;
             if (wheelPitch > 360 || wheelPitch <-360) {
                 wheelPitch = 0;
             }

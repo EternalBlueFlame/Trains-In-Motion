@@ -2,6 +2,7 @@ package ebf.tim.models.tmt;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Map;
  */
 public class ModelPool {
 	
-    public static ModelPoolEntry addFile(String file, Map<String, TransformGroupBone> group, Map<String, TextureGroup> textureGroup){
+    public static ModelPoolEntry addFile(String file, Map<String, TransformGroupBone> group, Map<String, List<TexturedPolygon>> textureGroup){
 		if(modelMap.containsKey(file)){
 			ModelPoolEntry entry = modelMap.get(file);
 			entry.applyGroups(group, textureGroup);
@@ -28,7 +29,7 @@ public class ModelPool {
 				//return null;
 				//}
 				entry.groups = new HashMap<String, TransformGroupBone>();
-				entry.textures = new HashMap<String, TextureGroup>();
+				entry.textures = new HashMap<String, List<TexturedPolygon>>();
 				entry.name = file;
 				entry.setGroup("0");
 				entry.setTextureGroup("0");

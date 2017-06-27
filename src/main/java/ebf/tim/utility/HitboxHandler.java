@@ -176,73 +176,62 @@ public class HitboxHandler {
                         }
                         continue;
                     }
-                    /*if the parent is an Entity Rollingstock, and the other checks were false, we now need to check if we roadkill the entity, or get pushed by it.*/
-                    if (transport instanceof EntityRollingStockCore) {
-                        if(entity instanceof HitboxHandler.MultipartHitbox){
-                            //check for front coupling if this is the front hitbox
-                            if (box.isFirst() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT) && box.parent.frontLinkedID == null){
-                                //check if we're linking to the front of the other
-                                if (((MultipartHitbox) entity).isFirst() && ((MultipartHitbox) entity).parent.frontLinkedID == null){
-                                    box.parent.frontLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
-                                    ((MultipartHitbox) entity).parent.frontLinkedTransport = box.parent.getPersistentID();
-                                    System.out.println("front front linked");
-                                    //check if we're linking to the back of the other.
-                                } else if (((MultipartHitbox) entity).isLast() && ((MultipartHitbox) entity).parent.backLinkedID == null){
-                                    box.parent.frontLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
-                                    ((MultipartHitbox) entity).parent.backLinkedTransport = box.parent.getPersistentID();
-                                    System.out.println("front back linked");
-                                }
 
-                                //otherwise check for back coupling if this is the back hitbox
-                            } else if (box.isLast() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK) && box.parent.backLinkedID == null){
-                                if (((MultipartHitbox) entity).isFirst() && ((MultipartHitbox) entity).parent.frontLinkedID == null){
-                                    box.parent.backLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
-                                    ((MultipartHitbox) entity).parent.frontLinkedTransport = box.parent.getPersistentID();
-                                    System.out.println("back front linked");
-                                    //check if we're linking to the back of the other.
-                                } else if (((MultipartHitbox) entity).isLast() && ((MultipartHitbox) entity).parent.backLinkedID == null){
-                                    box.parent.backLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
-                                    ((MultipartHitbox) entity).parent.backLinkedTransport = box.parent.getPersistentID();
-                                    System.out.println("back back linked");
-                                }
+                    if(entity instanceof HitboxHandler.MultipartHitbox){
+                        //check for front coupling if this is the front hitbox
+                        if (box.isFirst() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT) && box.parent.frontLinkedID == null){
+                            //check if we're linking to the front of the other
+                            if (((MultipartHitbox) entity).isFirst() && ((MultipartHitbox) entity).parent.frontLinkedID == null){
+                                box.parent.frontLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
+                                ((MultipartHitbox) entity).parent.frontLinkedTransport = box.parent.getPersistentID();
+                                //check if we're linking to the back of the other.
+                            } else if (((MultipartHitbox) entity).isLast() && ((MultipartHitbox) entity).parent.backLinkedID == null){
+                                box.parent.frontLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
+                                ((MultipartHitbox) entity).parent.backLinkedTransport = box.parent.getPersistentID();
                             }
+                            continue;
+                            //otherwise check for back coupling if this is the back hitbox
+                        } else if (box.isLast() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK) && box.parent.backLinkedID == null){
+                            if (((MultipartHitbox) entity).isFirst() && ((MultipartHitbox) entity).parent.frontLinkedID == null){
+                                box.parent.backLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
+                                ((MultipartHitbox) entity).parent.frontLinkedTransport = box.parent.getPersistentID();
+                                //check if we're linking to the back of the other.
+                            } else if (((MultipartHitbox) entity).isLast() && ((MultipartHitbox) entity).parent.backLinkedID == null){
+                                box.parent.backLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
+                                ((MultipartHitbox) entity).parent.backLinkedTransport = box.parent.getPersistentID();
+                            }
+                            continue;
                         }
-                        if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
-                            //in the case of roadkill
-                            entity.attackEntityFrom(new EntityDamageSource("rollingstock", transport), (float) (transport.frontBogie.motionX + transport.frontBogie.motionZ) * 1000);
-                            if (transport.worldObj.isRemote) {
-                                entity.applyEntityCollision(transport);
-                            }
-                        } else {
-                            vectorCache[0][0] = entity.posX - transport.posX;
-                            vectorCache[0][2] = entity.posZ - transport.posZ;
-                            vectorCache[0][1] = MathHelper.sqrt_double(vectorCache[0][0] * vectorCache[0][0] + vectorCache[0][2] * vectorCache[0][2]);
-
-                            if (vectorCache[0][1] >= 0.00999999987D) {
-                                vectorCache[0][0] /= vectorCache[0][1];
-                                vectorCache[0][2] /= vectorCache[0][1];
-
-                                vectorCache[0][0] *= 1.0D/vectorCache[0][1];
-                                vectorCache[0][2] *= 1.0D/vectorCache[0][1];
-                                vectorCache[0][0] *= 0.05000000074444445D;
-                                vectorCache[0][2] *= 0.05000000074444445D;
-
-                                transport.frontBogie.addVelocity(-vectorCache[0][0], 0.0D, -vectorCache[0][2]);
-                                transport.backBogie.addVelocity(-vectorCache[0][0], 0.0D, -vectorCache[0][2]);
-                            }
-                            entity.applyEntityCollision(transport);
-                        }
-                        /*however if this was n entity Train Core, we just have to figure out if we should roadkill it.*/
-                    } else if (transport.frontVelocityX > 0.5 || transport.frontVelocityX < -0.5 || transport.frontVelocityZ > 0.5 || transport.frontVelocityZ < -0.5) {
-                        entity.attackEntityFrom(new EntityDamageSource("train", transport), (float) (transport.frontVelocityX + transport.frontVelocityZ) * 1000);
+                    }
+                    if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
+                        //in the case of roadkill
+                        entity.attackEntityFrom(new EntityDamageSource("rollingstock", transport), (float) (transport.frontBogie.motionX + transport.frontBogie.motionZ) * 1000);
                         if (transport.worldObj.isRemote) {
                             entity.applyEntityCollision(transport);
                         }
+                    } else if (!(transport instanceof EntityTrainCore)) {
+                        vectorCache[0][0] = entity.posX - transport.posX;
+                        vectorCache[0][2] = entity.posZ - transport.posZ;
+                        vectorCache[0][1] = MathHelper.sqrt_double(vectorCache[0][0] * vectorCache[0][0] + vectorCache[0][2] * vectorCache[0][2]);
+
+                        if (vectorCache[0][1] >= 0.00999999987D) {
+                            vectorCache[0][0] /= vectorCache[0][1];
+                            vectorCache[0][2] /= vectorCache[0][1];
+
+                            vectorCache[0][0] *= 1.0D/vectorCache[0][1];
+                            vectorCache[0][2] *= 1.0D/vectorCache[0][1];
+                            vectorCache[0][0] *= 0.95000000074444445D;
+                            vectorCache[0][2] *= 0.95000000074444445D;
+
+                            transport.frontBogie.addVelocity(-vectorCache[0][0], 0.0D, -vectorCache[0][2]);
+                            transport.backBogie.addVelocity(-vectorCache[0][0], 0.0D, -vectorCache[0][2]);
+                        }
+                        entity.applyEntityCollision(transport);
                     } else {
                         boolean bool = rand.nextBoolean();
-                        vectorCache[0][0] = bool?0.05:0;
-                        vectorCache[0][2] = bool?0:0.05;
-                        vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], 0,transport.rotationYaw,0);
+                        vectorCache[0][0] = bool ? 0.05 : 0;
+                        vectorCache[0][2] = bool ? 0 : 0.05;
+                        vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], 0, transport.rotationYaw, 0);
                         entity.addVelocity(vectorCache[0][0], -0.5, vectorCache[0][2]);
                         entity.applyEntityCollision(transport);
                     }
