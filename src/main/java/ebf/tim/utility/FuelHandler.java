@@ -30,6 +30,7 @@ public class FuelHandler{
 	/**the steam tank, used for steam and nuclear steam trains*/
 	public int steamTank=0;
 	public Item lastFuelConsumed = null;
+	public float heatC =21;
 
 	/**
 	 * <h2>check if an item is a usable fuel</h2>
@@ -43,6 +44,20 @@ public class FuelHandler{
 
 		}
 		return false;
+	}
+
+	public float maxFuel(GenericRailTransport transport){
+		switch (transport.getType()){
+			case STEAM:{return transport.getMaxFuel() * 204800;}
+		}
+		return 0;
+	}
+
+	public float maxHeat(GenericRailTransport transport){
+		switch (transport.getType()){
+			case STEAM:{return transport.getMaxFuel() * 750;}
+		}
+		return 0;
 	}
 
 	/**
@@ -95,6 +110,10 @@ public class FuelHandler{
 
 		//be sure there is fuel before trying to consume it
 		if (fuel > 0) {
+			//calculate the heat increase
+			heatC += (float) ((1- Math.sqrt(heatC/maxHeat(train))) * Math.sqrt(fuel/maxFuel(train)))*train.getEfficiency();
+
+			//TODO begin unfinished code
 					/*
 					* add steam from burning to the steam tank.
 					* steam is equal to water used, minus a small percentage to compensate for impurities in the water that don't transition to steam,
@@ -119,9 +138,18 @@ public class FuelHandler{
 				train.dropItem(train.getItem(), 1);
 				train.attackEntityFromPart(null, new EntityDamageSource("overheat", train),100);
 			}
-
-		} else if (fuel <0){
-			fuel=0;
+		//TODO end unfinished code
+		} else {
+			//be sure fuel is a valid value.
+			if (fuel <0) {
+				fuel = 0;
+			}
+			//cool down, or heat up the boiler to match the temperature of the biome and height
+			heatC += 1- Math.sqrt(heatC/ (
+					(((train.worldObj.getBiomeGenForCoords(train.chunkCoordX, train.chunkCoordZ).temperature -0.15)//biome temperature with freezing point (0.15) set to 0
+							- (0.0014166695 * (train.posY - 64))) //temperature changes by 0.00166667 for every meter above or below sea level (64), the value is -15% to match up with the change to biome temp
+							*36.8)//converts the temp to celsius with compensation for the temp offset
+			));
 		}
 
 		if (steamTank >0){
@@ -132,6 +160,7 @@ public class FuelHandler{
 			train.setBoolean(GenericRailTransport.boolValues.RUNNING, false);
 		}
 	}
+
 
 
 

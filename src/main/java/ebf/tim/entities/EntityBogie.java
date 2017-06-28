@@ -233,8 +233,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @param block the block at the next position
      */
     private void moveBogie(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, BlockRailBase block) {
-        double cachedMotionX = currentMotionX;
-        double cachedMotionZ = currentMotionZ;
+        double cachedMotionX = currentMotionX * block.getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ);
+        double cachedMotionZ = currentMotionZ * block.getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ);
         //define the incrementation of movement, use the cache to store the real value and increment it down, and then throw it to the next loop, then use current for the clamped to calculate movement'
         if (currentMotionX>0.25){
             currentMotionX= 0.25;

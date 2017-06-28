@@ -233,8 +233,6 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     /**gets the max speed of the transport in blocks per second*/
     public float getMaxSpeed(){return 0;}
-    /**gets the max fuel for the train, burnables in the case of steam, RF in the case of electric, etc.*/
-    public int getMaxFuel(){return 100;}
     /**gets the acceleration rate of the train*/
     public float getAcceleration(){return 0.025f;}
     /**gets the resource location for the horn sound*/

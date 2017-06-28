@@ -891,6 +891,12 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**defines the weight of the transport, can't be less than 1, or more than 850
      * todo: placeholder math till proper torque calculations are in that support weight dynamically*/
     public float weightTons(){return 1;}
+    /** returns the max fuel.
+     * for steam trains this is cubic meters of the firebox size. (1.5 on average)
+     * for diesel this is cubic meters. (11.3 on average)
+     * for electric this is Kw. (400 on average)
+     * for nuclear this is the number of fusion cores, rounded down. (usually 1)*/
+    public float getMaxFuel(){return 1;}
 
 
     /*

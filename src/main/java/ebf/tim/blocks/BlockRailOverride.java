@@ -15,10 +15,12 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
@@ -48,6 +50,17 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
     }
 
     @Override
+    public boolean isFlexibleRail(IBlockAccess world, int y, int x, int z){return true;}
+
+    @Override
+    public float getRailMaxSpeed(World world, EntityMinecart cart, int y, int x, int z){
+        if (world.getTileEntity(x,y,z) instanceof renderTileEntity){
+            return ((renderTileEntity) world.getTileEntity(x,y,z)).getRailSpeed();
+        }
+        return 0.4f;
+    }
+
+    @Override
     public TileEntity createNewTileEntity(World world, int meta){
         return new renderTileEntity();
     }
@@ -71,6 +84,12 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
         private ModelBase model=railStraightModel;
         private ResourceLocation texture = railStraightTexture;
 
+        public float getRailSpeed(){
+            float speed =0.4f;
+            if (metal == 0){speed+=0.2f;}
+            if (ties == 1){speed+=0.2f;}
+            return speed;
+        }
 
         public String getRailTexture(){
             String name;
