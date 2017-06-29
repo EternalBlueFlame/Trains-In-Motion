@@ -4,6 +4,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
+import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.items.ItemTransport;
 import ebf.tim.models.tmt.Vec3d;
 import ebf.tim.registry.TransportRegistry;
@@ -105,14 +106,12 @@ public class EntityBrigadelok080 extends EntityTrainCore {
     public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.STEAM;}
     /**
      * <h2>Max Fuel</h2>
-     * <h4>STEAM ONLY.</h4>
-     * This is only used for steam locomotives because it defines the max burnable fuel, other locomotives only use the tanks.
-     * @return the max burnable fuel the train can store, one ton is considered a stack.
-     * In the case of coal which is worth 1600 would be 102400 (1600 * 64 = 102400)
-     * @see FuelHandler for more information on fuel consumption
+     * @return the maxstorage of fuel the train can store.
+     * @see GenericRailTransport#getMaxFuel() for more info.
+     * @see FuelHandler for information on fuel consumption.
      */
     @Override
-    public int getMaxFuel(){return 71680;}
+    public float getMaxFuel(){return 1;}
     /**
      * <h2>Rider offset</h2>
      * @return defines the offsets of the riders in blocks, the first value is how far back, and the second is how high.
@@ -198,7 +197,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
 
     /**
      * <h2>fuel management</h2>
-     * defines how the transport manages fuel, both in consuming items, and in managing the fuel.
+     * defines how the transport manages burnHeat, both in consuming items, and in managing the burnHeat.
      */
     @Override
     public void manageFuel(){

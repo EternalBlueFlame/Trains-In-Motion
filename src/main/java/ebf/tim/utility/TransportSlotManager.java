@@ -8,6 +8,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntityFurnace;
 
 /**
  * @author EternalBlueFlame
@@ -54,7 +55,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         //cover trains
         if (entityTrain instanceof EntityTrainCore) {
             slot++;
-            //fuel slot
+            //burnHeat slot
             addSlotToContainer(new fuelSlot(railTransport, 0, 114, 32));
         }
 
@@ -168,7 +169,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
 
     /**
      * <h2>Water Filtered Slot</h2>
-     * basically exactly the same as a filtered slot but used to check for water via the fuel handler
+     * basically exactly the same as a filtered slot but used to check for water via the burnHeat handler
      * @see FuelHandler#isUseableFluid(ItemStack, GenericRailTransport)
      */
     private class waterSlot extends Slot{
@@ -183,8 +184,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
 
     /**
      * <h2>Fuel Filtered Slot</h2>
-     * basically exactly the same as a filtered slot but used to check for fuel via the fuel handler
-     * @see FuelHandler#isFuel(ItemStack, GenericRailTransport)
+     * basically exactly the same as a filtered slot but used to check for burnHeat via the burnHeat handler
      */
     private class fuelSlot extends Slot{
         public fuelSlot(IInventory p_i1824_1_, int p_i1824_2_, int p_i1824_3_, int p_i1824_4_) {
@@ -192,7 +192,11 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         }
         @Override
         public boolean isItemValid(ItemStack item) {
-            return FuelHandler.isFuel(item, railTransport);
+            switch (railTransport.getType()) {
+                case STEAM:{return TileEntityFurnace.getItemBurnTime(item) >0;}
+                case ELECTRIC:case MAGLEV:{FuelHandler.isUseableFluid(item,railTransport);}
+            }
+            return false;
         }
     }
 }

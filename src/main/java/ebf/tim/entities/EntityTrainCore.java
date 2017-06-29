@@ -4,19 +4,14 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.FuelHandler;
-import ebf.tim.utility.HitboxHandler;
 import ebf.tim.utility.RailUtility;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.UUID;
-
-import static ebf.tim.utility.RailUtility.rotatePoint;
 
 /**
  * <h1>Train core</h1>
@@ -25,7 +20,7 @@ import static ebf.tim.utility.RailUtility.rotatePoint;
  */
 public class EntityTrainCore extends GenericRailTransport {
 
-    /**manages the items for fuel, and the fuel itself.*/
+    /**manages the items for burnHeat, and the burnHeat itself.*/
     public FuelHandler fuelHandler = new FuelHandler();
     /**defines the speed percentage the user is attempting to apply.*/
     public int accelerator =0;
@@ -69,21 +64,21 @@ public class EntityTrainCore extends GenericRailTransport {
     public void readSpawnData(ByteBuf additionalData) {
     super.readSpawnData(additionalData);
         accelerator = additionalData.readInt();
-        fuelHandler.fuel = additionalData.readInt();
+        fuelHandler.heatC = additionalData.readFloat();
     }
     /**sends the data to server from client*/
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         super.writeSpawnData(buffer);
         buffer.writeInt(accelerator);
-        buffer.writeInt(fuelHandler.fuel);
+        buffer.writeFloat(fuelHandler.heatC);
     }
     /**loads the entity's save file*/
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
         accelerator = tag.getInteger(NBTKeys.accelerator);
-        this.fuelHandler.fuel = tag.getInteger(NBTKeys.transportFuel);
+        this.fuelHandler.heatC = tag.getFloat(NBTKeys.transportFuel);
         this.fuelHandler.steamTank = tag.getInteger(NBTKeys.transportSteam);
 
     }
@@ -92,7 +87,7 @@ public class EntityTrainCore extends GenericRailTransport {
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
         tag.setInteger(NBTKeys.accelerator, accelerator);
-        tag.setInteger(NBTKeys.transportFuel, fuelHandler.fuel);
+        tag.setFloat(NBTKeys.transportFuel, fuelHandler.heatC);
         tag.setInteger(NBTKeys.transportSteam, fuelHandler.steamTank);
 
     }
