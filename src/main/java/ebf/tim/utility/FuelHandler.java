@@ -26,6 +26,7 @@ public class FuelHandler{
 	/**the main burnHeat variable used by most trains*/
 	public int burnHeat =0;
 	private int burnTime =0;
+	private int burnTimeReset =5;
 	/**the steam tank, used for steam and nuclear steam trains*/
 	public int steamTank=0;
 	public float heatC =21;
@@ -68,13 +69,17 @@ public class FuelHandler{
 
 	public void manageSteam(EntityTrainCore train){
 		//manage solid burnHeat
-		if (burnTime >6){
+		if (burnTime >burnTimeReset){
 			burnTime=0;
 			if (train.getStackInSlot(0) != null) {
 				burnHeat = (int) (TileEntityFurnace.getItemBurnTime(train.getStackInSlot(0)) * train.getEfficiency());
-			}
-			if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
-				train.decrStackSize(0, 1);
+				burnTimeReset = MathHelper.ceiling_double_int(burnHeat *0.1);
+				if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
+					train.decrStackSize(0, 1);
+				}
+			} else {
+				burnHeat = 0;
+				burnTimeReset = 5;
 			}
 		} else {
 			burnTime++;
@@ -92,7 +97,7 @@ public class FuelHandler{
 		//be sure there is burnHeat before trying to consume it
 		if (burnHeat > 0) {
 			//calculate the heat increase
-			heatC += (float) ((1- Math.sqrt(heatC/maxHeat(train))) * Math.sqrt(2000/burnHeat))*train.getEfficiency();
+			heatC += (float) ((1- Math.sqrt(heatC/maxHeat(train))) * Math.sqrt((heatC+burnHeat)/burnHeat))*train.getEfficiency();
 			int steam = (int)Math.floor(
 					(heatC*0.005f) * //calculate heat from burnHeat
 							(train.getTankAmount()*0.005f) //calculate surface area of water

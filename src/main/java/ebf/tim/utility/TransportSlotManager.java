@@ -110,7 +110,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
             for (int currentSlot = 0; currentSlot < this.inventorySlots.size(); currentSlot++) {
                 tempSlot = (Slot) this.inventorySlots.get(currentSlot);
                 //if the item is in the train inventory
-                if (slot > 35 || currentSlot > 35) {
+                if (tempSlot.inventory == railTransport) {
                     //if the slot is empty, just move it and return null
                     if (!tempSlot.getHasStack()) {
                         tempSlot.putStack(stack.getStack());
@@ -130,6 +130,17 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         }
         //if the slot was null, return null
         return null;
+    }
+
+    @Override
+    public ItemStack slotClick(int fromSlot, int p_75144_2_, int p_75144_3_, EntityPlayer p_75144_4_) {
+        return super.slotClick(fromSlot,0,0,p_75144_4_);
+    }
+    @Override
+    public void onContainerClosed(EntityPlayer p_75134_1_)
+    {
+        super.onContainerClosed(p_75134_1_);
+        this.railTransport.closeInventory();
     }
 
     /**
