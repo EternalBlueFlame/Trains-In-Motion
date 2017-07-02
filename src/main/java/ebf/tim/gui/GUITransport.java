@@ -19,6 +19,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -45,6 +46,8 @@ public class GUITransport extends GuiContainer {
     private static final float guiScaler = 0.00390625F;
     /**the center position for the inventory render*/
     private int yCenter=0;
+
+    private static DecimalFormat decimal = new DecimalFormat("#.##");
 
     /**
      * <h2>GUI initialization</h2>
@@ -121,10 +124,14 @@ public class GUITransport extends GuiContainer {
                 drawHoveringText(Arrays.asList(tankType(true), transport.getTankAmount() * 0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity() * 0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
             }
             //draw the steam tank hover text
-            if ((transport.getType() == TrainsInMotion.transportTypes.STEAM || transport.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) &&
-                    (mouseY >= guiTop - 14 && mouseY <= guiTop + 20) &&
-                    ((mouseX >= guiLeft + 178 && mouseX <= guiLeft + 196)  || (mouseX >= guiLeft + 240 && mouseX <= guiLeft + 258))) {
-                drawHoveringText(Arrays.asList(tankType(false), secondTankFluid * 0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity() * 0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
+            if ((transport.getType() == TrainsInMotion.transportTypes.STEAM || transport.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM)) {
+                GL11.glPushMatrix();
+                fontRendererObj.drawString(decimal.format(transport.getDataWatcher().getWatchableObjectInt(15)*0.01f) + "C°", guiLeft+205, guiTop+72, 0);
+                GL11.glPopMatrix();
+                if ((mouseY >= guiTop - 14 && mouseY <= guiTop + 20) &&
+                        ((mouseX >= guiLeft + 178 && mouseX <= guiLeft + 196) || (mouseX >= guiLeft + 240 && mouseX <= guiLeft + 258))) {
+                    drawHoveringText(Arrays.asList(tankType(false), secondTankFluid * 0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity() * 0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
+                }
             }
         }
 
@@ -231,7 +238,12 @@ public class GUITransport extends GuiContainer {
         //icon for furnace fuel
         drawTexturedRect(guiLeft+112, guiTop + 1, 54, 51, 20, 20);
         //icon for furnace
-        drawTexturedRect(guiLeft+112, guiTop + 1, 54, 51, 20, 20);
+        //drawTexturedRect(guiLeft+112, guiTop + 1, 54, 51, 20, 20);
+
+        int i1 = transport.getDataWatcher().getWatchableObjectInt(13);
+        if (i1>0) {
+            drawTexturedRect(guiLeft + 113, guiTop + 15 - i1, 176, 13 - i1, 19, i1 + 5, 14, i1+1);
+        }
 
         //slot for fuel
         drawTexturedRect(guiLeft+112, guiTop + 30, 54, 51, 20, 20);

@@ -164,10 +164,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * <h2>Entity initialization</h2>
      * Entity init runs right before the first tick.
      * This is useful for registering the datawatchers and inventory before we actually use them.
+     * NOTE: slot 0 and 1 of the datawatcher are used by vanilla. It may be wise to leave the first 5 empty.
      */
     @Override
     public void entityInit(){
-        this.dataWatcher.addObject(17, 0);
+        this.dataWatcher.addObject(13, 0);//train fuel consumption current
+        this.dataWatcher.addObject(14, 0);//train steam
+        this.dataWatcher.addObject(15, 0);//train heat
+        this.dataWatcher.addObject(17, 0);//booleans
         this.dataWatcher.addObject(19, 0);//owner
         this.dataWatcher.addObject(20, 0);//tankA
         this.dataWatcher.addObject(21, 0);//front linked transport

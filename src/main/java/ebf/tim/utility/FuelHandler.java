@@ -25,8 +25,8 @@ public class FuelHandler{
 
 	/**the main burnHeat variable used by most trains*/
 	public int burnHeat =0;
-	private int burnTime =0;
-	private int burnTimeReset =5;
+	private float burnTime =0;
+	private float burnTimeMax =0;
 	/**the steam tank, used for steam and nuclear steam trains*/
 	public int steamTank=0;
 	public float heatC =21;
@@ -69,20 +69,21 @@ public class FuelHandler{
 
 	public void manageSteam(EntityTrainCore train){
 		//manage solid burnHeat
-		if (burnTime >burnTimeReset){
+		if (burnTime <1){
 			burnTime=0;
 			if (train.getStackInSlot(0) != null) {
 				burnHeat = (int) (TileEntityFurnace.getItemBurnTime(train.getStackInSlot(0)) * train.getEfficiency());
-				burnTimeReset = MathHelper.ceiling_double_int(burnHeat *0.1);
+				burnTime = MathHelper.ceiling_double_int(burnHeat *0.1);
+				burnTimeMax = burnTime;
 				if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
 					train.decrStackSize(0, 1);
 				}
 			} else {
 				burnHeat = 0;
-				burnTimeReset = 5;
+				burnTimeMax = 0;
 			}
 		} else {
-			burnTime++;
+			burnTime--;
 		}
 		//if there's a fluid item in the slot and the train can consume the entire thing
 		if (train.getStackInSlot(1) != null &&
@@ -129,6 +130,11 @@ public class FuelHandler{
 		} else {
 			train.setBoolean(GenericRailTransport.boolValues.RUNNING, false);
 		}
+
+		//update the datawatchers so client can display the info on the GUI.
+		train.getDataWatcher().updateObject(13, burnTime>0?(int)((burnTime/ burnTimeMax)*14):0);
+		train.getDataWatcher().updateObject(14, steamTank);
+		train.getDataWatcher().updateObject(15, MathHelper.floor_float(heatC * 100f));
 	}
 
 
