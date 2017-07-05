@@ -67,6 +67,12 @@ public class FuelHandler{
 	}
 
 
+	/**
+	 * <h2>steam management</h2>
+	 *
+	 * Credit to zodiacmal for the heatC calculation.
+	 * @param train
+	 */
 	public void manageSteam(EntityTrainCore train){
 		//manage solid burnHeat
 		if (burnTime <1){
@@ -132,7 +138,7 @@ public class FuelHandler{
 		}
 
 		//update the datawatchers so client can display the info on the GUI.
-		train.getDataWatcher().updateObject(13, burnTime>0?(int)((burnTime/ burnTimeMax)*14):0);
+		train.getDataWatcher().updateObject(13, burnTime>0?(int)((burnTime/ burnTimeMax)*18):0);
 		train.getDataWatcher().updateObject(14, steamTank);
 		train.getDataWatcher().updateObject(15, MathHelper.floor_float(heatC * 100f));
 	}

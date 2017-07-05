@@ -14,6 +14,7 @@ import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
+import mods.railcraft.api.carts.IFluidCart;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
@@ -48,7 +49,7 @@ import static ebf.tim.utility.RailUtility.rotatePoint;
  * this is the base for all trains and rollingstock.
  * @author Eternal Blue Flame
  */
-public class GenericRailTransport extends EntityMinecart implements IEntityAdditionalSpawnData, IEntityMultiPart, IInventory, IFluidHandler {
+public class GenericRailTransport extends EntityMinecart implements IEntityAdditionalSpawnData, IEntityMultiPart, IInventory, IFluidHandler, IFluidCart {
 
     /*
      * <h2>variables</h2>
@@ -149,6 +150,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
     public GenericRailTransport(World world){
         super(world);
+        setSize(1,2);
     }
     public GenericRailTransport(UUID owner, World world, double xPos, double yPos, double zPos){
         super(world);
@@ -158,6 +160,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         posZ = zPos;
         this.owner = owner;
         key = new ItemStack(new ItemKey(owner, getItem().getUnlocalizedName()));
+        setSize(1,2);
     }
 
     /**
@@ -185,7 +188,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 items.add(null);
             }
         }
-        setSize(1.5f,0.5f);
     }
 
 
@@ -574,8 +576,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 updateWatchers = true;
             }
 
-            if (getBoolean(boolValues.DERAILED) && !displayDerail){
-                MinecraftServer.getServer().addChatMessage(new ChatComponentText(getOwner().getName()+"'s " + StatCollector.translateToLocal(getItem().getUnlocalizedName()) + " has derailed!"));
+            if (!worldObj.isRemote && getBoolean(boolValues.DERAILED) && !displayDerail){
+                //MinecraftServer.getServer().addChatMessage(new ChatComponentText(getOwner().getName()+"'s " + StatCollector.translateToLocal(getItem().getUnlocalizedName()) + " has derailed!"));
                 displayDerail = true;
             }
 
@@ -849,6 +851,25 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         }
         return null;
     }
+
+
+    @Override
+    public boolean canPassFluidRequests(Fluid fluid){
+        return getTankCapacity() !=0;
+    }
+
+    @Override
+    public boolean canAcceptPushedFluid(EntityMinecart requester, Fluid fluid){
+        return false;
+    }
+
+    @Override
+    public boolean canProvidePulledFluid(EntityMinecart requester, Fluid fluid){
+        return getTankCapacity()!=0 && canDrain(ForgeDirection.UNKNOWN, fluid);
+    }
+
+    @Override
+    public void setFilling(boolean filling){}
 
     /*
      * <h2>Inherited variables</h2>

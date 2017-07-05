@@ -26,7 +26,7 @@ import java.util.Random;
  * this is the recommended and easier to implement interface for Electricity
  * related minecarts. In fact, the Railcraft Ic2 Energy Carts will be
  * redirecting to this interface. The Energy Loaders will continue to work
- * exclusively with IEnergyTransfer for the moment due to the high Ic2 isCoupling
+ * exclusively with IEnergyTransfer for the moment due to the high Ic2 coupling
  * of their design. An alternative loader block utilizing the IElectricMinecart
  * interface may be provided in the future, but no guarantee.
  * <p>

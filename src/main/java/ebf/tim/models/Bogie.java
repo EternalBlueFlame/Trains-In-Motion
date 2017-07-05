@@ -20,7 +20,6 @@ public class Bogie {
     public final ResourceLocation bogieTexture;
     /**the model defined in the registration of this.*/
     public final ModelBase bogieModel;
-    int updateTicks=0;
     private double[] offset = new double[]{0,0,0};
 
 
@@ -35,7 +34,6 @@ public class Bogie {
      * @param entity the GenericRailTransport to get the pitch from.
      */
     public void setPositionAndRotation(GenericRailTransport entity, double distance){
-        updateTicks ++;
         //update positions
         offset[0] = distance;
         if(prevPos == null){
@@ -43,7 +41,7 @@ public class Bogie {
             prevPos[0] += entity.posX;
             prevPos[2] += entity.posZ;
             rotationYaw = entity.rotationYaw;
-        } else if (updateTicks %4 ==0) {
+        } else if (shouldUpdate(entity,prevPos)) {
             double[] position = RailUtility.rotatePoint(offset, 0, entity.rotationYaw,0);
             position[0] += entity.posX;
             position[2] += entity.posZ;
@@ -53,7 +51,10 @@ public class Bogie {
             }
             rotationYaw = (float) Math.toDegrees(Math.atan2(position[2] - prevPos[2], position[0] - prevPos[0]));
             prevPos = position;
-            updateTicks =0;
         }
+    }
+
+    private static boolean shouldUpdate(GenericRailTransport entity, double[] prevPos){
+        return Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ) > Math.sqrt(prevPos[0] * prevPos[0]) + Math.sqrt(prevPos[2] * prevPos[2]);
     }
 }

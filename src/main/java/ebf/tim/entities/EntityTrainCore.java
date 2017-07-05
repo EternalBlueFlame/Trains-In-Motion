@@ -6,11 +6,14 @@ import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.FuelHandler;
 import ebf.tim.utility.RailUtility;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -99,56 +102,59 @@ public class EntityTrainCore extends GenericRailTransport {
         this.updateWatchers = true;
     }
 
+
     /**
-     * <h2>Calculate drag</h2>
-     * Add more drag if there are rollingstock.
-     * if you have more than one train pulling or pushing a load, the drag should be reduced accordingly.
+     * <h2>Calculate speed increase rate</h2>
+     *
+     * speed calculation provided by zodiacmal
      */
-    public float calculateDrag(float current, @Nullable UUID frontCheckID, @Nullable UUID backCheckID){
+    public void calculateAcceleration(){
+        boolean hasReversed = false;
+        float weight = weightTons();
+        float hp = getHorsePower();
+        List<GenericRailTransport> checked = new ArrayList<>();
+        checked.add(this);
+        GenericRailTransport front = (GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
 
-        //if frontLinkedTransport and backLinkedTransport are null then return null
-        if (frontCheckID == null && backCheckID == null) {
-            return current;
-        }
-        GenericRailTransport frontCheck = (GenericRailTransport) CommonProxy.getEntityFromUuid(frontCheckID);
-        GenericRailTransport backCheck = (GenericRailTransport) CommonProxy.getEntityFromUuid(backCheckID);
+        while(front != null){
+            //calculate the speed modification
+            if(!front.getType().isTrain() && front.weightTons()!=0){
+                weight+= front.weightTons();
+            } else if (front instanceof EntityTrainCore) {
+                hp += ((EntityTrainCore)front).getHorsePower()*0.75f;
+            }
 
-        //if frontLinkedTransport is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
-        if (frontCheck instanceof EntityTrainCore && frontCheck.getBoolean(boolValues.RUNNING)){
-            current += ((accelerator / 6f) * 0.01302083f) *(((EntityTrainCore) frontCheck).getAcceleration()*0.5f);
-        } else if (frontCheck != null && frontCheck.weightTons() !=0){
-            current *=(0.01302083f * frontCheck.weightTons());
-        }
-        //if backLinkedTransport is a train then reduce drag, otherwise increase it. If it's null then nothing happens.
-        if (backCheck instanceof EntityTrainCore && backCheck.getBoolean(boolValues.RUNNING)){
-            current += ((accelerator / 6f) * 0.01302083f) *(((EntityTrainCore) backCheck).getAcceleration()*0.5f);
-        } else if (backCheck != null && backCheck.weightTons() !=0){
-            current *=(0.01302083f * backCheck.weightTons());
-        }
-
-        UUID nextFront = null;
-        UUID nextBack = null;
-        //detect if the next bogie to look at stats for is in the frontLinkedTransport or backLinkedTransport of the frontLinkedTransport bogie
-        if (frontCheck != null) {
-            if (frontCheck.frontLinkedTransport != null & frontCheck.frontLinkedTransport != this.getPersistentID()) {
-                nextFront = frontCheck.frontLinkedTransport;
-            } else if (frontCheck.backLinkedTransport != null & frontCheck.backLinkedTransport != this.getPersistentID()) {
-                nextFront = frontCheck.backLinkedTransport;
+            //add the one we just used to the checked list
+            checked.add(front);
+            //loop to the next rollingstock.
+            Entity test = worldObj.getEntityByID(front.frontLinkedID);
+            //if it's null and we haven't reversed yet, start the loop over from the back. if we have reversed though, end the loop.
+            if(test == null){
+                if (!hasReversed){
+                    front = (GenericRailTransport) worldObj.getEntityByID(backLinkedID);
+                    hasReversed = true;
+                } else {
+                    front = null;
+                }
+                //if the list of checked transports doesn't contain the new one then change the loop to the new one,
+            } else if (!checked.contains(test)) {
+                front = (GenericRailTransport) test;
+                //if the list does contain the checked one, and we haven't reversed yet,  start the loop over from the back. if we have reversed though, end the loop.
+            } else {
+                if (!hasReversed){
+                    front = (GenericRailTransport) worldObj.getEntityByID(backLinkedID);
+                    hasReversed = true;
+                } else {
+                    front = null;
+                }
             }
         }
-        //detect if the next bogie to look at stats for is in the frontLinkedTransport or backLinkedTransport of the backLinkedTransport bogie
-        if (backCheck != null) {
-            if (backCheck.frontLinkedTransport != null & backCheck.frontLinkedTransport != this.getPersistentID()) {
-                nextBack = backCheck.frontLinkedTransport;
-            } else if (backCheck.backLinkedTransport != null & backCheck.backLinkedTransport != this.getPersistentID()) {
-                nextBack = backCheck.backLinkedTransport;
-            }
-        }
-        //loop again to get the next carts in the list.
-        return calculateDrag(current, nextFront, nextBack);
+
+
+        vectorCache[0][0] = (745.70 * ((accelerator / 6) * hp) / weight)*0.05;
+
 
     }
-
 
     /**
      * <h2> on entity update</h2>
@@ -161,8 +167,10 @@ public class EntityTrainCore extends GenericRailTransport {
     public void onUpdate() {
 
         if(accelerator!=0 && frontBogie != null && backBogie != null) {
-            //acceleration is scaled down to fit the scale of the trains.
-            vectorCache[0][0] = calculateDrag(((accelerator / 6f) * 0.01302083f) * getAcceleration(), frontLinkedTransport, backLinkedTransport);
+            //every second, or when the speed is 0, re-calculate the speed.
+            if(ticksExisted %20==0 || vectorCache[0][0] ==0){
+                calculateAcceleration();
+            }
 
             //cap speed to max.
             if (frontBogie.motionX+ frontBogie.motionZ > getMaxSpeed() || frontBogie.motionX+ frontBogie.motionZ <-getMaxSpeed() ||
@@ -229,7 +237,7 @@ public class EntityTrainCore extends GenericRailTransport {
     /**gets the max speed of the transport in blocks per second*/
     public float getMaxSpeed(){return 0;}
     /**gets the acceleration rate of the train*/
-    public float getAcceleration(){return 0.025f;}
+    public float getHorsePower(){return 0.025f;}
     /**gets the resource location for the horn sound*/
     public ResourceLocation getHorn(){return null;}
     /**gets the resource location for the running/chugging sound*/

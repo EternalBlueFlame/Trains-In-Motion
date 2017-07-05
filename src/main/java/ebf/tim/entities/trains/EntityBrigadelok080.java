@@ -128,7 +128,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      * TODO: might not be a bad idea to replace this with a calculation based on metric horse power, pulled weight, the train's weight, and max speed
      */
     @Override
-    public float getAcceleration(){return 0.4f;}
+    public float getHorsePower(){return 0.4f;}
     /**
      * <h2>Hitbox offsets</h2>
      * @return defines the positions for the hitboxes in blocks. 0 being the center, negative values being towards the front.

@@ -118,7 +118,7 @@ public class GUITransport extends GuiContainer {
         super.drawScreen(mouseX, mouseY, par3);//should be useless with new buttons
 
         if (transport instanceof EntityTrainCore) {
-            secondTankFluid = ((EntityTrainCore) transport).fuelHandler.steamTank;
+            secondTankFluid = transport.getDataWatcher().getWatchableObjectInt(14);
 
             if ((mouseX >= guiLeft + 210 && mouseX <= guiLeft + 226 && mouseY >= guiTop - 14 && mouseY <= guiTop + 50)) {
                 drawHoveringText(Arrays.asList(tankType(true), transport.getTankAmount() * 0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity() * 0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
@@ -236,13 +236,12 @@ public class GUITransport extends GuiContainer {
         //bind the inventory image which we use the slot images and inventory image from.
         mc.getTextureManager().bindTexture(vanillaInventory);
         //icon for furnace fuel
-        drawTexturedRect(guiLeft+112, guiTop + 1, 54, 51, 20, 20);
-        //icon for furnace
-        //drawTexturedRect(guiLeft+112, guiTop + 1, 54, 51, 20, 20);
+        drawTexturedRect(guiLeft+112, guiTop + 1, 56, 36, 20, 20, 16, 16);
 
+        //icon for furnace
         int i1 = transport.getDataWatcher().getWatchableObjectInt(13);
         if (i1>0) {
-            drawTexturedRect(guiLeft + 113, guiTop + 15 - i1, 176, 13 - i1, 19, i1 + 5, 14, i1+1);
+            drawTexturedRect(guiLeft + 113, guiTop + 16 - i1, 176, 13 - i1, 17, i1+2, 14, i1);
         }
 
         //slot for fuel
@@ -378,15 +377,15 @@ public class GUITransport extends GuiContainer {
      * @param posV the Y position of the texture to start from.
      * @param width the width of the box.
      * @param height the height of the box.
-     * @param scaleU defines the X size of the texture part used
-     * @param scaleV defines the X Y size of the texture part used
+     * @param widthUV defines the X size of the texture part used
+     * @param heightUV defines the X Y size of the texture part used
      */
-    public static void drawTexturedRect(int posX, int posY, int posU, int posV, int width, int height, int scaleU, int scaleV) {
+    public static void drawTexturedRect(int posX, int posY, int posU, int posV, int width, int height, int widthUV, int heightUV) {
         Tessellator tessellator = Tessellator.instance;
         tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV(posX, posY + height, 0, posU * guiScaler, (posV + scaleV) * guiScaler);
-        tessellator.addVertexWithUV(posX + width, posY + height, 0, (posU + scaleU) * guiScaler, (posV + scaleV) * guiScaler);
-        tessellator.addVertexWithUV(posX + width, posY, 0, (posU + scaleU) * guiScaler, posV * guiScaler);
+        tessellator.addVertexWithUV(posX, posY + height, 0, posU * guiScaler, (posV + heightUV) * guiScaler);
+        tessellator.addVertexWithUV(posX + width, posY + height, 0, (posU + widthUV) * guiScaler, (posV + heightUV) * guiScaler);
+        tessellator.addVertexWithUV(posX + width, posY, 0, (posU + widthUV) * guiScaler, posV * guiScaler);
         tessellator.addVertexWithUV(posX, posY, 0, posU * guiScaler, posV * guiScaler);
         tessellator.draw();
     }
