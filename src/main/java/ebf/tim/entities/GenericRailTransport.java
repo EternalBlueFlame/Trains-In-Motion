@@ -15,7 +15,6 @@ import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
@@ -26,7 +25,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.*;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
@@ -505,13 +503,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         if (frontBogie!=null && backBogie != null && (!getBoolean(boolValues.DERAILED) || ticksExisted==1)){
             //handle movement.
             if (!hitboxHandler.getCollision(this)) {
-                setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons()));
-                setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons()));
+                setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
+                setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
             } else {
                 frontBogie.addVelocity(-frontBogie.motionX,-frontBogie.motionY,-frontBogie.motionZ);
                 backBogie.addVelocity(-backBogie.motionX,-backBogie.motionY,-backBogie.motionZ);
-                setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons()));
-                setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightTons()));
+                setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
+                setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
             }
             frontVelocityX = frontBogie.motionX;
             frontVelocityZ = frontBogie.motionZ;
@@ -904,7 +902,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public float getRenderScale(){return 0.0625f;}
     /**defines if the transport is explosion resistant*/
     public boolean isReinforced(){return false;}
-    /**defines the capacity of the fluidTank tank*/
+    /**defines the capacity of the fluidTank tank.
+     * Usually value is 10,000 *the cubic meter capacity, so 242 gallons, is 0.9161 cubic meters, which is 9161 tank capacity
+     *NOTE if this is used for a train, minimum value should be 1100, which is just a little over a single bucket to allow prevention of overheating.*/
     public int getTankCapacity(){return 0;}
     /**defines the capacity of the RF storage, intended for electric rollingstock that store power for the train.*/
     public int getRFCapacity(){return 0;}
@@ -913,9 +913,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**this function allows individual trains and rollingstock to implement custom fuel consumption and management
      * @see FuelHandler#manageSteam(EntityTrainCore) */
     public void manageFuel(){}
-    /**defines the weight of the transport, can't be less than 1, or more than 850
-     * todo: placeholder math till proper torque calculations are in that support weight dynamically*/
-    public float weightTons(){return 1;}
+    /**defines the weight of the transport.*/
+    public float weightKg(){return 907.1847f;}
     /** returns the max fuel.
      * for steam trains this is cubic meters of the firebox size. (1.5 on average)
      * for diesel this is cubic meters. (11.3 on average)

@@ -2,7 +2,6 @@ package ebf.tim.entities;
 
 import ebf.tim.TrainsInMotion;
 import ebf.tim.registry.NBTKeys;
-import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.FuelHandler;
 import ebf.tim.utility.RailUtility;
 import io.netty.buffer.ByteBuf;
@@ -11,7 +10,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -110,7 +108,7 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     public void calculateAcceleration(){
         boolean hasReversed = false;
-        float weight = weightTons();
+        float weight = weightKg();
         float hp = getHorsePower();
         List<GenericRailTransport> checked = new ArrayList<>();
         checked.add(this);
@@ -118,8 +116,8 @@ public class EntityTrainCore extends GenericRailTransport {
 
         while(front != null){
             //calculate the speed modification
-            if(!front.getType().isTrain() && front.weightTons()!=0){
-                weight+= front.weightTons();
+            if(!front.getType().isTrain() && front.weightKg()!=0){
+                weight+= front.weightKg();
             } else if (front instanceof EntityTrainCore) {
                 hp += ((EntityTrainCore)front).getHorsePower()*0.75f;
             }
@@ -151,7 +149,7 @@ public class EntityTrainCore extends GenericRailTransport {
         }
 
 
-        vectorCache[0][0] = (745.70 * ((accelerator / 6) * hp) / weight)*0.05;
+        vectorCache[0][0] = (745.70 * ((accelerator / 6) * hp) / (weight))*0.05;
 
 
     }
@@ -237,7 +235,7 @@ public class EntityTrainCore extends GenericRailTransport {
     /**gets the max speed of the transport in blocks per second*/
     public float getMaxSpeed(){return 0;}
     /**gets the acceleration rate of the train*/
-    public float getHorsePower(){return 0.025f;}
+    public float getHorsePower(){return 100f;}
     /**gets the resource location for the horn sound*/
     public ResourceLocation getHorn(){return null;}
     /**gets the resource location for the running/chugging sound*/

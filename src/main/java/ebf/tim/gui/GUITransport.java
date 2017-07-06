@@ -277,8 +277,8 @@ public class GUITransport extends GuiContainer {
             drawTexturedRect(guiLeft + 240, guiTop-14, 0, 0, 18, 30, 16, 16);
             if (secondTankFluid>0) {
                 int liquid3 = Math.abs((secondTankFluid * 30) / transport.getTankCapacity());
-                drawTexturedRect(guiLeft+178, guiTop +24 - liquid3, 32,0, 18, liquid3, 16, 16);
-                drawTexturedRect(guiLeft+240, guiTop +24 - liquid3, 32,0, 18, liquid3, 16, 16);
+                drawTexturedRect(guiLeft+178, guiTop +18 - liquid3, 32,0, 18, liquid3, 16, 16);
+                drawTexturedRect(guiLeft+240, guiTop +18 - liquid3, 32,0, 18, liquid3, 16, 16);
             }
         }
     }

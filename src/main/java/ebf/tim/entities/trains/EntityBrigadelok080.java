@@ -25,6 +25,7 @@ import java.util.UUID;
 
 /**
  * <h1>Brigadelok 0-8-0 entity</h1>
+ * designed after the : Henschel No.15968
  * This class is intended to serve as the primary example for API use.
  * @author Eternal Blue Flame
  */
@@ -125,10 +126,13 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      * <h2>Acceleration</h2>
      * <h4>TRAINS ONLY.</h4>
      * @return defines the acceleration that is applied to the train in blocks per second.
-     * TODO: might not be a bad idea to replace this with a calculation based on metric horse power, pulled weight, the train's weight, and max speed
      */
     @Override
-    public float getHorsePower(){return 0.4f;}
+    public float getHorsePower(){return 75f;}
+
+    @Override
+    public float weightKg(){return 10886.2169f;}
+
     /**
      * <h2>Hitbox offsets</h2>
      * @return defines the positions for the hitboxes in blocks. 0 being the center, negative values being towards the front.
@@ -183,7 +187,7 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      * <h2>Fluid Tank Capacity</h2>
      */
     @Override
-    public int getTankCapacity(){return 1100;}
+    public int getTankCapacity(){return 9161;}
 
     /**
      * <h2>fluid filter</h2>
