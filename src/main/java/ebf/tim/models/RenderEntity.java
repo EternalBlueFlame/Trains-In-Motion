@@ -51,6 +51,7 @@ public class RenderEntity extends Render {
     /**the value to rotate the geometry with.*/
     private float wheelPitch=0;
 
+
     private ResourceLocation boundTexture;
 
     private static final float RailOffset = 0.34f;
@@ -161,8 +162,9 @@ public class RenderEntity extends Render {
          * if there is, then calculate the vectors and apply the animations
          */
         if (ClientProxy.EnableAnimations && entity.frontBogie!=null&&entity.backBogie!=null) {
-            //define the rotation angle
-            wheelPitch += (float)(entity.backBogie.motionX * entity.backBogie.motionX + entity.backBogie.motionZ * entity.backBogie.motionZ)*20;
+            //define the rotation angle, if it's going fast enough.
+            wheelPitch += (entity.backBogie.motionX > 0.25 || entity.backBogie.motionX < 0.25 || entity.backBogie.motionZ > 0.25 || entity.backBogie.motionZ < 0.25)?
+                    (float)(Math.sqrt(entity.backBogie.motionX * entity.backBogie.motionX) + Math.sqrt(entity.backBogie.motionZ * entity.backBogie.motionZ))*0.08:0;
             if (wheelPitch > 360 || wheelPitch <-360) {
                 wheelPitch = 0;
             }

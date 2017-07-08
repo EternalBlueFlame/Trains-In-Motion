@@ -112,7 +112,13 @@ public class EntityTrainCore extends GenericRailTransport {
         float hp = getHorsePower();
         List<GenericRailTransport> checked = new ArrayList<>();
         checked.add(this);
-        GenericRailTransport front = (GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
+        GenericRailTransport front = null;
+        if (frontLinkedID!=null){
+            front = (GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
+        } else if (backLinkedID != null){
+            front = (GenericRailTransport) worldObj.getEntityByID(backLinkedID);
+            hasReversed = true;
+        }
 
         while(front != null){
             //calculate the speed modification
@@ -125,11 +131,11 @@ public class EntityTrainCore extends GenericRailTransport {
             //add the one we just used to the checked list
             checked.add(front);
             //loop to the next rollingstock.
-            Entity test = worldObj.getEntityByID(front.frontLinkedID);
+            Entity test = frontLinkedID!=null?worldObj.getEntityByID(front.frontLinkedID):null;
             //if it's null and we haven't reversed yet, start the loop over from the back. if we have reversed though, end the loop.
             if(test == null){
                 if (!hasReversed){
-                    front = (GenericRailTransport) worldObj.getEntityByID(backLinkedID);
+                    front = backLinkedID!=null?(GenericRailTransport)worldObj.getEntityByID(backLinkedID):null;
                     hasReversed = true;
                 } else {
                     front = null;
@@ -140,7 +146,7 @@ public class EntityTrainCore extends GenericRailTransport {
                 //if the list does contain the checked one, and we haven't reversed yet,  start the loop over from the back. if we have reversed though, end the loop.
             } else {
                 if (!hasReversed){
-                    front = (GenericRailTransport) worldObj.getEntityByID(backLinkedID);
+                    front = backLinkedID!=null?(GenericRailTransport)worldObj.getEntityByID(backLinkedID):null;
                     hasReversed = true;
                 } else {
                     front = null;

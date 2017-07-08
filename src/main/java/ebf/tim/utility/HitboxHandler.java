@@ -139,8 +139,10 @@ public class HitboxHandler {
                     for (; l1 <= box.boundingBox.maxY; ++l1) {
                         for (; i2 <= box.boundingBox.maxZ; ++i2) {
                             Block b1 = transport.worldObj.getBlock(k1, l1, i2);
-                            if (b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2) != null && b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2).intersectsWith(box.getBoundingBox())){
-                                return b1.getBlockBoundsMaxX() + b1.getBlockBoundsMaxY() + b1.getBlockBoundsMaxZ() !=0;
+                            if (b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2) != null &&
+                                    b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2).intersectsWith(box.getBoundingBox()) &&
+                                    b1.getBlockBoundsMaxX() + b1.getBlockBoundsMaxY() + b1.getBlockBoundsMaxZ() !=0){
+                                return true;
                             }
                         }
                     }
@@ -172,7 +174,7 @@ public class HitboxHandler {
                             if(transport.getType().isHopper() &&
                             transport.isItemValidForSlot(0,((EntityItem) entity).getEntityItem()) && ((EntityItem) entity).posY > transport.posY+1){
                             transport.addItem(((EntityItem) entity).getEntityItem());
-                            ((EntityItem) entity).worldObj.removeEntity((EntityItem) entity);
+                            ((EntityItem) entity).worldObj.removeEntity(entity);
                         }
                         continue;
                     }
@@ -218,10 +220,8 @@ public class HitboxHandler {
                             vectorCache[0][0] /= vectorCache[0][1];
                             vectorCache[0][2] /= vectorCache[0][1];
 
-                            vectorCache[0][0] *= 1.0D/vectorCache[0][1];
-                            vectorCache[0][2] *= 1.0D/vectorCache[0][1];
-                            vectorCache[0][0] *= 0.95000000074444445D;
-                            vectorCache[0][2] *= 0.95000000074444445D;
+                            vectorCache[0][0] *= (1.0D/vectorCache[0][1]) * 0.055D;
+                            vectorCache[0][2] *= (1.0D/vectorCache[0][1]) * 0.055D;
 
                             transport.frontBogie.addVelocity(-vectorCache[0][0], 0.0D, -vectorCache[0][2]);
                             transport.backBogie.addVelocity(-vectorCache[0][0], 0.0D, -vectorCache[0][2]);

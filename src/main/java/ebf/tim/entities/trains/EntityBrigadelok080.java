@@ -89,7 +89,6 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      * <h2>Bogie Offset</h2>
      * @return the list of offsets for the bogies, 0 being the center. negative values are towards the front of the train.
      * Must always go from front to back. First and last values must always be exact opposites.
-     * TODO: in alpha 3 this should be client only, for the bogie render only, and have a second function to get the actual offset which only needs 1 double, because the values have to be perfectly opposite.
      */
     @Override
     public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-0.75, 0.75);}

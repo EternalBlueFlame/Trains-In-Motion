@@ -21,6 +21,8 @@ public class Bogie {
     /**the model defined in the registration of this.*/
     public final ModelBase bogieModel;
     private double[] offset = new double[]{0,0,0};
+    public double sqrtPos = 0;
+    public double oldSqrtPos = 0;
 
 
     public Bogie(ResourceLocation texture, ModelBase model){
@@ -41,7 +43,9 @@ public class Bogie {
             prevPos[0] += entity.posX;
             prevPos[2] += entity.posZ;
             rotationYaw = entity.rotationYaw;
-        } else if (shouldUpdate(entity,prevPos)) {
+            oldSqrtPos = Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ);
+        } else if (shouldUpdate()) {
+            oldSqrtPos = Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ);
             double[] position = RailUtility.rotatePoint(offset, 0, entity.rotationYaw,0);
             position[0] += entity.posX;
             position[2] += entity.posZ;
@@ -51,10 +55,12 @@ public class Bogie {
             }
             rotationYaw = (float) Math.toDegrees(Math.atan2(position[2] - prevPos[2], position[0] - prevPos[0]));
             prevPos = position;
+        } else {
+            sqrtPos = Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ);
         }
     }
 
-    private static boolean shouldUpdate(GenericRailTransport entity, double[] prevPos){
-        return Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ) > Math.sqrt(prevPos[0] * prevPos[0]) + Math.sqrt(prevPos[2] * prevPos[2]);
+    private boolean shouldUpdate(){
+        return sqrtPos -0.09 > oldSqrtPos || sqrtPos + 0.09 <oldSqrtPos;
     }
 }

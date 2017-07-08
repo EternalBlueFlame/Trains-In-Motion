@@ -20,7 +20,7 @@ import java.util.Arrays;
 public class Tessellator {
 
 	private static ByteBuffer bbuf = GLAllocation.createDirectByteBuffer(0x200000 * 4);
-	private int rbs = 0, verts = 0, rbi = 0, dm, n;
+	private int rbs = 0, verts = 0, rbi = 0, o = 0, vtc = 0, dm, n;
 	private boolean ht = false, in = false, drawing = false, hc = false;
 	private static Tessellator INSTANCE = new Tessellator();
 	private static FloatBuffer fbuf = bbuf.asFloatBuffer();
@@ -46,10 +46,10 @@ public class Tessellator {
 
 	public int draw(){
 		if(drawing){
-			drawing = false; int o = 0;
-			GL11.glPushMatrix();
+			drawing = false; o = 0;
+			GL11.glDisable(GL11.GL_LIGHTING);
 			while (o < verts){
-				int vtc = Math.min(verts - o, 0x200000 >> 5);
+				vtc = verts - o;
 				ibuf.clear(); ibuf.put(rb, o * 10, vtc * 10); bbuf.position(0); bbuf.limit(vtc * 40); o += vtc;
 				if(ht){
 					fbuf.position(3);
@@ -57,10 +57,10 @@ public class Tessellator {
 					GL11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
 				}
 				if(hc){
-                    bbuf.position(28);
-                    GL11.glColorPointer(4, true, 40, bbuf);
-                    GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
-                }
+					bbuf.position(28);
+					GL11.glColorPointer(4, true, 40, bbuf);
+					GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
+				}
 				if(in){
 					bbuf.position(32);
 					GL11.glNormalPointer(40, bbuf);
@@ -69,14 +69,24 @@ public class Tessellator {
 				fbuf.position(0);
 				GL11.glVertexPointer(3, 40, fbuf);
 				GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-				GL11.glDisable(GL11.GL_LIGHTING);
 				GL11.glDrawArrays(dm, 0, vtc);
+				GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
+				if(ht){
+					GL11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
+				}
+				if(hc){
+					GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
+				}
+				if(in){
+					GL11.glDisableClientState(GL11.GL_NORMAL_ARRAY);
+				}
 			}
-			if(rbs > 0x20000 && rbi < (rbs << 3)){
+			if(rbs > 0x20000/*131072*/ && rbi < (rbs << 3)){
 				rbs = 0; rb = null;
 			}
+			GL11.glEnable(GL11.GL_LIGHTING);
+
 			reset();
-			GL11.glPopMatrix();
 		}
 		return 0;
 	}
@@ -89,7 +99,7 @@ public class Tessellator {
 
 	public void addVertex(double par1, double par3, double par5){
 		if(rbi >= rbs - 40) {
-			if(rbs == 0){rbs = 0x10000; rb = new int[rbs];}
+			if(rbs == 0){rbs = 0x10000/*65536*/; rb = new int[rbs];}
 			else{rbs *= 2; rb = Arrays.copyOf(rb, rbs);}
 		}
 		if(ht){
@@ -151,13 +161,13 @@ public class Tessellator {
 	}
 
 	public static void bindTexture(ResourceLocation textureURI) {
-		if (Minecraft.getMinecraft().getTextureManager().getTexture(textureURI) == null || GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)!= Minecraft.getMinecraft().getTextureManager().getTexture(textureURI).getGlTextureId()) {
 		ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
-
 		if (object == null) {
 			object =  new SimpleTexture(textureURI);
 			Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI,object);
 		}
+
+		if (GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)!= object.getGlTextureId()) {
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, object.getGlTextureId());
 		}
 	}

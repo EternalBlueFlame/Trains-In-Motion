@@ -179,30 +179,30 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                     motionX =0;
                     this.cartVelocityX =0;
                 } else {
-                    this.motionX *= 0.75-(weight*0.00075);
-                    this.cartVelocityX *= 0.75-(weight*0.00075);
+                    this.motionX *= 0.75-(weight*8.2673352e-7);
+                    this.cartVelocityX *= 0.75-(weight*8.2673352e-7);
                 }
                 if (motionZ <0.01 && motionZ >-0.01){
                     motionZ =0;
                     this.cartVelocityZ =0;
                 } else {
-                    this.motionZ *= 0.75-(weight*0.00075);
-                    this.cartVelocityZ *= 0.75-(weight*0.00075);
+                    this.motionZ *= 0.75-(weight*8.2673352e-7);
+                    this.cartVelocityZ *= 0.75-(weight*8.2673352e-7);
                 }
             } else if ((!isRunning && isTrain) || !isTrain){
                 if (motionX <0.005 && motionX >-0.005){
                     motionX =0;
                     this.cartVelocityX =0;
                 } else {
-                    this.motionX *= 0.9-(weight*0.001);
-                    this.cartVelocityX *= 0.9-(weight*0.001);
+                    this.motionX *= 0.9-(weight*0.00000110231);
+                    this.cartVelocityX *= 0.9-(weight*0.00000110231);
                 }
                 if (motionZ <0.005 && motionZ >-0.005){
                     motionZ =0;
                     this.cartVelocityZ =0;
                 } else {
-                    this.motionZ *= 0.9-(weight*0.001);
-                    this.cartVelocityZ *= 0.9-(weight*0.001);
+                    this.motionZ *= 0.9-(weight*0.00000110231);
+                    this.cartVelocityZ *= 0.9-(weight*0.00000110231);
                 }
             }
 

@@ -102,11 +102,22 @@ public class FuelHandler{
 		}
 
 		//be sure there is burnHeat before trying to consume it
-		if (burnHeat > 0) {
+		if (burnHeat > 1) {
+			System.out.println(burnHeat);
 			//calculate the heat increase
 			heatC += (float) ((1- Math.sqrt(heatC/maxHeat(train))) * Math.sqrt((heatC+burnHeat)/burnHeat))*train.getEfficiency();
+		} else {
+			//cool down, or heat up the boiler to match the temperature of the biome and height
+			heatC += 1- Math.sqrt(heatC/ (
+					(((train.worldObj.getBiomeGenForCoords(train.chunkCoordX, train.chunkCoordZ).temperature -0.15)//biome temperature with freezing point (0.15) set to 0
+							- (0.0014166695 * (train.posY - 64))) //temperature changes by 0.00166667 for every meter above or below sea level (64), the value is -15% to match up with the change to biome temp
+							*36.8)//converts the temp to celsius with compensation for the temp offset
+			));
+		}
+		//if the boiler temp is above the boiling point, start generating steam.
+		if (heatC >100){
 			int steam = (int)Math.floor(
-					(heatC*0.005f) * //calculate heat from burnHeat
+					((heatC-100)*0.05f) * //calculate heat from burnHeat
 							(train.getTankAmount()*0.005f) //calculate surface area of water
 			);
 			//drain fluid
@@ -121,14 +132,8 @@ public class FuelHandler{
 				train.dropItem(train.getItem(), 1);
 				train.attackEntityFromPart(null, new EntityDamageSource("overheat", train),100);
 			}
-		} else {
-			//cool down, or heat up the boiler to match the temperature of the biome and height
-			heatC += 1- Math.sqrt(heatC/ (
-					(((train.worldObj.getBiomeGenForCoords(train.chunkCoordX, train.chunkCoordZ).temperature -0.15)//biome temperature with freezing point (0.15) set to 0
-							- (0.0014166695 * (train.posY - 64))) //temperature changes by 0.00166667 for every meter above or below sea level (64), the value is -15% to match up with the change to biome temp
-							*36.8)//converts the temp to celsius with compensation for the temp offset
-			));
 		}
+
 		if (steamTank >0){
 			train.setBoolean(GenericRailTransport.boolValues.RUNNING, true);
 			//steam is expelled through the pistons to push them back and forth, but even when the accelerator is off, a degree of steam is still escaping.
