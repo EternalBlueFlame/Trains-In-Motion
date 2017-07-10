@@ -61,6 +61,11 @@ Date: December, 2016
 <table>
 <td>
 <h2>Simplified:</h2>
+<h3>Turbo Model Thingy</h3>
+<ul>
+<li> TMT has it's own license separate from this project. See <a href="https://github.com/EternalBlueFlame/Trains-In-Motion/blob/master/src/main/java/ebf/tim/models/tmt/ModelRendererTurbo.java#L21">src/main/java/ebf/tim/models/tmt/ModelRendererTurbo.java</a></li>
+</ul>
+
 <h3>Modpacks and Servers:</h3>
 <ul>
 <li> You are allowed to use the compiled mod in your public and private modpacks without permission.</li>
@@ -81,6 +86,7 @@ Date: December, 2016
 <td>
 <h2>Full License:</h2>
 <ul>
+<li> TMT has it's own license separate from this project. See <a href="https://github.com/EternalBlueFlame/Trains-In-Motion/blob/master/src/main/java/ebf/tim/models/tmt/ModelRendererTurbo.java#L21">src/main/java/ebf/tim/models/tmt/ModelRendererTurbo.java</a></li>
 <li>See the full TiM License.md here: <a href="https://github.com/EternalBlueFlame/Trains-In-Motion/blob/master/TiM-License.md">https://github.com/EternalBlueFlame/Trains-In-Motion/blob/master/TiM-License.md</a> </li>
 </ul>
 </td>
