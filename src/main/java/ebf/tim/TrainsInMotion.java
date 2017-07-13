@@ -142,14 +142,7 @@ public class TrainsInMotion {
         //loop for registering the entities. the values needed are the class, entity name, entity ID, mod instance, update range, update rate, and if it does velocity things,
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", 15, TrainsInMotion.instance, 60, 1, true);
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntitySeat.class, "Seat", 16, TrainsInMotion.instance, 60, 2, true);
-        int index =0;
-        ///now we loop for every value in the train registry and registry it, when the index reaches a null value, then it will stop.
-        while (TransportRegistry.listTrains(index)!=null) {
-            TransportRegistry registry = TransportRegistry.listTrains(index);
-            cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(registry.trainClass, registry.item.getUnlocalizedName().replace("item","entity"), index+17, TrainsInMotion.instance, 60, 1, true);
-            GameRegistry.registerItem(registry.item, registry.item.getUnlocalizedName().substring(5));
-            index++;
-        }
+        TransportRegistry.registerTransports(17);
 
 
         //register the networking instances and channels

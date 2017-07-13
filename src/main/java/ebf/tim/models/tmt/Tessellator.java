@@ -47,9 +47,10 @@ public class Tessellator {
 	public int draw(){
 		if(drawing){
 			drawing = false; o = 0;
+			GL11.glPushMatrix();
 			GL11.glDisable(GL11.GL_LIGHTING);
 			while (o < verts){
-				vtc = verts - o;
+				vtc = Math.min(verts - o, 0x200000 >> 5);
 				ibuf.clear(); ibuf.put(rb, o * 10, vtc * 10); bbuf.position(0); bbuf.limit(vtc * 40); o += vtc;
 				if(ht){
 					fbuf.position(3);
@@ -85,6 +86,8 @@ public class Tessellator {
 				rbs = 0; rb = null;
 			}
 			GL11.glEnable(GL11.GL_LIGHTING);
+
+			GL11.glPopMatrix();
 
 			reset();
 		}

@@ -2,6 +2,7 @@ package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.tmt.ModelRendererTurbo;
+import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.block.Block;
@@ -108,7 +109,7 @@ public class GroupedModelRender {
             }
             //render a block in place of the geometry.
             // bind the texture
-            render.bindTexture(TextureMap.locationBlocksTexture);
+            Tessellator.bindTexture(TextureMap.locationBlocksTexture);
             for (ModelRendererTurbo block : boxRefrence) {
                 GL11.glPushMatrix();
                 //define position from model
@@ -128,7 +129,7 @@ public class GroupedModelRender {
             GL11.glPopMatrix();
         } else {
             //render the geometry normally if it's not a block.
-            render.bindTexture(render.getEntityTexture(null));
+            Tessellator.bindTexture(render.getEntityTexture(null));
             for (ModelRendererTurbo block : boxRefrence) {
                 block.render(entityRenderScale);
             }

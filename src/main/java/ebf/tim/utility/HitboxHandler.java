@@ -165,7 +165,7 @@ public class HitboxHandler {
                         continue;
                     }
                     /*if it's something we don't collide with, skip to next iteration.*/
-                    if (entity instanceof EntityBogie || entity instanceof GenericRailTransport ||
+                    if (entity instanceof EntityBogie || entity instanceof GenericRailTransport || entity instanceof EntitySeat ||
                             entity.ridingEntity instanceof EntitySeat || entity.ridingEntity instanceof GenericRailTransport || hitboxList.contains(entity)) {
                         continue;
                     }
@@ -225,6 +225,7 @@ public class HitboxHandler {
 
                             transport.frontBogie.addVelocity(-vectorCache[0][0], 0.0D, -vectorCache[0][2]);
                             transport.backBogie.addVelocity(-vectorCache[0][0], 0.0D, -vectorCache[0][2]);
+                            System.out.println(transport.getClass() + ": " + entity.getClass());
                         }
                         entity.applyEntityCollision(transport);
                     } else {
@@ -233,6 +234,7 @@ public class HitboxHandler {
                         vectorCache[0][2] = bool ? 0 : 0.05;
                         vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], 0, transport.rotationYaw, 0);
                         entity.addVelocity(vectorCache[0][0], -0.5, vectorCache[0][2]);
+                        System.out.println(transport.getClass() + ": " + entity.getClass());
                         entity.applyEntityCollision(transport);
                     }
                 }

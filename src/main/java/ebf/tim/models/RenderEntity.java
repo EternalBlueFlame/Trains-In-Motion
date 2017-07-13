@@ -1,10 +1,11 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.ModelRendererTurbo;
+import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.RailUtility;
-import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
@@ -13,100 +14,20 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * <h2>Entity Rendering</h2>
  * used for rendering all trains and rollingstock, along with their particle effects, smoke and steam as examples.
- * for the variables fed to this class:
- * @see ClientProxy#register()
+ * all the variables have to be stored outside this class because it's assigned to the entity class, not it's instances.
  * @author Eternal Blue Flame
  */
 public class RenderEntity extends Render {
 
-    /*
-     * <h2>variables</h2>
-     */
-
-    /**the base model of the entity, this holds every piece of sub-geometry and their texture mappings*/
-    private final ModelBase model;
-    /**texture used by the base model*/
-    private final ResourceLocation texture;
-    /**the models, textures, and other data for each bogie to render*/
-    private Bogie[] bogieRenders;
-    /**a cached list of all the animatedPart, and other geometry that just spins.
-     * all the actual work related to this variable is handled in
-     * @see StaticModelAnimator*/
-    private List<StaticModelAnimator> animatedPart = new ArrayList<StaticModelAnimator>();
-    /**a cached list of all the cargo blocks for both blocks and parts of the main model.
-     * most of the actual work related to this variable is handled in
-     * @see GroupedModelRender*/
-    private List<GroupedModelRender> blockCargoRenders = new ArrayList<GroupedModelRender>();
-    /**a cached list of all the vectors used, so we don't have to re-initialize them every frame.*/
-    private double[][] animationCache = new double[4][3];
-    /**a cached list of all the cubes intended to display liveries.*/
-    private List<ModelRendererTurbo> liveriesSquare = new ArrayList<ModelRendererTurbo>();
-    /**the value to rotate the geometry with.*/
-    private float wheelPitch=0;
-
-
-    private ResourceLocation boundTexture;
-
     private static final float RailOffset = 0.34f;
 
-    /**
-     * <h3>class constructor</h3>
-     * instances the render, and caches the geometry tagged for runtime modification (like animation and block renders)
-     * caching here means we don't even need to check it every render frame.
-     * @param modelLoad the model class to render.
-     * @param textureLoad the texture ResourceLocation to apply to the model.
-     * @param bogieRenders the model and texture class to render for the bogies, if null then no bogies will not be rendered. null indexes are allowed as well.
-     */
-    public RenderEntity(ModelBase modelLoad, ResourceLocation textureLoad, @Nullable Bogie[] bogieRenders) {
-        //define the models and textures.
-        model = modelLoad;
-        texture = textureLoad;
-        this.bogieRenders = bogieRenders;
-
-        if (ClientProxy.EnableAnimations){
-            boolean isAdded;
-            for (Object box : model.boxList) {
-                if (box instanceof ModelRendererTurbo) {
-                    ModelRendererTurbo render = ((ModelRendererTurbo) box);
-                    //attempt to cache the parts for the main transport model
-                    if (StaticModelAnimator.canAdd(render)) {
-                        animatedPart.add(new StaticModelAnimator(render));
-                    } else if (GroupedModelRender.canAdd(render)) {
-                        //if it's a grouped render we have to figure out if we already have a group for this or not.
-                        isAdded =false;
-                        for (GroupedModelRender cargo : blockCargoRenders) {
-                            if (cargo.getGroupName().equals(render.boxName)){
-                                cargo.add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render));
-                                isAdded= true;break;
-                            }
-                        }
-                        if (!isAdded){
-                            blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render)));
-                        }
-                    }
-                }
-            }
-
-
-            //cache the animating parts for bogies.
-            if (bogieRenders != null){
-                for (Bogie bogie : bogieRenders){
-                    for (Object box : bogie.bogieModel.boxList) {
-                        if (box instanceof ModelRendererTurbo) {
-                            animatedPart.add(new StaticModelAnimator(((ModelRendererTurbo) box)));
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //public RenderEntity() {}
 
     /**
      * <h3>overall texture</h3>
@@ -114,17 +35,18 @@ public class RenderEntity extends Render {
      * @see GroupedModelRender#doRender(RenderBlocks, ItemStack, RenderEntity, float, GenericRailTransport)
      */
     public ResourceLocation getEntityTexture(Entity entity){
-        return texture;
+        return null;
     }
 
     /**
      * <h3>base render extension</h3>
      * acts as a redirect for the base render function to our own function.
      * This is just to do typecasting and a few calculations beforehand so we only need to do them once per render.
+     * todo: 1.9+ should support Entity<t extends GenericRailTransport> so this typecasting method should be completely useless then.
      */
+    @Override
     public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick){
         if (entity instanceof GenericRailTransport){
-
             doRender((GenericRailTransport) entity,x,y,z, entity.prevRotationYaw + MathHelper.wrapAngleTo180_float(entity.rotationYaw - entity.prevRotationYaw)*partialTick);
         }
     }
@@ -149,6 +71,59 @@ public class RenderEntity extends Render {
      *
      */
     public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw){
+
+        if (model == null || model.getClass() != entity.getModel().getClass()){
+            model = entity.getModel();
+            bogieRenders = entity.getBogieModels();
+            if (bogieRenders != null) {
+                for (Bogie b : bogieRenders) {
+                    b.rotationYaw = entity.rotationYaw;
+                }
+            }
+            cachedParts = false;
+        }
+
+        //cache animating parts
+        if (ClientProxy.EnableAnimations && !cachedParts){
+            boolean isAdded;
+            for (Object box : model.boxList) {
+                if (box instanceof ModelRendererTurbo) {
+                    ModelRendererTurbo render = ((ModelRendererTurbo) box);
+                    //attempt to cache the parts for the main transport model
+                    if (StaticModelAnimator.canAdd(render)) {
+                        animatedPart.add(new StaticModelAnimator(render));
+                    } else if (GroupedModelRender.canAdd(render)) {
+                        //if it's a grouped render we have to figure out if we already have a group for this or not.
+                        isAdded =false;
+                        for (GroupedModelRender cargo : blockCargoRenders) {
+                            if (cargo.getGroupName().equals(render.boxName)){
+                                cargo.add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render));
+                                isAdded= true;break;
+                            }
+                        }
+                        if (!isAdded){
+                            blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render)));
+                        }
+                    }
+                }
+            }
+            //cache the animating parts for bogies.
+            if (entity.getBogieModels() != null){
+                for (Bogie bogie : entity.getBogieModels()){
+                    for (Object box : bogie.bogieModel.boxList) {
+                        if (box instanceof ModelRendererTurbo) {
+                            animatedPart.add(new StaticModelAnimator(((ModelRendererTurbo) box)));
+                        }
+                    }
+                }
+            }
+            cachedParts = true;
+        }
+
+
+
+
+
         GL11.glPushMatrix();
         //set the render position
         GL11.glTranslated(x, y+ RailOffset + (entity.getRenderScale()-0.0625f)*10, z);
@@ -186,8 +161,7 @@ public class RenderEntity extends Render {
          * In that render there is a check whether to render it as a cargo block, or use the geometry size/position/rotation to render a block similar to enderman.
          * @see net.minecraft.client.renderer.entity.RenderEnderman#renderEquippedItems(EntityEnderman, float)
          */
-        boundTexture = null;
-        bindTexture(texture);
+        Tessellator.bindTexture(entity.getTexture());
         for(Object cube : model.boxList){
             if (cube instanceof ModelRendererTurbo && !(GroupedModelRender.canAdd((ModelRendererTurbo) cube))) {
                 ((ModelRendererTurbo)cube).render();
@@ -195,16 +169,9 @@ public class RenderEntity extends Render {
         }
 
 
-        int itteration=0;
         //loop for the groups of cargo
-        for (GroupedModelRender cargo : blockCargoRenders) {
-
-            if (itteration<entity.calculatePercentageUsed(blockCargoRenders.size())) {
-                cargo.doRender(field_147909_c, entity.getFirstBlock(itteration), this, entity.getRenderScale(), entity);
-                itteration++;
-            } else {
-                break;
-            }
+        for (int i=0; i< blockCargoRenders.size() && i < entity.calculatePercentageUsed(blockCargoRenders.size()); i++) {
+                blockCargoRenders.get(i).doRender(field_147909_c, entity.getFirstBlock(i), this, entity.getRenderScale(), entity);
         }
 
         GL11.glPopMatrix();
@@ -244,19 +211,6 @@ public class RenderEntity extends Render {
         //render the particles, if there are any.
         for(ParticleFX particle : entity.particles){
             ParticleFX.doRender(particle, x,y,z);
-        }
-    }
-
-    /**
-     * <h2>Bind texture override</h2>
-     * binds the texture to the render, assuming it's not already bound.
-     * NOTE: be sure to reset the boundTexture value on the start of doRender, otherwise it will carry over from the last loop when no texture is actually bound.
-     */
-    @Override
-    public void bindTexture(ResourceLocation resourceLocation){
-        if(boundTexture == null || resourceLocation != boundTexture){
-            this.renderManager.renderEngine.bindTexture(resourceLocation);
-            boundTexture = resourceLocation;
         }
     }
 }

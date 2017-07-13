@@ -8,13 +8,17 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.items.ItemKey;
+import ebf.tim.models.Bogie;
 import ebf.tim.models.ParticleFX;
+import ebf.tim.models.TransportRenderData;
+import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.Vec3d;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
+import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
@@ -111,6 +115,10 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public List<ParticleFX> particles = new ArrayList<>();
     /**Used to be sure we only say once that the transport has been derailed*/
     private boolean displayDerail = false;
+
+    @SideOnly(Side.CLIENT)
+    public TransportRenderData renderData = null;
+
     /**the array of booleans, defined as bits
      * 0- brake: defines the brake
      * 1- locked: defines if transport is locked to owner and key holders
@@ -921,6 +929,12 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * for electric this is Kw. (400 on average)
      * for nuclear this is the number of fusion cores, rounded down. (usually 1)*/
     public float getMaxFuel(){return 1;}
+
+    public Bogie[] getBogieModels(){return null;}
+
+    public ResourceLocation getTexture(){return null;}
+
+    public ModelBase getModel(){return null;}
 
 
     /*

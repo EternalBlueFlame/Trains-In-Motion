@@ -131,7 +131,9 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     public ItemStack slotClick(int slotId, int dragType, int clickTypeIn, EntityPlayer player) {
         //return super.slotClick(fromSlot,0,p_75144_3_!=4?0:4,p_75144_4_);
 
-        System.out.println(dragType + ":" + clickTypeIn);
+        if (clickTypeIn == 4){
+            clickTypeIn =0;
+        }
 
         ItemStack itemstack = null;
         InventoryPlayer inventoryplayer = player.inventory;

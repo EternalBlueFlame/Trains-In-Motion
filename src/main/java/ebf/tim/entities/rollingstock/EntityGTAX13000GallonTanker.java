@@ -1,12 +1,19 @@
 package ebf.tim.entities.rollingstock;
 
 import ebf.tim.TrainsInMotion;
+import ebf.tim.api.RollingstockBase;
 import ebf.tim.entities.EntityRollingStockCore;
 import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemTransport;
+import ebf.tim.models.Bogie;
+import ebf.tim.models.rollingstock.ModelGATX1300GallonTanker;
+import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.Vec3d;
+import ebf.tim.models.trains.Brigadelok_080;
+import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.FuelHandler;
 import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
@@ -14,13 +21,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static ebf.tim.registry.TransportRegistry.GenericCMDBogie;
+
 /**
  * <h1>V.A.T Log Car entity</h1>
  * For more information on the overrides and functions:
  * @see EntityBrigadelok080
  * @author Eternal Blue Flame
  */
-public class EntityGTAX13000GallonTanker extends EntityRollingStockCore {
+public class EntityGTAX13000GallonTanker extends RollingstockBase {
 
     public static final String[] itemDescription = new String[]{
             "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 4" + StatCollector.translateToLocal("menu.item.tons"),
@@ -60,4 +69,10 @@ public class EntityGTAX13000GallonTanker extends EntityRollingStockCore {
     public void manageFuel(){
         FuelHandler.manageTanker(this);
     }
+    @Override
+    public Bogie[] getBogieModels(){return new Bogie[]{GenericCMDBogie(), GenericCMDBogie()};}
+    @Override
+    public ResourceLocation getTexture(){return  URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png");}
+    @Override
+    public ModelBase getModel(){return new ModelGATX1300GallonTanker();}
 }

@@ -1,11 +1,18 @@
 package ebf.tim.entities.rollingstock;
 
 import ebf.tim.TrainsInMotion;
+import ebf.tim.api.RollingstockBase;
 import ebf.tim.entities.EntityRollingStockCore;
 import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemTransport;
+import ebf.tim.models.Bogie;
+import ebf.tim.models.rollingstock.PullmansPalace;
+import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.Vec3d;
+import ebf.tim.models.trains.Brigadelok_080;
+import ebf.tim.registry.URIRegistry;
 import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
@@ -19,7 +26,7 @@ import java.util.UUID;
  * @see EntityBrigadelok080
  * @author Eternal Blue Flame
  */
-public class EntityPullmansPalace extends EntityRollingStockCore {
+public class EntityPullmansPalace extends RollingstockBase {
     private static final String[] itemDescription = new String[]{
             "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2 " + StatCollector.translateToLocal("menu.item.tons"),
             "\u00A77" + StatCollector.translateToLocal("menu.item.seats") +": 4 " + StatCollector.translateToLocal("menu.item.players")};
@@ -55,7 +62,7 @@ public class EntityPullmansPalace extends EntityRollingStockCore {
      * <h2>Rider offsets</h2>
      */
     @Override
-    public double[][] getRiderOffsets(){return new double[][]{{2.5f,1.5f, 0f},{1f,0.5f, 0f},{-1f,0.5f, 0f},{-2.5f,0.5f, 0f}};}
+    public double[][] getRiderOffsets(){return new double[][]{{2f,0.5f, 0.2f},{0.75f,0.5f, 0.2f},{-0.75f,0.5f, 0.2f},{-2f,0.5f, 0.2f}};}
     /**
      * <h2>Hitbox offsets</h2>
      */
@@ -67,7 +74,14 @@ public class EntityPullmansPalace extends EntityRollingStockCore {
     @Override
     public Vec3d getLampOffset(){return new Vec3d(0,2,0);}
 
+    @Override
+    public ResourceLocation getTexture(){return  URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png");}
 
+    @Override
+    public ModelBase getModel(){return new PullmansPalace();}
+
+    @Override
+    public Bogie[] getBogieModels(){return null;}
 
     /**
      * <h2>pre-asigned values</h2>

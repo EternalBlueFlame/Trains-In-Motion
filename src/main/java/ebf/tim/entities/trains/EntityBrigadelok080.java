@@ -3,10 +3,14 @@ package ebf.tim.entities.trains;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
+import ebf.tim.api.TrainBase;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.items.ItemTransport;
+import ebf.tim.models.Bogie;
+import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.Vec3d;
+import ebf.tim.models.trains.Brigadelok_080;
 import ebf.tim.registry.TransportRegistry;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.FuelHandler;
@@ -29,7 +33,7 @@ import java.util.UUID;
  * This class is intended to serve as the primary example for API use.
  * @author Eternal Blue Flame
  */
-public class EntityBrigadelok080 extends EntityTrainCore {
+public class EntityBrigadelok080 extends TrainBase {
     /**
      * <h2>Basic Train Constructor</h2>
      * To make your own custom train or rollingstock, create a new class that is a copy of the train or rollingstock that is closest to what you are adding,
@@ -212,10 +216,17 @@ public class EntityBrigadelok080 extends EntityTrainCore {
      * These return values are defined from the top of the class.
      * These should only need modification for advanced users, and even that's a stretch.
      */
-    @Override
     public Item getItem(){
         return thisItem;
     }
+
+    @Override
+    public Bogie[] getBogieModels(){return null;}
+    @Override
+    public ResourceLocation getTexture(){return  URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png");}
+
+    @Override
+    public ModelBase getModel(){return new Brigadelok_080();}
 
     /**
      * <h2>sets the resource location for sounds, like horn and the sound made for the engine running</h2>

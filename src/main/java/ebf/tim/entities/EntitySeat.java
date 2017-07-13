@@ -118,7 +118,7 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
     @Override
     public void updateRiderPosition() {
         if (this.riddenByEntity != null) {
-            this.riddenByEntity.setPosition(this.posX, this.posY, this.posZ);
+            this.riddenByEntity.setPosition(this.posX, this.posY+1, this.posZ);
         }
     }
 

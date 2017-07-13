@@ -142,11 +142,11 @@ public class ClientProxy extends CommonProxy {
 
         //trains and rollingstock
         int index=0;
-        while (TransportRegistry.listTrains(index)!=null) {
-            TransportRegistry reg = TransportRegistry.listTrains(index);
-            RenderingRegistry.registerEntityRenderingHandler(reg.trainClass, new RenderEntity(
-                    reg.model, reg.texture, reg.bogieModels));
+        GenericRailTransport transport = TransportRegistry.listTrains(0);
+        while (transport!=null) {
+            RenderingRegistry.registerEntityRenderingHandler(transport.getClass(), new RenderEntity());
             index++;
+            transport = TransportRegistry.listTrains(index);
         }
         //hitboxes
         RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.MultipartHitbox.class, nullRender);
