@@ -173,15 +173,17 @@ public class FuelHandler{
 
 
 	public static void manageTanker(GenericRailTransport transport){
-		//consume the water, if the second slot contains a water bucket, also places an empty bucket in inventory
-		if (transport.getStackInSlot(0) != null &&
+		//consume fluid if the top slot has a fluid container.
+		if (transport.getStackInSlot(0) != null && isUseableFluid(transport.getStackInSlot(0), transport) != null &&
 				transport.fill(null, isUseableFluid(transport.getStackInSlot(0), transport), false) >= FluidContainerRegistry.getFluidForFilledItem(transport.getStackInSlot(0)).amount) {
 			transport.fill(null, isUseableFluid(transport.getStackInSlot(0), transport), true);
 			if (!transport.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
 				transport.decrStackSize(0, 1);
-				transport.addItem(new ItemStack(Items.bucket));
+				transport.setInventorySlotContents(0, new ItemStack(Items.bucket,1));
 			}
 		}
+		//empty the tank if the bottom slot contains a bucket.
+
 	}
 
 } 

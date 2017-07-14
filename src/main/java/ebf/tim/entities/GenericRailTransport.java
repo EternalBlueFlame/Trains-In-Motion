@@ -117,7 +117,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     private boolean displayDerail = false;
 
     @SideOnly(Side.CLIENT)
-    public TransportRenderData renderData = null;
+    public TransportRenderData renderData = new TransportRenderData();
 
     /**the array of booleans, defined as bits
      * 0- brake: defines the brake
@@ -1042,7 +1042,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     @Override
     public boolean hasCustomInventoryName() {return items != null;}
     @Override
-    public int getInventoryStackLimit() {return items!=null?64:0;}
+    public int getInventoryStackLimit() {return getType().isTanker()?1:items!=null?64:0;}
 
     /**
      * <h2>is Locked</h2>

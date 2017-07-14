@@ -72,37 +72,37 @@ public class RenderEntity extends Render {
      */
     public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw){
 
-        if (model == null || model.getClass() != entity.getModel().getClass()){
-            model = entity.getModel();
-            bogieRenders = entity.getBogieModels();
-            if (bogieRenders != null) {
-                for (Bogie b : bogieRenders) {
+        if (entity.renderData.model == null || entity.renderData.model.getClass() != entity.getModel().getClass()){
+            entity.renderData.model = entity.getModel();
+            entity.renderData.bogieRenders = entity.getBogieModels();
+            if (entity.renderData.bogieRenders != null) {
+                for (Bogie b : entity.renderData.bogieRenders) {
                     b.rotationYaw = entity.rotationYaw;
                 }
             }
-            cachedParts = false;
+            entity.renderData.cachedParts = false;
         }
 
         //cache animating parts
-        if (ClientProxy.EnableAnimations && !cachedParts){
+        if (ClientProxy.EnableAnimations && !entity.renderData.cachedParts){
             boolean isAdded;
-            for (Object box : model.boxList) {
+            for (Object box : entity.renderData.model.boxList) {
                 if (box instanceof ModelRendererTurbo) {
                     ModelRendererTurbo render = ((ModelRendererTurbo) box);
                     //attempt to cache the parts for the main transport model
                     if (StaticModelAnimator.canAdd(render)) {
-                        animatedPart.add(new StaticModelAnimator(render));
+                        entity.renderData.animatedPart.add(new StaticModelAnimator(render));
                     } else if (GroupedModelRender.canAdd(render)) {
                         //if it's a grouped render we have to figure out if we already have a group for this or not.
                         isAdded =false;
-                        for (GroupedModelRender cargo : blockCargoRenders) {
+                        for (GroupedModelRender cargo : entity.renderData.blockCargoRenders) {
                             if (cargo.getGroupName().equals(render.boxName)){
                                 cargo.add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render));
                                 isAdded= true;break;
                             }
                         }
                         if (!isAdded){
-                            blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render)));
+                            entity.renderData.blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render)));
                         }
                     }
                 }
@@ -112,12 +112,12 @@ public class RenderEntity extends Render {
                 for (Bogie bogie : entity.getBogieModels()){
                     for (Object box : bogie.bogieModel.boxList) {
                         if (box instanceof ModelRendererTurbo) {
-                            animatedPart.add(new StaticModelAnimator(((ModelRendererTurbo) box)));
+                            entity.renderData.animatedPart.add(new StaticModelAnimator(((ModelRendererTurbo) box)));
                         }
                     }
                 }
             }
-            cachedParts = true;
+            entity.renderData.cachedParts = true;
         }
 
 
@@ -138,18 +138,19 @@ public class RenderEntity extends Render {
          */
         if (ClientProxy.EnableAnimations && entity.frontBogie!=null&&entity.backBogie!=null) {
             //define the rotation angle, if it's going fast enough.
-            wheelPitch += (entity.backBogie.motionX > 0.25 || entity.backBogie.motionX < 0.25 || entity.backBogie.motionZ > 0.25 || entity.backBogie.motionZ < 0.25)?
+            entity.renderData.wheelPitch += (entity.backBogie.motionX > 0.25 || entity.backBogie.motionX < 0.25 || entity.backBogie.motionZ > 0.25 || entity.backBogie.motionZ < 0.25)?
                     (float)(Math.sqrt(entity.backBogie.motionX * entity.backBogie.motionX) + Math.sqrt(entity.backBogie.motionZ * entity.backBogie.motionZ))*0.08:0;
-            if (wheelPitch > 360 || wheelPitch <-360) {
-                wheelPitch = 0;
+            if (entity.renderData.wheelPitch > 360 || entity.renderData.wheelPitch <-360) {
+                entity.renderData.wheelPitch = 0;
             }
-            if (wheelPitch !=0) {
+            if (entity.renderData.wheelPitch !=0) {
                 //if it's actually moving, then define the new position
-                animationCache[1][0] = entity.getPistonOffset() * RailUtility.radianF;
-                animationCache[0] = RailUtility.rotatePoint(animationCache[1], Math.copySign(wheelPitch, 1), Math.copySign(wheelPitch, 1), 0);
+                entity.renderData.animationCache[1][0] = entity.getPistonOffset() * RailUtility.radianF;
+                entity.renderData.animationCache[0] = RailUtility.rotatePoint(entity.renderData.animationCache[1],
+                        Math.copySign(entity.renderData.wheelPitch, 1), Math.copySign(entity.renderData.wheelPitch, 1), 0);
                 //animate the tagged parts
-                for (StaticModelAnimator partToAnimate : animatedPart) {
-                    partToAnimate.Animate(wheelPitch, animationCache[0]);
+                for (StaticModelAnimator partToAnimate : entity.renderData.animatedPart) {
+                    partToAnimate.Animate(entity.renderData.wheelPitch, entity.renderData.animationCache[0]);
                 }
             }
         }
@@ -162,7 +163,7 @@ public class RenderEntity extends Render {
          * @see net.minecraft.client.renderer.entity.RenderEnderman#renderEquippedItems(EntityEnderman, float)
          */
         Tessellator.bindTexture(entity.getTexture());
-        for(Object cube : model.boxList){
+        for(Object cube : entity.renderData.model.boxList){
             if (cube instanceof ModelRendererTurbo && !(GroupedModelRender.canAdd((ModelRendererTurbo) cube))) {
                 ((ModelRendererTurbo)cube).render();
             }
@@ -170,8 +171,8 @@ public class RenderEntity extends Render {
 
 
         //loop for the groups of cargo
-        for (int i=0; i< blockCargoRenders.size() && i < entity.calculatePercentageUsed(blockCargoRenders.size()); i++) {
-                blockCargoRenders.get(i).doRender(field_147909_c, entity.getFirstBlock(i), this, entity.getRenderScale(), entity);
+        for (int i=0; i< entity.renderData.blockCargoRenders.size() && i < entity.calculatePercentageUsed(entity.renderData.blockCargoRenders.size()); i++) {
+            entity.renderData.blockCargoRenders.get(i).doRender(field_147909_c, entity.getFirstBlock(i), this, entity.getRenderScale(), entity);
         }
 
         GL11.glPopMatrix();
@@ -181,23 +182,23 @@ public class RenderEntity extends Render {
          * in TiM here we render the bogies. This will be removed in TC.
          * this loops for every bogie defined in the registry for the transport, that way we can have different bogies.
          */
-        if (bogieRenders != null && bogieRenders.length >0){
+        if (entity.renderData.bogieRenders != null && entity.renderData.bogieRenders.length >0){
             for (int i = 0; i<entity.getRenderBogieOffsets().size(); i++){
-                if (bogieRenders.length>i && bogieRenders[i] != null) {
+                if (entity.renderData.bogieRenders.length>i && entity.renderData.bogieRenders[i] != null) {
                     //bind the texture
-                    bindTexture(bogieRenders[i].bogieTexture);
+                    bindTexture(entity.renderData.bogieRenders[i].bogieTexture);
                     GL11.glPushMatrix();
                     //set the offset
-                    animationCache[2][0]=entity.getRenderBogieOffsets().get(i) + Math.copySign((entity.getRenderScale()-0.0625f)*26, entity.getRenderBogieOffsets().get(i));
-                    animationCache[2][1] = RailOffset;
-                    animationCache[3] = RailUtility.rotatePoint(animationCache[2], entity.rotationPitch, entity.rotationYaw,0);
-                    GL11.glTranslated(animationCache[3][0]+x,animationCache[3][1]+y, animationCache[3][2]+z);
-                    bogieRenders[i].setPositionAndRotation(entity, entity.getRenderBogieOffsets().get(i));
+                    entity.renderData.animationCache[2][0]=entity.getRenderBogieOffsets().get(i) + Math.copySign((entity.getRenderScale()-0.0625f)*26, entity.getRenderBogieOffsets().get(i));
+                    entity.renderData.animationCache[2][1] = RailOffset;
+                    entity.renderData.animationCache[3] = RailUtility.rotatePoint(entity.renderData.animationCache[2], entity.rotationPitch, entity.rotationYaw,0);
+                    GL11.glTranslated(entity.renderData.animationCache[3][0]+x,entity.renderData.animationCache[3][1]+y, entity.renderData.animationCache[3][2]+z);
+                    entity.renderData.bogieRenders[i].setPositionAndRotation(entity, entity.getRenderBogieOffsets().get(i));
                     //set the rotation
-                    GL11.glRotatef(-bogieRenders[i].rotationYaw,0,1.0f,0);
+                    GL11.glRotatef(-entity.renderData.bogieRenders[i].rotationYaw,0,1.0f,0);
                     GL11.glRotatef(entity.rotationPitch - 180f, 1.0f, 0.0f, 0.0f);
                     //render the geometry
-                    for (Object modelBogiePart : bogieRenders[i].bogieModel.boxList) {
+                    for (Object modelBogiePart : entity.renderData.bogieRenders[i].bogieModel.boxList) {
                         if (modelBogiePart instanceof ModelRendererTurbo) {
                             ((ModelRendererTurbo) modelBogiePart).render();
                         }

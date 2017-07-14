@@ -29,6 +29,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -181,7 +183,10 @@ public class ClientProxy extends CommonProxy {
     public static final TileEntitySpecialRenderer specialRenderer = new TileEntitySpecialRenderer() {
         @Override
         public void renderTileEntityAt(TileEntity tileEntity, double x, double y, double z, float p_147500_8_) {
-            ((BlockRailOverride.renderTileEntity) tileEntity).render(x,y,z);
+            GL11.glPushMatrix();
+            GL11.glTranslated(x+0.5,y+0.325, z+0.5);
+            tileEntity.func_145828_a(null);
+            GL11.glPopMatrix();
         }
 
         @Override

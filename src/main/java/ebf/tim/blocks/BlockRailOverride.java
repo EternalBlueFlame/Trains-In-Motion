@@ -109,10 +109,9 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
             this.ties = tiesType;
         }
 
-        public void render(double x, double y, double z) {
-            if (worldObj.isRemote) {
-                GL11.glPushMatrix();
-                GL11.glTranslated(x+0.5,y+0.325, z+0.5);
+        @Override
+        public void func_145828_a(@Nullable CrashReportCategory p_145828_1_)  {
+            if (p_145828_1_ == null && worldObj.isRemote) {
                 GL11.glScaled(1,0.5,1);
                 Tessellator.bindTexture(texture);
                 switch (rotation) {
@@ -134,8 +133,8 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
                     }
                 }
                 model.render();
-
-                GL11.glPopMatrix();
+            } else if (p_145828_1_ != null){
+                super.func_145828_a(p_145828_1_);
             }
         }
 
