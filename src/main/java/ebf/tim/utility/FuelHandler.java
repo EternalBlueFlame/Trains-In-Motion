@@ -7,6 +7,7 @@ import ebf.tim.entities.GenericRailTransport;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.EntityDamageSource;
@@ -183,7 +184,14 @@ public class FuelHandler{
 			}
 		}
 		//empty the tank if the bottom slot contains a bucket.
-
+		if (transport.getStackInSlot(1) != null && transport.getStackInSlot(1).getItem() instanceof ItemBucket &&
+				transport.drain(null, 1000, false) != null && transport.drain(null, 1000, false).amount >= 1000) {
+			transport.setInventorySlotContents(1, FluidContainerRegistry.fillFluidContainer(transport.drain(null, 1000, false), transport.getStackInSlot(1)));
+			if (!transport.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
+				transport.drain(null, 1000, true);
+			}
+		}
+		//todo: add support for dynamically filled non-bucket items? (is that even a thing in 1.9+? if it's not probably not worth the bother)
 	}
 
 } 
