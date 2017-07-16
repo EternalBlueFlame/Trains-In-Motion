@@ -83,6 +83,7 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
         private direction rotation = direction.NORTH;
         private ModelBase model=railStraightModel;
         private ResourceLocation texture = railStraightTexture;
+        private AxisAlignedBB boundingBox = null;
 
         public float getRailSpeed(){
             float speed =0.4f;
@@ -148,6 +149,9 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
 
         @Override
         public void updateEntity(){
+            if (boundingBox == null){
+                boundingBox = AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1);
+            }
             if (ticksExisted %40 ==0){
                 ticksExisted =0;
             } else {
@@ -248,6 +252,8 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
         }
 
 
+        @Override
+        public AxisAlignedBB getRenderBoundingBox(){return boundingBox;}
 
 
         @Override

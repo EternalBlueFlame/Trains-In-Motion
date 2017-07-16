@@ -166,8 +166,10 @@ public class Tessellator {
 	public static void bindTexture(ResourceLocation textureURI) {
 		ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
 		if (object == null) {
-			object =  new SimpleTexture(textureURI);
-			Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI,object);
+			try {
+				object = new SimpleTexture(textureURI);
+				Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
+			} catch (Exception e){return;}
 		}
 
 		if (GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)!= object.getGlTextureId()) {

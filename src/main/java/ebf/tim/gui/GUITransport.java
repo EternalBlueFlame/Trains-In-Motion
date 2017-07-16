@@ -17,6 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.fluids.FluidRegistry;
 import org.lwjgl.opengl.GL11;
 
 import java.text.DecimalFormat;
@@ -117,7 +118,7 @@ public class GUITransport extends GuiContainer {
     public void drawScreen(int mouseX, int mouseY, float par3){
         super.drawScreen(mouseX, mouseY, par3);//should be useless with new buttons
 
-        if (transport instanceof EntityTrainCore) {
+        if (transport.getType().isTrain()) {
             secondTankFluid = transport.getDataWatcher().getWatchableObjectInt(14);
 
             if ((mouseX >= guiLeft + 210 && mouseX <= guiLeft + 226 && mouseY >= guiTop - 14 && mouseY <= guiTop + 50)) {
@@ -132,6 +133,18 @@ public class GUITransport extends GuiContainer {
                         ((mouseX >= guiLeft + 178 && mouseX <= guiLeft + 196) || (mouseX >= guiLeft + 240 && mouseX <= guiLeft + 258))) {
                     drawHoveringText(Arrays.asList(tankType(false), secondTankFluid * 0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity() * 0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
                 }
+            }
+        } else if (transport.getType().isTanker()){
+            //drawTexturedRect(guiLeft+28, guiTop, 0, 0, 100, 64, 16, 16);
+            if(mouseY>guiTop && mouseY<guiTop+64 && mouseX>guiLeft+28 &&mouseX <guiLeft+128){
+
+                drawHoveringText(Arrays.asList(
+                        (transport.getTankAmount()==0?
+                                "0 " + StatCollector.translateToLocal("gui.buckets"):
+                                ((transport.getTankAmount() * 0.001f) + " " + FluidRegistry.getFluid(transport.getDataWatcher().getWatchableObjectInt(14)).getLocalizedName() + " " + StatCollector.translateToLocal("gui.buckets"))
+                        ),
+                        StatCollector.translateToLocal("gui.of") + (transport.getTankCapacity() * 0.001f) + StatCollector.translateToLocal("gui.buckets")
+                ),mouseX, mouseY, fontRendererObj);
             }
         }
 

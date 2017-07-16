@@ -146,7 +146,7 @@ public class ClientProxy extends CommonProxy {
         int index=0;
         GenericRailTransport transport = TransportRegistry.listTrains(0);
         while (transport!=null) {
-            RenderingRegistry.registerEntityRenderingHandler(transport.getClass(), new RenderEntity());
+            RenderingRegistry.registerEntityRenderingHandler(transport.getClass(), transportRenderer);
             index++;
             transport = TransportRegistry.listTrains(index);
         }
@@ -193,6 +193,7 @@ public class ClientProxy extends CommonProxy {
         protected void bindTexture(ResourceLocation p_147499_1_){}
     };
 
+    private static final RenderEntity transportRenderer = new RenderEntity();
 
     /**
      * <h3>null render</h3>

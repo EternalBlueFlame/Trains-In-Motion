@@ -157,6 +157,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public GenericRailTransport(World world){
         super(world);
         setSize(1,2);
+        ignoreFrustumCheck = true;
     }
     public GenericRailTransport(UUID owner, World world, double xPos, double yPos, double zPos){
         super(world);
@@ -167,6 +168,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this.owner = owner;
         key = new ItemStack(new ItemKey(owner, getItem().getUnlocalizedName()));
         setSize(1,2);
+        ignoreFrustumCheck = true;
     }
 
     /**
@@ -178,10 +180,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     @Override
     public void entityInit(){
         this.dataWatcher.addObject(13, 0);//train fuel consumption current
-        this.dataWatcher.addObject(14, 0);//train steam
+        this.dataWatcher.addObject(14, 0);//train steam, or rollingstock fluid ID (so client can show fluid name)
         this.dataWatcher.addObject(15, 0);//train heat
         this.dataWatcher.addObject(17, 0);//booleans
-        this.dataWatcher.addObject(19, 0);//owner
+        //19 is used by the core minecart
+        this.dataWatcher.addObject(23, 0);//owner
         this.dataWatcher.addObject(20, 0);//tankA
         this.dataWatcher.addObject(21, 0);//front linked transport
         this.dataWatcher.addObject(22, 0);//back linked transport
@@ -195,6 +198,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
         }
     }
+
 
 
     /*
@@ -588,10 +592,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
 
             if(updateWatchers){
-                if (fluidTank != null){
-                    dataWatcher.updateObject(20, fluidTank.amount);
+                dataWatcher.updateObject(20, fluidTank==null?0:fluidTank.amount);
+                if (!getType().isTrain()) {
+                    dataWatcher.updateObject(14, fluidTank == null ? -1 : fluidTank.getFluidID());
                 }
-                this.dataWatcher.updateObject(19,ownerID);
+                this.dataWatcher.updateObject(23,ownerID);
                 this.dataWatcher.updateObject(17, bools.toInt());
                 this.dataWatcher.updateObject(21, linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0);
                 this.dataWatcher.updateObject(22,linkedTransport instanceof GenericRailTransport?linkedTransport.getEntityId():0);
@@ -917,7 +922,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**defines the capacity of the RF storage, intended for electric rollingstock that store power for the train.*/
     public int getRFCapacity(){return 0;}
     /**defines the ID of the owner*/
-    public int getOwnerID(){return this.dataWatcher.getWatchableObjectInt(19);}
+    public int getOwnerID(){return this.dataWatcher.getWatchableObjectInt(23);}
     /**this function allows individual trains and rollingstock to implement custom fuel consumption and management
      * @see FuelHandler#manageSteam(EntityTrainCore) */
     public void manageFuel(){}

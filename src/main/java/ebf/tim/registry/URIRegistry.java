@@ -15,7 +15,7 @@ public enum URIRegistry {
     /**used for non-vanilla GUI textures*/
     GUI_PREFIX("textures/gui/"),
     /**used for train textures*/
-    MODEL_TRAIN_TEXTURE("textures/train"),
+    MODEL_TRAIN_TEXTURE("textures/train/"),
     /**used for icons*/
     ITEM_TRANSPORT_ICON("item/transport/"),
     /**used for rollingstock textures*/

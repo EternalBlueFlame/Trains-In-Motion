@@ -185,9 +185,9 @@ public class RenderEntity extends Render {
         if (entity.renderData.bogieRenders != null && entity.renderData.bogieRenders.length >0){
             for (int i = 0; i<entity.getRenderBogieOffsets().size(); i++){
                 if (entity.renderData.bogieRenders.length>i && entity.renderData.bogieRenders[i] != null) {
-                    //bind the texture
-                    bindTexture(entity.renderData.bogieRenders[i].bogieTexture);
                     GL11.glPushMatrix();
+                    //bind the texture
+                    Tessellator.bindTexture(entity.renderData.bogieRenders[i].bogieTexture);
                     //set the offset
                     entity.renderData.animationCache[2][0]=entity.getRenderBogieOffsets().get(i) + Math.copySign((entity.getRenderScale()-0.0625f)*26, entity.getRenderBogieOffsets().get(i));
                     entity.renderData.animationCache[2][1] = RailOffset;

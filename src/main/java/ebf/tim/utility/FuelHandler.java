@@ -8,6 +8,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBucket;
+import net.minecraft.item.ItemBucketMilk;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.EntityDamageSource;
@@ -104,7 +105,6 @@ public class FuelHandler{
 
 		//be sure there is burnHeat before trying to consume it
 		if (burnHeat > 1) {
-			System.out.println(burnHeat);
 			//calculate the heat increase
 			heatC += (float) ((1- Math.sqrt(heatC/maxHeat(train))) * Math.sqrt((heatC+burnHeat)/burnHeat))*train.getEfficiency();
 		} else {
@@ -133,14 +133,14 @@ public class FuelHandler{
 				train.dropItem(train.getItem(), 1);
 				train.attackEntityFromPart(null, new EntityDamageSource("overheat", train),100);
 			}
-		}
-
-		if (steamTank >0){
 			train.setBoolean(GenericRailTransport.boolValues.RUNNING, true);
-			//steam is expelled through the pistons to push them back and forth, but even when the accelerator is off, a degree of steam is still escaping.
-			steamTank -=(5*train.getEfficiency())*((train.accelerator)*train.getEfficiency());
 		} else {
 			train.setBoolean(GenericRailTransport.boolValues.RUNNING, false);
+		}
+
+		if (steamTank >0) {
+			//steam is expelled through the pistons to push them back and forth, but even when the accelerator is off, a degree of steam is still escaping.
+			steamTank -= (5 * train.getEfficiency()) * ((train.accelerator) * train.getEfficiency()) * 0.55;
 		}
 
 		//update the datawatchers so client can display the info on the GUI.
@@ -184,7 +184,8 @@ public class FuelHandler{
 			}
 		}
 		//empty the tank if the bottom slot contains a bucket.
-		if (transport.getStackInSlot(1) != null && transport.getStackInSlot(1).getItem() instanceof ItemBucket &&
+		if (transport.getStackInSlot(1) != null &&
+				(transport.getStackInSlot(1).getItem() instanceof ItemBucket || transport.getStackInSlot(1).getItem() instanceof ItemBucketMilk) &&
 				transport.drain(null, 1000, false) != null && transport.drain(null, 1000, false).amount >= 1000) {
 			transport.setInventorySlotContents(1, FluidContainerRegistry.fillFluidContainer(transport.drain(null, 1000, false), transport.getStackInSlot(1)));
 			if (!transport.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {

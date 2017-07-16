@@ -151,12 +151,13 @@ public class CommonProxy implements IGuiHandler {
         FluidContainerRegistry.registerFluidContainer(fluidDiesel, new ItemStack(bucketDiesel), new ItemStack(Items.bucket));
 
         //register the train crafting table
-        GameRegistry.registerBlock(trainTable, "TrainTable");
+        trainTable.setBlockName("block.traintable");
+        GameRegistry.registerBlock(trainTable, "block.traintable");
         GameRegistry.registerTileEntity(TileEntityStorage.class, "StorageEntity");
         addRecipe(new ItemStack(trainTable, 1),  "WWW", "WIW", "WWW", 'W', Blocks.planks, 'I', Items.iron_ingot);
 
-        railBlock.setCreativeTab(TrainsInMotion.creativeTab);
-        GameRegistry.registerBlock(railBlock, "TiMRail");
+        railBlock.setCreativeTab(TrainsInMotion.creativeTab).setBlockName("block.timrail");
+        GameRegistry.registerBlock(railBlock, "block.timrail");
         GameRegistry.registerTileEntity(BlockRailOverride.renderTileEntity.class, "TiMRailEntity");
         addRecipe(new ItemStack(railBlock, 1),  "I I", "IWI", "IWI", 'W', Blocks.planks, 'I', Items.iron_ingot);
     }
