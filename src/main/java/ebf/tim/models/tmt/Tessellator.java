@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -164,17 +165,21 @@ public class Tessellator {
 	}
 
 	public static void bindTexture(ResourceLocation textureURI) {
-		ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
-		if (object == null) {
-			try {
+		ITextureObject object;
+		if (textureURI != null) {
+			object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
+			if (object == null) {
 				object = new SimpleTexture(textureURI);
 				Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
-			} catch (Exception e){return;}
+			}
+		} else {
+			object = TextureUtil.missingTexture;
 		}
 
-		if (GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)!= object.getGlTextureId()) {
+		if (GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D) != object.getGlTextureId()) {
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, object.getGlTextureId());
 		}
+
 	}
 	
 }

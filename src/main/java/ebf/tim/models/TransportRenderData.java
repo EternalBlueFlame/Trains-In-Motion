@@ -31,7 +31,4 @@ public class TransportRenderData {
     /**the value to rotate the geometry with.*/
     public float wheelPitch=0;
 
-    /*checks if the parts have been cached, may be completely useless*/
-    public boolean cachedParts = false;
-
 }

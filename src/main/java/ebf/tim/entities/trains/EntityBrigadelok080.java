@@ -223,7 +223,7 @@ public class EntityBrigadelok080 extends TrainBase {
     @Override
     public Bogie[] getBogieModels(){return null;}
     @Override
-    public ResourceLocation getTexture(){return  URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png");}
+    public ResourceLocation getTexture(){return null;} //URIRegistry.MODEL_TRAIN_TEXTURE.getResource("null.png");}
 
     @Override
     public ModelBase getModel(){return new Brigadelok_080();}

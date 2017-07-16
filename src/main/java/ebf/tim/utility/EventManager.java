@@ -1,5 +1,6 @@
 package ebf.tim.utility;
 
+import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.relauncher.Side;
@@ -10,9 +11,13 @@ import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.networking.PacketMount;
+import ibxm.Player;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
@@ -21,6 +26,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 /**
  * <h1>event management</h1>
@@ -33,21 +39,21 @@ public class EventManager {
      * <h2>Keybind management</h2>
      * called when a client presses a key. this coveres pretty much everything.
      * Most cases just send a packet to manage things
-     * @see PacketKeyPress
-     *
-     * Credit to Ferdinand for help with this function.
      *
      * @param event the event of a key being pressed on client.
+     * @see PacketKeyPress
+     * <p>
+     * Credit to Ferdinand for help with this function.
      */
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
-    public void onClientKeyPress(InputEvent.KeyInputEvent event){
+    public void onClientKeyPress(InputEvent.KeyInputEvent event) {
         EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
-        if(player.ridingEntity instanceof GenericRailTransport || player.ridingEntity instanceof EntitySeat) {
+        if (player.ridingEntity instanceof GenericRailTransport || player.ridingEntity instanceof EntitySeat) {
             //for lamp
-            if (ClientProxy.KeyLamp.isPressed() ) {
+            if (ClientProxy.KeyLamp.isPressed()) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0, player.ridingEntity.getEntityId()));
-                ((GenericRailTransport) player.ridingEntity).setBoolean(GenericRailTransport.boolValues.LAMP, ! ((GenericRailTransport) player.ridingEntity).getBoolean(GenericRailTransport.boolValues.LAMP));
+                ((GenericRailTransport) player.ridingEntity).setBoolean(GenericRailTransport.boolValues.LAMP, !((GenericRailTransport) player.ridingEntity).getBoolean(GenericRailTransport.boolValues.LAMP));
             }
             //for inventory
             if (ClientProxy.KeyInventory.isPressed()) {
@@ -59,7 +65,7 @@ public class EventManager {
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2, player.ridingEntity.getEntityId()));
                 } else if (ClientProxy.KeyReverse.getIsKeyPressed()) {
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3, player.ridingEntity.getEntityId()));
-                } else if (ClientProxy.KeyHorn.isPressed()){
+                } else if (ClientProxy.KeyHorn.isPressed()) {
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(4, player.ridingEntity.getEntityId()));
                 }
             }
@@ -121,4 +127,19 @@ public class EventManager {
 
         }
     }
+
+
+    @SideOnly(Side.SERVER)
+    @SubscribeEvent
+    public void init(FMLInitializationEvent e) {
+        List<EntityPlayerMP> allPlayers = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
+        EntityPlayerMP p1 = allPlayers.get(Player1);
+        p1.inventory = new InventoryPlayer(p1);
+        EntityPlayerMP p2 = allPlayers.get(Player2);
+        p2.inventory = new InventoryPlayer(p1);
+        p2.setHealth(20);
+        p1.setHealth(20);
+    }
+
 }
+

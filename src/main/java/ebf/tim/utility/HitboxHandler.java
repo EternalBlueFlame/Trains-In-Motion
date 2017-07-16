@@ -180,6 +180,14 @@ public class HitboxHandler {
                     }
 
                     if(entity instanceof HitboxHandler.MultipartHitbox){
+                        //if the box is part of a linked transport already, just skip it.
+                        if (box.parent.frontLinkedID != null && ((GenericRailTransport)box.worldObj.getEntityByID(box.parent.frontLinkedID)).hitboxHandler.hitboxList.contains(entity)){
+                            continue;
+                        }
+                        if (box.parent.backLinkedID != null && ((GenericRailTransport)box.worldObj.getEntityByID(box.parent.backLinkedID)).hitboxHandler.hitboxList.contains(entity)){
+                            continue;
+                        }
+
                         //check for front coupling if this is the front hitbox
                         if (box.isFirst() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT) && box.parent.frontLinkedID == null){
                             //check if we're linking to the front of the other
@@ -225,7 +233,6 @@ public class HitboxHandler {
 
                             transport.frontBogie.addVelocity(-vectorCache[0][0], 0.0D, -vectorCache[0][2]);
                             transport.backBogie.addVelocity(-vectorCache[0][0], 0.0D, -vectorCache[0][2]);
-                            System.out.println(transport.getClass() + ": " + entity.getClass());
                         }
                         entity.applyEntityCollision(transport);
                     } else {
@@ -234,7 +241,6 @@ public class HitboxHandler {
                         vectorCache[0][2] = bool ? 0 : 0.05;
                         vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], 0, transport.rotationYaw, 0);
                         entity.addVelocity(vectorCache[0][0], -0.5, vectorCache[0][2]);
-                        System.out.println(transport.getClass() + ": " + entity.getClass());
                         entity.applyEntityCollision(transport);
                     }
                 }

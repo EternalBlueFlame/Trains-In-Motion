@@ -253,7 +253,8 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
 
 
         @Override
-        public AxisAlignedBB getRenderBoundingBox(){return boundingBox;}
+        public AxisAlignedBB getRenderBoundingBox(){return boundingBox!= null?boundingBox:
+                AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1);}
 
 
         @Override

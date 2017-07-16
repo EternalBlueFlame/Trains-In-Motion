@@ -697,8 +697,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                     vectorCache[6] = rotatePoint(vectorCache[5], 0, frontLink.rotationYaw, 0);
                     vectorCache[6][0] += frontLink.posX;
                     vectorCache[6][2] += frontLink.posZ;
-                    frontBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.005, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.005);
-                    backBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.005, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.005);
+                    frontBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
+                    backBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
                 }
             }
             //Manage the backLinkedTransport link
@@ -706,10 +706,10 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 Entity backLink = worldObj.getEntityByID(backLinkedID);
                 if (backLink instanceof GenericRailTransport) {
                     //to here
-                    vectorCache[5][0] = getHitboxPositions()[getHitboxPositions().length - 1] + 1;
-                    vectorCache[6] = rotatePoint(vectorCache[5], 0, rotationYaw, 0);
-                    vectorCache[6][0] += posX;
-                    vectorCache[6][2] += posZ;
+                    vectorCache[3][0] = getHitboxPositions()[getHitboxPositions().length - 1] + 1;
+                    vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
+                    vectorCache[4][0] += posX;
+                    vectorCache[4][2] += posZ;
                     //from here
                     vectorCache[5][0] = ((GenericRailTransport) backLink).getHitboxPositions()[
                             (((GenericRailTransport) backLink).backLinkedTransport == this.getPersistentID()) ? (((GenericRailTransport) backLink).getHitboxPositions().length - 1) : 0
@@ -717,8 +717,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                     vectorCache[6] = rotatePoint(vectorCache[5], 0, backLink.rotationYaw, 0);
                     vectorCache[6][0] += backLink.posX;
                     vectorCache[6][2] += backLink.posZ;
-                    frontBogie.addVelocity(-(vectorCache[6][0] - vectorCache[6][0]) * 0.005, 0, -(vectorCache[6][2] - vectorCache[6][2]) * 0.005);
-                    backBogie.addVelocity(-(vectorCache[6][0] - vectorCache[6][0]) * 0.005, 0, -(vectorCache[6][2] - vectorCache[6][2]) * 0.005);
+                    frontBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
+                    backBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
                 }
             }
         }

@@ -72,7 +72,8 @@ public class RenderEntity extends Render {
      */
     public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw){
 
-        if (entity.renderData.model == null || entity.renderData.model.getClass() != entity.getModel().getClass()){
+        if (entity.renderData.model == null || entity.renderData.model.getClass() != entity.getModel().getClass()) {
+            entity.renderData = new TransportRenderData();
             entity.renderData.model = entity.getModel();
             entity.renderData.bogieRenders = entity.getBogieModels();
             if (entity.renderData.bogieRenders != null) {
@@ -80,44 +81,43 @@ public class RenderEntity extends Render {
                     b.rotationYaw = entity.rotationYaw;
                 }
             }
-            entity.renderData.cachedParts = false;
-        }
 
-        //cache animating parts
-        if (ClientProxy.EnableAnimations && !entity.renderData.cachedParts){
-            boolean isAdded;
-            for (Object box : entity.renderData.model.boxList) {
-                if (box instanceof ModelRendererTurbo) {
-                    ModelRendererTurbo render = ((ModelRendererTurbo) box);
-                    //attempt to cache the parts for the main transport model
-                    if (StaticModelAnimator.canAdd(render)) {
-                        entity.renderData.animatedPart.add(new StaticModelAnimator(render));
-                    } else if (GroupedModelRender.canAdd(render)) {
-                        //if it's a grouped render we have to figure out if we already have a group for this or not.
-                        isAdded =false;
-                        for (GroupedModelRender cargo : entity.renderData.blockCargoRenders) {
-                            if (cargo.getGroupName().equals(render.boxName)){
-                                cargo.add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render));
-                                isAdded= true;break;
+            //cache animating parts
+            if (ClientProxy.EnableAnimations) {
+                boolean isAdded;
+                for (Object box : entity.renderData.model.boxList) {
+                    if (box instanceof ModelRendererTurbo) {
+                        ModelRendererTurbo render = ((ModelRendererTurbo) box);
+                        //attempt to cache the parts for the main transport model
+                        if (StaticModelAnimator.canAdd(render)) {
+                            entity.renderData.animatedPart.add(new StaticModelAnimator(render));
+                        } else if (GroupedModelRender.canAdd(render)) {
+                            //if it's a grouped render we have to figure out if we already have a group for this or not.
+                            isAdded = false;
+                            for (GroupedModelRender cargo : entity.renderData.blockCargoRenders) {
+                                if (cargo.getGroupName().equals(render.boxName)) {
+                                    cargo.add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render));
+                                    isAdded = true;
+                                    break;
+                                }
+                            }
+                            if (!isAdded) {
+                                entity.renderData.blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render)));
                             }
                         }
-                        if (!isAdded){
-                            entity.renderData.blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render)));
+                    }
+                }
+                //cache the animating parts for bogies.
+                if (entity.getBogieModels() != null) {
+                    for (Bogie bogie : entity.getBogieModels()) {
+                        for (Object box : bogie.bogieModel.boxList) {
+                            if (box instanceof ModelRendererTurbo) {
+                                entity.renderData.animatedPart.add(new StaticModelAnimator(((ModelRendererTurbo) box)));
+                            }
                         }
                     }
                 }
             }
-            //cache the animating parts for bogies.
-            if (entity.getBogieModels() != null){
-                for (Bogie bogie : entity.getBogieModels()){
-                    for (Object box : bogie.bogieModel.boxList) {
-                        if (box instanceof ModelRendererTurbo) {
-                            entity.renderData.animatedPart.add(new StaticModelAnimator(((ModelRendererTurbo) box)));
-                        }
-                    }
-                }
-            }
-            entity.renderData.cachedParts = true;
         }
 
 

@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
@@ -12,6 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.MathHelper;
+import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -120,6 +122,84 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         return itemstack;
     }
 
+    /**modified from 1.7.10 version to check if the item is valid for the slot*/
+    @Override
+    protected boolean mergeItemStack(ItemStack itemStack, int startIndex, int endIndex, boolean reverseDirection) {
+        boolean flag1 = false;
+        int k = startIndex;
+
+        if (reverseDirection) {
+            k = endIndex - 1;
+        }
+
+        Slot slot;
+        ItemStack itemstack1;
+
+        if (itemStack.isStackable()) {
+            while (itemStack.stackSize > 0 && (!reverseDirection && k < endIndex || reverseDirection && k >= startIndex)) {
+                slot = (Slot)this.inventorySlots.get(k);
+                itemstack1 = slot.getStack();
+
+                if (slot.isItemValid(itemStack) && itemstack1 != null && itemstack1.getItem() == itemStack.getItem() && (!itemStack.getHasSubtypes() || itemStack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(itemStack, itemstack1)) {
+                    int l = itemstack1.stackSize + itemStack.stackSize;
+
+                    if (l <= itemStack.getMaxStackSize()) {
+                        itemStack.stackSize = 0;
+                        itemstack1.stackSize = l;
+                        slot.onSlotChanged();
+                        flag1 = true;
+                    }
+                    else if (itemstack1.stackSize < itemStack.getMaxStackSize()) {
+                        itemStack.stackSize -= itemStack.getMaxStackSize() - itemstack1.stackSize;
+                        itemstack1.stackSize = itemStack.getMaxStackSize();
+                        slot.onSlotChanged();
+                        flag1 = true;
+                    }
+                }
+
+                if (reverseDirection) {
+                    --k;
+                } else {
+                    ++k;
+                }
+            }
+        }
+
+        if (itemStack.stackSize > 0) {
+            if (reverseDirection) {
+                k = endIndex - 1;
+            } else {
+                k = startIndex;
+            }
+
+            while (!reverseDirection && k < endIndex || reverseDirection && k >= startIndex) {
+                slot = (Slot)this.inventorySlots.get(k);
+                itemstack1 = slot.getStack();
+
+                if (itemstack1 == null && slot.isItemValid(itemStack)) {
+                    slot.putStack(itemStack.copy());
+                    slot.onSlotChanged();
+                    itemStack.stackSize = 0;
+                    flag1 = true;
+                    break;
+                }
+
+                if (reverseDirection) {
+                    --k;
+                }
+                else {
+                    ++k;
+                }
+            }
+        }
+
+        return flag1;
+    }
+
+
+
+
+
     private int dragEvent;
     private final Set<Slot> dragSlots = Sets.<Slot>newHashSet();
     private int dragMode =-1;
@@ -132,7 +212,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         //return super.slotClick(fromSlot,0,p_75144_3_!=4?0:4,p_75144_4_);
 
         if (clickTypeIn == 4){
-            clickTypeIn =0;
+            clickTypeIn = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)?1:0;
         }
 
         ItemStack itemstack = null;
@@ -196,7 +276,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
 
              this.dragSlots.clear();
         } else if ((clickTypeIn == 0 /*ClickType.PICKUP*/ || clickTypeIn == 1 /*ClickType.QUICK_MOVE*/) && (dragType == 0 || dragType == 1)) {
-            if (slotId == -999) { //¯|_(ツ)_|¯
+            if (slotId == -999) { //if the slot was the cursor
                 if (inventoryplayer.getItemStack() != null) {
                     if (dragType == 0) {
                         player.dropItem(inventoryplayer.getItemStack().getItem(),inventoryplayer.getItemStack().stackSize);

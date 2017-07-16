@@ -82,7 +82,7 @@ public class EntityVATLogCar extends RollingstockBase {
     public Bogie[] getBogieModels(){return new Bogie[]{GenericCMDBogie(), GenericCMDBogie()};}
 
     @Override
-    public ResourceLocation getTexture(){return  URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png");}
+    public ResourceLocation getTexture(){return null;} //URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png");}
 
     @Override
     public ModelBase getModel(){return new VATLogCar();}

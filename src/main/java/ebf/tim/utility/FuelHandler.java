@@ -118,7 +118,7 @@ public class FuelHandler{
 		//if the boiler temp is above the boiling point, start generating steam.
 		if (heatC >100){
 			int steam = (int)Math.floor(
-					((heatC-100)*0.05f) * //calculate heat from burnHeat
+					((heatC-100)*0.015f) * //calculate heat from burnHeat
 							(train.getTankAmount()*0.005f) //calculate surface area of water
 			);
 			//drain fluid
