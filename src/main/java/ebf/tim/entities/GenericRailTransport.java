@@ -725,6 +725,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     }
 
 
+    public boolean hasHitbox(Entity box){
+        if (hitboxHandler == null || hitboxHandler.hitboxList == null){
+            return false;
+        } else {
+            return hitboxHandler.hitboxList.contains(box);
+        }
+    }
+
     /**
      * <h2>RF storage transfer</h2>
      * this is used to figure out how much RF this transport can take from another transport.

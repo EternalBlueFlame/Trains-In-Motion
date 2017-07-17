@@ -181,10 +181,10 @@ public class HitboxHandler {
 
                     if(entity instanceof HitboxHandler.MultipartHitbox){
                         //if the box is part of a linked transport already, just skip it.
-                        if (box.parent.frontLinkedID != null && ((GenericRailTransport)box.worldObj.getEntityByID(box.parent.frontLinkedID)).hitboxHandler.hitboxList.contains(entity)){
+                        if (box.parent.frontLinkedID != null && ((GenericRailTransport)box.worldObj.getEntityByID(box.parent.frontLinkedID)).hasHitbox(entity)){
                             continue;
                         }
-                        if (box.parent.backLinkedID != null && ((GenericRailTransport)box.worldObj.getEntityByID(box.parent.backLinkedID)).hitboxHandler.hitboxList.contains(entity)){
+                        if (box.parent.backLinkedID != null && ((GenericRailTransport)box.worldObj.getEntityByID(box.parent.backLinkedID)).hasHitbox(entity)){
                             continue;
                         }
 
