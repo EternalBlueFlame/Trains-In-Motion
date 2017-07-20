@@ -133,7 +133,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * @see #setBoolean(boolValues, boolean)
      */
     private BitList bools = new BitList();
-    public enum boolValues{BRAKE(0), LOCKED(1), LAMP(2), CREATIVE(3), COUPLINGFRONT(4), COUPLINGBACK(4), WHITELIST(6), RUNNING(7), DERAILED(8);
+    public enum boolValues{BRAKE(0), LOCKED(1), LAMP(2), CREATIVE(3), COUPLINGFRONT(4), COUPLINGBACK(5), WHITELIST(6), RUNNING(7), DERAILED(8);
         public int index;
         boolValues(int index){this.index = index;}
     }
@@ -678,6 +678,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * this is used to reposition the transport based on the linked transports.
      * If coupling is on then it will check sides without linked transports for anything to link to.
      */
+    private GenericRailTransport linkChecker = null;
     public void manageLinks() {
 
         if (!worldObj.isRemote) {
@@ -685,18 +686,19 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             if (frontLinkedID != null) {
                 Entity frontLink = worldObj.getEntityByID(frontLinkedID);
                 if (frontLink instanceof GenericRailTransport) {
+                    linkChecker = (GenericRailTransport) frontLink;
                     //to here
                     vectorCache[3][0] = getHitboxPositions()[0] - 1;
                     vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
                     vectorCache[4][0] += posX;
                     vectorCache[4][2] += posZ;
                     //from here
-                    vectorCache[5][0] = ((GenericRailTransport) frontLink).getHitboxPositions()[
-                            (((GenericRailTransport) frontLink).backLinkedTransport == this.getPersistentID()) ? (((GenericRailTransport) frontLink).getHitboxPositions().length - 1) : 0
+                    vectorCache[5][0] = linkChecker.getHitboxPositions()[
+                            (linkChecker.backLinkedTransport == this.getPersistentID()) ? (linkChecker.getHitboxPositions().length - 1) : 0
                             ];
-                    vectorCache[6] = rotatePoint(vectorCache[5], 0, frontLink.rotationYaw, 0);
-                    vectorCache[6][0] += frontLink.posX;
-                    vectorCache[6][2] += frontLink.posZ;
+                    vectorCache[6] = rotatePoint(vectorCache[5], 0, linkChecker.rotationYaw, 0);
+                    vectorCache[6][0] += linkChecker.posX;
+                    vectorCache[6][2] += linkChecker.posZ;
                     frontBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
                     backBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
                 }
@@ -705,6 +707,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             if (backLinkedID != null) {
                 Entity backLink = worldObj.getEntityByID(backLinkedID);
                 if (backLink instanceof GenericRailTransport) {
+                    linkChecker = (GenericRailTransport) backLink;
                     //to here
                     vectorCache[3][0] = getHitboxPositions()[getHitboxPositions().length - 1] + 1;
                     vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
@@ -712,24 +715,16 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                     vectorCache[4][2] += posZ;
                     //from here
                     vectorCache[5][0] = ((GenericRailTransport) backLink).getHitboxPositions()[
-                            (((GenericRailTransport) backLink).backLinkedTransport == this.getPersistentID()) ? (((GenericRailTransport) backLink).getHitboxPositions().length - 1) : 0
+                            (linkChecker.backLinkedTransport == this.getPersistentID()) ? (linkChecker.getHitboxPositions().length - 1) : 0
                             ];
-                    vectorCache[6] = rotatePoint(vectorCache[5], 0, backLink.rotationYaw, 0);
-                    vectorCache[6][0] += backLink.posX;
-                    vectorCache[6][2] += backLink.posZ;
+                    vectorCache[6] = rotatePoint(vectorCache[5], 0, linkChecker.rotationYaw, 0);
+                    vectorCache[6][0] += linkChecker.posX;
+                    vectorCache[6][2] +=linkChecker.posZ;
                     frontBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
                     backBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
                 }
             }
-        }
-    }
-
-
-    public boolean hasHitbox(Entity box){
-        if (hitboxHandler == null || hitboxHandler.hitboxList == null){
-            return false;
-        } else {
-            return hitboxHandler.hitboxList.contains(box);
+            linkChecker = null;
         }
     }
 

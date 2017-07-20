@@ -1,5 +1,7 @@
 package ebf.tim.models.tmt;
 
+import net.minecraft.entity.Entity;
+
 /**
  * Converts flans models to our version of ModelRendererTurbo, which doesn't use the sme animation methods.
  */
@@ -24,7 +26,7 @@ public class ModelConverter extends ModelBase {
 	public ModelRendererTurbo leftTrackWheelModels[] = new ModelRendererTurbo[0];
 	public ModelRendererTurbo trailerModel[] = new ModelRendererTurbo[0];
 	public ModelRendererTurbo steeringWheelModel[] = new ModelRendererTurbo[0];
-	
+
 	public void render(){
 		render(bodyModel);
 		render(model);
@@ -43,6 +45,11 @@ public class ModelConverter extends ModelBase {
 		render(leftTrackWheelModels);
 		render(trailerModel);
 		render(steeringWheelModel);
+	}
+
+	@Override
+	public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5){
+		render();
 	}
 
 	public void flipAll(){

@@ -181,36 +181,36 @@ public class HitboxHandler {
 
                     if(entity instanceof HitboxHandler.MultipartHitbox){
                         //if the box is part of a linked transport already, just skip it.
-                        if (box.parent.frontLinkedID != null && ((GenericRailTransport)box.worldObj.getEntityByID(box.parent.frontLinkedID)).hasHitbox(entity)){
+                        if (((MultipartHitbox) entity).parent == box.parent){
                             continue;
                         }
-                        if (box.parent.backLinkedID != null && ((GenericRailTransport)box.worldObj.getEntityByID(box.parent.backLinkedID)).hasHitbox(entity)){
-                            continue;
-                        }
+
 
                         //check for front coupling if this is the front hitbox
                         if (box.isFirst() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT) && box.parent.frontLinkedID == null){
                             //check if we're linking to the front of the other
-                            if (((MultipartHitbox) entity).isFirst() && ((MultipartHitbox) entity).parent.frontLinkedID == null){
+                            if (((MultipartHitbox) entity).isFirst() && ((MultipartHitbox) entity).parent.frontLinkedID == null && ((MultipartHitbox) entity).parent.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT)){
                                 box.parent.frontLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
                                 ((MultipartHitbox) entity).parent.frontLinkedTransport = box.parent.getPersistentID();
+                                continue;
                                 //check if we're linking to the back of the other.
-                            } else if (((MultipartHitbox) entity).isLast() && ((MultipartHitbox) entity).parent.backLinkedID == null){
+                            } else if (((MultipartHitbox) entity).isLast() && ((MultipartHitbox) entity).parent.backLinkedID == null && ((MultipartHitbox) entity).parent.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK)){
                                 box.parent.frontLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
                                 ((MultipartHitbox) entity).parent.backLinkedTransport = box.parent.getPersistentID();
+                                continue;
                             }
-                            continue;
                             //otherwise check for back coupling if this is the back hitbox
                         } else if (box.isLast() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK) && box.parent.backLinkedID == null){
-                            if (((MultipartHitbox) entity).isFirst() && ((MultipartHitbox) entity).parent.frontLinkedID == null){
+                            if (((MultipartHitbox) entity).isFirst() && ((MultipartHitbox) entity).parent.frontLinkedID == null && ((MultipartHitbox) entity).parent.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT)){
                                 box.parent.backLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
                                 ((MultipartHitbox) entity).parent.frontLinkedTransport = box.parent.getPersistentID();
+                                continue;
                                 //check if we're linking to the back of the other.
-                            } else if (((MultipartHitbox) entity).isLast() && ((MultipartHitbox) entity).parent.backLinkedID == null){
+                            } else if (((MultipartHitbox) entity).isLast() && ((MultipartHitbox) entity).parent.backLinkedID == null && ((MultipartHitbox) entity).parent.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK)){
                                 box.parent.backLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
                                 ((MultipartHitbox) entity).parent.backLinkedTransport = box.parent.getPersistentID();
+                                continue;
                             }
-                            continue;
                         }
                     }
                     if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
