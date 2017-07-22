@@ -195,7 +195,7 @@ public class ParticleFX {
                 (((entity.color >> 8 & 0xFF)/255.0F) - entity.colorTint),
                 (((entity.color & 0xFF)/255.0F) - entity.colorTint));
         //set the position
-        tessellator.setTranslation(posX - entity.posX, posY - entity.posY, posZ - entity.posZ);
+        GL11.glTranslated(posX - entity.posX, posY - entity.posY, posZ - entity.posZ);
         //now actually render the sides.
         tessellator.setNormal(0, 0, -1);
         tessellator.addVertex(entity.boundingBox.minX, entity.boundingBox.maxY, entity.boundingBox.minZ);
