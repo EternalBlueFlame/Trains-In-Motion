@@ -249,12 +249,12 @@ public class GUITransport extends GuiContainer {
         //bind the inventory image which we use the slot images and inventory image from.
         mc.getTextureManager().bindTexture(vanillaInventory);
         //icon for furnace fuel
-        drawTexturedRect(guiLeft+112, guiTop + 1, 56, 36, 20, 20, 16, 16);
+        drawTexturedRect(guiLeft+113, guiTop + 1, 56, 36, 20, 20, 16, 16);
 
         //icon for furnace
         int i1 = transport.getDataWatcher().getWatchableObjectInt(13);
         if (i1>0) {
-            drawTexturedRect(guiLeft + 113, guiTop + 16 - i1, 176, 13 - i1, 17, i1+2, 14, i1);
+            drawTexturedRect(guiLeft + 113, guiTop + 16 - i1, 176, 14 - i1, 17, i1+2, 14, i1);
         }
 
         //slot for fuel

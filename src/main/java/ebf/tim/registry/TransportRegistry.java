@@ -43,7 +43,7 @@ public class TransportRegistry {
             cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(
                     registry.getClass(),
                     registry.getItem().getUnlocalizedName().replace("item","entity"),
-                    index+17, TrainsInMotion.instance, 60, 1, true);
+                    index+entityIDOffset, TrainsInMotion.instance, 60, 1, true);
             GameRegistry.registerItem(registry.getItem(), registry.getItem().getUnlocalizedName().substring(5));
             index++;
             registry = listTrains(index);
