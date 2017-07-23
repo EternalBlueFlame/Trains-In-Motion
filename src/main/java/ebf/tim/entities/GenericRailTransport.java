@@ -18,6 +18,7 @@ import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
+import net.minecraft.block.Block;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
@@ -278,21 +279,21 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         if (health<1){
             //remove bogies
             frontBogie.isDead = true;
-            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(frontBogie.getEntityId()));
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(frontBogie.getEntityId(),false));
             worldObj.removeEntity(frontBogie);
             backBogie.isDead = true;
-            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(backBogie.getEntityId()));
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(backBogie.getEntityId(),false));
             worldObj.removeEntity(backBogie);
             //remove seats
             for (EntitySeat seat : seats) {
                 seat.isDead = true;
-                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(seat.getEntityId()));
+                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(seat.getEntityId(),false));
                 seat.worldObj.removeEntity(seat);
             }
             //remove hitboxes
             for (EntityDragonPart hitbox : hitboxHandler.hitboxList){
                 hitbox.isDead = true;
-                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId()));
+                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId(),false));
                 hitbox.worldObj.removeEntity(hitbox);
             }
             //if the damage source is an explosion, or this (from overheating as an example), we circumstantially blow up.
@@ -300,7 +301,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
             //remove this
             isDead=true;
-            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(getEntityId()));
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(getEntityId(), !((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode));
             worldObj.removeEntity(this);
         }
         return false;
@@ -447,6 +448,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
         }
 
+    }
+
+    /**plays a sound during entity movement*/
+    @Override
+    protected void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_) {
     }
 
 
@@ -1177,9 +1183,23 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * <h2>unused</h2>
      * we have to initialize these values, but due to the design of the entity we don't actually use them.
      */
-    /**normally used to drop the inventory content when the GUI is closed, but we don't do that.*/
+    /**used to sync the inventory on close.*/
     @Override
-    public ItemStack getStackInSlotOnClosing(int p_70304_1_) {return null;}
+    public ItemStack getStackInSlotOnClosing(int p_70304_1_) {
+        List<ItemStack> aitemstack = this.items;
+
+        if (p_70304_1_ >= this.items.size()) {
+            p_70304_1_ -= this.items.size();
+        }
+
+        if (aitemstack.get(p_70304_1_) != null) {
+            ItemStack itemstack = aitemstack.get(p_70304_1_);
+            aitemstack.set(p_70304_1_, null);
+            return itemstack;
+        } else {
+            return null;
+        }
+    }
     @Override
     public void markDirty() {}
     /**called when the inventory GUI is opened*/
@@ -1188,6 +1208,15 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**called when the inventory GUI is closed*/
     @Override
     public void closeInventory() {}
+
+    public void dropAllItems() {
+        for (int i = 0; i < this.items.size(); ++i) {
+            if (this.items.get(i) != null) {
+                this.dropItem(this.items.get(i).getItem(),this.items.get(i).stackSize);
+                this.items.set(i, null);
+            }
+        }
+    }
 
 
     /*

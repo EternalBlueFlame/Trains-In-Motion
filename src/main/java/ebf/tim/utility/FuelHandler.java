@@ -185,7 +185,7 @@ public class FuelHandler{
 		}
 		//empty the tank if the bottom slot contains a bucket.
 		if (transport.getStackInSlot(1) != null &&
-				(transport.getStackInSlot(1).getItem() instanceof ItemBucket || transport.getStackInSlot(1).getItem() instanceof ItemBucketMilk) &&
+				FluidContainerRegistry.getFluidForFilledItem(transport.getStackInSlot(1)) == null &&
 				transport.drain(null, 1000, false) != null && transport.drain(null, 1000, false).amount >= 1000) {
 			transport.setInventorySlotContents(1, FluidContainerRegistry.fillFluidContainer(transport.drain(null, 1000, false), transport.getStackInSlot(1)));
 			if (!transport.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {

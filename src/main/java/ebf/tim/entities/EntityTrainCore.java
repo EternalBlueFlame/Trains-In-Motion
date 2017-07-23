@@ -123,9 +123,10 @@ public class EntityTrainCore extends GenericRailTransport {
         while(front != null){
             //calculate the speed modification
             if(!front.getType().isTrain() && front.weightKg()!=0){
-                weight+= front.weightKg();
+                weight+= front.getBoolean(boolValues.BRAKE)?front.weightKg()*1.25f:front.weightKg();
             } else if (front instanceof EntityTrainCore) {
-                hp += ((EntityTrainCore)front).getHorsePower()*0.75f;
+                hp += front.getBoolean(boolValues.RUNNING)?((EntityTrainCore)front).getHorsePower()*0.75f:0;
+                weight+= front.getBoolean(boolValues.BRAKE)?front.weightKg()*1.25f:front.weightKg();
             }
 
             //add the one we just used to the checked list
@@ -154,8 +155,8 @@ public class EntityTrainCore extends GenericRailTransport {
             }
         }
 
-
-        vectorCache[0][0] = (745.70 * ((accelerator / 6) * hp) / (weight))*0.05;
+        //745.7 converts watts to horsepower, but considering the scale, it should be a thousandth of that
+        vectorCache[0][0] = (((0.7457 * (accelerator / 6D)) * hp) / weight);
 
 
     }
@@ -172,14 +173,14 @@ public class EntityTrainCore extends GenericRailTransport {
 
         if(accelerator!=0 && frontBogie != null && backBogie != null) {
             //every second, or when the speed is 0, re-calculate the speed.
-            if(ticksExisted %20==0 || vectorCache[0][0] ==0){
+            if(ticksExisted %20==0){
                 calculateAcceleration();
             }
 
             //cap speed to max.
             if (frontBogie.motionX+ frontBogie.motionZ > getMaxSpeed() || frontBogie.motionX+ frontBogie.motionZ <-getMaxSpeed() ||
-                    !((getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM || getType() == TrainsInMotion.transportTypes.STEAM) && fuelHandler.steamTank> getTankCapacity()*0.25)//check for steam fuel
-                    || !(getType() == TrainsInMotion.transportTypes.ELECTRIC && getTankAmount()<1)//check for electric fuel
+                    ((getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM || getType() == TrainsInMotion.transportTypes.STEAM) && fuelHandler.steamTank< getTankCapacity()*0.25)//check for steam fuel
+                    || (getType() == TrainsInMotion.transportTypes.ELECTRIC && getTankAmount()<1)//check for electric fuel
                     ) {
                 vectorCache[0][0] = 0;
             }

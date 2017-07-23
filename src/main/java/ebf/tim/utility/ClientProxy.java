@@ -65,6 +65,8 @@ public class ClientProxy extends CommonProxy {
     public static boolean EnableAnimations = true;
     /**whether or not to use the 3D rails*/
     public static boolean Enable3DRails = true;
+    /**defines if the inventory graphics should be loaded from a TiM URI or if vanilla graphics should be used*/
+    public static boolean useVanillaInventoryTextures = true;
     /**the keybind for the lamp toggle*/
     public static KeyBinding KeyLamp = new KeyBinding("Lamp Toggle", 38, "Trains in Motion");
     /**the keybind for the horn/whistle*/
@@ -116,6 +118,8 @@ public class ClientProxy extends CommonProxy {
         EnableAnimations = config.get(Configuration.CATEGORY_GENERAL, "EnableAnimations", true).getBoolean(true);
         config.addCustomCategoryComment("Quality (Client only)", "Overrides the render of vanilla rails to make them use a more detailed 3D render which supports more detailed switches and diagonals.");
         Enable3DRails = config.get(Configuration.CATEGORY_GENERAL, "Enable3DRails", false).getBoolean(false);
+        config.addCustomCategoryComment("Quality (Client only)", "Overrides the render of train and rollingstock inventories to use textures from vanilla (including resourcepacks), so you can use textures in a texturepack specifically for this mod");
+        useVanillaInventoryTextures = config.get(Configuration.CATEGORY_GENERAL, "UseVanillaInventoryTextures", true).getBoolean(true);
 
         config.addCustomCategoryComment("Keybinds (Client only)", "accepted values can be set from in-game, or defined using the key code values from: http://minecraft.gamepedia.com/Key_codes");
 

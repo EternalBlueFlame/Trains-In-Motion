@@ -18,20 +18,24 @@ import net.minecraft.item.ItemStack;
 public class PacketRemove implements IMessage {
     /**the entity ID to define what entity to use the function on*/
     private int entityId;
+    private boolean shouldDropItem;
 
     public PacketRemove() {}
-    public PacketRemove(int entityId) {
+    public PacketRemove(int entityId, boolean shouldDropItem) {
         this.entityId = entityId;
+        this.shouldDropItem = shouldDropItem;
     }
     /**reads the packet on server to get the variables from the Byte Buffer*/
     @Override
     public void fromBytes(ByteBuf bbuf) {
         entityId = bbuf.readInt();
+        shouldDropItem = bbuf.readBoolean();
     }
     /**puts the variables into a Byte Buffer so they can be sent to server*/
     @Override
     public void toBytes(ByteBuf bbuf) {
         bbuf.writeInt(entityId);
+        bbuf.writeBoolean(shouldDropItem);
     }
 
     /**
@@ -45,7 +49,11 @@ public class PacketRemove implements IMessage {
             Entity entity = context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId);
             //if the entity was an instance of Generic Rail Transport, then spawn it's item and remove it from world.
             if (entity instanceof GenericRailTransport) {
-                entity.worldObj.spawnEntityInWorld(new EntityItem(entity.worldObj, entity.posX, entity.posY, entity.posZ, new ItemStack(((GenericRailTransport) entity).getItem(),1)));
+                if (message.shouldDropItem) {
+                    entity.worldObj.spawnEntityInWorld(new EntityItem(entity.worldObj, entity.posX, entity.posY, entity.posZ, new ItemStack(((GenericRailTransport) entity).getItem(), 1)));
+                }
+                //be sure we drop the inventory items on death.
+                ((GenericRailTransport) entity).dropAllItems();
                 for(HitboxHandler.MultipartHitbox hitbox : ((GenericRailTransport) entity).hitboxHandler.hitboxList) {
                     context.getServerHandler().playerEntity.worldObj.removeEntity(hitbox);
                 }

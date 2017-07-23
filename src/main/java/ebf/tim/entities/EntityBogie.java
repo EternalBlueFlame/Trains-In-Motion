@@ -76,6 +76,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         buffer.writeInt(parentId);
     }
 
+    /**plays a sound during entity movement*/
+    @Override
+    protected void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_) {}
+
     /**used by the game to tell different types of minecarts from eachother, this doesnt effect us, so just use something random*/
     @Override
     public int getMinecartType() {

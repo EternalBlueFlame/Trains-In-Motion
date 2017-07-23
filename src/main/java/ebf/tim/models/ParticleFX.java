@@ -188,6 +188,8 @@ public class ParticleFX {
         GL11.glPushMatrix();
         //disabling texturing of GL will do some weird stuff.
         GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_LIGHTING);
+        GL11.glEnable(GL11.GL_CULL_FACE);
         Tessellator tessellator = Tessellator.getInstance();
         tessellator.startDrawing(GL11.GL_QUADS);
         //set the color with the tint.
@@ -229,6 +231,8 @@ public class ParticleFX {
         tessellator.addVertex(entity.boundingBox.maxX, entity.boundingBox.minY, entity.boundingBox.maxZ);
         tessellator.draw();
         //before we end this be sure to re-enabling texturing for other things.
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_CULL_FACE);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glPopMatrix();
 

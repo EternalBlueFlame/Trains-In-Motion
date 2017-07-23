@@ -110,11 +110,11 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
             ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
 
-            if (index < railTransport.getInventorySize().getRow() * 9) {
-                if (!this.mergeItemStack(itemstack1, railTransport.getInventorySize().getRow() * 9, this.inventorySlots.size(), true)) {
+            if (index < railTransport.getSizeInventory()) {
+                if (!this.mergeItemStack(itemstack1, railTransport.getSizeInventory(), this.inventorySlots.size(), true)) {
                     return null;
                 }
-            } else if (!this.mergeItemStack(itemstack1, 0, railTransport.getInventorySize().getRow() * 9, false)) {
+            } else if (!this.mergeItemStack(itemstack1, 0, railTransport.getSizeInventory(), false)) {
                 return null;
             }
             slot.putStack(null);
@@ -210,6 +210,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     @Override
     public ItemStack slotClick(int slotId, int dragType, int clickTypeIn, EntityPlayer player) {
         //return super.slotClick(fromSlot,0,p_75144_3_!=4?0:4,p_75144_4_);
+        //System.out.println(slotId + ":" + dragType + ":" + clickTypeIn);
 
         if (clickTypeIn == 4){
             clickTypeIn = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)?1:0;

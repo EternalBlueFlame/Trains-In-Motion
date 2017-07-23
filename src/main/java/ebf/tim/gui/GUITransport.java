@@ -5,10 +5,12 @@ import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.registry.URIRegistry;
+import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.TileEntitySlotManager;
 import ebf.tim.utility.TransportSlotManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.Tessellator;
@@ -34,9 +36,13 @@ import static ebf.tim.TrainsInMotion.transportTypes.PASSENGER;
 public class GUITransport extends GuiContainer {
 
     /**a reference to the resource location of the vanilla furnace texture, this also gets overridden by texturepacks*/
-    private static final ResourceLocation vanillaInventory = new ResourceLocation("textures/gui/container/furnace.png");
+    private static final ResourceLocation vanillaInventory =
+            ClientProxy.useVanillaInventoryTextures?new ResourceLocation("textures/gui/container/furnace.png"):
+                    new ResourceLocation(TrainsInMotion.MODID, "textures/gui/furnace.png");
     /**a reference to the resource location of the vanilla chest texture, this also gets overridden by texturepacks*/
-    private static final ResourceLocation vanillaChest = new ResourceLocation("textures/gui/container/generic_54.png");
+    private static final ResourceLocation vanillaChest =
+            ClientProxy.useVanillaInventoryTextures?new ResourceLocation("textures/gui/container/generic_54.png"):
+                    new ResourceLocation(TrainsInMotion.MODID, "textures/gui/generic_54.png");
     /**a reference to the host entity that this GUI is for.*/
     private static GenericRailTransport transport;
     /**a reference to the player that opened the GUI.*/
@@ -67,16 +73,16 @@ public class GUITransport extends GuiContainer {
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
         //draw the text for trains
         if (transport instanceof EntityTrainCore) {
-            fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 4210752);
-            fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 110, 72, 4210752);
+            drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
+            drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 110, 72, 16777215);
             //draw the text for transports with large inventories
         } else if (transport.getType() != PASSENGER && transport.getInventorySize().getRow()>5) {
-            fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 4210752);
-            fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 110, 70, 4210752);
+            drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
+            drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 110, 70, 16777215);
             //draw the text for everything but the passenger car
         } else if (transport.getType() != PASSENGER){
-            fontRendererObj.drawString(StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), 8, 66-(transport.getInventorySize().getRow()*18), 4210752);
-            fontRendererObj.drawString(I18n.format("container.inventory", new Object()), 8, 80, 4210752);
+            drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), 8, 66-(transport.getInventorySize().getRow()*18), 16777215);
+            drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 8, 80, 16777215);
         }
     }
 
@@ -127,7 +133,7 @@ public class GUITransport extends GuiContainer {
             //draw the steam tank hover text
             if ((transport.getType() == TrainsInMotion.transportTypes.STEAM || transport.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM)) {
                 GL11.glPushMatrix();
-                fontRendererObj.drawString(decimal.format(transport.getDataWatcher().getWatchableObjectInt(15)*0.01f) + "C°", guiLeft+205, guiTop+72, 0);
+                drawTextOutlined(fontRendererObj, decimal.format(transport.getDataWatcher().getWatchableObjectInt(15)*0.01f) + "C°", guiLeft+205, guiTop+72, 16777215);
                 GL11.glPopMatrix();
                 if ((mouseY >= guiTop - 14 && mouseY <= guiTop + 20) &&
                         ((mouseX >= guiLeft + 178 && mouseX <= guiLeft + 196) || (mouseX >= guiLeft + 240 && mouseX <= guiLeft + 258))) {
@@ -179,24 +185,24 @@ public class GUITransport extends GuiContainer {
         } else {
             //generic to all
             if (player.getEntityId() == transport.getOwnerID()) {
-                this.buttonList.add(new GUIButton(13, guiLeft+112, guiTop + 166, 18, 18, "unlink"));
-                this.buttonList.add(new GUIButton(12, guiLeft + 166, guiTop + 166, 18, 18, "dropkey"));
+                this.buttonList.add(new GUIButton(13, guiLeft+112, guiTop + 166, 18, 20, "unlink"));
+                this.buttonList.add(new GUIButton(12, guiLeft + 166, guiTop + 166, 18, 20, "dropkey"));
             }
-            this.buttonList.add(new GUIButton(6, guiLeft + 130, guiTop + 166, 18, 18, "locked"));
-            this.buttonList.add(new GUIButton(7, guiLeft + 148, guiTop + 166, 18, 18, "coupler"));
+            this.buttonList.add(new GUIButton(6, guiLeft + 130, guiTop + 166, 18, 20, "locked"));
+            this.buttonList.add(new GUIButton(7, guiLeft + 148, guiTop + 166, 18, 20, "coupler"));
             if (transport.getLampOffset().yCoord>1) {
-                this.buttonList.add(new GUIButton(5, guiLeft + 238, guiTop + 166, 18, 18, "lamp"));
+                this.buttonList.add(new GUIButton(5, guiLeft + 238, guiTop + 166, 18, 20, "lamp"));
             }
             //train specific
             if (transport instanceof EntityTrainCore) {
                 if (player.capabilities.isCreativeMode) {
-                    this.buttonList.add(new GUIButton(11, guiLeft + 184, guiTop + 166, 18, 18, "creative"));
+                    this.buttonList.add(new GUIButton(11, guiLeft + 184, guiTop + 166, 18, 20, "creative"));
                 }
                 if (transport.getType() != TrainsInMotion.transportTypes.STEAM) {
-                    this.buttonList.add(new GUIButton(10, guiLeft + 202, guiTop + 166, 18, 18, "running"));
+                    this.buttonList.add(new GUIButton(10, guiLeft + 202, guiTop + 166, 18, 20, "running"));
                 }
-                this.buttonList.add(new GUIButton(4, guiLeft + 220, guiTop + 166, 18, 18, "brake"));
-                this.buttonList.add(new GUIButton(8, guiLeft + 256, guiTop + 166, 18, 18, "horn"));
+                this.buttonList.add(new GUIButton(4, guiLeft + 220, guiTop + 166, 18, 20, "brake"));
+                this.buttonList.add(new GUIButton(8, guiLeft + 256, guiTop + 166, 18, 20, "horn"));
 
             }
         }
@@ -290,8 +296,8 @@ public class GUITransport extends GuiContainer {
             drawTexturedRect(guiLeft + 240, guiTop-14, 0, 0, 18, 30, 16, 16);
             if (secondTankFluid>0) {
                 int liquid3 = Math.abs((secondTankFluid * 30) / transport.getTankCapacity());
-                drawTexturedRect(guiLeft+178, guiTop +18 - liquid3, 32,0, 18, liquid3, 16, 16);
-                drawTexturedRect(guiLeft+240, guiTop +18 - liquid3, 32,0, 18, liquid3, 16, 16);
+                drawTexturedRect(guiLeft+178, guiTop +16 - liquid3, 32,0, 18, liquid3, 16, 16);
+                drawTexturedRect(guiLeft+240, guiTop +16 - liquid3, 32,0, 18, liquid3, 16, 16);
             }
         }
     }
@@ -377,6 +383,27 @@ public class GUITransport extends GuiContainer {
 
 
 
+    public static void drawTextOutlined(FontRenderer font, String string, int x, int y, int color){
+        //bottom left
+        font.drawString(string, x-1, y+1, 0);
+        //bottom
+        font.drawString(string, x, y+1, 0);
+        //bottom right
+        font.drawString(string, x+1, y+1, 0);
+        //left
+        font.drawString(string, x-1, y, 0);
+        //right
+        font.drawString(string, x+1, y, 0);
+        //top left
+        font.drawString(string, x-1, y-1, 0);
+        //top
+        font.drawString(string, x, y-1, 0);
+        //top right
+        font.drawString(string, x+1, y-1, 0);
+
+
+        font.drawString(string,x,y,color);
+    }
 
 
 

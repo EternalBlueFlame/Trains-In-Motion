@@ -2,6 +2,7 @@ package ebf.tim.gui;
 
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.models.tmt.Tessellator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -33,7 +34,7 @@ public class GUIButton extends GuiButton {
     public void drawButton(Minecraft p_146112_1_, int mouseX, int mouseY) {
         if (this.visible) {
             GL11.glPushMatrix();
-            p_146112_1_.getTextureManager().bindTexture(buttonTextures);
+            Tessellator.bindTexture(buttonTextures);
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             this.field_146123_n = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
             int k = this.getHoverState(this.field_146123_n);
