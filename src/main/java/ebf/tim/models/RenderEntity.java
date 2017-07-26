@@ -6,6 +6,7 @@ import ebf.tim.models.tmt.ModelRendererTurbo;
 import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.RailUtility;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
@@ -16,6 +17,10 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static ebf.tim.models.tmt.ModelRendererTurbo.degreesF;
+import static ebf.tim.utility.RailUtility.degreesD;
+import static ebf.tim.utility.RailUtility.radianF;
 
 /**
  * <h2>Entity Rendering</h2>
@@ -136,21 +141,23 @@ public class RenderEntity extends Render {
          * Be sure animations are enabled in user settings, then check of there is something to animate.
          * if there is, then calculate the vectors and apply the animations
          */
-        if (ClientProxy.EnableAnimations && entity.frontBogie!=null&&entity.backBogie!=null) {
-            //define the rotation angle, if it's going fast enough.
-            entity.renderData.wheelPitch += (entity.backBogie.motionX > 0.25 || entity.backBogie.motionX < 0.25 || entity.backBogie.motionZ > 0.25 || entity.backBogie.motionZ < 0.25)?
-                    (float)(Math.sqrt(entity.backBogie.motionX * entity.backBogie.motionX) + Math.sqrt(entity.backBogie.motionZ * entity.backBogie.motionZ))*0.08:0;
-            if (entity.renderData.wheelPitch > 360 || entity.renderData.wheelPitch <-360) {
-                entity.renderData.wheelPitch = 0;
+        if (!Minecraft.getMinecraft().isGamePaused() &&ClientProxy.EnableAnimations && entity.backBogie!=null &&
+                (entity.backBogie.motionX > 0.1 || entity.backBogie.motionX < -0.1 || entity.backBogie.motionZ > 0.1 || entity.backBogie.motionZ < -0.1)) {
+            if (entity.renderData.wheelPitch >= 6.2831855f || entity.renderData.wheelPitch <=-6.2831855f) {
+                entity.renderData.wheelPitch -= Math.copySign(6.2831855f, entity.renderData.wheelPitch);
             }
-            if (entity.renderData.wheelPitch !=0) {
+            //define the rotation angle, if it's going fast enough.
+            entity.renderData.wheelPitch += -((Math.sqrt(entity.backBogie.motionX * entity.backBogie.motionX) + Math.sqrt(entity.backBogie.motionZ * entity.backBogie.motionZ))*0.08f);
+                    System.out.println(":" + entity.renderData.wheelPitch);
+
+            if (entity.renderData.wheelPitch != entity.renderData.lastWheelPitch) {
+                entity.renderData.lastWheelPitch =entity.renderData.wheelPitch;
                 //if it's actually moving, then define the new position
-                entity.renderData.animationCache[1][0] = entity.getPistonOffset() * RailUtility.radianF;
-                entity.renderData.animationCache[0] = RailUtility.rotatePoint(entity.renderData.animationCache[1],
-                        Math.copySign(entity.renderData.wheelPitch, 1), Math.copySign(entity.renderData.wheelPitch, 1), 0);
+
+                entity.renderData.animationCache[1][0] = entity.getPistonOffset();
                 //animate the tagged parts
                 for (StaticModelAnimator partToAnimate : entity.renderData.animatedPart) {
-                    partToAnimate.Animate(entity.renderData.wheelPitch, entity.renderData.animationCache[0]);
+                    partToAnimate.Animate(entity.renderData.wheelPitch, entity.renderData.animationCache[1]);
                 }
             }
         }

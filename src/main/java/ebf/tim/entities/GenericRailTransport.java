@@ -301,7 +301,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
             //remove this
             isDead=true;
-            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(getEntityId(), !((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode));
+            if (damageSource.getEntity() instanceof EntityPlayer) {
+                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(getEntityId(), !((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode));
+            } else {
+                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(getEntityId(),false));
+            }
             worldObj.removeEntity(this);
         }
         return false;
@@ -629,22 +633,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 int maxSpawnThisTick = 0;
                 for (float[] smoke : getSmokeOffset()) {
                     for (int i = 0; i < smoke[4]; i++) {
-                        //define the position
-                        vectorCache[7][0] = smoke[0];
-                        vectorCache[7][1] = smoke[1];
-                        vectorCache[7][2] = smoke[2];
-                        vectorCache[8] = RailUtility.rotatePoint(vectorCache[7], rotationPitch, rotationYaw, 0);
                         //we only want to spawn at most 5 particles per tick.
                         //this helps make them spawn more evenly rather than all at once. It also helps prevent a lot of lag.
                         if (getBoolean(boolValues.RUNNING) && particles.size() <= itteration && maxSpawnThisTick < 5) {
-                            particles.add(new ParticleFX(posZ, posY, posX, smoke[3], vectorCache[8],
-                                    backBogie.motionX + (rand.nextInt(40) - 20) * 0.001f,
-                                    smoke[1] * 0.05,
-                                    backBogie.motionZ + (rand.nextInt(40) - 20) * 0.001f));
+                            particles.add(new ParticleFX(this, smoke[3], smoke));
                             maxSpawnThisTick++;
                         } else if (maxSpawnThisTick == 0 && particles.size() > itteration) {
                             //if the particles have finished spawning in, move them.
-                            particles.get(itteration).onUpdate(this, posX, posY, posZ, getBoolean(boolValues.RUNNING));
+                            particles.get(itteration).onUpdate(getBoolean(boolValues.RUNNING));
                         }
                         itteration++;
                     }

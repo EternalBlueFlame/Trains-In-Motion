@@ -30,5 +30,6 @@ public class TransportRenderData {
     public List<ModelRendererTurbo> liveriesSquare = new ArrayList<ModelRendererTurbo>();
     /**the value to rotate the geometry with.*/
     public float wheelPitch=0;
+    public float lastWheelPitch =0;
 
 }

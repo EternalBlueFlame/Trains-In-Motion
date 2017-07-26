@@ -1,6 +1,8 @@
 package ebf.tim.models;
 
+import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.tmt.Tessellator;
+import ebf.tim.utility.RailUtility;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import org.lwjgl.opengl.GL11;
@@ -19,15 +21,13 @@ public class ParticleFX {
     /*the number of ticks this particle will survive till it needs to reset position.*/
     private int lifespan =-1;
     /*the X position of the particle*/
-    public float posX;
+    public double posX;
     /*the Y position of the particle*/
-    public float posY;
+    public double posY;
     /*the Z position of the particle*/
-    public float posZ;
+    public double posZ;
     /*returns if the particle should render or not*/
     public boolean shouldRender = false;
-    /*the spawn offset of the particle*/
-    private final double[] offset;
     /*the color to render the particle as*/
     private final int color;
     /*the ticks the particle has existed*/
@@ -42,12 +42,6 @@ public class ParticleFX {
     private double motionY=0;
     /*the Z motion of the particle*/
     private double motionZ=0;
-    /*the original X motion of the particle*/
-    private final double originMotionX;;
-    /*the original Y motion of the particle*/
-    private final double originMotionY;;
-    /*the original Z motion of the particle*/
-    private final double originMotionZ;
     /*a random to use for variable generating*/
     private static final Random rand = new Random();
     /*the list of objects in the hitbox*/
@@ -58,53 +52,50 @@ public class ParticleFX {
     private double oldY;
     /*the cached Z motion of the particle*/
     private double oldZ;
+    /*the host entity*/
+    private GenericRailTransport host;
+    /*the position offset to move based on the transport's rotation*/
+    private double[] offset;
 
     /**
      * Initialize the particle, basically for spawning it
-     * @param x the x position to spawn at.
-     * @param y the y position to spawn at.
-     * @param z the z position to spawn at.
      * @param color the color of the particle.
-     * @param offset the offset from the center to spawn the particle at.
-     * @param xMotion the x velocity of the particle movement.
-     * @param yMotion the y velocity of the particle movement.
-     * @param zMotion the z velocity of the particle movement.
      */
-    public ParticleFX(double x, double y, double z, float color, double[] offset, double xMotion, double yMotion, double zMotion) {
-        posX = (float) x;
-        posY = (float) y;
-        posZ = (float) z;
+    public ParticleFX(GenericRailTransport transport, float color, float[] offset) {
+        host = transport;
+        this.offset = new double[]{offset[0], offset[1], offset[2]};
+        double[] pos = RailUtility.rotatePoint(this.offset, transport.rotationPitch, transport.rotationYaw, 0);
+        posX = pos[0] + transport.posX;
+        posY = pos[1] + transport.posY;
+        posZ = pos[2] + transport.posZ;
 
-        originMotionX =xMotion;
-        originMotionY =yMotion;
-        originMotionZ =zMotion;
-        motionX =xMotion;
-        motionY =yMotion;
-        motionZ =zMotion;
 
-        this.offset = offset;
+        motionX = (rand.nextInt(40) - 20) * 0.001f;
+        motionY = this.offset[1] * 0.05;
+        motionZ = (rand.nextInt(40) - 20) * 0.001f;
+
         this.color = (int)color;
-        this.boundingBox = AxisAlignedBB.getBoundingBox(posX + offset[0] -0.1, posY + offset[1]-0.1, posZ + offset[2]-0.1, posX + offset[0]+0.1,  posY + offset[1]+0.1, posZ + offset[2]+0.1);
+        this.boundingBox = AxisAlignedBB.getBoundingBox(posX -0.1, posY -0.1, posZ -0.1, posX +0.1,  posY +0.1, posZ +0.1);
     }
 
     /**
      * <h2>movement calculations</h2>
      * call this from the host's onUpdate to update the position of the particle.
-     * @param host the host entity to get the world object from.
      */
-    public void onUpdate(Entity host, double x, double y, double z, boolean hostIsRunning){
-        posX = (float) x;
-        posY = (float) y;
-        posZ = (float) z;
+    public void onUpdate(boolean hostIsRunning){
+        posX = (float) host.posX;
+        posY = (float) host.posY;
+        posZ = (float) host.posZ;
         //if the lifespan is out we reset the information, as if we just spawned a new particle.
         if (hostIsRunning && this.ticksExisted > this.lifespan) {
             colorTint = (rand.nextInt(60) - 30)* 0.005f;
             lifespan = rand.nextInt(60) +100;
             ticksExisted =0;
-            this.boundingBox.setBounds(posX + offset[0] -0.1, posY + offset[1]-0.1, posZ + offset[2]-0.1, posX + offset[0]+0.1,  posY + offset[1]+0.1, posZ + offset[2]+0.1);
-            motionX = originMotionX;
-            motionY = originMotionY;
-            motionZ = originMotionZ;
+            double[] pos = RailUtility.rotatePoint(offset, host.rotationPitch, host.rotationYaw, 0);
+            this.boundingBox.setBounds(posX+pos[0] -0.1, posY+pos[1] -0.1, posZ+pos[2] -0.1, posX+pos[0] +0.1,  posY+pos[1] +0.1, posZ+pos[2] +0.1);
+            motionX = (rand.nextInt(40) - 20) * 0.001f;
+            motionY = this.offset[1] * 0.05;
+            motionZ = (rand.nextInt(40) - 20) * 0.001f;
             shouldRender = true;
         } else if (this.ticksExisted > this.lifespan) {
             //if the transport isn't running and this has finished it's movement, set it' position to the transport and set that it shouldn't render.

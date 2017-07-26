@@ -1,6 +1,9 @@
 package ebf.tim.models;
 
 import ebf.tim.models.tmt.ModelRendererTurbo;
+import ebf.tim.utility.RailUtility;
+
+import static ebf.tim.models.tmt.ModelRendererTurbo.degreesF;
 
 /**
  * <h2>Static model animator</h2>
@@ -16,8 +19,8 @@ public class StaticModelAnimator {
     public static final String tagAdvancedPiston = "advancedpiston";
     /**tag for animatedPart, axles, and other geometry that just spins.*/
     public static final String tagSimpleRotate = "simplerotate";
-    /**A copy of the original geometry before modifications*/
-    private final ModelRendererTurbo originalGeometryCopy;
+    /**A copy of the original Vec6F for the model part*/
+    private final float[] originalRotationValuesXYZ;
     /**a reference to the current model geometry, the one with the modifications that's actually being rendered.*/
     private ModelRendererTurbo modelRefrence;
 
@@ -26,7 +29,8 @@ public class StaticModelAnimator {
      * @param model a refrence to the model geometry to animate.
      */
     public StaticModelAnimator(ModelRendererTurbo model){
-        this.originalGeometryCopy = model;
+        this.originalRotationValuesXYZ = new float[]{model.rotationPointX, model.rotationPointY, model.rotationPointZ,
+                model.rotateAngleX, model.rotateAngleY, model.rotateAngleZ};
         modelRefrence=model;
     }
 
@@ -47,26 +51,33 @@ public class StaticModelAnimator {
      * Actually animate the geometry.
      * to add more animations override this and add your own checks before calling the super.
      * @param rotationZ the rotation degree for the animation.
-     * @param positionOffset the x/y/z of the position to move the geometry to in the animation.
      */
-    public void Animate(float rotationZ, double[] positionOffset){
-        switch (originalGeometryCopy.boxName){
+    public void Animate(float rotationZ, double[] pistonOffset){
+        switch (modelRefrence.boxName){
             //animate wheels
             case tagSimpleRotate:{
-                modelRefrence.rotateAngleZ = rotationZ;
+                modelRefrence.rotateAngleZ = rotationZ*0.3f;
                 break;
             }
             //animate simple pistons, just rotates around center
             case tagSimplePiston:{
-                modelRefrence.rotationPointY = originalGeometryCopy.rotationPointY - (float) positionOffset[1];
-                modelRefrence.rotationPointX = originalGeometryCopy.rotationPointY - (float) positionOffset[0];
+                double[] positionOffset = RailUtility.rotatePoint(pistonOffset,
+                        rotationZ *degreesF,
+                        rotationZ *degreesF, 0);
+
+                modelRefrence.rotationPointY = originalRotationValuesXYZ[1] - (float) positionOffset[1];
+                modelRefrence.rotationPointX = originalRotationValuesXYZ[0] - (float) positionOffset[0];
                 break;
             }
             //animate advanced pistons, uses position and rotation
             case tagAdvancedPiston:{
-                modelRefrence.rotationPointY = originalGeometryCopy.rotationPointY - (float)(positionOffset[2]*0.5d);
-                modelRefrence.rotationPointX = originalGeometryCopy.rotationPointX - (float)positionOffset[0];
-                modelRefrence.rotateAngleZ = originalGeometryCopy.rotateAngleZ - (float)(positionOffset[2] * 0.05d);
+                double[] positionOffset = RailUtility.rotatePoint(pistonOffset,
+                        rotationZ *degreesF,
+                        rotationZ *degreesF, 0);
+
+                modelRefrence.rotationPointY = originalRotationValuesXYZ[1] - (float)(positionOffset[2]*0.5d);
+                modelRefrence.rotationPointX = originalRotationValuesXYZ[0] - (float)positionOffset[0];
+                modelRefrence.rotateAngleZ = originalRotationValuesXYZ[5] - (float)(positionOffset[2] * 0.05d);
             }
         }
     }
