@@ -12,6 +12,7 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import org.lwjgl.input.Keyboard;
 
@@ -210,10 +211,11 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     @Override
     public ItemStack slotClick(int slotId, int dragType, int clickTypeIn, EntityPlayer player) {
         //return super.slotClick(fromSlot,0,p_75144_3_!=4?0:4,p_75144_4_);
-        //System.out.println(slotId + ":" + dragType + ":" + clickTypeIn);
+        player.addChatComponentMessage(new ChatComponentText("Slot Debug Info" + slotId + ":" + dragType + ":" + clickTypeIn));
 
         if (clickTypeIn == 4){
-            clickTypeIn = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)?1:0;
+            clickTypeIn = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)?1:
+                    slotId==-1?4:0;
         }
 
         ItemStack itemstack = null;
@@ -280,12 +282,14 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
             if (slotId == -999) { //if the slot was the cursor
                 if (inventoryplayer.getItemStack() != null) {
                     if (dragType == 0) {
-                        player.dropItem(inventoryplayer.getItemStack().getItem(),inventoryplayer.getItemStack().stackSize);
+                        if (!player.worldObj.isRemote){
+                            player.entityDropItem(inventoryplayer.getItemStack(),inventoryplayer.getItemStack().stackSize);
+                        }
                         inventoryplayer.setItemStack(null);
                     }
 
-                    if (dragType == 1) {
-                        player.dropItem(inventoryplayer.getItemStack().getItem(), 1);
+                    if (dragType == 1 && !player.worldObj.isRemote) {
+                        player.entityDropItem(inventoryplayer.getItemStack(), 1);
                     }
                 }
             } else if (clickTypeIn == 1 /*ClickType.QUICK_MOVE*/) {//used for shift click
@@ -357,8 +361,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                                 itemstack11.stackSize += j2;
                                 itemstack8 = slot6.decrStackSize(j2);
 
-                                if (itemstack8 == null)
-                                {
+                                if (itemstack8 == null) {
                                     slot6.putStack(null);
                                 }
 
@@ -397,8 +400,8 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                         slot4.putStack(itemstack6.splitStack(slot4.getSlotStackLimit()));
                         slot4.onSlotChanged();
 
-                        if (!inventoryplayer.addItemStackToInventory(itemstack10)) {
-                            player.dropItem(itemstack10.getItem(), itemstack10.stackSize);
+                        if (!inventoryplayer.addItemStackToInventory(itemstack10) && !player.worldObj.isRemote) {
+                            player.entityDropItem(itemstack10, itemstack10.stackSize);
                         }
                     } else {
                         slot4.putStack(itemstack6);
@@ -415,15 +418,18 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                 itemstack5.stackSize =itemstack5.getMaxStackSize();
                 inventoryplayer.setItemStack(itemstack5);
             }
-        } else if (clickTypeIn == 4 /*ClickType.THROW*/ && inventoryplayer.getItemStack() == null && slotId >= 0) {
+        }//theoretically case 4 will never happen, and probably wouldn't even happen in vanilla.
+        /*else if (clickTypeIn == 4 /*ClickType.THROW* && inventoryplayer.getItemStack() == null && slotId >= 0) {
             Slot slot2 = (Slot) this.inventorySlots.get(slotId);
 
             if (slot2 != null && slot2.getHasStack() && slot2.canTakeStack(player)) {
                 ItemStack itemstack4 = slot2.decrStackSize(dragType == 0 ? 1 : slot2.getStack().stackSize);
                 slot2.onSlotChanged();
-                player.dropItem(itemstack4.getItem(), itemstack4.stackSize);
+                if (!player.worldObj.isRemote) {
+                    player.entityDropItem(itemstack4, itemstack4.stackSize);
+                }
             }
-        } else if (clickTypeIn == 6/*ClickType.PICKUP_ALL*/ && slotId >= 0) {
+        }*/ else if (clickTypeIn == 6/*ClickType.PICKUP_ALL*/ && slotId >= 0) {
             Slot slot = (Slot) this.inventorySlots.get(slotId);
             ItemStack itemstack1 = inventoryplayer.getItemStack();
 

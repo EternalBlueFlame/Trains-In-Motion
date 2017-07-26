@@ -187,7 +187,13 @@ public class FuelHandler{
 		if (transport.getStackInSlot(1) != null &&
 				FluidContainerRegistry.getFluidForFilledItem(transport.getStackInSlot(1)) == null &&
 				transport.drain(null, 1000, false) != null && transport.drain(null, 1000, false).amount >= 1000) {
-			transport.setInventorySlotContents(1, FluidContainerRegistry.fillFluidContainer(transport.drain(null, 1000, false), transport.getStackInSlot(1)));
+			if (transport.getStackInSlot(1).stackSize >1){
+				transport.getStackInSlot(1).stackSize--;
+			} else {
+				transport.setInventorySlotContents(1, null);
+			}
+
+			transport.addItem(FluidContainerRegistry.fillFluidContainer(transport.drain(null, 1000, false), transport.getStackInSlot(1)));
 			if (!transport.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
 				transport.drain(null, 1000, true);
 			}

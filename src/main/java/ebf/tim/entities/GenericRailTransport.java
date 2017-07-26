@@ -1139,7 +1139,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 return;
             }
         }
-        dropItem(item.getItem(), item.stackSize);
+        entityDropItem(item, item.stackSize);
     }
 
     /**
@@ -1208,7 +1208,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public void dropAllItems() {
         for (int i = 0; i < this.items.size(); ++i) {
             if (this.items.get(i) != null) {
-                this.dropItem(this.items.get(i).getItem(),this.items.get(i).stackSize);
+                this.entityDropItem(this.items.get(i),this.items.get(i).stackSize);
                 this.items.set(i, null);
             }
         }
