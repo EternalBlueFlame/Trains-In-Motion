@@ -133,8 +133,8 @@ public class RenderEntity extends Render {
         //set the render position
         GL11.glTranslated(x, y+ RailOffset + (entity.getRenderScale()-0.0625f)*10, z);
         //rotate the model.
-        GL11.glRotatef(-yaw, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(entity.rotationPitch-180f, 1.0f, 0.0f, 0.0f);
+        GL11.glRotatef(-yaw - 180f, 0.0f, 1.0f, 0.0f);
+        GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
 
         /*
          * <h3>animations</h3>
@@ -148,7 +148,6 @@ public class RenderEntity extends Render {
             }
             //define the rotation angle, if it's going fast enough.
             entity.renderData.wheelPitch += -((Math.sqrt(entity.backBogie.motionX * entity.backBogie.motionX) + Math.sqrt(entity.backBogie.motionZ * entity.backBogie.motionZ))*0.08f);
-                    System.out.println(":" + entity.renderData.wheelPitch);
 
             if (entity.renderData.wheelPitch != entity.renderData.lastWheelPitch) {
                 entity.renderData.lastWheelPitch =entity.renderData.wheelPitch;
@@ -202,8 +201,8 @@ public class RenderEntity extends Render {
                     GL11.glTranslated(entity.renderData.animationCache[3][0]+x,entity.renderData.animationCache[3][1]+y, entity.renderData.animationCache[3][2]+z);
                     entity.renderData.bogieRenders[i].setPositionAndRotation(entity, entity.getRenderBogieOffsets().get(i));
                     //set the rotation
-                    GL11.glRotatef(-entity.renderData.bogieRenders[i].rotationYaw,0,1.0f,0);
-                    GL11.glRotatef(entity.rotationPitch - 180f, 1.0f, 0.0f, 0.0f);
+                    GL11.glRotatef(-entity.renderData.bogieRenders[i].rotationYaw - 180f,0.0f,1.0f,0);
+                    GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
                     //render the geometry
                     for (Object modelBogiePart : entity.renderData.bogieRenders[i].bogieModel.boxList) {
                         if (modelBogiePart instanceof ModelRendererTurbo) {
