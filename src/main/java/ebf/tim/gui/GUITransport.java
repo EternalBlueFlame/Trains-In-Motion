@@ -12,19 +12,26 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.fluids.FluidRegistry;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
+import javax.annotation.Nullable;
 import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 
 import static ebf.tim.TrainsInMotion.transportTypes.PASSENGER;
 
@@ -380,6 +387,366 @@ public class GUITransport extends GuiContainer {
         drawTexturedRect(guiLeft+70, guiTop - 30, 54, 51, 20,20);
         drawTexturedRect(guiLeft+150, guiTop + 44, 54, 51, 20,20);
     }
+
+
+    private boolean doubleClick;
+    private Slot lastClickSlot;
+    private long lastClickTime;
+    private int lastClickButton;
+    private Slot clickedSlot;
+    private ItemStack draggedStack;
+    private boolean isRightMouseClick;
+    private boolean ignoreMouseUp;
+    private boolean dragSplitting;
+    private int dragSplittingButton;
+    private int dragSplittingLimit;
+    private ItemStack shiftClickedSlot = null;
+    private Slot currentDragTargetSlot;
+    private long dragItemDropDelay;
+    private List<Slot> dragSplittingSlots = new ArrayList<>();
+    private int dragSplittingRemnant;
+    private GuiButton selectedButton;
+    private ItemStack returningStack;
+    private Long returningStackTime;
+    private Slot returningStackDestSlot;
+
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {
+        if (mouseButton == 0) {
+            for (int i = 0; i < this.buttonList.size(); ++i) {
+                GuiButton guibutton = (GuiButton) this.buttonList.get(i);
+
+                if (guibutton.mousePressed(this.mc, mouseX, mouseY)) {
+                    net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent.Pre event = new net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent.Pre(this, guibutton, this.buttonList);
+                    if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event)) {
+                        break;
+                    } else {
+                        guibutton = event.button;
+                        this.selectedButton = guibutton;
+                        guibutton.func_146113_a(this.mc.getSoundHandler());
+                        this.actionPerformed(guibutton);
+                        if (this.equals(this.mc.currentScreen)) {
+                            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent.Post(this, event.button, this.buttonList));
+                            //todo: maybe use this to reload the button list?
+                            return; //seriously forge? you let this madness continue if it was a button? do you expect 3 buttons and a slot to overlap eachother? why?
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("okay into the itemstack code");
+        boolean flag = this.mc.gameSettings.keyBindPickBlock.isPressed();//mouseButton - 100);
+        Slot slot = this.getSlotAtPosition(mouseX, mouseY);
+        long i = Minecraft.getSystemTime();
+        this.doubleClick = this.lastClickSlot == slot && i - this.lastClickTime < 250L && this.lastClickButton == mouseButton;
+        this.ignoreMouseUp = false;
+
+        if (mouseButton == 0 || mouseButton == 1 || flag) {
+            //todo: this is probably the source of the bugs...
+            boolean flag1 = mouseX < this.guiLeft || mouseY < this.guiTop || mouseX >= this.guiLeft + this.xSize || mouseY >= this.guiTop + this.ySize;
+            if (slot != null){ flag1 = false;} // Forge, prevent dropping of items through slots outside of GUI boundaries
+            int l = -1;
+            System.out.println(flag1 +"please dont be true");
+
+            if (slot != null) {
+                l = slot.slotNumber;
+            }
+
+            if (flag1) {
+                l = -999;
+            }
+            if (this.mc.gameSettings.touchscreen && flag1 && this.mc.thePlayer.inventory.getItemStack() == null) {
+                this.mc.displayGuiScreen(null);
+                return;
+            }
+
+            System.out.println(l + " and drag was " + dragSplitting);
+            if (l != -1) {
+                if (this.mc.gameSettings.touchscreen) {
+                    if (slot != null && slot.getHasStack()) {
+                        this.clickedSlot = slot;
+                        this.draggedStack = null;
+                        this.isRightMouseClick = mouseButton == 1;
+                    } else {
+                        this.clickedSlot = null;
+                    }
+                } else if (!this.dragSplitting) {
+                    if (this.mc.thePlayer.inventory.getItemStack() == null) {
+                        if (this.mc.gameSettings.keyBindPickBlock.isPressed()){//.isActiveAndMatches(mouseButton - 100)) {
+                            this.handleMouseClick(slot, l, mouseButton, 3 /*ClickType.CLONE*/);
+                        } else {
+                            boolean flag2 = l != -999 && (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54));
+                            int clicktype = 0 /*ClickType.PICKUP*/;
+
+                            if (flag2) {
+                                this.shiftClickedSlot = slot.getStack() != null && slot.getHasStack() ? slot.getStack().copy() : null;
+                                clicktype = 1 /*ClickType.QUICK_MOVE*/;
+                            } else if (l == -999) {
+                                clicktype = 4 /*ClickType.THROW*/;
+                            }
+
+                            this.handleMouseClick(slot, l, mouseButton, clicktype);
+                        }
+
+                        this.ignoreMouseUp = true;
+                    } else {
+                        this.dragSplitting = true;
+                        this.dragSplittingButton = mouseButton;
+                        this.dragSplittingSlots.clear();
+
+                        if (mouseButton == 0) {
+                            this.dragSplittingLimit = 0;
+                        } else if (mouseButton == 1) {
+                            this.dragSplittingLimit = 1;
+                        } else if (this.mc.gameSettings.keyBindPickBlock.isPressed()){//.isActiveAndMatches(mouseButton - 100)) {
+                            this.dragSplittingLimit = 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        this.lastClickSlot = slot;
+        this.lastClickTime = i;
+        this.lastClickButton = mouseButton;
+        this.dragSplitting = false;
+    }
+
+
+
+    @Override
+    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+        Slot slot = this.getSlotAtPosition(mouseX, mouseY);
+        ItemStack itemstack = this.mc.thePlayer.inventory.getItemStack();
+        if (this.clickedSlot != null && this.mc.gameSettings.touchscreen) {
+            if (clickedMouseButton == 0 || clickedMouseButton == 1) {
+                if (this.draggedStack == null) {
+                    if (slot != this.clickedSlot && this.clickedSlot.getStack() !=null) {
+                        this.draggedStack = this.clickedSlot.getStack().copy();
+                    }
+                } else if (this.draggedStack.stackSize > 1 && slot != null && canAddItemToSlot(slot, this.draggedStack, false)) {
+                    long i = Minecraft.getSystemTime();
+
+                    if (this.currentDragTargetSlot == slot) {
+                        if (i - this.dragItemDropDelay > 500L) {
+                            this.handleMouseClick(this.clickedSlot, this.clickedSlot.slotNumber, 0, 0 /*ClickType.PICKUP*/);
+                            this.handleMouseClick(slot, slot.slotNumber, 1, 0 /*ClickType.PICKUP*/);
+                            this.handleMouseClick(this.clickedSlot, this.clickedSlot.slotNumber, 0, 0 /*ClickType.PICKUP*/);
+                            this.dragItemDropDelay = i + 750L;
+                            this.draggedStack.stackSize--;
+                        }
+                    } else {
+                        this.currentDragTargetSlot = slot;
+                        this.dragItemDropDelay = i;
+                    }
+                }
+            }
+        }
+        else if (this.dragSplitting && slot != null && itemstack != null && itemstack.stackSize !=0 &&
+                (itemstack.stackSize > this.dragSplittingSlots.size() || this.dragSplittingLimit == 2) &&
+                canAddItemToSlot(slot, itemstack, true) && slot.isItemValid(itemstack) && this.inventorySlots.canDragIntoSlot(slot)) {
+            this.dragSplittingSlots.add(slot);
+            this.updateDragSplitting();
+        }
+    }
+
+    @Override
+    protected void mouseMovedOrUp(int mouseX, int mouseY, int state) {
+        //super.mouseReleased(mouseX, mouseY, state); //Forge, Call parent to release buttons
+        if (this.selectedButton != null && state == 0) {
+            this.selectedButton.mouseReleased(mouseX, mouseY);
+            this.selectedButton = null;
+        }
+        Slot slot = this.getSlotAtPosition(mouseX, mouseY);
+        int i = this.guiLeft;
+        int j = this.guiTop;
+        boolean flag = mouseX < this.guiLeft || mouseY < this.guiTop || mouseX >= this.guiLeft + this.xSize || mouseY >= this.guiTop + this.ySize;
+        if (slot != null) flag = false; // Forge, prevent dropping of items through slots outside of GUI boundaries
+        int k = -1;
+
+        if (slot != null) {
+            k = slot.slotNumber;
+        }
+
+        if (flag) {
+            k = -999;
+        }
+
+        if (this.doubleClick && slot != null && state == 0) {
+            if (isShiftKeyDown()) {
+                if (this.shiftClickedSlot != null) {
+                    Slot slot2;
+                    for (Object s : this.inventorySlots.inventorySlots) {
+                        if (s instanceof Slot){
+                            slot2 = (Slot)s;
+                        } else {
+                            continue;
+                        }
+                        if (slot2.canTakeStack(this.mc.thePlayer) && slot2.getHasStack() && slot2.isSlotInInventory(slot.inventory, slot.getSlotIndex()) &&
+                                canAddItemToSlot(slot2, this.shiftClickedSlot, true)) {
+                            this.handleMouseClick(slot2, slot2.slotNumber, state,  1 /*ClickType.QUICK_MOVE*/);
+                        }
+                    }
+                }
+            } else {
+                this.handleMouseClick(slot, k, state, 6/*ClickType.PICKUP_ALL*/);
+            }
+
+            this.doubleClick = false;
+            this.lastClickTime = 0L;
+        } else {
+            if (this.dragSplitting && this.dragSplittingButton != state) {
+                this.dragSplitting = false;
+                this.dragSplittingSlots.clear();
+                this.ignoreMouseUp = true;
+                return;
+            }
+
+            if (this.ignoreMouseUp) {
+                this.ignoreMouseUp = false;
+                return;
+            }
+
+            if (this.clickedSlot != null && this.mc.gameSettings.touchscreen) {
+                if (state == 0 || state == 1) {
+                    if (this.draggedStack != null && slot != this.clickedSlot) {
+                        this.draggedStack = this.clickedSlot.getStack();
+                    }
+
+                    boolean flag2 = canAddItemToSlot(slot, this.draggedStack, false);
+
+                    if (k != -1 && this.draggedStack != null && flag2) {
+                        this.handleMouseClick(this.clickedSlot, this.clickedSlot.slotNumber, state, 0 /*ClickType.PICKUP*/);
+                        this.handleMouseClick(slot, k, 0, 0 /*ClickType.PICKUP*/);
+
+                        if (this.mc.thePlayer.inventory.getItemStack() == null) {
+                            this.returningStack = null;
+                        } else {
+                            this.handleMouseClick(this.clickedSlot, this.clickedSlot.slotNumber, state, 0 /*ClickType.PICKUP*/);
+                            //this.touchUpX = mouseX - i;
+                            //this.touchUpY = mouseY - j;
+                            this.returningStackDestSlot = this.clickedSlot;
+                            this.returningStack = this.draggedStack;
+                            this.returningStackTime = Minecraft.getSystemTime();
+                        }
+                    } else if (this.draggedStack != null) {
+                        //this.touchUpX = mouseX - i;
+                        //this.touchUpY = mouseY - j;
+                        this.returningStackDestSlot = this.clickedSlot;
+                        this.returningStack = this.draggedStack;
+                        this.returningStackTime = Minecraft.getSystemTime();
+                    }
+
+                    this.draggedStack = null;
+                    this.clickedSlot = null;
+                }
+            }
+            else if (this.dragSplitting && !this.dragSplittingSlots.isEmpty()) {
+                this.handleMouseClick((Slot)null, -999, ((this.dragSplittingLimit & 3) << 2), 5/*ClickType.QUICK_CRAFT*/);
+
+                for (Slot slot1 : this.dragSplittingSlots) {
+                    this.handleMouseClick(slot1, slot1.slotNumber, (1 & 3 | (this.dragSplittingLimit & 3) << 2), 5/*ClickType.QUICK_CRAFT*/);
+                }
+
+                this.handleMouseClick(null, -999, (2 & 3 | (this.dragSplittingLimit & 3) << 2), 5/*ClickType.QUICK_CRAFT*/);
+            }
+            else if (this.mc.thePlayer.inventory.getItemStack() != null) {
+                if (this.mc.gameSettings.keyBindPickBlock.isPressed()){//isActiveAndMatches(state - 100)) {
+                    this.handleMouseClick(slot, k, state, 3 /*ClickType.CLONE*/);
+                } else {
+                    boolean flag1 = k != -999 && (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54));
+
+                    if (flag1) {
+                        this.shiftClickedSlot = slot != null && slot.getHasStack() ? slot.getStack().copy() : null;
+                    }
+
+                    this.handleMouseClick(slot, k, state, flag1 ? 1 /*ClickType.QUICK_MOVE*/ : 0 /*ClickType.PICKUP*/);
+                }
+            }
+        }
+
+        if (this.mc.thePlayer.inventory.getItemStack() == null) {
+            this.lastClickTime = 0L;
+        }
+
+        this.dragSplitting = false;
+    }
+
+    private void updateDragSplitting() {
+        ItemStack itemstack = this.mc.thePlayer.inventory.getItemStack();
+
+        if (itemstack != null && this.dragSplitting) {
+            if (this.dragSplittingLimit == 2) {
+                this.dragSplittingRemnant = itemstack.getMaxStackSize();
+            } else {
+                this.dragSplittingRemnant = itemstack.stackSize;
+
+                for (Slot slot : this.dragSplittingSlots) {
+                    ItemStack itemstack1 = itemstack.copy();
+                    ItemStack itemstack2 = slot.getStack();
+                    int i = itemstack2!=null?itemstack2.stackSize:0;
+                    computeStackSize(this.dragSplittingSlots, this.dragSplittingLimit, itemstack1, i);
+                    int j = Math.min(itemstack1.getMaxStackSize(), slot.getSlotStackLimit());
+
+                    if (itemstack1.stackSize > j) {
+                        itemstack1.stackSize =j;
+                    }
+
+                    this.dragSplittingRemnant -= itemstack1.stackSize - i;
+                }
+            }
+        }
+    }
+
+    public static void computeStackSize(List<Slot> dragSlotsIn, int dragModeIn, ItemStack stack, int slotStackSize) {
+        switch (dragModeIn) {
+            case 0: {
+                stack.stackSize = (stack.stackSize / dragSlotsIn.size());
+                break;
+            }
+            case 1: {
+                stack.stackSize = 1;
+                break;
+            }
+            case 2: {
+                stack.stackSize = stack.getMaxStackSize();
+                break; //really forge? even in 1.12 you NEVER added this break? WHY?
+            }
+            default:{
+                stack.stackSize += slotStackSize;
+            }
+        }
+    }
+
+    public static boolean canAddItemToSlot(@Nullable Slot slotIn, ItemStack stack, boolean stackSizeMatters) {
+        System.out.println("i sware im checking");
+        boolean flag = slotIn == null || !slotIn.getHasStack();
+
+        if (!flag && stack.isItemEqual(slotIn.getStack()) && ItemStack.areItemStackTagsEqual(slotIn.getStack(), stack)) {
+            return slotIn.getStack().stackSize + (stackSizeMatters ? 0 : stack.stackSize) <= stack.getMaxStackSize();
+        } else {
+            return flag;
+        }
+    }
+
+
+    private Slot getSlotAtPosition(int mouseX, int mouseY) {
+        for (int k = 0; k < this.inventorySlots.inventorySlots.size(); ++k) {
+            Slot slot = (Slot)this.inventorySlots.inventorySlots.get(k);
+
+            if (this.func_146978_c(slot.xDisplayPosition, slot.yDisplayPosition, 16, 16, mouseX, mouseY)) {
+                return slot;
+            }
+        }
+
+        return null;
+    }
+
+
+
+
+
+
 
 
 

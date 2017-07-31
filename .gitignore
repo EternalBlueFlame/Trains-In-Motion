@@ -33,3 +33,4 @@ crash-reports
 run
 lib
 /.nb-gradle/
+*.tmp
