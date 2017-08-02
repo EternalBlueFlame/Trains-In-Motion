@@ -51,6 +51,8 @@ public class EntityVATLogCar extends RollingstockBase {
      */
     @Override
     public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-1.3, 1.3);}
+    @Override
+    public double getLengthFromCenter(){return 1.2D;}
     /**
      * <h2>Inventory Size</h2>
      */
@@ -70,7 +72,7 @@ public class EntityVATLogCar extends RollingstockBase {
      * <h2>Hitbox offsets</h2>
      */
     @Override
-    public double[] getHitboxPositions(){return new double[]{-1.5d,0,1.5d};}
+    public double[] getHitboxPositions(){return new double[]{-2.1d,-1.5d,0,1.5d,2.1d};}
     /**
      * <h2>Lamp offset</h2>
      */

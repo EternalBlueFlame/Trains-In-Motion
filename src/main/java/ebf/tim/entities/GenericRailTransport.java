@@ -87,7 +87,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public ItemStack key;
     /**used to initialize a laege number of variables that are used to calculate everything from movement to linking.
      * this is so we don't have to initialize each of these variables every tick, saves CPU.*/
-    private double[][] vectorCache = new double[9][3];
+    private double[][] vectorCache = new double[10][3];
     /**the health of the entity, similar to that of EntityLiving*/
     private int health = 20;
     /**the fluidTank tank*/
@@ -206,7 +206,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * <h2>base entity overrides</h2>
      * modify basic entity variables to give different uses/values.
      */
-     /**returns if the player can push this, we actually use our own systems for this, so we return false*/
+    /**returns if the player can push this, we actually use our own systems for this, so we return false*/
     @Override
     public boolean canBePushed() {return false;}
     @Override
@@ -257,6 +257,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     }
     @Override
     public boolean attackEntityFrom(DamageSource damageSource, float p_70097_2_){
+        if (damageSource.getEntity() instanceof GenericRailTransport){
+            return false;
+        }
         //if its a creative player, destroy instantly
         if (damageSource.getEntity() instanceof EntityPlayer && ((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode && !damageSource.isProjectile()){
             health -=20;
@@ -296,6 +299,28 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId(),false));
                 hitbox.worldObj.removeEntity(hitbox);
             }
+            //be sure the front and back links are removed in the case of this entity being removed from the world.
+            if (frontLinkedID != null){
+                GenericRailTransport front = ((GenericRailTransport)worldObj.getEntityByID(frontLinkedID));
+                if(front.frontLinkedID != null && front.frontLinkedID == this.getEntityId()){
+                    front.frontLinkedID = null;
+                    front.frontLinkedTransport = null;
+                } else if(front.backLinkedID != null && front.backLinkedID == this.getEntityId()){
+                    front.backLinkedID = null;
+                    front.backLinkedTransport = null;
+                }
+            }
+            if (backLinkedID != null){
+                GenericRailTransport back = ((GenericRailTransport)worldObj.getEntityByID(backLinkedID));
+                if(back.frontLinkedID != null && back.frontLinkedID == this.getEntityId()){
+                    back.frontLinkedID = null;
+                    back.frontLinkedTransport = null;
+                } else if(back.backLinkedID != null && back.backLinkedID == this.getEntityId()){
+                    back.backLinkedID = null;
+                    back.backLinkedTransport = null;
+                }
+            }
+
             //if the damage source is an explosion, or this (from overheating as an example), we circumstantially blow up.
             //radius is defined by whether or not it's a nuclear train, and fire spread creation is defined by whether or not it's diesel.
 
@@ -307,6 +332,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 TrainsInMotion.keyChannel.sendToServer(new PacketRemove(getEntityId(),false));
             }
             worldObj.removeEntity(this);
+            return true;
         }
         return false;
     }
@@ -681,52 +707,60 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * If coupling is on then it will check sides without linked transports for anything to link to.
      */
     private GenericRailTransport linkChecker = null;
+    private Entity linkTemp = null;
     public void manageLinks() {
 
         if (!worldObj.isRemote) {
+            vectorCache[4][0] = vectorCache[4][2] =vectorCache[6][0] = vectorCache[6][2] =0;
             //manage the frontLinkedTransport link
             if (frontLinkedID != null) {
-                Entity frontLink = worldObj.getEntityByID(frontLinkedID);
-                if (frontLink instanceof GenericRailTransport) {
-                    linkChecker = (GenericRailTransport) frontLink;
-                    //to here
-                    vectorCache[3][0] = getHitboxPositions()[0] - 1;
-                    vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
-                    vectorCache[4][0] += posX;
-                    vectorCache[4][2] += posZ;
-                    //from here
-                    vectorCache[5][0] = linkChecker.getHitboxPositions()[
-                            (linkChecker.backLinkedTransport == this.getPersistentID()) ? (linkChecker.getHitboxPositions().length - 1) : 0
-                            ];
-                    vectorCache[6] = rotatePoint(vectorCache[5], 0, linkChecker.rotationYaw, 0);
-                    vectorCache[6][0] += linkChecker.posX;
-                    vectorCache[6][2] += linkChecker.posZ;
-                    frontBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
-                    backBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
+                linkTemp = worldObj.getEntityByID(frontLinkedID);
+                if (linkTemp instanceof GenericRailTransport) {
+                    linkChecker = (GenericRailTransport) linkTemp;
+                    int targetHitboxToGet =(linkChecker.frontLinkedTransport != null && linkChecker.frontLinkedTransport == this.getPersistentID())?0:linkChecker.getHitboxPositions().length-1;
+                    vectorCache[3][0] = Math.copySign((
+                            Math.sqrt((linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ - hitboxHandler.hitboxList.get(0).posZ) *
+                                    (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ - hitboxHandler.hitboxList.get(0).posZ))
+                                    +
+                                    Math.sqrt((linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX - hitboxHandler.hitboxList.get(0).posX) *
+                                            (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX - hitboxHandler.hitboxList.get(0).posX)
+                                    )
+                            ) *0.3, 1);
+                    //maybe cap the movement?
+                    vectorCache[4] = rotatePoint(vectorCache[3], 0, (float) Math.toDegrees(Math.atan2(
+                            (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ - hitboxHandler.hitboxList.get(0).posZ),
+                            (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX - hitboxHandler.hitboxList.get(0).posX)
+                    )), 0);
                 }
             }
+            linkTemp = null;
+            linkChecker = null;
             //Manage the backLinkedTransport link
             if (backLinkedID != null) {
-                Entity backLink = worldObj.getEntityByID(backLinkedID);
-                if (backLink instanceof GenericRailTransport) {
-                    linkChecker = (GenericRailTransport) backLink;
-                    //to here
-                    vectorCache[3][0] = getHitboxPositions()[getHitboxPositions().length - 1] + 1;
-                    vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
-                    vectorCache[4][0] += posX;
-                    vectorCache[4][2] += posZ;
-                    //from here
-                    vectorCache[5][0] = ((GenericRailTransport) backLink).getHitboxPositions()[
-                            (linkChecker.backLinkedTransport == this.getPersistentID()) ? (linkChecker.getHitboxPositions().length - 1) : 0
-                            ];
-                    vectorCache[6] = rotatePoint(vectorCache[5], 0, linkChecker.rotationYaw, 0);
-                    vectorCache[6][0] += linkChecker.posX;
-                    vectorCache[6][2] +=linkChecker.posZ;
-                    frontBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
-                    backBogie.addVelocity(-(vectorCache[4][0] - vectorCache[6][0]) * 0.05, 0, -(vectorCache[4][2] - vectorCache[6][2]) * 0.05);
+                linkTemp = worldObj.getEntityByID(backLinkedID);
+                if (linkTemp instanceof GenericRailTransport) {
+                    linkChecker = (GenericRailTransport) linkTemp;
+                    int targetHitboxToGet =(linkChecker.frontLinkedTransport != null && linkChecker.frontLinkedTransport == this.getPersistentID())?0:linkChecker.getHitboxPositions().length-1;
+                    vectorCache[5][0] = Math.copySign((
+                            Math.sqrt((linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ - hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posZ) *
+                                    (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ - hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posZ))
+                                    +
+                                    Math.sqrt((linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX - hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posX) *
+                                            (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX - hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posX)
+                                    )
+                    ) *0.3, 1);
+                    //maybe cap the movement?
+                    vectorCache[6] = rotatePoint(vectorCache[5], 0, (float) Math.toDegrees(Math.atan2(
+                            (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ - hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posZ),
+                            (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX - hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posX)
+                    )), 0);
                 }
             }
+
+            frontBogie.setLinkedVelocity(vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2]);
+            backBogie.setLinkedVelocity(vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2]);
             linkChecker = null;
+            linkTemp = null;
         }
     }
 
@@ -758,7 +792,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             case 4:{ //Toggle brake
                 setBoolean(boolValues.BRAKE, !bools.get(0));
                 return true;
-            }case 5:{ //Toggle lamp
+            }case 15: {
+                setBoolean(boolValues.BRAKE, false);
+            }case 5: { //Toggle lamp
                 setBoolean(boolValues.LAMP, !bools.get(2));
                 return true;
             }case 6:{ //Toggle locked
@@ -901,8 +937,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * the second represents height offset in blocks
      * the third value is for the horizontal offset*/
     public double[][] getRiderOffsets(){return new double[][]{{0,0,0}};}
-    /**returns the positions for the hitbox, they are defined by length from center.*/
-    public double[] getHitboxPositions(){return new double[]{-1,0,1};}
+    /**returns the positions for the hitbox, they are defined by length from center.
+     * must have at least 4 hitboxes, the first and last values are used for coupling positions*/
+    public double[] getHitboxPositions(){return new double[]{-1.6,1,0,1,1.6};}
     /**returns the item of the transport, this should be a static value in the transport's class.*/
     public Item getItem(){return null;}
     /**defines the size of the inventory, not counting any special slots like for fuel.

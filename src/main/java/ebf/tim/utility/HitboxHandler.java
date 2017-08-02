@@ -39,19 +39,23 @@ public class HitboxHandler {
         /**reference to the parent entity of this hitbox*/
         public GenericRailTransport parent;
         /**initializer for entity hitbox*/
-        public MultipartHitbox(IEntityMultiPart host, GenericRailTransport parent, double posX, double posY , double posZ){
-            super(host, "hitboxGeneric", 2,1);
+        public MultipartHitbox(IEntityMultiPart host, GenericRailTransport parent, double posX, double posY , double posZ, boolean small){
+            super(host, "hitboxGeneric", small?0.2f:1,small?0.1f:2);
             this.parent = parent;
             this.posX = posX;
             this.posY = posY;
             this.posZ = posZ;
-            this.setSize(1,2);
-            this.boundingBox.minX = posX-0.45;
-            this.boundingBox.minY = posY;
-            this.boundingBox.minZ = posZ-0.45;
-            this.boundingBox.maxX = posX+0.45;
-            this.boundingBox.maxY = posY+2.5;
-            this.boundingBox.maxZ = posZ+0.45;
+            if(small){
+                this.boundingBox.minX = posX - 0.045;
+                this.boundingBox.minZ = posZ - 0.045;
+                this.boundingBox.maxX = posX + 0.045;
+                this.boundingBox.maxZ = posZ + 0.045;
+            } else {
+                this.boundingBox.minX = posX - 0.45;
+                this.boundingBox.minZ = posZ - 0.45;
+                this.boundingBox.maxX = posX + 0.45;
+                this.boundingBox.maxZ = posZ + 0.45;
+            }
         }
         @Override
         public AxisAlignedBB getBoundingBox(){
@@ -88,6 +92,10 @@ public class HitboxHandler {
         public boolean isFirst(){return parent.hitboxHandler.hitboxList.get(0) == this;}
         public boolean isLast(){return parent.hitboxHandler.hitboxList.get(parent.hitboxHandler.hitboxList.size()-1) == this;}
 
+        public boolean isFront(){return parent.hitboxHandler.hitboxList.get(0) == this || parent.hitboxHandler.hitboxList.get(1) == this;}
+        public boolean isBack(){return parent.hitboxHandler.hitboxList.get(parent.hitboxHandler.hitboxList.size()-1) == this ||
+                parent.hitboxHandler.hitboxList.get(parent.hitboxHandler.hitboxList.size()-2) == this;}
+
     }
 
 
@@ -98,9 +106,11 @@ public class HitboxHandler {
     public boolean getCollision(GenericRailTransport transport){
         //Be sure the transport has hitboxes
         for (int iteration = 0; iteration < transport.getHitboxPositions().length; iteration++) {
+            //todo add to a vector cache
             double[] position = RailUtility.rotatePoint(new double[]{transport.getHitboxPositions()[iteration], 0, 0}, transport.rotationPitch, transport.rotationYaw, 0);
             if (hitboxList.size() <= iteration || transport.ticksExisted == 0) {
-                hitboxList.add(new MultipartHitbox(transport, transport, position[0] + transport.posX, position[1] + transport.posY, position[2] + transport.posZ));
+                hitboxList.add(new MultipartHitbox(transport, transport, position[0] + transport.posX, position[1] + transport.posY, position[2] + transport.posZ,
+                        (iteration==0 || iteration == transport.getHitboxPositions().length-1)));
                 transport.worldObj.spawnEntityInWorld(hitboxList.get(iteration));
             } else {
                 hitboxList.get(iteration).setLocationAndAngles(position[0] + transport.posX, position[1] + transport.posY, position[2] + transport.posZ, transport.rotationYaw, transport.rotationPitch);
@@ -112,28 +122,32 @@ public class HitboxHandler {
         int i2;
         List list;
         Entity entity;
+        MultipartHitbox tempBox;
         double[][] vectorCache = new double[2][3];
 
         //detect collisions with blocks on X, Y, and Z.
         for (MultipartHitbox box : hitboxList) {
-            //define the values as temporary variables first since it will be faster than flooring the variable every loop check
-            k1 = MathHelper.floor_double(box.boundingBox.minX);
-            l1 = MathHelper.floor_double(box.boundingBox.minY);
-            i2 = MathHelper.floor_double(box.boundingBox.minZ);
+            //skip block checking for first and last hitboxes
+            if (!box.isFirst() && !box.isLast()) {
+                //define the values as temporary variables first since it will be faster than flooring the variable every loop check
+                k1 = MathHelper.floor_double(box.boundingBox.minX);
+                l1 = MathHelper.floor_double(box.boundingBox.minY);
+                i2 = MathHelper.floor_double(box.boundingBox.minZ);
             /*
              * check if the chunk exists, then loop for X, Y, and Z to check for a rail or an air block.
              * if one isnt found return true to stop the movement.
              * @see GenericRailTransport#onUpdate()
              */
-            if (transport.worldObj.checkChunksExist(k1, l1, i2, MathHelper.floor_double(box.boundingBox.maxX), MathHelper.floor_double(box.boundingBox.maxY), MathHelper.floor_double(box.boundingBox.maxZ))) {
-                for (; k1 <= box.boundingBox.maxX; ++k1) {
-                    for (; l1 <= box.boundingBox.maxY; ++l1) {
-                        for (; i2 <= box.boundingBox.maxZ; ++i2) {
-                            Block b1 = transport.worldObj.getBlock(k1, l1, i2);
-                            if (b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2) != null &&
-                                    b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2).intersectsWith(box.getBoundingBox()) &&
-                                    b1.getBlockBoundsMaxX() + b1.getBlockBoundsMaxY() + b1.getBlockBoundsMaxZ() !=0){
-                                return true;
+                if (transport.worldObj.checkChunksExist(k1, l1, i2, MathHelper.floor_double(box.boundingBox.maxX), MathHelper.floor_double(box.boundingBox.maxY), MathHelper.floor_double(box.boundingBox.maxZ))) {
+                    for (; k1 <= box.boundingBox.maxX; ++k1) {
+                        for (; l1 <= box.boundingBox.maxY; ++l1) {
+                            for (; i2 <= box.boundingBox.maxZ; ++i2) {
+                                Block b1 = transport.worldObj.getBlock(k1, l1, i2);
+                                if (b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2) != null &&
+                                        b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2).intersectsWith(box.getBoundingBox()) &&
+                                        b1.getBlockBoundsMaxX() + b1.getBlockBoundsMaxY() + b1.getBlockBoundsMaxZ() != 0) {
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -157,52 +171,58 @@ public class HitboxHandler {
                     }
                     /*if it's something we don't collide with, skip to next iteration.*/
                     if (entity instanceof EntityBogie || entity instanceof GenericRailTransport || entity instanceof EntitySeat ||
-                            entity.ridingEntity instanceof EntitySeat || entity.ridingEntity instanceof GenericRailTransport || hitboxList.contains(entity)) {
+                            entity.ridingEntity instanceof EntitySeat || entity.ridingEntity instanceof GenericRailTransport) {
                         continue;
                     }
-                    /*if it's an item, check if we should add it to the inventory, maybe do it, and continue to the next iteration*/
-                    if (entity instanceof EntityItem){
-                            if(transport.getType().isHopper() &&
-                            transport.isItemValidForSlot(0,((EntityItem) entity).getEntityItem()) && ((EntityItem) entity).posY > transport.posY+1){
-                            transport.addItem(((EntityItem) entity).getEntityItem());
-                            ((EntityItem) entity).worldObj.removeEntity(entity);
-                        }
-                        continue;
-                    }
-
                     if(entity instanceof HitboxHandler.MultipartHitbox){
+                        tempBox = (MultipartHitbox) entity;
                         //if the box is part of a linked transport already, just skip it.
-                        if (((MultipartHitbox) entity).parent == box.parent){
+                        if (hitboxList.contains(tempBox) ||
+                                (box.parent.frontLinkedID != null && tempBox.parent.getEntityId() == box.parent.frontLinkedID) ||
+                                (box.parent.backLinkedID != null && tempBox.parent.getEntityId() == box.parent.backLinkedID)){
                             continue;
                         }
 
 
                         //check for front coupling if this is the front hitbox
-                        if (box.isFirst() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT) && box.parent.frontLinkedID == null){
+                        if (box.isFront() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT) && box.parent.frontLinkedID == null){
                             //check if we're linking to the front of the other
-                            if (((MultipartHitbox) entity).isFirst() && ((MultipartHitbox) entity).parent.frontLinkedID == null && ((MultipartHitbox) entity).parent.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT)){
-                                box.parent.frontLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
-                                ((MultipartHitbox) entity).parent.frontLinkedTransport = box.parent.getPersistentID();
+                            if (tempBox.isFirst() && tempBox.parent.frontLinkedID == null && tempBox.parent.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT)){
+                                box.parent.frontLinkedTransport = tempBox.parent.getPersistentID();
+                                tempBox.parent.frontLinkedTransport = box.parent.getPersistentID();
                                 continue;
                                 //check if we're linking to the back of the other.
-                            } else if (((MultipartHitbox) entity).isLast() && ((MultipartHitbox) entity).parent.backLinkedID == null && ((MultipartHitbox) entity).parent.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK)){
-                                box.parent.frontLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
-                                ((MultipartHitbox) entity).parent.backLinkedTransport = box.parent.getPersistentID();
+                            } else if (tempBox.isLast() && tempBox.parent.backLinkedID == null && tempBox.parent.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK)){
+                                box.parent.frontLinkedTransport = tempBox.parent.getPersistentID();
+                                tempBox.parent.backLinkedTransport = box.parent.getPersistentID();
                                 continue;
                             }
                             //otherwise check for back coupling if this is the back hitbox
-                        } else if (box.isLast() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK) && box.parent.backLinkedID == null){
-                            if (((MultipartHitbox) entity).isFirst() && ((MultipartHitbox) entity).parent.frontLinkedID == null && ((MultipartHitbox) entity).parent.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT)){
-                                box.parent.backLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
-                                ((MultipartHitbox) entity).parent.frontLinkedTransport = box.parent.getPersistentID();
+                        } else if (box.isBack() && transport.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK) && box.parent.backLinkedID == null){
+                            if (tempBox.isFirst() && tempBox.parent.frontLinkedID == null && tempBox.parent.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT)){
+                                box.parent.backLinkedTransport = tempBox.parent.getPersistentID();
+                                tempBox.parent.frontLinkedTransport = box.parent.getPersistentID();
                                 continue;
                                 //check if we're linking to the back of the other.
-                            } else if (((MultipartHitbox) entity).isLast() && ((MultipartHitbox) entity).parent.backLinkedID == null && ((MultipartHitbox) entity).parent.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK)){
-                                box.parent.backLinkedTransport = ((MultipartHitbox) entity).parent.getPersistentID();
-                                ((MultipartHitbox) entity).parent.backLinkedTransport = box.parent.getPersistentID();
+                            } else if (tempBox.isLast() && tempBox.parent.backLinkedID == null && tempBox.parent.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK)){
+                                box.parent.backLinkedTransport = tempBox.parent.getPersistentID();
+                                tempBox.parent.backLinkedTransport = box.parent.getPersistentID();
                                 continue;
                             }
                         }
+                    }
+                    //if it's the first or last box, just skip the rest of the processing.
+                    if (box.isFirst() || box.isLast()){
+                        continue;
+                    }
+                    /*if it's an item, check if we should add it to the inventory, maybe do it, and continue to the next iteration*/
+                    if (entity instanceof EntityItem){
+                        if(transport.getType().isHopper() &&
+                                transport.isItemValidForSlot(0,((EntityItem) entity).getEntityItem()) && ((EntityItem) entity).posY > transport.posY+1){
+                            transport.addItem(((EntityItem) entity).getEntityItem());
+                            ((EntityItem) entity).worldObj.removeEntity(entity);
+                        }
+                        continue;
                     }
                     if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
                         //in the case of roadkill

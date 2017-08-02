@@ -38,6 +38,9 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     private double cartVelocityY =0;
     /**client velocity used to smooth actual movement, this is a replacement for the vanilla velocity variables which have private access.*/
     private double cartVelocityZ =0;
+
+    private double linkedVelocityX=0;
+    private double linkedVelocityZ=0;
     /**client velocity multiplier used to smooth actual movement, this is a replacement for the vanilla turnProgress which has private access.*/
     private double motionProgress=0;
     /**defines if this is the front bogie of the transport*/
@@ -212,7 +215,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
             //update on normal rails
             if (worldObj.getBlock(floorX, floorY, floorZ) instanceof BlockRailBase) {
-                moveBogie(this.motionX, this.motionZ, floorX, floorY, floorZ, (BlockRailBase) this.worldObj.getBlock(floorX, floorY, floorZ));
+                moveBogie(this.motionX + linkedVelocityX, this.motionZ + linkedVelocityZ, floorX, floorY, floorZ, (BlockRailBase) this.worldObj.getBlock(floorX, floorY, floorZ));
                 //update on ZnD rails, and ones that don't extend block rail base.
             } else if (worldObj.getBlock(floorX, floorY, floorZ) instanceof ITrackBase) {
                 //update position for ZnD rails.
@@ -240,21 +243,21 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         double cachedMotionX = currentMotionX * block.getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ);
         double cachedMotionZ = currentMotionZ * block.getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ);
         //define the incrementation of movement, use the cache to store the real value and increment it down, and then throw it to the next loop, then use current for the clamped to calculate movement'
-        if (currentMotionX>0.25){
-            currentMotionX= 0.25;
-            cachedMotionX -= 0.25;
-        } else if (currentMotionX <-0.25){
-            currentMotionX = -0.25;
-            cachedMotionX += 0.25;
+        if (currentMotionX>0.2){
+            currentMotionX= 0.2;
+            cachedMotionX -= 0.2;
+        } else if (currentMotionX <-0.2){
+            currentMotionX = -0.2;
+            cachedMotionX += 0.2;
         } else {
             cachedMotionX= Math.copySign(0, currentMotionX);
         }
-        if (currentMotionZ>0.25){
-            currentMotionZ= 0.25;
-            cachedMotionZ -=0.25;
-        } else if (currentMotionZ <-0.25){
-            currentMotionZ = -0.25;
-            cachedMotionZ += 0.25;
+        if (currentMotionZ>0.2){
+            currentMotionZ= 0.2;
+            cachedMotionZ -=0.2;
+        } else if (currentMotionZ <-0.2){
+            currentMotionZ = -0.2;
+            cachedMotionZ += 0.2;
         } else {
             cachedMotionZ= Math.copySign(0, currentMotionZ);
         }
@@ -427,17 +430,22 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         motionProgress= turnProgress+2;
     }
 
+    public void setLinkedVelocity(double x, double z){
+        linkedVelocityX = x;
+        linkedVelocityZ = z;
+    }
+
     @Override
     public void setVelocity(double x, double y, double z) {
         cartVelocityX = motionX = x;
         cartVelocityY = motionY = y;
         cartVelocityZ = motionZ = z;
+        isAirBorne = true;
     }
     /**used to add to the current velocity movement, also sets this as airborne*/
     @Override
     public void addVelocity(double velocityX, double velocityY, double velocityZ){
             setVelocity(motionX + velocityX, motionY + velocityY, motionZ + velocityZ);
-            isAirBorne = true;
     }
     /**override of the super method just so we can set the position without updating the hitbox, because we don't need to.*/
     @Override

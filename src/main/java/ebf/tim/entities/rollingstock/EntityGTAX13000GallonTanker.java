@@ -50,13 +50,15 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
     @Override
     public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-2.4D, 2.4D);}
     @Override
+    public double getLengthFromCenter(){return 2.3D;}
+    @Override
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.NULL;}
     @Override
     public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.TANKER;}
     @Override
     public double[][] getRiderOffsets(){return null;}
     @Override
-    public double[] getHitboxPositions(){return new double[]{-2.75d,-1.35d,0d,1.35d,2.75d};}
+    public double[] getHitboxPositions(){return new double[]{-3.35d,-2.75d,-1.35d,0d,1.35d,2.75d,3.35d};}
     @Override
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
     @Override

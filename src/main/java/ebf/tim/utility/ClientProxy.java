@@ -39,6 +39,7 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -68,15 +69,17 @@ public class ClientProxy extends CommonProxy {
     /**defines if the inventory graphics should be loaded from a TiM URI or if vanilla graphics should be used*/
     public static boolean useVanillaInventoryTextures = true;
     /**the keybind for the lamp toggle*/
-    public static KeyBinding KeyLamp = new KeyBinding("Lamp Toggle", 38, "Trains in Motion");
+    public static KeyBinding KeyLamp = new KeyBinding("Lamp Toggle", Keyboard.KEY_L, "Trains in Motion");
     /**the keybind for the horn/whistle*/
-    public static KeyBinding KeyHorn = new KeyBinding("Use Horn/Whistle", 35, "Trains in Motion");
+    public static KeyBinding KeyHorn = new KeyBinding("Use Horn/Whistle", Keyboard.KEY_H, "Trains in Motion");
     /**the keybind for opening the inventory*/
-    public static KeyBinding KeyInventory = new KeyBinding("Open Train/rollingstock GUI", 23, "Trains in Motion");
+    public static KeyBinding KeyInventory = new KeyBinding("Open Train/rollingstock GUI",  Keyboard.KEY_I, "Trains in Motion");
     /**the keybind for acceleration*/
-    public static KeyBinding KeyAccelerate = new KeyBinding("Train Acceleration", 19, "Trains in Motion");//R
+    public static KeyBinding KeyAccelerate = new KeyBinding("Train Acceleration", Keyboard.KEY_U, "Trains in Motion");
     /**the keybind for deceleration/reverse*/
-    public static KeyBinding KeyReverse = new KeyBinding("Train Deceleration/Reverse", 33, "Trains in Motion");//F
+    public static KeyBinding KeyReverse = new KeyBinding("Train Deceleration/Reverse", Keyboard.KEY_J, "Trains in Motion");
+    /**the keybind for deceleration/reverse*/
+    public static KeyBinding KeyBrake = new KeyBinding("Train Brake", Keyboard.KEY_SPACE, "Trains in Motion");
 
     /**
      * <h2> Client GUI Redirect </h2>
@@ -123,11 +126,12 @@ public class ClientProxy extends CommonProxy {
 
         config.addCustomCategoryComment("Keybinds (Client only)", "accepted values can be set from in-game, or defined using the key code values from: http://minecraft.gamepedia.com/Key_codes");
 
-        KeyLamp.setKeyCode(config.getInt("LampKeybind", "Keybinds", 38, 0, 0, ""));
-        KeyLamp.setKeyCode(config.getInt("HornKeybind", "Keybinds", 35, 0, 0, ""));
-        KeyInventory.setKeyCode(config.getInt("InventoryKeybind", "Keybinds", 23, 0, 0, ""));
-        KeyAccelerate.setKeyCode(config.getInt("AccelerateKeybind", "Keybinds", 19, 0, 0, ""));
-        KeyReverse.setKeyCode(config.getInt("ReverseKeybind", "Keybinds", 33, 0, 0, ""));
+        KeyLamp.setKeyCode(config.getInt("LampKeybind", "Keybinds", Keyboard.KEY_L, 0, 0, ""));
+        KeyLamp.setKeyCode(config.getInt("HornKeybind", "Keybinds", Keyboard.KEY_H, 0, 0, ""));
+        KeyInventory.setKeyCode(config.getInt("InventoryKeybind", "Keybinds", Keyboard.KEY_I, 0, 0, ""));
+        KeyAccelerate.setKeyCode(config.getInt("AccelerateKeybind", "Keybinds", Keyboard.KEY_U, 0, 0, ""));
+        KeyReverse.setKeyCode(config.getInt("ReverseKeybind", "Keybinds", Keyboard.KEY_J, 0, 0, ""));
+        KeyBrake.setKeyCode(config.getInt("BrakeKeybind", "Keybinds", Keyboard.KEY_SPACE, 0, 0, ""));
     }
 
     /**the client only lamp block*/
@@ -176,6 +180,7 @@ public class ClientProxy extends CommonProxy {
         ClientRegistry.registerKeyBinding(KeyInventory);
         ClientRegistry.registerKeyBinding(KeyAccelerate);
         ClientRegistry.registerKeyBinding(KeyReverse);
+        ClientRegistry.registerKeyBinding(KeyBrake);
 
         //register the transport HUD.
         HUDTrain hud = new HUDTrain();

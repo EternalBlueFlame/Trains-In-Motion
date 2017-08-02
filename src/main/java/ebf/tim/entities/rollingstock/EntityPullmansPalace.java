@@ -47,7 +47,7 @@ public class EntityPullmansPalace extends RollingstockBase {
      * <h2>Bogie Offset</h2>
      */
     @Override
-    public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-1.75, 1.75);}
+    public double getLengthFromCenter(){return 1.7;}
     /**
      * <h2>Inventory Size</h2>
      */
@@ -67,7 +67,7 @@ public class EntityPullmansPalace extends RollingstockBase {
      * <h2>Hitbox offsets</h2>
      */
     @Override
-    public double[] getHitboxPositions(){return new double[]{-2.75d,-1.25d,0d,1.35d,2.75d};}
+    public double[] getHitboxPositions(){return new double[]{-3.35d-2.75d,-1.25d,0d,1.35d,2.75d,3.35d};}
     /**
      * <h2>Lamp offset</h2>
      */

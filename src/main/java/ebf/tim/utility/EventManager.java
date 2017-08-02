@@ -16,6 +16,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
+import org.lwjgl.input.Keyboard;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -31,7 +32,7 @@ public class EventManager {
 
     /**
      * <h2>Keybind management</h2>
-     * called when a client presses a key. this coveres pretty much everything.
+     * manages key pressed or released, since 1.7.10 has no direct support for key released we have to do it directly through LWJGL.
      * Most cases just send a packet to manage things
      * @see PacketKeyPress
      *
@@ -60,7 +61,15 @@ public class EventManager {
                 } else if (ClientProxy.KeyReverse.getIsKeyPressed()) {
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3, player.ridingEntity.getEntityId()));
                 } else if (ClientProxy.KeyHorn.isPressed()){
+                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(9, player.ridingEntity.getEntityId()));
+                } else if (ClientProxy.KeyBrake.isPressed()){
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(4, player.ridingEntity.getEntityId()));
+                }
+
+                //manage key release events
+                if (Keyboard.getEventKey() == ClientProxy.KeyBrake.getKeyCode() && !Keyboard.getEventKeyState()){
+                    System.out.println("brake was released");
+                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(15, player.ridingEntity.getEntityId()));
                 }
             }
         }

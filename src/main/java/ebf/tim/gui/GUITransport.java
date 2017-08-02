@@ -154,7 +154,7 @@ public class GUITransport extends GuiContainer {
                 drawHoveringText(Arrays.asList(
                         (transport.getTankAmount()==0?
                                 "0 " + StatCollector.translateToLocal("gui.buckets"):
-                                ((transport.getTankAmount() * 0.001f) + " " + FluidRegistry.getFluid(transport.getDataWatcher().getWatchableObjectInt(14)).getLocalizedName() + " " + StatCollector.translateToLocal("gui.buckets"))
+                                ((transport.getTankAmount() * 0.001f) + " " + StatCollector.translateToLocal(FluidRegistry.getFluid(transport.getDataWatcher().getWatchableObjectInt(14)).getUnlocalizedName()) + " " + StatCollector.translateToLocal("gui.buckets"))
                         ),
                         StatCollector.translateToLocal("gui.of") + (transport.getTankCapacity() * 0.001f) + StatCollector.translateToLocal("gui.buckets")
                 ),mouseX, mouseY, fontRendererObj);
@@ -203,13 +203,13 @@ public class GUITransport extends GuiContainer {
             //train specific
             if (transport instanceof EntityTrainCore) {
                 if (player.capabilities.isCreativeMode) {
-                    this.buttonList.add(new GUIButton(11, guiLeft + 184, guiTop + 166, 18, 20, "creative"));
+                    this.buttonList.add(new GUIButton(10, guiLeft + 184, guiTop + 166, 18, 20, "creative"));
                 }
                 if (transport.getType() != TrainsInMotion.transportTypes.STEAM) {
-                    this.buttonList.add(new GUIButton(10, guiLeft + 202, guiTop + 166, 18, 20, "running"));
+                    this.buttonList.add(new GUIButton(8, guiLeft + 202, guiTop + 166, 18, 20, "running"));
                 }
                 this.buttonList.add(new GUIButton(4, guiLeft + 220, guiTop + 166, 18, 20, "brake"));
-                this.buttonList.add(new GUIButton(8, guiLeft + 256, guiTop + 166, 18, 20, "horn"));
+                this.buttonList.add(new GUIButton(9, guiLeft + 256, guiTop + 166, 18, 20, "horn"));
 
             }
         }
@@ -389,12 +389,14 @@ public class GUITransport extends GuiContainer {
     }
 
 
+    //todo: assuming these haven't caused issues by 0.2.6.5, removed fields that are marked depreciated due to being unaccessed.
     private boolean doubleClick;
     private Slot lastClickSlot;
     private long lastClickTime;
     private int lastClickButton;
     private Slot clickedSlot;
     private ItemStack draggedStack;
+    @Deprecated
     private boolean isRightMouseClick;
     private boolean ignoreMouseUp;
     private boolean dragSplitting;
@@ -404,10 +406,14 @@ public class GUITransport extends GuiContainer {
     private Slot currentDragTargetSlot;
     private long dragItemDropDelay;
     private List<Slot> dragSplittingSlots = new ArrayList<>();
+    @Deprecated
     private int dragSplittingRemnant;
     private GuiButton selectedButton;
+    @Deprecated
     private ItemStack returningStack;
+    @Deprecated
     private Long returningStackTime;
+    @Deprecated
     private Slot returningStackDestSlot;
 
     @Override
@@ -434,7 +440,6 @@ public class GUITransport extends GuiContainer {
                 }
             }
         }
-        System.out.println("okay into the itemstack code");
         boolean flag = this.mc.gameSettings.keyBindPickBlock.isPressed();//mouseButton - 100);
         Slot slot = this.getSlotAtPosition(mouseX, mouseY);
         long i = Minecraft.getSystemTime();
@@ -446,7 +451,6 @@ public class GUITransport extends GuiContainer {
             boolean flag1 = mouseX < this.guiLeft || mouseY < this.guiTop || mouseX >= this.guiLeft + this.xSize || mouseY >= this.guiTop + this.ySize;
             if (slot != null){ flag1 = false;} // Forge, prevent dropping of items through slots outside of GUI boundaries
             int l = -1;
-            System.out.println(flag1 +"please dont be true");
 
             if (slot != null) {
                 l = slot.slotNumber;
@@ -460,7 +464,6 @@ public class GUITransport extends GuiContainer {
                 return;
             }
 
-            System.out.println(l + " and drag was " + dragSplitting);
             if (l != -1) {
                 if (this.mc.gameSettings.touchscreen) {
                     if (slot != null && slot.getHasStack()) {
@@ -719,7 +722,6 @@ public class GUITransport extends GuiContainer {
     }
 
     public static boolean canAddItemToSlot(@Nullable Slot slotIn, ItemStack stack, boolean stackSizeMatters) {
-        System.out.println("i sware im checking");
         boolean flag = slotIn == null || !slotIn.getHasStack();
 
         if (!flag && stack.isItemEqual(slotIn.getStack()) && ItemStack.areItemStackTagsEqual(slotIn.getStack(), stack)) {

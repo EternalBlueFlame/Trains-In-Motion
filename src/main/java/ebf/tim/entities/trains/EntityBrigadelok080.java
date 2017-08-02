@@ -74,7 +74,7 @@ public class EntityBrigadelok080 extends TrainBase {
         super(world);
     }
 
-    /**
+    /*
      * <h1>Variable Overrides</h1>
      * We override the functions defined in the super here, to give them different values.
      * This is more efficient than having to store them in the super, or actual variables, because we won't have to store them in the NBT or RAM.
@@ -141,7 +141,7 @@ public class EntityBrigadelok080 extends TrainBase {
      * @return defines the positions for the hitboxes in blocks. 0 being the center, negative values being towards the front.
      */
     @Override
-    public double[] getHitboxPositions(){return new double[]{-1.15d,0d,1.15d};}
+    public double[] getHitboxPositions(){return new double[]{-1.75d,-1.15d,0d,1.15d,1.75d};}
     /**
      * <h2>Lamp offset</h2>
      * @return defines the offset for the lamp in blocks.
