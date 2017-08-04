@@ -1,6 +1,7 @@
 package ebf.tim.models.tmt;
 
 import ebf.tim.models.RenderEntity;
+import ebf.tim.models.StaticModelAnimator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.model.PositionTextureVertex;
@@ -192,6 +193,11 @@ public class ModelRendererTurbo extends ModelRenderer {
      * @param d the depth of the shape, used in determining the texture
      */
     public void addRectShape(float[] v, float[] v1, float[] v2, float[] v3, float[] v4, float[] v5, float[] v6, float[] v7, float w, float h, float d) {
+        //check which sides should be rendered.
+        boolean showZ= w!=0;
+        boolean showY= h!=0;
+        boolean showX= d!=0;
+
         //small edit to prevent depth errors
         if (w ==0){
             w=0.001f;
@@ -200,10 +206,6 @@ public class ModelRendererTurbo extends ModelRenderer {
         } else if (d ==0){
             d=0.001f;
         }
-        //check which sides should be rendered.
-        boolean showZ= v7[2]+v6[2]+v5[2]+v4[2]+v3[2]+v2[2]+v1[2]+v[2]==0;
-        boolean showY= v7[1]+v6[1]+v5[1]+v4[1]+v3[1]+v2[1]+v1[1]+v[1]==0;
-        boolean showX= v7[0]+v6[0]+v5[0]+v4[0]+v3[0]+v2[0]+v1[0]+v[0]==0;
 
         PositionTextureVertex[] verts = new PositionTextureVertex[8];
         TexturedPolygon[] poly = new TexturedPolygon[(showX?2:0) + (showY?2:0) +(showZ?2:0)];

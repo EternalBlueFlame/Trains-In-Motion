@@ -21,6 +21,13 @@ minecraft {
     runDir = "run"
 }
 
+repositories {
+    maven {
+        name "ChickenBones"
+        url "http://chickenbones.net/maven/"
+    }
+}
+
 dependencies {
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
@@ -30,6 +37,9 @@ dependencies {
     // real examples
     //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
     //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
+    compile "codechicken:CodeChickenLib:1.7.10-1.1.3.138:dev"
+    compile "codechicken:CodeChickenCore:1.7.10-1.0.7.46:dev"
+    compile "codechicken:NotEnoughItems:1.7.10-1.0.5.120:dev"
 
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
