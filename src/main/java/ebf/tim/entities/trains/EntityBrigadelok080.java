@@ -141,7 +141,7 @@ public class EntityBrigadelok080 extends TrainBase {
      * @return defines the positions for the hitboxes in blocks. 0 being the center, negative values being towards the front.
      */
     @Override
-    public double[] getHitboxPositions(){return new double[]{-1.75d,-1.15d,0d,1.15d,1.75d};}
+    public double[][] getHitboxPositions(){return new double[][]{{-1.75d,0.25d,0d},{-1.15d,0.25d,0d},{0d,0.25d,0d},{1.15d, 0.25d,0d},{1.75d,0.25d,0d}};}
     /**
      * <h2>Lamp offset</h2>
      * @return defines the offset for the lamp in blocks.

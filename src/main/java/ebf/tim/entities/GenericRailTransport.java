@@ -939,7 +939,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public double[][] getRiderOffsets(){return new double[][]{{0,0,0}};}
     /**returns the positions for the hitbox, they are defined by length from center.
      * must have at least 4 hitboxes, the first and last values are used for coupling positions*/
-    public double[] getHitboxPositions(){return new double[]{-1.6,1,0,1,1.6};}
+    public double[][] getHitboxPositions(){return new double[][]{{-1.6,0,0},{1,0,0},{0,0,0},{1,0,0},{1.6,0,0}};}
     /**returns the item of the transport, this should be a static value in the transport's class.*/
     public Item getItem(){return null;}
     /**defines the size of the inventory, not counting any special slots like for fuel.

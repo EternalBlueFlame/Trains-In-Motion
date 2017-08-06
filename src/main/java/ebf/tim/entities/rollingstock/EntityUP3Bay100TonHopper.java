@@ -72,7 +72,7 @@ public class EntityUP3Bay100TonHopper extends RollingstockBase {
      * <h2>Hitbox offsets</h2>
      */
     @Override
-    public double[] getHitboxPositions(){return new double[]{-1.7d,-1.1d,0d,1.1d,1.7d};}
+    public double[][] getHitboxPositions(){return new double[][]{{-1.7d,0.25d,0d},{-1.1d,0.25d,0d},{0d,0.25d,0d},{1,0.25d,0d},{1d,0.25d,0d},{1.7d,0.25d,0d}};}
     /**
      * <h2>Lamp offset</h2>
      */
