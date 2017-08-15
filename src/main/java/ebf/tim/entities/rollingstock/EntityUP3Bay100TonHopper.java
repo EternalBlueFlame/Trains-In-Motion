@@ -2,15 +2,12 @@ package ebf.tim.entities.rollingstock;
 
 import ebf.tim.TrainsInMotion;
 import ebf.tim.api.RollingstockBase;
-import ebf.tim.entities.EntityRollingStockCore;
 import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemTransport;
 import ebf.tim.models.Bogie;
-import ebf.tim.models.rollingstock.PullmansPalace;
 import ebf.tim.models.rollingstock.UP3Bay100TonHopper;
 import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.Vec3d;
-import ebf.tim.registry.URIRegistry;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;

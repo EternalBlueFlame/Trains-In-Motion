@@ -19,7 +19,6 @@ import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
 import net.minecraft.block.Block;
-import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
@@ -30,7 +29,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.*;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -116,6 +118,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public List<ParticleFX> particles = new ArrayList<>();
     /**Used to be sure we only say once that the transport has been derailed*/
     private boolean displayDerail = false;
+    /*this is cached so we can keep the hitbox handler running even when derailed.*/
+    private boolean collision;
 
     @SideOnly(Side.CLIENT)
     public TransportRenderData renderData = new TransportRenderData();
@@ -280,61 +284,64 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
         //on Destruction
         if (health<1){
-            //remove bogies
-            frontBogie.isDead = true;
-            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(frontBogie.getEntityId(),false));
-            worldObj.removeEntity(frontBogie);
-            backBogie.isDead = true;
-            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(backBogie.getEntityId(),false));
-            worldObj.removeEntity(backBogie);
-            //remove seats
-            for (EntitySeat seat : seats) {
-                seat.isDead = true;
-                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(seat.getEntityId(),false));
-                seat.worldObj.removeEntity(seat);
-            }
-            //remove hitboxes
-            for (EntityDragonPart hitbox : hitboxHandler.hitboxList){
-                hitbox.isDead = true;
-                TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId(),false));
-                hitbox.worldObj.removeEntity(hitbox);
-            }
-            //be sure the front and back links are removed in the case of this entity being removed from the world.
-            if (frontLinkedID != null){
-                GenericRailTransport front = ((GenericRailTransport)worldObj.getEntityByID(frontLinkedID));
-                if(front.frontLinkedID != null && front.frontLinkedID == this.getEntityId()){
-                    front.frontLinkedID = null;
-                    front.frontLinkedTransport = null;
-                } else if(front.backLinkedID != null && front.backLinkedID == this.getEntityId()){
-                    front.backLinkedID = null;
-                    front.backLinkedTransport = null;
-                }
-            }
-            if (backLinkedID != null){
-                GenericRailTransport back = ((GenericRailTransport)worldObj.getEntityByID(backLinkedID));
-                if(back.frontLinkedID != null && back.frontLinkedID == this.getEntityId()){
-                    back.frontLinkedID = null;
-                    back.frontLinkedTransport = null;
-                } else if(back.backLinkedID != null && back.backLinkedID == this.getEntityId()){
-                    back.backLinkedID = null;
-                    back.backLinkedTransport = null;
-                }
-            }
-
-            //if the damage source is an explosion, or this (from overheating as an example), we circumstantially blow up.
-            //radius is defined by whether or not it's a nuclear train, and fire spread creation is defined by whether or not it's diesel.
-
             //remove this
-            isDead=true;
             if (damageSource.getEntity() instanceof EntityPlayer) {
                 TrainsInMotion.keyChannel.sendToServer(new PacketRemove(getEntityId(), !((EntityPlayer) damageSource.getEntity()).capabilities.isCreativeMode));
             } else {
                 TrainsInMotion.keyChannel.sendToServer(new PacketRemove(getEntityId(),false));
             }
-            worldObj.removeEntity(this);
+            setDead();
             return true;
         }
         return false;
+    }
+    public void setDead() {
+        super.setDead();
+        //remove bogies
+        if (frontBogie != null) {
+            frontBogie.setDead();
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(frontBogie.getEntityId(), false));
+            worldObj.removeEntity(frontBogie);
+        }
+        if (backBogie != null) {
+            backBogie.setDead();
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(backBogie.getEntityId(), false));
+            worldObj.removeEntity(backBogie);
+        }
+        //remove seats
+        for (EntitySeat seat : seats) {
+            seat.setDead();
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(seat.getEntityId(),false));
+            seat.worldObj.removeEntity(seat);
+        }
+        //remove hitboxes
+        for (EntityDragonPart hitbox : hitboxHandler.hitboxList){
+            hitbox.setDead();
+            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId(),false));
+            hitbox.worldObj.removeEntity(hitbox);
+        }
+        //be sure the front and back links are removed in the case of this entity being removed from the world.
+        if (frontLinkedID != null){
+            GenericRailTransport front = ((GenericRailTransport)worldObj.getEntityByID(frontLinkedID));
+            if(front.frontLinkedID != null && front.frontLinkedID == this.getEntityId()){
+                front.frontLinkedID = null;
+                front.frontLinkedTransport = null;
+            } else if(front.backLinkedID != null && front.backLinkedID == this.getEntityId()){
+                front.backLinkedID = null;
+                front.backLinkedTransport = null;
+            }
+        }
+        if (backLinkedID != null){
+            GenericRailTransport back = ((GenericRailTransport)worldObj.getEntityByID(backLinkedID));
+            if(back.frontLinkedID != null && back.frontLinkedID == this.getEntityId()){
+                back.frontLinkedID = null;
+                back.frontLinkedTransport = null;
+            } else if(back.backLinkedID != null && back.backLinkedID == this.getEntityId()){
+                back.backLinkedID = null;
+                back.backLinkedTransport = null;
+            }
+        }
+
     }
 
 
@@ -548,9 +555,10 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
          *
          * this stops updating if the transport derails. Why update positions of something that doesn't move? We compensate for first tick to be sure hitboxes, bogies, etc, spawn on join.
          */
+        collision = hitboxHandler.getCollision(this);
         if (frontBogie!=null && backBogie != null && (!getBoolean(boolValues.DERAILED) || ticksExisted==1)){
             //handle movement.
-            if (!hitboxHandler.getCollision(this)) {
+            if (!collision) {
                 setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
                 setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
             } else {
@@ -559,6 +567,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
                 setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
             }
+            manageLinks();
             frontVelocityX = frontBogie.motionX;
             frontVelocityZ = frontBogie.motionZ;
             backVelocityX = backBogie.motionX;
@@ -586,7 +595,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 vectorCache[0] = rotatePoint(vectorCache[1], rotationPitch, rotationYaw, 0.0f);
                 backBogie.setPosition(vectorCache[0][0] + posX, backBogie.posY, vectorCache[0][2] + posZ);
             }
-            manageLinks();
         }
 
         //rider updating isn't called if there's no driver/conductor, so just in case of that, we reposition the seats here too.
@@ -708,29 +716,73 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      */
     private GenericRailTransport linkChecker = null;
     private Entity linkTemp = null;
+    private int targetHitboxToGet;
     public void manageLinks() {
 
+
+
+        if (worldObj.isRemote || (frontLinkedID == null && backLinkedID == null)) {//Do you really need an isRemote call here? Perhaps just make sure the method is called on remote only by checking before actually calling it (unless you override it somewhere for client-side funtionality as well, of course).
+            return;
+        }
+
+        //reset vector cache and create temporary fields
+        vectorCache[4][0] = vectorCache[4][2] = vectorCache[6][0] = vectorCache[6][2] =0;
+        GenericRailTransport linkChecker;
+        Entity entity;
+        HitboxHandler.MultipartHitbox targetBB;
+        HitboxHandler.MultipartHitbox currentBB;
+
+        //manage the frontLinkedTransport link
+        if (frontLinkedID != null) {
+            entity = worldObj.getEntityByID(frontLinkedID);
+            if (entity instanceof GenericRailTransport) {
+                linkChecker = (GenericRailTransport) entity;
+                int targetHitboxToGet = (this.getPersistentID().equals(linkChecker.frontLinkedTransport)) ? 0 : linkChecker.getHitboxPositions().length-1;
+                targetBB = linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet);
+                currentBB = this.hitboxHandler.hitboxList.get(0);
+                double diffX = targetBB.posX - currentBB.posX;
+                double diffZ = targetBB.posZ - currentBB.posZ;
+                vectorCache[3][0] = (Math.abs(diffZ) + Math.abs(diffX)) * 0.3;
+
+                vectorCache[4] = rotatePoint(vectorCache[3], 0, (float) Math.toDegrees(Math.atan2(diffZ, diffX)), 0);
+            }
+        }
+        //Manage the backLinkedTransport link
+        if (backLinkedID != null) {
+            entity = worldObj.getEntityByID(backLinkedID);
+            if (entity instanceof GenericRailTransport) {
+                linkChecker = (GenericRailTransport) entity;
+                int targetHitboxToGet = (this.getPersistentID().equals(linkChecker.frontLinkedTransport)) ? 0 : linkChecker.getHitboxPositions().length-1;
+                targetBB = linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet);
+                currentBB = this.hitboxHandler.hitboxList.get(getHitboxPositions().length-1);
+                double diffX = targetBB.posX - currentBB.posX;
+                double diffZ = targetBB.posZ - currentBB.posZ;
+                vectorCache[3][0] = (Math.abs(diffZ) + Math.abs(diffX)) * 0.3;
+
+                vectorCache[6] = rotatePoint(vectorCache[3], 0, (float) Math.toDegrees(Math.atan2(diffZ, diffX)), 0);
+            }
+        }
+
+        //if (Math.abs(vectorCache[4][0] + vectorCache[6][0]) > 0.05) {
+            frontBogie.moveLinked(rotationPitch, rotationYaw, vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2], weightKg());
+            backBogie.moveLinked(rotationPitch, rotationYaw, vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2], weightKg());
+        //}
+
+
+/*
         if (!worldObj.isRemote) {
-            vectorCache[4][0] = vectorCache[4][2] =vectorCache[6][0] = vectorCache[6][2] =0;
+            vectorCache[3][0] = vectorCache[3][2] =vectorCache[4][0] = vectorCache[4][2] =0;
             //manage the frontLinkedTransport link
             if (frontLinkedID != null) {
                 linkTemp = worldObj.getEntityByID(frontLinkedID);
                 if (linkTemp instanceof GenericRailTransport) {
                     linkChecker = (GenericRailTransport) linkTemp;
-                    int targetHitboxToGet =(linkChecker.frontLinkedTransport != null && linkChecker.frontLinkedTransport == this.getPersistentID())?0:linkChecker.getHitboxPositions().length-1;
-                    vectorCache[3][0] = Math.copySign((
-                            Math.sqrt((linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ - hitboxHandler.hitboxList.get(0).posZ) *
-                                    (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ - hitboxHandler.hitboxList.get(0).posZ))
-                                    +
-                                    Math.sqrt((linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX - hitboxHandler.hitboxList.get(0).posX) *
-                                            (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX - hitboxHandler.hitboxList.get(0).posX)
-                                    )
-                            ) *0.3, 1);
-                    //maybe cap the movement?
-                    vectorCache[4] = rotatePoint(vectorCache[3], 0, (float) Math.toDegrees(Math.atan2(
-                            (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ - hitboxHandler.hitboxList.get(0).posZ),
-                            (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX - hitboxHandler.hitboxList.get(0).posX)
-                    )), 0);
+                    targetHitboxToGet =(linkChecker.frontLinkedTransport != null && linkChecker.frontLinkedTransport == this.getPersistentID())?0:linkChecker.getHitboxPositions().length-1;
+
+                    vectorCache[4][0] = (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX * linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX -
+                            hitboxHandler.hitboxList.get(0).posX * hitboxHandler.hitboxList.get(0).posX);
+                    vectorCache[4][2] = (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ * linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ -
+                            hitboxHandler.hitboxList.get(0).posZ * hitboxHandler.hitboxList.get(0).posZ);
                 }
             }
             linkTemp = null;
@@ -740,28 +792,25 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 linkTemp = worldObj.getEntityByID(backLinkedID);
                 if (linkTemp instanceof GenericRailTransport) {
                     linkChecker = (GenericRailTransport) linkTemp;
-                    int targetHitboxToGet =(linkChecker.frontLinkedTransport != null && linkChecker.frontLinkedTransport == this.getPersistentID())?0:linkChecker.getHitboxPositions().length-1;
-                    vectorCache[5][0] = Math.copySign((
-                            Math.sqrt((linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ - hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posZ) *
-                                    (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ - hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posZ))
-                                    +
-                                    Math.sqrt((linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX - hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posX) *
-                                            (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX - hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posX)
-                                    )
-                    ) *0.3, 1);
-                    //maybe cap the movement?
-                    vectorCache[6] = rotatePoint(vectorCache[5], 0, (float) Math.toDegrees(Math.atan2(
-                            (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ - hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posZ),
-                            (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX - hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posX)
-                    )), 0);
+                    targetHitboxToGet =(linkChecker.frontLinkedTransport != null && linkChecker.frontLinkedTransport == this.getPersistentID())?0:linkChecker.getHitboxPositions().length-1;
+
+                    vectorCache[4][0] += (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX * linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX -
+                            hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posX * hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posX);
+                    vectorCache[4][2] += (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ * linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ -
+                            hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posZ * hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posZ);
                 }
             }
-
-            frontBogie.setLinkedVelocity(vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2]);
-            backBogie.setLinkedVelocity(vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2]);
+            vectorCache[5][0] =(vectorCache[4][0] + vectorCache[4][2])*0.001;
+            //works perfectly until one of the values goes negative. maybe subtract 180 from the yaw if whatever circumstance causes it is true
+            while(vectorCache[5][0] <-0.01 || vectorCache[5][0]>0.01){
+                vectorCache[5][0] *= 0.3;
+                vectorCache[4] = RailUtility.rotatePoint(vectorCache[5], 0, rotationYaw, 0);
+                frontBogie.moveLinked(rotationPitch, rotationYaw, -vectorCache[4][0], -vectorCache[4][2], weightKg());
+                backBogie.moveLinked(rotationPitch, rotationYaw, -vectorCache[4][0], -vectorCache[4][2], weightKg());
+            }
             linkChecker = null;
             linkTemp = null;
-        }
+        }*/
     }
 
     /**

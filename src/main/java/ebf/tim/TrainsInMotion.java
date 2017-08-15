@@ -22,7 +22,6 @@ import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.EventManager;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;

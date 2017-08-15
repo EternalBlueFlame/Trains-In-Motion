@@ -1,7 +1,6 @@
 package ebf.tim.registry;
 
 
-import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;

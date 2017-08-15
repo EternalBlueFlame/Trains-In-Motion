@@ -12,13 +12,11 @@ import mods.railcraft.api.carts.IRoutableCart;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.block.BlockRailBase;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import zoranodensha.api.structures.tracks.ITrackBase;
@@ -38,9 +36,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     private double cartVelocityY =0;
     /**client velocity used to smooth actual movement, this is a replacement for the vanilla velocity variables which have private access.*/
     private double cartVelocityZ =0;
-
-    private double linkedVelocityX=0;
-    private double linkedVelocityZ=0;
     /**client velocity multiplier used to smooth actual movement, this is a replacement for the vanilla turnProgress which has private access.*/
     private double motionProgress=0;
     /**defines if this is the front bogie of the transport*/
@@ -186,7 +181,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                     motionX =0;
                     this.cartVelocityX =0;
                 } else {
-                    this.motionX *= 0.75-(weight*8.2673352e-7);
+                    this.motionX *= 0.85-(weight*8.2673352e-7);
                     this.cartVelocityX *= 0.75-(weight*8.2673352e-7);
                 }
                 if (motionZ <0.01 && motionZ >-0.01){
@@ -194,7 +189,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                     this.cartVelocityZ =0;
                 } else {
                     this.motionZ *= 0.75-(weight*8.2673352e-7);
-                    this.cartVelocityZ *= 0.75-(weight*8.2673352e-7);
+                    this.cartVelocityZ *= 0.85-(weight*8.2673352e-7);
                 }
             } else if ((!isRunning && isTrain) || !isTrain){
                 if (motionX <0.005 && motionX >-0.005){
@@ -213,13 +208,16 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 }
             }
 
+            Block block = worldObj.getBlock(floorX, floorY, floorZ);
             //update on normal rails
-            if (worldObj.getBlock(floorX, floorY, floorZ) instanceof BlockRailBase) {
-                moveBogie(this.motionX + linkedVelocityX, this.motionZ + linkedVelocityZ, floorX, floorY, floorZ, (BlockRailBase) this.worldObj.getBlock(floorX, floorY, floorZ));
+            if (block instanceof BlockRailBase) {
+                moveBogie(this.motionX * ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ),
+                        this.motionZ * ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ),
+                        floorX, floorY, floorZ, (BlockRailBase) block);
                 //update on ZnD rails, and ones that don't extend block rail base.
-            } else if (worldObj.getBlock(floorX, floorY, floorZ) instanceof ITrackBase) {
+            } else if (block instanceof ITrackBase) {
                 //update position for ZnD rails.
-                moveBogieZnD(this.motionX, this.motionZ, floorX, floorY, floorZ, (ITrackBase) this.worldObj.getBlock(floorX, floorY, floorZ));
+                moveBogieZnD(this.motionX, this.motionZ, floorX, floorY, floorZ, (ITrackBase) block);
             } else {
                 return true;
             }
@@ -228,6 +226,74 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     }
 
 
+    public void moveLinked(float pitch, float yaw, double linkedVelocityX, double linkedVelocityZ, float weight){
+        this.setRotation(yaw, pitch);
+
+
+        //client only, update position
+        if (this.worldObj.isRemote) {
+            if (motionProgress > 0) {
+                this.posX += (prevPosX - this.posX) / motionProgress;
+                this.posY += (((prevPosY - this.posY) + yOffset) / motionProgress);
+                this.posZ += (prevPosZ - this.posZ) / motionProgress;
+                --motionProgress;
+            }
+        } else {
+            //update old position, add the gravity, and get the block below this,
+            this.prevPosX = this.posX;
+            this.prevPosY = this.posY;
+            this.prevPosZ = this.posZ;
+            int floorX = MathHelper.floor_double(this.posX);
+            int floorY = MathHelper.floor_double(this.posY);
+            int floorZ = MathHelper.floor_double(this.posZ);
+            Block b = worldObj.getBlock(floorX, floorY, floorZ);
+            //compensate for y offsets based on current position, just in case the movement is too steep.
+            if (!BlockRailBase.func_150049_b_(this.worldObj, floorX, floorY, floorZ)) {
+                if (BlockRailBase.func_150049_b_(this.worldObj, floorX, floorY - 1, floorZ)) {
+                    --floorY;
+                } else if (b instanceof BlockAir && worldObj.getBlock(floorX, floorY - 1, floorZ) instanceof BlockAir && posY > -64) {
+                    posY -= 0.1D;
+                    return;
+                }
+            }
+            if (motionX <0.005 && motionX >-0.005){
+                motionX =0;
+                this.cartVelocityX =0;
+            } else {
+                this.motionX *= 0.9-(weight*0.00000110231);
+                this.cartVelocityX *= 0.9-(weight*0.00000110231);
+            }
+            if (motionZ <0.005 && motionZ >-0.005){
+                motionZ =0;
+                this.cartVelocityZ =0;
+            } else {
+                this.motionZ *= 0.9-(weight*0.00000110231);
+                this.cartVelocityZ *= 0.9-(weight*0.00000110231);
+            }
+
+
+            //update on normal rails
+            if (b instanceof BlockRailBase) {
+                moveBogie(linkedVelocityX, linkedVelocityZ, floorX, floorY, floorZ, (BlockRailBase) b);
+                //update on ZnD rails, and ones that don't extend block rail base.
+            } else if (b instanceof ITrackBase) {
+                //update position for ZnD rails.
+                moveBogieZnD(this.motionX, this.motionZ, floorX, floorY, floorZ, (ITrackBase) b);
+            } else {
+                posX += linkedVelocityX;
+                posZ += linkedVelocityZ;
+            }
+        }
+    }
+    private double cachedMotionX;
+    private double cachedMotionZ;
+    private double railPathX;
+    private double railPathZ;
+    private double railPathSqrt;
+    private double motionSqrt;
+    private double railPathX2;
+    private double railPathZ2;
+    private double railPathDirection;
     /**
      * <h2>incrementally move the bogie</h2>
      * moves the entity in increments of a quarter block, the calculations are basically the same as vanilla.
@@ -240,24 +306,24 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @param block the block at the next position
      */
     private void moveBogie(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, BlockRailBase block) {
-        double cachedMotionX = currentMotionX * block.getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ);
-        double cachedMotionZ = currentMotionZ * block.getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ);
+        cachedMotionX = currentMotionX;// * block.getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ);
+        cachedMotionZ = currentMotionZ;// * block.getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ);
         //define the incrementation of movement, use the cache to store the real value and increment it down, and then throw it to the next loop, then use current for the clamped to calculate movement'
-        if (currentMotionX>0.2){
-            currentMotionX= 0.2;
-            cachedMotionX -= 0.2;
-        } else if (currentMotionX <-0.2){
-            currentMotionX = -0.2;
-            cachedMotionX += 0.2;
+        if (currentMotionX>0.3){
+            currentMotionX= 0.3;
+            cachedMotionX -= 0.3;
+        } else if (currentMotionX <-0.3){
+            currentMotionX = -0.3;
+            cachedMotionX += 0.3;
         } else {
             cachedMotionX= Math.copySign(0, currentMotionX);
         }
-        if (currentMotionZ>0.2){
-            currentMotionZ= 0.2;
-            cachedMotionZ -=0.2;
-        } else if (currentMotionZ <-0.2){
-            currentMotionZ = -0.2;
-            cachedMotionZ += 0.2;
+        if (currentMotionZ>0.3){
+            currentMotionZ= 0.3;
+            cachedMotionZ -=0.3;
+        } else if (currentMotionZ <-0.3){
+            currentMotionZ = -0.3;
+            cachedMotionZ += 0.3;
         } else {
             cachedMotionZ= Math.copySign(0, currentMotionZ);
         }
@@ -266,18 +332,18 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
         //add the uphill/downhill velocity
         switch (railMetadata){
-            case 2:{this.motionX -= 0.0078125D; this.posY = (double)(floorY + 1); break;}
-            case 3:{this.motionX += 0.0078125D; this.posY = (double)(floorY + 1); break;}
-            case 4:{this.motionZ += 0.0078125D; this.posY = (double)(floorY + 1); break;}
-            case 5:{this.motionZ -= 0.0078125D; this.posY = (double)(floorY + 1); break;}
+            case 2:{currentMotionX -= 0.0078125D; this.posY = (double)(floorY + 1); break;}
+            case 3:{currentMotionX += 0.0078125D; this.posY = (double)(floorY + 1); break;}
+            case 4:{currentMotionZ += 0.0078125D; this.posY = (double)(floorY + 1); break;}
+            case 5:{currentMotionZ -= 0.0078125D; this.posY = (double)(floorY + 1); break;}
         }
 
         //beginMagic();
 
         //figure out the current rail's direction
-        double railPathX = (vanillaRailMatrix[railMetadata][1][0] - vanillaRailMatrix[railMetadata][0][0]);
-        double railPathZ = (vanillaRailMatrix[railMetadata][1][2] - vanillaRailMatrix[railMetadata][0][2]);
-        double railPathSqrt = Math.sqrt(railPathX * railPathX + railPathZ * railPathZ);
+        railPathX = (vanillaRailMatrix[railMetadata][1][0] - vanillaRailMatrix[railMetadata][0][0]);
+        railPathZ = (vanillaRailMatrix[railMetadata][1][2] - vanillaRailMatrix[railMetadata][0][2]);
+        railPathSqrt = Math.sqrt(railPathX * railPathX + railPathZ * railPathZ);
 
         //if it ends up being reverse of what it should be, inverse the motion.
         if (currentMotionX * railPathX + currentMotionZ * railPathZ < 0.0D) {
@@ -286,19 +352,19 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         }
 
         //define the motion for current and overall based on the rail path for the relevant movement, so they are in sync.
-        double motionSqrt = Math.sqrt(currentMotionX * currentMotionX + currentMotionZ * currentMotionZ);
+        motionSqrt = Math.sqrt(currentMotionX * currentMotionX + currentMotionZ * currentMotionZ);
         if (motionSqrt > 2.0D) {
             motionSqrt = 2.0D;
         }
-        currentMotionX = motionSqrt * railPathX / railPathSqrt;
-        currentMotionZ = motionSqrt * railPathZ / railPathSqrt;
+        currentMotionX = motionSqrt * (railPathX / railPathSqrt);
+        currentMotionZ = motionSqrt * (railPathZ / railPathSqrt);
 
         motionSqrt = Math.sqrt(motionX * motionX +motionZ * motionZ);
         if (motionSqrt > 2.0D) {
             motionSqrt = 2.0D;
         }
-        motionX = motionSqrt * railPathX / railPathSqrt;
-        motionZ = motionSqrt * railPathZ / railPathSqrt;
+        motionX = motionSqrt * (railPathX / railPathSqrt);
+        motionZ = motionSqrt * (railPathZ / railPathSqrt);
 
         if (cachedMotionX !=0 || cachedMotionZ !=0) {
             //define the motion based on the rail path for current movement, and the next, so they are in sync.
@@ -311,25 +377,24 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         }
 
         //define the rail path again, for reasons.....
-        double d8 = floorX + 0.5D + vanillaRailMatrix[railMetadata][0][0] * 0.5D;
-        double d9 = floorZ + 0.5D + vanillaRailMatrix[railMetadata][0][2] * 0.5D;
-        railPathX = (floorX + 0.5D + vanillaRailMatrix[railMetadata][1][0] * 0.5D) - d8;
-        railPathZ = (floorZ + 0.5D + vanillaRailMatrix[railMetadata][1][2] * 0.5D) - d9;
+        railPathX2 = floorX + 0.5D + vanillaRailMatrix[railMetadata][0][0] * 0.5D;
+        railPathZ2 = floorZ + 0.5D + vanillaRailMatrix[railMetadata][0][2] * 0.5D;
+        railPathX = (floorX + 0.5D + vanillaRailMatrix[railMetadata][1][0] * 0.5D) - railPathX2;
+        railPathZ = (floorZ + 0.5D + vanillaRailMatrix[railMetadata][1][2] * 0.5D) - railPathZ2;
 
         //pick the bigger one
-        double d7;
         if (railPathX == 0.0D) {
-            this.posX = (double)floorX + 0.5D;
-            d7 = this.posZ - (double)floorZ;
+            //this.posX = floorX + 0.5D;
+            railPathDirection = this.posZ - floorZ;
         } else if (railPathZ == 0.0D) {
-            this.posZ = (double)floorZ + 0.5D;
-            d7 = this.posX - (double)floorX;
+            //this.posZ = floorZ + 0.5D;
+            railPathDirection = this.posX - floorX;
         } else {
-            d7 = ((this.posX - d8) * railPathX + (this.posZ - d9) * railPathZ) * 2.0D;
+            railPathDirection = ((this.posX - railPathX2) * railPathX + (this.posZ - railPathZ2) * railPathZ) * 2.0D;
         }
         //actually set the movement
-        this.posX = (d8 + railPathX * d7) + currentMotionX;
-        this.posZ = (d9 + railPathZ * d7) + currentMotionZ;
+        this.posX = (railPathX2 + railPathX * railPathDirection) + currentMotionX;
+        this.posZ = (railPathZ2 + railPathZ * railPathDirection) + currentMotionZ;
         this.prevPosY =motionY;
         //set the Y position
         if (vanillaRailMatrix[railMetadata][0][1] != 0 && MathHelper.floor_double(this.posX) - floorX == vanillaRailMatrix[railMetadata][0][0] && MathHelper.floor_double(this.posZ) - floorZ == vanillaRailMatrix[railMetadata][0][2]) {
@@ -428,11 +493,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         motionY = cartVelocityY;
         motionZ = cartVelocityZ;
         motionProgress= turnProgress+2;
-    }
-
-    public void setLinkedVelocity(double x, double z){
-        linkedVelocityX = x;
-        linkedVelocityZ = z;
     }
 
     @Override

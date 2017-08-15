@@ -1,7 +1,6 @@
 package ebf.tim.gui;
 
 import codechicken.nei.NEIClientConfig;
-import cpw.mods.fml.common.*;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
@@ -14,25 +13,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.fluids.FluidRegistry;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
-import javax.annotation.Nullable;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.Arrays;
 
 import static ebf.tim.TrainsInMotion.transportTypes.PASSENGER;
 
@@ -62,7 +55,6 @@ public class GUITransport extends GuiContainer {
     /**the center position for the inventory render*/
     private int yCenter=0;
     private Boolean NEIEnabled = null;
-    private boolean NEIHidden = false;
 
     private static DecimalFormat decimal = new DecimalFormat("#.##");
 
@@ -181,6 +173,7 @@ public class GUITransport extends GuiContainer {
     @Override
     public void initGui() {
         super.initGui();
+        initNEI();
 
 
         yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
@@ -411,25 +404,22 @@ public class GUITransport extends GuiContainer {
         font.drawString(string,x,y,color);
     }
 
+    @cpw.mods.fml.common.Optional.Method(modid = "NotEnoughItems")
+    private void initNEI(){
+        NEIEnabled = NEIClientConfig.isEnabled();
+        NEIClientConfig.setEnabled(!NEIClientConfig.isHidden());
+    }
 
     //NEI support for GUI because when it's hidden the widgets remain and you can't click through them, so we have to disable NEI when you hide it..
     @cpw.mods.fml.common.Optional.Method(modid = "NotEnoughItems")
     @Override
     protected void keyTyped(char p_73869_1_, int p_73869_2_) {
+
         if (Keyboard.isKeyDown(NEIClientConfig.getKeyBinding("gui.hide"))) {
-            if(NEIEnabled == null) {
-                NEIEnabled = NEIClientConfig.isEnabled();
-                NEIHidden = NEIClientConfig.isHidden();
-            }
-            NEIClientConfig.setEnabled( NEIClientConfig.isHidden());
+            NEIClientConfig.setEnabled(NEIClientConfig.isHidden());
         }
         if (p_73869_2_ == 1 || p_73869_2_ == this.mc.gameSettings.keyBindInventory.getKeyCode()){
-            if (NEIEnabled != null) {
-                NEIClientConfig.setEnabled(NEIEnabled);
-                if (NEIHidden != NEIClientConfig.getBooleanSetting("inventory.hidden")) {
-                    NEIClientConfig.toggleBooleanSetting("inventory.hidden");
-                }
-            }
+            NEIClientConfig.setEnabled(NEIEnabled);
         }
 
         super.keyTyped(p_73869_1_, p_73869_2_);

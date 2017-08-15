@@ -1,7 +1,6 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.ModelRendererTurbo;
 import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.utility.ClientProxy;
@@ -14,13 +13,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static ebf.tim.models.tmt.ModelRendererTurbo.degreesF;
-import static ebf.tim.utility.RailUtility.degreesD;
-import static ebf.tim.utility.RailUtility.radianF;
 
 /**
  * <h2>Entity Rendering</h2>

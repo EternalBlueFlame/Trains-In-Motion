@@ -9,7 +9,6 @@ package ebf.tim.models.rails;
 
 import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.ModelRendererTurbo;
-import net.minecraft.entity.Entity;
 
 public class ModelRailStraight extends ModelBase
 {

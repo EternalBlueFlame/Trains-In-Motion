@@ -1,6 +1,5 @@
 package ebf.tim.gui;
 
-import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.tmt.Tessellator;
 import net.minecraft.client.Minecraft;

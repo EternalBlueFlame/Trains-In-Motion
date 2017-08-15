@@ -2,8 +2,12 @@ package ebf.tim.utility;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ebf.tim.entities.*;
+import ebf.tim.entities.EntityBogie;
+import ebf.tim.entities.EntitySeat;
+import ebf.tim.entities.EntityTrainCore;
+import ebf.tim.entities.GenericRailTransport;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
@@ -12,6 +16,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
+import zoranodensha.api.structures.tracks.ITrackBase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +129,9 @@ public class HitboxHandler {
         Entity entity;
         MultipartHitbox tempBox;
         double[][] vectorCache = new double[2][3];
+        boolean containsRail = false;
+        boolean detectedCollision = false;
+        Block b1;
 
         //detect collisions with blocks on X, Y, and Z.
         for (MultipartHitbox box : hitboxList) {
@@ -139,17 +147,23 @@ public class HitboxHandler {
              * @see GenericRailTransport#onUpdate()
              */
                 if (transport.worldObj.checkChunksExist(k1, l1, i2, MathHelper.floor_double(box.boundingBox.maxX), MathHelper.floor_double(box.boundingBox.maxY), MathHelper.floor_double(box.boundingBox.maxZ))) {
-                    for (; k1 <= box.boundingBox.maxX; ++k1) {
-                        for (; l1 <= box.boundingBox.maxY; ++l1) {
+                    for (; k1 <= box.boundingBox.maxX && !containsRail; ++k1) {
+                        for (; l1 <= box.boundingBox.maxY && !containsRail; ++l1) {
                             for (; i2 <= box.boundingBox.maxZ; ++i2) {
-                                Block b1 = transport.worldObj.getBlock(k1, l1, i2);
-                                if (b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2) != null &&
-                                        b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2).intersectsWith(box.getBoundingBox()) &&
-                                        b1.getBlockBoundsMaxX() + b1.getBlockBoundsMaxY() + b1.getBlockBoundsMaxZ() != 0) {
-                                    return true;
+                                b1 = transport.worldObj.getBlock(k1, l1, i2);
+                                if (b1 instanceof BlockRailBase || b1 instanceof ITrackBase) {
+                                    containsRail = true;
+                                    break;
+                                } else if (b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2) != null &&
+                                        b1.getCollisionBoundingBoxFromPool(transport.worldObj, k1, l1, i2).intersectsWith(box.getBoundingBox())) {
+                                    detectedCollision = true;
                                 }
                             }
                         }
+                    }
+
+                    if (!containsRail && detectedCollision){
+                        return true;
                     }
                 }
             }
@@ -180,7 +194,10 @@ public class HitboxHandler {
                         if (hitboxList.contains(tempBox) ||
                                 (box.parent.frontLinkedID != null && tempBox.parent.getEntityId() == box.parent.frontLinkedID) ||
                                 (box.parent.backLinkedID != null && tempBox.parent.getEntityId() == box.parent.backLinkedID)){
-                            continue;
+
+                            //if ( transport.worldObj.getEntitiesWithinAABBExcludingEntity(transport, box.boundingBox).contains(entity)) {
+                                continue;
+                            //}
                         }
 
 
@@ -224,6 +241,9 @@ public class HitboxHandler {
                         }
                         continue;
                     }
+                    if (transport.frontBogie == null || transport.backBogie == null){
+                        continue;
+                    }
                     if (transport.frontBogie.motionX > 0.5 || transport.frontBogie.motionX < -0.5 || transport.frontBogie.motionZ > 0.5 || transport.frontBogie.motionZ < -0.5) {
                         //in the case of roadkill
                         entity.attackEntityFrom(new EntityDamageSource("rollingstock", transport), (float) (transport.frontBogie.motionX + transport.frontBogie.motionZ) * 1000);
@@ -239,11 +259,11 @@ public class HitboxHandler {
                             vectorCache[0][0] /= vectorCache[0][1];
                             vectorCache[0][2] /= vectorCache[0][1];
 
-                            vectorCache[0][0] *= (1.0D/vectorCache[0][1]) * 0.055D;
-                            vectorCache[0][2] *= (1.0D/vectorCache[0][1]) * 0.055D;
+                            vectorCache[0][0] *= vectorCache[0][1] *-0.1375D;
+                            vectorCache[0][2] *= vectorCache[0][1] *-0.1375D;
 
-                            transport.frontBogie.addVelocity(-vectorCache[0][0], 0.0D, -vectorCache[0][2]);
-                            transport.backBogie.addVelocity(-vectorCache[0][0], 0.0D, -vectorCache[0][2]);
+                            transport.frontBogie.addVelocity(vectorCache[0][0], 0.0D, vectorCache[0][2]);
+                            transport.backBogie.addVelocity(vectorCache[0][0], 0.0D, vectorCache[0][2]);
                         }
                         entity.applyEntityCollision(transport);
                     } else {

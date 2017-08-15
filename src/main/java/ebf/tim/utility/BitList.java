@@ -1,8 +1,5 @@
 package ebf.tim.utility;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * <h1>bit management</h1>
  * stores a list of bits (booleans), and converts them to a single int for efficient networking transfer.

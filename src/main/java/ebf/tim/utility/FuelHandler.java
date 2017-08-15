@@ -7,8 +7,6 @@ import ebf.tim.entities.GenericRailTransport;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBucket;
-import net.minecraft.item.ItemBucketMilk;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.EntityDamageSource;
@@ -122,7 +120,7 @@ public class FuelHandler{
 							(train.getTankAmount()*0.005f) //calculate surface area of water
 			);
 			//drain fluid
-			if (train.drain(null, steam,true)!= null) {
+			if (train.drain(null, steam!=0?steam/3:0,true)!= null) {
 				steamTank +=steam*0.9f;//compensate for water impurities
 				if(steamTank>train.getTankCapacity()){//in TiM it needs to be  > getTankCapacity-getTankAmount.
 					steamTank= train.getTankCapacity();
@@ -179,7 +177,6 @@ public class FuelHandler{
 				transport.fill(null, isUseableFluid(transport.getStackInSlot(0), transport), false) >= FluidContainerRegistry.getFluidForFilledItem(transport.getStackInSlot(0)).amount) {
 			transport.fill(null, isUseableFluid(transport.getStackInSlot(0), transport), true);
 			if (!transport.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
-				transport.decrStackSize(0, 1);
 				transport.setInventorySlotContents(0, new ItemStack(Items.bucket,1));
 			}
 		}
@@ -187,18 +184,12 @@ public class FuelHandler{
 		if (transport.getStackInSlot(1) != null &&
 				FluidContainerRegistry.getFluidForFilledItem(transport.getStackInSlot(1)) == null &&
 				transport.drain(null, 1000, false) != null && transport.drain(null, 1000, false).amount >= 1000) {
-			if (transport.getStackInSlot(1).stackSize >1){
-				transport.getStackInSlot(1).stackSize--;
-			} else {
-				transport.setInventorySlotContents(1, null);
-			}
 
-			transport.addItem(FluidContainerRegistry.fillFluidContainer(transport.drain(null, 1000, false), transport.getStackInSlot(1)));
+			transport.setInventorySlotContents(1, FluidContainerRegistry.fillFluidContainer(transport.drain(null, 1000, false), transport.getStackInSlot(1)));
 			if (!transport.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
 				transport.drain(null, 1000, true);
 			}
 		}
-		//todo: add support for dynamically filled non-bucket items? (is that even a thing in 1.9+? if it's not probably not worth the bother)
 	}
 
 } 

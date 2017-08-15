@@ -155,8 +155,8 @@ public class EntityTrainCore extends GenericRailTransport {
             }
         }
 
-        //745.7 converts watts to horsepower, but considering the scale, it should be a thousandth of that
-        vectorCache[0][0] = (((0.7457 * (accelerator / 6D)) * hp) / weight);
+        //745.7 converts watts to horsepower, but considering the scale, it should be substantially less
+        vectorCache[0][0] = (((0.07457 * (accelerator / 6D)) * hp) / weight);
 
 
     }

@@ -1,18 +1,14 @@
 package ebf.tim.blocks;
 
 import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.models.rails.*;
-import ebf.tim.models.tmt.*;
+import ebf.tim.models.tmt.ModelBase;
+import ebf.tim.models.tmt.Tessellator;
+import ebf.tim.models.tmt.Vec3d;
 import ebf.tim.registry.URIRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRail;
-import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.PositionTextureVertex;
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
@@ -24,7 +20,6 @@ import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -75,6 +70,9 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
     private static final ResourceLocation railStraightTexture = URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailStraight.png");
     private static final ResourceLocation railCurveTexture = URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailCurveVerySmall.png");
 
+
+    private static final ModelRailPixel rail = new ModelRailPixel();
+
     enum direction{NORTH,SOUTH, EAST, WEST};
 
     public class renderTileEntity extends TileEntity{
@@ -114,6 +112,7 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
 
         @Override
         public void func_145828_a(@Nullable CrashReportCategory p_145828_1_)  {
+
             if (p_145828_1_ == null && worldObj.isRemote) {
                 GL11.glScaled(1,0.5,1);
                 Tessellator.bindTexture(texture);
@@ -135,7 +134,17 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
                         break;
                     }
                 }
-                model.render();
+                model = new ModelRailStraight();/*
+                GL11.glRotatef(180, 1, 0, -1);
+
+
+                rail.render();
+
+                double[] angle = RailUtility.rotatePoint(new double[]{1*0.0625,0,0},0, 45, 0);
+                GL11.glRotatef(45, 0,0.0625f,0);
+                GL11.glTranslated(angle[0],angle[1],angle[2]);
+
+                rail.render();*/
             } else if (p_145828_1_ != null){
                 super.func_145828_a(p_145828_1_);
             }
@@ -273,64 +282,6 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
             ties = tag.getInteger("ties");
         }
 
-        @SideOnly(Side.CLIENT)
-        List<Vec3d> points = new ArrayList<Vec3d>();
-
-
-
-
-
-        @SideOnly(Side.CLIENT)
-        public void RenderNew(@Nullable CrashReportCategory p_145828_1_){
-            if(p_145828_1_ != null){
-                super.func_145828_a(p_145828_1_);
-            } else {
-                Vec3d lastPoint = null;
-                for(Vec3d point : railStraightPoints){
-                    if (lastPoint == null){
-                        lastPoint = point;
-                    }
-
-                    double yaw = Math.toDegrees(Math.atan2(point.xCoord - lastPoint.xCoord, point.zCoord - lastPoint.zCoord));
-
-                    ModelBase railPixel = new ModelBase();
-                    ModelRendererTurbo[] railpixelModel = new ModelRendererTurbo[7];
-                    //todo: rework texturemappings to a 32x32 area, or less if possible and switsh to shapeboxes
-                    //todo: maybe pre-define the shapebox and just use deforms
-                    railpixelModel[0] = new ModelRendererTurbo(railPixel, 58, 2, 32,32); // beam
-                    railpixelModel[1] = new ModelRendererTurbo(railPixel, 53, 29, 32,32); // RailRight 3
-                    railpixelModel[2] = new ModelRendererTurbo(railPixel, 53, 26, 32,32); // RailLeft 3
-                    railpixelModel[3] = new ModelRendererTurbo(railPixel, 1, 7, 32,32); // railRight 2
-                    railpixelModel[4] = new ModelRendererTurbo(railPixel, 1, 7, 32,32); // RailLeft 2
-                    railpixelModel[5] = new ModelRendererTurbo(railPixel, 35, 2, 32,32); // RailLeft1
-                    railpixelModel[6] = new ModelRendererTurbo(railPixel, 1, 3, 32,32); // railRight1
-
-                    railpixelModel[0].addBox(0F, 0F, -7F, 2, 2, 14, 0F); // beam
-                    railpixelModel[0].setRotationPoint(-7F, 8F, 0F);
-
-                    railpixelModel[1].addBox(-8F, 0F, 0F, 1, 1, 2, 0F); // RailRight 3
-                    railpixelModel[1].setRotationPoint(0F, 7F, -6F);
-
-                    railpixelModel[2].addBox(-8F, 0F, 0F, 1, 1, 2, 0F); // RailLeft 3
-                    railpixelModel[2].setRotationPoint(0F, 7F, 4F);
-
-                    railpixelModel[3].addBox(-8F, 0F, 0F, 1, 1, 1, 0F); // railRight 2
-                    railpixelModel[3].setRotationPoint(0F, 6F, -5.5F);
-
-                    railpixelModel[4].addBox(-8F, 0F, 0F, 1, 1, 1, 0F); // RailLeft 2
-                    railpixelModel[4].setRotationPoint(0F, 6F, 4.5F);
-
-                    railpixelModel[5].addBox(-8F, 0F, 0F, 1, 1, 2, 0F); // RailLeft1
-                    railpixelModel[5].setRotationPoint(0F, 5F, 4F);
-
-                    railpixelModel[6].addBox(-8F, 0F, 0F, 1, 1, 2, 0F); // railRight1
-                    railpixelModel[6].setRotationPoint(0F, 5F, -6F);
-
-
-                }
-
-            }
-        }
     }
     private static final List<Vec3d> railStraightPoints = Arrays.asList(new Vec3d(0,0,0), new Vec3d(1,0,0), new Vec3d(2,0,0), new Vec3d(3,0,0),
             new Vec3d(4,0,0), new Vec3d(5,0,0), new Vec3d(6,0,0), new Vec3d(7,0,0), new Vec3d(8,0,0), new Vec3d(9,0,0),
@@ -338,17 +289,11 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
             new Vec3d(15,0,0), new Vec3d(16,0,0)
     );
 
-
     private class railPoint{
         public Vec3d position;
 
-        public TexturedPolygon railFaceTop;
-        public TexturedPolygon railFaceBottom;
-        public TexturedPolygon railFaceLeft;
-        public TexturedPolygon railFaceRight;
-        public TexturedPolygon railFaceFront;
-        public TexturedPolygon railFaceBack;
-
+        private static final int textureX = 64;
+        private static final int textureY = 32;
 
 
     }

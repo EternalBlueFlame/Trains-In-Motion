@@ -1,15 +1,11 @@
 package ebf.tim.models.tmt;
 
 import ebf.tim.models.RenderEntity;
-import ebf.tim.models.StaticModelAnimator;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.model.PositionTextureVertex;
 import net.minecraft.client.model.TexturedQuad;
 import net.minecraft.client.renderer.GLAllocation;
-import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GLContext;
 
 import java.util.*;
 /**

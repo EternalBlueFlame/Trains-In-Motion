@@ -1,10 +1,8 @@
 package ebf.tim.api;
 
 import ebf.tim.entities.EntityRollingStockCore;
-import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.tmt.ModelBase;
-import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 

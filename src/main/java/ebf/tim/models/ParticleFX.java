@@ -3,7 +3,6 @@ package ebf.tim.models;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.utility.RailUtility;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import org.lwjgl.opengl.GL11;
 

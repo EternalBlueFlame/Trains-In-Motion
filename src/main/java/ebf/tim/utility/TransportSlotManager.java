@@ -4,12 +4,10 @@ import com.google.common.collect.Sets;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.ChatComponentText;
@@ -17,7 +15,7 @@ import net.minecraft.util.MathHelper;
 import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Set;
 
 /**
  * @author EternalBlueFlame
@@ -49,7 +47,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         switch (entityTrain.getType()){
             case TANKER:{
                 addSlotToContainer(new waterSlot(railTransport, 0, 72, -28));
-                addSlotToContainer(new filteredSlot(railTransport, 1, 152, 46));
+                addSlotToContainer(new filteredSlot(railTransport, 1, 152, 46).setSlotMax(1));
                 break;
             }
             case STEAM:case NUCLEAR_STEAM:{
@@ -111,11 +109,14 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
             ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
 
-            if (index < railTransport.getSizeInventory()) {
+            if (index < railTransport.getSizeInventory()-1) {
                 if (!this.mergeItemStack(itemstack1, railTransport.getSizeInventory(), this.inventorySlots.size(), true)) {
-                    return null;
+                    System.out.println(player.worldObj.isRemote + " moved the item to slot " + index);
+                    slot.putStack(null);
+                   return null;
                 }
             } else if (!this.mergeItemStack(itemstack1, 0, railTransport.getSizeInventory(), false)) {
+                slot.putStack(null);
                 return null;
             }
             slot.putStack(null);
@@ -126,7 +127,6 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     /**modified from 1.7.10 version to check if the item is valid for the slot*/
     @Override
     protected boolean mergeItemStack(ItemStack itemStack, int startIndex, int endIndex, boolean reverseDirection) {
-        boolean flag1 = false;
         int k = startIndex;
 
         if (reverseDirection) {
@@ -141,20 +141,21 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                 slot = (Slot)this.inventorySlots.get(k);
                 itemstack1 = slot.getStack();
 
-                if (slot.isItemValid(itemStack) && itemstack1 != null && itemstack1.getItem() == itemStack.getItem() && (!itemStack.getHasSubtypes() || itemStack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(itemStack, itemstack1)) {
+                if (slot.isItemValid(itemStack) && itemstack1 != null && itemstack1.getItem() == itemStack.getItem() && (!itemStack.getHasSubtypes() ||
+                        itemStack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(itemStack, itemstack1)) {
                     int l = itemstack1.stackSize + itemStack.stackSize;
 
-                    if (l <= itemStack.getMaxStackSize()) {
+                    if (l <= itemStack.getMaxStackSize() && l <= slot.getSlotStackLimit()) {
                         itemStack.stackSize = 0;
                         itemstack1.stackSize = l;
                         slot.onSlotChanged();
-                        flag1 = true;
+                        return true;
                     }
-                    else if (itemstack1.stackSize < itemStack.getMaxStackSize()) {
-                        itemStack.stackSize -= itemStack.getMaxStackSize() - itemstack1.stackSize;
-                        itemstack1.stackSize = itemStack.getMaxStackSize();
+                    else if (itemstack1.stackSize < itemStack.getMaxStackSize() && l <= slot.getSlotStackLimit()) {
+                        itemStack.stackSize -= (slot.getSlotStackLimit()>= itemStack.getMaxStackSize()?(itemStack.getMaxStackSize() - itemstack1.stackSize): (slot.getSlotStackLimit() - itemstack1.stackSize));
+                        itemstack1.stackSize = (slot.getSlotStackLimit()>= itemStack.getMaxStackSize()?itemStack.getMaxStackSize():slot.getSlotStackLimit());
                         slot.onSlotChanged();
-                        flag1 = true;
+                        return true;
                     }
                 }
 
@@ -178,11 +179,19 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                 itemstack1 = slot.getStack();
 
                 if (itemstack1 == null && slot.isItemValid(itemStack)) {
-                    slot.putStack(itemStack.copy());
-                    slot.onSlotChanged();
-                    itemStack.stackSize = 0;
-                    flag1 = true;
-                    break;
+                    if (itemStack.stackSize < slot.getSlotStackLimit()) {
+                        slot.putStack(itemStack.copy());
+                        slot.onSlotChanged();
+                        itemStack.stackSize = 0;
+                        return true;
+                    } else {
+                        slot.putStack(new ItemStack(itemStack.getItem(), slot.getSlotStackLimit()));
+                        slot.onSlotChanged();
+                        itemStack.stackSize -=slot.getSlotStackLimit();
+                        if (itemStack.stackSize <1){
+                            return true;
+                        }
+                    }
                 }
 
                 if (reverseDirection) {
@@ -194,7 +203,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
             }
         }
 
-        return flag1;
+        return false;
     }
 
 
@@ -211,10 +220,12 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     @Override
     public ItemStack slotClick(int slotId, int dragType, int clickTypeIn, EntityPlayer player) {
         //return super.slotClick(fromSlot,0,clickTypeIn!=4?0:4,player);
-        //player.addChatComponentMessage(new ChatComponentText("Slot Debug Info" + slotId + ":" + dragType + ":" + clickTypeIn));
+        player.addChatComponentMessage(new ChatComponentText("Slot Debug Info" + slotId + ":" + dragType + ":" + clickTypeIn));
         if (clickTypeIn == 4){
-            clickTypeIn = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)?1:
-                    player.inventory.getItemStack() != null?4:0;
+                clickTypeIn = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT) ? 1 ://cover shift click
+                        player.inventory.getItemStack() != null ? 4 : //cover if the cursor is carrying an item
+                                (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))?3://cover CTRL clicking
+                                        0;//cover everything else
         }
         ItemStack itemstack = null;
         InventoryPlayer inventoryplayer = player.inventory;
@@ -537,6 +548,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
      * A simple slot meant for the actual inventory to allow filtering.
      */
     private class filteredSlot extends Slot{
+        private int slotmax =64;
 
         public filteredSlot(IInventory p_i1824_1_, int p_i1824_2_, int p_i1824_3_, int p_i1824_4_) {
             super(p_i1824_1_,p_i1824_2_,p_i1824_3_,p_i1824_4_);
@@ -553,6 +565,15 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         public boolean isItemValid(ItemStack item) {
             return railTransport.isItemValidForSlot(0, item);
         }
+
+        public filteredSlot setSlotMax(int max){
+            slotmax = max;
+            return this;
+        }
+        @Override
+        public int getSlotStackLimit(){
+            System.out.println(slotmax + ":");
+            return slotmax;}
     }
 
 
@@ -569,6 +590,9 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         public boolean isItemValid(ItemStack item) {
             return FuelHandler.isUseableFluid(item, railTransport) != null;
         }
+
+        @Override
+        public int getSlotStackLimit(){return 1;}
     }
 
     /**

@@ -49,6 +49,7 @@ public class PacketRemove implements IMessage {
             Entity entity = context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId);
             //if the entity was an instance of Generic Rail Transport, then spawn it's item and remove it from world.
             if (entity instanceof GenericRailTransport) {
+                entity.setDead();
                 if (message.shouldDropItem) {
                     entity.worldObj.spawnEntityInWorld(new EntityItem(entity.worldObj, entity.posX, entity.posY, entity.posZ, new ItemStack(((GenericRailTransport) entity).getItem(), 1)));
                 }
