@@ -108,24 +108,24 @@ public class ClientProxy extends CommonProxy {
     public void loadConfig(Configuration config){
         super.loadConfig(config);
         config.addCustomCategoryComment("Quality (Client only)", "Lamps take up a lot of extra processing on client side due to forced chunk reloading");
-        EnableLights = config.get(Configuration.CATEGORY_GENERAL, "EnableLamp", true).getBoolean(true);
+        EnableLights = config.get("Quality (Client only)", "EnableLamp", true).getBoolean(true);
         config.addCustomCategoryComment("Quality (Client only)", "Smoke and steam effects are more lightweight than those of normal minecraft. These shouldn't cause much lag if any, but its client only so if you wanna disable it you can.");
-        EnableSmokeAndSteam = config.get(Configuration.CATEGORY_GENERAL, "EnableSmokeAndSteam", true).getBoolean(true);
+        EnableSmokeAndSteam = config.get("Quality (Client only)", "EnableSmokeAndSteam", true).getBoolean(true);
         config.addCustomCategoryComment("Quality (Client only)", "Animations are calculated by vector positioning and rotation every frame. These shouldn't cause much lag if any, but its client only so if you wanna disable it you can.");
-        EnableAnimations = config.get(Configuration.CATEGORY_GENERAL, "EnableAnimations", true).getBoolean(true);
+        EnableAnimations = config.get("Quality (Client only)", "EnableAnimations", true).getBoolean(true);
         config.addCustomCategoryComment("Quality (Client only)", "Overrides the render of vanilla rails to make them use a more detailed 3D render which supports more detailed switches and diagonals.");
-        Enable3DRails = config.get(Configuration.CATEGORY_GENERAL, "Enable3DRails", false).getBoolean(false);
+        Enable3DRails = config.get("Quality (Client only)", "Enable3DRails", false).getBoolean(false);
         config.addCustomCategoryComment("Quality (Client only)", "Overrides the render of train and rollingstock inventories to use textures from vanilla (including resourcepacks), so you can use textures in a texturepack specifically for this mod");
-        useVanillaInventoryTextures = config.get(Configuration.CATEGORY_GENERAL, "UseVanillaInventoryTextures", true).getBoolean(true);
+        useVanillaInventoryTextures = config.get("Quality (Client only)", "UseVanillaInventoryTextures", true).getBoolean(true);
 
         config.addCustomCategoryComment("Keybinds (Client only)", "accepted values can be set from in-game, or defined using the key code values from: http://minecraft.gamepedia.com/Key_codes");
 
-        KeyLamp.setKeyCode(config.getInt("LampKeybind", "Keybinds", Keyboard.KEY_L, 0, 0, ""));
-        KeyLamp.setKeyCode(config.getInt("HornKeybind", "Keybinds", Keyboard.KEY_H, 0, 0, ""));
-        KeyInventory.setKeyCode(config.getInt("InventoryKeybind", "Keybinds", Keyboard.KEY_I, 0, 0, ""));
-        KeyAccelerate.setKeyCode(config.getInt("AccelerateKeybind", "Keybinds", Keyboard.KEY_U, 0, 0, ""));
-        KeyReverse.setKeyCode(config.getInt("ReverseKeybind", "Keybinds", Keyboard.KEY_J, 0, 0, ""));
-        KeyBrake.setKeyCode(config.getInt("BrakeKeybind", "Keybinds", Keyboard.KEY_SPACE, 0, 0, ""));
+        KeyLamp.setKeyCode(config.getInt("LampKeybind", "Keybinds (Client only)", Keyboard.KEY_L, 0, 0, ""));
+        KeyLamp.setKeyCode(config.getInt("HornKeybind", "Keybinds (Client only)", Keyboard.KEY_H, 0, 0, ""));
+        KeyInventory.setKeyCode(config.getInt("InventoryKeybind", "Keybinds (Client only)", Keyboard.KEY_I, 0, 0, ""));
+        KeyAccelerate.setKeyCode(config.getInt("AccelerateKeybind", "Keybinds (Client only)", Keyboard.KEY_U, 0, 0, ""));
+        KeyReverse.setKeyCode(config.getInt("ReverseKeybind", "Keybinds (Client only)", Keyboard.KEY_J, 0, 0, ""));
+        KeyBrake.setKeyCode(config.getInt("BrakeKeybind", "Keybinds (Client only)", Keyboard.KEY_SPACE, 0, 0, ""));
     }
 
     /**the client only lamp block*/

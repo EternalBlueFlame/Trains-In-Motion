@@ -42,14 +42,14 @@ import net.minecraftforge.common.config.Configuration;
 public class TrainsInMotion {
 
     /**the ID of the mod and the version displayed in game, as well as used for version check in the version.txt file*/
-    public static final String MODID = "tim";
+    public static final String MODID = "trainsinmotion";
     /**the version identifier of the mod*/
-    public static final String MOD_VERSION="0.2.6.0 alpha";
+    public static final String MOD_VERSION="0.2.6.5 alpha";
     /**an instance of the mod*/
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
     /**the creative tab for the mod*/
-    public static CreativeTabs creativeTab = new TiMTab(CreativeTabs.getNextID(), "Trains in Motion");
+    public static CreativeTabs creativeTab = new TiMTab("Trains in Motion");
     /**
      *Setup the proxy, this is used for managing some of the client and server specific features.
      *@see CommonProxy
@@ -125,6 +125,7 @@ public class TrainsInMotion {
         config.save();
         ForgeChunkManager.setForcedChunkLoadingCallback(TrainsInMotion.instance, chunkHandler);
         MinecraftForge.EVENT_BUS.register(chunkHandler);
+
     }
 
     /**

@@ -11,8 +11,8 @@ import net.minecraft.item.Item;
 public class TiMTab extends CreativeTabs {
 
     /**instances the tab by handling it through the super.*/
-    public TiMTab(int modID, String name) {
-        super(modID, name);
+    public TiMTab(String name) {
+        super(CreativeTabs.getNextID(), name);
     }
     /**returns the label of the tab, this is defined in the language files,*/
     @Override

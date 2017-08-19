@@ -3,13 +3,12 @@
   "modid": "trainsinmotion",
   "name": "Trains in Motion",
   "description": "A mod that adds trains to minecraft",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
-  "url": "https://github.com/EternalBlueFlame/Trains-In-Motion",
+  "version": "1.7.10.1558-1614",
+  "url": "http://eternal-b-flame.blogspot.com/p/trains-in-motion.html",
   "updateUrl": "https://github.com/EternalBlueFlame/Trains-In-Motion/releases",
   "authorList": ["Eternal Blue Flame"],
-  "credits": "Eternal Blue Flame",
-  "logoFile": "",
+  "credits": "Eternal Blue Flame | Lunar Tales | Zora no Densha | Fexcraft",
+  "logoFile": "/assets/tim/textures/liveries/TiM.png",
   "screenshots": [],
   "dependencies": []
 }

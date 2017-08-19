@@ -111,7 +111,6 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
 
             if (index < railTransport.getSizeInventory()-1) {
                 if (!this.mergeItemStack(itemstack1, railTransport.getSizeInventory(), this.inventorySlots.size(), true)) {
-                    System.out.println(player.worldObj.isRemote + " moved the item to slot " + index);
                     slot.putStack(null);
                    return null;
                 }
@@ -220,7 +219,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     @Override
     public ItemStack slotClick(int slotId, int dragType, int clickTypeIn, EntityPlayer player) {
         //return super.slotClick(fromSlot,0,clickTypeIn!=4?0:4,player);
-        player.addChatComponentMessage(new ChatComponentText("Slot Debug Info" + slotId + ":" + dragType + ":" + clickTypeIn));
+        //player.addChatComponentMessage(new ChatComponentText("Slot Debug Info" + slotId + ":" + dragType + ":" + clickTypeIn));
         if (clickTypeIn == 4){
                 clickTypeIn = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT) ? 1 ://cover shift click
                         player.inventory.getItemStack() != null ? 4 : //cover if the cursor is carrying an item

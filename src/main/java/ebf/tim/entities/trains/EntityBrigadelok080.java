@@ -167,7 +167,7 @@ public class EntityBrigadelok080 extends TrainBase {
      * the 5th number is for density, there's no min/max but larger numbers will create more lag.
      */
     @Override
-    public float[][] getSmokeOffset(){return new float[][]{{-1,0,0.5f,0xB2B2B2,30},{-1,0,-0.5f,0xB2B2B2,30},{-1.325f,1.65f,0,0x3C3C3C,500}};}
+    public float[][] getSmokeOffset(){return new float[][]{{-1,0,0.5f,0xB2B2B2,30},{-1,0,-0.5f,0xB2B2B2,30},{-1.4f,2f,0,0x3C3C3C,500}};}
 
     /**
      * <h2>rider sit or stand</h2>

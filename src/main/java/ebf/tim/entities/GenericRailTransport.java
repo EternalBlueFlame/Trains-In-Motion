@@ -323,7 +323,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         //be sure the front and back links are removed in the case of this entity being removed from the world.
         if (frontLinkedID != null){
             GenericRailTransport front = ((GenericRailTransport)worldObj.getEntityByID(frontLinkedID));
-            if(front.frontLinkedID != null && front.frontLinkedID == this.getEntityId()){
+            if(front == null || (front.frontLinkedID != null && front.frontLinkedID == this.getEntityId())){
                 front.frontLinkedID = null;
                 front.frontLinkedTransport = null;
             } else if(front.backLinkedID != null && front.backLinkedID == this.getEntityId()){
@@ -333,7 +333,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         }
         if (backLinkedID != null){
             GenericRailTransport back = ((GenericRailTransport)worldObj.getEntityByID(backLinkedID));
-            if(back.frontLinkedID != null && back.frontLinkedID == this.getEntityId()){
+            if(back == null || (back.frontLinkedID != null && back.frontLinkedID == this.getEntityId())){
                 back.frontLinkedID = null;
                 back.frontLinkedTransport = null;
             } else if(back.backLinkedID != null && back.backLinkedID == this.getEntityId()){
@@ -715,8 +715,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * If coupling is on then it will check sides without linked transports for anything to link to.
      */
     private GenericRailTransport linkChecker = null;
-    private Entity linkTemp = null;
-    private int targetHitboxToGet;
     public void manageLinks() {
 
 
@@ -727,24 +725,23 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
         //reset vector cache and create temporary fields
         vectorCache[4][0] = vectorCache[4][2] = vectorCache[6][0] = vectorCache[6][2] =0;
-        GenericRailTransport linkChecker;
         Entity entity;
-        HitboxHandler.MultipartHitbox targetBB;
-        HitboxHandler.MultipartHitbox currentBB;
 
         //manage the frontLinkedTransport link
         if (frontLinkedID != null) {
             entity = worldObj.getEntityByID(frontLinkedID);
             if (entity instanceof GenericRailTransport) {
                 linkChecker = (GenericRailTransport) entity;
-                int targetHitboxToGet = (this.getPersistentID().equals(linkChecker.frontLinkedTransport)) ? 0 : linkChecker.getHitboxPositions().length-1;
-                targetBB = linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet);
-                currentBB = this.hitboxHandler.hitboxList.get(0);
-                double diffX = targetBB.posX - currentBB.posX;
-                double diffZ = targetBB.posZ - currentBB.posZ;
-                vectorCache[3][0] = (Math.abs(diffZ) + Math.abs(diffX)) * 0.3;
+                //get the distance between wagons - ALWAYS >=0
+                vectorCache[3][0] = (Math.abs(linkChecker.posZ - this.posZ) + Math.abs(linkChecker.posX - this.posX));
+                //subtract the distance between links, using their absolute distance value.
+                vectorCache[3][0] -= (Math.abs(getHitboxPositions()[0][0]) + Math.abs(linkChecker.getHitboxPositions()[
+                        (this.getPersistentID().equals(linkChecker.frontLinkedTransport)) ? 0 : linkChecker.getHitboxPositions().length-1][0]));
+                //lower it a bit to be sure nothing flies off into oblivion if something goes wrong, also reverse the end result, because its backwards for some reason.
+                vectorCache[3][0] *= -0.3;
+                vectorCache[3][0] -= (Math.sin(Math.toDegrees(Math.atan2(linkChecker.posZ - this.posZ, linkChecker.posX - this.posX))+rotationYaw) * (vectorCache[3][0]));
 
-                vectorCache[4] = rotatePoint(vectorCache[3], 0, (float) Math.toDegrees(Math.atan2(diffZ, diffX)), 0);
+                vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
             }
         }
         //Manage the backLinkedTransport link
@@ -752,65 +749,24 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             entity = worldObj.getEntityByID(backLinkedID);
             if (entity instanceof GenericRailTransport) {
                 linkChecker = (GenericRailTransport) entity;
-                int targetHitboxToGet = (this.getPersistentID().equals(linkChecker.frontLinkedTransport)) ? 0 : linkChecker.getHitboxPositions().length-1;
-                targetBB = linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet);
-                currentBB = this.hitboxHandler.hitboxList.get(getHitboxPositions().length-1);
-                double diffX = targetBB.posX - currentBB.posX;
-                double diffZ = targetBB.posZ - currentBB.posZ;
-                vectorCache[3][0] = (Math.abs(diffZ) + Math.abs(diffX)) * 0.3;
+                //get the distance between wagons - ALWAYS >=0
+                vectorCache[3][0] = (Math.abs(linkChecker.posZ - this.posZ) + Math.abs(linkChecker.posX - this.posX));
+                //subtract the distance between links, using their absolute distance value.
+                vectorCache[3][0] -= (Math.abs(getHitboxPositions()[0][0]) + Math.abs(linkChecker.getHitboxPositions()[
+                        (this.getPersistentID().equals(linkChecker.frontLinkedTransport)) ? 0 : linkChecker.getHitboxPositions().length-1][0]));
+                //lower it a bit to be sure nothing flies off into oblivion if something goes wrong, also reverse the end result, because its backwards for some reason.
+                vectorCache[3][0] *= 0.3;
+                vectorCache[3][0] += (Math.sin(Math.toDegrees(Math.atan2(linkChecker.posZ - this.posZ, linkChecker.posX - this.posX))+rotationYaw) * (vectorCache[3][0]));
 
-                vectorCache[6] = rotatePoint(vectorCache[3], 0, (float) Math.toDegrees(Math.atan2(diffZ, diffX)), 0);
+                vectorCache[6] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
             }
         }
 
-        //if (Math.abs(vectorCache[4][0] + vectorCache[6][0]) > 0.05) {
+
+
             frontBogie.moveLinked(rotationPitch, rotationYaw, vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2], weightKg());
             backBogie.moveLinked(rotationPitch, rotationYaw, vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2], weightKg());
-        //}
 
-
-/*
-        if (!worldObj.isRemote) {
-            vectorCache[3][0] = vectorCache[3][2] =vectorCache[4][0] = vectorCache[4][2] =0;
-            //manage the frontLinkedTransport link
-            if (frontLinkedID != null) {
-                linkTemp = worldObj.getEntityByID(frontLinkedID);
-                if (linkTemp instanceof GenericRailTransport) {
-                    linkChecker = (GenericRailTransport) linkTemp;
-                    targetHitboxToGet =(linkChecker.frontLinkedTransport != null && linkChecker.frontLinkedTransport == this.getPersistentID())?0:linkChecker.getHitboxPositions().length-1;
-
-                    vectorCache[4][0] = (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX * linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX -
-                            hitboxHandler.hitboxList.get(0).posX * hitboxHandler.hitboxList.get(0).posX);
-                    vectorCache[4][2] = (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ * linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ -
-                            hitboxHandler.hitboxList.get(0).posZ * hitboxHandler.hitboxList.get(0).posZ);
-                }
-            }
-            linkTemp = null;
-            linkChecker = null;
-            //Manage the backLinkedTransport link
-            if (backLinkedID != null) {
-                linkTemp = worldObj.getEntityByID(backLinkedID);
-                if (linkTemp instanceof GenericRailTransport) {
-                    linkChecker = (GenericRailTransport) linkTemp;
-                    targetHitboxToGet =(linkChecker.frontLinkedTransport != null && linkChecker.frontLinkedTransport == this.getPersistentID())?0:linkChecker.getHitboxPositions().length-1;
-
-                    vectorCache[4][0] += (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX * linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posX -
-                            hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posX * hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posX);
-                    vectorCache[4][2] += (linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ * linkChecker.hitboxHandler.hitboxList.get(targetHitboxToGet).posZ -
-                            hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posZ * hitboxHandler.hitboxList.get(getHitboxPositions().length-1).posZ);
-                }
-            }
-            vectorCache[5][0] =(vectorCache[4][0] + vectorCache[4][2])*0.001;
-            //works perfectly until one of the values goes negative. maybe subtract 180 from the yaw if whatever circumstance causes it is true
-            while(vectorCache[5][0] <-0.01 || vectorCache[5][0]>0.01){
-                vectorCache[5][0] *= 0.3;
-                vectorCache[4] = RailUtility.rotatePoint(vectorCache[5], 0, rotationYaw, 0);
-                frontBogie.moveLinked(rotationPitch, rotationYaw, -vectorCache[4][0], -vectorCache[4][2], weightKg());
-                backBogie.moveLinked(rotationPitch, rotationYaw, -vectorCache[4][0], -vectorCache[4][2], weightKg());
-            }
-            linkChecker = null;
-            linkTemp = null;
-        }*/
     }
 
     /**
