@@ -738,7 +738,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 vectorCache[3][0] -= (Math.abs(getHitboxPositions()[0][0]) + Math.abs(linkChecker.getHitboxPositions()[
                         (this.getPersistentID().equals(linkChecker.frontLinkedTransport)) ? 0 : linkChecker.getHitboxPositions().length-1][0]));
                 //lower it a bit to be sure nothing flies off into oblivion if something goes wrong, also reverse the end result, because its backwards for some reason.
-                vectorCache[3][0] *= -0.3;
+                vectorCache[3][0] *= -0.5;
                 vectorCache[3][0] -= (Math.sin(Math.toDegrees(Math.atan2(linkChecker.posZ - this.posZ, linkChecker.posX - this.posX))+rotationYaw) * (vectorCache[3][0]));
 
                 vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
@@ -755,7 +755,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 vectorCache[3][0] -= (Math.abs(getHitboxPositions()[0][0]) + Math.abs(linkChecker.getHitboxPositions()[
                         (this.getPersistentID().equals(linkChecker.frontLinkedTransport)) ? 0 : linkChecker.getHitboxPositions().length-1][0]));
                 //lower it a bit to be sure nothing flies off into oblivion if something goes wrong, also reverse the end result, because its backwards for some reason.
-                vectorCache[3][0] *= 0.3;
+                vectorCache[3][0] *= 0.5;
                 vectorCache[3][0] += (Math.sin(Math.toDegrees(Math.atan2(linkChecker.posZ - this.posZ, linkChecker.posX - this.posX))+rotationYaw) * (vectorCache[3][0]));
 
                 vectorCache[6] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
@@ -763,9 +763,10 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         }
 
 
-
+        if (vectorCache[4][0] + vectorCache[6][0] >0.0001 || vectorCache[4][0] + vectorCache[6][0] <-0.0001) {
             frontBogie.moveLinked(rotationPitch, rotationYaw, vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2], weightKg());
             backBogie.moveLinked(rotationPitch, rotationYaw, vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2], weightKg());
+        }
 
     }
 

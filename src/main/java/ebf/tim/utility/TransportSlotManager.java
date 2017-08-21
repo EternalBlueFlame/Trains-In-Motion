@@ -427,9 +427,9 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                 ItemStack itemstack5 = slot3.getStack().copy();
                 itemstack5.stackSize =itemstack5.getMaxStackSize();
                 inventoryplayer.setItemStack(itemstack5);
+                return itemstack5;
             }
-        }//theoretically case 4 will never happen, and probably wouldn't even happen in vanilla.
-        else if (clickTypeIn == 4 /*ClickType.THROW*/ && inventoryplayer.getItemStack() == null && slotId >= 0) {
+        } else if (clickTypeIn == 4 /*ClickType.THROW*/ && inventoryplayer.getItemStack() == null && slotId >= 0) {
             Slot slot2 = (Slot) this.inventorySlots.get(slotId);
 
             if (slot2 != null && slot2.getHasStack() && slot2.canTakeStack(player)) {

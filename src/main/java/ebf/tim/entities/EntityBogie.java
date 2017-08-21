@@ -9,6 +9,7 @@ import ebf.tim.utility.RailUtility;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IMinecart;
 import mods.railcraft.api.carts.IRoutableCart;
+import mods.railcraft.api.tracks.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.block.BlockRailBase;
@@ -42,6 +43,31 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     private boolean isFront=true;
     /**used to calculate the X/Y/Z velocity based on the direction the rail is facing, similar to how vanilla minecarts work.*/
     private static final int[][][] vanillaRailMatrix = new int[][][] {{{0, 0, -1}, {0, 0, 1}}, {{ -1, 0, 0}, {1, 0, 0}}, {{ -1, -1, 0}, {1, 0, 0}}, {{ -1, 0, 0}, {1, -1, 0}}, {{0, 0, -1}, {0, -1, 1}}, {{0, -1, -1}, {0, 0, 1}}, {{0, 0, 1}, {1, 0, 0}}, {{0, 0, 1}, { -1, 0, 0}}, {{0, 0, -1}, { -1, 0, 0}}, {{0, 0, -1}, {1, 0, 0}}};
+    /**x/y/z/meta of the last rail used.*/
+    private int[] lastUsedRail = null;
+
+    /**cached value for the temporary motion, prevents need to generate a new variable multiple times per tick*/
+    private double cachedMotionX;
+    /**cached value for the temporary motion, prevents need to generate a new variable multiple times per tick*/
+    private double cachedMotionZ;
+    /**cached value for the rail path, prevents need to generate a new variable multiple times per tick*/
+    private double railPathX;
+    /**cached value for the rail path, prevents need to generate a new variable multiple times per tick*/
+    private double railPathZ;
+    /**cached value for the rail path, prevents need to generate a new variable multiple times per tick*/
+    private double railPathSqrt;
+    /**cached value for the rail path, prevents need to generate a new variable multiple times per tick*/
+    private double motionSqrt;
+    /**cached value for the rail path, prevents need to generate a new variable multiple times per tick*/
+    private double railPathX2;
+    /**cached value for the rail path, prevents need to generate a new variable multiple times per tick*/
+    private double railPathZ2;
+    /**cached value for the rail path, prevents need to generate a new variable multiple times per tick*/
+    private double railPathDirection;
+    /**cached value for the rail path, prevents need to generate a new variable multiple times per tick*/
+    private int railMetadata;
+    /**cached value for the rail path, prevents need to generate a new variable multiple times per tick*/
+    private Block blockNext;
 
     public EntityBogie(World world) {
         super(world);
@@ -285,15 +311,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             }
         }
     }
-    private double cachedMotionX;
-    private double cachedMotionZ;
-    private double railPathX;
-    private double railPathZ;
-    private double railPathSqrt;
-    private double motionSqrt;
-    private double railPathX2;
-    private double railPathZ2;
-    private double railPathDirection;
     /**
      * <h2>incrementally move the bogie</h2>
      * moves the entity in increments of a quarter block, the calculations are basically the same as vanilla.
@@ -306,8 +323,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @param block the block at the next position
      */
     private void moveBogie(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, BlockRailBase block) {
-        cachedMotionX = currentMotionX;// * block.getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ);
-        cachedMotionZ = currentMotionZ;// * block.getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ);
+        cachedMotionX = currentMotionX;
+        cachedMotionZ = currentMotionZ;
         //define the incrementation of movement, use the cache to store the real value and increment it down, and then throw it to the next loop, then use current for the clamped to calculate movement'
         if (currentMotionX>0.3){
             currentMotionX= 0.3;
@@ -328,7 +345,16 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             cachedMotionZ= Math.copySign(0, currentMotionZ);
         }
         //get the direction of the rail from it's metadata
-        int railMetadata = block.getBasicRailMetadata(worldObj, null, floorX, floorY, floorZ);
+        if (worldObj.getTileEntity(floorX, floorY, floorZ) instanceof ITrackTile && (((ITrackTile)worldObj.getTileEntity(floorX, floorY, floorZ)).getTrackInstance() instanceof ITrackSwitch)){
+            railMetadata =((ITrackTile)worldObj.getTileEntity(floorX, floorY, floorZ)).getTrackInstance().getBasicRailMetadata(this);//railcraft support
+        } else {
+            railMetadata = block.getBasicRailMetadata(worldObj, null, floorX, floorY, floorZ);
+        }
+
+        //be sure the last used rail is not null
+        if(lastUsedRail == null){
+            lastUsedRail = new int[]{floorX, floorY, floorZ, railMetadata};
+        }
 
         //add the uphill/downhill velocity
         switch (railMetadata){
@@ -336,6 +362,52 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             case 3:{currentMotionX += 0.0078125D; this.posY = (double)(floorY + 1); break;}
             case 4:{currentMotionZ += 0.0078125D; this.posY = (double)(floorY + 1); break;}
             case 5:{currentMotionZ -= 0.0078125D; this.posY = (double)(floorY + 1); break;}
+            //add support for intersections
+            case 0:{
+                if (lastUsedRail[1] == 1 && lastUsedRail[0] != floorX && lastUsedRail[2] == floorZ){
+                    railMetadata =1;
+                }
+                break;
+            }
+            case 1:{
+                if (lastUsedRail[1] == 0 && lastUsedRail[2] != floorZ && lastUsedRail[0] == floorX){
+                    railMetadata =0;
+                }
+                break;
+            }
+            //in some specific circumstances we have to cover how rails are approached to smooth movement So if you enter a turn from the wrong side, it treats it as a straight rather than a turn.
+            case 6:{
+                if (lastUsedRail[1] == 1 && lastUsedRail[0] < floorX){
+                    railMetadata =1;
+                } else if (lastUsedRail[1] == 0 && lastUsedRail[2] < floorZ){
+                    railMetadata =0;
+                }
+                break;
+            }
+            case 7:{
+                if (lastUsedRail[1] == 1 && lastUsedRail[0] > floorX){
+                    railMetadata =1;
+                } else if (lastUsedRail[1] == 0 && lastUsedRail[2] < floorZ){
+                    railMetadata =0;
+                }
+                break;
+            }
+            case 8:{
+                if (lastUsedRail[1] == 1 && lastUsedRail[0] > floorX){
+                    railMetadata =1;
+                } else if (lastUsedRail[1] == 0 && lastUsedRail[2] > floorZ){
+                    railMetadata =0;
+                }
+                break;
+            }
+            case 9:{
+                if (lastUsedRail[1] == 1 && lastUsedRail[0] < floorX){
+                    railMetadata =1;
+                } else if (lastUsedRail[1] == 0 && lastUsedRail[2] > floorZ){
+                    railMetadata =0;
+                }
+                break;
+            }
         }
 
         //beginMagic();
@@ -412,15 +484,28 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         if (block == Blocks.activator_rail) {
             this.onActivatorRailPass(floorX, floorY, floorZ, (worldObj.getBlockMetadata(floorX, floorY, floorZ) & 8) != 0);
         }
-        //now loop this again for the next increment of movement
-        if (cachedMotionX !=0 || cachedMotionZ !=0){
 
-            floorX = MathHelper.floor_double(this.posX);
-            floorY = MathHelper.floor_double(this.posY);
-            floorZ = MathHelper.floor_double(this.posZ);
-            Block blockNew = this.worldObj.getBlock(floorX, floorY, floorZ);
-            if (blockNew instanceof BlockRailBase) {
-                moveBogie(cachedMotionX, cachedMotionZ, floorX, floorY, floorZ, (BlockRailBase) blockNew);
+        //update the last used block to the one we just used, if it's actually different.
+        floorX = MathHelper.floor_double(this.posX);
+        floorY = MathHelper.floor_double(this.posY);
+        floorZ = MathHelper.floor_double(this.posZ);
+        blockNext = this.worldObj.getBlock(floorX, floorY, floorZ);
+        //update the last rail used so we can properly smooth movement.
+        if (blockNext instanceof BlockRailBase) {
+            block = (BlockRailBase) blockNext;
+            if (floorX > lastUsedRail[0]+1){
+                lastUsedRail = new int[]{floorX-1, block.getBasicRailMetadata(worldObj, null, floorX-1, floorY, floorZ), floorZ};
+            } else if (floorX < lastUsedRail[0]-1){
+                lastUsedRail = new int[]{floorX+1, block.getBasicRailMetadata(worldObj, null, floorX+1, floorY, floorZ), floorZ};
+            }
+            if (floorZ > lastUsedRail[2]+1){
+                lastUsedRail = new int[]{floorX, block.getBasicRailMetadata(worldObj, null, lastUsedRail[0], floorY, floorZ-1), floorZ-1};
+            } else if (floorZ < lastUsedRail[2]-1){
+                lastUsedRail = new int[]{floorX, block.getBasicRailMetadata(worldObj, null, lastUsedRail[0], floorY, floorZ+1), floorZ+1};
+            }
+        //now loop this again for the next increment of movement, if there is one
+        if (cachedMotionX !=0 || cachedMotionZ !=0){
+                moveBogie(cachedMotionX, cachedMotionZ, floorX, floorY, floorZ, block);
             }
         }
     }

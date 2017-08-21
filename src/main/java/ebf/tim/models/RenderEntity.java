@@ -69,7 +69,7 @@ public class RenderEntity extends Render {
      */
     public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw){
 
-        if (entity.renderData.model == null || entity.renderData.model.getClass() != entity.getModel().getClass()) {
+        if (entity.renderData.model == null) {
             entity.renderData = new TransportRenderData();
             entity.renderData.model = entity.getModel();
             entity.renderData.bogieRenders = entity.getBogieModels();

@@ -61,6 +61,6 @@ public class Bogie {
     }
 
     private boolean shouldUpdate(){
-        return sqrtPos -0.4 > oldSqrtPos || sqrtPos + 0.4 <oldSqrtPos;
+        return sqrtPos -1 > oldSqrtPos || sqrtPos + 1 <oldSqrtPos;
     }
 }
