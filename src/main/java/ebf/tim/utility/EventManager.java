@@ -1,5 +1,6 @@
 package ebf.tim.utility;
 
+import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.relauncher.Side;
@@ -56,19 +57,18 @@ public class EventManager {
             }
             if (player.ridingEntity instanceof EntityTrainCore) {
                 //for speed change
-                if (ClientProxy.KeyAccelerate.isPressed()) {
+                if (FMLClientHandler.instance().getClient().gameSettings.keyBindForward.isPressed()) {
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2, player.ridingEntity.getEntityId()));
-                } else if (ClientProxy.KeyReverse.getIsKeyPressed()) {
+                } else if (FMLClientHandler.instance().getClient().gameSettings.keyBindBack.getIsKeyPressed()) {
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3, player.ridingEntity.getEntityId()));
                 } else if (ClientProxy.KeyHorn.isPressed()){
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(9, player.ridingEntity.getEntityId()));
-                } else if (ClientProxy.KeyBrake.isPressed()){
+                } else if (FMLClientHandler.instance().getClient().gameSettings.keyBindJump.isPressed()){
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(4, player.ridingEntity.getEntityId()));
                 }
 
                 //manage key release events
-                if (Keyboard.getEventKey() == ClientProxy.KeyBrake.getKeyCode() && !Keyboard.getEventKeyState()){
-                    System.out.println("brake was released");
+                if (Keyboard.getEventKey() == FMLClientHandler.instance().getClient().gameSettings.keyBindJump.getKeyCode() && !Keyboard.getEventKeyState()){
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(15, player.ridingEntity.getEntityId()));
                 }
             }

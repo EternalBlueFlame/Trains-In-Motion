@@ -21,8 +21,6 @@ public abstract class TrainBase extends EntityTrainCore{
         super(worldObj);
     }
 
-    public abstract ResourceLocation getTexture();
-
     public abstract ModelBase getModel();
 
     public abstract Bogie[] getBogieModels();

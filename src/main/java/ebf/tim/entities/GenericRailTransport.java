@@ -19,6 +19,7 @@ import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
 import net.minecraft.block.Block;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
@@ -29,6 +30,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.integrated.IntegratedPlayerList;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
@@ -37,16 +39,12 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTankInfo;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.*;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
+import static ebf.tim.TrainsInMotion.MODID;
 import static ebf.tim.utility.RailUtility.rotatePoint;
 
 /**
@@ -120,6 +118,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     private boolean displayDerail = false;
     /*this is cached so we can keep the hitbox handler running even when derailed.*/
     private boolean collision;
+    /***/
+    private List<ResourceLocation> transportSkins = new ArrayList<ResourceLocation>();
 
     @SideOnly(Side.CLIENT)
     public TransportRenderData renderData = new TransportRenderData();
@@ -188,11 +188,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this.dataWatcher.addObject(14, 0);//train steam, or rollingstock fluid ID (so client can show fluid name)
         this.dataWatcher.addObject(15, 0);//train heat
         this.dataWatcher.addObject(17, 0);//booleans
+        //18 is used by EntityTrainCore
         //19 is used by the core minecart
         this.dataWatcher.addObject(23, 0);//owner
         this.dataWatcher.addObject(20, 0);//tankA
         this.dataWatcher.addObject(21, 0);//front linked transport
         this.dataWatcher.addObject(22, 0);//back linked transport
+        this.dataWatcher.addObject(24, 0);//currently used texture
         if (getSizeInventory()>0 && items == null) {
             items = new ArrayList<>();
             while (items.size() < getSizeInventory()) {
@@ -323,7 +325,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         //be sure the front and back links are removed in the case of this entity being removed from the world.
         if (frontLinkedID != null){
             GenericRailTransport front = ((GenericRailTransport)worldObj.getEntityByID(frontLinkedID));
-            if(front == null || (front.frontLinkedID != null && front.frontLinkedID == this.getEntityId())){
+            if(front.frontLinkedID != null && front.frontLinkedID == this.getEntityId()){
                 front.frontLinkedID = null;
                 front.frontLinkedTransport = null;
             } else if(front.backLinkedID != null && front.backLinkedID == this.getEntityId()){
@@ -333,7 +335,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         }
         if (backLinkedID != null){
             GenericRailTransport back = ((GenericRailTransport)worldObj.getEntityByID(backLinkedID));
-            if(back == null || (back.frontLinkedID != null && back.frontLinkedID == this.getEntityId())){
+            if(back.frontLinkedID != null && back.frontLinkedID == this.getEntityId()){
                 back.frontLinkedID = null;
                 back.frontLinkedTransport = null;
             } else if(back.backLinkedID != null && back.backLinkedID == this.getEntityId()){
@@ -558,6 +560,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         collision = hitboxHandler.getCollision(this);
         if (frontBogie!=null && backBogie != null && (!getBoolean(boolValues.DERAILED) || ticksExisted==1)){
             //handle movement.
+            manageLinks();
             if (!collision) {
                 setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
                 setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
@@ -567,7 +570,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
                 setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
             }
-            manageLinks();
             frontVelocityX = frontBogie.motionX;
             frontVelocityZ = frontBogie.motionZ;
             backVelocityX = backBogie.motionX;
@@ -715,16 +717,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * If coupling is on then it will check sides without linked transports for anything to link to.
      */
     private GenericRailTransport linkChecker = null;
+    private double cornering;
     public void manageLinks() {
-
-
-
         if (worldObj.isRemote || (frontLinkedID == null && backLinkedID == null)) {//Do you really need an isRemote call here? Perhaps just make sure the method is called on remote only by checking before actually calling it (unless you override it somewhere for client-side funtionality as well, of course).
             return;
         }
 
         //reset vector cache and create temporary fields
-        vectorCache[4][0] = vectorCache[4][2] = vectorCache[6][0] = vectorCache[6][2] =0;
+        vectorCache[3][0] = vectorCache[4][0] = vectorCache[4][2] = vectorCache[6][0] = vectorCache[6][2] = vectorCache[5][0] = vectorCache[5][1] = vectorCache[5][2] =0;
         Entity entity;
 
         //manage the frontLinkedTransport link
@@ -732,16 +732,27 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             entity = worldObj.getEntityByID(frontLinkedID);
             if (entity instanceof GenericRailTransport) {
                 linkChecker = (GenericRailTransport) entity;
-                //get the distance between wagons - ALWAYS >=0
-                vectorCache[3][0] = (Math.abs(linkChecker.posZ - this.posZ) + Math.abs(linkChecker.posX - this.posX));
-                //subtract the distance between links, using their absolute distance value.
-                vectorCache[3][0] -= (Math.abs(getHitboxPositions()[0][0]) + Math.abs(linkChecker.getHitboxPositions()[
-                        (this.getPersistentID().equals(linkChecker.frontLinkedTransport)) ? 0 : linkChecker.getHitboxPositions().length-1][0]));
-                //lower it a bit to be sure nothing flies off into oblivion if something goes wrong, also reverse the end result, because its backwards for some reason.
-                vectorCache[3][0] *= -0.5;
-                vectorCache[3][0] -= (Math.sin(Math.toDegrees(Math.atan2(linkChecker.posZ - this.posZ, linkChecker.posX - this.posX))+rotationYaw) * (vectorCache[3][0]));
+                //get the distance between wagons which is ALWAYS >0, then subtract the distance between links, using their absolute distance value.
+                vectorCache[3][0] = (Math.abs(linkChecker.posZ - this.posZ) + Math.abs(linkChecker.posX - this.posX)) -
+                        (Math.abs(getHitboxPositions()[0][0]) + Math.abs(linkChecker.getHitboxPositions()[
+                                (linkChecker.frontLinkedID != null && this.getEntityId() == linkChecker.frontLinkedID) ? 0 : linkChecker.getHitboxPositions().length-1]
+                                [0]));
+                //reverse the end result, because its backwards for some reason.
+                vectorCache[3][0] *= -1;
+                cornering = Math.cos(Math.toDegrees(Math.atan2(this.posZ - linkChecker.posZ, this.posX - linkChecker.posX))+rotationYaw);
+                vectorCache[3][0] = (Math.sin(cornering) * vectorCache[3][0]) + (Math.cos(cornering) * vectorCache[3][0]);
+
 
                 vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
+                linkChecker.frontBogie.setVelocity((frontBogie.motionX + linkChecker.frontBogie.motionX) * 0.5,
+                        (frontBogie.motionY  + linkChecker.frontBogie.motionY) * 0.5,
+                        (frontBogie.motionZ + linkChecker.frontBogie.motionZ) * 0.5);
+                linkChecker.backBogie.setVelocity((backBogie.motionX + linkChecker.backBogie.motionX) * 0.5,
+                        (backBogie.motionY  + linkChecker.backBogie.motionY) * 0.5,
+                        (backBogie.motionZ + linkChecker.backBogie.motionZ) * 0.5);
+                vectorCache[5][0]+=linkChecker.frontBogie.motionX;
+                vectorCache[5][1]+=linkChecker.frontBogie.motionY;
+                vectorCache[5][2]+=linkChecker.frontBogie.motionZ;
             }
         }
         //Manage the backLinkedTransport link
@@ -749,21 +760,28 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             entity = worldObj.getEntityByID(backLinkedID);
             if (entity instanceof GenericRailTransport) {
                 linkChecker = (GenericRailTransport) entity;
-                //get the distance between wagons - ALWAYS >=0
-                vectorCache[3][0] = (Math.abs(linkChecker.posZ - this.posZ) + Math.abs(linkChecker.posX - this.posX));
-                //subtract the distance between links, using their absolute distance value.
-                vectorCache[3][0] -= (Math.abs(getHitboxPositions()[0][0]) + Math.abs(linkChecker.getHitboxPositions()[
-                        (this.getPersistentID().equals(linkChecker.frontLinkedTransport)) ? 0 : linkChecker.getHitboxPositions().length-1][0]));
-                //lower it a bit to be sure nothing flies off into oblivion if something goes wrong, also reverse the end result, because its backwards for some reason.
-                vectorCache[3][0] *= 0.5;
-                vectorCache[3][0] += (Math.sin(Math.toDegrees(Math.atan2(linkChecker.posZ - this.posZ, linkChecker.posX - this.posX))+rotationYaw) * (vectorCache[3][0]));
+                //get the distance between wagons which is ALWAYS >0 then subtract the distance between links, using their absolute distance value.
+                vectorCache[3][0] = (Math.abs(linkChecker.posZ - this.posZ) + Math.abs(linkChecker.posX - this.posX)) -
+                        (Math.abs(getHitboxPositions()[0][0]) + Math.abs(linkChecker.getHitboxPositions()[
+                                (linkChecker.frontLinkedID != null && this.getEntityId() == linkChecker.frontLinkedID) ? 0 : linkChecker.getHitboxPositions().length-1]
+                                [0]));
+                cornering = Math.cos(Math.toDegrees(Math.atan2(this.posZ - linkChecker.posZ, this.posX - linkChecker.posX))+rotationYaw);
+                vectorCache[3][0] = (Math.sin(cornering) * vectorCache[3][0]) + (Math.cos(cornering) * vectorCache[3][0]);
 
                 vectorCache[6] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
+                linkChecker.frontBogie.setVelocity(frontBogie.motionX, frontBogie.motionY, frontBogie.motionZ);
+                linkChecker.backBogie.setVelocity(backBogie.motionX, backBogie.motionY, backBogie.motionZ);
+                vectorCache[5][0]+=linkChecker.frontBogie.motionX;
+                vectorCache[5][1]+=linkChecker.frontBogie.motionY;
+                vectorCache[5][2]+=linkChecker.frontBogie.motionZ;
             }
         }
 
+        if (vectorCache[5][0] + vectorCache[5][1] + vectorCache[5][2] !=0){
+            frontBogie.setVelocity((frontBogie.motionX + vectorCache[5][0]) *0.5,(frontBogie.motionY + vectorCache[5][1]) *0.5,(frontBogie.motionZ + vectorCache[5][2]) *0.5);
+        }
 
-        if (vectorCache[4][0] + vectorCache[6][0] >0.0001 || vectorCache[4][0] + vectorCache[6][0] <-0.0001) {
+        if (Math.abs(vectorCache[4][0]) + Math.abs(vectorCache[4][2]) + Math.abs(vectorCache[6][0]) + Math.abs(vectorCache[6][2]) >0.05) {
             frontBogie.moveLinked(rotationPitch, rotationYaw, vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2], weightKg());
             backBogie.moveLinked(rotationPitch, rotationYaw, vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2], weightKg());
         }
@@ -877,8 +895,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             return false;
         }
 
-        //be sure admins and owners can do whatever
-        if (player.capabilities.isCreativeMode || owner == player.getUniqueID()) {
+        //be sure operators and owners can do whatever
+        if ((player.capabilities.isCreativeMode && player.canCommandSenderUseCommand(2, "")) || owner == player.getUniqueID()) {
             return true;
         }
 
@@ -982,10 +1000,31 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * for electric this is Kw. (400 on average)
      * for nuclear this is the number of fusion cores, rounded down. (usually 1)*/
     public float getMaxFuel(){return 1;}
+    /**defines the functionality to run when rendering a gui on client*/
+    public void guiClient(){}
+    /**defines the functionality to run when setting up the GUI on server*/
+    public void guiServer(){}
+
 
     public Bogie[] getBogieModels(){return null;}
 
-    public ResourceLocation getTexture(){return null;}
+    public ResourceLocation getTexture(int index){
+        return (index> transportSkins.size() || transportSkins.size()==0?new ResourceLocation(MODID, "null.png"):transportSkins.get(index));
+    }
+
+    public void addTransportSkins(ResourceLocation[] skins){
+        for(ResourceLocation skin : skins){
+            if (skin != null && skin.getResourceDomain() == null){
+                transportSkins.add(new ResourceLocation(MODID, skin.getResourcePath()));
+            } else if (skin!= null) {
+                if (transportSkins == null){
+                    transportSkins = Collections.singletonList(skin);
+                } else {
+                    transportSkins.add(skin);
+                }
+            }
+        }
+    }
 
     public ModelBase getModel(){return null;}
 
@@ -1332,7 +1371,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**returns the list of fluid tanks and their capacity.*/
     @Override
     public FluidTankInfo[] getTankInfo(ForgeDirection from){
-        return getTankCapacity()<1?null:new FluidTankInfo[]{new FluidTankInfo(fluidTank, getTankCapacity())};
+        return new FluidTankInfo[]{new FluidTankInfo(fluidTank!=null?fluidTank:new FluidStack(FluidRegistry.WATER,0), getTankCapacity())};
     }
 
     /*

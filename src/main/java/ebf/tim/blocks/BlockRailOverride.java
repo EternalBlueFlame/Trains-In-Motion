@@ -6,6 +6,8 @@ import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.models.tmt.Vec3d;
 import ebf.tim.registry.URIRegistry;
+import ebf.tim.utility.DebugUtil;
+import ebf.tim.utility.RailUtility;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRail;
 import net.minecraft.block.ITileEntityProvider;
@@ -134,17 +136,22 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
                         break;
                     }
                 }
-                model = new ModelRailStraight();/*
-                GL11.glRotatef(180, 1, 0, -1);
+                if(!DebugUtil.dev()) {
+                    model.render();
+                } else {
+                    //model = new ModelRailStraight();
+                    ///*
+                    //GL11.glRotatef(180, 1, 0, -1);
 
 
-                rail.render();
+                    rail.render();
 
-                double[] angle = RailUtility.rotatePoint(new double[]{1*0.0625,0,0},0, 45, 0);
-                GL11.glRotatef(45, 0,0.0625f,0);
-                GL11.glTranslated(angle[0],angle[1],angle[2]);
+                    double[] angle = RailUtility.rotatePoint(new double[]{0.9, 0, 0}, 0, 45, 0);
+                    GL11.glRotatef(0.016f, 0, 45, 0);
+                    GL11.glTranslated(angle[0], angle[1], angle[2]);
 
-                rail.render();*/
+                    rail.render();//*/
+                }
             } else if (p_145828_1_ != null){
                 super.func_145828_a(p_145828_1_);
             }

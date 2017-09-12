@@ -72,6 +72,8 @@ public class EntityBrigadelok080 extends TrainBase {
     }
     public EntityBrigadelok080(World world){
         super(world);
+        //add the textures here
+        addTransportSkins(new ResourceLocation[]{URIRegistry.MODEL_TRAIN_TEXTURE.getResource("brigadelok_080.png")});
     }
 
     /*
@@ -138,7 +140,7 @@ public class EntityBrigadelok080 extends TrainBase {
 
     /**
      * <h2>Hitbox offsets</h2>
-     * @return defines the positions for the hitboxes in blocks. 0 being the center, negative values being towards the front.
+     * @return defines the positions for the hitboxes in blocks. 0 being the center, negative values being towards the front. the first and last values define the positions of the couplers
      */
     @Override
     public double[][] getHitboxPositions(){return new double[][]{{-1.75d,0.25d,0d},{-1.15d,0.25d,0d},{0d,0.25d,0d},{1.15d, 0.25d,0d},{1.75d,0.25d,0d}};}
@@ -222,8 +224,6 @@ public class EntityBrigadelok080 extends TrainBase {
 
     @Override
     public Bogie[] getBogieModels(){return null;}
-    @Override
-    public ResourceLocation getTexture(){return URIRegistry.MODEL_TRAIN_TEXTURE.getResource("brigadelok_080.png");}
 
     @Override
     public ModelBase getModel(){return new Brigadelok_080();}

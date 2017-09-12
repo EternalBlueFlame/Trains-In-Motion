@@ -513,6 +513,9 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
 
     private void moveBogieZnD(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, ITrackBase track){
+        double[][] posVec6 = track.getPositionOnTrack(this);
+        //6[0] is xyz
+        //6[1] is rotations
         System.out.println(track.getDirectionOfSection().toString() + ":::" + track.getOrientation());
     }
 

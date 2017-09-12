@@ -68,12 +68,6 @@ public class ClientProxy extends CommonProxy {
     public static KeyBinding KeyHorn = new KeyBinding("Use Horn/Whistle", Keyboard.KEY_H, "Trains in Motion");
     /**the keybind for opening the inventory*/
     public static KeyBinding KeyInventory = new KeyBinding("Open Train/rollingstock GUI",  Keyboard.KEY_I, "Trains in Motion");
-    /**the keybind for acceleration*/
-    public static KeyBinding KeyAccelerate = new KeyBinding("Train Acceleration", Keyboard.KEY_U, "Trains in Motion");
-    /**the keybind for deceleration/reverse*/
-    public static KeyBinding KeyReverse = new KeyBinding("Train Deceleration/Reverse", Keyboard.KEY_J, "Trains in Motion");
-    /**the keybind for deceleration/reverse*/
-    public static KeyBinding KeyBrake = new KeyBinding("Train Brake", Keyboard.KEY_SPACE, "Trains in Motion");
 
     /**
      * <h2> Client GUI Redirect </h2>
@@ -123,9 +117,6 @@ public class ClientProxy extends CommonProxy {
         KeyLamp.setKeyCode(config.getInt("LampKeybind", "Keybinds (Client only)", Keyboard.KEY_L, 0, 0, ""));
         KeyLamp.setKeyCode(config.getInt("HornKeybind", "Keybinds (Client only)", Keyboard.KEY_H, 0, 0, ""));
         KeyInventory.setKeyCode(config.getInt("InventoryKeybind", "Keybinds (Client only)", Keyboard.KEY_I, 0, 0, ""));
-        KeyAccelerate.setKeyCode(config.getInt("AccelerateKeybind", "Keybinds (Client only)", Keyboard.KEY_U, 0, 0, ""));
-        KeyReverse.setKeyCode(config.getInt("ReverseKeybind", "Keybinds (Client only)", Keyboard.KEY_J, 0, 0, ""));
-        KeyBrake.setKeyCode(config.getInt("BrakeKeybind", "Keybinds (Client only)", Keyboard.KEY_SPACE, 0, 0, ""));
     }
 
     /**the client only lamp block*/
@@ -172,9 +163,6 @@ public class ClientProxy extends CommonProxy {
         //keybinds
         ClientRegistry.registerKeyBinding(KeyLamp);
         ClientRegistry.registerKeyBinding(KeyInventory);
-        ClientRegistry.registerKeyBinding(KeyAccelerate);
-        ClientRegistry.registerKeyBinding(KeyReverse);
-        ClientRegistry.registerKeyBinding(KeyBrake);
 
         //register the transport HUD.
         HUDTrain hud = new HUDTrain();

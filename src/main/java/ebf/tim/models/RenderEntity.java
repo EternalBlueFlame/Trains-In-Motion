@@ -160,12 +160,9 @@ public class RenderEntity extends Render {
          * In that render there is a check whether to render it as a cargo block, or use the geometry size/position/rotation to render a block similar to enderman.
          * @see net.minecraft.client.renderer.entity.RenderEnderman#renderEquippedItems(EntityEnderman, float)
          */
-        Tessellator.bindTexture(entity.getTexture());
-        for(Object cube : entity.renderData.model.boxList){
-            if (cube instanceof ModelRendererTurbo && !(GroupedModelRender.canAdd((ModelRendererTurbo) cube))) {
-                ((ModelRendererTurbo)cube).render();
-            }
-        }
+        //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
+        Tessellator.bindTexture(entity.getTexture(entity.getDataWatcher().getWatchableObjectInt(24)));
+        entity.renderData.model.render(null,0,0,0,0,0,0.0625f);
 
 
         //loop for the groups of cargo
