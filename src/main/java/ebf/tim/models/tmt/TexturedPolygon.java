@@ -9,9 +9,10 @@ import java.util.ArrayList;
 /**
  * An extension of TexturedQuad that adds support for more shapes beyond simple quads.
  */
-public class TexturedPolygon extends TexturedQuad {
-	public TexturedPolygon(PositionTextureVertex apositionTexturevertex[]) {
-		super(apositionTexturevertex);
+public class TexturedPolygon {
+	public TexturedPolygon(PositionTransformVertex apositionTexturevertex[]) {
+		this.vertexPositions = apositionTexturevertex;
+		this.nVertices = apositionTexturevertex.length;
     }
 
 	public void setNormals(int x, int y, int z)
@@ -46,10 +47,8 @@ public class TexturedPolygon extends TexturedQuad {
 	        }
         }
         for(int i = 0; i < nVertices; i++) {
-            PositionTextureVertex positionTexturevertex = vertexPositions[i];
-            if(positionTexturevertex instanceof PositionTransformVertex) {
-				((PositionTransformVertex) positionTexturevertex).setTransformation();
-			}
+            PositionTransformVertex positionTexturevertex = vertexPositions[i];
+			positionTexturevertex.setTransformation();
             if(i < iNormals.size()) {
 				tessellator.setNormal(iNormals.get(i)[0], iNormals.get(i)[1], iNormals.get(i)[2]);
             }
@@ -59,6 +58,17 @@ public class TexturedPolygon extends TexturedQuad {
         tessellator.draw();
     }
 
+	public void flipFace() {
+		PositionTransformVertex[] apositiontexturevertex = new PositionTransformVertex[this.vertexPositions.length];
+		for (int i = 0; i < this.vertexPositions.length; ++i) {
+			apositiontexturevertex[i] = this.vertexPositions[this.vertexPositions.length - i - 1];
+		}
+
+		this.vertexPositions = apositiontexturevertex;
+	}
+
+    public PositionTransformVertex[] vertexPositions;
+	private int nVertices;
     private int[] normals = new int[0];
     private Vec3d Vec3d2;
     private ArrayList<int[]> iNormals = new ArrayList<>();

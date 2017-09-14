@@ -1,29 +1,38 @@
 package ebf.tim.models.tmt;
 
 import net.minecraft.client.model.PositionTextureVertex;
+import net.minecraft.util.Vec3;
 
 import java.util.ArrayList;
 
 /**
  * an extension to PositionTextureVertex that adds support for the neutral vector.
  */
-public class PositionTransformVertex extends PositionTextureVertex {
+public class PositionTransformVertex {
+	public Vec3d vector3D;
+	public float texturePositionX;
+	public float texturePositionY;
+
 	public PositionTransformVertex(double x, double y, double z, float u, float v) {
 		this(new Vec3d(x, y, z), u, v);
 	}
-	
-	public PositionTransformVertex(PositionTextureVertex vertex, float u, float v) {
-		super(vertex, u, v);
-		neutralVector = (vertex instanceof PositionTransformVertex)?((PositionTransformVertex) vertex).neutralVector:new Vec3d(vertex.vector3D.xCoord, vertex.vector3D.yCoord, vertex.vector3D.zCoord);
+
+	public PositionTransformVertex(PositionTransformVertex vertex, float u, float v) {
+		vector3D = vertex.vector3D;
+		texturePositionX = u;
+		texturePositionY = v;
+		neutralVector = vertex.neutralVector;
 	}
-	
-	public PositionTransformVertex(PositionTextureVertex vertex) {
-		this(vertex, vertex.texturePositionX, vertex.texturePositionY);
+
+	public PositionTransformVertex setTexturePosition(float p_78240_1_, float p_78240_2_)
+	{
+		return new PositionTransformVertex(this, p_78240_1_, p_78240_2_);
 	}
 	
 	public PositionTransformVertex(Vec3d vector, float u, float v) {
-		super(vector, u, v);
-		neutralVector = vector;
+		texturePositionX = u;
+		texturePositionY = v;
+		vector3D = neutralVector = vector;
 	}
 	
 	public void setTransformation() {
@@ -58,7 +67,7 @@ public class PositionTransformVertex extends PositionTextureVertex {
 	{
 		transformGroups.remove(group);
 	}
-		
+
 	public Vec3d neutralVector;
 	public ArrayList<TransformGroupBone> transformGroups = new ArrayList<TransformGroupBone>();
 	

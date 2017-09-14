@@ -169,7 +169,7 @@ public class ModelPoolEntry {
 				} else if(s.startsWith("f ")) {
 					//faces
 					s = s.substring(s.indexOf(" ") + 1).trim();
-					ArrayList<PositionTextureVertex> v = new ArrayList<PositionTextureVertex>();
+					ArrayList<PositionTransformVertex> v = new ArrayList<PositionTransformVertex>();
 					String s1;
 					int finalPhase = 0;
 					int[] normal = new int[] {0, 0, 0};
@@ -231,7 +231,7 @@ public class ModelPoolEntry {
 					normal[1]/= d;
 					normal[2]/= d;
 
-					PositionTextureVertex[] vToArr = new PositionTextureVertex[v.size()];
+					PositionTransformVertex[] vToArr = new PositionTransformVertex[v.size()];
 
 					for(int i = 0; i < v.size(); i++) {
 						vToArr[i] = v.get(i);

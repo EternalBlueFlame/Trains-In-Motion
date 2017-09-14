@@ -114,8 +114,8 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
 
         @Override
         public void func_145828_a(@Nullable CrashReportCategory p_145828_1_)  {
-
             if (p_145828_1_ == null && worldObj.isRemote) {
+                GL11.glPushMatrix();
                 GL11.glScaled(1,0.5,1);
                 Tessellator.bindTexture(texture);
                 switch (rotation) {
@@ -152,6 +152,7 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
 
                     rail.render();//*/
                 }
+                GL11.glPushMatrix();
             } else if (p_145828_1_ != null){
                 super.func_145828_a(p_145828_1_);
             }

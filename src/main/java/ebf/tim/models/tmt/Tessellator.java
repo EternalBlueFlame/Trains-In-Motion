@@ -39,7 +39,7 @@ public class Tessellator {
 	private static Tessellator INSTANCE = new Tessellator();
 	private static FloatBuffer fbuf = bbuf.asFloatBuffer();
 	private static IntBuffer ibuf = bbuf.asIntBuffer();
-	private double u, v, w, x_o, y_o, z_o;
+	private float u, v, w;
 	private int[] rb;
 
 	public static Tessellator getInstance(){
@@ -107,8 +107,6 @@ public class Tessellator {
 			GL11.glEnable(GL11.GL_LIGHTING);
 
 			GL11.glPopMatrix();
-
-			reset();
 		}
 		return 0;
 	}
@@ -119,28 +117,46 @@ public class Tessellator {
 		bbuf.clear();
 	}
 
-	public void addVertex(double par1, double par3, double par5){
+	public void addVertex(float par1, float par3, float par5){
 		if(rbi >= rbs - 40) {
-			if(rbs == 0){rbs = 0x10000/*65536*/; rb = new int[rbs];}
+			if(rbs == 0){rbs = 0x10000/*65536*/; rb = new int[rbs];}//theoretically the value of rbs could never exceed 9? (8 if one value was set to 7)
 			else{rbs *= 2; rb = Arrays.copyOf(rb, rbs);}
 		}
 		if(ht){
-			rb[rbi + 3] = Float.floatToRawIntBits((float)u); rb[rbi + 4] = Float.floatToRawIntBits((float)v);
-			rb[rbi + 5] = 0; rb[rbi + 6] = Float.floatToRawIntBits((float)w);
+			rb[rbi + 3] = Float.floatToRawIntBits(u); rb[rbi + 4] = Float.floatToRawIntBits(v);
+			rb[rbi + 5] = 0; rb[rbi + 6] = Float.floatToRawIntBits(w);
 		}
 		if(in){rb[rbi + 8] = n;}
-		rb[rbi] = Float.floatToRawIntBits((float)(par1 + x_o));
-		rb[rbi + 1] = Float.floatToRawIntBits((float)(par3 + y_o));
-		rb[rbi + 2] = Float.floatToRawIntBits((float)(par5 + z_o));
+		rb[rbi] = Float.floatToRawIntBits(par1);
+		rb[rbi + 1] = Float.floatToRawIntBits(par3);
+		rb[rbi + 2] = Float.floatToRawIntBits(par5);
 		rbi += 10; verts++;
 	}
 
-	public void addVertexWithUV(double i, double j, double k, double l, double m){
+	public void addVertex(double par1, double par3, double par5){
+		/*
+		if(rbi >= rbs - 40) {
+			if(rbs == 0){rbs = 0x10000; rb = new int[rbs];}//theoretically the value of rbs could never exceed 9? (8 if one value was set to 7)
+			else{rbs *= 2; rb = Arrays.copyOf(rb, rbs);}
+		}*/
+		if(rbs == 0){rbs = 40; rb = new int[rbs];}
+		if(ht){
+			rb[rbi + 3] = Float.floatToRawIntBits(u); rb[rbi + 4] = Float.floatToRawIntBits(v);
+			rb[rbi + 5] = 0; rb[rbi + 6] = Float.floatToRawIntBits(w);
+		}
+		if(in){rb[rbi + 8] = n;}
+		rb[rbi] = Float.floatToRawIntBits((float) par1);
+		rb[rbi + 1] = Float.floatToRawIntBits((float) par3);
+		rb[rbi + 2] = Float.floatToRawIntBits((float) par5);
+		rbi += 10; verts++;
+	}
+
+	public void addVertexWithUV(float i, float j, float k, float l, float m){
 		this.setTextureUV(l, m); this.addVertex(i, j, k);
 	}
 
-	public void addVertexWithUVW(double i, double j, double k, double l, double m, double n){
-		this.setTextureUVW(l, m, n); this.addVertex(i, j, k);
+	public void addVertexWithUV(double i, double j, double k, float l, float m){
+		this.setTextureUV(l, m); this.addVertex(i, j, k);
 	}
 
 	public void setNormal(float x, float y, float z){
@@ -152,20 +168,12 @@ public class Tessellator {
 		n = ((x * 127)) & 255 | (((y * 127)) & 255) << 8 | (((z * 127)) & 255) << 16;
 	}
 
-	public void setTextureUV(double i, double j){
-		this.ht = true; this.u = i; this.v = j; this.w = 1.0D;
+	public void setTextureUV(float i, float j){
+		this.ht = true; this.u = i; this.v = j; this.w = 1.0F;
 	}
 
-	public void setTextureUVW(double i, double j, double k){
+	public void setTextureUVW(float i, float j, float k){
 		this.ht = true; this.u = i; this.v = j; this.w = k;
-	}
-
-	public void setTranslation(double x, double y, double z){
-		x_o = x; y_o = y; z_o = z;
-	}
-
-	public void addTranslation(float x, float y, float z){
-		x_o += x; y_o += y; z_o += z;
 	}
 
 	public void setColorRGBAf(float f, float g, float h, float i) {
@@ -185,30 +193,19 @@ public class Tessellator {
 
 
 	public static void bindTexture(ResourceLocation textureURI) {
-		new threadedTextureLoader(textureURI).run();
-	}
-
-	public static class threadedTextureLoader implements Runnable{
-		private final ResourceLocation textureURI;
-		public threadedTextureLoader(ResourceLocation texture){
-			textureURI = texture;
+		ITextureObject object;
+		if (textureURI != null) {
+			object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
+			if (object == null) {
+				object = new SimpleTexture(textureURI);
+				Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
+			}
+		} else {
+			object = TextureUtil.missingTexture;
 		}
-		@Override
-		public void run() {
-			ITextureObject object;
-			if (textureURI != null) {
-				object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
-				if (object == null) {
-					object = new SimpleTexture(textureURI);
-					Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
-				}
-			} else {
-				object = TextureUtil.missingTexture;
-			}
 
-			if (GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D) != object.getGlTextureId()) {
-				GL11.glBindTexture(GL_TEXTURE_2D, object.getGlTextureId());
-			}
+		if (GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D) != object.getGlTextureId()) {
+			GL11.glBindTexture(GL_TEXTURE_2D, object.getGlTextureId());
 		}
 	}
 
