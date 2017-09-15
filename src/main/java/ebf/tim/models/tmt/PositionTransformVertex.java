@@ -1,8 +1,5 @@
 package ebf.tim.models.tmt;
 
-import net.minecraft.client.model.PositionTextureVertex;
-import net.minecraft.util.Vec3;
-
 import java.util.ArrayList;
 
 /**
@@ -49,12 +46,12 @@ public class PositionTransformVertex {
 		vector3D.zCoord = 0;
 
 		for(TransformGroupBone transform : transformGroups) {
-			double cWeight = transform.getWeight() / weight;
+			weight = transform.getWeight() / weight;
 			Vec3d vector = transform.doTransformation(this);
 			
-			vector3D.xCoord += cWeight * vector.xCoord;
-			vector3D.yCoord += cWeight * vector.yCoord;
-			vector3D.zCoord += cWeight * vector.zCoord;
+			vector3D.xCoord += weight * vector.xCoord;
+			vector3D.yCoord += weight * vector.yCoord;
+			vector3D.zCoord += weight * vector.zCoord;
 		}
 	}
 	

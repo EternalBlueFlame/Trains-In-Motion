@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class ModelPool {
 	
-    public static ModelPoolEntry addFile(String file, Map<String, TransformGroupBone> group, Map<String, List<TexturedPolygon>> textureGroup){
+    public static ModelPoolEntry addFile(String file, Map<String, TransformGroupBone> group, Map<String, List<TexturedCube>> textureGroup){
 		if(modelMap.containsKey(file)){
 			ModelPoolEntry entry = modelMap.get(file);
 			entry.applyGroups(group, textureGroup);
@@ -29,7 +29,7 @@ public class ModelPool {
 				//return null;
 				//}
 				entry.groups = new HashMap<String, TransformGroupBone>();
-				entry.textures = new HashMap<String, List<TexturedPolygon>>();
+				entry.textures = new HashMap<String, List<TexturedCube>>();
 				entry.name = file;
 				entry.setGroup("0");
 				entry.setTextureGroup("0");

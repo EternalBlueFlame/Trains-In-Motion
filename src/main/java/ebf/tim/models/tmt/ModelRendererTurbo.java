@@ -1,9 +1,6 @@
 package ebf.tim.models.tmt;
 
-import ebf.tim.models.RenderEntity;
 import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.client.model.PositionTextureVertex;
-import net.minecraft.client.model.TexturedQuad;
 import net.minecraft.client.renderer.GLAllocation;
 import org.lwjgl.opengl.GL11;
 
@@ -38,7 +35,7 @@ public class ModelRendererTurbo extends ModelRenderer {
     public ModelRendererTurbo(ModelBase modelbase, String s) {
         super(modelbase, s);
         transformGroup.put("0", new TransformGroupBone(new Bone(0, 0, 0, 0), 1D));
-        textureGroup.put("0", new ArrayList<TexturedPolygon>());
+        textureGroup.put("0", new ArrayList<TexturedCube>());
         currentTextureGroup = textureGroup.get("0");
     }
     /**
@@ -104,7 +101,7 @@ public class ModelRendererTurbo extends ModelRenderer {
      * @param verts an array of vertices
      */
     public void addPolygon(PositionTransformVertex[] verts) {
-        copyTo(verts, new TexturedPolygon[] {new TexturedPolygon(verts)});
+        copyTo(new TexturedCube[] {new TexturedCube(verts)});
     }
 
     /**
@@ -127,11 +124,7 @@ public class ModelRendererTurbo extends ModelRenderer {
      * @param u2
      * @param v2
      */
-    public void addPolygon(PositionTransformVertex[] verts, int u1, int v1, int u2, int v2) {
-        copyTo(verts, new TexturedPolygon[] {addPolygonReturn(verts, u1, v1, u2, v2)});
-    }
-
-    private TexturedPolygon addPolygonReturn(PositionTransformVertex[] verts, float u1, float v1, float u2, float v2) {
+    private TexturedCube addPolygonReturn(PositionTransformVertex[] verts, float u1, float v1, float u2, float v2) {
         if(verts.length < 3) {
             return null;
         }
@@ -169,7 +162,7 @@ public class ModelRendererTurbo extends ModelRenderer {
             verts[2] = verts[2].setTexturePosition(u1 / textureWidth + uOffs, v2 / textureHeight - vOffs);
             verts[3] = verts[3].setTexturePosition(u2 / textureWidth - uOffs, v2 / textureHeight - vOffs);
         }
-        return new TexturedPolygon(verts);
+        return new TexturedCube(verts);
     }
 
     /**
@@ -194,7 +187,7 @@ public class ModelRendererTurbo extends ModelRenderer {
         boolean showX= d!=0.01;
 
         PositionTransformVertex[] verts = new PositionTransformVertex[8];
-        TexturedPolygon[] poly = new TexturedPolygon[(showX?2:0) + (showY?2:0) +(showZ?2:0)];
+        TexturedCube[] poly = new TexturedCube[(showX?2:0) + (showY?2:0) +(showZ?2:0)];
         verts[0] = new PositionTransformVertex(v[0], v[1], v[2], 0.0F, 0.0F);
         verts[1] = new PositionTransformVertex(v1[0], v1[1], v1[2], 0.0F, 8F);
         verts[2] = new PositionTransformVertex(v2[0], v2[1], v2[2], 8F, 8F);
@@ -236,14 +229,14 @@ public class ModelRendererTurbo extends ModelRenderer {
             }, textureOffsetX + d + w + d, textureOffsetY + d, textureOffsetX + d + w + d + w, textureOffsetY + d + h);
         }
 
-        if(mirror ^ flip) {
-            for(TexturedPolygon polygon : poly) {
+        if(mirror) {
+            for(TexturedCube polygon : poly) {
                 polygon.flipFace();
             }
 
         }
 
-        copyTo(verts, poly);
+        copyTo(poly);
     }
 
     /**
@@ -602,12 +595,7 @@ public class ModelRendererTurbo extends ModelRenderer {
         PositionTransformVertex positionTexturevertex7 = new PositionTransformVertex(x, y1, z1, 8F, 0.0F);
 
 
-        copyTo(
-                new PositionTransformVertex[]{
-                        positionTexturevertex,positionTexturevertex1,positionTexturevertex2,positionTexturevertex3,positionTexturevertex4,
-                        positionTexturevertex5,positionTexturevertex6,positionTexturevertex7
-                },
-                new TexturedPolygon[]{
+        copyTo(new TexturedCube[]{
                         addPolygonReturn(new PositionTransformVertex[] {
                                 positionTexturevertex5, positionTexturevertex1, positionTexturevertex2, positionTexturevertex6
                         }, w, h, w + 1, h + 1),
@@ -837,14 +825,8 @@ public class ModelRendererTurbo extends ModelRenderer {
         if(entry == null){
             return;
         }
-        PositionTransformVertex[] verts = Arrays.copyOf(entry.vertices, entry.vertices.length);
-        TexturedPolygon[] poly = Arrays.copyOf(entry.faces, entry.faces.length);
-        if(flip){
-            for(TexturedPolygon face : faces) {
-                face.flipFace();
-            }
-        }
-        copyTo(verts, poly, false);
+        TexturedCube[] poly = Arrays.copyOf(entry.faces, entry.faces.length);
+        copyTo(poly);
     }
 
     /**
@@ -871,24 +853,6 @@ public class ModelRendererTurbo extends ModelRenderer {
         rotationPointZ = z;
     }
 
-    /**
-     * Mirrors the model in any direction.
-     * @param x whether the model should be mirrored in the x-direction
-     * @param y whether the model should be mirrored in the y-direction
-     * @param z whether the model should be mirrored in the z-direction
-     */
-    public void doMirror(boolean x, boolean y, boolean z) {
-        for(TexturedPolygon face : faces) {
-            for (PositionTransformVertex vert : face.vertexPositions) {
-                vert.vector3D.xCoord *= (x ? -1 : 1);
-                vert.vector3D.yCoord *= (y ? -1 : 1);
-                vert.vector3D.zCoord *= (z ? -1 : 1);
-            }
-            if (x ^ y ^ z) {
-                face.flipFace();
-            }
-        }
-    }
 
     /**
      * Sets whether the shape is mirrored or not. This has effect on the way the textures
@@ -901,24 +865,11 @@ public class ModelRendererTurbo extends ModelRenderer {
     }
 
     /**
-     * Sets whether the shape's faces are flipped or not. When GL_CULL_FACE is enabled,
-     * it won't render the back faces, effectively giving you the possibility to make
-     * "hollow" shapes. When working with addSprite and addPixel, it will be ignored.
-     * @param isFlipped a boolean to define whether the shape is flipped
-     */
-    public void setFlipped(boolean isFlipped)
-    {
-        flip = isFlipped;
-    }
-
-    /**
      * Clears the current shape. Since all shapes are stacked into one shape, you can't
      * just replace a shape by overwriting the shape with another one. In this case you
      * would need to clear the shape first.
      */
     public void clear() {
-        vertices = new PositionTransformVertex[0];
-        faces = new TexturedPolygon[0];
         transformGroup.clear();
         transformGroup.put("0", new TransformGroupBone(new Bone(0, 0, 0, 0), 1D));
         currentGroup = transformGroup.get("0");
@@ -928,30 +879,10 @@ public class ModelRendererTurbo extends ModelRenderer {
      * Copies an array of vertices and polygons to the current shape. This mainly is
      * used to copy each shape to the main class, but you can just use it to copy
      * your own shapes, for example from other classes, into the current class.
-     * @param verts the array of vertices you want to copy
      * @param poly the array of polygons you want to copy
      */
-    public void copyTo(PositionTransformVertex[] verts, TexturedPolygon[] poly)
-    {
-        copyTo(verts, poly, true);
-    }
-
-    public void copyTo(PositionTransformVertex[] verts, TexturedPolygon[] poly, boolean copyGroup) {
-        vertices = Arrays.copyOf(vertices, vertices.length + verts.length);
-        faces = Arrays.copyOf(faces, faces.length + poly.length);
-
-        for(int idx = 0; idx < verts.length; idx++) {
-            vertices[vertices.length - verts.length + idx] = verts[idx];
-            if(copyGroup) {
-                verts[idx].addGroup(currentGroup);
-            }
-        }
-
-        for(int idx = 0; idx < poly.length; idx++) {
-            faces[faces.length - poly.length + idx] = poly[idx];
-            if(copyGroup)
-                currentTextureGroup.add(poly[idx]);
-        }
+    public void copyTo(TexturedCube[] poly) {
+        Collections.addAll(currentTextureGroup, poly);
     }
 
     /**
@@ -1045,36 +976,28 @@ public class ModelRendererTurbo extends ModelRenderer {
     }
 
     public void compileDisplayList(float worldScale) {
-        Iterator<List<TexturedPolygon>> itr = textureGroup.values().iterator();
+        Iterator<List<TexturedCube>> itr = textureGroup.values().iterator();
         displayListArray = new int[textureGroup.size()];
         for(int i = 0; itr.hasNext(); i++) {
             displayListArray[i] = GLAllocation.generateDisplayLists(1);
             GL11.glNewList(displayListArray[i], GL11.GL_COMPILE);
-            Tessellator tessellator = Tessellator.getInstance();
 
-            List<TexturedPolygon> usedGroup = itr.next();
-            for(TexturedPolygon poly : usedGroup) {
-                poly.draw(tessellator, worldScale);
-            }
+            TexturedCube.drawQuads(Tessellator.getInstance(), worldScale, itr.next());
 
             GL11.glEndList();
         }
 
         compiled = true;
     }
-
-    private PositionTransformVertex vertices[] = new PositionTransformVertex[0];
-    private TexturedPolygon faces[] = new TexturedPolygon[0];
     private int textureOffsetX;
     private int textureOffsetY;
     private boolean compiled = false;
     private int displayListArray[];
     private Map<String, TransformGroupBone> transformGroup = new HashMap<String, TransformGroupBone>();
-    private Map<String, List<TexturedPolygon>> textureGroup = new HashMap<String, List<TexturedPolygon>>();
+    private Map<String, List<TexturedCube>> textureGroup = new HashMap<String, List<TexturedCube>>();
     private TransformGroupBone currentGroup;
-    private List<TexturedPolygon> currentTextureGroup;
+    private List<TexturedCube> currentTextureGroup;
     public boolean mirror = false;
-    public boolean flip = false;
     public boolean showModel = true;
     //ETERNAL EDIT: removed field_1402_i, use ShowModel instead.
     //ETERNAL EDIT: removed forcedRecompile, just use compiled

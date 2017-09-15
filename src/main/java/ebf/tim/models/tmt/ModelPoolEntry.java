@@ -1,6 +1,5 @@
 package ebf.tim.models.tmt;
 
-import net.minecraft.client.model.PositionTextureVertex;
 import net.minecraft.util.MathHelper;
 
 import java.io.BufferedReader;
@@ -51,12 +50,12 @@ public class ModelPoolEntry {
      */
     protected void setTextureGroup(String groupName) {
     	if(textures.size() == 0 || !textures.containsKey(groupName)) {
-    		textures.put(groupName, new ArrayList<TexturedPolygon>());
+    		textures.put(groupName, new ArrayList<TexturedCube>());
     	}
     	texture = textures.get(groupName);
     }
     
-    protected void applyGroups(Map<String, TransformGroupBone> groupsMap, Map<String, List<TexturedPolygon>> texturesMap) {
+    protected void applyGroups(Map<String, TransformGroupBone> groupsMap, Map<String, List<TexturedCube>> texturesMap) {
     	
     	Iterator<String> groupsItr = groups.keySet().iterator();
     	Iterator<String> texturesItr = textures.keySet().iterator();
@@ -86,11 +85,11 @@ public class ModelPoolEntry {
     	
     public String name;
 	public PositionTransformVertex[] vertices;
-	public TexturedPolygon[] faces;
+	public TexturedCube[] faces;
 	public Map<String, TransformGroupBone> groups;
-	public Map<String, List<TexturedPolygon>> textures;
+	public Map<String, List<TexturedCube>> textures;
 	protected TransformGroupBone group;
-	protected List<TexturedPolygon> texture = new ArrayList<TexturedPolygon>();
+	protected List<TexturedCube> texture = new ArrayList<TexturedCube>();
 
 
 	public ModelPoolEntry() {
@@ -110,7 +109,7 @@ public class ModelPoolEntry {
 			ArrayList<PositionTransformVertex> verts = new ArrayList<PositionTransformVertex>();
 			ArrayList<float[]> uvs = new ArrayList<float[]>();
 			ArrayList<int[]> normals = new ArrayList<int[]>();
-			ArrayList<TexturedPolygon> face = new ArrayList<TexturedPolygon>();
+			ArrayList<TexturedCube> face = new ArrayList<TexturedCube>();
 
 			while((s = in.readLine()) != null) {
 				s = s.contains("#")?s.substring(0, s.indexOf("#")).trim():s.trim();
@@ -173,7 +172,6 @@ public class ModelPoolEntry {
 					String s1;
 					int finalPhase = 0;
 					int[] normal = new int[] {0, 0, 0};
-					ArrayList<int[]> iNormal = new ArrayList<>();
 					while(finalPhase < 1) {
 						int vInt;
 						float[] curUV;
@@ -206,8 +204,6 @@ public class ModelPoolEntry {
 							curNormals = (normals.size() > vInt)?normals.get(vInt):new int[]{0, 0, 0};
 						}
 
-						iNormal.add(new int[]{curNormals[0], curNormals[1], curNormals[2]});
-
 						normal[0]+= curNormals[0];
 						normal[1]+= curNormals[1];
 						normal[2]+= curNormals[2];
@@ -237,8 +233,7 @@ public class ModelPoolEntry {
 						vToArr[i] = v.get(i);
 					}
 
-					TexturedPolygon poly = new TexturedPolygon(vToArr);
-					poly.setNormals(iNormal);
+					TexturedCube poly = new TexturedCube(vToArr);
 
 					face.add(poly);
 					texture.add(poly);
@@ -249,7 +244,7 @@ public class ModelPoolEntry {
 			for(int i = 0; i < verts.size(); i++) {
 				vertices[i] = verts.get(i);
 			}
-			faces = new TexturedPolygon[face.size()];
+			faces = new TexturedCube[face.size()];
 			for(int i = 0; i < face.size(); i++) {
 				faces[i] = face.get(i);
 			}
