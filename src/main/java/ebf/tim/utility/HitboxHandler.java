@@ -113,8 +113,6 @@ public class HitboxHandler {
         int k1;
         int l1;
         int i2;
-        boolean containsRail = false;
-        boolean detectedCollision = false;
         Block b1;
         double[][] vectorCache = new double[3][3];
         //Be sure the transport has hitboxes

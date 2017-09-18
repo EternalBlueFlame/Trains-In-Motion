@@ -3,6 +3,7 @@ package ebf.tim.utility;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
+import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
@@ -109,10 +110,11 @@ public class EventManager {
             //add alpha notice
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("You are currently playing an alpha release of Trains In Motion."));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("For official releases, check out https://github.com/EternalBlueFlame/Trains-In-Motion/"));
-            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Keep in mind that everything in this mod is subject to change, and report any bugs you find."));
+            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Keep in mind that everything in this mod is subject to change, especially the rails, and report any bugs you find."));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Good luck and thanks for the assistance. - Eternal Blue Flame."));
 
             //use an HTTP request and parse to check for new versions of the mod from github.
+            System.out.println();
             try {
                 //make an HTTP connection to the version text file, and set the type as get.
                 HttpURLConnection conn = (HttpURLConnection) new URL("https://raw.githubusercontent.com/USER/PROJECT/BRANCH/version.txt").openConnection();
@@ -130,4 +132,14 @@ public class EventManager {
 
         }
     }
+
+    @SubscribeEvent
+    @SuppressWarnings("unused")
+    public void playerQuitEvent(PlayerEvent.PlayerLoggedOutEvent event){
+        if (event.player.ridingEntity instanceof GenericRailTransport || event.player.ridingEntity instanceof EntitySeat){
+            event.player.dismountEntity(event.player.ridingEntity);
+        }
+    }
+
+
 }

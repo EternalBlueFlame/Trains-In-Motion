@@ -184,7 +184,7 @@ public class ParticleFX {
         GL11.glEnable(GL11.GL_LIGHTING);
         GL11.glEnable(GL11.GL_CULL_FACE);
         Tessellator tessellator = Tessellator.getInstance();
-        tessellator.startDrawing(GL11.GL_QUADS);
+        tessellator.startDrawing();
         //set the color with the tint.
         GL11.glColor3f((((entity.color >> 16 & 0xFF)/255.0F) - entity.colorTint),
                 (((entity.color >> 8 & 0xFF)/255.0F) - entity.colorTint),

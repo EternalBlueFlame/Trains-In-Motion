@@ -101,6 +101,7 @@ public class RenderEntity extends Render {
                             if (!isAdded) {
                                 entity.renderData.blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render)));
                             }
+                            render.showModel = false;
                         }
                     }
                 }
@@ -134,12 +135,12 @@ public class RenderEntity extends Render {
          * if there is, then calculate the vectors and apply the animations
          */
         if (!Minecraft.getMinecraft().isGamePaused() &&ClientProxy.EnableAnimations && entity.backBogie!=null &&
-                (entity.backBogie.motionX > 0.1 || entity.backBogie.motionX < -0.1 || entity.backBogie.motionZ > 0.1 || entity.backBogie.motionZ < -0.1)) {
+                (entity.backBogie.motionX > 0.03 || entity.backBogie.motionX < -0.03 || entity.backBogie.motionZ > 0.03 || entity.backBogie.motionZ < -0.03)) {
             if (entity.renderData.wheelPitch >= 6.2831855f || entity.renderData.wheelPitch <=-6.2831855f) {
                 entity.renderData.wheelPitch -= Math.copySign(6.2831855f, entity.renderData.wheelPitch);
             }
             //define the rotation angle, if it's going fast enough.
-            entity.renderData.wheelPitch += -((Math.sqrt(entity.backBogie.motionX * entity.backBogie.motionX) + Math.sqrt(entity.backBogie.motionZ * entity.backBogie.motionZ))*0.08f);
+            entity.renderData.wheelPitch += ((Math.sqrt(entity.backBogie.motionX * entity.backBogie.motionX) + Math.sqrt(entity.backBogie.motionZ * entity.backBogie.motionZ))*0.08f);
 
             if (entity.renderData.wheelPitch != entity.renderData.lastWheelPitch) {
                 entity.renderData.lastWheelPitch =entity.renderData.wheelPitch;

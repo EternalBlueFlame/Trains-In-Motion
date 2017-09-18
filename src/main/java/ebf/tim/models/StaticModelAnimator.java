@@ -56,7 +56,7 @@ public class StaticModelAnimator {
         switch (modelRefrence.boxName){
             //animate wheels
             case tagSimpleRotate:{
-                modelRefrence.rotateAngleZ = rotationZ*0.3f;
+                modelRefrence.rotateAngleZ = rotationZ*0.5f;
                 break;
             }
             //animate simple pistons, just rotates around center
@@ -77,7 +77,7 @@ public class StaticModelAnimator {
 
                 modelRefrence.rotationPointY = originalRotationValuesXYZ[1] - (float)(positionOffset[2]*0.5d);
                 modelRefrence.rotationPointX = originalRotationValuesXYZ[0] - (float)positionOffset[0];
-                modelRefrence.rotateAngleZ = originalRotationValuesXYZ[5] - (float)(positionOffset[2] * 0.05d);
+                modelRefrence.rotateAngleZ = originalRotationValuesXYZ[5] - (float)(positionOffset[2] * 0.15d);
             }
         }
     }

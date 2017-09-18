@@ -22,7 +22,7 @@ public class ModelBase extends net.minecraft.client.model.ModelBase {
 	
 	public static void render(ModelRendererTurbo[] part){
 		for(ModelRendererTurbo mrt : part){
-			mrt.render();
+			mrt.render(0.0625f);
 		}
 	}
 	

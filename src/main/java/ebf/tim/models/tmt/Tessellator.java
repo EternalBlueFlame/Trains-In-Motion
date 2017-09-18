@@ -2,6 +2,7 @@ package ebf.tim.models.tmt;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.utility.ClientProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.texture.ITextureObject;
@@ -42,7 +43,7 @@ public class Tessellator {
 
 	}
 
-	public void startDrawing(int i){
+	public void startDrawing(){
 		ht = false;
 		rbi = 0;
 		rb = new int[240];
@@ -121,7 +122,7 @@ public class Tessellator {
 			object = TextureUtil.missingTexture;
 		}
 
-		if (GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D) != object.getGlTextureId()) {
+		if (ClientProxy.ForceTextureBinding || GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D) != object.getGlTextureId()) {
 			GL11.glBindTexture(GL_TEXTURE_2D, object.getGlTextureId());
 		}
 	}

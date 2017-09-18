@@ -15,11 +15,13 @@ public enum URIRegistry {
     /**used for non-vanilla GUI textures*/
     GUI_PREFIX("textures/gui/"),
     /**used for train textures*/
-    MODEL_TRAIN_TEXTURE("textures/train/"),
+    MODEL_TRAIN_TEXTURE("textures/sd/train/"),
+    HD_MODEL_TRAIN_TEXTURE("textures/hd/train/"),
     /**used for icons*/
     ITEM_TRANSPORT_ICON("item/transport/"),
     /**used for rollingstock textures*/
-    MODEL_ROLLINGSTOCK_TEXTURE("textures/rollingstock/"),
+    MODEL_ROLLINGSTOCK_TEXTURE("textures/sd/rollingstock/"),
+    HD_MODEL_ROLLINGSTOCK_TEXTURE("textures/hd/rollingstock/"),
     /**used for rail textures*/
     MODEL_RAIL_TEXTURE("textures/rail/"),
     /**used for block textures*/

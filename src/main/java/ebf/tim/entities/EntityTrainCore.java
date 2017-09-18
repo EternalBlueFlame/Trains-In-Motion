@@ -102,6 +102,16 @@ public class EntityTrainCore extends GenericRailTransport {
 
 
     /**
+     * <h2>Max speed</h2>
+     * @return the value of the max speed in blocks per second(km/h * 0.277778) scaled to the size (1/7.68)
+     * for example if the train speed is 25, the calculation would be ((25*0.277778)* 0.130208333) = 0.90422525
+     * or simplified to 25 * 0.0361690103 = 0.90422525
+     */
+    public float getProcessedMaxSpeed(){
+        return (getMaxSpeed() * 0.0361690103f);
+    }
+
+    /**
      * <h2>Calculate speed increase rate</h2>
      *
      * speed calculation provided by zodiacmal
@@ -156,7 +166,13 @@ public class EntityTrainCore extends GenericRailTransport {
         }
 
         //745.7 converts watts to horsepower, but considering the scale, it should be substantially less
-        vectorCache[0][0] = (((0.07457 * (accelerator / 6D)) * hp) / weight);
+
+        vectorCache[0][0] += (((0.7457 * (accelerator / 6D)) * hp) / (weight * 0.7457));
+        if (vectorCache[0][0] > getProcessedMaxSpeed()){
+            vectorCache[0][0] = getProcessedMaxSpeed();
+        } else if (vectorCache[0][0] < -getProcessedMaxSpeed()){
+            vectorCache[0][0] = -getProcessedMaxSpeed();
+        }
 
 
     }
@@ -172,20 +188,17 @@ public class EntityTrainCore extends GenericRailTransport {
     public void onUpdate() {
 
         if(accelerator!=0 && frontBogie != null && backBogie != null) {
-            //every second, or when the speed is 0, re-calculate the speed.
-            if(ticksExisted %20==0){
-                calculateAcceleration();
+            //twice a second, re-calculate the speed.
+            if(ticksExisted %10==0 ){
+                //stop calculation if it can't move
+                if (((getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM || getType() == TrainsInMotion.transportTypes.STEAM) && fuelHandler.steamTank< getTankCapacity()*0.25)//check for steam fuel
+                        || (getType() == TrainsInMotion.transportTypes.ELECTRIC && getTankAmount()<1)//check for electric fuel
+                ) {
+                    vectorCache[0][0] = 0;
+                } else {
+                    calculateAcceleration();
+                }
             }
-
-            //cap speed to max.
-            if (frontBogie.motionX+ frontBogie.motionZ > getMaxSpeed() || frontBogie.motionX+ frontBogie.motionZ <-getMaxSpeed() ||
-                    ((getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM || getType() == TrainsInMotion.transportTypes.STEAM) && fuelHandler.steamTank< getTankCapacity()*0.25)//check for steam fuel
-                    || (getType() == TrainsInMotion.transportTypes.ELECTRIC && getTankAmount()<1)//check for electric fuel
-                    ) {
-                vectorCache[0][0] = 0;
-            }
-
-
             vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], rotationPitch, rotationYaw, 0);
             frontBogie.addVelocity(vectorCache[1][0], vectorCache[1][1], vectorCache[1][2]);
             backBogie.addVelocity(vectorCache[1][0], vectorCache[1][1], vectorCache[1][2]);

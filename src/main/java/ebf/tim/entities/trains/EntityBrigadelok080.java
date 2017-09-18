@@ -13,6 +13,7 @@ import ebf.tim.models.tmt.Vec3d;
 import ebf.tim.models.trains.Brigadelok_080;
 import ebf.tim.registry.TransportRegistry;
 import ebf.tim.registry.URIRegistry;
+import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.FuelHandler;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -73,7 +74,11 @@ public class EntityBrigadelok080 extends TrainBase {
     public EntityBrigadelok080(World world){
         super(world);
         //add the textures here
-        addTransportSkins(new ResourceLocation[]{URIRegistry.MODEL_TRAIN_TEXTURE.getResource("brigadelok_080.png")});
+        if(ClientProxy.useHDSkins){
+            addTransportSkins(new ResourceLocation[]{URIRegistry.HD_MODEL_TRAIN_TEXTURE.getResource("brigadelok_080.png")});
+        } else {
+            addTransportSkins(new ResourceLocation[]{URIRegistry.MODEL_TRAIN_TEXTURE.getResource("brigadelok_080.png")});
+        }
     }
 
     /*
@@ -86,11 +91,10 @@ public class EntityBrigadelok080 extends TrainBase {
     /**
      * <h2>Max speed</h2>
      * <h4>TRAINS ONLY.</h4>
-     * @return the value of the max speed in blocks per second(km/h * 0.277778) scaled to the train size (1/7.68)
-     * in this case the train speed is 25, so the calculation would be ((25*0.277778)* 0.130208333) = 0.9042252581
+     * @return the value of the max speed in km/h
      */
     @Override
-    public float getMaxSpeed(){return 0.9042252581f;}
+    public float getMaxSpeed(){return 25;}
     /**
      * <h2>Bogie Offset</h2>
      * @return the list of offsets for the bogies, 0 being the center. negative values are towards the front of the train.
@@ -126,7 +130,7 @@ public class EntityBrigadelok080 extends TrainBase {
      *     Only the first 3 values of each set of floats are actually used.
      */
     @Override
-    public double[][] getRiderOffsets(){return new double[][]{{1.3f,1.1f, 0f}};}
+    public double[][] getRiderOffsets(){return new double[][]{{1.3f,1.2f, 0f}};}
     /**
      * <h2>Acceleration</h2>
      * <h4>TRAINS ONLY.</h4>

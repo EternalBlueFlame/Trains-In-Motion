@@ -99,33 +99,33 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[75] = new ModelRendererTurbo(this, 97, 65, textureXY, textureXY); // Box 78
 		brigadelok_080Model[76] = new ModelRendererTurbo(this, 121, 57, textureXY, textureXY); // Box 79
 		brigadelok_080Model[77] = new ModelRendererTurbo(this, 73, 65, textureXY, textureXY); // Box 80
-		brigadelok_080Model[78] = new ModelRendererTurbo(this, 121, 65, textureXY, textureXY); // Box 81
-		brigadelok_080Model[79] = new ModelRendererTurbo(this, 153, 65, textureXY, textureXY); // Box 82
-		brigadelok_080Model[80] = new ModelRendererTurbo(this, 33, 73, textureXY, textureXY); // Box 83
-		brigadelok_080Model[81] = new ModelRendererTurbo(this, 49, 73, textureXY, textureXY); // Box 84
-		brigadelok_080Model[82] = new ModelRendererTurbo(this, 121, 73, textureXY, textureXY); // Box 85
-		brigadelok_080Model[83] = new ModelRendererTurbo(this, 153, 73, textureXY, textureXY); // Box 86
-		brigadelok_080Model[84] = new ModelRendererTurbo(this, 1, 81, textureXY, textureXY); // Box 87
-		brigadelok_080Model[85] = new ModelRendererTurbo(this, 1, 89, textureXY, textureXY); // Box 88
-		brigadelok_080Model[86] = new ModelRendererTurbo(this, 81, 41, textureXY, textureXY); // Box 89
-		brigadelok_080Model[87] = new ModelRendererTurbo(this, 41, 105, textureXY, textureXY); // Box 90
-		brigadelok_080Model[88] = new ModelRendererTurbo(this, 81, 121, textureXY, textureXY); // Box 91
-		brigadelok_080Model[89] = new ModelRendererTurbo(this, 113, 121, textureXY, textureXY); // Box 92
+		brigadelok_080Model[78] = new ModelRendererTurbo(this, 121, 65, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // SimpleRotate
+		brigadelok_080Model[79] = new ModelRendererTurbo(this, 153, 65, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // SimpleRotate
+		brigadelok_080Model[80] = new ModelRendererTurbo(this, 33, 73, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // SimpleRotate
+		brigadelok_080Model[81] = new ModelRendererTurbo(this, 49, 73, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // SimpleRotate
+		brigadelok_080Model[82] = new ModelRendererTurbo(this, 121, 73, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // SimpleRotate
+		brigadelok_080Model[83] = new ModelRendererTurbo(this, 153, 73, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // SimpleRotate
+		brigadelok_080Model[84] = new ModelRendererTurbo(this, 1, 81, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // SimpleRotate
+		brigadelok_080Model[85] = new ModelRendererTurbo(this, 1, 89, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // SimpleRotate
+		brigadelok_080Model[86] = new ModelRendererTurbo(this, 81, 41, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // SimpleRotate
+		brigadelok_080Model[87] = new ModelRendererTurbo(this, 41, 105, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // SimpleRotate
+		brigadelok_080Model[88] = new ModelRendererTurbo(this, 81, 121, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // SimpleRotate
+		brigadelok_080Model[89] = new ModelRendererTurbo(this, 113, 121, textureXY, textureXY, StaticModelAnimator.tagSimpleRotate); // SimpleRotate
 		brigadelok_080Model[90] = new ModelRendererTurbo(this, 185, 121, textureXY, textureXY); // Box 93
 		brigadelok_080Model[91] = new ModelRendererTurbo(this, 25, 137, textureXY, textureXY); // Box 94
 		brigadelok_080Model[92] = new ModelRendererTurbo(this, 97, 137, textureXY, textureXY); // Box 95
-		brigadelok_080Model[93] = new ModelRendererTurbo(this, 129, 129, textureXY, textureXY); // Box 96
-		brigadelok_080Model[94] = new ModelRendererTurbo(this, 241, 89, textureXY, textureXY); // Box 97
-		brigadelok_080Model[95] = new ModelRendererTurbo(this, 169, 137, textureXY, textureXY); // Box 98
+		brigadelok_080Model[93] = new ModelRendererTurbo(this, 129, 129, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // simplepiston
+		brigadelok_080Model[94] = new ModelRendererTurbo(this, 241, 89, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // simplepiston
+		brigadelok_080Model[95] = new ModelRendererTurbo(this, 169, 137, textureXY, textureXY, StaticModelAnimator.tagAdvancedPiston); // advandedpiston
 		brigadelok_080Model[96] = new ModelRendererTurbo(this, 249, 41, textureXY, textureXY); // Box 99
-		brigadelok_080Model[97] = new ModelRendererTurbo(this, 209, 137, textureXY, textureXY); // Box 100
+		brigadelok_080Model[97] = new ModelRendererTurbo(this, 209, 137, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // simplepiston
 		brigadelok_080Model[98] = new ModelRendererTurbo(this, 201, 73, textureXY, textureXY); // Box 99
 		brigadelok_080Model[99] = new ModelRendererTurbo(this, 57, 49, textureXY, textureXY); // Box 100
 		brigadelok_080Model[100] = new ModelRendererTurbo(this, 57, 81, textureXY, textureXY); // Box 101
-		brigadelok_080Model[101] = new ModelRendererTurbo(this, 177, 145, textureXY, textureXY); // Box 102
-		brigadelok_080Model[102] = new ModelRendererTurbo(this, 137, 97, textureXY, textureXY); // Box 103
-		brigadelok_080Model[103] = new ModelRendererTurbo(this, 1, 145, textureXY, textureXY); // Box 104
-		brigadelok_080Model[104] = new ModelRendererTurbo(this, 1, 153, textureXY, textureXY); // Box 105
+		brigadelok_080Model[101] = new ModelRendererTurbo(this, 177, 145, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // simplepiston
+		brigadelok_080Model[102] = new ModelRendererTurbo(this, 137, 97, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // simplepiston
+		brigadelok_080Model[103] = new ModelRendererTurbo(this, 1, 145, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // simplepiston
+		brigadelok_080Model[104] = new ModelRendererTurbo(this, 1, 153, textureXY, textureXY, StaticModelAnimator.tagAdvancedPiston); // advandedpiston
 		brigadelok_080Model[105] = new ModelRendererTurbo(this, 209, 49, textureXY, textureXY); // Box 106
 		brigadelok_080Model[106] = new ModelRendererTurbo(this, 201, 81, textureXY, textureXY); // Box 107
 		brigadelok_080Model[107] = new ModelRendererTurbo(this, 57, 105, textureXY, textureXY); // Box 108
@@ -271,20 +271,20 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[45].addBox(0F, 0F, 0F, 1, 25, 16, 0F); // Box 47
 		brigadelok_080Model[45].setRotationPoint(7F, -22.5F, -8F);
 
-		brigadelok_080Model[46].addBox(0F, 0F, 0F, 5, 24, 1, 0F); // Box 48
-		brigadelok_080Model[46].setRotationPoint(7F, -21.5F, -9F);
+		brigadelok_080Model[46].addBox(0F, 0F, 0F, 5, 25, 1, 0F); // Box 48
+		brigadelok_080Model[46].setRotationPoint(7F, -22F, -9F);
 
-		brigadelok_080Model[47].addBox(0F, 0F, 0F, 5, 24, 1, 0F); // Box 49
-		brigadelok_080Model[47].setRotationPoint(7F, -21.5F, 8F);
+		brigadelok_080Model[47].addBox(0F, 0F, 0F, 5, 25, 1, 0F); // Box 49
+		brigadelok_080Model[47].setRotationPoint(7F, -22F, 8F);
 
 		brigadelok_080Model[48].addBox(0F, 0F, 0F, 1, 29, 18, 0F); // Box 50
 		brigadelok_080Model[48].setRotationPoint(27F, -22.5F, -9F);
 
 		brigadelok_080Model[49].addBox(0F, 0F, 0F, 15, 1, 18, 0F); // Box 51
-		brigadelok_080Model[49].setRotationPoint(12F, 5.5F, -9F);
+		brigadelok_080Model[49].setRotationPoint(12F, 6F, -9F);
 
 		brigadelok_080Model[50].addBox(0F, 0F, 0F, 1, 4, 18, 0F); // Box 52
-		brigadelok_080Model[50].setRotationPoint(11F, 2.5F, -9F);
+		brigadelok_080Model[50].setRotationPoint(11F, 3F, -9F);
 
 		brigadelok_080Model[51].addBox(0F, 0F, 0F, 4, 1, 16, 0F); // Box 53
 		brigadelok_080Model[51].setRotationPoint(8F, 1.5F, -8F);
@@ -367,40 +367,40 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[77].addBox(0F, 0F, 0F, 3, 2, 1, 0F); // Box 80
 		brigadelok_080Model[77].setRotationPoint(-18F, 5.5F, 5F);
 
-		brigadelok_080Model[78].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // Box 81
+		brigadelok_080Model[78].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // SimpleRotate
 		brigadelok_080Model[78].setRotationPoint(-14.5F, 6F, -5F);
 
-		brigadelok_080Model[79].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // Box 82
+		brigadelok_080Model[79].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // SimpleRotate
 		brigadelok_080Model[79].setRotationPoint(-8.5F, 6F, -5F);
 
-		brigadelok_080Model[80].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // Box 83
+		brigadelok_080Model[80].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // SimpleRotate
 		brigadelok_080Model[80].setRotationPoint(3.5F, 6F, -5F);
 
-		brigadelok_080Model[81].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // Box 84
+		brigadelok_080Model[81].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // SimpleRotate
 		brigadelok_080Model[81].setRotationPoint(-2.5F, 6F, -5F);
 
-		brigadelok_080Model[82].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // Box 85
+		brigadelok_080Model[82].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // SimpleRotate
 		brigadelok_080Model[82].setRotationPoint(3.5F, 6F, 5F);
 
-		brigadelok_080Model[83].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // Box 86
+		brigadelok_080Model[83].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // SimpleRotate
 		brigadelok_080Model[83].setRotationPoint(-2.5F, 6F, 5F);
 
-		brigadelok_080Model[84].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // Box 87
+		brigadelok_080Model[84].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // SimpleRotate
 		brigadelok_080Model[84].setRotationPoint(-8.5F, 6F, 5F);
 
-		brigadelok_080Model[85].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // Box 88
+		brigadelok_080Model[85].addBox(-2.5F, -2.5F, 0F, 5, 5, 0, 0F); // SimpleRotate
 		brigadelok_080Model[85].setRotationPoint(-14.5F, 6F, 5F);
 
-		brigadelok_080Model[86].addBox(-0.5F, -0.5F, 0F, 1, 1, 13, 0F); // Box 89
+		brigadelok_080Model[86].addBox(-0.5F, -0.5F, 0F, 1, 1, 13, 0F); // SimpleRotate
 		brigadelok_080Model[86].setRotationPoint(3.5F, 6F, -6.5F);
 
-		brigadelok_080Model[87].addBox(-0.5F, -0.5F, 0F, 1, 1, 13, 0F); // Box 90
+		brigadelok_080Model[87].addBox(-0.5F, -0.5F, 0F, 1, 1, 13, 0F); // SimpleRotate
 		brigadelok_080Model[87].setRotationPoint(-2.5F, 6F, -6.5F);
 
-		brigadelok_080Model[88].addBox(-0.5F, -0.5F, 0F, 1, 1, 13, 0F); // Box 91
+		brigadelok_080Model[88].addBox(-0.5F, -0.5F, 0F, 1, 1, 13, 0F); // SimpleRotate
 		brigadelok_080Model[88].setRotationPoint(-8.5F, 6F, -6.5F);
 
-		brigadelok_080Model[89].addBox(-0.5F, -0.5F, 0F, 1, 1, 13, 0F); // Box 92
+		brigadelok_080Model[89].addBox(-0.5F, -0.5F, 0F, 1, 1, 13, 0F); // SimpleRotate
 		brigadelok_080Model[89].setRotationPoint(-14.5F, 6F, -6.5F);
 
 		brigadelok_080Model[90].addBox(0F, 0F, 0F, 16, 1, 12, 0F); // Box 93
@@ -412,20 +412,20 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[92].addBox(0F, 0F, 0F, 30, 1, 9, 0F); // Box 95
 		brigadelok_080Model[92].setRotationPoint(-23F, 2F, -4.5F);
 
-		brigadelok_080Model[93].addBox(-9.5F, -0.5F, -0.5F, 19, 1, 1, 0F); // Box 96
+		brigadelok_080Model[93].addBox(-9.5F, -0.5F, -0.5F, 19, 1, 1, 0F); // simplepiston
 		brigadelok_080Model[93].setRotationPoint(-5.5F, 6F, 7F);
 
-		brigadelok_080Model[94].addBox(-9F, -0.5F, -0.5F, 4, 1, 1, 0F); // Box 97
+		brigadelok_080Model[94].addBox(-9F, -0.5F, -0.5F, 4, 1, 1, 0F); // simplepiston
 		brigadelok_080Model[94].setRotationPoint(-10.5F, 5F, 7.5F);
 
-		brigadelok_080Model[95].addBox(-9F, -0.5F, -0.5F, 18, 1, 1, 0F); // Box 98
+		brigadelok_080Model[95].addBox(-9F, -0.5F, -0.5F, 18, 1, 1, 0F); // advandedpiston
 		brigadelok_080Model[95].setRotationPoint(-10.5F, 4.75F, 8F);
 		brigadelok_080Model[95].rotateAngleZ = 6.14355897F;
 
 		brigadelok_080Model[96].addBox(-1F, 0F, -0.5F, 1, 4, 1, 0F); // Box 99
 		brigadelok_080Model[96].setRotationPoint(-9.5F, 1.5F, 8F);
 
-		brigadelok_080Model[97].addBox(-7F, -0.5F, -0.5F, 14, 1, 1, 0F); // Box 100
+		brigadelok_080Model[97].addBox(-7F, -0.5F, -0.5F, 14, 1, 1, 0F); // simplepiston
 		brigadelok_080Model[97].setRotationPoint(-8.75F, 5.5F, 7.5F);
 		brigadelok_080Model[97].rotateAngleZ = 6.20900881F;
 
@@ -438,17 +438,17 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[100].addBox(0F, 0F, 0F, 2, 2, 2, 0F); // Box 101
 		brigadelok_080Model[100].setRotationPoint(3.5F, -26F, -1F);
 
-		brigadelok_080Model[101].addBox(-9.5F, -0.5F, -0.5F, 19, 1, 1, 0F); // Box 102
+		brigadelok_080Model[101].addBox(-9.5F, -0.5F, -0.5F, 19, 1, 1, 0F); // simplepiston
 		brigadelok_080Model[101].setRotationPoint(-5.5F, 6F, -7F);
 
-		brigadelok_080Model[102].addBox(-9F, -0.5F, -0.5F, 4, 1, 1, 0F); // Box 103
+		brigadelok_080Model[102].addBox(-9F, -0.5F, -0.5F, 4, 1, 1, 0F); // simplepiston
 		brigadelok_080Model[102].setRotationPoint(-10.5F, 5F, -7.5F);
 
-		brigadelok_080Model[103].addBox(-7F, -0.5F, -0.5F, 14, 1, 1, 0F); // Box 104
+		brigadelok_080Model[103].addBox(-7F, -0.5F, -0.5F, 14, 1, 1, 0F); // simplepiston
 		brigadelok_080Model[103].setRotationPoint(-8.75F, 5.5F, -7.5F);
 		brigadelok_080Model[103].rotateAngleZ = 6.20900881F;
 
-		brigadelok_080Model[104].addBox(-9F, -0.5F, -0.5F, 18, 1, 1, 0F); // Box 105
+		brigadelok_080Model[104].addBox(-9F, -0.5F, -0.5F, 18, 1, 1, 0F); // advandedpiston
 		brigadelok_080Model[104].setRotationPoint(-10.5F, 4.75F, -8F);
 		brigadelok_080Model[104].rotateAngleZ = 6.14355897F;
 

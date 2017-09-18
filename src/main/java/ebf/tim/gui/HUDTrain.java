@@ -37,13 +37,13 @@ public class HUDTrain extends GuiScreen {
     @SuppressWarnings("unused")
     public void onRenderExperienceBar(RenderGameOverlayEvent event) {
         if (game != null && game.thePlayer != null && game.thePlayer.ridingEntity instanceof EntityTrainCore) {
-            fontRendererObj.drawString(StatCollector.translateToLocal(((GenericRailTransport)game.thePlayer.ridingEntity).getItem().getUnlocalizedName().replace("item","entity")), 8, 6, 4210752);
+            //fontRendererObj.drawString(StatCollector.translateToLocal(((GenericRailTransport)game.thePlayer.ridingEntity).getItem().getUnlocalizedName().replace("item","entity")), 8, 6, 4210752);
             //draw the gui background color
             //GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             //set the texture.
-            game.renderEngine.bindTexture(URIRegistry.TEXTURE_GENERIC.getResource("null.png"));
+            //game.renderEngine.bindTexture(URIRegistry.TEXTURE_GENERIC.getResource("null.png"));
             //draw the texture
-            drawTexturedModalRect(0, 50, 0, 150, 137, 90);
+            //drawTexturedModalRect(0, 50, 0, 150, 137, 90);
         } else {
             game = mc = Minecraft.getMinecraft();
             fontRendererObj = mc.fontRenderer;

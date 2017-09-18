@@ -15,7 +15,7 @@ public class TexturedCube {
 
 	public static void drawQuads(Tessellator tessellator, float f, List<TexturedCube> faces) {
 
-		tessellator.startDrawing(GL11.GL_QUADS);
+		tessellator.startDrawing();
 		for(TexturedCube quad: faces) {
 			for(PositionTransformVertex vert : quad.vertexPositions){
 				vert.setTransformation();

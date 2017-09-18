@@ -60,6 +60,10 @@ public class ClientProxy extends CommonProxy {
     public static boolean EnableAnimations = true;
     /**whether or not to use the 3D rails*/
     public static boolean Enable3DRails = true;
+    /**whether or not to use HD skins*/
+    public static boolean useHDSkins = false;
+    /**whether or not to force texture binding*/
+    public static boolean ForceTextureBinding = false;
     /**defines if the inventory graphics should be loaded from a TiM URI or if vanilla graphics should be used*/
     public static boolean useVanillaInventoryTextures = true;
     /**the keybind for the lamp toggle*/
@@ -111,6 +115,10 @@ public class ClientProxy extends CommonProxy {
         Enable3DRails = config.get("Quality (Client only)", "Enable3DRails", false).getBoolean(false);
         config.addCustomCategoryComment("Quality (Client only)", "Overrides the render of train and rollingstock inventories to use textures from vanilla (including resourcepacks), so you can use textures in a texturepack specifically for this mod");
         useVanillaInventoryTextures = config.get("Quality (Client only)", "UseVanillaInventoryTextures", true).getBoolean(true);
+        config.addCustomCategoryComment("Quality (Client only)", "Overrides the render of train and rollingstock inventories to use textures from vanilla (including resourcepacks), so you can use textures in a texturepack specifically for this mod");
+        useVanillaInventoryTextures = config.get("Quality (Client only)", "UseVanillaInventoryTextures", true).getBoolean(true);
+        config.addCustomCategoryComment("Quality (Client only)", "Forces textures to be bound, slows performance on some machines, speeds it up on others, and fixes a rare bug where the the texture does not get bound. So... This REALLY depends on your machine, see what works best for you.");
+        ForceTextureBinding = config.get("Quality (Client only)", "ForceTextureBinding", false).getBoolean(false);
 
         config.addCustomCategoryComment("Keybinds (Client only)", "accepted values can be set from in-game, or defined using the key code values from: http://minecraft.gamepedia.com/Key_codes");
 
