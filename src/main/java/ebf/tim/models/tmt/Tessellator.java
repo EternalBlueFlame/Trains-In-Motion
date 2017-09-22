@@ -20,6 +20,8 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
@@ -34,6 +36,7 @@ public class Tessellator {
 	private static IntBuffer ibuf = bbuf.asIntBuffer();
 	private float u, v, w;
 	private int[] rb;
+	private static Map<ResourceLocation, ITextureObject> cachedTextures = new HashMap<ResourceLocation, ITextureObject>();
 
 	public static Tessellator getInstance(){
 		return INSTANCE;
@@ -109,20 +112,24 @@ public class Tessellator {
 		this.ht = true; this.u = i; this.v = j; this.w = 1.0F;
 	}
 
-
 	public static void bindTexture(ResourceLocation textureURI) {
 		ITextureObject object;
-		if (textureURI != null) {
-			object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
-			if (object == null) {
-				object = new SimpleTexture(textureURI);
-				Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
-			}
+		if (cachedTextures.containsKey(textureURI)){
+			object = cachedTextures.get(textureURI);
 		} else {
-			object = TextureUtil.missingTexture;
+			if (textureURI != null) {
+				object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
+				if (object == null) {
+					object = new SimpleTexture(textureURI);
+					Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
+				}
+			} else {
+				object = TextureUtil.missingTexture;
+			}
+			cachedTextures.put(textureURI, object);
 		}
 
-		if (ClientProxy.ForceTextureBinding || GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D) != object.getGlTextureId()) {
+		if (GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D) != object.getGlTextureId() || ClientProxy.ForceTextureBinding) {
 			GL11.glBindTexture(GL_TEXTURE_2D, object.getGlTextureId());
 		}
 	}

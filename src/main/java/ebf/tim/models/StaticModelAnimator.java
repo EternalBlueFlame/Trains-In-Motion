@@ -75,8 +75,8 @@ public class StaticModelAnimator {
                         rotationZ *degreesF,
                         rotationZ *degreesF, 0);
 
-                modelRefrence.rotationPointY = originalRotationValuesXYZ[1] - (float)(positionOffset[2]*0.5d);
-                modelRefrence.rotationPointX = originalRotationValuesXYZ[0] - (float)positionOffset[0];
+                modelRefrence.rotationPointY = originalRotationValuesXYZ[1] - (float) positionOffset[1] *0.85f;
+                modelRefrence.rotationPointX = originalRotationValuesXYZ[0] - (float) positionOffset[0] *0.85f;
                 modelRefrence.rotateAngleZ = originalRotationValuesXYZ[5] - (float)(positionOffset[2] * 0.15d);
             }
         }

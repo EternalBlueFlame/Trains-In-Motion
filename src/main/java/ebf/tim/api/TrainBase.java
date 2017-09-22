@@ -6,6 +6,7 @@ import ebf.tim.models.tmt.ModelBase;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -21,7 +22,7 @@ public abstract class TrainBase extends EntityTrainCore{
         super(worldObj);
     }
 
-    public abstract ModelBase getModel();
+    public abstract List<? extends ModelBase> getModel();
 
     public abstract Bogie[] getBogieModels();
 

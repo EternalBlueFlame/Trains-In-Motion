@@ -143,14 +143,24 @@ public class BlockRailOverride extends BlockRail implements ITileEntityProvider 
                     ///*
                     //GL11.glRotatef(180, 1, 0, -1);
 
+                    List<double[]> positions =RailUtility.CalculateBezierCurve(new double[]{0,0,-1},new double[]{0,0,0},new double[]{0.5,0,0}, 16);
+                    ModelRailPixel pixel = new ModelRailPixel();
+                    for(double[] point : positions){
+                        GL11.glPushMatrix();
+                        GL11.glTranslated(point[0], point[1], point[2]);
 
-                    rail.render();
+                        pixel.render();
+                        GL11.glPopMatrix();
+                    }
 
-                    double[] angle = RailUtility.rotatePoint(new double[]{0.9, 0, 0}, 0, 45, 0);
-                    GL11.glRotatef(0.016f, 0, 45, 0);
-                    GL11.glTranslated(angle[0], angle[1], angle[2]);
 
-                    rail.render();//*/
+                    //rail.render();
+
+                    //double[] angle = RailUtility.rotatePoint(new double[]{0.9, 0, 0}, 0, 45, 0);
+                    //GL11.glRotatef(0.016f, 0, 45, 0);
+                    //GL11.glTranslated(angle[0], angle[1], angle[2]);
+
+                    //rail.render();//*/
                 }
                 GL11.glPopMatrix();
             } else if (p_145828_1_ != null){

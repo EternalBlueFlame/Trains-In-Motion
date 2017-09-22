@@ -25,6 +25,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -230,7 +231,7 @@ public class EntityBrigadelok080 extends TrainBase {
     public Bogie[] getBogieModels(){return null;}
 
     @Override
-    public ModelBase getModel(){return new Brigadelok_080();}
+    public List<? extends ModelBase> getModel(){return Collections.singletonList(new Brigadelok_080());}
 
     /**
      * <h2>sets the resource location for sounds, like horn and the sound made for the engine running</h2>

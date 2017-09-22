@@ -1,6 +1,7 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.ModelRendererTurbo;
 import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.utility.ClientProxy;
@@ -69,9 +70,9 @@ public class RenderEntity extends Render {
      */
     public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw){
 
-        if (entity.renderData.model == null) {
+        if (entity.renderData.modelList == null) {
             entity.renderData = new TransportRenderData();
-            entity.renderData.model = entity.getModel();
+            entity.renderData.modelList = entity.getModel();
             entity.renderData.bogieRenders = entity.getBogieModels();
             if (entity.renderData.bogieRenders != null) {
                 for (Bogie b : entity.renderData.bogieRenders) {
@@ -82,26 +83,28 @@ public class RenderEntity extends Render {
             //cache animating parts
             if (ClientProxy.EnableAnimations) {
                 boolean isAdded;
-                for (Object box : entity.renderData.model.boxList) {
-                    if (box instanceof ModelRendererTurbo) {
-                        ModelRendererTurbo render = ((ModelRendererTurbo) box);
-                        //attempt to cache the parts for the main transport model
-                        if (StaticModelAnimator.canAdd(render)) {
-                            entity.renderData.animatedPart.add(new StaticModelAnimator(render));
-                        } else if (GroupedModelRender.canAdd(render)) {
-                            //if it's a grouped render we have to figure out if we already have a group for this or not.
-                            isAdded = false;
-                            for (GroupedModelRender cargo : entity.renderData.blockCargoRenders) {
-                                if (cargo.getGroupName().equals(render.boxName)) {
-                                    cargo.add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render));
-                                    isAdded = true;
-                                    break;
+                for (ModelBase part : entity.renderData.modelList) {
+                    for (Object box : part.boxList) {
+                        if (box instanceof ModelRendererTurbo) {
+                            ModelRendererTurbo render = ((ModelRendererTurbo) box);
+                            //attempt to cache the parts for the main transport model
+                            if (StaticModelAnimator.canAdd(render)) {
+                                entity.renderData.animatedPart.add(new StaticModelAnimator(render));
+                            } else if (GroupedModelRender.canAdd(render)) {
+                                //if it's a grouped render we have to figure out if we already have a group for this or not.
+                                isAdded = false;
+                                for (GroupedModelRender cargo : entity.renderData.blockCargoRenders) {
+                                    if (cargo.getGroupName().equals(render.boxName)) {
+                                        cargo.add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render));
+                                        isAdded = true;
+                                        break;
+                                    }
                                 }
+                                if (!isAdded) {
+                                    entity.renderData.blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render)));
+                                }
+                                render.showModel = false;
                             }
-                            if (!isAdded) {
-                                entity.renderData.blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render)));
-                            }
-                            render.showModel = false;
                         }
                     }
                 }
@@ -163,7 +166,9 @@ public class RenderEntity extends Render {
          */
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
         Tessellator.bindTexture(entity.getTexture(entity.getDataWatcher().getWatchableObjectInt(24)));
-        entity.renderData.model.render(null,0,0,0,0,0,0.0625f);
+        for(ModelBase model : entity.renderData.modelList) {
+            model.render(null, 0, 0, 0, 0, 0, 0.0625f);
+        }
 
 
         //loop for the groups of cargo

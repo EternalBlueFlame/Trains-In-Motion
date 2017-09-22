@@ -197,37 +197,33 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 if (BlockRailBase.func_150049_b_(this.worldObj, floorX, floorY - 1, floorZ)) {
                     --floorY;
                 } else if (worldObj.getBlock(floorX, floorY, floorZ) instanceof BlockAir && worldObj.getBlock(floorX, floorY-1, floorZ) instanceof BlockAir && posY>-64){
-                    posY-=0.1D;
+                    posY-=0.3D;
                 }
             }
 
             //apply brake
             if (brake){
                 if (motionX <0.01 && motionX >-0.01){
-                    motionX =0;
-                    this.cartVelocityX =0;
+                    this.cartVelocityX = motionX =0;
                 } else {
                     this.motionX *= 0.85-(weight*8.2673352e-7);
                     this.cartVelocityX *= 0.75-(weight*8.2673352e-7);
                 }
                 if (motionZ <0.01 && motionZ >-0.01){
-                    motionZ =0;
-                    this.cartVelocityZ =0;
+                    this.cartVelocityZ =motionZ =0;
                 } else {
                     this.motionZ *= 0.75-(weight*8.2673352e-7);
                     this.cartVelocityZ *= 0.85-(weight*8.2673352e-7);
                 }
             } else if ((!isRunning && isTrain) || !isTrain){
                 if (motionX <0.005 && motionX >-0.005){
-                    motionX =0;
-                    this.cartVelocityX =0;
+                    this.cartVelocityX = motionX =0;
                 } else {
                     this.motionX *= 0.9-(weight*0.00000110231);
                     this.cartVelocityX *= 0.9-(weight*0.00000110231);
                 }
                 if (motionZ <0.005 && motionZ >-0.005){
-                    motionZ =0;
-                    this.cartVelocityZ =0;
+                    this.cartVelocityZ =motionZ =0;
                 } else {
                     this.motionZ *= 0.9-(weight*0.00000110231);
                     this.cartVelocityZ *= 0.9-(weight*0.00000110231);
@@ -251,66 +247,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         return false;
     }
 
-
-    public void moveLinked(float pitch, float yaw, double linkedVelocityX, double linkedVelocityZ, float weight){
-        this.setRotation(yaw, pitch);
-
-
-        //client only, update position
-        if (this.worldObj.isRemote) {
-            if (motionProgress > 0) {
-                this.posX += (prevPosX - this.posX) / motionProgress;
-                this.posY += (((prevPosY - this.posY) + yOffset) / motionProgress);
-                this.posZ += (prevPosZ - this.posZ) / motionProgress;
-                --motionProgress;
-            }
-        } else {
-            //update old position, add the gravity, and get the block below this,
-            this.prevPosX = this.posX;
-            this.prevPosY = this.posY;
-            this.prevPosZ = this.posZ;
-            int floorX = MathHelper.floor_double(this.posX);
-            int floorY = MathHelper.floor_double(this.posY);
-            int floorZ = MathHelper.floor_double(this.posZ);
-            Block b = worldObj.getBlock(floorX, floorY, floorZ);
-            //compensate for y offsets based on current position, just in case the movement is too steep.
-            if (!BlockRailBase.func_150049_b_(this.worldObj, floorX, floorY, floorZ)) {
-                if (BlockRailBase.func_150049_b_(this.worldObj, floorX, floorY - 1, floorZ)) {
-                    --floorY;
-                } else if (b instanceof BlockAir && worldObj.getBlock(floorX, floorY - 1, floorZ) instanceof BlockAir && posY > -64) {
-                    posY -= 0.1D;
-                    return;
-                }
-            }
-            if (motionX <0.005 && motionX >-0.005){
-                motionX =0;
-                this.cartVelocityX =0;
-            } else {
-                this.motionX *= 0.9-(weight*0.00000110231);
-                this.cartVelocityX *= 0.9-(weight*0.00000110231);
-            }
-            if (motionZ <0.005 && motionZ >-0.005){
-                motionZ =0;
-                this.cartVelocityZ =0;
-            } else {
-                this.motionZ *= 0.9-(weight*0.00000110231);
-                this.cartVelocityZ *= 0.9-(weight*0.00000110231);
-            }
-
-
-            //update on normal rails
-            if (b instanceof BlockRailBase) {
-                moveBogie(linkedVelocityX, linkedVelocityZ, floorX, floorY, floorZ, (BlockRailBase) b);
-                //update on ZnD rails, and ones that don't extend block rail base.
-            } else if (b instanceof ITrackBase) {
-                //update position for ZnD rails.
-                moveBogieZnD(this.motionX, this.motionZ, floorX, floorY, floorZ, (ITrackBase) b);
-            } else {
-                posX += linkedVelocityX;
-                posZ += linkedVelocityZ;
-            }
-        }
-    }
     /**
      * <h2>incrementally move the bogie</h2>
      * moves the entity in increments of a quarter block, the calculations are basically the same as vanilla.

@@ -115,6 +115,9 @@ public class HitboxHandler {
         int i2;
         Block b1;
         double[][] vectorCache = new double[3][3];
+        List list;
+        Entity entity;
+        MultipartHitbox tempBox;
         //Be sure the transport has hitboxes
         for (int iteration = 0; iteration < transport.getHitboxPositions().length; iteration++) {
             //todo add to a vector cache
@@ -156,10 +159,6 @@ public class HitboxHandler {
                     }
                 }
             }
-
-            List list;
-            Entity entity;
-            MultipartHitbox tempBox;
 
             /*
              * detect collision with entities.

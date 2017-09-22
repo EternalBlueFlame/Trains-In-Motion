@@ -6,6 +6,7 @@ import ebf.tim.models.tmt.ModelBase;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -23,7 +24,8 @@ public abstract class RollingstockBase extends EntityRollingStockCore{
 
     public abstract ResourceLocation getTexture();
 
-    public abstract ModelBase getModel();
+    /*if this needs to be changed, then after you change it, have the renderdata.modelList variable set to null so it has to regen the data with the new models*/
+    public abstract List<? extends ModelBase> getModel();
 
     public abstract Bogie[] getBogieModels();
 

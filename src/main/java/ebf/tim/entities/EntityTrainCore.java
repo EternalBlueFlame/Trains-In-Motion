@@ -213,10 +213,10 @@ public class EntityTrainCore extends GenericRailTransport {
     /**
      * <h2>linking management</h2>
      * this is an override to make sure rollingstock doesn't push trains
-     * @see GenericRailTransport#manageLinks()
+     * @see GenericRailTransport#manageLinks(GenericRailTransport)
      */
     @Override
-    public void manageLinks(){}
+    public void manageLinks(GenericRailTransport linkedTransport){}
 
 
     @Override

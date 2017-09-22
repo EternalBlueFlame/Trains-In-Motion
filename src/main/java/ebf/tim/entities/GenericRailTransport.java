@@ -19,7 +19,6 @@ import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
 import net.minecraft.block.Block;
-import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
@@ -30,11 +29,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.integrated.IntegratedPlayerList;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.*;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -325,20 +320,20 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         //be sure the front and back links are removed in the case of this entity being removed from the world.
         if (frontLinkedID != null){
             GenericRailTransport front = ((GenericRailTransport)worldObj.getEntityByID(frontLinkedID));
-            if(front.frontLinkedID != null && front.frontLinkedID == this.getEntityId()){
+            if(front != null && front.frontLinkedID != null && front.frontLinkedID == this.getEntityId()){
                 front.frontLinkedID = null;
                 front.frontLinkedTransport = null;
-            } else if(front.backLinkedID != null && front.backLinkedID == this.getEntityId()){
+            } else if(front != null && front.backLinkedID != null && front.backLinkedID == this.getEntityId()){
                 front.backLinkedID = null;
                 front.backLinkedTransport = null;
             }
         }
         if (backLinkedID != null){
             GenericRailTransport back = ((GenericRailTransport)worldObj.getEntityByID(backLinkedID));
-            if(back.frontLinkedID != null && back.frontLinkedID == this.getEntityId()){
+            if(back != null && back.frontLinkedID != null && back.frontLinkedID == this.getEntityId()){
                 back.frontLinkedID = null;
                 back.frontLinkedTransport = null;
-            } else if(back.backLinkedID != null && back.backLinkedID == this.getEntityId()){
+            } else if(back != null && back.backLinkedID != null && back.backLinkedID == this.getEntityId()){
                 back.backLinkedID = null;
                 back.backLinkedTransport = null;
             }
@@ -505,7 +500,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * managing rotationYaw and rotationPitch.
      * updating rider entity positions if there is no one riding the core seat.
      * calling on link management.
-     * @see #manageLinks()
+     * @see #manageLinks(GenericRailTransport)
      * syncing the owner entity ID with client.
      * being sure the transport is listed in the main class (for lighting management).
      * @see ClientProxy#onTick(TickEvent.ClientTickEvent)
@@ -560,7 +555,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         collision = hitboxHandler.getCollision(this);
         if (frontBogie!=null && backBogie != null && (!getBoolean(boolValues.DERAILED) || ticksExisted==1)){
             //handle movement.
-            manageLinks();
+            if (!worldObj.isRemote) {
+                if (frontLinkedID != null && worldObj.getEntityByID(frontLinkedID) instanceof GenericRailTransport) {
+                    manageLinks((GenericRailTransport) worldObj.getEntityByID(frontLinkedID));
+                }
+                if (backLinkedID != null && worldObj.getEntityByID(backLinkedID) instanceof GenericRailTransport) {
+                    manageLinks((GenericRailTransport) worldObj.getEntityByID(backLinkedID));
+                }
+            }
             if (!collision) {
                 setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
                 setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
@@ -570,8 +572,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
                 setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
             }
-            frontVelocityX = frontBogie.motionX;
-            frontVelocityZ = frontBogie.motionZ;
+            motionX = frontVelocityX = frontBogie.motionX;
+            motionZ = frontVelocityZ = frontBogie.motionZ;
             backVelocityX = backBogie.motionX;
             backVelocityZ = backBogie.motionZ;
 
@@ -718,75 +720,42 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      */
     private GenericRailTransport linkChecker = null;
     private double cornering;
-    public void manageLinks() {
-        if (worldObj.isRemote || (frontLinkedID == null && backLinkedID == null)) {//Do you really need an isRemote call here? Perhaps just make sure the method is called on remote only by checking before actually calling it (unless you override it somewhere for client-side funtionality as well, of course).
-            return;
+    public void manageLinks(GenericRailTransport linkedTransport) {
+        vectorCache[4][0]=linkedTransport.posX - this.posX;
+        vectorCache[4][2]=linkedTransport.posZ - this.posZ;
+
+        double distance = MathHelper.sqrt_double((vectorCache[4][0] * vectorCache[4][0]) + (vectorCache[4][2] * vectorCache[4][2]));
+
+        vectorCache[5][0] = vectorCache[4][0] / distance;
+        vectorCache[5][2] = vectorCache[4][2] / distance;
+
+        if(linkedTransport.frontLinkedID != null && linkedTransport.frontLinkedID == this.getEntityId()){
+            distance-= Math.abs(linkedTransport.getHitboxPositions()[0][0]);
+        } else {
+            distance-= Math.abs(linkedTransport.getHitboxPositions()[linkedTransport.getHitboxPositions().length -1][0]);
+        }
+        if(this.frontLinkedID != null && this.frontLinkedID == linkedTransport.getEntityId()){
+            distance-= Math.abs(this.getHitboxPositions()[0][0]);
+        } else {
+            distance-= Math.abs(this.getHitboxPositions()[this.getHitboxPositions().length -1][0]);
         }
 
-        //reset vector cache and create temporary fields
-        vectorCache[3][0] = vectorCache[4][0] = vectorCache[4][2] = vectorCache[6][0] = vectorCache[6][2] = vectorCache[5][0] = vectorCache[5][1] = vectorCache[5][2] =0;
-        Entity entity;
+        vectorCache[3][0] = 0.25 * distance * vectorCache[4][0];
+        vectorCache[3][2] = 0.25 * distance * vectorCache[4][2];
 
-        //manage the frontLinkedTransport link
-        if (frontLinkedID != null) {
-            entity = worldObj.getEntityByID(frontLinkedID);
-            if (entity instanceof GenericRailTransport) {
-                linkChecker = (GenericRailTransport) entity;
-                //get the distance between wagons which is ALWAYS >0, then subtract the distance between links, using their absolute distance value.
-                vectorCache[3][0] = (Math.abs(linkChecker.posZ - this.posZ) + Math.abs(linkChecker.posX - this.posX)) -
-                        (Math.abs(getHitboxPositions()[0][0]) + Math.abs(linkChecker.getHitboxPositions()[
-                                (linkChecker.frontLinkedID != null && this.getEntityId() == linkChecker.frontLinkedID) ? 0 : linkChecker.getHitboxPositions().length-1]
-                                [0]));
-                //reverse the end result, because its backwards for some reason.
-                vectorCache[3][0] *= -1;
-                cornering = Math.cos(Math.toDegrees(Math.atan2(this.posZ - linkChecker.posZ, this.posX - linkChecker.posX))+rotationYaw);
-                vectorCache[3][0] = (Math.sin(cornering) * vectorCache[3][0]) + (Math.cos(cornering) * vectorCache[3][0]);
+        distance = (-vectorCache[3][0] - vectorCache[3][0]) * vectorCache[5][0] + (-vectorCache[3][2] - vectorCache[3][2]) * vectorCache[5][2];
 
+        vectorCache[3][0] -= 0.4 * distance * vectorCache[5][0] * -1;
+        vectorCache[3][2] -= 0.4 * distance * vectorCache[5][2] * -1;
 
-                vectorCache[4] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
-                linkChecker.frontBogie.setVelocity((frontBogie.motionX + linkChecker.frontBogie.motionX) * 0.5,
-                        (frontBogie.motionY  + linkChecker.frontBogie.motionY) * 0.5,
-                        (frontBogie.motionZ + linkChecker.frontBogie.motionZ) * 0.5);
-                linkChecker.backBogie.setVelocity((backBogie.motionX + linkChecker.backBogie.motionX) * 0.5,
-                        (backBogie.motionY  + linkChecker.backBogie.motionY) * 0.5,
-                        (backBogie.motionZ + linkChecker.backBogie.motionZ) * 0.5);
-                vectorCache[5][0]+=linkChecker.frontBogie.motionX;
-                vectorCache[5][1]+=linkChecker.frontBogie.motionY;
-                vectorCache[5][2]+=linkChecker.frontBogie.motionZ;
-            }
-        }
-        //Manage the backLinkedTransport link
-        if (backLinkedID != null) {
-            entity = worldObj.getEntityByID(backLinkedID);
-            if (entity instanceof GenericRailTransport) {
-                linkChecker = (GenericRailTransport) entity;
-                //get the distance between wagons which is ALWAYS >0 then subtract the distance between links, using their absolute distance value.
-                vectorCache[3][0] = (Math.abs(linkChecker.posZ - this.posZ) + Math.abs(linkChecker.posX - this.posX)) -
-                        (Math.abs(getHitboxPositions()[0][0]) + Math.abs(linkChecker.getHitboxPositions()[
-                                (linkChecker.frontLinkedID != null && this.getEntityId() == linkChecker.frontLinkedID) ? 0 : linkChecker.getHitboxPositions().length-1]
-                                [0]));
-                cornering = Math.cos(Math.toDegrees(Math.atan2(this.posZ - linkChecker.posZ, this.posX - linkChecker.posX))+rotationYaw);
-                vectorCache[3][0] = (Math.sin(cornering) * vectorCache[3][0]) + (Math.cos(cornering) * vectorCache[3][0]);
-
-                vectorCache[6] = rotatePoint(vectorCache[3], 0, rotationYaw, 0);
-                linkChecker.frontBogie.setVelocity(frontBogie.motionX, frontBogie.motionY, frontBogie.motionZ);
-                linkChecker.backBogie.setVelocity(backBogie.motionX, backBogie.motionY, backBogie.motionZ);
-                vectorCache[5][0]+=linkChecker.frontBogie.motionX;
-                vectorCache[5][1]+=linkChecker.frontBogie.motionY;
-                vectorCache[5][2]+=linkChecker.frontBogie.motionZ;
-            }
-        }
-
-        if (vectorCache[5][0] + vectorCache[5][1] + vectorCache[5][2] !=0){
-            frontBogie.setVelocity((frontBogie.motionX + vectorCache[5][0]) *0.5,(frontBogie.motionY + vectorCache[5][1]) *0.5,(frontBogie.motionZ + vectorCache[5][2]) *0.5);
-        }
 
         if (Math.abs(vectorCache[4][0]) + Math.abs(vectorCache[4][2]) + Math.abs(vectorCache[6][0]) + Math.abs(vectorCache[6][2]) >0.05) {
-            frontBogie.moveLinked(rotationPitch, rotationYaw, vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2], weightKg());
-            backBogie.moveLinked(rotationPitch, rotationYaw, vectorCache[4][0] + vectorCache[6][0], vectorCache[4][2] + vectorCache[6][2], weightKg());
+            this.frontBogie.addVelocity(vectorCache[3][0], 0, vectorCache[3][2]);
+            this.backBogie.addVelocity(vectorCache[3][0], 0, vectorCache[3][2]);
         }
 
     }
+
 
     /**
      * <h2>RF storage transfer</h2>
@@ -1026,7 +995,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         }
     }
 
-    public ModelBase getModel(){return null;}
+    public List<? extends ModelBase> getModel(){return new ArrayList<ModelBase>();}
 
 
     /*

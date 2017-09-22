@@ -14,6 +14,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -84,7 +85,7 @@ public class EntityVATLogCar extends RollingstockBase {
     public ResourceLocation getTexture(){return null;} //URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png");}
 
     @Override
-    public ModelBase getModel(){return new VATLogCar();}
+    public List<? extends ModelBase> getModel(){return Collections.singletonList(new VATLogCar());}
 
     /**
      * <h2>pre-asigned values</h2>

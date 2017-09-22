@@ -14,6 +14,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -83,7 +84,7 @@ public class EntityUP3Bay100TonHopper extends RollingstockBase {
     public ResourceLocation getTexture(){return null;} //URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png");}
 
     @Override
-    public ModelBase getModel(){return new UP3Bay100TonHopper();}
+    public List<? extends ModelBase> getModel(){return Collections.singletonList(new UP3Bay100TonHopper());}
 
     /**
      * <h2>pre-asigned values</h2>
