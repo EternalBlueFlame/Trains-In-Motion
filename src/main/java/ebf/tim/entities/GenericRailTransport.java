@@ -82,7 +82,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public ItemStack key;
     /**used to initialize a laege number of variables that are used to calculate everything from movement to linking.
      * this is so we don't have to initialize each of these variables every tick, saves CPU.*/
-    private double[][] vectorCache = new double[10][3];
+    protected double[][] vectorCache = new double[8][3];
     /**the health of the entity, similar to that of EntityLiving*/
     private int health = 20;
     /**the fluidTank tank*/
@@ -113,10 +113,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     private boolean displayDerail = false;
     /*this is cached so we can keep the hitbox handler running even when derailed.*/
     private boolean collision;
+    /**/
+    float prevRotationRoll;
+    /**/
+    float rotationRoll;
     /***/
     private List<ResourceLocation> transportSkins = new ArrayList<ResourceLocation>();
 
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     public TransportRenderData renderData = new TransportRenderData();
 
     /**the array of booleans, defined as bits
@@ -402,11 +406,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         //load owner
         owner = new UUID(tag.getLong(NBTKeys.ownerMost),tag.getLong(NBTKeys.ownerLeast));
         //load bogie velocities
-        tag.setDouble(NBTKeys.frontBogieX, frontVelocityX);
-        tag.setDouble(NBTKeys.frontBogieZ, frontVelocityZ);
-        tag.setDouble(NBTKeys.backBogieX, backVelocityX);
-        tag.setDouble(NBTKeys.backBogieZ, backVelocityZ);
+        frontVelocityX = tag.getDouble(NBTKeys.frontBogieX);
+        frontVelocityZ = tag.getDouble(NBTKeys.frontBogieZ);
+        backVelocityX = tag.getDouble(NBTKeys.backBogieX);
+        backVelocityZ = tag.getDouble(NBTKeys.backBogieZ);
 
+        rotationRoll = tag.getFloat(NBTKeys.rotationRoll);
+        prevRotationRoll = tag.getFloat(NBTKeys.prevRotationRoll);
         //load tanks
         if (getTankCapacity() >0) {
             if(tag.hasKey("FluidName")) {
@@ -458,6 +464,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         tag.setDouble(NBTKeys.backBogieX, backVelocityX);
         tag.setDouble(NBTKeys.backBogieZ, backVelocityZ);
 
+        tag.setFloat(NBTKeys.rotationRoll, rotationRoll);
+        tag.setFloat(NBTKeys.prevRotationRoll, prevRotationRoll);
 
 
         //tanks
@@ -555,7 +563,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         collision = hitboxHandler.getCollision(this);
         if (frontBogie!=null && backBogie != null && (!getBoolean(boolValues.DERAILED) || ticksExisted==1)){
             //handle movement.
-            if (!worldObj.isRemote) {
+            if (!worldObj.isRemote && !(this instanceof EntityTrainCore)) {
                 if (frontLinkedID != null && worldObj.getEntityByID(frontLinkedID) instanceof GenericRailTransport) {
                     manageLinks((GenericRailTransport) worldObj.getEntityByID(frontLinkedID));
                 }
@@ -564,18 +572,19 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 }
             }
             if (!collision) {
-                setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
-                setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
+                setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
+                setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
             } else {
-                frontBogie.addVelocity(-frontBogie.motionX,-frontBogie.motionY,-frontBogie.motionZ);
-                backBogie.addVelocity(-backBogie.motionX,-backBogie.motionY,-backBogie.motionZ);
-                setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
-                setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.BRAKE), getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
+                frontBogie.setVelocity(-frontBogie.motionX,-frontBogie.motionY,-frontBogie.motionZ);
+                backBogie.setVelocity(-backBogie.motionX,-backBogie.motionY,-backBogie.motionZ);
+                setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
+                setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.RUNNING), getType().isTrain(), weightKg()));
             }
             motionX = frontVelocityX = frontBogie.motionX;
             motionZ = frontVelocityZ = frontBogie.motionZ;
             backVelocityX = backBogie.motionX;
             backVelocityZ = backBogie.motionZ;
+
 
             //position this
             setPosition(
@@ -587,7 +596,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             setRotation((float)Math.toDegrees(Math.atan2(
                     frontBogie.posZ - backBogie.posZ,
                     frontBogie.posX - backBogie.posX)),
-                    MathHelper.floor_double(Math.acos(frontBogie.posY / backBogie.posY)*RailUtility.degreesD));
+                    MathHelper.floor_double(Math.acos(frontBogie.posY / backBogie.posY)*RailUtility.degreesD),
+                    rotationYaw-prevRotationYaw);
 
 
             if (ticksExisted %2 ==0) {
@@ -718,8 +728,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * this is used to reposition the transport based on the linked transports.
      * If coupling is on then it will check sides without linked transports for anything to link to.
      */
-    private GenericRailTransport linkChecker = null;
-    private double cornering;
     public void manageLinks(GenericRailTransport linkedTransport) {
         vectorCache[4][0]=linkedTransport.posX - this.posX;
         vectorCache[4][2]=linkedTransport.posZ - this.posZ;
@@ -889,6 +897,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this. prevRotationPitch = this.rotationPitch = p_70101_2_;
     }
 
+    protected void setRotation(float yaw, float pitch, float roll){
+        setRotation(yaw, pitch);
+        this.prevRotationRoll = this.rotationRoll = roll;
+    }
+
 
     public GameProfile getOwner(){
         if (ownerID != 0 && worldObj.getEntityByID(ownerID) instanceof EntityPlayer){
@@ -945,7 +958,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**defines smoke positions, the outer array defines each new smoke point, the inner arrays define the X/Y/Z*/
     public float[][] getSmokeOffset(){return new float[0][0];}
     /**defines the length from center of the transport, thus is used for the motion calculation*/
-    public double getLengthFromCenter(){return 1d;}
+    public int getLengthFromCenter(){return 1;}
     /**defines the render scale, minecraft's default is 0.0625*/
     public float getRenderScale(){return 0.0625f;}
     /**defines if the transport is explosion resistant*/
@@ -1123,9 +1136,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
             case COALHOPPER: {
                 return RailUtility.isCoal(itemStack);
-            }
-            case TANKER: {
-                return itemStack.getItem() instanceof ItemBucket;
             }
         }
 

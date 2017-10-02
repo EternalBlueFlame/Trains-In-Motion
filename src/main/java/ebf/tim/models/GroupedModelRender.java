@@ -129,7 +129,7 @@ public class GroupedModelRender {
             GL11.glPopMatrix();
         } else {
             //render the geometry normally if it's not a block.
-            Tessellator.bindTexture(render.getEntityTexture(null));
+            Tessellator.bindTexture(transport.getTexture(transport.getDataWatcher().getWatchableObjectInt(24)));
             for (ModelRendererTurbo block : boxRefrence) {
                 block.render(entityRenderScale);
             }

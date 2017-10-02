@@ -26,7 +26,7 @@ public class EntityTrainCore extends GenericRailTransport {
     /**defines the speed percentage the user is attempting to apply.*/
     public int accelerator =0;
     /**used to initialize all the vectors that are used to calculate everything from movement to linking, this is so we don't have to make new variable instances, saves CPU.*/
-    private double[][] vectorCache = new double[4][3];
+    //private double[][] vectorCache = new double[4][3];
 
 
 
@@ -81,6 +81,8 @@ public class EntityTrainCore extends GenericRailTransport {
         accelerator = tag.getInteger(NBTKeys.accelerator);
         this.fuelHandler.heatC = tag.getFloat(NBTKeys.transportFuel);
         this.fuelHandler.steamTank = tag.getInteger(NBTKeys.transportSteam);
+        vectorCache[7][0] = tag.getDouble(NBTKeys.trainSpeed);
+
 
     }
     /**saves the entity to server world*/
@@ -90,6 +92,7 @@ public class EntityTrainCore extends GenericRailTransport {
         tag.setInteger(NBTKeys.accelerator, accelerator);
         tag.setFloat(NBTKeys.transportFuel, fuelHandler.heatC);
         tag.setInteger(NBTKeys.transportSteam, fuelHandler.steamTank);
+        tag.setDouble(NBTKeys.trainSpeed, vectorCache[7][0]);
 
     }
 
@@ -118,7 +121,7 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     public void calculateAcceleration(){
         boolean hasReversed = false;
-        float weight = weightKg();
+        float weight = weightKg() * (getBoolean(boolValues.BRAKE)?10:1);
         float hp = getHorsePower();
         List<GenericRailTransport> checked = new ArrayList<>();
         checked.add(this);
@@ -133,10 +136,10 @@ public class EntityTrainCore extends GenericRailTransport {
         while(front != null){
             //calculate the speed modification
             if(!front.getType().isTrain() && front.weightKg()!=0){
-                weight+= front.getBoolean(boolValues.BRAKE)?front.weightKg()*1.25f:front.weightKg();
+                weight+= front.weightKg() * (getBoolean(boolValues.BRAKE)?2:1);
             } else if (front instanceof EntityTrainCore) {
                 hp += front.getBoolean(boolValues.RUNNING)?((EntityTrainCore)front).getHorsePower()*0.75f:0;
-                weight+= front.getBoolean(boolValues.BRAKE)?front.weightKg()*1.25f:front.weightKg();
+                weight+= front.weightKg() * (getBoolean(boolValues.BRAKE)?10:1);
             }
 
             //add the one we just used to the checked list
@@ -166,12 +169,25 @@ public class EntityTrainCore extends GenericRailTransport {
         }
 
         //745.7 converts watts to horsepower, but considering the scale, it should be substantially less
-
-        vectorCache[0][0] += (((0.7457 * (accelerator / 6D)) * hp) / (weight * 0.7457));
-        if (vectorCache[0][0] > getProcessedMaxSpeed()){
-            vectorCache[0][0] = getProcessedMaxSpeed();
-        } else if (vectorCache[0][0] < -getProcessedMaxSpeed()){
-            vectorCache[0][0] = -getProcessedMaxSpeed();
+        if (accelerator !=0) {
+            vectorCache[7][0] += (((0.7457 * (accelerator / 6D)) * hp) / (weight * 0.7457));
+        } else {
+            if (vectorCache[7][0]>0) {
+                vectorCache[7][0] *= (1 - (0.05* (weight * 0.0007457)));
+                if (vectorCache[7][0] <0){
+                    vectorCache[7][0] =0;
+                }
+            } else {
+                vectorCache[7][0] *= (1 - (0.005* (weight * 0.0007457)));
+                if (vectorCache[7][0] >0){
+                    vectorCache[7][0] =0;
+                }
+            }
+        }
+        if (vectorCache[7][0] > getProcessedMaxSpeed()){
+            vectorCache[7][0] = getProcessedMaxSpeed();
+        } else if (vectorCache[7][0] < -getProcessedMaxSpeed()){
+            vectorCache[7][0] = -getProcessedMaxSpeed();
         }
 
 
@@ -187,21 +203,27 @@ public class EntityTrainCore extends GenericRailTransport {
     @Override
     public void onUpdate() {
 
-        if(accelerator!=0 && frontBogie != null && backBogie != null) {
+        if(frontBogie != null && backBogie != null && !worldObj.isRemote) {
             //twice a second, re-calculate the speed.
-            if(ticksExisted %10==0 ){
+            if(ticksExisted %10==0){
                 //stop calculation if it can't move
                 if (((getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM || getType() == TrainsInMotion.transportTypes.STEAM) && fuelHandler.steamTank< getTankCapacity()*0.25)//check for steam fuel
                         || (getType() == TrainsInMotion.transportTypes.ELECTRIC && getTankAmount()<1)//check for electric fuel
                 ) {
-                    vectorCache[0][0] = 0;
+                    vectorCache[7][0] = 0;
+                    setBoolean(boolValues.RUNNING, false);
                 } else {
                     calculateAcceleration();
                 }
             }
-            vectorCache[1] = RailUtility.rotatePoint(vectorCache[0], rotationPitch, rotationYaw, 0);
-            frontBogie.addVelocity(vectorCache[1][0], vectorCache[1][1], vectorCache[1][2]);
-            backBogie.addVelocity(vectorCache[1][0], vectorCache[1][1], vectorCache[1][2]);
+            vectorCache[6] = RailUtility.rotatePoint(vectorCache[7], rotationPitch, rotationYaw, 0);
+            frontBogie.setVelocity(vectorCache[6][0], vectorCache[6][1], vectorCache[6][2]);
+            backBogie.setVelocity(vectorCache[6][0], vectorCache[6][1], vectorCache[6][2]);
+
+            frontVelocityX = frontBogie.motionX;
+            frontVelocityZ = frontBogie.motionZ;
+            backVelocityX = backBogie.motionX;
+            backVelocityZ = backBogie.motionZ;
         }
 
         if (updateWatchers){
@@ -231,17 +253,17 @@ public class EntityTrainCore extends GenericRailTransport {
                     worldObj.playSoundEffect(posX, posY, posZ, getHorn().getResourcePath(), 1, 0.5f);
                     return true;
                 }case 2:{ //decrease speed
-                    if (accelerator >-6) {
+                    if (accelerator >-6 && getBoolean(boolValues.RUNNING)) {
                         accelerator--;
                         updateWatchers = true;
-                        return true;
                     }
+                    return true;
                 }case 3:{ //increase speed
-                    if (accelerator <6) {
+                    if (accelerator <6 && getBoolean(boolValues.RUNNING)) {
                         accelerator++;
                         updateWatchers = true;
-                        return true;
                     }
+                    return true;
                 }
             }
         }

@@ -8,6 +8,7 @@ import ebf.tim.models.Bogie;
 import ebf.tim.models.rollingstock.ModelGATX1300GallonTanker;
 import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.Vec3d;
+import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.FuelHandler;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -46,9 +47,9 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
      */
 
     @Override
-    public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-2.4D, 2.4D);}
+    public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-2.1D, 2.1D);}
     @Override
-    public double getLengthFromCenter(){return 2.3D;}
+    public int getLengthFromCenter(){return 2;}
     @Override
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.NULL;}
     @Override
@@ -72,7 +73,7 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
     @Override
     public Bogie[] getBogieModels(){return new Bogie[]{GenericCMDBogie(), GenericCMDBogie()};}
     @Override
-    public ResourceLocation getTexture(){return null;} //URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png");}
+    public ResourceLocation getTexture(){return URIRegistry.HD_MODEL_ROLLINGSTOCK_TEXTURE.getResource("gatx_13000_gallon_tanker.png");} //URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png");}
     @Override
     public List<? extends ModelBase> getModel(){return Collections.singletonList(new ModelGATX1300GallonTanker());}
 }

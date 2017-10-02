@@ -3,7 +3,6 @@ package ebf.tim.utility;
 
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.GenericRailTransport;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -200,43 +199,5 @@ public class RailUtility {
         }
         return OREDICT_COAL.contains(i.getUnlocalizedName());
     }
-	/**
-	 * @author Herman Tulleken - http://devmag.org.za/2011/04/05/bzier-curves-a-tutorial/
-	 * @param p1 - Point 1 in bezier curve
-	 * @param p2 - Point 2 in curve
-	 * @param p3 - point 3 in curve
-	 * @param SegmentCount - How many segments do you want in the curve
-	 * @return
-	 */
-	public static List<double[]> CalculateBezierCurve(double[] p1, double[] p2, double[] p3, double SegmentCount){
-		
-		List<double[]> Positions = new ArrayList<double[]>();
-		
-		for(double i = 0; i < SegmentCount; i++) {
-			double Segment = i / SegmentCount;
-			
-			double Identifier = 1 - Segment;
-			double TSquare = Segment * Segment;
-			double USquare = Identifier * Identifier;
-			double UCube = Math.pow(Identifier, 3);
-			double TCube = Math.pow(Segment, 3);
-			
-			double[] p = {UCube * p1[0], UCube * p1[1], UCube * p1[2]};
-			p[0] += 3 * USquare * Segment * p1[0];
-			p[1] += 3 * USquare * Segment * p1[1];
-			p[2] += 3 * USquare * Segment * p1[2];
-			
-			p[0] += 3 * Identifier * TSquare * p2[0];
-			p[1] += 3 * Identifier * TSquare * p2[1];
-			p[2] += 3 * Identifier * TSquare * p2[2];
-			
-			p[0] += TCube * Segment * p3[0];
-			p[1] += TCube * Segment * p3[1];
-			p[2] += TCube * Segment * p3[2];
-			
-			Positions.add(p);
-		}
-		return Positions;
-	}
     
 }

@@ -170,7 +170,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @see RailUtility
      * returns true or false depending on whether or not it derails from having no rail.
      */
-    public boolean minecartMove(float yaw, float pitch, boolean brake, boolean isRunning, boolean isTrain, float weight)   {
+    public boolean minecartMove(float yaw, float pitch, boolean isRunning, boolean isTrain, float weight)   {
         //define the yaw from the super
         this.setRotation(yaw, pitch);
 
@@ -201,21 +201,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 }
             }
 
-            //apply brake
-            if (brake){
-                if (motionX <0.01 && motionX >-0.01){
-                    this.cartVelocityX = motionX =0;
-                } else {
-                    this.motionX *= 0.85-(weight*8.2673352e-7);
-                    this.cartVelocityX *= 0.75-(weight*8.2673352e-7);
-                }
-                if (motionZ <0.01 && motionZ >-0.01){
-                    this.cartVelocityZ =motionZ =0;
-                } else {
-                    this.motionZ *= 0.75-(weight*8.2673352e-7);
-                    this.cartVelocityZ *= 0.85-(weight*8.2673352e-7);
-                }
-            } else if ((!isRunning && isTrain) || !isTrain){
+            //apply drag
+            if ((!isRunning && isTrain) || !isTrain){
                 if (motionX <0.005 && motionX >-0.005){
                     this.cartVelocityX = motionX =0;
                 } else {
@@ -439,8 +426,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             } else if (floorZ < lastUsedRail[2]-1){
                 lastUsedRail = new int[]{floorX, block.getBasicRailMetadata(worldObj, null, lastUsedRail[0], floorY, floorZ+1), floorZ+1};
             }
-        //now loop this again for the next increment of movement, if there is one
-        if (cachedMotionX !=0 || cachedMotionZ !=0){
+            //now loop this again for the next increment of movement, if there is one
+            if (cachedMotionX !=0 || cachedMotionZ !=0){
                 moveBogie(cachedMotionX, cachedMotionZ, floorX, floorY, floorZ, block);
             }
         }

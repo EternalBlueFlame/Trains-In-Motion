@@ -8,6 +8,7 @@ import ebf.tim.models.Bogie;
 import ebf.tim.models.rollingstock.VATLogCar;
 import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.models.tmt.Vec3d;
+import ebf.tim.registry.URIRegistry;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
@@ -50,7 +51,7 @@ public class EntityVATLogCar extends RollingstockBase {
     @Override
     public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-1.3, 1.3);}
     @Override
-    public double getLengthFromCenter(){return 1.2D;}
+    public int getLengthFromCenter(){return 1;}
     /**
      * <h2>Inventory Size</h2>
      */
@@ -82,7 +83,7 @@ public class EntityVATLogCar extends RollingstockBase {
     public Bogie[] getBogieModels(){return new Bogie[]{GenericCMDBogie(), GenericCMDBogie()};}
 
     @Override
-    public ResourceLocation getTexture(){return null;} //URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png");}
+    public ResourceLocation getTexture(){return URIRegistry.HD_MODEL_ROLLINGSTOCK_TEXTURE.getResource("vat_logcar.png");} //URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png");}
 
     @Override
     public List<? extends ModelBase> getModel(){return Collections.singletonList(new VATLogCar());}

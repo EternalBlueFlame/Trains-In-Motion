@@ -15,7 +15,6 @@ import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -56,7 +55,7 @@ public class GUITransport extends GuiContainer {
     private int yCenter=0;
     private Boolean NEIEnabled = null;
 
-    private static DecimalFormat decimal = new DecimalFormat("#.##");
+    public static final DecimalFormat decimal = new DecimalFormat("#.##");
 
     /**
      * <h2>GUI initialization</h2>
@@ -76,15 +75,15 @@ public class GUITransport extends GuiContainer {
         //draw the text for trains
         if (transport instanceof EntityTrainCore) {
             drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
-            drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 110, 72, 16777215);
+            drawTextOutlined(fontRendererObj, String.format("container.inventory", decimal), 110, 72, 16777215);
             //draw the text for transports with large inventories
         } else if (transport.getType() != PASSENGER && transport.getInventorySize().getRow()>5) {
             drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
-            drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 110, 70, 16777215);
+            drawTextOutlined(fontRendererObj, String.format("container.inventory", decimal), 110, 70, 16777215);
             //draw the text for everything but the passenger car
         } else if (transport.getType() != PASSENGER){
             drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), 8, 66-(transport.getInventorySize().getRow()*18), 16777215);
-            drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 8, 80, 16777215);
+            drawTextOutlined(fontRendererObj, String.format("container.inventory", decimal), 8, 80, 16777215);
         }
     }
 
@@ -173,7 +172,6 @@ public class GUITransport extends GuiContainer {
     @Override
     public void initGui() {
         super.initGui();
-        initNEI();
 
 
         yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
@@ -209,6 +207,7 @@ public class GUITransport extends GuiContainer {
 
             }
         }
+        initNEI();
     }
 
     /**
@@ -283,7 +282,7 @@ public class GUITransport extends GuiContainer {
 
 
         //draw the tanks
-        mc.getTextureManager().bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
+        Tessellator.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"), null);
         //liquid fuel tank
         drawTexturedRect(guiLeft + 210, guiTop - 14, 0, 0, 18, 64, 16, 16);
         if (transport.getTankAmount()>0) {
@@ -369,7 +368,7 @@ public class GUITransport extends GuiContainer {
         drawTexturedRect(guiLeft, guiTop+ 79, 0, 128, 176, 94);
         drawTexturedRect(guiLeft, guiTop+ 76, 0, 0, 176, 8);
 
-        mc.getTextureManager().bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
+        Tessellator.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"), null);
         drawTexturedRect(guiLeft+28, guiTop, 0, 0, 100, 64, 16, 16);
         if (transport.getTankAmount()>0) {
             //draw the water tank

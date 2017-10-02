@@ -13,12 +13,18 @@ import static ebf.tim.models.tmt.ModelRendererTurbo.degreesF;
  */
 public class StaticModelAnimator {
 
-    /**tag for simple pistons, ones that move in a simple circle.*/
+    /**tag for simple pistons, ones that move in a simple circle such as wheel connectors.*/
     public static final String tagSimplePiston = "simplepiston";
     /**tag for advanced pistons, ones that rotate and move in a simple circle.*/
     public static final String tagAdvancedPiston = "advancedpiston";
     /**tag for animatedPart, axles, and other geometry that just spins.*/
     public static final String tagSimpleRotate = "simplerotate";
+    /**tag for lens flare effects. use this on geometric faces to hide or change color dependant on the state of the train*/
+    public static final String tagLenseFlare = "lenseflare";
+    /**tag for doors that slide open and closed*/
+    public static final String tagDoorSlide = "doorslide";
+    /**tag for doors that swing open and closed, the center point for all parts must be at the hinge.*/
+    public static final String tagDoorSwing = "doorswing";
     /**A copy of the original Vec6F for the model part*/
     private final float[] originalRotationValuesXYZ;
     /**a reference to the current model geometry, the one with the modifications that's actually being rendered.*/

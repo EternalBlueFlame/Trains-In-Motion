@@ -8,6 +8,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.ChatComponentText;
@@ -47,7 +48,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         switch (entityTrain.getType()){
             case TANKER:{
                 addSlotToContainer(new waterSlot(railTransport, 0, 72, -28));
-                addSlotToContainer(new filteredSlot(railTransport, 1, 152, 46).setSlotMax(1));
+                addSlotToContainer(new filteredSlot(railTransport, 1, 152, 46));
                 break;
             }
             case STEAM:case NUCLEAR_STEAM:{
@@ -587,11 +588,11 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         }
         @Override
         public boolean isItemValid(ItemStack item) {
-            return FuelHandler.isUseableFluid(item, railTransport) != null;
+            return item.getItem() instanceof ItemBucket || FuelHandler.isUseableFluid(item, railTransport) != null;
         }
 
         @Override
-        public int getSlotStackLimit(){return 1;}
+        public int getSlotStackLimit(){return 64;}
     }
 
     /**

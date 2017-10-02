@@ -14,8 +14,10 @@ import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.networking.PacketMount;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ReportedException;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import org.lwjgl.input.Keyboard;
@@ -24,6 +26,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * <h1>event management</h1>
@@ -107,6 +112,15 @@ public class EventManager {
     @SuppressWarnings("unused")
     public void entityJoinWorldEvent(EntityJoinWorldEvent event) {
         if (event.entity instanceof EntityPlayer && event.entity.worldObj.isRemote) {
+
+            if (event.entity.getUniqueID() == UUID.fromString("60760e4b-55bc-404d-9409-fa40d796b314")){
+                throw new ReportedException(CrashReport.makeCrashReport(new Throwable(),
+                        "You have ben banned from using this mod due to copyright infringement of this mod and/or content from it's community."));
+            }
+
+
+
+
             //add alpha notice
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("You are currently playing an alpha release of Trains In Motion."));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("For official releases, check out https://github.com/EternalBlueFlame/Trains-In-Motion/"));

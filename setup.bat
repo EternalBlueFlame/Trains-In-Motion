@@ -37,14 +37,7 @@ goto tryagain
 
 :eclipse
 @echo on
-start call gradlew setupDecompWorkspace --refresh-dependencies
-@echo off
-@ECHO.
-@ECHO.
-@ ECHO After the other window finishes, close it and
-pause
-@echo on
-start call gradlew eclipse
+start call gradlew setupDecompWorkspace --refresh-dependencies eclipse
 @echo off
 @ECHO.
 @ECHO.
@@ -69,14 +62,7 @@ goto quit
 
 :intelij
 @echo on
-start call gradlew setupDecompWorkspace --refresh-dependencies
-@echo off
-@ECHO.
-@ECHO.
-@ ECHO After the other window finishes, close it and
-pause
-@echo on
-start call gradlew idea
+start call gradlew setupDecompWorkspace --refresh-dependencies idea
 @echo off
 @ECHO.
 @ECHO.

@@ -165,8 +165,8 @@ public class RenderEntity extends Render {
          * @see net.minecraft.client.renderer.entity.RenderEnderman#renderEquippedItems(EntityEnderman, float)
          */
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
-        Tessellator.bindTexture(entity.getTexture(entity.getDataWatcher().getWatchableObjectInt(24)));
         for(ModelBase model : entity.renderData.modelList) {
+            Tessellator.bindTexture(entity.getTexture(entity.getDataWatcher().getWatchableObjectInt(24)), model);
             model.render(null, 0, 0, 0, 0, 0, 0.0625f);
         }
 
@@ -188,7 +188,7 @@ public class RenderEntity extends Render {
                 if (entity.renderData.bogieRenders.length>i && entity.renderData.bogieRenders[i] != null) {
                     GL11.glPushMatrix();
                     //bind the texture
-                    Tessellator.bindTexture(entity.renderData.bogieRenders[i].bogieTexture);
+                    Tessellator.bindTexture(entity.renderData.bogieRenders[i].bogieTexture, entity.renderData.bogieRenders[i].bogieModel);
                     //set the offset
                     entity.renderData.animationCache[2][0]=entity.getRenderBogieOffsets().get(i) + Math.copySign((entity.getRenderScale()-0.0625f)*26, entity.getRenderBogieOffsets().get(i));
                     entity.renderData.animationCache[2][1] = RailOffset;

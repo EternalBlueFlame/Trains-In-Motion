@@ -33,6 +33,8 @@ public class ModelBase extends net.minecraft.client.model.ModelBase {
 			mod.rotationPointZ += z;
 		}
 	}
+
+	public int getTextureNoiseScale(){return 2;}
 	
 	public void translateAll(float x, float y, float z){
 		translate(baseModel, x, y, z);

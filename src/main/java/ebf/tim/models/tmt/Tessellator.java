@@ -2,21 +2,15 @@ package ebf.tim.models.tmt;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ebf.tim.utility.ClientProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -36,7 +30,7 @@ public class Tessellator {
 	private static IntBuffer ibuf = bbuf.asIntBuffer();
 	private float u, v, w;
 	private int[] rb;
-	private static Map<ResourceLocation, ITextureObject> cachedTextures = new HashMap<ResourceLocation, ITextureObject>();
+	private static Map<ResourceLocation, Integer> cachedTextures = new HashMap<ResourceLocation, Integer>();
 
 	public static Tessellator getInstance(){
 		return INSTANCE;
@@ -112,66 +106,51 @@ public class Tessellator {
 		this.ht = true; this.u = i; this.v = j; this.w = 1.0F;
 	}
 
-	public static void bindTexture(ResourceLocation textureURI) {
-		ITextureObject object;
-		if (cachedTextures.containsKey(textureURI)){
-			object = cachedTextures.get(textureURI);
+	public static void bindTexture(ResourceLocation textureURI, ModelBase model) {
+		if (cachedTextures.containsKey(textureURI) && textureURI != null){
+			GL11.glBindTexture(GL_TEXTURE_2D, cachedTextures.get(textureURI));
 		} else {
-			if (textureURI != null) {
-				object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
-				if (object == null) {
-					object = new SimpleTexture(textureURI);
-					Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
-				}
-			} else {
-				object = TextureUtil.missingTexture;
+			ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
+			if (object == null) {
+				object = new SimpleTexture(textureURI);
+				Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
 			}
-			cachedTextures.put(textureURI, object);
-		}
-
-		if (GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D) != object.getGlTextureId() || ClientProxy.ForceTextureBinding) {
+			cachedTextures.put(textureURI, object.getGlTextureId());
 			GL11.glBindTexture(GL_TEXTURE_2D, object.getGlTextureId());
 		}
-	}
 
-	/**EXPERIMENTAL CODE
-	 * this is an experimental texture loader for external files, use should be
-	 * @param file "images/image.png"
-	 */
-	private void loadExternalTexture(String file) {
-		IntBuffer i = BufferUtils.createIntBuffer(1);
-		GL11.glGenTextures(i);
-		int id =  i.get(0);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
-		try {
-			//get the image file
-			URL url = this.getClass().getResource( file);
-			BufferedImage image = ImageIO.read(url);
-			ByteBuffer imageData = loadTexture(image);
-			//set the currently bound texture to the image we loaded
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D,0,GL11.GL_RGBA, image.getWidth(),image.getHeight(),0,GL11.GL_RGBA,GL11.GL_UNSIGNED_BYTE,imageData);
-			//add extra effects, and define filtering
-			GL11.glTexParameteri(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MAG_FILTER,GL11.GL_NEAREST);
-			GL11.glTexParameteri(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MIN_FILTER,GL11.GL_NEAREST);
-			GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
-		} catch (IOException e){
-			System.out.println("Failed to load image " + file);
+
+
+
+		if (false || textureURI != null && !textureURI.getResourcePath().contains("null")) {
+			if (cachedTextures.containsKey(textureURI)){
+				GL11.glBindTexture(GL_TEXTURE_2D, cachedTextures.get(textureURI));
+			} else {
+				//replace the assets string with ./ to go to the mods folder, theoretically... the entire address could also be replaced with a URI or drive directory.
+				BufferedImage image = TextureLoader.loadImage(textureURI.getResourcePath());//The path is inside the jar file
+				if (image != null) {
+					int texID = TextureLoader.loadTexture(image, model==null?0:model.getTextureNoiseScale());
+					GL11.glBindTexture(GL_TEXTURE_2D, texID);
+					cachedTextures.put(textureURI, texID);
+				} else {
+					GL11.glBindTexture(GL_TEXTURE_2D, TextureUtil.missingTexture.getGlTextureId());
+				}
+			}
 		}
 	}
-	/**EXPERIMENTAL CODE
-	 * this is an experimental texture loader for external files, do not call this directly, instead use
-	 * @see #loadExternalTexture(String)
-	 */
-	protected ByteBuffer loadTexture(BufferedImage image) {
-		BufferedImage img = new BufferedImage(image.getWidth(),image.getHeight(),image.getColorModel().getNumComponents() == 3? BufferedImage.TYPE_3BYTE_BGR: BufferedImage.TYPE_4BYTE_ABGR);
-		Graphics2D g = img.createGraphics();
-		g.scale(1,-1);
-		g.drawImage(image, 0, -image.getHeight(), null);
-		byte[] data = new byte[image.getColorModel().getNumComponents() * image.getWidth() * image.getHeight()];
-		img.getRaster().getDataElements(0, 0, image.getWidth(), image.getHeight(), data);
-		ByteBuffer pixels = BufferUtils.createByteBuffer(data.length);
-		pixels.put(data).rewind();
-		return pixels;
+
+	public static void bindTexture(ResourceLocation textureURI) {
+		if (cachedTextures.containsKey(textureURI)){
+			GL11.glBindTexture(GL_TEXTURE_2D, cachedTextures.get(textureURI));
+		} else {
+			ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
+			if (object == null) {
+				object = new SimpleTexture(textureURI);
+				Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
+			}
+			cachedTextures.put(textureURI, object.getGlTextureId());
+			GL11.glBindTexture(GL_TEXTURE_2D, object.getGlTextureId());
+		}
+
 	}
-	
 }

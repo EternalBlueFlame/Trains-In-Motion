@@ -44,7 +44,7 @@ public class EntityPullmansPalace extends RollingstockBase {
      * <h2>Bogie Offset</h2>
      */
     @Override
-    public double getLengthFromCenter(){return 1.7;}
+    public int getLengthFromCenter(){return 2;}
     /**
      * <h2>Inventory Size</h2>
      */

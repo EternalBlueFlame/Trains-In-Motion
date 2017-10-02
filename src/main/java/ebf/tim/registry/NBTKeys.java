@@ -59,6 +59,8 @@ public class NBTKeys {
     public static final String transportFuel = "fuel.main";
     /**the storage for steam in FuelHandler, only used for steam and nuclear steam trains*/
     public static final String transportSteam = "fuel.steam";
+    /**the last known speed of the train*/
+    public static final String trainSpeed= "train.speed";
 
 
     //positions
@@ -66,5 +68,8 @@ public class NBTKeys {
     public static final String frontBogieZ = "extended.front.z";
     public static final String backBogieX = "extended.back.x";
     public static final String backBogieZ = "extended.back.z";
+
+    public static final  String rotationRoll = "extended.roll";
+    public static final  String prevRotationRoll = "extended.prevroll";
 
 }

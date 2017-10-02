@@ -20,30 +20,30 @@ public class ModelRailPixel extends ModelBase
 	public ModelRailPixel()
 	{
 		baseModel = new ModelRendererTurbo[6];
-		baseModel[0] = new ModelRendererTurbo(this, 53, 29, textureX, textureY); // Box 4
-		baseModel[1] = new ModelRendererTurbo(this, 53, 26, textureX, textureY); // Box 5
-		baseModel[2] = new ModelRendererTurbo(this, 1, 7, textureX, textureY); // Box 6
-		baseModel[3] = new ModelRendererTurbo(this, 1, 7, textureX, textureY); // Box 7
-		baseModel[4] = new ModelRendererTurbo(this, 35, 2, textureX, textureY); // Box 8
+		baseModel[0] = new ModelRendererTurbo(this, 1, 7, textureX, textureY); // Box 6
+		baseModel[1] = new ModelRendererTurbo(this, 1, 3, textureX, textureY); // Box 9
+		baseModel[2] = new ModelRendererTurbo(this, 1, 3, textureX, textureY); // Box 6
+		baseModel[3] = new ModelRendererTurbo(this, 1, 3, textureX, textureY); // Box 7
+		baseModel[4] = new ModelRendererTurbo(this, 1, 7, textureX, textureY); // Box 8
 		baseModel[5] = new ModelRendererTurbo(this, 1, 3, textureX, textureY); // Box 9
 
-		baseModel[0].addBox(-8F, 0F, 0F, 1, 1, 2, 0F); // Box 4
-		baseModel[0].setRotationPoint(0F, 7F, -6F);
+		baseModel[0].addBox(-0.5F, 6F, -6.5F, 1, 1, 1, 0F); // Box 6
+		baseModel[0].setRotationPoint(0F, 0F, 0F);
 
-		baseModel[1].addBox(-8F, 0F, 0F, 1, 1, 2, 0F); // Box 5
-		baseModel[1].setRotationPoint(0F, 7F, 4F);
+		baseModel[1].addBox(-0.5F, 5F, -7F, 1, 1, 2, 0F); // Box 9
+		baseModel[1].setRotationPoint(0F, 0F, 0F);
 
-		baseModel[2].addBox(-8F, 0F, 0F, 1, 1, 1, 0F); // Box 6
-		baseModel[2].setRotationPoint(0F, 6F, -5.5F);
+		baseModel[2].addBox(-0.5F, 7F, -7F, 1, 1, 2, 0F); // Box 6
+		baseModel[2].setRotationPoint(0F, 0F, 0F);
 
-		baseModel[3].addBox(-8F, 0F, 0F, 1, 1, 1, 0F); // Box 7
-		baseModel[3].setRotationPoint(0F, 6F, 4.5F);
+		baseModel[3].addBox(-0.5F, 5F, 5F, 1, 1, 2, 0F); // Box 7
+		baseModel[3].setRotationPoint(0F, 0F, 0F);
 
-		baseModel[4].addBox(-8F, 0F, 0F, 1, 1, 2, 0F); // Box 8
-		baseModel[4].setRotationPoint(0F, 5F, 4F);
+		baseModel[4].addBox(-0.5F, 6F, 5.5F, 1, 1, 1, 0F); // Box 8
+		baseModel[4].setRotationPoint(0F, 0F, 0F);
 
-		baseModel[5].addBox(-8F, 0F, 0F, 1, 1, 2, 0F); // Box 9
-		baseModel[5].setRotationPoint(0F, 5F, -6F);
+		baseModel[5].addBox(-0.5F, 7F, 5F, 1, 1, 2, 0F); // Box 9
+		baseModel[5].setRotationPoint(0F, 0F, 0F);
 
 
 	}

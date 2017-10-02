@@ -183,7 +183,7 @@ public class ClientProxy extends CommonProxy {
         @Override
         public void renderTileEntityAt(TileEntity tileEntity, double x, double y, double z, float p_147500_8_) {
             GL11.glPushMatrix();
-            GL11.glTranslated(x+0.5,y+0.325, z+0.5);
+            GL11.glTranslated(x,y, z);
             tileEntity.func_145828_a(null);
             GL11.glPopMatrix();
         }
