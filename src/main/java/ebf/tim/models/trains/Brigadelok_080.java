@@ -10,9 +10,9 @@
 package ebf.tim.models.trains;
 
 import ebf.tim.models.StaticModelAnimator;
-import ebf.tim.models.tmt.ModelBase;
-import ebf.tim.models.tmt.ModelRendererTurbo;
 import net.minecraft.entity.Entity;
+import tmt.ModelBase;
+import tmt.ModelRendererTurbo;
 
 public class Brigadelok_080 extends ModelBase
 {
@@ -479,7 +479,7 @@ public class Brigadelok_080 extends ModelBase
 	{
 		for(int i = 0; i < 111; i++)
 		{
-			brigadelok_080Model[i].render(f5);
+			brigadelok_080Model[i].render(f5, brigadelok_080Model[i].rotorder);
 		}
 	}
 

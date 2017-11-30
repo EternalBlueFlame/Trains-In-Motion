@@ -33,7 +33,7 @@ public class TransportRegistry {
 
 
     /**returns a CMD Bogie with the default texture, just to simplify some code*/
-    public static Bogie GenericCMDBogie(){return new Bogie(URIRegistry.HD_MODEL_ROLLINGSTOCK_TEXTURE.getResource("cmd_bogie.png "), new CMDBogie());}
+    public static Bogie GenericCMDBogie(){return new Bogie(URIRegistry.HD_MODEL_ROLLINGSTOCK_TEXTURE.getResource("cmd_bogie.png"), new CMDBogie());}
 
     public static void registerTransports(int entityIDOffset){
         int index =0;

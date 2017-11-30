@@ -11,8 +11,8 @@
 package ebf.tim.models.bogies;
 
 import ebf.tim.models.StaticModelAnimator;
-import ebf.tim.models.tmt.ModelBase;
-import ebf.tim.models.tmt.ModelRendererTurbo;
+import tmt.ModelBase;
+import tmt.ModelRendererTurbo;
 
 public class CMDBogie extends ModelBase
 {
@@ -164,4 +164,6 @@ public class CMDBogie extends ModelBase
 		baseModel[34].setRotationPoint(-7.5F, 6.5F, -5F);
 
 	}
+
+	ModelRendererTurbo[] baseModel;
 }

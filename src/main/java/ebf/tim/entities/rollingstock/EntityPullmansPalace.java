@@ -6,8 +6,8 @@ import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemTransport;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.rollingstock.PullmansPalace;
-import ebf.tim.models.tmt.ModelBase;
-import ebf.tim.models.tmt.Vec3d;
+import tmt.ModelBase;
+import tmt.Vec3d;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
@@ -45,6 +45,42 @@ public class EntityPullmansPalace extends RollingstockBase {
      */
     @Override
     public int getLengthFromCenter(){return 2;}
+
+    @Override
+    public float getRenderScale() {
+        return 0.0625f;
+    }
+
+    @Override
+    public boolean isReinforced() {
+        return false;
+    }
+
+    @Override
+    public int getTankCapacity() {
+        return 0;
+    }
+
+    @Override
+    public int getRFCapacity() {
+        return 0;
+    }
+
+    @Override
+    public void manageFuel() {
+
+    }
+
+    @Override
+    public float weightKg() {
+        return 1814.3f;
+    }
+
+    @Override
+    public float getMaxFuel() {
+        return 0;
+    }
+
     /**
      * <h2>Inventory Size</h2>
      */
@@ -72,6 +108,16 @@ public class EntityPullmansPalace extends RollingstockBase {
     public Vec3d getLampOffset(){return new Vec3d(0,2,0);}
 
     @Override
+    public float getPistonOffset() {
+        return 0;
+    }
+
+    @Override
+    public float[][] getSmokeOffset() {
+        return null;
+    }
+
+    @Override
     public ResourceLocation getTexture(){return null;} //URIRegistry.MODEL_ROLLINGSTOCK_TEXTURE.getResource("null.png");}
 
     @Override
@@ -79,6 +125,11 @@ public class EntityPullmansPalace extends RollingstockBase {
 
     @Override
     public Bogie[] getBogieModels(){return null;}
+
+    @Override
+    public List<Double> getRenderBogieOffsets() {
+        return null;
+    }
 
     /**
      * <h2>pre-asigned values</h2>

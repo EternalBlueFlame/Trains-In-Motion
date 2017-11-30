@@ -1,9 +1,8 @@
 package ebf.tim.models;
 
 
-import ebf.tim.models.tmt.ModelBase;
-import ebf.tim.models.tmt.ModelRendererTurbo;
-
+import tmt.ModelBase;
+import tmt.ModelRendererTurbo;
 
 /**
  * <h2>Techne model render</h2>

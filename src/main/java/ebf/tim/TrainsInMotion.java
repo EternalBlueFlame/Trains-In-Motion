@@ -76,14 +76,14 @@ public class TrainsInMotion {
 
      /**define the transport types*/
     public enum transportTypes {
-        STEAM,DIESEL,HYDROGEN_DIESEL,ELECTRIC,NUCLEAR_STEAM,NUCLEAR_ELECTRIC,MAGLEV, //trains
+        STEAM,DIESEL,HYDROGEN_DIESEL,ELECTRIC,NUCLEAR_STEAM,NUCLEAR_ELECTRIC, //trains
         PASSENGER, FREIGHT, HOPPER, TANKER, WORKCAR, SLUG, B_UNIT, //generic rollingstock
         LOGCAR, RAILCAR, FREEZERCAR, LAVATANKER, GRAINHOPPER, COALHOPPER, OILCAR, //specific cargo rollingstock
         FUELTANKER, TENDER, ELECTRIC_TENDER, JUKEBOX, TRACKBUILDER; //specialized Rollingstock
 
          public boolean isTrain(){
              return this == STEAM || this == DIESEL || this == HYDROGEN_DIESEL || this == ELECTRIC ||
-                     this == NUCLEAR_STEAM || this == NUCLEAR_ELECTRIC || this == MAGLEV || this == B_UNIT;
+                     this == NUCLEAR_STEAM || this == NUCLEAR_ELECTRIC || this == B_UNIT;
          }
          public boolean isHopper(){
              return this == HOPPER || this == GRAINHOPPER || this == COALHOPPER;

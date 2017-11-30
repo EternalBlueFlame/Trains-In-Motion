@@ -7,7 +7,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
-import ebf.tim.blocks.BlockRailOverride;
+import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.blocks.LampBlock;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.EntityBogie;
@@ -162,8 +162,8 @@ public class ClientProxy extends CommonProxy {
 
 
 
-        //GameRegistry.registerBlock(new BlockRailOverride(), Item);
-        ClientRegistry.bindTileEntitySpecialRenderer(BlockRailOverride.renderTileEntity.class, specialRenderer);
+        //GameRegistry.registerBlock(new BlockRailCore(), Item);
+        ClientRegistry.bindTileEntitySpecialRenderer(RailTileEntity.class, specialRenderer);
 
 
 

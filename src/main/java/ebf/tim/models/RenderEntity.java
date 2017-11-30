@@ -1,9 +1,6 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.models.tmt.ModelBase;
-import ebf.tim.models.tmt.ModelRendererTurbo;
-import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.client.Minecraft;
@@ -14,6 +11,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
+import tmt.ModelBase;
+import tmt.ModelRendererTurbo;
+import tmt.Tessellator;
 
 /**
  * <h2>Entity Rendering</h2>
@@ -87,6 +87,7 @@ public class RenderEntity extends Render {
                     for (Object box : part.boxList) {
                         if (box instanceof ModelRendererTurbo) {
                             ModelRendererTurbo render = ((ModelRendererTurbo) box);
+                            if (render.boxName ==null){continue;}
                             //attempt to cache the parts for the main transport model
                             if (StaticModelAnimator.canAdd(render)) {
                                 entity.renderData.animatedPart.add(new StaticModelAnimator(render));
@@ -166,13 +167,13 @@ public class RenderEntity extends Render {
          */
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
         for(ModelBase model : entity.renderData.modelList) {
-            Tessellator.bindTexture(entity.getTexture(entity.getDataWatcher().getWatchableObjectInt(24)), model);
+            Tessellator.bindTexture(entity.getTexture(entity.getDataWatcher().getWatchableObjectInt(24)));
             model.render(null, 0, 0, 0, 0, 0, 0.0625f);
         }
 
 
         //loop for the groups of cargo
-        for (int i=0; i< entity.renderData.blockCargoRenders.size() && i < entity.calculatePercentageUsed(entity.renderData.blockCargoRenders.size()); i++) {
+        for (int i = 0; i< entity.renderData.blockCargoRenders.size() && i < entity.calculatePercentageOfSlotsUsed(entity.renderData.blockCargoRenders.size()); i++) {
             entity.renderData.blockCargoRenders.get(i).doRender(field_147909_c, entity.getFirstBlock(i), this, entity.getRenderScale(), entity);
         }
 
@@ -188,7 +189,7 @@ public class RenderEntity extends Render {
                 if (entity.renderData.bogieRenders.length>i && entity.renderData.bogieRenders[i] != null) {
                     GL11.glPushMatrix();
                     //bind the texture
-                    Tessellator.bindTexture(entity.renderData.bogieRenders[i].bogieTexture, entity.renderData.bogieRenders[i].bogieModel);
+                    Tessellator.bindTexture(entity.renderData.bogieRenders[i].bogieTexture);
                     //set the offset
                     entity.renderData.animationCache[2][0]=entity.getRenderBogieOffsets().get(i) + Math.copySign((entity.getRenderScale()-0.0625f)*26, entity.getRenderBogieOffsets().get(i));
                     entity.renderData.animationCache[2][1] = RailOffset;

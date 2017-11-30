@@ -1,7 +1,8 @@
 package ebf.tim.models;
 
-import ebf.tim.models.tmt.ModelBase;
-import ebf.tim.models.tmt.ModelRendererTurbo;
+
+import tmt.ModelBase;
+import tmt.ModelRendererTurbo;
 
 import java.util.ArrayList;
 import java.util.List;

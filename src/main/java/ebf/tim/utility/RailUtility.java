@@ -26,6 +26,7 @@ public class RailUtility {
     public static final float radianF = (float) Math.PI / 180.0f;
     /**converts a radians double to degrees*/
     public static final double degreesD = 180.0d / Math.PI;
+    public static final float degreesF = (float) (180.0d / Math.PI);
 
 
     /**
@@ -45,6 +46,7 @@ public class RailUtility {
      * courtesy of Zora No Densha.
      * There are version for doubles and floats.
      */
+    @Deprecated//only necessary for animations.
     public static double[] rotatePoint(double[] f, float pitch, float yaw, float roll) {
         double cos;
         double sin;
@@ -77,6 +79,23 @@ public class RailUtility {
             xyz[2] = (f[2] * sin) + (f[1] * cos);
         }
 
+        return xyz;
+    }
+
+    public static double[] rotateDistance(double distance, float pitch, float yaw) {
+        double[] xyz = new double[]{distance, 0,0};
+        //rotate pitch
+        if (pitch != 0.0F) {
+            pitch *= radianF;
+            xyz[0] = distance * Math.cos(pitch);
+            xyz[1] = distance * Math.sin(pitch);
+        }
+        //rotate yaw
+        if (yaw != 0.0F) {
+            yaw *= radianF;
+            xyz[0] = (distance * MathHelper.cos(yaw));
+            xyz[2] = (distance * MathHelper.sin(yaw));
+        }
         return xyz;
     }
 

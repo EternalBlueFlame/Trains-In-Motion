@@ -1,9 +1,9 @@
 package ebf.tim.models;
 
-import ebf.tim.models.tmt.ModelRendererTurbo;
 import ebf.tim.utility.RailUtility;
+import tmt.ModelRendererTurbo;
 
-import static ebf.tim.models.tmt.ModelRendererTurbo.degreesF;
+import static ebf.tim.utility.RailUtility.degreesF;
 
 /**
  * <h2>Static model animator</h2>
@@ -19,8 +19,14 @@ public class StaticModelAnimator {
     public static final String tagAdvancedPiston = "advancedpiston";
     /**tag for animatedPart, axles, and other geometry that just spins.*/
     public static final String tagSimpleRotate = "simplerotate";
-    /**tag for lens flare effects. use this on geometric faces to hide or change color dependant on the state of the train*/
+    /**tag for lens flare effects. use this on geometric faces to hide or change color dependant on the state of the train.
+     * this also disables lightmapping in the render for the geometry.
+     * @see ModelRendererTurbo#render(float, boolean)  */
     public static final String tagLenseFlare = "lenseflare";
+    /**tag for parts that glow, this disables the game's lightmapping on the geometry to make it appear as if it's glowing.
+     * this is fully managed by the render
+     * @see ModelRendererTurbo#render(float, boolean)  */
+    public static final String tagGlow = "glow";
     /**tag for doors that slide open and closed*/
     public static final String tagDoorSlide = "doorslide";
     /**tag for doors that swing open and closed, the center point for all parts must be at the hinge.*/

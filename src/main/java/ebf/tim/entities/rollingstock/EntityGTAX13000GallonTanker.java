@@ -6,8 +6,8 @@ import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemTransport;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.rollingstock.ModelGATX1300GallonTanker;
-import ebf.tim.models.tmt.ModelBase;
-import ebf.tim.models.tmt.Vec3d;
+import tmt.ModelBase;
+import tmt.Vec3d;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.FuelHandler;
 import net.minecraft.item.Item;
@@ -50,6 +50,17 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
     public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-2.1D, 2.1D);}
     @Override
     public int getLengthFromCenter(){return 2;}
+
+    @Override
+    public float getRenderScale() {
+        return  0.0625f;
+    }
+
+    @Override
+    public boolean isReinforced() {
+        return false;
+    }
+
     @Override
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.NULL;}
     @Override
@@ -60,16 +71,44 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
     public double[][] getHitboxPositions(){return new double[][]{{-3.35d,0.25d,0d},{-2.75d,0.25d,0d},{-1.35d,0.25d,0d},{0d,0.25d,0d},{1.35d,0.25d,0d},{2.75d,0.25d,0d},{3.35d,0.25d,0d}};}
     @Override
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
+
+    @Override
+    public float getPistonOffset() {
+        return 0;
+    }
+
+    @Override
+    public float[][] getSmokeOffset() {
+        return null;
+    }
+
     @Override
     public Item getItem(){
         return thisItem;
     }
     @Override
     public int getTankCapacity(){return 13400;}
+
+    @Override
+    public int getRFCapacity() {
+        return 0;
+    }
+
     @Override
     public void manageFuel(){
         FuelHandler.manageTanker(this);
     }
+
+    @Override
+    public float weightKg() {
+        return 1814.3f;
+    }
+
+    @Override
+    public float getMaxFuel() {
+        return 0;
+    }
+
     @Override
     public Bogie[] getBogieModels(){return new Bogie[]{GenericCMDBogie(), GenericCMDBogie()};}
     @Override

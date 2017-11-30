@@ -1,9 +1,9 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.models.tmt.ModelBase;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.util.ResourceLocation;
+import tmt.ModelBase;
 
 /**
  * <h1>New Bogie</h1>

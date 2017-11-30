@@ -4,7 +4,7 @@ import codechicken.nei.NEIClientConfig;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.models.tmt.Tessellator;
+import tmt.Tessellator;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.ClientProxy;
@@ -15,6 +15,7 @@ import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -75,15 +76,15 @@ public class GUITransport extends GuiContainer {
         //draw the text for trains
         if (transport instanceof EntityTrainCore) {
             drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
-            drawTextOutlined(fontRendererObj, String.format("container.inventory", decimal), 110, 72, 16777215);
+            drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 110, 72, 16777215);
             //draw the text for transports with large inventories
         } else if (transport.getType() != PASSENGER && transport.getInventorySize().getRow()>5) {
             drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
-            drawTextOutlined(fontRendererObj, String.format("container.inventory", decimal), 110, 70, 16777215);
+            drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 110, 70, 16777215);
             //draw the text for everything but the passenger car
         } else if (transport.getType() != PASSENGER){
             drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), 8, 66-(transport.getInventorySize().getRow()*18), 16777215);
-            drawTextOutlined(fontRendererObj, String.format("container.inventory", decimal), 8, 80, 16777215);
+            drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 8, 80, 16777215);
         }
     }
 
@@ -183,27 +184,28 @@ public class GUITransport extends GuiContainer {
             }
             this.buttonList.add(new GUIButton(6, guiLeft + 26, guiTop + 174, 18, 18, "locked"));
             this.buttonList.add(new GUIButton(7, guiLeft + 44, guiTop + 174, 18, 18, "coupler"));
+            this.buttonList.add(new GUIButton(4, guiLeft + 80, guiTop + 174, 18, 18, "brake"));
         } else {
             //generic to all
             if (player.getEntityId() == transport.getOwnerID()) {
-                this.buttonList.add(new GUIButton(13, guiLeft +112, guiTop + 166, 18, 20, "unlink"));
-                this.buttonList.add(new GUIButton(12, guiLeft + 166, guiTop + 166, 18, 20, "dropkey"));
+                this.buttonList.add(new GUIButton(13, guiLeft +112, guiTop + 166, 18, 18, "unlink"));
+                this.buttonList.add(new GUIButton(12, guiLeft + 166, guiTop + 166, 18, 18, "dropkey"));
             }
-            this.buttonList.add(new GUIButton(6, guiLeft + 130, guiTop + 166, 18, 20, "locked"));
-            this.buttonList.add(new GUIButton(7, guiLeft + 148, guiTop + 166, 18, 20, "coupler"));
+            this.buttonList.add(new GUIButton(6, guiLeft + 130, guiTop + 166, 18, 18, "locked"));
+            this.buttonList.add(new GUIButton(7, guiLeft + 148, guiTop + 166, 18, 18, "coupler"));
             if (transport.getLampOffset().yCoord>1) {
-                this.buttonList.add(new GUIButton(5, guiLeft + 238, guiTop + 166, 18, 20, "lamp"));
+                this.buttonList.add(new GUIButton(5, guiLeft + 238, guiTop + 166, 18, 18, "lamp"));
             }
+            this.buttonList.add(new GUIButton(4, guiLeft + 220, guiTop + 166, 18, 18, "brake"));
             //train specific
             if (transport instanceof EntityTrainCore) {
                 if (player.capabilities.isCreativeMode) {
-                    this.buttonList.add(new GUIButton(10, guiLeft + 184, guiTop + 166, 18, 20, "creative"));
+                    this.buttonList.add(new GUIButton(10, guiLeft + 184, guiTop + 166, 18, 18, "creative"));
                 }
                 if (transport.getType() != TrainsInMotion.transportTypes.STEAM) {
-                    this.buttonList.add(new GUIButton(8, guiLeft + 202, guiTop + 166, 18, 20, "running"));
+                    this.buttonList.add(new GUIButton(8, guiLeft + 202, guiTop + 166, 18, 18, "running"));
                 }
-                this.buttonList.add(new GUIButton(4, guiLeft + 220, guiTop + 166, 18, 20, "brake"));
-                this.buttonList.add(new GUIButton(9, guiLeft + 256, guiTop + 166, 18, 20, "horn"));
+                this.buttonList.add(new GUIButton(9, guiLeft + 256, guiTop + 166, 18, 18, "horn"));
 
             }
         }
@@ -233,7 +235,7 @@ public class GUITransport extends GuiContainer {
                 }
             }
             case DIESEL:{return StatCollector.translateToLocal("gui.diesel") + ":";}
-            case ELECTRIC: case MAGLEV:{return StatCollector.translateToLocal("gui.rf") + ":";}
+            case ELECTRIC:{return StatCollector.translateToLocal("gui.rf") + ":";}
             case HYDROGEN_DIESEL:{return StatCollector.translateToLocal("gui.hydrogencell") + ":";}
             case NUCLEAR_ELECTRIC:{return StatCollector.translateToLocal("gui.coolant") + ":";}
             default:{return "Unknown Tank";}
@@ -282,7 +284,7 @@ public class GUITransport extends GuiContainer {
 
 
         //draw the tanks
-        Tessellator.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"), null);
+        Tessellator.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
         //liquid fuel tank
         drawTexturedRect(guiLeft + 210, guiTop - 14, 0, 0, 18, 64, 16, 16);
         if (transport.getTankAmount()>0) {
@@ -368,7 +370,7 @@ public class GUITransport extends GuiContainer {
         drawTexturedRect(guiLeft, guiTop+ 79, 0, 128, 176, 94);
         drawTexturedRect(guiLeft, guiTop+ 76, 0, 0, 176, 8);
 
-        Tessellator.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"), null);
+        Tessellator.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
         drawTexturedRect(guiLeft+28, guiTop, 0, 0, 100, 64, 16, 16);
         if (transport.getTankAmount()>0) {
             //draw the water tank
@@ -439,7 +441,7 @@ public class GUITransport extends GuiContainer {
      */
     public static void drawTexturedRect(int posX, int posY, int posU, int posV, int width, int height, int widthUV, int heightUV) {
         Tessellator tessellator = Tessellator.getInstance();
-        tessellator.startDrawing();
+        tessellator.startDrawing(GL11.GL_QUADS);
         tessellator.addVertexWithUV(posX, posY + height, 0, posU * guiScaler, (posV + heightUV) * guiScaler);
         tessellator.addVertexWithUV(posX + width, posY + height, 0, (posU + widthUV) * guiScaler, (posV + heightUV) * guiScaler);
         tessellator.addVertexWithUV(posX + width, posY, 0, (posU + widthUV) * guiScaler, posV * guiScaler);
@@ -448,7 +450,7 @@ public class GUITransport extends GuiContainer {
     }
     public static void drawTexturedRect(int posX, int posY, int posU, int posV, int width, int height) {
         Tessellator tessellator = Tessellator.getInstance();
-        tessellator.startDrawing();
+        tessellator.startDrawing(GL11.GL_QUADS);
         tessellator.addVertexWithUV(posX, posY + height, 0, posU * guiScaler, (posV + height) * guiScaler);
         tessellator.addVertexWithUV(posX + width, posY + height, 0, (posU + width) * guiScaler, (posV + height) * guiScaler);
         tessellator.addVertexWithUV(posX + width, posY, 0, (posU + width) * guiScaler, posV * guiScaler);

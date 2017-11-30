@@ -10,6 +10,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -121,7 +122,7 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     public void calculateAcceleration(){
         boolean hasReversed = false;
-        float weight = weightKg() * (getBoolean(boolValues.BRAKE)?10:1);
+        float weight = weightKg() * (getBoolean(boolValues.BRAKE)?4:1) * (frontBogie.isOnSlope?2:1) * (backBogie.isOnSlope?2:1);
         float hp = getHorsePower();
         List<GenericRailTransport> checked = new ArrayList<>();
         checked.add(this);
@@ -136,16 +137,17 @@ public class EntityTrainCore extends GenericRailTransport {
         while(front != null){
             //calculate the speed modification
             if(!front.getType().isTrain() && front.weightKg()!=0){
-                weight+= front.weightKg() * (getBoolean(boolValues.BRAKE)?2:1);
+                weight+= front.weightKg() * (getBoolean(boolValues.BRAKE)?2:1) * (front.frontBogie.isOnSlope?2:1) * (front.backBogie.isOnSlope?2:1);
             } else if (front instanceof EntityTrainCore) {
                 hp += front.getBoolean(boolValues.RUNNING)?((EntityTrainCore)front).getHorsePower()*0.75f:0;
-                weight+= front.weightKg() * (getBoolean(boolValues.BRAKE)?10:1);
+                weight+= front.weightKg() * (getBoolean(boolValues.BRAKE)?4:1) * (front.frontBogie.isOnSlope?2:1) * (front.backBogie.isOnSlope?2:1);
             }
 
             //add the one we just used to the checked list
             checked.add(front);
             //loop to the next rollingstock.
-            Entity test = frontLinkedID!=null?worldObj.getEntityByID(front.frontLinkedID):null;
+            @Nullable
+            Entity test = front.frontLinkedID!=null?worldObj.getEntityByID(front.frontLinkedID):null;
             //if it's null and we haven't reversed yet, start the loop over from the back. if we have reversed though, end the loop.
             if(test == null){
                 if (!hasReversed){
@@ -173,7 +175,7 @@ public class EntityTrainCore extends GenericRailTransport {
             vectorCache[7][0] += (((0.7457 * (accelerator / 6D)) * hp) / (weight * 0.7457));
         } else {
             if (vectorCache[7][0]>0) {
-                vectorCache[7][0] *= (1 - (0.05* (weight * 0.0007457)));
+                vectorCache[7][0] *= (1 - (0.005* (weight * 0.0007457)));
                 if (vectorCache[7][0] <0){
                     vectorCache[7][0] =0;
                 }
@@ -184,6 +186,10 @@ public class EntityTrainCore extends GenericRailTransport {
                 }
             }
         }
+        if (vectorCache[7][0]>-0.005 && vectorCache[7][0]<0.005){
+            vectorCache[7][0] = 0;
+        }
+
         if (vectorCache[7][0] > getProcessedMaxSpeed()){
             vectorCache[7][0] = getProcessedMaxSpeed();
         } else if (vectorCache[7][0] < -getProcessedMaxSpeed()){

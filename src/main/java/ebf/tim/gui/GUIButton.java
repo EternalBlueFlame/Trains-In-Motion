@@ -1,12 +1,12 @@
 package ebf.tim.gui;
 
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.models.tmt.Tessellator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
+import tmt.Tessellator;
 
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +60,7 @@ public class GUIButton extends GuiButton {
             case "lamp": {return Collections.singletonList(StatCollector.translateToLocal("gui.lamp")  + ((transport.getBoolean(GenericRailTransport.boolValues.LAMP))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off")));}
             case "creative":{return Collections.singletonList(StatCollector.translateToLocal("gui.creativemode") + ((transport.getBoolean(GenericRailTransport.boolValues.CREATIVE))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off")));}
             case "running":{return Collections.singletonList(StatCollector.translateToLocal("gui.trainisrunning")  + ((transport.getBoolean(GenericRailTransport.boolValues.RUNNING))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off")));}
-            case "brake": {return Collections.singletonList(StatCollector.translateToLocal("gui.brake")  + ((transport.getBoolean(GenericRailTransport.boolValues.BRAKE))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off")));}
+            case "brake": {return Collections.singletonList(StatCollector.translateToLocal("gui.brake")  + ((transport.getBoolean(GenericRailTransport.boolValues.PARKING))?StatCollector.translateToLocal("gui.on"):StatCollector.translateToLocal("gui.off")));}
             case "horn": {return Collections.singletonList(StatCollector.translateToLocal("gui.horn"));}
 
             default: {return Collections.singletonList("Missing Statement");}

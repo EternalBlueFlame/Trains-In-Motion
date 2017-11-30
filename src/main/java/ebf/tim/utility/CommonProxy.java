@@ -5,7 +5,8 @@ import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.BlockDynamic;
-import ebf.tim.blocks.BlockRailOverride;
+import ebf.tim.blocks.RailTileEntity;
+import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.GenericRailTransport;
@@ -122,7 +123,7 @@ public class CommonProxy implements IGuiHandler {
     /**the crafting table for trains*/
     public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", Material.wood, TrainsInMotion.blockTypes.CRAFTING);
 
-    public static BlockRailOverride railBlock = new BlockRailOverride();
+    public static BlockRailCore railBlock = new BlockRailCore();
     /**
      * <h2>Server Register</h2>
      * Used for registering server only functions.
@@ -158,7 +159,7 @@ public class CommonProxy implements IGuiHandler {
 
         railBlock.setCreativeTab(TrainsInMotion.creativeTab).setBlockName("block.timrail");
         GameRegistry.registerBlock(railBlock, "block.timrail");
-        GameRegistry.registerTileEntity(BlockRailOverride.renderTileEntity.class, "TiMRailEntity");
+        GameRegistry.registerTileEntity(RailTileEntity.class, "TiMRailEntity");
         addRecipe(new ItemStack(railBlock, 1),  "I I", "IWI", "IWI", 'W', Blocks.planks, 'I', Items.iron_ingot);
     }
 }

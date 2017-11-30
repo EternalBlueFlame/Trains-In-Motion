@@ -70,7 +70,7 @@ public class EventManager {
                 } else if (ClientProxy.KeyHorn.isPressed()){
                     TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(9, player.ridingEntity.getEntityId()));
                 } else if (FMLClientHandler.instance().getClient().gameSettings.keyBindJump.isPressed()){
-                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(4, player.ridingEntity.getEntityId()));
+                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(16, player.ridingEntity.getEntityId()));
                 }
 
                 //manage key release events

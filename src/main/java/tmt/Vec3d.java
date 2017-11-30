@@ -1,8 +1,9 @@
-package ebf.tim.models.tmt;
+package tmt;
 
 import net.minecraft.util.Vec3;
 
 /**
+ * @author EternalBlueFlame
  * <h1>Vector 3d</h1>
  * this is intended to replicate the Vec3d from minecraft 1.8+
  * mostly it just makes handling vector 3's simpler.

@@ -46,7 +46,7 @@ public class FuelHandler{
 	 */
 	public static FluidStack isUseableFluid(ItemStack itemStack, GenericRailTransport transport){
 		switch (transport.getType()){
-			case MAGLEV:case ELECTRIC:{
+			case ELECTRIC:{
 				if (itemStack.getItem() == Items.redstone){
 					return new FluidStack(FluidRegistry.WATER, 250);
 				} else if (itemStack.getItem() == Item.getItemFromBlock(Blocks.redstone_block)){

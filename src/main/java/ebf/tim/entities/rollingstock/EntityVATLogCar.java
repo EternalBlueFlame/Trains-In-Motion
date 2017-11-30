@@ -6,8 +6,8 @@ import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemTransport;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.rollingstock.VATLogCar;
-import ebf.tim.models.tmt.ModelBase;
-import ebf.tim.models.tmt.Vec3d;
+import tmt.ModelBase;
+import tmt.Vec3d;
 import ebf.tim.registry.URIRegistry;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -52,6 +52,42 @@ public class EntityVATLogCar extends RollingstockBase {
     public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-1.3, 1.3);}
     @Override
     public int getLengthFromCenter(){return 1;}
+
+    @Override
+    public float getRenderScale() {
+        return 0.0625f;
+    }
+
+    @Override
+    public boolean isReinforced() {
+        return false;
+    }
+
+    @Override
+    public int getTankCapacity() {
+        return 0;
+    }
+
+    @Override
+    public int getRFCapacity() {
+        return 0;
+    }
+
+    @Override
+    public void manageFuel() {
+
+    }
+
+    @Override
+    public float weightKg() {
+        return 1814.3f;
+    }
+
+    @Override
+    public float getMaxFuel() {
+        return 0;
+    }
+
     /**
      * <h2>Inventory Size</h2>
      */
@@ -77,6 +113,16 @@ public class EntityVATLogCar extends RollingstockBase {
      */
     @Override
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
+
+    @Override
+    public float getPistonOffset() {
+        return 0;
+    }
+
+    @Override
+    public float[][] getSmokeOffset() {
+        return null;
+    }
 
 
     @Override

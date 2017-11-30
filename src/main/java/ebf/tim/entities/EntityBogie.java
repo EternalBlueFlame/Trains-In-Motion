@@ -43,8 +43,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     private boolean isFront=true;
     /**used to calculate the X/Y/Z velocity based on the direction the rail is facing, similar to how vanilla minecarts work.*/
     private static final int[][][] vanillaRailMatrix = new int[][][] {{{0, 0, -1}, {0, 0, 1}}, {{ -1, 0, 0}, {1, 0, 0}}, {{ -1, -1, 0}, {1, 0, 0}}, {{ -1, 0, 0}, {1, -1, 0}}, {{0, 0, -1}, {0, -1, 1}}, {{0, -1, -1}, {0, 0, 1}}, {{0, 0, 1}, {1, 0, 0}}, {{0, 0, 1}, { -1, 0, 0}}, {{0, 0, -1}, { -1, 0, 0}}, {{0, 0, -1}, {1, 0, 0}}};
-    /**x/y/z/meta of the last rail used.*/
-    private int[] lastUsedRail = null;
+    /*used by the transport class to apply a weight multiplication if the bogies are on a slope*/
+    public boolean isOnSlope=false;
 
     /**cached value for the temporary motion, prevents need to generate a new variable multiple times per tick*/
     private double cachedMotionX;
@@ -170,7 +170,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @see RailUtility
      * returns true or false depending on whether or not it derails from having no rail.
      */
-    public boolean minecartMove(float yaw, float pitch, boolean isRunning, boolean isTrain, float weight)   {
+    public boolean minecartMove(float yaw, float pitch, boolean isRunning, boolean isTrain, boolean parking,  float weight, boolean isLinked)   {
         //define the yaw from the super
         this.setRotation(yaw, pitch);
 
@@ -201,8 +201,24 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 }
             }
 
+            //apply parking brake
+            if (parking){
+                if (motionX <0.005 && motionX >-0.005){
+                    this.cartVelocityX = motionX =0;
+                } else {
+                    this.motionX *= 0.9-(0.01* (weight * 0.0007457));
+                    this.cartVelocityX *= 0.9-(0.01* (weight * 0.0007457));
+                }
+                if (motionZ <0.005 && motionZ >-0.005){
+                    this.cartVelocityZ =motionZ =0;
+                } else {
+                    this.motionZ *= 0.9-(0.01* (weight * 0.0007457));
+                    this.cartVelocityZ *= 0.9-(0.01* (weight * 0.0007457));
+                }
+            }
+
             //apply drag
-            if ((!isRunning && isTrain) || !isTrain){
+            if (((!isRunning && isTrain) || !isTrain)){
                 if (motionX <0.005 && motionX >-0.005){
                     this.cartVelocityX = motionX =0;
                 } else {
@@ -222,7 +238,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             if (block instanceof BlockRailBase) {
                 moveBogie(this.motionX * ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ),
                         this.motionZ * ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ),
-                        floorX, floorY, floorZ, (BlockRailBase) block);
+                        floorX, floorY, floorZ, (BlockRailBase) block, isLinked|| isTrain);
                 //update on ZnD rails, and ones that don't extend block rail base.
             } else if (block instanceof ITrackBase) {
                 //update position for ZnD rails.
@@ -245,7 +261,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @param floorZ the floored Z value of the next position.
      * @param block the block at the next position
      */
-    private void moveBogie(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, BlockRailBase block) {
+    private void moveBogie(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, BlockRailBase block, boolean train) {
         cachedMotionX = currentMotionX;
         cachedMotionZ = currentMotionZ;
         //define the incrementation of movement, use the cache to store the real value and increment it down, and then throw it to the next loop, then use current for the clamped to calculate movement'
@@ -271,66 +287,16 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         if (worldObj.getTileEntity(floorX, floorY, floorZ) instanceof ITrackTile && (((ITrackTile)worldObj.getTileEntity(floorX, floorY, floorZ)).getTrackInstance() instanceof ITrackSwitch)){
             railMetadata =((ITrackTile)worldObj.getTileEntity(floorX, floorY, floorZ)).getTrackInstance().getBasicRailMetadata(this);//railcraft support
         } else {
-            railMetadata = block.getBasicRailMetadata(worldObj, null, floorX, floorY, floorZ);
-        }
-
-        //be sure the last used rail is not null
-        if(lastUsedRail == null){
-            lastUsedRail = new int[]{floorX, floorY, floorZ, railMetadata};
+            railMetadata = block.getBasicRailMetadata(worldObj, this, floorX, floorY, floorZ);
         }
 
         //add the uphill/downhill velocity
         switch (railMetadata){
-            case 2:{currentMotionX -= 0.0078125D; this.posY = (double)(floorY + 1); break;}
-            case 3:{currentMotionX += 0.0078125D; this.posY = (double)(floorY + 1); break;}
-            case 4:{currentMotionZ += 0.0078125D; this.posY = (double)(floorY + 1); break;}
-            case 5:{currentMotionZ -= 0.0078125D; this.posY = (double)(floorY + 1); break;}
-            //add support for intersections
-            case 0:{
-                if (lastUsedRail[1] == 1 && lastUsedRail[0] != floorX && lastUsedRail[2] == floorZ){
-                    railMetadata =1;
-                }
-                break;
-            }
-            case 1:{
-                if (lastUsedRail[1] == 0 && lastUsedRail[2] != floorZ && lastUsedRail[0] == floorX){
-                    railMetadata =0;
-                }
-                break;
-            }
-            //in some specific circumstances we have to cover how rails are approached to smooth movement So if you enter a turn from the wrong side, it treats it as a straight rather than a turn.
-            case 6:{
-                if (lastUsedRail[1] == 1 && lastUsedRail[0] < floorX){
-                    railMetadata =1;
-                } else if (lastUsedRail[1] == 0 && lastUsedRail[2] < floorZ){
-                    railMetadata =0;
-                }
-                break;
-            }
-            case 7:{
-                if (lastUsedRail[1] == 1 && lastUsedRail[0] > floorX){
-                    railMetadata =1;
-                } else if (lastUsedRail[1] == 0 && lastUsedRail[2] < floorZ){
-                    railMetadata =0;
-                }
-                break;
-            }
-            case 8:{
-                if (lastUsedRail[1] == 1 && lastUsedRail[0] > floorX){
-                    railMetadata =1;
-                } else if (lastUsedRail[1] == 0 && lastUsedRail[2] > floorZ){
-                    railMetadata =0;
-                }
-                break;
-            }
-            case 9:{
-                if (lastUsedRail[1] == 1 && lastUsedRail[0] < floorX){
-                    railMetadata =1;
-                } else if (lastUsedRail[1] == 0 && lastUsedRail[2] > floorZ){
-                    railMetadata =0;
-                }
-                break;
-            }
+            case 2:{if (!train){currentMotionX -= 0.0078125D;} this.posY = (double)(floorY + 1); isOnSlope=true; break;}
+            case 3:{if (!train){currentMotionX += 0.0078125D;} this.posY = (double)(floorY + 1); isOnSlope=true; break;}
+            case 4:{if (!train){currentMotionZ += 0.0078125D;} this.posY = (double)(floorY + 1); isOnSlope=true; break;}
+            case 5:{if (!train){currentMotionZ -= 0.0078125D;} this.posY = (double)(floorY + 1); isOnSlope=true; break;}
+            default:{isOnSlope=false;}
         }
 
         //beginMagic();
@@ -413,23 +379,9 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         floorY = MathHelper.floor_double(this.posY);
         floorZ = MathHelper.floor_double(this.posZ);
         blockNext = this.worldObj.getBlock(floorX, floorY, floorZ);
-        //update the last rail used so we can properly smooth movement.
-        if (blockNext instanceof BlockRailBase) {
-            block = (BlockRailBase) blockNext;
-            if (floorX > lastUsedRail[0]+1){
-                lastUsedRail = new int[]{floorX-1, block.getBasicRailMetadata(worldObj, null, floorX-1, floorY, floorZ), floorZ};
-            } else if (floorX < lastUsedRail[0]-1){
-                lastUsedRail = new int[]{floorX+1, block.getBasicRailMetadata(worldObj, null, floorX+1, floorY, floorZ), floorZ};
-            }
-            if (floorZ > lastUsedRail[2]+1){
-                lastUsedRail = new int[]{floorX, block.getBasicRailMetadata(worldObj, null, lastUsedRail[0], floorY, floorZ-1), floorZ-1};
-            } else if (floorZ < lastUsedRail[2]-1){
-                lastUsedRail = new int[]{floorX, block.getBasicRailMetadata(worldObj, null, lastUsedRail[0], floorY, floorZ+1), floorZ+1};
-            }
-            //now loop this again for the next increment of movement, if there is one
-            if (cachedMotionX !=0 || cachedMotionZ !=0){
-                moveBogie(cachedMotionX, cachedMotionZ, floorX, floorY, floorZ, block);
-            }
+        //now loop this again for the next increment of movement, if there is one
+        if (blockNext instanceof BlockRailBase && (cachedMotionX !=0 || cachedMotionZ !=0)) {
+            moveBogie(cachedMotionX, cachedMotionZ, floorX, floorY, floorZ, (BlockRailBase) blockNext, train);
         }
     }
 
@@ -437,9 +389,12 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
     private void moveBogieZnD(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, ITrackBase track){
         double[][] posVec6 = track.getPositionOnTrack(this);
+        posX = posVec6[0][0];
+        posY = posVec6[0][1];
+        posZ = posVec6[0][2];
         //6[0] is xyz
         //6[1] is rotations
-        System.out.println(track.getDirectionOfSection().toString() + ":::" + track.getOrientation());
+        //System.out.println(track.getDirectionOfSection().toString() + ":::" + track.getOrientation());
     }
 
 

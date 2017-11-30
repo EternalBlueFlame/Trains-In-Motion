@@ -8,8 +8,8 @@ import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.items.ItemTransport;
 import ebf.tim.models.Bogie;
-import ebf.tim.models.tmt.ModelBase;
-import ebf.tim.models.tmt.Vec3d;
+import tmt.ModelBase;
+import tmt.Vec3d;
 import ebf.tim.models.trains.Brigadelok_080;
 import ebf.tim.registry.TransportRegistry;
 import ebf.tim.registry.URIRegistry;
@@ -176,6 +176,16 @@ public class EntityBrigadelok080 extends TrainBase {
     @Override
     public float[][] getSmokeOffset(){return new float[][]{{-1,0,0.5f,0xB2B2B2,30},{-1,0,-0.5f,0xB2B2B2,30},{-1.4f,2f,0,0x3C3C3C,500}};}
 
+    @Override
+    public int getLengthFromCenter() {
+        return 1;
+    }
+
+    @Override
+    public float getRenderScale() {
+        return  0.0625f;
+    }
+
     /**
      * <h2>rider sit or stand</h2>
      * @return true if the rider(s) should be sitting, false if the rider should be standing.
@@ -198,6 +208,11 @@ public class EntityBrigadelok080 extends TrainBase {
      */
     @Override
     public int getTankCapacity(){return 9161;}
+
+    @Override
+    public int getRFCapacity() {
+        return 0;
+    }
 
     /**
      * <h2>fluid filter</h2>

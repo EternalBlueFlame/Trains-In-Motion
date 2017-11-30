@@ -1,8 +1,8 @@
 package ebf.tim.models;
 
 
-import ebf.tim.models.tmt.ModelBase;
-import ebf.tim.models.tmt.ModelRendererTurbo;
+import tmt.ModelBase;
+import tmt.ModelRendererTurbo;
 
 
 /**
@@ -39,7 +39,7 @@ public class CubikModelRenderer extends ModelRendererTurbo {
      * we use this to convert the model from BDCraft Cubik Pro's .java format to the TMT format.
      */
     @Override
-    public ModelRendererTurbo addBox(float unused1, float unused2, float unused3, float boxWidth, float boxHeight, float boxDepth) {
+    public ModelRendererTurbo addBox(float unused1, float unused2, float unused3, int boxWidth, int boxHeight, int boxDepth) {
         width = (-(boxWidth)*0.5f);
         height = (-(boxHeight )*0.5f);
         depth = (-(boxDepth)*0.5f);
@@ -47,16 +47,6 @@ public class CubikModelRenderer extends ModelRendererTurbo {
         return this;
     }
 
-    /**
-     * <h2>add box integer</h2>
-     * a simple redirect for integer calls to
-     * @see #addBox(float, float, float, float, float, float)
-     */
-    @Override
-    public ModelRendererTurbo addBox(float unused1, float unused2, float unused3, int boxWidth, int boxHeight, int boxDepth) {
-        addBox(width,height,depth,(float) boxWidth,(float) boxHeight,(float) boxDepth);
-        return this;
-    }
 
     /**
      * <h2>set Rotation point</h2>

@@ -1,10 +1,10 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.util.AxisAlignedBB;
 import org.lwjgl.opengl.GL11;
+import tmt.Tessellator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -181,10 +181,8 @@ public class ParticleFX {
         GL11.glPushMatrix();
         //disabling texturing of GL will do some weird stuff.
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_LIGHTING);
-        GL11.glEnable(GL11.GL_CULL_FACE);
         Tessellator tessellator = Tessellator.getInstance();
-        tessellator.startDrawing();
+        tessellator.startDrawing(GL11.GL_QUADS);
         //set the color with the tint.
         GL11.glColor3f((((entity.color >> 16 & 0xFF)/255.0F) - entity.colorTint),
                 (((entity.color >> 8 & 0xFF)/255.0F) - entity.colorTint),
@@ -224,8 +222,6 @@ public class ParticleFX {
         tessellator.addVertex(entity.boundingBoxF[1], entity.boundingBoxF[2], entity.boundingBoxF[5]);
         tessellator.draw();
         //before we end this be sure to re-enabling texturing for other things.
-        GL11.glDisable(GL11.GL_LIGHTING);
-        GL11.glDisable(GL11.GL_CULL_FACE);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glPopMatrix();
 

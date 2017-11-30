@@ -1,8 +1,6 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.models.tmt.ModelRendererTurbo;
-import ebf.tim.models.tmt.Tessellator;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.block.Block;
@@ -10,6 +8,8 @@ import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
+import tmt.ModelRendererTurbo;
+import tmt.Tessellator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +39,8 @@ public class GroupedModelRender {
     public static final String tagBlockScaleInventory = "scaleblockinventory";
     /**tag for geometry that scales the Y size to represent inventory use. renders using the model's texture.*/
     public static final String tagScaleInventory = "scaleinventory";
+    /**tag for livery spots, it's marked here so multiple spots can host the same texture value.*/
+    public static final String tagLivery = "liveryimg";
 
     /**if it should be rendered as a normal block from the inventory, similar to enderman, or part of the model*/
     private boolean isBlock;
@@ -89,6 +91,15 @@ public class GroupedModelRender {
     }
 
     /**
+     * to add more allowed types extend this function and add more circumstances before calling super.
+     * @param modelReference the geometry to check
+     * @return if the box is supposed to be scaled with the percentage of inventory used.
+     */
+    public static boolean isLivery(ModelRendererTurbo modelReference){
+        return (modelReference.boxName.contains(tagLivery));
+    }
+
+    /**
      * used to actually render the models in this group, either as actual blocks, or as a part of the host model.
      * if you wanna change this stuff in your own mod you'll have to make you're own render that extends our RenderEntity.
      * @param field_147909_c the RenderBlocks variable from the render class, since it's private.
@@ -100,12 +111,12 @@ public class GroupedModelRender {
         if (isBlock) {
             GL11.glPushMatrix();
             if(isScaled){
-                float yScale = transport.calculatePercentageUsed(100)*0.01f;
+                float yScale = transport.calculatePercentageOfSlotsUsed(100)*0.01f;
                 if (yScale == 0) {
                     GL11.glPopMatrix();
                     return;
                 }
-                GL11.glScaled(1,transport.calculatePercentageUsed(100)*0.01f,1);
+                GL11.glScaled(1,transport.calculatePercentageOfSlotsUsed(100)*0.01f,1);
             }
             //render a block in place of the geometry.
             // bind the texture
@@ -130,7 +141,15 @@ public class GroupedModelRender {
         } else {
             //render the geometry normally if it's not a block.
             Tessellator.bindTexture(transport.getTexture(transport.getDataWatcher().getWatchableObjectInt(24)));
+            int liveryIndex=-1;
+            String lastLivery="";
             for (ModelRendererTurbo block : boxRefrence) {
+                if (isLivery(block)){
+                    if (!block.boxName.equals(lastLivery)){
+                        liveryIndex++;lastLivery = block.boxName;
+                    }
+                    //Tessellator.bindTexture(transport.getLivery(liveryIndex));
+                }
                 block.render(entityRenderScale);
             }
         }
