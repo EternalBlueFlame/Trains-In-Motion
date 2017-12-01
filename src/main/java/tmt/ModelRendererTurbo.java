@@ -45,9 +45,7 @@ public class ModelRendererTurbo extends ModelRenderer {
     private boolean compiled;
     private int displayList;
     private int displayListArray[];
-    private Map<String, TransformGroup> transformGroup;
     private Map<String, TextureGroup> textureGroup;
-    private TransformGroup currentGroup;
     private TextureGroup currentTextureGroup;
     public boolean mirror;
     public boolean flip;
@@ -56,7 +54,6 @@ public class ModelRendererTurbo extends ModelRenderer {
     public boolean field_1402_i;
     public boolean forcedRecompile;
     public boolean useLegacyCompiler;
-    public List<?> cubeList;
     public List<?> childModels;
     public final String boxName;
     public boolean isShape = false;
@@ -88,14 +85,12 @@ public class ModelRendererTurbo extends ModelRenderer {
         vertices = new PositionTextureVertex[0];
         faces = new TexturedPolygon[0];
         forcedRecompile = false;
-        transformGroup = new HashMap<String, TransformGroup>();
-        transformGroup.put("0", new TransformGroupBone(new Bone(0, 0, 0, 0), 1D));
         textureGroup = new HashMap<String, TextureGroup>();
         textureGroup.put("0", new TextureGroup());
         currentTextureGroup = textureGroup.get("0");
         boxName = s;
         defaultTexture = "";
-        useLegacyCompiler = false;
+        useLegacyCompiler = true;
 	}
 	
 	public ModelRendererTurbo(ModelBase modelbase){
@@ -1252,11 +1247,13 @@ public class ModelRendererTurbo extends ModelRenderer {
      * which are either resources/models or resources/mods/models.
      */
     public void addObj(String file){
+        useLegacyCompiler = false;
     	addModel(file, ModelPool.OBJ);
     }
     
     public void addObjF(String file){
     	try{
+            useLegacyCompiler = false;
 			addModelF(file, ModelPool.OBJ);
 		}
     	catch(IOException e) {
@@ -1271,7 +1268,7 @@ public class ModelRendererTurbo extends ModelRenderer {
      * @param modelFormat the class of the model format interpreter
      */
     public void addModel(String file, Class<?> modelFormat){
-    	ModelPoolEntry entry = ModelPool.addFile(file, modelFormat, transformGroup, textureGroup);
+    	ModelPoolEntry entry = ModelPool.addFile(file, modelFormat, textureGroup);
     	if(entry == null){
     		return;
     	}
@@ -1286,7 +1283,7 @@ public class ModelRendererTurbo extends ModelRenderer {
     }
     
     public void addModelF(String file, Class<?> modelFormat) throws IOException{
-    	ModelPoolEntry entry = ModelPool.addFileF(file, modelFormat, transformGroup, textureGroup);
+    	ModelPoolEntry entry = ModelPool.addFileF(file, modelFormat, textureGroup);
     	if(entry == null){
     		return;
     	}
@@ -1372,9 +1369,6 @@ public class ModelRendererTurbo extends ModelRenderer {
     public void clear(){
     	vertices = new PositionTextureVertex[0];
     	faces = new TexturedPolygon[0];
-        transformGroup.clear();
-        transformGroup.put("0", new TransformGroupBone(new Bone(0, 0, 0, 0), 1D));
-        currentGroup = transformGroup.get("0");
     }
     
     /**
@@ -1394,8 +1388,6 @@ public class ModelRendererTurbo extends ModelRenderer {
         
         for(int idx = 0; idx < verts.length; idx++){
         	vertices[vertices.length - verts.length + idx] = verts[idx];
-        	if(copyGroup && verts[idx] instanceof PositionTransformVertex)
-        		((PositionTransformVertex)verts[idx]).addGroup(currentGroup);
         }
         for(int idx = 0; idx < poly.length; idx++){
         	faces[faces.length - poly.length + idx] = poly[idx];
@@ -1417,50 +1409,6 @@ public class ModelRendererTurbo extends ModelRenderer {
     		poly[idx] = new TexturedPolygon(quad[idx].vertexPositions);
     	}
     	copyTo(verts, poly);
-    }
-       
-    /**
-     * Sets the current transformation group. The transformation group is used
-     * to allow for vertex transformation. If a transformation group does not exist,
-     * a new one will be created.
-     * @param groupName the name of the transformation group you want to switch to
-     */
-    public void setGroup(String groupName){
-    	setGroup(groupName, new Bone(0, 0, 0, 0), 1D);
-    }
-    
-    /**
-     * Sets the current transformation group. The transformation group is used
-     * to allow for vertex transformation. If a transformation group does not exist,
-     * a new one will be created.
-     * @param groupName the name of the transformation group you want to switch to
-     * @param bone the Bone this transformation group is attached to
-     * @param weight the weight of the transformation group
-     */
-    public void setGroup(String groupName, Bone bone, double weight){
-    	if(!transformGroup.containsKey(groupName)){
-    		transformGroup.put(groupName, new TransformGroupBone(bone, weight));
-    	}
-    	currentGroup = transformGroup.get(groupName);
-    }
-
-    /**
-     * Gets the current transformation group.
-     * @return the current PositionTransformGroup.
-     */
-    public TransformGroup getGroup(){
-    	return currentGroup;
-    }
-    
-    /**
-     * Gets the transformation group with a given group name.
-     * @return the current PositionTransformGroup.
-     */
-    public TransformGroup getGroup(String groupName){
-    	if(!transformGroup.containsKey(groupName)){
-    		return null;
-    	}
-    	return transformGroup.get(groupName);
     }
     
     /**
@@ -1687,8 +1635,8 @@ public class ModelRendererTurbo extends ModelRenderer {
         displayList = GLAllocation.generateDisplayLists(1);
         GL11.glNewList(displayList, 4864 /*GL_COMPILE*/);
         Tessellator tessellator = Tessellator.getInstance();
-        for(int i = 0; i < faces.length; i++){
-            faces[i].draw(tessellator, scale);
+        for(TexturedPolygon face : faces){
+            face.draw(tessellator, scale);
         }
         GL11.glEndList();
     }

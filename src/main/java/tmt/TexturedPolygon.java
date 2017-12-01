@@ -69,9 +69,6 @@ public class TexturedPolygon extends TexturedQuad {
         }
         for(int i = 0; i < nVertices; i++){
             PositionTextureVertex positionTexturevertex = vertexPositions[i];
-            if(positionTexturevertex instanceof PositionTransformVertex){
-            	((PositionTransformVertex)positionTexturevertex).setTransformation();
-            }
             if(i < iNormals.size()){
             	if(invertNormal){
             		tessellator.setNormal(-iNormals.get(i).xCoord, -iNormals.get(i).yCoord, -iNormals.get(i).zCoord);

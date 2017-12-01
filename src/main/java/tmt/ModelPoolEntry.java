@@ -11,9 +11,7 @@ public abstract class ModelPoolEntry {
 	public String name;
 	public PositionTransformVertex[] vertices;
 	public TexturedPolygon[] faces;
-	public Map<String, TransformGroupBone> groups;
 	public Map<String, TextureGroup> textures;
-	protected TransformGroupBone group;
 	protected TextureGroup texture;
 	protected String[] fileExtensions;
 	
@@ -33,31 +31,6 @@ public abstract class ModelPoolEntry {
 	}
 	
 	public abstract void getModel(File file);
-	
-    /**
-     * Sets the current transformation group. The transformation group is used
-     * to allow for vertex transformation. If a transformation group does not exist,
-     * a new one will be created.
-     * @param groupName the name of the transformation group you want to switch to
-     */
-    protected void setGroup(String groupName){
-    	setGroup(groupName, new Bone(0, 0, 0, 0), 1D);
-    }
-    
-    /**
-     * Sets the current transformation group. The transformation group is used
-     * to allow for vertex transformation. If a transformation group does not exist,
-     * a new one will be created.
-     * @param groupName the name of the transformation group you want to switch to
-     * @param bone the Bone this transformation group is attached to
-     * @param weight the weight of the transformation group
-     */
-    protected void setGroup(String groupName, Bone bone, double weight){
-    	if(groups.size() == 0 || !groups.containsKey(groupName)){
-    		groups.put(groupName, new TransformGroupBone(bone, weight));
-    	}
-    	group = groups.get(groupName);
-    }
     
     /**
      * Sets the current texture group, which is used to switch the
@@ -75,26 +48,14 @@ public abstract class ModelPoolEntry {
     	texture = textures.get(groupName);
     }
     
-    protected void applyGroups(Map<String, TransformGroup> groupsMap, Map<String, TextureGroup> texturesMap){
-    	Set<String> groupsCol = groups.keySet();
+    protected void applyGroups( Map<String, TextureGroup> texturesMap){
     	Collection<String> texturesCol = textures.keySet();
-    	Iterator<String> groupsItr = groupsCol.iterator();
     	Iterator<String> texturesItr = texturesCol.iterator();
-    	while(groupsItr.hasNext()){
-    		int nameIdx = 0;
-    		String groupKey = groupsItr.next();
-    		String currentGroup = name + "_" + nameIdx + ":" + groupKey;
-    		while(groupsMap.size() > 0 && groupsMap.containsKey(currentGroup)){
-    			nameIdx++;
-    			currentGroup = name + "_" + nameIdx + ":" + groupKey;
-    		}
-    		groupsMap.put(currentGroup, groups.get(groupKey));
-    	}
     	while(texturesItr.hasNext()){
     		int nameIdx = 0;
     		String groupKey = texturesItr.next();
     		String currentGroup = name + "_" + nameIdx + ":" + groupKey;
-    		while(groupsMap.size() > 0 && texturesMap.containsKey(currentGroup)){
+    		while(texturesMap.containsKey(currentGroup)){
     			nameIdx++;
     			currentGroup = name + "_" + nameIdx + ":" + groupKey;
     		}

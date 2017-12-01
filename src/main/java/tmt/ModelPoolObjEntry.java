@@ -154,9 +154,6 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 						normal[2]+= curNormals[2];
 						if(vInt < verts.size()){
 							v.add(verts.get(vInt).setTexturePosition(curUV[0], curUV[1]));
-							if(verts.get(vInt) instanceof PositionTransformVertex){
-								((PositionTransformVertex)verts.get(vInt)).addGroup(group);
-							}
 						}
 						if(ind > -1){
 							s = s.substring(s.indexOf(" ") + 1).trim();

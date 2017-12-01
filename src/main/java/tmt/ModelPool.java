@@ -12,11 +12,11 @@ import org.apache.commons.io.IOUtils;
 
 public class ModelPool {
 	
-	public static ModelPoolEntry addFile(String file, Class<?> modelClass, Map<String, TransformGroup> group, Map<String, TextureGroup> textureGroup){
+	public static ModelPoolEntry addFile(String file, Class<?> modelClass, Map<String, TextureGroup> textureGroup){
 		ModelPoolEntry entry = null;
 		if(modelMap.containsKey(file)){
 			entry = modelMap.get(file);
-			entry.applyGroups(group, textureGroup);
+			entry.applyGroups(textureGroup);
 			return entry;
 		}
 		try{
@@ -38,22 +38,20 @@ public class ModelPool {
 			System.out.println("The model with the name " + file + " does not exist.");
 			return null;
 		}
-		entry.groups = new HashMap<String, TransformGroupBone>();
 		entry.textures = new HashMap<String, TextureGroup>();
 		entry.name = file;
-		entry.setGroup("0");
 		entry.setTextureGroup("0");
 		entry.getModel(modelFile);
-		entry.applyGroups(group, textureGroup);
+		entry.applyGroups(textureGroup);
 		modelMap.put(file, entry);
 		return entry;
 	}
 	
-    public static ModelPoolEntry addFileF(String file, Class<?> modelClass, Map<String, TransformGroup> group, Map<String, TextureGroup> textureGroup) throws IOException{
+    public static ModelPoolEntry addFileF(String file, Class<?> modelClass, Map<String, TextureGroup> textureGroup) throws IOException{
 		ModelPoolEntry entry = null;
 		if(modelMap.containsKey(file)){
 			entry = modelMap.get(file);
-			entry.applyGroups(group, textureGroup);
+			entry.applyGroups(textureGroup);
 			return entry;
 		}
 		try{
@@ -76,13 +74,11 @@ public class ModelPool {
 			System.out.println("The model with the name " + file + " does not exist.");
 			return null;
 		}
-		entry.groups = new HashMap<String, TransformGroupBone>();
 		entry.textures = new HashMap<String, TextureGroup>();
 		entry.name = file;
-		entry.setGroup("0");
 		entry.setTextureGroup("0");
 		entry.getModel(modelFile);
-		entry.applyGroups(group, textureGroup);
+		entry.applyGroups(textureGroup);
 		modelMap.put(file, entry);
 		return entry;
 	}
