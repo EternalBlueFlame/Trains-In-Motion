@@ -1,26 +1,34 @@
 package tmt;
 
-import java.util.ArrayList;
-
 import net.minecraft.client.model.PositionTextureVertex;
+import net.minecraft.util.Vec3;
 
-public class PositionTransformVertex extends PositionTextureVertex {
+public class PositionTransformVertex{
 
+	public Vec3f vector3F;
+	public float textureX;
+	public float textureY;
 
 	public PositionTransformVertex(float x, float y, float z, float u, float v){
 		this(new Vec3f(x, y, z), u, v);
 	}
-	
+
+	@Deprecated
 	public PositionTransformVertex(PositionTextureVertex vertex, float u, float v){
-		super(vertex, u, v);
+		vector3F = new Vec3f(vertex.vector3D);
+		textureX = u;
+		textureY = v;
 	}
-	
-	public PositionTransformVertex(PositionTextureVertex vertex){
-		this(vertex, vertex.texturePositionX, vertex.texturePositionY);
-	}
-	
+
 	public PositionTransformVertex(Vec3f vector, float u, float v){
-		super(new Vec3d(vector.xCoord, vector.yCoord, vector.zCoord), u, v);
+		vector3F = new Vec3f(vector.xCoord, vector.yCoord, vector.zCoord);
+		textureX = u;
+		textureY = v;
 	}
+
+	public PositionTransformVertex setTexturePosition(float p_78240_1_, float p_78240_2_) {
+		return new PositionTransformVertex(vector3F, p_78240_1_, p_78240_2_);
+	}
+
 	
 }

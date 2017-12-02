@@ -46,6 +46,9 @@ public class Vec3f {
         yCoord+=vec.yCoord;
         zCoord+=vec.zCoord;
     }
+    public Vec3f addVector(float x, float y, float z){
+        return new Vec3f(xCoord + x,yCoord + y,zCoord + z);
+    }
 
     public Vec3f subtract(Vec3f vec){
         return new Vec3f(xCoord-vec.xCoord,

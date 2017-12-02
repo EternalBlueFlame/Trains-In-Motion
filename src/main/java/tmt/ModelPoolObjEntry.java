@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 
-import net.minecraft.client.model.PositionTextureVertex;
-
 public class ModelPoolObjEntry extends ModelPoolEntry {
 	
 	public ModelPoolObjEntry(){
@@ -89,7 +87,7 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 				}
 				if(s.startsWith("f ")){
 					s = s.substring(s.indexOf(" ") + 1).trim();
-					ArrayList<PositionTextureVertex> v = new ArrayList<PositionTextureVertex>();
+					ArrayList<PositionTransformVertex> v = new ArrayList<PositionTransformVertex>();
 					String s1;
 					int finalPhase = 0;
 					float[] normal = new float[] {0F, 0F, 0F};
@@ -167,7 +165,7 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 					normal[0]/= d;
 					normal[1]/= d;
 					normal[2]/= d;
-					PositionTextureVertex[] vToArr = new PositionTextureVertex[v.size()];
+					PositionTransformVertex[] vToArr = new PositionTransformVertex[v.size()];
 					for(int i = 0; i < v.size(); i++){
 						vToArr[i] = v.get(i);
 					}

@@ -22,16 +22,16 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 * 
 */
 @SideOnly(Side.CLIENT)
-public class Tessellator extends net.minecraft.client.renderer.Tessellator{
+public class Tessellator{
 	
 	private static ByteBuffer bbuf = GLAllocation.createDirectByteBuffer(0x200000 * 4);
-	private int rbs = 0, verts = 0, /*br, c,*/ rbi = 0, /*vertices = 0,*/ dm, n;
+	private int rbs = 0, verts = 0, /*br, c,*/ rbi = 0, /*vertices = 0,*/ dm, n, vtc;
 	private boolean ht = false, in = false, drawing = false;
 	public static Tessellator INSTANCE = new Tessellator();
 	private static FloatBuffer fbuf = bbuf.asFloatBuffer();
 	//private static ShortBuffer sbuf = bbuf.asShortBuffer();
 	private static IntBuffer ibuf = bbuf.asIntBuffer();
-	private double u, v, w, x, y, z;
+	private float u, v, w, x, y, z;
 	private int[] rb;
 	
 	public static Tessellator getInstance(){
@@ -49,13 +49,12 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 			reset();
 		}
 	}
-	
-	@Override
+
 	public int draw(){
 		if(drawing){
 			drawing = false; int o = 0;
 			while(o < verts){
-				int vtc = Math.min(verts - o, 0x200000 >> 5);
+				vtc = Math.min(verts - o, 0x200000 >> 5);
 				ibuf.clear(); ibuf.put(rb, o * 10, vtc * 10); bbuf.position(0); bbuf.limit(vtc * 40); o += vtc;
 				if(ht){
 					fbuf.position(3);
@@ -93,27 +92,27 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 		bbuf.clear();
 	}
 	
-	public void addVertex(double par1, double par3, double par5){
+	public void addVertex(float par1, float par3, float par5){
 		if(rbi >= rbs - 40) {
 			if(rbs == 0){rbs = 0x10000; rb = new int[rbs];}
 			else{rbs *= 2; rb = Arrays.copyOf(rb, rbs);}
 		}
 		if(ht){
-			rb[rbi + 3] = Float.floatToRawIntBits((float)u); rb[rbi + 4] = Float.floatToRawIntBits((float)v);
-			rb[rbi + 5] = Float.floatToRawIntBits(0.0F); rb[rbi + 6] = Float.floatToRawIntBits((float)w);
+			rb[rbi + 3] = Float.floatToRawIntBits(u); rb[rbi + 4] = Float.floatToRawIntBits(v);
+			rb[rbi + 5] = Float.floatToRawIntBits(0.0F); rb[rbi + 6] = Float.floatToRawIntBits(w);
 		}
 		if(in){rb[rbi + 8] = n;}
-		rb[rbi] = Float.floatToRawIntBits((float)(par1 + x));
-		rb[rbi + 1] = Float.floatToRawIntBits((float)(par3 + y));
-		rb[rbi + 2] = Float.floatToRawIntBits((float)(par5 + z));
+		rb[rbi] = Float.floatToRawIntBits((par1 + x));
+		rb[rbi + 1] = Float.floatToRawIntBits((par3 + y));
+		rb[rbi + 2] = Float.floatToRawIntBits((par5 + z));
 		rbi += 10; verts++; //vertices++;
 	}
 	
-	public void addVertexWithUV(double i, double j, double k, double l, double m){
+	public void addVertexWithUV(float i, float j, float k, float l, float m){
 		this.setTextureUV(l, m); this.addVertex(i, j, k);
 	}
 	
-	public void addVertexWithUVW(double i, double j, double k, double l, double m, double n){
+	public void addVertexWithUVW(float i, float j, float k, float l, float m, float n){
 		this.setTextureUVW(l, m, n); this.addVertex(i, j, k);
 	}
 	
@@ -123,15 +122,15 @@ public class Tessellator extends net.minecraft.client.renderer.Tessellator{
 		n = b0 & 255 | (b1 & 255) << 8 | (b2 & 255) << 16;
 	}
 	
-	public void setTextureUV(double i, double j){
-		this.ht = true; this.u = i; this.v = j; this.w = 1.0D;
+	public void setTextureUV(float i, float j){
+		this.ht = true; this.u = i; this.v = j; this.w = 1.0F;
 	}
 	
-	public void setTextureUVW(double i, double j, double k){
+	public void setTextureUVW(float i, float j, float k){
 		this.ht = true; this.u = i; this.v = j; this.w = k;
 	}
 	
-	public void setTranslation(double x, double y, double z){
+	public void setTranslation(float x, float y, float z){
 		this.x = x; this.y = y; this.z = z;
 	}
 	
