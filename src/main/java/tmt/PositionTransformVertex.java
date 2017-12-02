@@ -1,7 +1,6 @@
 package tmt;
 
 import net.minecraft.client.model.PositionTextureVertex;
-import net.minecraft.util.Vec3;
 
 public class PositionTransformVertex{
 

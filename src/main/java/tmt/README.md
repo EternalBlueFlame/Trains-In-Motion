@@ -1,6 +1,6 @@
 <b>
 Modified TMT from https://github.com/Fexcraft/FCL
-Original branch version tbis was copied from:
+Original branch version tbis was copied from: https://github.com/Fexcraft/FCL/tree/9331a66cda097e55e743f2590b3dc6cf1b78f137
 </b><hr/>
 <h3>Primary license:</h3>
 This version of TMT was updated, maintened, as well as extended for 1.8 and newer Minecraft versions by FEX___96
