@@ -479,7 +479,7 @@ public class Brigadelok_080 extends ModelBase
 	{
 		for(int i = 0; i < 111; i++)
 		{
-			brigadelok_080Model[i].render(f5, brigadelok_080Model[i].rotorder);
+			brigadelok_080Model[i].render(f5, brigadelok_080Model[i].rotorder, true);
 		}
 	}
 

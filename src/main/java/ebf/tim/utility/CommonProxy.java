@@ -10,6 +10,7 @@ import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.items.ItemAdminBook;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialLiquid;
@@ -27,7 +28,7 @@ import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 
 import javax.annotation.Nullable;
-import java.util.UUID;
+import java.util.*;
 
 import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
 
@@ -59,6 +60,8 @@ public class CommonProxy implements IGuiHandler {
         }
         return null;
     }
+
+    public boolean isClient(){return false;}
 
     /**
      * <h2>Load config</h2>
@@ -151,6 +154,8 @@ public class CommonProxy implements IGuiHandler {
         GameRegistry.registerItem(bucketDiesel, "fluid.diesel.bucket");
         FluidContainerRegistry.registerFluidContainer(fluidDiesel, new ItemStack(bucketDiesel), new ItemStack(Items.bucket));
 
+
+        GameRegistry.registerItem(new ItemAdminBook(), "adminbook");
         //register the train crafting table
         trainTable.setBlockName("block.traintable");
         GameRegistry.registerBlock(trainTable, "block.traintable");

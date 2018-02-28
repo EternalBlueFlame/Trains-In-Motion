@@ -31,7 +31,7 @@ public abstract class Model<T> extends net.minecraft.client.model.ModelBase {
 	
 	public void render(ModelRendererTurbo[] model, float scale, boolean rotorder){
 		for(ModelRendererTurbo sub : model){
-			sub.render(scale, rotorder);
+			sub.render(scale, rotorder, true);
 		}
 	}
 	

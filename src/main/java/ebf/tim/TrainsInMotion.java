@@ -12,6 +12,7 @@ import cpw.mods.fml.relauncher.Side;
 import ebf.tim.blocks.OreGen;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
+import ebf.tim.items.ItemAdminBook;
 import ebf.tim.items.TiMTab;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.networking.PacketMount;
@@ -44,7 +45,7 @@ public class TrainsInMotion {
     /**the ID of the mod and the version displayed in game, as well as used for version check in the version.txt file*/
     public static final String MODID = "trainsinmotion";
     /**the version identifier of the mod*/
-    public static final String MOD_VERSION="0.2.6.5 alpha";
+    public static final String MOD_VERSION="0.2.7 pre-alpha";
     /**an instance of the mod*/
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
@@ -56,7 +57,7 @@ public class TrainsInMotion {
      *@see ClientProxy
      */
     @SidedProxy(clientSide = "ebf.tim.utility.ClientProxy", serverSide = "ebf.tim.utility.CommonProxy")
-    private static CommonProxy proxy;
+    public static CommonProxy proxy;
 
     /**instance the network wrapper for the channels.
      * Every wrapper runs on it's own thread, so heavy traffic should go on it's own wrapper, using channels to separate packet types.*/
@@ -153,6 +154,8 @@ public class TrainsInMotion {
         TrainsInMotion.keyChannel.registerMessage(PacketKeyPress.Handler.class, PacketKeyPress.class, 1, Side.SERVER);
         TrainsInMotion.keyChannel.registerMessage(PacketMount.Handler.class, PacketMount.class, 2, Side.SERVER);
         TrainsInMotion.keyChannel.registerMessage(PacketRemove.Handler.class, PacketRemove.class, 3, Side.SERVER);
+        TrainsInMotion.keyChannel.registerMessage(ItemAdminBook.PacketAdminBook.Handler.class, ItemAdminBook.PacketAdminBook.class, 4, Side.SERVER);
+
 
         //register the worldgen
         GameRegistry.registerWorldGenerator(new OreGen(), 0);

@@ -1,7 +1,18 @@
 package ebf.tim.blocks;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.models.rails.ModelRailSegment;
 import ebf.tim.models.rails.RailPointRenderData;
+import ebf.tim.utility.CommonProxy;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.util.Vec3;
+import org.lwjgl.BufferUtils;
 import tmt.Tessellator;
 import ebf.tim.registry.URIRegistry;
 import net.minecraft.block.Block;
@@ -17,8 +28,13 @@ import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
+import java.awt.image.BufferedImage;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.lwjgl.opengl.GL11.GL_LIGHTING;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class RailTileEntity extends TileEntity {
 
@@ -66,24 +82,33 @@ public class RailTileEntity extends TileEntity {
 
     private static ItemStack grass = new ItemStack(Blocks.stone, 1);
 
+    @SideOnly(Side.CLIENT)
     protected RenderBlocks blocks = new RenderBlocks();
-
-    private double[] lastPoints = null;
-
-    private List<ModelRailSegment> segments = new ArrayList<>();
 
     public void func_145828_a(@Nullable CrashReportCategory report)  {
         if (report == null) {
             if (!worldObj.isRemote || renderShape == null) {
                 return;
             }
-                Tessellator.bindTexture(texture);
+                //Tessellator.bindTexture(texture);
+            GL11.glPushMatrix();
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            //GL11.glDisable(GL11.GL_LIGHTING);
+            //GL11.glBindTexture(GL_TEXTURE_2D, TextureUtil.missingTexture.getGlTextureId());
+
+            //RenderHelper.enableGUIStandardItemLighting();
+            //int color = Minecraft.getMinecraft().renderEngine.getTexture().getGlTextureId();
+
+            GL11.glColor3d(((Blocks.iron_block.getMapColor(0).colorValue >> 16 & 0xFF)* 0.00392156863),
+                    ((Blocks.iron_block.getMapColor(0).colorValue >> 8 & 0xFF)* 0.00392156863),
+                    ((Blocks.iron_block.getMapColor(0).colorValue & 0xFF)* 0.00392156863));
             for(List<RailPointRenderData> renderData : renderShape) {
                 for (RailPointRenderData point : renderData) {
                     GL11.glPushMatrix();
-                    GL11.glTranslated(point.position[0], point.position[1] - 0.05, point.position[2]);
+                    GL11.glTranslated(point.position[0], point.position[1] + 0.05, point.position[2]);
                     GL11.glRotated(point.position[4], 0, 1, 0);
-                    GL11.glRotated(180, 0, 0, 1);
+                    GL11.glRotated(-90+point.position[3], 0, 0, 1);
+                    //GL11.glRotated(180, 1, 0, 0);
                     GL11.glScaled(1, 0.5, 0.5);
 
                     point.segment.render(null, 0, 0, 0, 0, 0, 0.0625f);
@@ -93,10 +118,38 @@ public class RailTileEntity extends TileEntity {
                     GL11.glPopMatrix();
                 }
             }
+            //GL11.glEnable(GL11.GL_LIGHTING);
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            GL11.glPopMatrix();
 
         } else {super.func_145828_a(report);}
     }
 
+    private static FloatBuffer colorBuffer = GLAllocation.createDirectFloatBuffer(16);
+    private static final Vec3 field_82884_b = Vec3.createVectorHelper(0.20000000298023224D, 1.0D, -0.699999988079071D).normalize();
+    private static final Vec3 field_82885_c = Vec3.createVectorHelper(-0.20000000298023224D, 1.0D, 0.699999988079071D).normalize();
+    /**
+     * Update and return colorBuffer with the RGBA values passed as arguments
+     */
+    private static FloatBuffer setColorBuffer(double p_74517_0_, double p_74517_2_, double p_74517_4_, double p_74517_6_)
+    {
+        /**
+         * Update and return colorBuffer with the RGBA values passed as arguments
+         */
+        return setColorBuffer((float)p_74517_0_, (float)p_74517_2_, (float)p_74517_4_, (float)p_74517_6_);
+    }
+
+    /**
+     * Update and return colorBuffer with the RGBA values passed as arguments
+     */
+    private static FloatBuffer setColorBuffer(float p_74521_0_, float p_74521_1_, float p_74521_2_, float p_74521_3_)
+    {
+        colorBuffer.clear();
+        colorBuffer.put(p_74521_0_).put(p_74521_1_).put(p_74521_2_).put(p_74521_3_);
+        colorBuffer.flip();
+        /** Float buffer used to set OpenGL material colors */
+        return colorBuffer;
+    }
     @Override
     public boolean shouldRefresh(Block oldBlock, Block newBlock, int oldMeta, int newMeta, World world, int x, int y, int z) {
         return oldBlock != newBlock;

@@ -31,7 +31,7 @@ public class TexturedPolygon {
 		iNormals = iNormal;
 	}
 
-	public void draw(Tessellator tessellator, float f){
+	public void draw(Tessellator tessellator, float f, boolean isTextured){
         if(vertices.length == 3){
         	tessellator.startDrawing(GL11.GL_TRIANGLES);
         }
@@ -77,7 +77,11 @@ public class TexturedPolygon {
             		tessellator.setNormal(iNormals.get(i).xCoord, iNormals.get(i).yCoord, iNormals.get(i).zCoord);
             	}
             }
-            tessellator.addVertexWithUV(positionTexturevertex.vector3F.xCoord * f, positionTexturevertex.vector3F.yCoord * f, positionTexturevertex.vector3F.zCoord * f, positionTexturevertex.textureX, positionTexturevertex.textureY);
+            if (isTextured) {
+				tessellator.addVertexWithUV(positionTexturevertex.vector3F.xCoord * f, positionTexturevertex.vector3F.yCoord * f, positionTexturevertex.vector3F.zCoord * f, positionTexturevertex.textureX, positionTexturevertex.textureY);
+			} else {
+            	tessellator.addVertex(positionTexturevertex.vector3F.xCoord * f, positionTexturevertex.vector3F.yCoord * f, positionTexturevertex.vector3F.zCoord * f);
+			}
         }
         tessellator.draw();
     }

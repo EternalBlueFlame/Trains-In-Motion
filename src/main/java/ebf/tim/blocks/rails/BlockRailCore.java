@@ -1,7 +1,10 @@
 package ebf.tim.blocks.rails;
 
+import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.models.rails.*;
+import ebf.tim.utility.CommonProxy;
+import net.minecraft.block.Block;
 import tmt.Vec3d;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.block.BlockRail;
@@ -74,7 +77,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         updateTick(worldObj, xCoord, yCoord, zCoord, p_149674_5_);
     }
 
-    //TODO: nee a new method(s) to run this from that's less common, because this seems to be rather demanding
+
     @Override
     public void updateTick(World worldObj, int xCoord, int yCoord, int zCoord, Random p_149674_5_) {
         super.updateTick(worldObj, xCoord,yCoord,zCoord,p_149674_5_);
@@ -158,10 +161,19 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
 
         ((RailTileEntity) worldObj.getTileEntity(xCoord,yCoord,zCoord)).
-                setRenderShape(quadCurveAtPoint(1, baseShape[1][0], baseShape[1][1], baseShape[1][2], baseShape[1][3]), quadCurveAtPoint(1, baseShape[2][0], baseShape[2][1], baseShape[2][2], baseShape[2][3]));
+                setRenderShape(quadCurveAtPoint(1, baseShape[1][0], baseShape[1][1], baseShape[1][2]), quadCurveAtPoint(1, baseShape[2][0], baseShape[2][1], baseShape[2][2]));
 
 
     }
+
+
+
+    @Override
+    public void onNeighborBlockChange(World worldObj, int x, int y, int z, Block b) {
+        super.onNeighborBlockChange(worldObj, x, y, z, b);
+    }
+
+
 
 
     /**
@@ -196,7 +208,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         if (t ==0){
             throw new ReportedException(CrashReport.makeCrashReport(new Throwable(), "Why did you make a rail with a length of 0 blocks???"));
         }
-        final double originalT =(1F/16F)/t;
+        final double originalT =(1F/24F)/t;
         t=0;
         List<RailPointRenderData> points = new ArrayList<RailPointRenderData>();
         while(t<=1.0d) {
@@ -210,14 +222,19 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             };
             //define yaw rotation
             if(t==originalT){
-                points.get(0).position[4] = 180-Math.toDegrees(Math.atan2(tempPoint.position[2] - points.get(0).position[2], tempPoint.position[0] - points.get(0).position[0]));
+                double dX= tempPoint.position[0] - points.get(0).position[0];
+                double dZ = tempPoint.position[2] - points.get(0).position[2];
+                points.get(0).position[4] = 180- Math.toDegrees(Math.atan2(dZ, dX));
+                points.get(0).position[3] = Math.toDegrees(Math.atan2(Math.sqrt(dZ * dZ + dX * dX), tempPoint.position[1] - points.get(0).position[1]) + Math.PI);
             }
             if (t !=0){
                 double dX = tempPoint.position[0] - points.get(points.size()-1).position[0];
-                double dY = tempPoint.position[1] - points.get(points.size()-1).position[1];
                 double dZ = tempPoint.position[2] - points.get(points.size()-1).position[2];
-                tempPoint.position[4] = 180-Math.toDegrees(Math.atan2(tempPoint.position[2] - points.get(points.size()-1).position[2], tempPoint.position[0] - points.get(points.size()-1).position[0]));
-                tempPoint.position[3] = Math.toDegrees(Math.atan2(Math.sqrt(dZ * dZ + dX * dX), dY) + Math.PI);
+                tempPoint.position[4] = 180- Math.toDegrees(Math.atan2(dZ, dX));
+                tempPoint.position[3] = Math.toDegrees(Math.atan2(Math.sqrt(dZ * dZ + dX * dX), tempPoint.position[1] - points.get(points.size()-1).position[1]) + Math.PI);
+                if(tempPoint.position[4] - points.get(points.size()-1).position[4]>180){
+                    tempPoint.position[4]-=360;
+                }
             }
             //TODO: define pitch and roll
             points.add(tempPoint);
@@ -228,43 +245,47 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
 
-
-    protected static List<RailPointRenderData> quadCurveAtPointR(double t, Vec3d P1, Vec3d P2, Vec3d P3, Vec3d P4, double gague){
+    protected static List<RailPointRenderData> quadCurveAtPoint(double t, Vec3d P1, Vec3d P2, Vec3d P3){
         if (t ==0){
             throw new ReportedException(CrashReport.makeCrashReport(new Throwable(), "Why did you make a rail with a length of 0 blocks???"));
         }
         final double originalT =(1F/16F)/t;
         t=0;
+        double t2=0;
+        double dX;
+        double dZ;
         List<RailPointRenderData> points = new ArrayList<RailPointRenderData>();
+        RailPointRenderData nextEstimatedPoint = null;
         while(t<=1.0d) {
             RailPointRenderData tempPoint = new RailPointRenderData();
             //define position
-            tempPoint.position = new double[]{
-                    (Math.pow(1 - t, 3) * P1.xCoord) + (3*Math.pow(1-t,2)*t*P2.xCoord) + (3*(1-t)*Math.pow(t,2)*P3.xCoord) + (Math.pow(t,3)*P4.xCoord),//X
-                    (Math.pow(1 - t, 3) * P1.yCoord) + (3*Math.pow(1-t,2)*t*P2.yCoord) + (3*(1-t)*Math.pow(t,2)*P3.yCoord) + (Math.pow(t,3)*P4.yCoord),//Y
-                    (Math.pow(1 - t, 3) * P1.zCoord) + (3*Math.pow(1-t,2)*t*P2.zCoord) + (3*(1-t)*Math.pow(t,2)*P3.zCoord) + (Math.pow(t,3)*P4.zCoord),//X
-                    0,0,0
+            if (nextEstimatedPoint ==null) {
+                tempPoint.position = new double[]{
+                        (Math.pow(1 - t, 2) * P1.xCoord) + (2 * (1 - t) * t * P2.xCoord) + ((Math.pow(t, 2) * P3.xCoord)),//X
+                        (Math.pow(1 - t, 2) * P1.yCoord) + (2 * (1 - t) * t * P2.yCoord) + ((Math.pow(t, 2) * P3.yCoord)),//Y
+                        (Math.pow(1 - t, 2) * P1.zCoord) + (2 * (1 - t) * t * P2.zCoord) + ((Math.pow(t, 2) * P3.zCoord)),//X
+                        0, 0, 0
+                };
+                nextEstimatedPoint = new RailPointRenderData();
+            } else {
+                tempPoint = nextEstimatedPoint;
+            }
+
+            t2=t+(originalT);
+            nextEstimatedPoint.position = new double[]{
+                    (Math.pow(1 - t2, 2) * P1.xCoord) + (2*(1-t2)*t2*P2.xCoord) + ((Math.pow(t2,2)*P3.xCoord)),//X
+                    (Math.pow(1 - t2, 2) * P1.yCoord) + (2*(1-t2)*t2*P2.yCoord) + ((Math.pow(t2,2)*P3.yCoord)),//Y
+                    (Math.pow(1 - t2, 2) * P1.zCoord) + (2*(1-t2)*t2*P2.zCoord) + ((Math.pow(t2,2)*P3.zCoord)),//X
+                    0, 0, 0
             };
             //define yaw rotation
-            if(t==originalT){
-                points.get(0).position[4] = 180-Math.toDegrees(Math.atan2(tempPoint.position[2] - points.get(0).position[2], tempPoint.position[0] - points.get(0).position[0]));
-                double[] vec = RailUtility.rotatePoint(new double[]{0,0,gague}, (float)points.get(0).position[3], (float)points.get(0).position[4],0);
-                points.get(0).position[0] += vec[0];
-                points.get(0).position[1] += vec[1];
-                points.get(0).position[2] += vec[2];
+            dX= nextEstimatedPoint.position[0] - tempPoint.position[0];
+            dZ = nextEstimatedPoint.position[2] - tempPoint.position[2];
+            //yaw
+            tempPoint.position[4] = 180- Math.toDegrees(Math.atan2(dZ, dX));
+            //pitch
+            tempPoint.position[3] = Math.toDegrees(Math.atan2(Math.sqrt(dZ * dZ + dX * dX), tempPoint.position[1] - nextEstimatedPoint.position[1]) + Math.PI);
 
-            }
-            if (t !=0){
-                double dX = tempPoint.position[0] - points.get(points.size()-1).position[0];
-                double dY = tempPoint.position[1] - points.get(points.size()-1).position[1];
-                double dZ = tempPoint.position[2] - points.get(points.size()-1).position[2];
-                tempPoint.position[4] = 180-Math.toDegrees(Math.atan2(tempPoint.position[2] - points.get(points.size()-1).position[2], tempPoint.position[0] - points.get(points.size()-1).position[0]));
-                tempPoint.position[3] = Math.toDegrees(Math.atan2(Math.sqrt(dZ * dZ + dX * dX), dY) + Math.PI);
-                double[] vec = RailUtility.rotatePoint(new double[]{0,0,gague}, (float)tempPoint.position[3], (float)tempPoint.position[4],0);
-                tempPoint.position[0] += vec[0];
-                tempPoint.position[1] += vec[1];
-                tempPoint.position[2] += vec[2];
-            }
             //TODO: define pitch and roll
             points.add(tempPoint);
             t += originalT;
@@ -272,4 +293,64 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         RailPointRenderData.setRotation(points);
         return points;
     }
+
+
+
+/*
+    public List<RailPointRenderData> getRenderData() {
+        // This is NOT perfect.  It is good enough for now.
+        List<RailPointRenderData> data = new ArrayList<RailPointRenderData>();
+
+        float radius = info.length;
+
+        float angleDelta = (90 / ((float)Math.PI * (radius+1)/2)) * (float)gauge.scale();
+
+        double hack = 0.05;
+
+        double xPos = Math.floor(Math.sin(Math.toRadians(realStartAngle)) * (radius+hack));
+        double zPos = Math.floor(Math.cos(Math.toRadians(realStartAngle)) * (radius+hack));
+
+        // Magic numbers
+        hack = 0.7 * (gauge.value() - Gauge.STANDARD.value()/2);
+
+        if (info.direction == TrackDirection.LEFT) {
+            xPos += 1;
+            zPos += 1;
+        } else {
+            xPos -= 1;
+        }
+        xPos += 1-gauge.scale();
+
+        int counter = 0;
+
+        for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
+            double gagX = Math.sin(Math.toRadians(angle)) * (radius+hack)-xPos;
+            double gagZ = Math.cos(Math.toRadians(angle)) * (radius+hack)-zPos;
+            float switchAngle = 0;
+            float switchOffset = 0;
+            if (track.switchState == SwitchState.STRAIGHT) {
+                if (track.direction == TrackDirection.RIGHT ) {
+                    if (angle > startAngle - 4*angleDelta) {
+                        counter++;
+                        switchOffset = (4-counter) / 30f * -(float)gauge.scale();
+                        switchAngle = angleDelta * info.length / 30;
+                    }
+                } else {
+                    if (angle < endAngle + 4*angleDelta) {
+                        counter++;
+                        switchOffset = (counter) / 30f * (float)gauge.scale();
+                        switchAngle = -angleDelta * info.length / 30;
+                    }
+                }
+            }
+            if (switchAngle == 0) {
+                data.add(new RailPointRenderData(gagX, 0, gagZ, angle+90 + angleDelta/2 + switchAngle));
+            } else {
+                data.add(new RailPointRenderData(gagX, 0, gagZ, angle+90 + angleDelta/2, "RAIL_BASE", "RAIL_RIGHT"));
+                data.add(new RailPointRenderData(gagX + switchOffset, 0, gagZ, angle+90 + angleDelta/2 + switchAngle, "RAIL_LEFT"));
+            }
+        }
+
+        return data;
+    }*/
 }

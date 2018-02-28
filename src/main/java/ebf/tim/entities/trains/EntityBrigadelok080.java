@@ -8,6 +8,7 @@ import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.items.ItemTransport;
 import ebf.tim.models.Bogie;
+import net.minecraft.client.Minecraft;
 import tmt.ModelBase;
 import tmt.Vec3d;
 import ebf.tim.models.trains.Brigadelok_080;
@@ -75,7 +76,7 @@ public class EntityBrigadelok080 extends TrainBase {
     public EntityBrigadelok080(World world){
         super(world);
         //add the textures here
-        if(ClientProxy.useHDSkins){
+        if(TrainsInMotion.proxy.isClient() && ClientProxy.useHDSkins){
             addTransportSkins(new ResourceLocation[]{URIRegistry.HD_MODEL_TRAIN_TEXTURE.getResource("brigadelok_080.png")});
         } else {
             addTransportSkins(new ResourceLocation[]{URIRegistry.MODEL_TRAIN_TEXTURE.getResource("brigadelok_080.png")});

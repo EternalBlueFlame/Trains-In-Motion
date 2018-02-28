@@ -20,23 +20,21 @@ public class RailPointRenderData {
         for (int s =0; s< points.size()-1; s++) {
 
             double x = Math.abs(points.get(s).position[0] - points.get(s+1).position[0]);
+            double y = Math.abs(points.get(s).position[1] - points.get(s+1).position[1]);
             double z = Math.abs(points.get(s).position[2] - points.get(s+1).position[2]);
 
-            float yaw = (float)(points.get(s).position[4] - points.get(s+1).position[4]);
-
-                float distance = (16f)* (float)(x+z);
+                float distance = (16f)* (float)((Math.abs(x)+Math.abs(z) + Math.abs(y)));
                 if (distance == 0f){
                     continue;
                 }
-                float zOffset=yaw!=0?(yaw*0.0465f)*distance:0;
 
-                points.get(s).segment.railTop[1] = new Vec3f(distance, 0, (zOffset));
-                points.get(s).segment.railTop[5] = new Vec3f(distance, 0, (zOffset));
+                points.get(s).segment.railTop[1] = new Vec3f(distance, 0, 0);
+                points.get(s).segment.railTop[5] = new Vec3f(distance, 0, 0);
 
 
                 //vec2 = RailUtility.rotatePoint(new double[]{0,0,1}, pitch, yaw,0);
-                points.get(s).segment.railTop[6] = new Vec3f(distance, 0, (-zOffset));
-                points.get(s).segment.railTop[2] = new Vec3f(distance, 0, (-zOffset));
+                points.get(s).segment.railTop[6] = new Vec3f(distance, 0, 0);
+                points.get(s).segment.railTop[2] = new Vec3f(distance, 0, 0);
 
                 points.get(s).segment.regenModel();
         }

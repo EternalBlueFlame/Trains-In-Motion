@@ -183,10 +183,10 @@ public class ParticleFX {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         Tessellator tessellator = Tessellator.getInstance();
         tessellator.startDrawing(GL11.GL_QUADS);
-        //set the color with the tint.
-        GL11.glColor3f((((entity.color >> 16 & 0xFF)/255.0F) - entity.colorTint),
-                (((entity.color >> 8 & 0xFF)/255.0F) - entity.colorTint),
-                (((entity.color & 0xFF)/255.0F) - entity.colorTint));
+        //set the color with the tint.   * 0.00392156863 is the same as /255, but multiplication is more efficient than division.
+        GL11.glColor3f((((entity.color >> 16 & 0xFF)* 0.00392156863f) - entity.colorTint),
+                (((entity.color >> 8 & 0xFF)* 0.00392156863f) - entity.colorTint),
+                (((entity.color & 0xFF)* 0.00392156863f) - entity.colorTint));
         //set the position
         GL11.glTranslated(posX - entity.posX, posY - entity.posY, posZ - entity.posZ);
         //now actually render the sides.

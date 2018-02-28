@@ -22,12 +22,14 @@ import ebf.tim.registry.TransportRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -35,6 +37,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
+import tmt.Tessellator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +49,9 @@ import java.util.List;
  */
 public class ClientProxy extends CommonProxy {
     public static List<GenericRailTransport> carts = new ArrayList<GenericRailTransport>();
+
+    public static double[][] devSplineModification = {{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
+    public static int devSplineCurrentPoint=0;
 
     /*
      * <h3>keybinds</h3>
@@ -73,6 +79,17 @@ public class ClientProxy extends CommonProxy {
     /**the keybind for opening the inventory*/
     public static KeyBinding KeyInventory = new KeyBinding("Open Train/rollingstock GUI",  Keyboard.KEY_I, "Trains in Motion");
 
+    public static KeyBinding raildevtoolUp = new KeyBinding("Move Point Z+", Keyboard.KEY_UP, "Trains in Motion Dev");
+    public static KeyBinding raildevtoolDown = new KeyBinding("Move Point Z-", Keyboard.KEY_DOWN, "Trains in Motion Dev");
+    public static KeyBinding raildevtoolLeft = new KeyBinding("Move Point X+", Keyboard.KEY_LEFT, "Trains in Motion Dev");
+    public static KeyBinding raildevtoolRight = new KeyBinding("Move Point X-", Keyboard.KEY_RIGHT, "Trains in Motion Dev");
+    public static KeyBinding raildevtoolRaise = new KeyBinding("Move Point Y+", Keyboard.KEY_PRIOR, "Trains in Motion Dev");
+    public static KeyBinding raildevtoolLower = new KeyBinding("Move Point Y-", Keyboard.KEY_NEXT, "Trains in Motion Dev");
+
+    public static KeyBinding raildevtoolNextPoint = new KeyBinding("Next Point", Keyboard.KEY_ADD, "Trains in Motion Dev");
+    public static KeyBinding raildevtoolLastPoint = new KeyBinding("Previous Point", Keyboard.KEY_SUBTRACT, "Trains in Motion Dev");
+
+
     /**
      * <h2> Client GUI Redirect </h2>
      *
@@ -97,6 +114,10 @@ public class ClientProxy extends CommonProxy {
         }
         return null;
     }
+
+    @Override
+    public boolean isClient(){return true;}
+
 
     /**
      * <h2>Load config</h2>
@@ -171,6 +192,18 @@ public class ClientProxy extends CommonProxy {
         //keybinds
         ClientRegistry.registerKeyBinding(KeyLamp);
         ClientRegistry.registerKeyBinding(KeyInventory);
+
+        ClientRegistry.registerKeyBinding(raildevtoolUp);
+        ClientRegistry.registerKeyBinding(raildevtoolDown);
+        ClientRegistry.registerKeyBinding(raildevtoolLeft);
+        ClientRegistry.registerKeyBinding(raildevtoolRight);
+        ClientRegistry.registerKeyBinding(raildevtoolRaise);
+        ClientRegistry.registerKeyBinding(raildevtoolLower);
+        ClientRegistry.registerKeyBinding(raildevtoolNextPoint);
+        ClientRegistry.registerKeyBinding(raildevtoolLastPoint);
+
+
+
 
         //register the transport HUD.
         HUDTrain hud = new HUDTrain();

@@ -1581,19 +1581,24 @@ public class ModelRendererTurbo extends ModelRenderer {
     }
     
     public void render(){
-    	render(0.0625F, rotorder);
+    	render(0.0625F, rotorder, true);
     }
 
     //Eternal: why was this removed....?
     public void render(float scale){
-        render(scale, rotorder);
+        render(scale, rotorder, true);
     }
-    
+
+    //Eternal: why was this removed....?
+    public void renderNoTexture(float scale){
+        render(scale, rotorder, false);
+    }
+
     /**
      * Renders the shape.
      * @param scale the scale of the shape. Usually is 0.0625.
      */
-    public void render(float scale, boolean bool){
+    public void render(float scale, boolean flipAxis, boolean isTextured){
         if(field_1402_i){
             return;
         }
@@ -1601,12 +1606,12 @@ public class ModelRendererTurbo extends ModelRenderer {
             return;
         }
         if(!compiled || forcedRecompile){
-            compileDisplayList(scale);
+            compileDisplayList(scale, isTextured);
         }
         if(rotateAngleX != 0.0F || rotateAngleY != 0.0F || rotateAngleZ != 0.0F){
             GL11.glPushMatrix();
             GL11.glTranslatef(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
-            if(bool){
+            if(flipAxis){
                 if(rotateAngleZ != 0.0F){
                     GL11.glRotatef(rotateAngleZ * 57.29578F, 0.0F, 0.0F, 1.0F);
                 }
@@ -1627,6 +1632,7 @@ public class ModelRendererTurbo extends ModelRenderer {
             }
             callDisplayList();
             if(childModels != null){
+                System.out.println("sware to drunk im not god theres actually" + childModels.size());
                 for(Object child : childModels){
                     ((ModelRenderer)child).render(scale);
                 }
@@ -1661,7 +1667,7 @@ public class ModelRendererTurbo extends ModelRenderer {
             return;
         }
         if(!compiled){
-            compileDisplayList(f);
+            compileDisplayList(f, false);
         }
         GL11.glPushMatrix();
         GL11.glTranslatef(rotationPointX * f, rotationPointY * f, rotationPointZ * f);
@@ -1686,7 +1692,7 @@ public class ModelRendererTurbo extends ModelRenderer {
             return;
         }
         if(!compiled || forcedRecompile){
-            compileDisplayList(f);
+            compileDisplayList(f, false);
         }
         if(rotateAngleX != 0.0F || rotateAngleY != 0.0F || rotateAngleZ != 0.0F){
             GL11.glTranslatef(rotationPointX * f, rotationPointY * f, rotationPointZ * f);
@@ -1724,9 +1730,9 @@ public class ModelRendererTurbo extends ModelRenderer {
     	}
     }
 
-    private void compileDisplayList(float scale){
+    private void compileDisplayList(float scale, boolean isTextured){
     	if(useLegacyCompiler){
-    		compileLegacyDisplayList(scale);
+    		compileLegacyDisplayList(scale, isTextured);
     	}
     	else{    		
     		Collection<TextureGroup> textures = textureGroup.values();
@@ -1738,7 +1744,7 @@ public class ModelRendererTurbo extends ModelRenderer {
     			Tessellator tessellator = Tessellator.getInstance();
     			TextureGroup usedGroup = itr.next();
     			for(int j = 0; j < usedGroup.poly.size(); j++){
-    				usedGroup.poly.get(j).draw(tessellator, scale);
+    				usedGroup.poly.get(j).draw(tessellator, scale, isTextured);
     			}
     			GL11.glEndList();
     		}
@@ -1746,12 +1752,12 @@ public class ModelRendererTurbo extends ModelRenderer {
         compiled = true;
     }
     
-    private void compileLegacyDisplayList(float scale){
+    private void compileLegacyDisplayList(float scale, boolean isTextured){
         displayList = GLAllocation.generateDisplayLists(1);
         GL11.glNewList(displayList, GL11.GL_COMPILE);
         Tessellator tessellator = Tessellator.getInstance();
         for(TexturedPolygon poly : faces){
-            poly.draw(tessellator, scale);
+            poly.draw(tessellator, scale, isTextured);
         }
         GL11.glEndList();
     }

@@ -10,6 +10,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
+import tmt.Vec3d;
 import zoranodensha.api.structures.tracks.ITrackBase;
 
 import java.util.*;
@@ -46,7 +47,6 @@ public class RailUtility {
      * courtesy of Zora No Densha.
      * There are version for doubles and floats.
      */
-    @Deprecated//only necessary for animations.
     public static double[] rotatePoint(double[] f, float pitch, float yaw, float roll) {
         double cos;
         double sin;
@@ -82,19 +82,54 @@ public class RailUtility {
         return xyz;
     }
 
-    public static double[] rotateDistance(double distance, float pitch, float yaw) {
-        double[] xyz = new double[]{distance, 0,0};
+    public static Vec3d rotatePoint(Vec3d f, float pitch, float yaw, float roll) {
+        double cos;
+        double sin;
+        Vec3d xyz = f;
         //rotate pitch
         if (pitch != 0.0F) {
             pitch *= radianF;
-            xyz[0] = distance * Math.cos(pitch);
-            xyz[1] = distance * Math.sin(pitch);
+            cos = Math.cos(pitch);
+            sin = Math.sin(pitch);
+
+            xyz.xCoord = (f.yCoord * sin) + (f.xCoord * cos);
+            xyz.yCoord = (f.yCoord * cos) - (f.xCoord * sin);
         }
         //rotate yaw
         if (yaw != 0.0F) {
             yaw *= radianF;
-            xyz[0] = (distance * MathHelper.cos(yaw));
-            xyz[2] = (distance * MathHelper.sin(yaw));
+            cos = MathHelper.cos(yaw);
+            sin = MathHelper.sin(yaw);
+
+            xyz.xCoord = (f.xCoord * cos) - (f.zCoord * sin);
+            xyz.zCoord = (f.xCoord * sin) + (f.zCoord * cos);
+        }
+        //rotate roll
+        if (roll != 0.0F) {
+            roll *=  radianF;
+            cos = MathHelper.cos(roll);
+            sin = MathHelper.sin(roll);
+
+            xyz.yCoord = (f.zCoord * cos) - (f.yCoord * sin);
+            xyz.zCoord = (f.zCoord * sin) + (f.yCoord * cos);
+        }
+
+        return xyz;
+    }
+
+    public static Vec3d rotateDistance(double distance, float pitch, float yaw) {
+        Vec3d xyz = new Vec3d(distance, 0,0);
+        //rotate pitch
+        if (pitch != 0.0F) {
+            pitch *= radianF;
+            xyz.xCoord = distance * Math.cos(pitch);
+            xyz.yCoord = distance * Math.sin(pitch);
+        }
+        //rotate yaw
+        if (yaw != 0.0F) {
+            yaw *= radianF;
+            xyz.xCoord = (distance * MathHelper.cos(yaw));
+            xyz.zCoord = (distance * MathHelper.sin(yaw));
         }
         return xyz;
     }

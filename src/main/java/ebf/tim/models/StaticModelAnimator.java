@@ -65,6 +65,9 @@ public class StaticModelAnimator {
      * @param rotationZ the rotation degree for the animation.
      */
     public void Animate(float rotationZ, double[] pistonOffset){
+        if(modelRefrence ==null || modelRefrence.boxName ==null){
+            return;
+        }
         switch (modelRefrence.boxName){
             //animate wheels
             case tagSimpleRotate:{

@@ -121,6 +121,7 @@ public class GUITransport extends GuiContainer {
      * this draws the upper layer of the GUI, and handles things like the tooltips.
      * Most of this is just checking if the cursor position is in the correct place for displaying tooltips.
      * TODO: maps are disabled
+     * TODO: maps are disabled
      */
     @Override
     public void drawScreen(int mouseX, int mouseY, float par3){
@@ -178,7 +179,7 @@ public class GUITransport extends GuiContainer {
         yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
         if (!(transport instanceof EntityTrainCore) && transport.getInventorySize().getRow()<6) {
             //generic to all
-            if (player.getEntityId() == transport.getOwnerID()) {
+            if (player.getDisplayName().equals(transport.getOwnerName())) {
                 this.buttonList.add(new GUIButton(13, guiLeft + 8, guiTop + 174, 18, 18, "unlink"));
                 this.buttonList.add(new GUIButton(12, guiLeft + 62, guiTop + 174, 18, 18, "dropkey"));
             }
@@ -187,7 +188,7 @@ public class GUITransport extends GuiContainer {
             this.buttonList.add(new GUIButton(4, guiLeft + 80, guiTop + 174, 18, 18, "brake"));
         } else {
             //generic to all
-            if (player.getEntityId() == transport.getOwnerID()) {
+            if (player.getDisplayName().equals(transport.getOwnerName())) {
                 this.buttonList.add(new GUIButton(13, guiLeft +112, guiTop + 166, 18, 18, "unlink"));
                 this.buttonList.add(new GUIButton(12, guiLeft + 166, guiTop + 166, 18, 18, "dropkey"));
             }

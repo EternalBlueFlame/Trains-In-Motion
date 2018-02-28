@@ -77,7 +77,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**the id of the rollingstock linked to the back*/
     public Integer backLinkedID = null;
     /**the ID of the owner*/
-    public int ownerID =-1;
+    public String ownerName ="";
     /**the destination for routing*/
     public String destination ="";
     /**the key item for the entity*/
@@ -121,6 +121,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     float rotationRoll;
     /***/
     private List<ResourceLocation> transportSkins = new ArrayList<ResourceLocation>();
+    public int forceBackupTimer =0;
 
     public boolean hasTrain=false;
 
@@ -194,7 +195,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this.dataWatcher.addObject(17, 0);//booleans
         //18 is used by EntityTrainCore
         //19 is used by the core minecart
-        this.dataWatcher.addObject(23, 0);//owner
+        this.dataWatcher.addObject(23, "");//owner
         this.dataWatcher.addObject(20, 0);//tankA
         this.dataWatcher.addObject(21, 0);//front linked transport
         this.dataWatcher.addObject(22, 0);//back linked transport
@@ -543,6 +544,15 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      */
     @Override
     public void onUpdate() {
+        if (!worldObj.isRemote) {
+            if (forceBackupTimer > 0) {
+                forceBackupTimer--;
+            } else if (forceBackupTimer == 0) {
+                ServerLogger.writeWagonToFolder(this);
+                forceBackupTimer--;
+            }
+        }
+
         //if the cart has fallen out of the map, destroy it.
         if (posY < -64.0D & isDead){
             worldObj.removeEntity(this);
@@ -629,10 +639,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
             @Nullable
             Entity player = CommonProxy.getEntityFromUuid(owner);
-            if (player!= null) {
-                ownerID = player.getEntityId();
-            } else {
-                ownerID = -1;
+            if (player instanceof EntityPlayer) {
+                ownerName = ((EntityPlayer) player).getDisplayName();
             }
             //sync the linked transports with client, and on server, easier to use an ID than a UUID.
             Entity linkedTransport = CommonProxy.getEntityFromUuid(frontLinkedTransport);
@@ -656,7 +664,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 if (!getType().isTrain()) {
                     dataWatcher.updateObject(14, fluidTank == null ? -1 : fluidTank.getFluidID());
                 }
-                this.dataWatcher.updateObject(23, ownerID);
+                this.dataWatcher.updateObject(23, ownerName);
                 this.dataWatcher.updateObject(17, bools.toInt());
                 this.dataWatcher.updateObject(21, frontLinkedID!=null?frontLinkedID:-1);
                 this.dataWatcher.updateObject(22, backLinkedID!=null?backLinkedID:-1);
@@ -916,7 +924,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         }
 
         //be sure operators and owners can do whatever
-        if ((player.capabilities.isCreativeMode && player.canCommandSenderUseCommand(2, "")) || ownerID == player.getEntityId()) {
+        if ((player.capabilities.isCreativeMode && player.canCommandSenderUseCommand(2, "")) || ownerName.equals(player.getDisplayName())) {
             return true;
         }
 
@@ -952,8 +960,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
 
     public GameProfile getOwner(){
-        if (ownerID != -1 && worldObj.getEntityByID(ownerID) instanceof EntityPlayer){
-            return ((EntityPlayer) worldObj.getEntityByID(ownerID)).getGameProfile();
+        if (ownerName != null && !ownerName.equals("") && worldObj.getPlayerEntityByName(ownerName) !=null){
+            return (worldObj.getPlayerEntityByName(ownerName)).getGameProfile();
         }
         return null;
     }
@@ -1018,7 +1026,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**defines the capacity of the RF storage, intended for electric rollingstock that store power for the train.*/
     public int getRFCapacity(){return 0;}
     /**defines the ID of the owner*/
-    public int getOwnerID(){return this.dataWatcher.getWatchableObjectInt(23);}
+    public String getOwnerName(){return ownerName.equals("")?this.dataWatcher.getWatchableObjectString(23):ownerName;}
     /**this function allows individual trains and rollingstock to implement custom fuel consumption and management
      * @see FuelHandler#manageSteam(EntityTrainCore) */
     public void manageFuel(){}
@@ -1153,7 +1161,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      */
     @Override
     public boolean isItemValidForSlot(int slot, ItemStack itemStack) {
-        System.out.println("slot: " + slot + " : " + (itemStack!=null?itemStack.getUnlocalizedName():"null"));
         if (itemStack == null){return true;}
         //compensate for specific rollingstock
         switch (getType()) {
@@ -1236,13 +1243,17 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         return inventory==null || inventory.size()<p_70304_1_?null:inventory.get(p_70304_1_).getStack();
     }
     @Override
-    public void markDirty() {}
+    public void markDirty() {forceBackupTimer = 30;}
     /**called when the inventory GUI is opened*/
     @Override
     public void openInventory() {}
     /**called when the inventory GUI is closed*/
     @Override
-    public void closeInventory() {}
+    public void closeInventory() {
+        if (!worldObj.isRemote){
+            ServerLogger.writeWagonToFolder(this);
+        }
+    }
 
     public void dropAllItems() {
         if (inventory != null) {

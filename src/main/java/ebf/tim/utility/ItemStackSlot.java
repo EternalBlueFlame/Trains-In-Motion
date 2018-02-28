@@ -146,9 +146,7 @@ public class ItemStackSlot extends Slot {
      */
     @Override
     public void onSlotChanged() {
-        if (inventory instanceof TileEntity){
-            this.inventory.markDirty();
-        }
+        inventory.markDirty();
     }
 
     /**
