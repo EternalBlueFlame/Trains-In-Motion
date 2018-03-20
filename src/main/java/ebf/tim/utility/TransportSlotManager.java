@@ -135,7 +135,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     /**modified from 1.7.10 version to check if the item is valid for the slot*/
     @Override
     protected boolean mergeItemStack(ItemStack itemStack, int startIndex, int endIndex, boolean reverseDirection) {
-        System.out.println("something is using merge stack, this is bad");
+        DebugUtil.println("something is using merge stack, this is bad");
         int k = reverseDirection? endIndex-1:startIndex;
 
         Slot slot;

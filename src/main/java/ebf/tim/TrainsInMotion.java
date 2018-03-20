@@ -154,7 +154,8 @@ public class TrainsInMotion {
         TrainsInMotion.keyChannel.registerMessage(PacketKeyPress.Handler.class, PacketKeyPress.class, 1, Side.SERVER);
         TrainsInMotion.keyChannel.registerMessage(PacketMount.Handler.class, PacketMount.class, 2, Side.SERVER);
         TrainsInMotion.keyChannel.registerMessage(PacketRemove.Handler.class, PacketRemove.class, 3, Side.SERVER);
-        TrainsInMotion.keyChannel.registerMessage(ItemAdminBook.PacketAdminBook.Handler.class, ItemAdminBook.PacketAdminBook.class, 4, Side.SERVER);
+        TrainsInMotion.keyChannel.registerMessage(ItemAdminBook.PacketAdminBook.Handler.class, ItemAdminBook.PacketAdminBook.class, 4, Side.CLIENT);
+        TrainsInMotion.keyChannel.registerMessage(ItemAdminBook.PacketAdminBookClient.Handler.class, ItemAdminBook.PacketAdminBookClient.class, 5, Side.SERVER);
 
 
         //register the worldgen

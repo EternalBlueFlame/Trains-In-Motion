@@ -57,7 +57,6 @@ public class ItemStackSlot extends Slot {
 
     public ItemStack mergeStack(ItemStack itemStack){
         if (isItemValid(itemStack)) {
-            System.out.println("was valid for " + getSlotID() + ":" + getSlotIndex());
             if (!getHasStack()) {
                 return setSlotContents(itemStack) ? null : itemStack;
             } else {

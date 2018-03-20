@@ -12,25 +12,45 @@ import org.apache.logging.log4j.Logger;
  */
 public class DebugUtil {
 	
-	private static final Logger logger = LogManager.getLogger("TiM-Debug");
-	
-	private static boolean dev, ck;
+	private static Boolean dev;
 	
 	public static boolean dev(){
-		if(!ck){
-			ck = true;
+		if(dev == null){
 			dev = (Boolean)Launch.blackboard.get("fml.deobfuscatedEnvironment");
 		}
 		return dev;
 	}
-	
+
 	/**
-	 * Generic logging method;
+	 * Replicated method of System.out.println that supports an array of data and only prints in a dev environment.
+	 * @param o
+	 */
+	public static void println(Object... o){
+		if(dev()){
+			System.out.println("------------------TiM Debug------------------");
+			for (Object obj : o){
+				System.out.println(obj);
+			}
+			System.out.println("------------------TiM Debug------------------");
+		}
+	}
+	public static void println(Object o){
+		if(dev()){
+			System.out.println("------------------TiM Debug------------------");
+			System.out.println(o);
+			System.out.println("------------------TiM Debug------------------");
+		}
+	}
+
+	/**
+	 * Generic logging method, meant for using an actual minecraft logger;
 	 * @param obj the object to be logged or string
 	 */
+	@Deprecated
 	public static void log(Object obj){
 		if(dev()){
-			logger.info(String.valueOf(obj));
+			//logger.info(String.valueOf(obj));
+			System.out.println(obj);
 		}
 	}
 	
