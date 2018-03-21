@@ -155,7 +155,7 @@ public class ServerLogger {
     Reading
     --------------------------------------------------
      */
-    
+
     //parses the document for itemstacks
     public static List<ItemStack> getItems(String doc){
         try {

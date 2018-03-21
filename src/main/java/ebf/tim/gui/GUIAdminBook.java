@@ -129,6 +129,10 @@ public class GUIAdminBook extends GuiScreen {
                 TrainsInMotion.keyChannel.sendToServer(new ItemAdminBook.PacketAdminBookClient( "0:"+list[0].substring(1,list[0].length()), Minecraft.getMinecraft().thePlayer.getEntityId()));//tell server to drop items
                 break;
             }
+            case 0:{
+                TrainsInMotion.keyChannel.sendToServer(new ItemAdminBook.PacketAdminBookClient( "1:"+list[0].substring(1), Minecraft.getMinecraft().thePlayer.getEntityId()));//tell server to drop items
+                break;
+            }
             case 1:{
                 if (!isTrainPage){
                     page--;
@@ -144,7 +148,8 @@ public class GUIAdminBook extends GuiScreen {
                 page++;
                 buttonList = new ArrayList();
                 initGui();
-                break;}
+                break;
+            }
             default:{
                 TrainsInMotion.keyChannel.sendToServer(new ItemAdminBook.PacketAdminBookClient( list[button.id-3], Minecraft.getMinecraft().thePlayer.getEntityId()));//tell server to send a new gui
                 break;
@@ -160,18 +165,24 @@ public class GUIAdminBook extends GuiScreen {
         this.guiTop = (this.height - 166) / 2;
 
         if(!isTrainPage) {
-            for (int i = 6 * page; i < Math.min(list.length, 8); i++) {//only show 6 entries per page
-                this.buttonList.add(new GuiButton((i*page)+i+3, guiLeft-70, guiTop+20 +(i*18), 150, 20, list[(page*i)+i].equals("")?"Back":list[(page*i)+i]));
+            int index=0;
+            for (int i = 6 * page; i < 6+(6*page) && i<list.length-1; i++) {//only show 6 entries per page
+                this.buttonList.add(new GuiButton(i+3, guiLeft-70, guiTop+20 +(index*18), 150, 20, list[i].equals("")?"Back":list[i]));
+                index++;
             }
-            if(page !=0 && (page*6<list.length-1 || page*54<inventory.getSizeInventory())){
+            if(list.length-6-(page*6)>6){
                 //draw next
-                this.buttonList.add(new GuiButton(2, guiLeft-20, guiTop+80 , 150, 20, "next page"));
+                this.buttonList.add(new GuiButton(2, guiLeft-70, guiTop+140 , 70, 20, "next page"));
+            }
+            if (page>0){
+                this.buttonList.add(new GuiButton(1, guiLeft+10, guiTop+140 , 70, 20, "back"));
             }
         } else {
             try {
                 //draw back
                 this.buttonList.add(new GuiButton(-1,guiLeft+80,guiTop+140,120,20,"clone inventory"));
-                this.buttonList.add(new GuiButton(1, guiLeft+20, guiTop+140 , 80, 20, "back"));
+                this.buttonList.add(new GuiButton(0,guiLeft+10,guiTop+140,70,20,"delete entry"));
+                this.buttonList.add(new GuiButton(1, guiLeft-70, guiTop+140 , 70, 20, "back"));
                 List<ItemStack> items = ServerLogger.getItems(list[10]);
                 for(int i=0; i<items.size(); i++) {
                     inventory.setInventorySlotContents(i, items.get(i));

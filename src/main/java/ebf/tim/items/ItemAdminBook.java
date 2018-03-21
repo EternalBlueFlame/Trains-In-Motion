@@ -148,9 +148,13 @@ public class ItemAdminBook extends Item{
             @Override
             public IMessage onMessage(PacketAdminBookClient message, MessageContext context) {
                 int event=0;
-                if(message.id.substring(0,2).equals("0:")){
+                if(message.id.length()>2 && message.id.substring(0,2).equals("0:")){
                     message.id = message.id.substring(2, message.id.length());
                     event=1;
+                }
+                if(message.id.length()>2 && message.id.substring(0,2).equals("1:")){
+                    message.id = message.id.substring(2, message.id.length());
+                    event=2;
                 }
                 DebugUtil.println(message.id);
                 if (new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "\\traincraft\\" + message.id).exists()) {
@@ -205,7 +209,10 @@ public class ItemAdminBook extends Item{
                                         }
                                     }
                                 }
-
+                            } else if (event==2){
+                                if (new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "\\traincraft\\" + message.id).exists()) {
+                                    new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "\\traincraft\\" + message.id).delete();
+                                }
                             }
                         } catch (Exception e){}
                     } else {
