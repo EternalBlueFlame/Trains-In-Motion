@@ -3,6 +3,7 @@ package ebf.tim.blocks.rails;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.models.rails.*;
+import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.CommonProxy;
 import net.minecraft.block.Block;
 import tmt.Vec3d;
@@ -16,6 +17,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import tmt.Vec3f;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,9 +55,9 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public float getRailMaxSpeed(World world, EntityMinecart cart, int y, int x, int z){
-        if (world.getTileEntity(x,y,z) instanceof RailTileEntity){
-            return ((RailTileEntity) world.getTileEntity(x,y,z)).getRailSpeed();
-        }
+        //if (world.getTileEntity(x,y,z) instanceof RailTileEntity){
+        //    return ((RailTileEntity) world.getTileEntity(x,y,z)).getRailSpeed();
+        //}todo: do this in the rail, the tile entity should only be an intermediate for the block to save
         return 0.4f;
     }
 
@@ -67,7 +69,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public int getBasicRailMetadata(IBlockAccess world, EntityMinecart cart, int x, int y, int z) {
-        return RailVanillaShapes.processRailMeta(super.getBasicRailMetadata(world, cart, x, y, z), cart,x,y,z);
+        return world.getBlockMetadata(x,y,z);//RailVanillaShapes.processRailMeta(super.getBasicRailMetadata(world, cart, x, y, z), cart,x,y,z);
     }
 
 
@@ -81,90 +83,8 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     @Override
     public void updateTick(World worldObj, int xCoord, int yCoord, int zCoord, Random p_149674_5_) {
         super.updateTick(worldObj, xCoord,yCoord,zCoord,p_149674_5_);
-        hasTicked = !hasTicked;
-        if (hasTicked || !(worldObj.getTileEntity(xCoord,yCoord,zCoord) instanceof RailTileEntity)){
-            return;
-        }
-        Vec3d[][] baseShape= new Vec3d[3][];
-        switch (worldObj.getBlockMetadata(xCoord, yCoord, zCoord)){
-            //Z straight
-            case 0: {
-                baseShape[0] = RailVanillaShapes.vanillaZStraight(worldObj, xCoord,yCoord,zCoord,0);
-                baseShape[1] = RailVanillaShapes.vanillaZStraight(worldObj, xCoord,yCoord,zCoord,0.3125);
-                baseShape[2] = RailVanillaShapes.vanillaZStraight(worldObj, xCoord,yCoord,zCoord,-0.3125);
-                break;
-            }
-            //X straight
-            case 1: {
-                baseShape[0] = RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord, 0);
-                baseShape[1] = RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord, 0.3125);
-                baseShape[2] = RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord, -0.3125);
-                break;
-            }
-
-            //curves
-            case 9: {
-                baseShape[0] = RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord, 0);
-                baseShape[1] = RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord, 0.3125);
-                baseShape[2] = RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord, -0.3125);
-                break;
-            }
-            case 8: {
-                baseShape[0] = RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord, 0);
-                baseShape[1] = RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord, 0.3125);
-                baseShape[2] = RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord, -0.3125);
-                break;
-            }
-            case 7: {
-                baseShape[0] = RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord, 0);
-                baseShape[1] = RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord, 0.3125);
-                baseShape[2] = RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord, -0.3125);
-                break;
-            }
-            case 6: {
-                baseShape[0] = RailVanillaShapes.vanillaCurve6(worldObj, xCoord, yCoord, zCoord, 0);
-                baseShape[1] = RailVanillaShapes.vanillaCurve6(worldObj, xCoord, yCoord, zCoord, 0.3125);
-                baseShape[2] = RailVanillaShapes.vanillaCurve6(worldObj, xCoord, yCoord, zCoord, -0.3125);
-                break;
-            }
-            //Z slopes
-            case 5 :{
-                baseShape[0] = RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord, 0);
-                baseShape[1] = RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord, 0.3125);
-                baseShape[2] = RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord, -0.3125);
-                break;
-            }
-            case 4 :{
-                baseShape[0] = RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord, 0);
-                baseShape[1] = RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord, 0.3125);
-                baseShape[2] = RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord, -0.3125);
-                break;
-            }
-            //X slopes
-            case 2 :{
-                baseShape[0] = RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord, 0);
-                baseShape[1] = RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord, 0.3125);
-                baseShape[2] = RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord, -0.3125);
-                break;
-            }
-            case 3 :{
-                baseShape[0] = RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord, 0);
-                baseShape[1] = RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord, 0.3125);
-                baseShape[2] = RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord, -0.3125);
-                break;
-            }
-        }
-
-        //set the path
-        ((RailTileEntity) worldObj.getTileEntity(xCoord,yCoord,zCoord)).
-                setPath(quadCurveAtPoint(1, baseShape[0][0], baseShape[0][1], baseShape[0][2], baseShape[0][3]));
-
-
-        ((RailTileEntity) worldObj.getTileEntity(xCoord,yCoord,zCoord)).
-                setRenderShape(quadCurveAtPoint(1, baseShape[1][0], baseShape[1][1], baseShape[1][2]), quadCurveAtPoint(1, baseShape[2][0], baseShape[2][1], baseShape[2][2]));
-
-
     }
+
 
 
 
@@ -173,6 +93,20 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         super.onNeighborBlockChange(worldObj, x, y, z, b);
     }
 
+    //stuff from block container to make tile entity more reliable.
+    @Override
+    public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_)
+    {
+        super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
+        p_149749_1_.removeTileEntity(p_149749_2_, p_149749_3_, p_149749_4_);
+    }
+    @Override
+    public boolean onBlockEventReceived(World p_149696_1_, int p_149696_2_, int p_149696_3_, int p_149696_4_, int p_149696_5_, int p_149696_6_)
+    {
+        super.onBlockEventReceived(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_, p_149696_5_, p_149696_6_);
+        TileEntity tileentity = p_149696_1_.getTileEntity(p_149696_2_, p_149696_3_, p_149696_4_);
+        return tileentity != null && tileentity.receiveClientEvent(p_149696_5_, p_149696_6_);
+    }
 
 
 
@@ -197,160 +131,149 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     /**
      * generated a 3 point bezier curve using De Casteljau's algorithm on each axis.
-     * @param t number of blocks in length
      * @param P1 first point
      * @param P2 second point (mostly modifies first)
      * @param P3 third point (mostly modifies last)
      * @param P4 end point
      * @return the list of rail points to define positional data.
      */
-    protected static List<RailPointRenderData> quadCurveAtPoint(double t, Vec3d P1, Vec3d P2, Vec3d P3, Vec3d P4){
-        if (t ==0){
-            throw new ReportedException(CrashReport.makeCrashReport(new Throwable(), "Why did you make a rail with a length of 0 blocks???"));
-        }
-        final double originalT =(1F/24F)/t;
-        t=0;
-        List<RailPointRenderData> points = new ArrayList<RailPointRenderData>();
-        while(t<=1.0d) {
-            RailPointRenderData tempPoint = new RailPointRenderData();
+    @Deprecated
+    protected static List<ModelRailSegment> quadGenModel(Vec3f P1, Vec3f P2, Vec3f P3, Vec3f P4){
+        double dX=P4.xCoord - P1.xCoord;
+        double dZ=P4.zCoord - P1.zCoord;
+        double originalT =(Math.sqrt((dX*dX) + (dZ*dZ)))/ ClientProxy.railLoD;
+        double t=originalT;
+        List<float[]> points = new ArrayList<>();
+        points.add(new float[]{P1.xCoord,P1.yCoord,P1.zCoord});
+        while(t<=1+originalT) {
             //define position
-            tempPoint.position = new double[]{
-                    (Math.pow(1 - t, 3) * P1.xCoord) + (3*Math.pow(1-t,2)*t*P2.xCoord) + (3*(1-t)*Math.pow(t,2)*P3.xCoord) + (Math.pow(t,3)*P4.xCoord),//X
-                    (Math.pow(1 - t, 3) * P1.yCoord) + (3*Math.pow(1-t,2)*t*P2.yCoord) + (3*(1-t)*Math.pow(t,2)*P3.yCoord) + (Math.pow(t,3)*P4.yCoord),//Y
-                    (Math.pow(1 - t, 3) * P1.zCoord) + (3*Math.pow(1-t,2)*t*P2.zCoord) + (3*(1-t)*Math.pow(t,2)*P3.zCoord) + (Math.pow(t,3)*P4.zCoord),//X
-                    0,0,0
-            };
-            //define yaw rotation
-            if(t==originalT){
-                double dX= tempPoint.position[0] - points.get(0).position[0];
-                double dZ = tempPoint.position[2] - points.get(0).position[2];
-                points.get(0).position[4] = 180- Math.toDegrees(Math.atan2(dZ, dX));
-                points.get(0).position[3] = Math.toDegrees(Math.atan2(Math.sqrt(dZ * dZ + dX * dX), tempPoint.position[1] - points.get(0).position[1]) + Math.PI);
-            }
-            if (t !=0){
-                double dX = tempPoint.position[0] - points.get(points.size()-1).position[0];
-                double dZ = tempPoint.position[2] - points.get(points.size()-1).position[2];
-                tempPoint.position[4] = 180- Math.toDegrees(Math.atan2(dZ, dX));
-                tempPoint.position[3] = Math.toDegrees(Math.atan2(Math.sqrt(dZ * dZ + dX * dX), tempPoint.position[1] - points.get(points.size()-1).position[1]) + Math.PI);
-                if(tempPoint.position[4] - points.get(points.size()-1).position[4]>180){
-                    tempPoint.position[4]-=360;
-                }
-            }
-            //TODO: define pitch and roll
-            points.add(tempPoint);
+            points.add(new float[]{
+                    (float) ((Math.pow(1 - t, 3) * P1.xCoord) + (3*Math.pow(1-t,2)*t*P2.xCoord) + (3*(1-t)*Math.pow(t,2)*P3.xCoord) + (Math.pow(t,3)*P4.xCoord)),//X
+                    (float) ((Math.pow(1 - t, 3) * P1.yCoord) + (3*Math.pow(1-t,2)*t*P2.yCoord) + (3*(1-t)*Math.pow(t,2)*P3.yCoord) + (Math.pow(t,3)*P4.yCoord)),//Y
+                    (float) ((Math.pow(1 - t, 3) * P1.zCoord) + (3*Math.pow(1-t,2)*t*P2.zCoord) + (3*(1-t)*Math.pow(t,2)*P3.zCoord) + (Math.pow(t,3)*P4.zCoord))//Z
+            });
             t += originalT;
         }
-        RailPointRenderData.setRotation(points);
-        return points;
+        points.set(points.size()-2, new float[]{(float)P4.xCoord,(float)P4.yCoord,(float)P4.zCoord});
+
+        //now make the points
+        List<ModelRailSegment> segments = new ArrayList<>();
+        int i;
+        for (i = 0; i < points.size() - 1; i++) {
+
+            dX = points.get(i)[0] - (points.get(i+1)[0]);
+            dZ = points.get(i)[2] - (points.get(i+1)[2]);
+            double[] offsetInner = RailUtility.rotatePoint(new double[]{0,0,-0.0625}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
+            double[] offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
+
+            ModelRailSegment seg = new ModelRailSegment();
+            seg.position = new float[]{
+                    points.get(i)[0] * 16, points.get(i)[1] * 16, points.get(i)[2] * 16
+            };/*
+            seg.positionInner = new float[]{
+                    (float)(offsetInner[0]+points.get(i)[0]), (float)(offsetInner[1]+points.get(i)[1]), (float)(offsetInner[2]+points.get(i)[2])
+            };
+            seg.positionOuter = new float[]{
+                    (float)(offsetOuter[0]+points.get(i)[0]), (float)(offsetOuter[1]+points.get(i)[1]), (float)(offsetOuter[2]+points.get(i)[2])
+            };
+            seg.zOffset = new float[]{(float)offsetOuter[0],(float)offsetOuter[1],(float)offsetOuter[2]};
+            seg.regenModel();*/
+            segments.add(seg);
+        }
+/*
+        if (segments.size()>0) {
+            for (i = 0; i < segments.size() - 1; i++) {
+
+                segments.get(i).lastPositionInner = segments.get(i + 1).positionInner;
+                segments.get(i).lastPositionOuter = segments.get(i + 1).positionOuter;
+                segments.get(i).regenModel();
+            }
+
+            segments.get(segments.size()-1).lastPositionInner = segments.get(segments.size()-1).positionInner =null;
+            segments.get(segments.size()-1).lastPositionOuter = segments.get(segments.size()-1).lastPositionOuter = null;
+            segments.get(segments.size()-1).regenModel();
+        }*/
+        return segments;
     }
 
 
-    protected static List<RailPointRenderData> quadCurveAtPoint(double t, Vec3d P1, Vec3d P2, Vec3d P3){
-        if (t ==0){
-            throw new ReportedException(CrashReport.makeCrashReport(new Throwable(), "Why did you make a rail with a length of 0 blocks???"));
-        }
-        final double originalT =(1F/16F)/t;
-        t=0;
-        double t2=0;
-        double dX;
-        double dZ;
-        List<RailPointRenderData> points = new ArrayList<RailPointRenderData>();
-        RailPointRenderData nextEstimatedPoint = null;
-        while(t<=1.0d) {
-            RailPointRenderData tempPoint = new RailPointRenderData();
+
+    protected static List<ModelRailSegment> quadGenModel(Vec3f P1, Vec3f P2, Vec3f P3, Vec3f P4, float[] railOffsets){
+        double dX=P4.xCoord - P1.xCoord;
+        double dZ=P4.zCoord - P1.zCoord;
+        double originalT =(Math.abs(P4.xCoord) + Math.abs(P4.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord))/ (3*(Math.abs(P4.xCoord) + Math.abs(P4.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord)));
+        double t=-originalT;
+        int i;
+        List<float[]> points = new ArrayList<>();
+        for (i=0; i<3+3;i++){
             //define position
-            if (nextEstimatedPoint ==null) {
-                tempPoint.position = new double[]{
+            points.add(new float[]{
+                    (float) ((Math.pow(1 - t, 3) * P1.xCoord) + (3*Math.pow(1-t,2)*t*P2.xCoord) + (3*(1-t)*Math.pow(t,2)*P3.xCoord) + (Math.pow(t,3)*P4.xCoord)),//X
+                    (float) ((Math.pow(1 - t, 3) * P1.yCoord) + (3*Math.pow(1-t,2)*t*P2.yCoord) + (3*(1-t)*Math.pow(t,2)*P3.yCoord) + (Math.pow(t,3)*P4.yCoord)),//Y
+                    (float) ((Math.pow(1 - t, 3) * P1.zCoord) + (3*Math.pow(1-t,2)*t*P2.zCoord) + (3*(1-t)*Math.pow(t,2)*P3.zCoord) + (Math.pow(t,3)*P4.zCoord))//Z
+            });
+            t += originalT;
+        }
+        points.set(points.size()-2, new float[]{P4.xCoord,P4.yCoord,P4.zCoord});
+        points.set(1, new float[]{P1.xCoord,P1.yCoord,P1.zCoord});
+
+        double[] offsetInner;
+        double[] offsetOuter;
+
+        //now make the points
+        List<ModelRailSegment> segments = new ArrayList<>();
+        for (i = 1; i < points.size() - 1; i++) {
+
+            dX = points.get(i-1)[0] - (points.get(i + 1)[0]);
+            dZ = points.get(i-1)[2] - (points.get(i + 1)[2]);
+
+            offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
+
+            ModelRailSegment seg = new ModelRailSegment();
+            seg.position = new float[]{
+                    points.get(i)[0] * 16, points.get(i)[1] * 16, points.get(i)[2] * 16
+            };
+            seg.zOffset = new float[]{(float)offsetOuter[0],(float)offsetOuter[1],(float)offsetOuter[2]};
+
+            for (float f : railOffsets){
+                offsetInner = RailUtility.rotatePoint(new double[]{0,0,-0.0625+f}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
+                offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625+f}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
+
+                seg.models.add(seg.genNewSubModel(
+                        new float[]{
+                                (float)(offsetInner[0]+points.get(i)[0]), (float)(offsetInner[1]+points.get(i)[1]), (float)(offsetInner[2]+points.get(i)[2])
+                        },
+                        new float[]{
+                                (float)(offsetOuter[0]+points.get(i)[0]), (float)(offsetOuter[1]+points.get(i)[1]), (float)(offsetOuter[2]+points.get(i)[2])
+                        }
+                ));
+            }
+
+            segments.add(seg);
+        }
+
+        if (segments.size()>0) {
+            int ii=0;
+            for (i = 0; i < segments.size() - 1; i++) {
+                for (ii=0; ii<segments.get(i).models.size(); ii++) {
+
+                    segments.get(i).models.get(ii).lastPositionInner = segments.get(i + 1).models.get(ii).positionInner;
+                    segments.get(i).models.get(ii).lastPositionOuter = segments.get(i + 1).models.get(ii).positionOuter;
+                }
+            }
+
+            for (ii=0; ii<segments.get(i).models.size(); ii++) {
+                segments.get(segments.size() - 1).models.get(ii).lastPositionInner = segments.get(segments.size() - 1).models.get(ii).positionInner = null;
+                segments.get(segments.size() - 1).models.get(ii).lastPositionOuter = segments.get(segments.size() - 1).models.get(ii).lastPositionOuter = null;
+            }
+        }
+        return segments;
+    }
+
+
+/* three point bezier
                         (Math.pow(1 - t, 2) * P1.xCoord) + (2 * (1 - t) * t * P2.xCoord) + ((Math.pow(t, 2) * P3.xCoord)),//X
                         (Math.pow(1 - t, 2) * P1.yCoord) + (2 * (1 - t) * t * P2.yCoord) + ((Math.pow(t, 2) * P3.yCoord)),//Y
                         (Math.pow(1 - t, 2) * P1.zCoord) + (2 * (1 - t) * t * P2.zCoord) + ((Math.pow(t, 2) * P3.zCoord)),//X
-                        0, 0, 0
-                };
-                nextEstimatedPoint = new RailPointRenderData();
-            } else {
-                tempPoint = nextEstimatedPoint;
-            }
-
-            t2=t+(originalT);
-            nextEstimatedPoint.position = new double[]{
-                    (Math.pow(1 - t2, 2) * P1.xCoord) + (2*(1-t2)*t2*P2.xCoord) + ((Math.pow(t2,2)*P3.xCoord)),//X
-                    (Math.pow(1 - t2, 2) * P1.yCoord) + (2*(1-t2)*t2*P2.yCoord) + ((Math.pow(t2,2)*P3.yCoord)),//Y
-                    (Math.pow(1 - t2, 2) * P1.zCoord) + (2*(1-t2)*t2*P2.zCoord) + ((Math.pow(t2,2)*P3.zCoord)),//X
-                    0, 0, 0
-            };
-            //define yaw rotation
-            dX= nextEstimatedPoint.position[0] - tempPoint.position[0];
-            dZ = nextEstimatedPoint.position[2] - tempPoint.position[2];
-            //yaw
-            tempPoint.position[4] = 180- Math.toDegrees(Math.atan2(dZ, dX));
-            //pitch
-            tempPoint.position[3] = Math.toDegrees(Math.atan2(Math.sqrt(dZ * dZ + dX * dX), tempPoint.position[1] - nextEstimatedPoint.position[1]) + Math.PI);
-
-            //TODO: define pitch and roll
-            points.add(tempPoint);
-            t += originalT;
-        }
-        RailPointRenderData.setRotation(points);
-        return points;
-    }
-
-
-
-/*
-    public List<RailPointRenderData> getRenderData() {
-        // This is NOT perfect.  It is good enough for now.
-        List<RailPointRenderData> data = new ArrayList<RailPointRenderData>();
-
-        float radius = info.length;
-
-        float angleDelta = (90 / ((float)Math.PI * (radius+1)/2)) * (float)gauge.scale();
-
-        double hack = 0.05;
-
-        double xPos = Math.floor(Math.sin(Math.toRadians(realStartAngle)) * (radius+hack));
-        double zPos = Math.floor(Math.cos(Math.toRadians(realStartAngle)) * (radius+hack));
-
-        // Magic numbers
-        hack = 0.7 * (gauge.value() - Gauge.STANDARD.value()/2);
-
-        if (info.direction == TrackDirection.LEFT) {
-            xPos += 1;
-            zPos += 1;
-        } else {
-            xPos -= 1;
-        }
-        xPos += 1-gauge.scale();
-
-        int counter = 0;
-
-        for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
-            double gagX = Math.sin(Math.toRadians(angle)) * (radius+hack)-xPos;
-            double gagZ = Math.cos(Math.toRadians(angle)) * (radius+hack)-zPos;
-            float switchAngle = 0;
-            float switchOffset = 0;
-            if (track.switchState == SwitchState.STRAIGHT) {
-                if (track.direction == TrackDirection.RIGHT ) {
-                    if (angle > startAngle - 4*angleDelta) {
-                        counter++;
-                        switchOffset = (4-counter) / 30f * -(float)gauge.scale();
-                        switchAngle = angleDelta * info.length / 30;
-                    }
-                } else {
-                    if (angle < endAngle + 4*angleDelta) {
-                        counter++;
-                        switchOffset = (counter) / 30f * (float)gauge.scale();
-                        switchAngle = -angleDelta * info.length / 30;
-                    }
-                }
-            }
-            if (switchAngle == 0) {
-                data.add(new RailPointRenderData(gagX, 0, gagZ, angle+90 + angleDelta/2 + switchAngle));
-            } else {
-                data.add(new RailPointRenderData(gagX, 0, gagZ, angle+90 + angleDelta/2, "RAIL_BASE", "RAIL_RIGHT"));
-                data.add(new RailPointRenderData(gagX + switchOffset, 0, gagZ, angle+90 + angleDelta/2 + switchAngle, "RAIL_LEFT"));
-            }
-        }
-
-        return data;
-    }*/
+ */
 }

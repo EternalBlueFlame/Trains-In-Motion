@@ -10,10 +10,12 @@ import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.gui.GUIAdminBook;
 import ebf.tim.items.ItemAdminBook;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialLiquid;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -60,6 +62,8 @@ public class CommonProxy implements IGuiHandler {
         }
         return null;
     }
+
+    public void adminGui(String datacsv){};
 
     public boolean isClient(){return false;}
 

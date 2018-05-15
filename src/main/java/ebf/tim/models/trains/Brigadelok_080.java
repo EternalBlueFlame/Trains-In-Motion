@@ -117,7 +117,7 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[93] = new ModelRendererTurbo(this, 129, 129, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // simplepiston
 		brigadelok_080Model[94] = new ModelRendererTurbo(this, 241, 89, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // simplepiston
 		brigadelok_080Model[95] = new ModelRendererTurbo(this, 169, 137, textureXY, textureXY, StaticModelAnimator.tagAdvancedPiston); // advandedpiston
-		brigadelok_080Model[96] = new ModelRendererTurbo(this, 249, 41, textureXY, textureXY); // Box 99
+		brigadelok_080Model[96] = new ModelRendererTurbo(this, 249, 41, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // Box 99
 		brigadelok_080Model[97] = new ModelRendererTurbo(this, 209, 137, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // simplepiston
 		brigadelok_080Model[98] = new ModelRendererTurbo(this, 201, 73, textureXY, textureXY); // Box 99
 		brigadelok_080Model[99] = new ModelRendererTurbo(this, 57, 49, textureXY, textureXY); // Box 100
@@ -126,7 +126,7 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[102] = new ModelRendererTurbo(this, 137, 97, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // simplepiston
 		brigadelok_080Model[103] = new ModelRendererTurbo(this, 1, 145, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // simplepiston
 		brigadelok_080Model[104] = new ModelRendererTurbo(this, 1, 153, textureXY, textureXY, StaticModelAnimator.tagAdvancedPiston); // advandedpiston
-		brigadelok_080Model[105] = new ModelRendererTurbo(this, 209, 49, textureXY, textureXY); // Box 106
+		brigadelok_080Model[105] = new ModelRendererTurbo(this, 209, 49, textureXY, textureXY, StaticModelAnimator.tagSimplePiston); // Box 106
 		brigadelok_080Model[106] = new ModelRendererTurbo(this, 201, 81, textureXY, textureXY); // Box 107
 		brigadelok_080Model[107] = new ModelRendererTurbo(this, 57, 105, textureXY, textureXY); // Box 108
 		brigadelok_080Model[108] = new ModelRendererTurbo(this, 65, 121, textureXY, textureXY); // Box 109
@@ -471,6 +471,7 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[110].addBox(0F, 0F, 0F, 1, 3, 3, 0F); // Box 111
 		brigadelok_080Model[110].setRotationPoint(-26.5F, 5F, -1.5F);
 
+		fixRotation(brigadelok_080Model, false, true, true);
 
 	}
 

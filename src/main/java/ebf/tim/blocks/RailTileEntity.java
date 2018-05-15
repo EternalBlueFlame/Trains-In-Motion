@@ -2,9 +2,8 @@ package ebf.tim.blocks;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.blocks.rails.RailVanillaShapes;
 import ebf.tim.models.rails.ModelRailSegment;
-import ebf.tim.models.rails.RailPointRenderData;
-import ebf.tim.utility.CommonProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -26,6 +25,8 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
+import tmt.Vec3d;
+import tmt.Vec3f;
 
 import javax.annotation.Nullable;
 import java.awt.image.BufferedImage;
@@ -33,57 +34,38 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.opengl.GL11.GL_LIGHTING;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class RailTileEntity extends TileEntity {
 
-    private int metal =0;
-    private int ties =0;
-    private List<RailPointRenderData> path = null;
-    private ResourceLocation texture = URIRegistry.MODEL_RAIL_TEXTURE.getResource("RailNew.png");
+    private List<?extends ModelRailSegment> path = null;
     private AxisAlignedBB boundingBox = null;
-    private List<RailPointRenderData> renderShape[] = null;
+    private List<?extends ModelRailSegment> renderShape[] = null;
 
     public float getRailSpeed(){
         float speed =0.4f;
-        if (metal == 0){speed+=0.2f;}
-        if (ties == 1){speed+=0.2f;}
+        //if (metal == 0){speed+=0.2f;}
+        //if (ties == 1){speed+=0.2f;}
         return speed;
     }
-
-    public String getRailTexture(){
-        String name;
-        switch (metal){
-            case 1:{name = "iron"; break;}
-            default:{name = "steel"; break;}//0 and fallback
-        }
-        switch (ties){
-            case 1:{name += "concrete"; break;}
-            default:{name += "wood"; break;}//0 and fallback
-        }
-        return name;
-    }
-
-    public void setType(int metalType, int tiesType){
-        this.metal = metalType;
-        this.ties = tiesType;
-    }
-
-    public void setPath(List<RailPointRenderData> newShape){
+    public RailTileEntity setPath(List<?extends ModelRailSegment> newShape){
         path = newShape;
+        return this;
     }
 
 
     @SafeVarargs
-    public final void setRenderShape(List<RailPointRenderData> ... newShape){
-        renderShape = newShape;
+    @Deprecated
+    public final void setRenderShape(List<?extends ModelRailSegment> ... newShape){
+        if (worldObj.isRemote) {
+            renderShape = newShape;
+        }
     }
 
-    private static ItemStack grass = new ItemStack(Blocks.stone, 1);
-
-    @SideOnly(Side.CLIENT)
-    protected RenderBlocks blocks = new RenderBlocks();
+    private static final double[] color = {
+            (Blocks.iron_block.getMapColor(0).colorValue >> 16 & 0xFF)* 0.00392156863,
+            (Blocks.iron_block.getMapColor(0).colorValue >> 8 & 0xFF)* 0.00392156863,
+            (Blocks.iron_block.getMapColor(0).colorValue & 0xFF)* 0.00392156863
+    };
 
     public void func_145828_a(@Nullable CrashReportCategory report)  {
         if (report == null) {
@@ -98,24 +80,24 @@ public class RailTileEntity extends TileEntity {
 
             //RenderHelper.enableGUIStandardItemLighting();
             //int color = Minecraft.getMinecraft().renderEngine.getTexture().getGlTextureId();
+            Tessellator tessellator = Tessellator.getInstance();
+            //GL11.glColor3d(color[0],color[1],color[2]);
+            int i=0;
+            for(List<?extends ModelRailSegment> renderData : renderShape) {
+                i=0;
+                for (ModelRailSegment point : renderData) {
+                    //GL11.glTranslated(point.position[0], point.position[1] + 0.05, point.position[2]);
+                    //GL11.glRotated(point.position[4], 0, 1, 0);
+                    //GL11.glRotated(point.position[3], 0, 0, 1);
+                    //GL11.glScaled(1, 0.5, 0.5);
 
-            GL11.glColor3d(((Blocks.iron_block.getMapColor(0).colorValue >> 16 & 0xFF)* 0.00392156863),
-                    ((Blocks.iron_block.getMapColor(0).colorValue >> 8 & 0xFF)* 0.00392156863),
-                    ((Blocks.iron_block.getMapColor(0).colorValue & 0xFF)* 0.00392156863));
-            for(List<RailPointRenderData> renderData : renderShape) {
-                for (RailPointRenderData point : renderData) {
-                    GL11.glPushMatrix();
-                    GL11.glTranslated(point.position[0], point.position[1] + 0.05, point.position[2]);
-                    GL11.glRotated(point.position[4], 0, 1, 0);
-                    GL11.glRotated(-90+point.position[3], 0, 0, 1);
-                    //GL11.glRotated(180, 1, 0, 0);
-                    GL11.glScaled(1, 0.5, 0.5);
-
-                    point.segment.render(null, 0, 0, 0, 0, 0, 0.0625f);
+                    for(ModelRailSegment.subModel model : point.models) {
+                        model.render(tessellator, 0, i == 0, i == renderData.size() - 2);
+                    }
 
                     //GL11.glScaled(1.25, 2.15, 1.25);
                     //blocks.renderBlockAsItem(Block.getBlockFromItem(grass.getItem()), grass.getItemDamage(), 1.0f);
-                    GL11.glPopMatrix();
+                    i++;
                 }
             }
             //GL11.glEnable(GL11.GL_LIGHTING);
@@ -125,31 +107,6 @@ public class RailTileEntity extends TileEntity {
         } else {super.func_145828_a(report);}
     }
 
-    private static FloatBuffer colorBuffer = GLAllocation.createDirectFloatBuffer(16);
-    private static final Vec3 field_82884_b = Vec3.createVectorHelper(0.20000000298023224D, 1.0D, -0.699999988079071D).normalize();
-    private static final Vec3 field_82885_c = Vec3.createVectorHelper(-0.20000000298023224D, 1.0D, 0.699999988079071D).normalize();
-    /**
-     * Update and return colorBuffer with the RGBA values passed as arguments
-     */
-    private static FloatBuffer setColorBuffer(double p_74517_0_, double p_74517_2_, double p_74517_4_, double p_74517_6_)
-    {
-        /**
-         * Update and return colorBuffer with the RGBA values passed as arguments
-         */
-        return setColorBuffer((float)p_74517_0_, (float)p_74517_2_, (float)p_74517_4_, (float)p_74517_6_);
-    }
-
-    /**
-     * Update and return colorBuffer with the RGBA values passed as arguments
-     */
-    private static FloatBuffer setColorBuffer(float p_74521_0_, float p_74521_1_, float p_74521_2_, float p_74521_3_)
-    {
-        colorBuffer.clear();
-        colorBuffer.put(p_74521_0_).put(p_74521_1_).put(p_74521_2_).put(p_74521_3_);
-        colorBuffer.flip();
-        /** Float buffer used to set OpenGL material colors */
-        return colorBuffer;
-    }
     @Override
     public boolean shouldRefresh(Block oldBlock, Block newBlock, int oldMeta, int newMeta, World world, int x, int y, int z) {
         return oldBlock != newBlock;
@@ -158,8 +115,113 @@ public class RailTileEntity extends TileEntity {
     @Override
     public boolean canUpdate(){return true;}
 
+    //todo have block set the nearbymeta when a neighboring block changes
+    public int[] nearbymeta;
+    public int[] lastnearbymeta;
+
+    private int updateticks=0;
+    private static final float[] pathShape={0};
+    private static final float[] rendShape={0.3125f, -0.3125f};
+
     @Override
     public void updateEntity() {
+        updateticks++;
+
+        if (path == null || nearbymeta != lastnearbymeta || updateticks %20==0){
+            lastnearbymeta = nearbymeta;
+
+            switch (worldObj.getBlockMetadata(xCoord, yCoord, zCoord)){
+                //Z straight
+                case 0: {
+                    setPath(
+                            RailVanillaShapes.vanillaZStraight(worldObj, xCoord, yCoord, zCoord, 0)
+                    ).setRenderShape(
+                            RailVanillaShapes.vanillaZStraight(worldObj, xCoord, yCoord, zCoord, 0.3125f),
+                            RailVanillaShapes.vanillaZStraight(worldObj, xCoord, yCoord, zCoord, -0.3125f));
+                    return;
+                }
+                //X straight
+                case 1: {
+                    setPath(
+                            RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord, 0)
+                    ).setRenderShape(
+                            RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord, 0.3125f),
+                            RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord, -0.3125f));
+                    return;
+                }
+
+                //curves
+                case 9: {
+                    setPath(
+                            RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord, 0)
+                    ).setRenderShape(
+                            RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord, 0.3125f),
+                            RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord, -0.3125f));
+                    return;
+                }
+                case 8: {
+                    setPath(
+                            RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord, 0)
+                    ).setRenderShape(
+                            RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord, 0.3125f),
+                            RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord, -0.3125f));
+                    return;
+                }
+                case 7: {
+                    setPath(
+                            RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord, 0)
+                    ).setRenderShape(
+                            RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord, 0.3125f),
+                            RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord, -0.3125f));
+                    return;
+                }
+                case 6: {
+                    setPath(
+                            RailVanillaShapes.vanillaCurve6(worldObj, xCoord, yCoord, zCoord, pathShape)
+                    ).setRenderShape(
+                            RailVanillaShapes.vanillaCurve6(worldObj, xCoord, yCoord, zCoord, rendShape));
+                    return;
+                }
+                //Z slopes
+                case 5 :{
+                    setPath(
+                            RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord, 0)
+                    ).setRenderShape(
+                            RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord, 0.3125f),
+                            RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord, -0.3125f));
+                    return;
+                }
+                case 4 :{
+                    setPath(
+                            RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord, 0)
+                    ).setRenderShape(
+                            RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord, 0.3125f),
+                            RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord, -0.3125f));
+                    return;
+                }
+                //X slopes
+                case 2 :{
+                    setPath(
+                            RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord, 0)
+                    ).setRenderShape(
+                            RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord, 0.3125f),
+                            RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord, -0.3125f));
+                    return;
+                }
+                case 3 :{
+                    setPath(
+                            RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord, 0)
+                    ).setRenderShape(
+                            RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord, 0.3125f),
+                            RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord, -0.3125f));
+                    return;
+                }
+            }
+
+        }
+
+
+
     }
 
     @Override
@@ -174,15 +236,11 @@ public class RailTileEntity extends TileEntity {
     @Override
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
-        tag.setInteger("metal", metal);
-        tag.setInteger("ties", ties);
     }
 
     @Override
     public void readFromNBT(NBTTagCompound tag){
         super.readFromNBT(tag);
-        metal = tag.getInteger("metal");
-        ties = tag.getInteger("ties");
     }
 
 }

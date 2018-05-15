@@ -28,6 +28,7 @@ public class DebugUtil {
 	public static void println(Object... o){
 		if(dev()){
 			System.out.println("------------------TiM Debug------------------");
+			System.out.println(Thread.currentThread().getStackTrace()[2]);//print what function just called this
 			for (Object obj : o){
 				System.out.println(obj);
 			}
@@ -37,6 +38,7 @@ public class DebugUtil {
 	public static void println(Object o){
 		if(dev()){
 			System.out.println("------------------TiM Debug------------------");
+			System.out.println(Thread.currentThread().getStackTrace()[2]);//print what function just called this
 			System.out.println(o);
 			System.out.println("------------------TiM Debug------------------");
 		}

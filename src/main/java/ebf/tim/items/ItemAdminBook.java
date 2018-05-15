@@ -7,7 +7,6 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.gui.GUIAdminBook;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.ServerLogger;
 import io.netty.buffer.ByteBuf;
@@ -37,6 +36,8 @@ import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,47 +65,48 @@ public class ItemAdminBook extends Item{
         stringList.add("- Lock or unlock trains/rollingstock");
     }
     @Override
-    public boolean onItemUse(ItemStack itemStack, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ, int blockSide, float pointToRayX, float pointToRayY, float pointToRayZ) {
-
-        if(worldObj.isRemote){
-            return true;//checks if player is OP.
-        } else if (!playerEntity.canCommandSenderUseCommand(2, "")){
-            return false;
-        }
-
-        Vec3 v = playerEntity.getLookVec().normalize();
-        for(float i = 0.5f;i<4;i+=0.5f){
-            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(playerEntity.posX + (v.xCoord * i),
-                    playerEntity.posY + (v.yCoord * i), playerEntity.posZ + (v.zCoord * i),
-                    playerEntity.posX + (v.xCoord * i), playerEntity.posY + (v.yCoord * i),
-                    playerEntity.posZ + (v.zCoord * i));
-            List list = worldObj.getEntitiesWithinAABB(GenericRailTransport.class, aabb);
-            if(list.iterator().hasNext()){
-                GenericRailTransport transport = (GenericRailTransport)list.get(0);
-                transport.setBoolean(GenericRailTransport.boolValues.LOCKED, !transport.getBoolean(GenericRailTransport.boolValues.LOCKED));
-                playerEntity.addChatMessage(new ChatComponentText(transport.ownerName +"'s transport is now " + (transport.getBoolean(GenericRailTransport.boolValues.LOCKED)?"Locked":"Unlocked")));
-                //TrainsInMotion.keyChannel.sendTo(new PacketAdminBook(0, transport.getEntityId(), ""), (EntityPlayerMP) playerEntity);
-                return true;
+    public ItemStack onItemRightClick(ItemStack itemStack, World worldObj, EntityPlayer player) {
+        try {
+            if (worldObj.isRemote) {
+                return itemStack;
+            } else if (!player.canCommandSenderUseCommand(2, "")) {
+                return itemStack;
             }
-        }
 
-        if(new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "/traincraft/").exists()) {
-            //if player wasin't looking at a train
-            StringBuilder sb = new StringBuilder();
-            for (File f : new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "/traincraft/").listFiles()) {
-                if(f.isDirectory() && f.list()!=null && f.list().length>0) {
-                    sb.append(f.getName());
-                    sb.append(",");
+            if (new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "/traincraft/").exists()) {
+                //if player wasin't looking at a train
+                StringBuilder sb = new StringBuilder();
+                File[] list = new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "/traincraft/").listFiles();
+                if (list!=null) {
+                    Arrays.sort(list, new compareFile());
+                    for (File f : list) {
+                        if (f.isDirectory() && f.list() != null && f.list().length > 0) {
+                            sb.append(f.getName());
+                            sb.append(",");
+                        }
+                    }
+                    //wrong player or something....?
+                    TrainsInMotion.keyChannel.sendTo(new PacketAdminBook(1, -1, sb.toString()), (EntityPlayerMP) player);
                 }
+                return itemStack;
+            } else {
+                return itemStack;
             }
-            //wrong player or something....?
-            TrainsInMotion.keyChannel.sendTo(new PacketAdminBook(1, -1, sb.toString()), (EntityPlayerMP) playerEntity);
-            return true;
-        } else {
-            return false;
+        } catch (Exception e){
+            e.printStackTrace();
         }
-
+        return super.onItemRightClick(itemStack, worldObj, player);
     }
+
+
+
+    class compareFile implements Comparator<File> {
+        // Overriding the compare method to sort the age
+        public int compare(File d, File d1) {
+            return d.getName().compareTo(d1.getName());
+        }
+    }
+
 
 
 
@@ -156,11 +158,11 @@ public class ItemAdminBook extends Item{
                     message.id = message.id.substring(2, message.id.length());
                     event=2;
                 }
-                DebugUtil.println(message.id);
-                if (new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "\\traincraft\\" + message.id).exists()) {
+                File f = new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "\\traincraft\\" + message.id);
+                if (f.exists()) {
                     //if player wasin't looking at a train
                     StringBuilder sb = new StringBuilder();
-                    if (!new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "\\traincraft\\" + message.id).isDirectory()){
+                    if (!f.isDirectory()){
                         try {
                             if(event==0) {
                                 sb.append("<");
@@ -210,8 +212,8 @@ public class ItemAdminBook extends Item{
                                     }
                                 }
                             } else if (event==2){
-                                if (new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "\\traincraft\\" + message.id).exists()) {
-                                    new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "\\traincraft\\" + message.id).delete();
+                                if (f.exists()) {
+                                    f.delete();
                                 }
                             }
                         } catch (Exception e){}
@@ -219,15 +221,15 @@ public class ItemAdminBook extends Item{
                         if(!message.id.equals("")) {
                             sb.append(",");
                         }
-                        File[] folder = new File(DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath() + "/traincraft/" + message.id+"/").listFiles();
+                        File[] folder = f.listFiles();
                         if (folder !=null) {
-                            for (File f : folder) {
-                                if (f != null) {
+                            for (File file : folder) {
+                                if (file != null) {
                                     sb.append(message.id);
                                     if(!message.id.equals("")) {
                                         sb.append("\\");
                                     }
-                                    sb.append(f.getName());
+                                    sb.append(file.getName());
                                     sb.append(",");
                                 }
                             }
@@ -239,13 +241,13 @@ public class ItemAdminBook extends Item{
                     for (WorldServer world : DimensionManager.getWorlds()) {
                         if (world.getEntityByID(message.player) != null) {
                             TrainsInMotion.keyChannel.sendTo(new PacketAdminBook(1, -1, sb.toString()), (EntityPlayerMP) world.getEntityByID(message.player));
+                            return null;
                         }
                     }
                 }
                 return null;
             }
         }
-
     }
 
 
@@ -304,7 +306,7 @@ public class ItemAdminBook extends Item{
         public static class Handler implements IMessageHandler<PacketAdminBook, IMessage> {
             @Override
             public IMessage onMessage(PacketAdminBook message, MessageContext context) {
-                Minecraft.getMinecraft().displayGuiScreen(new GUIAdminBook(message.datacsv));
+                TrainsInMotion.proxy.adminGui(message.datacsv);
 
                 return null;
             }

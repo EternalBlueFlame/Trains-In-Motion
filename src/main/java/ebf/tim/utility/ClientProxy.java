@@ -13,6 +13,7 @@ import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.gui.GUIAdminBook;
 import ebf.tim.gui.GUITrainTable;
 import ebf.tim.gui.GUITransport;
 import ebf.tim.gui.HUDTrain;
@@ -78,6 +79,10 @@ public class ClientProxy extends CommonProxy {
     public static KeyBinding KeyHorn = new KeyBinding("Use Horn/Whistle", Keyboard.KEY_H, "Trains in Motion");
     /**the keybind for opening the inventory*/
     public static KeyBinding KeyInventory = new KeyBinding("Open Train/rollingstock GUI",  Keyboard.KEY_I, "Trains in Motion");
+    /**the value for rail detail*/
+    public static int railLoD = 8;
+    /**the skin to use for the rail*/
+    public static int railSkin = 2;
 
     public static KeyBinding raildevtoolUp = new KeyBinding("Move Point Z+", Keyboard.KEY_UP, "Trains in Motion Dev");
     public static KeyBinding raildevtoolDown = new KeyBinding("Move Point Z-", Keyboard.KEY_DOWN, "Trains in Motion Dev");
@@ -116,8 +121,16 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
+    public void adminGui(String datacsv){
+        Minecraft.getMinecraft().displayGuiScreen(new GUIAdminBook(datacsv));
+    };
+
+    @Override
     public boolean isClient(){return true;}
 
+    public int getRailLoD(){
+        return 3;
+    }
 
     /**
      * <h2>Load config</h2>
@@ -140,6 +153,15 @@ public class ClientProxy extends CommonProxy {
         useVanillaInventoryTextures = config.get("Quality (Client only)", "UseVanillaInventoryTextures", true).getBoolean(true);
         config.addCustomCategoryComment("Quality (Client only)", "Forces textures to be bound, slows performance on some machines, speeds it up on others, and fixes a rare bug where the the texture does not get bound. So... This REALLY depends on your machine, see what works best for you.");
         ForceTextureBinding = config.get("Quality (Client only)", "ForceTextureBinding", false).getBoolean(false);
+        config.addCustomCategoryComment("Quality (Client only)", "Defines the number of segments per block of rail, higher numbers will make smoother models, but lower numbers get better FPS. Minimum: 4");
+        railLoD = config.get("Quality (Client only)", "RailLoD", 8).getInt(8);
+        if (railLoD<4){
+            railLoD=4;
+        }
+
+        config.addCustomCategoryComment("Quality (Client only)", "Defines the skin to use. 0: flat 2D rail similar to vanilla. 1: basic 3D rail. 2: Normal 3D rail. 3: High detail 3D rail");
+        railLoD = config.get("Quality (Client only)", "railSkin", 2).getInt(2);
+
 
         config.addCustomCategoryComment("Keybinds (Client only)", "accepted values can be set from in-game, or defined using the key code values from: http://minecraft.gamepedia.com/Key_codes");
 

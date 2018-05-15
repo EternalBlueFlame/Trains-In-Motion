@@ -1,11 +1,13 @@
 package ebf.tim.blocks.rails;
 
-import ebf.tim.utility.ClientProxy;
+import ebf.tim.models.rails.ModelRailSegment;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.util.MathHelper;
 import tmt.Vec3d;
-import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.world.World;
+import tmt.Vec3f;
+
+import java.util.List;
 
 import static ebf.tim.blocks.rails.BlockRailCore.checkMultiblock;
 import static ebf.tim.utility.RailUtility.radianF;
@@ -16,443 +18,368 @@ import static ebf.tim.utility.RailUtility.radianF;
 public class RailVanillaShapes {
 
 
-    public static int processRailMeta(int meta, EntityMinecart cart, int x, int y, int z){
-        if (cart == null || cart.getEntityData() == null){
-            return meta;
-        }
-        //first be sure the key exists, and create it if it doesn't, that way we be sure we don't crash. Also if it doesn't exist we can just return the base meta unchanged.
-        if (!cart.getEntityData().hasKey("tim.lastusedrail.meta")){
-            cart.getEntityData().setInteger("tim.lastusedrail.meta",meta);
-            return meta;
-        }
-        boolean changed = false;
-        switch (meta){
-            //add support for intersections
-            case 0:{
-                //only part that theoretically works.
-                if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1){
-                    meta=1;
-                } else {
-                    changed=true;
-                }
-                break;
-            }
-            case 1:{
-                if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 0){
-                    meta=0;
-                } else {
-                    changed=true;
-                }
-                break;
-            }
-            default:{
-                changed=true;
-            }
-            /*
-            //in some specific circumstances we have to cover how rails are approached to smooth movement So if you enter a turn from the wrong side, it treats it as a straight rather than a turn.
-            case 6:{
-                if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1){
-                    meta=1;changed=true;
-                } else if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 0){
-                    meta=0;changed=true;
-                }
-                break;
-            }
-            case 7:{
-                if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1){
-                    meta=1;changed=true;
-                } else if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 0){
-                    meta=0;changed=true;
-                }
-                break;
-            }
-            case 8:{
-                if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1){
-                    meta=1;changed=true;
-                } else if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 0 && cart.getEntityData().getInteger("tim.lastusedrail.z") > z){
-                    meta=0;changed=true;
-                }
-                break;
-            }
-            case 9:{
-                if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1 && cart.getEntityData().getInteger("tim.lastusedrail.x") < x){
-                    meta=1;changed=true;
-                } else if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 0 && cart.getEntityData().getInteger("tim.lastusedrail.z") > z){
-                    meta=0;changed=true;
-                }
-                break;
-            }*/
-        }
-        if (changed){
-            cart.getEntityData().setInteger("tim.lastusedrail.meta",meta);
-            cart.getEntityData().setInteger("tim.lastusedrail.x",x);
-            cart.getEntityData().setInteger("tim.lastusedrail.z",z);
-        }
-        return meta;
-    }
-
-    public static Vec3d[] vanillaZStraight(World worldObj, int xCoord, int yCoord, int zCoord, double gauge){
-        Vec3d[] coords =
-                groupBlockCoords(gauge,0.5,
-                        gauge, 0.25,
-                        gauge, -0.25,
-                        gauge, -0.565);
+    public static List<?extends ModelRailSegment> vanillaZStraight(World worldObj, int xCoord, int yCoord, int zCoord, float gauge){
+        Vec3f[] coords =
+                groupBlockCoords(gauge,0.5f,
+                        gauge, 0.25f,
+                        gauge, -0.25f,
+                        gauge, -0.5f);
 
         //X axis slopes
         if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,4}})){
-            coords[3].yCoord = 0.15;
+            coords[3].yCoord = 0.15f;
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord-1,zCoord+1, 4}})){
-            coords[0].yCoord = -0.15;
+            coords[0].yCoord = -0.15f;
         }
         //Z axis slope
         if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1, 5}})){
-            coords[0].yCoord = 0.15;
+            coords[0].yCoord = 0.15f;
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord-1,zCoord-1, 5}})){
-            coords[3].yCoord = -0.15;
+            coords[3].yCoord = -0.15f;
         }
 
         //intersections
         if(checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,1},{xCoord, yCoord,zCoord+2,0}})){
-            coords[0] = coordsFromBlock(gauge, 1.06);
+            coords[0] = coordsFromBlock(gauge, 1.06f);
         }
         if(checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,1},{xCoord, yCoord,zCoord-2,0}})){
-            coords[3] = coordsFromBlock(gauge, -1.06);
+            coords[3] = coordsFromBlock(gauge, -1.06f);
         }
 
         //cover curve blending
         if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,7},{xCoord-1, yCoord,zCoord-1,9}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,6},{xCoord+1, yCoord,zCoord-1,8}})){
             coords[3] = coordsFromBlock(gauge, 0);
-            coords[2] = coordsFromBlock(gauge, 0.25);
+            coords[2] = coordsFromBlock(gauge, 0.25f);
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,9}, {xCoord+1, yCoord,zCoord+1,7}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,8},{xCoord-1, yCoord,zCoord+1,6}})){
             coords[0] = coordsFromBlock(gauge, 0);
-            coords[1] = coordsFromBlock(gauge, -0.25);
+            coords[1] = coordsFromBlock(gauge, -0.25f);
         }else if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,7 }}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,6}})){
-            coords[0] = coordsFromBlock(gauge, 1.5);
+            coords[0] = coordsFromBlock(gauge, 1.5f);
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,9}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,8}})) {
-            coords[3] = coordsFromBlock(gauge, -1.5);
+            coords[3] = coordsFromBlock(gauge, -1.5f);
         }
 
-        return coords;
+        return BlockRailCore.quadGenModel(coords[0],coords[1], coords[2], coords[3]);
     }
 
-    public static Vec3d[] vanillaXStraight(World worldObj, int xCoord, int yCoord, int zCoord, double gauge){
-        Vec3d[] coords =
+    public static List<?extends ModelRailSegment> vanillaXStraight(World worldObj, int xCoord, int yCoord, int zCoord, float gauge){
+        Vec3f[] coords =
                 groupBlockCoords(
-                  -0.565,gauge,
-                  -0.25,gauge,
-                  0.25,gauge,
-                  0.5,gauge
+                  -0.5f,gauge,
+                  -0.25f,gauge,
+                  0.25f,gauge,
+                  0.5f,gauge
                 );
 
         //X axis slopes
         if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,3}})){
-            coords[0].yCoord = 0.15;
+            coords[0].yCoord = 0.15f;
         }
         if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord-1,zCoord,3}})){
-            coords[3].yCoord = -0.15;
+            coords[3].yCoord = -0.15f;
         }
         if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord-1,zCoord,3},{xCoord-1, yCoord,zCoord,3}})){
-            coords[1].yCoord = 0.05;
-            coords[2].yCoord = -0.05;
+            coords[1].yCoord = 0.05f;
+            coords[2].yCoord = -0.05f;
         }
         //Z axis slopes
         if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,2}})){
-            coords[3].yCoord = 0.15;
+            coords[3].yCoord = 0.15f;
         }
         if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord-1,zCoord,2}})){
-            coords[0].yCoord = -0.15;
+            coords[0].yCoord = -0.15f;
         }
         if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord-1,zCoord,2}, {xCoord+1, yCoord,zCoord,2}})){
-            coords[1].yCoord = -0.05;
-            coords[2].yCoord = 0.05;
+            coords[1].yCoord = -0.05f;
+            coords[2].yCoord = 0.05f;
         }
         //intersections
         if(checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,0},{xCoord-2, yCoord,zCoord,1}})){
-            coords[0] = coordsFromBlock(-1.06, gauge);
+            coords[0] = coordsFromBlock(-1.06f, gauge);
         }
         if(checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,0},{xCoord+2, yCoord,zCoord,1}})){
-            coords[3] = coordsFromBlock(1.06, gauge);
+            coords[3] = coordsFromBlock(1.06f, gauge);
         }
 
 
         //cover curve blending
         if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,9},{xCoord-1, yCoord,zCoord-1,7}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,6},{xCoord-1, yCoord,zCoord+1,8}})){
-            coords[0] = coordsFromBlock(-0.1,gauge);
-            coords[1] = coordsFromBlock(0.25,gauge);
+            coords[0] = coordsFromBlock(0,gauge);
+            coords[1] = coordsFromBlock(0.25f,gauge);
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,7}, {xCoord+1, yCoord,zCoord+1,9}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,8},{xCoord+1, yCoord,zCoord-1,6}})){
-            coords[3] = coordsFromBlock(0.05,gauge);
-            coords[2] = coordsFromBlock(-0.25,gauge);
+            coords[3] = coordsFromBlock(0,gauge);
+            coords[2] = coordsFromBlock(-0.25f,gauge);
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,9}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,6}})){
-            coords[3] = coordsFromBlock(1.455, gauge);
+            coords[3] = coordsFromBlock(1.455f, gauge);
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,7}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,8}})){
-            coords[0] = coordsFromBlock(-1.565, gauge);
+            coords[0] = coordsFromBlock(-1.565f, gauge);
         }
 
-        return coords;
+        return BlockRailCore.quadGenModel(coords[0],coords[1], coords[2], coords[3]);
     }
 
 
-    public static Vec3d[] vanillaCurve6(World worldObj, int xCoord, int yCoord, int zCoord, double gauge){
-        Vec3d[] coords = groupBlockCoords(
-                gauge,0.5,
-                gauge, 0.25+(gauge*0.5),
-                0.25+(gauge*0.5),gauge,
-                0.5,gauge
+    public static List<?extends ModelRailSegment> vanillaCurve6(World worldObj, int xCoord, int yCoord, int zCoord, float[] gauge){
+        Vec3f[] coords = groupBlockCoords(
+                0f,0.5f,
+                0f, 0.25f,
+                0.25f,0f,
+                0.5f,0f
         );
 
         if (checkMultiblock(worldObj, new int[][]{{xCoord+1,yCoord,zCoord,8}})){
 
-            coords[3]=coordsFromBlock(0.5+(gauge*0.75),(gauge*0.75));
-            coords[2]=coordsFromBlock(0.375+(gauge*0.75),0.125+(gauge*0.75));
+            coords[3]=coordsFromBlock(0.5f,0);
+            coords[2]=coordsFromBlock(0.375f,0.125f);
             if (checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord+1,0}})){
-                coords[0] = coordsFromBlock(gauge,1);
-                coords[1] = coordsFromBlock(gauge, 0.5 + (gauge*0.75));
+                coords[0] = coordsFromBlock(0,1);
+                coords[1] = coordsFromBlock(0, 0.5f + 0);
             }
         }
         if (checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord+1,8}})){
 
-            coords[0] = coordsFromBlock((gauge*0.75)-0.025, 0.5+(gauge*0.75));
-            coords[1] = coordsFromBlock( 0.125+(gauge*0.75), 0.375+(gauge*0.75));
+            coords[0] = coordsFromBlock(-0.025f, 0.5f);
+            coords[1] = coordsFromBlock( 0.125f, 0.375f);
             if (checkMultiblock(worldObj, new int[][]{{xCoord+1,yCoord,zCoord,1}})){
-                coords[3] = coordsFromBlock(1, gauge);
-                coords[2] = coordsFromBlock(0.5+(gauge*0.5),gauge);
+                coords[3] = coordsFromBlock(1, 0);
+                coords[2] = coordsFromBlock(0.5f,0);
             }
         }
 
-        return coords;
+        return BlockRailCore.quadGenModel(coords[0],coords[1], coords[2], coords[3], gauge);
     }
 
-    public static Vec3d[] vanillaCurve8(World worldObj, int xCoord, int yCoord, int zCoord, double gauge){
+    public static List<?extends ModelRailSegment> vanillaCurve8(World worldObj, int xCoord, int yCoord, int zCoord, float gauge){
         //the base shape
-        Vec3d[] coords = groupBlockCoords(
-                -0.55, gauge,
-                -0.25+(gauge*0.5), gauge,
-                gauge, -0.25+(gauge*0.5),
-                gauge, -0.55);
+        Vec3f[] coords = groupBlockCoords(
+                -0.5f, gauge,
+                -0.25f+(gauge*0.5f), gauge,
+                gauge, -0.25f+(gauge*0.5f),
+                gauge, -0.5f);
 
         if (checkMultiblock(worldObj, new int[][]{{xCoord-1,yCoord,zCoord,6}})){
             //first half of the diagonal
-            coords[0] = coordsFromBlock(-0.5+(gauge*0.75), (gauge*0.75));
-            coords[1] = coordsFromBlock(-0.375+(gauge*0.75), -0.125+(gauge*0.75));
+            coords[0] = coordsFromBlock(-0.5f+(gauge*0.75f), (gauge*0.75f));
+            coords[1] = coordsFromBlock(-0.375f+(gauge*0.75f), -0.125f+(gauge*0.75f));
             if (checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord-1,0}})){
                 //extension of one side to match up with a straight block
-                coords[3] = coordsFromBlock(gauge,-1.0625);
-                coords[2] = coordsFromBlock(gauge, -0.5 + (gauge*0.75));
+                coords[3] = coordsFromBlock(gauge,-1.0625f);
+                coords[2] = coordsFromBlock(gauge, -0.5f + (gauge*0.75f));
             }
         }
         if (checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord-1,6}})) {
             //second half of the diagonal
-            coords[3] = coordsFromBlock((gauge*0.75)+0.025, -0.55+ (gauge*0.75));
-            coords[2] = coordsFromBlock(-0.375+(gauge*0.75), -0.125+(gauge*0.75));
+            coords[3] = coordsFromBlock((gauge*0.75f)+0.025f, -0.5f+ (gauge*0.75f));
+            coords[2] = coordsFromBlock(-0.375f+(gauge*0.75f), -0.125f+(gauge*0.75f));
             if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord, zCoord, 1}})) {
                 //extension of one side to match up with a straight block
                 coords[0] = coordsFromBlock(-1, gauge);
-                coords[1] = coordsFromBlock(-0.6875 + (gauge*0.75), gauge );
+                coords[1] = coordsFromBlock(-0.6875f + (gauge*0.75f), gauge );
             }
         }
 
-        return coords;
+        return BlockRailCore.quadGenModel(coords[0],coords[1], coords[2], coords[3]);
     }
 
 
-    public static Vec3d[] vanillaCurve7(World worldObj, int xCoord, int yCoord, int zCoord, double gauge){
+    public static List<?extends ModelRailSegment> vanillaCurve7(World worldObj, int xCoord, int yCoord, int zCoord, float gauge){
         //the base shape
-        Vec3d[] coords = groupBlockCoords(
-                -0.565, gauge,
-                -0.25-(gauge*0.5), gauge,
-                -gauge, 0.25+(gauge*0.5),
-                -gauge, 0.5);
+        Vec3f[] coords = groupBlockCoords(
+                -0.5f, gauge,
+                -0.25f-(gauge*0.5f), gauge,
+                -gauge, 0.25f+(gauge*0.5f),
+                -gauge, 0.5f);
 
 
         if (checkMultiblock(worldObj, new int[][]{{xCoord-1,yCoord,zCoord,9}})){
             //first half of the diagonal
-            coords[0] = coordsFromBlock(-0.5625-(gauge*0.75), -0.0625+(gauge*0.75));
-            coords[1] = coordsFromBlock(-0.375-(gauge*0.75), 0.125+(gauge*0.75));
+            coords[0] = coordsFromBlock(-0.5625f-(gauge*0.75f), -0.0625f+(gauge*0.75f));
+            coords[1] = coordsFromBlock(-0.375f-(gauge*0.75f), 0.125f+(gauge*0.75f));
             if (checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord+1,0}})){
                 //extension of one side to match up with a straight block
                 coords[3] = coordsFromBlock(-gauge,1);
-                coords[2] = coordsFromBlock(-gauge, 0.5 + (gauge*0.75));
+                coords[2] = coordsFromBlock(-gauge, 0.5f + (gauge*0.75f));
             }
         }
         if (checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord+1,9}})){
             //second half of the diagonal
-            coords[3] = coordsFromBlock(0.2625-(gauge*0.75), 0.7375+ (gauge*0.75));
-            coords[2] = coordsFromBlock(-0.375-(gauge*0.75), 0.125+(gauge*0.75));
+            coords[3] = coordsFromBlock(0.2625f-(gauge*0.75f), 0.7375f+ (gauge*0.75f));
+            coords[2] = coordsFromBlock(-0.375f-(gauge*0.75f), 0.125f+(gauge*0.75f));
             if (checkMultiblock(worldObj, new int[][]{{xCoord-1,yCoord,zCoord,1}})){
                 //extension of one side to match up with a straight block
-                coords[0] = coordsFromBlock(-1.05, gauge);
-                coords[1] = coordsFromBlock(-0.75 - (gauge*0.75), gauge);
+                coords[0] = coordsFromBlock(-1.05f, gauge);
+                coords[1] = coordsFromBlock(-0.75f - (gauge*0.75f), gauge);
             }
         }
 
-        return coords;
+        return BlockRailCore.quadGenModel(coords[0],coords[1], coords[2], coords[3]);
     }
 
-    public static Vec3d[] vanillaCurve9(World worldObj, int xCoord, int yCoord, int zCoord, double gauge){
+    public static List<?extends ModelRailSegment> vanillaCurve9(World worldObj, int xCoord, int yCoord, int zCoord, float gauge){
         //the base shape
-        Vec3d[] coords = groupBlockCoords(
-                0.5, gauge,
-                0.25-(gauge*0.5), gauge,
-                -gauge, -0.25+(gauge*0.5),
-                -gauge, -0.565);
+        Vec3f[] coords = groupBlockCoords(
+                0.5f, gauge,
+                0.25f-(gauge*0.5f), gauge,
+                -gauge, -0.25f+(gauge*0.5f),
+                -gauge, -0.5f);
 
-        coords[0] = coordsFromBlock(0.5, gauge);
+        coords[0] = coordsFromBlock(0.5f, gauge);
         coords[1] = coordsFromBlock(0-gauge, -0+gauge);
-        coords[2] = coordsFromBlock(-gauge, -0.565);
+        coords[2] = coordsFromBlock(-gauge, -0.5f);
 
         if (checkMultiblock(worldObj, new int[][]{{xCoord+1,yCoord,zCoord,7}})){
             //first half of the diagonal
-            coords[0] = coordsFromBlock(0.5+(gauge*0.75), -(gauge*0.75));
-            coords[1] = coordsFromBlock(0.375+(gauge*0.75), -0.125-(gauge*0.75));
+            coords[0] = coordsFromBlock(0.5f+(gauge*0.75f), -(gauge*0.75f));
+            coords[1] = coordsFromBlock(0.375f+(gauge*0.75f), -0.125f-(gauge*0.75f));
             if (checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord-1,0}})){
                 //extension of one side to match up with a straight block
-                coords[3] = coordsFromBlock(gauge,-1.0625);
-                coords[2] = coordsFromBlock(gauge, -0.5 - (gauge*0.75));
+                coords[3] = coordsFromBlock(gauge,-1.0625f);
+                coords[2] = coordsFromBlock(gauge, -0.5f - (gauge*0.75f));
             }
         }
         if (checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord-1,7}})) {
             //second half of the diagonal
-            coords[3] = coordsFromBlock((gauge*0.75), -0.5- (gauge*0.75));
-            coords[2] = coordsFromBlock(0.375+(gauge*0.75), -0.125-(gauge*0.75));
+            coords[3] = coordsFromBlock((gauge*0.75f), -0.5f- (gauge*0.75f));
+            coords[2] = coordsFromBlock(0.375f+(gauge*0.75f), -0.125f-(gauge*0.75f));
             if (checkMultiblock(worldObj, new int[][]{{xCoord + 1, yCoord, zCoord, 1}})) {
                 //extension of one side to match up with a straight block
-                coords[0] = coordsFromBlock(1.1, -gauge);
-                coords[1] = coordsFromBlock(0.6875 + (gauge*0.75), -gauge );
+                coords[0] = coordsFromBlock(1.1f, -gauge);
+                coords[1] = coordsFromBlock(0.6875f + (gauge*0.75f), -gauge );
             }
         }
 
 
-        return coords;
+        return BlockRailCore.quadGenModel(coords[0],coords[1], coords[2], coords[3]);
     }
 
 
 
 
 
-    public static Vec3d[] vanillaSlopeZ5(World worldObj, int xCoord, int yCoord, int zCoord, double gauge){
-        Vec3d[] coords = groupBlockCoords(
-                gauge,0.1,-0.6,
-                gauge,0.25,-0.25,
-                gauge,0.775,0.25,
-                gauge,0.88, 0.5);
+    public static List<?extends ModelRailSegment> vanillaSlopeZ5(World worldObj, int xCoord, int yCoord, int zCoord, float gauge){
+        Vec3f[] coords = groupBlockCoords(
+                gauge,0.1f,-0.6f,
+                gauge,0.25f,-0.25f,
+                gauge,0.775f,0.25f,
+                gauge,0.88f, 0.5f);
         if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord-1,zCoord-1,5}})){
-            coords[0].yCoord= -0.05;
-            coords[0].zCoord= -0.05;
-            coords[1].yCoord=0.25;
+            coords[0].yCoord= -0.05f;
+            coords[0].zCoord= -0.05f;
+            coords[1].yCoord=0.25f;
         }
         if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord+1,zCoord+1,5}})){
             coords[3].yCoord=1;
-            coords[2].yCoord=0.75;
+            coords[2].yCoord=0.75f;
         }
 
-        return coords;
+        return BlockRailCore.quadGenModel(coords[0],coords[1], coords[2], coords[3]);
     }
 
-    public static Vec3d[] vanillaSlopeZ4(World worldObj, int xCoord, int yCoord, int zCoord, double gauge){
-        Vec3d[] coords = groupBlockCoords(
-                gauge,0.13,0.5,
-                gauge,0.2,0.25,
-                gauge,0.75,-0.25,
-                gauge,0.875, -0.55);
+    public static List<?extends ModelRailSegment> vanillaSlopeZ4(World worldObj, int xCoord, int yCoord, int zCoord, float gauge){
+        Vec3f[] coords = groupBlockCoords(
+                gauge,0.13f,0.5f,
+                gauge,0.2f,0.25f,
+                gauge,0.75f,-0.25f,
+                gauge,0.875f, -0.5f);
         if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord-1,zCoord+1,4}})){
             coords[0].yCoord=0;
-            coords[1].yCoord=0.25;
+            coords[1].yCoord=0.25f;
         }
         if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord+1,zCoord-1,4}})){
-            coords[3].yCoord=1.05;
-            coords[2].yCoord=0.75;
+            coords[3].yCoord=1.05f;
+            coords[2].yCoord=0.75f;
         }
 
-        return coords;
+        return BlockRailCore.quadGenModel(coords[0],coords[1], coords[2], coords[3]);
     }
 
-    public static Vec3d[] vanillaSlopeX2(World worldObj, int xCoord, int yCoord, int zCoord, double gauge){
-        Vec3d[] coords = groupBlockCoords(
-                -0.525,0.13,gauge,
-                -0.25, 0.25, gauge,
-                0.25, 0.8, gauge,
-                0.525,0.88,gauge);
+    public static List<?extends ModelRailSegment> vanillaSlopeX2(World worldObj, int xCoord, int yCoord, int zCoord, float gauge){
+        Vec3f[] coords = groupBlockCoords(
+                -0.525f,0.13f,gauge,
+                -0.25f, 0.25f, gauge,
+                0.25f, 0.8f, gauge,
+                0.525f,0.88f,gauge);
 
         if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord-1,zCoord,2}})){
             coords[0].yCoord=0;
-            coords[1].yCoord=0.25;
+            coords[1].yCoord=0.25f;
         }
         if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord+1,zCoord,2}})){
-            coords[3].yCoord = 1.05;
-            coords[2].yCoord=0.75;
+            coords[3].yCoord = 1.05f;
+            coords[2].yCoord=0.75f;
         }
 
-        return coords;
+        return BlockRailCore.quadGenModel(coords[0],coords[1], coords[2], coords[3]);
     }
 
-    public static Vec3d[] vanillaSlopeX3(World worldObj, int xCoord, int yCoord, int zCoord, double gauge){
-        Vec3d[] coords = groupBlockCoords(
-                0.525,0.11,gauge,
-                0.25, 0.225, gauge,
-                -0.25, 0.75, gauge,
-                -0.525,0.865,gauge);
+    public static List<?extends ModelRailSegment> vanillaSlopeX3(World worldObj, int xCoord, int yCoord, int zCoord, float gauge){
+        Vec3f[] coords = groupBlockCoords(
+                0.525f,0.11f,gauge,
+                0.25f, 0.225f, gauge,
+                -0.25f, 0.75f, gauge,
+                -0.525f,0.865f,gauge);
         if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord-1,zCoord,3}})){
             coords[0].yCoord=0;
-            coords[1].yCoord=0.25;
+            coords[1].yCoord=0.25f;
         }
         if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord+1,zCoord,3}})){
-            coords[3].yCoord=1.05;
-            coords[2].yCoord=0.75;
+            coords[3].yCoord=1.05f;
+            coords[2].yCoord=0.75f;
         }
 
-        return coords;
+        return BlockRailCore.quadGenModel(coords[0],coords[1], coords[2], coords[3]);
     }
 
 
-    public static Vec3d[] groupBlockCoords(double x1, double z1, double x2, double z2, double x3, double z3, double x4, double z4){
-        return new Vec3d[]{
+    public static Vec3f[] groupBlockCoords(float x1, float z1, float x2, float z2, float x3, float z3, float x4, float z4){
+        return new Vec3f[]{
                 coordsFromBlock(x1,z1),
                 coordsFromBlock(x2,z2),
                 coordsFromBlock(x3,z3),
                 coordsFromBlock(x4,z4)};
     }
 
-    public static Vec3d coordsFromBlock(double x,  double z){
-        return new Vec3d(x+0.5, 0, z+0.5);
+    public static Vec3f coordsFromBlock(float x,  float z){
+        return new Vec3f(x+0.5f, 0, z+0.5f);
     }
 
-    public static Vec3d[] groupBlockCoords(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4){
-        return new Vec3d[]{
+    public static Vec3f[] groupBlockCoords(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4){
+        return new Vec3f[]{
                 coordsFromBlock(x1,y1,z1),
                 coordsFromBlock(x2,y2,z2),
                 coordsFromBlock(x3,y3,z3),
                 coordsFromBlock(x4,y4,z4)};
     }
 
-    public static Vec3d coordsFromBlock(double x, double y,  double z){
-        return new Vec3d(x+0.5, y, z+0.5);
+    public static Vec3f coordsFromBlock(float x, float y,  float z){
+        return new Vec3f(x+0.5f, y, z+0.5f);
     }
 
 
 
-    public static Vec3d[] makePath(double gauge, double length1, float angle1, double length2, float angle2, double length3, float angle3, double length4, float angle4){
-        return new Vec3d[]{
+    public static Vec3f[] makePath(float gauge, float length1, float angle1, float length2, float angle2, float length3, float angle3, float length4, float angle4){
+        return new Vec3f[]{
                 rotateYaw(length1, gauge, angle1, true),
                 rotateYaw(length2, gauge, angle2, false),
                 rotateYaw(length3, gauge, angle3, false),
                 rotateYaw(length4, gauge, angle4, true)
         };
     }
-    public static Vec3d rotateYaw(double xCoord, double zCoord, float yaw, boolean changeGauge) {
-        Vec3d xyz = new Vec3d(xCoord, 0, zCoord);
+    public static Vec3f rotateYaw(float xCoord, float zCoord, float yaw, boolean changeGauge) {
+        Vec3f xyz = new Vec3f(xCoord, 0, zCoord);
         //rotate yaw
         if (yaw != 0.0F) {
             yaw *= radianF;
-            double cos = MathHelper.cos(yaw);
-            double sin = MathHelper.sin(yaw);
+            float cos = MathHelper.cos(yaw);
+            float sin = MathHelper.sin(yaw);
 
             xyz.xCoord = (xCoord * cos) - (zCoord * sin);
             xyz.zCoord = (xCoord * sin) + (zCoord * cos);
@@ -465,7 +392,7 @@ public class RailVanillaShapes {
 
 
     //great in theory, doesn't work for shit in practice.
-    public static Vec3d[] setGauge(Vec3d[] path, double gauge){
+    public static Vec3d[] setGauge(Vec3d[] path, float gauge){
         float direction = (float)Math.toDegrees(Math.atan2(
                 path[1].xCoord - path[0].xCoord,
                 path[1].zCoord - path[0].zCoord));
