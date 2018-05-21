@@ -129,83 +129,21 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         return true;
     }
 
-    /**
-     * generated a 3 point bezier curve using De Casteljau's algorithm on each axis.
-     * @param P1 first point
-     * @param P2 second point (mostly modifies first)
-     * @param P3 third point (mostly modifies last)
-     * @param P4 end point
-     * @return the list of rail points to define positional data.
-     */
-    @Deprecated
-    protected static List<ModelRailSegment> quadGenModel(Vec3f P1, Vec3f P2, Vec3f P3, Vec3f P4){
+
+    protected static List<ModelRailSegment> quadGenModel(Vec3f P1, Vec3f P2, Vec3f P3, Vec3f P4, float[] railOffsets, float blockLength){
         double dX=P4.xCoord - P1.xCoord;
         double dZ=P4.zCoord - P1.zCoord;
-        double originalT =(Math.sqrt((dX*dX) + (dZ*dZ)))/ ClientProxy.railLoD;
-        double t=originalT;
-        List<float[]> points = new ArrayList<>();
-        points.add(new float[]{P1.xCoord,P1.yCoord,P1.zCoord});
-        while(t<=1+originalT) {
-            //define position
-            points.add(new float[]{
-                    (float) ((Math.pow(1 - t, 3) * P1.xCoord) + (3*Math.pow(1-t,2)*t*P2.xCoord) + (3*(1-t)*Math.pow(t,2)*P3.xCoord) + (Math.pow(t,3)*P4.xCoord)),//X
-                    (float) ((Math.pow(1 - t, 3) * P1.yCoord) + (3*Math.pow(1-t,2)*t*P2.yCoord) + (3*(1-t)*Math.pow(t,2)*P3.yCoord) + (Math.pow(t,3)*P4.yCoord)),//Y
-                    (float) ((Math.pow(1 - t, 3) * P1.zCoord) + (3*Math.pow(1-t,2)*t*P2.zCoord) + (3*(1-t)*Math.pow(t,2)*P3.zCoord) + (Math.pow(t,3)*P4.zCoord))//Z
-            });
-            t += originalT;
+        float segment = TrainsInMotion.proxy.isClient()?ClientProxy.railLoD:8;
+        segment*=blockLength;
+        if (segment<3){
+            segment=3;
         }
-        points.set(points.size()-2, new float[]{(float)P4.xCoord,(float)P4.yCoord,(float)P4.zCoord});
-
-        //now make the points
-        List<ModelRailSegment> segments = new ArrayList<>();
-        int i;
-        for (i = 0; i < points.size() - 1; i++) {
-
-            dX = points.get(i)[0] - (points.get(i+1)[0]);
-            dZ = points.get(i)[2] - (points.get(i+1)[2]);
-            double[] offsetInner = RailUtility.rotatePoint(new double[]{0,0,-0.0625}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
-            double[] offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
-
-            ModelRailSegment seg = new ModelRailSegment();
-            seg.position = new float[]{
-                    points.get(i)[0] * 16, points.get(i)[1] * 16, points.get(i)[2] * 16
-            };/*
-            seg.positionInner = new float[]{
-                    (float)(offsetInner[0]+points.get(i)[0]), (float)(offsetInner[1]+points.get(i)[1]), (float)(offsetInner[2]+points.get(i)[2])
-            };
-            seg.positionOuter = new float[]{
-                    (float)(offsetOuter[0]+points.get(i)[0]), (float)(offsetOuter[1]+points.get(i)[1]), (float)(offsetOuter[2]+points.get(i)[2])
-            };
-            seg.zOffset = new float[]{(float)offsetOuter[0],(float)offsetOuter[1],(float)offsetOuter[2]};
-            seg.regenModel();*/
-            segments.add(seg);
-        }
-/*
-        if (segments.size()>0) {
-            for (i = 0; i < segments.size() - 1; i++) {
-
-                segments.get(i).lastPositionInner = segments.get(i + 1).positionInner;
-                segments.get(i).lastPositionOuter = segments.get(i + 1).positionOuter;
-                segments.get(i).regenModel();
-            }
-
-            segments.get(segments.size()-1).lastPositionInner = segments.get(segments.size()-1).positionInner =null;
-            segments.get(segments.size()-1).lastPositionOuter = segments.get(segments.size()-1).lastPositionOuter = null;
-            segments.get(segments.size()-1).regenModel();
-        }*/
-        return segments;
-    }
-
-
-
-    protected static List<ModelRailSegment> quadGenModel(Vec3f P1, Vec3f P2, Vec3f P3, Vec3f P4, float[] railOffsets){
-        double dX=P4.xCoord - P1.xCoord;
-        double dZ=P4.zCoord - P1.zCoord;
-        double originalT =(Math.abs(P4.xCoord) + Math.abs(P4.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord))/ (3*(Math.abs(P4.xCoord) + Math.abs(P4.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord)));
+        double originalT =(Math.abs(P4.xCoord) + Math.abs(P4.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord))/ (segment*(Math.abs(P4.xCoord) + Math.abs(P4.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord)));
         double t=-originalT;
         int i;
+        //calculate the bezier curve
         List<float[]> points = new ArrayList<>();
-        for (i=0; i<3+3;i++){
+        for (i=0; i<segment+3;i++){
             //define position
             points.add(new float[]{
                     (float) ((Math.pow(1 - t, 3) * P1.xCoord) + (3*Math.pow(1-t,2)*t*P2.xCoord) + (3*(1-t)*Math.pow(t,2)*P3.xCoord) + (Math.pow(t,3)*P4.xCoord)),//X
@@ -224,18 +162,23 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         List<ModelRailSegment> segments = new ArrayList<>();
         for (i = 1; i < points.size() - 1; i++) {
 
-            dX = points.get(i-1)[0] - (points.get(i + 1)[0]);
-            dZ = points.get(i-1)[2] - (points.get(i + 1)[2]);
-
-            offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
-
+            //define the actual path
             ModelRailSegment seg = new ModelRailSegment();
             seg.position = new float[]{
                     points.get(i)[0] * 16, points.get(i)[1] * 16, points.get(i)[2] * 16
             };
+
+            //define the offset for model modifications.
+            dX = points.get(i-1)[0] - (points.get(i + 1)[0]);
+            dZ = points.get(i-1)[2] - (points.get(i + 1)[2]);
+            offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
             seg.zOffset = new float[]{(float)offsetOuter[0],(float)offsetOuter[1],(float)offsetOuter[2]};
 
+            //define the front positions for each model
             for (float f : railOffsets){
+                if (f==0f || !TrainsInMotion.proxy.isClient()){
+                    continue;
+                }
                 offsetInner = RailUtility.rotatePoint(new double[]{0,0,-0.0625+f}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
                 offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625+f}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
 
@@ -252,7 +195,8 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             segments.add(seg);
         }
 
-        if (segments.size()>0) {
+        //connect the back positions of each model to the previous model's front positions
+        if (segments.size()>0 && TrainsInMotion.proxy.isClient()) {
             int ii=0;
             for (i = 0; i < segments.size() - 1; i++) {
                 for (ii=0; ii<segments.get(i).models.size(); ii++) {
