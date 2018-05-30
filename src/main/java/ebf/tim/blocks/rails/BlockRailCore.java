@@ -69,14 +69,52 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public int getBasicRailMetadata(IBlockAccess world, EntityMinecart cart, int x, int y, int z) {
-        return world.getBlockMetadata(x,y,z);//RailVanillaShapes.processRailMeta(super.getBasicRailMetadata(world, cart, x, y, z), cart,x,y,z);
+        int meta = super.getBasicRailMetadata(world, cart, x, y, z);
+        if (cart == null || cart.getEntityData() == null){
+                return meta;
+            }
+        //first be sure the key exists, and create it if it doesn't, that way we be sure we don't crash. Also if it doesn't exist we can just return the base meta unchanged.
+                if (!cart.getEntityData().hasKey("tim.lastusedrail.meta")){
+                cart.getEntityData().setInteger("tim.lastusedrail.meta",meta);
+                return meta;
+            }
+        boolean changed = false;
+        switch (meta) {
+            //add support for intersections
+            case 0: {
+                //only part that theoretically works.
+                if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1) {
+                    meta = 1;
+                } else {
+                    changed = true;
+                }
+                break;
+            }
+            case 1: {
+                if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 0) {
+                    meta = 0;
+                } else {
+                    changed = true;
+                }
+                break;
+            }
+            default: {
+                changed = true;
+            }
+        }
+        //note changes in the entity so we can keep track of whether or not this is an intersection
+        if (changed){
+                cart.getEntityData().setInteger("tim.lastusedrail.meta",meta);
+                cart.getEntityData().setInteger("tim.lastusedrail.x",x);
+                cart.getEntityData().setInteger("tim.lastusedrail.z",z);
+            }
+        return meta;
     }
 
 
     @Override
     public void randomDisplayTick(World worldObj, int xCoord, int yCoord, int zCoord, Random p_149674_5_) {
         super.randomDisplayTick(worldObj, xCoord, yCoord, zCoord, p_149674_5_);
-        updateTick(worldObj, xCoord, yCoord, zCoord, p_149674_5_);
     }
 
 
@@ -130,9 +168,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
 
-    protected static List<ModelRailSegment> quadGenModel(Vec3f P1, Vec3f P2, Vec3f P3, Vec3f P4, float[] railOffsets, float blockLength){
-        double dX=P4.xCoord - P1.xCoord;
-        double dZ=P4.zCoord - P1.zCoord;
+    protected static List<ModelRailSegment> quadGenModel(Vec3f P1, Vec3f P2, Vec3f P3, Vec3f P4, float[] railOffsets, float blockLength, RailTileEntity tile){
         float segment = TrainsInMotion.proxy.isClient()?ClientProxy.railLoD:8;
         segment*=blockLength;
         if (segment<3){
@@ -155,8 +191,43 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         points.set(points.size()-2, new float[]{P4.xCoord,P4.yCoord,P4.zCoord});
         points.set(1, new float[]{P1.xCoord,P1.yCoord,P1.zCoord});
 
-        double[] offsetInner;
-        double[] offsetOuter;
+        return genSegments(points, railOffsets, tile);
+    }
+
+    protected static List<ModelRailSegment> triGenModel(Vec3f P1, Vec3f P2, Vec3f P3, float[] railOffsets, float blockLength, RailTileEntity tile){
+        float segment = TrainsInMotion.proxy.isClient()?ClientProxy.railLoD:8;
+        segment*=blockLength;
+        if (segment<3){
+            segment=3;
+        }
+        double originalT =(Math.abs(P3.xCoord) + Math.abs(P3.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord))/ (segment*(Math.abs(P3.xCoord) + Math.abs(P3.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord)));
+        double t=-originalT;
+        int i;
+        //calculate the bezier curve
+        List<float[]> points = new ArrayList<>();
+        for (i=0; i<segment+3;i++){
+            //define position
+            points.add(new float[]{
+                    (float) ((Math.pow(1 - t, 2) * P1.xCoord) + (2 * (1 - t) * t * P2.xCoord) + ((Math.pow(t, 2) * P3.xCoord))),//X
+                    (float) ((Math.pow(1 - t, 2) * P1.yCoord) + (2 * (1 - t) * t * P2.yCoord) + ((Math.pow(t, 2) * P3.yCoord))),//Y
+                    (float) ((Math.pow(1 - t, 2) * P1.zCoord) + (2 * (1 - t) * t * P2.zCoord) + ((Math.pow(t, 2) * P3.zCoord))),//X
+            });
+            t += originalT;
+        }
+        points.set(points.size()-2, new float[]{P3.xCoord,P3.yCoord,P3.zCoord});
+        points.set(1, new float[]{P1.xCoord,P1.yCoord,P1.zCoord});
+
+        return genSegments(points, railOffsets, tile);
+    }
+
+    public static List<ModelRailSegment> genSegments(List<float[]> points, float[] railOffsets, RailTileEntity tile){
+
+        double[] offsetInner, offsetOuter;
+        double dX, dZ;
+        int i, length;
+        Float inner, left, right;
+        float[] startEndnd=new float[]{0,0};
+
 
         //now make the points
         List<ModelRailSegment> segments = new ArrayList<>();
@@ -174,10 +245,24 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
             seg.zOffset = new float[]{(float)offsetOuter[0],(float)offsetOuter[1],(float)offsetOuter[2]};
 
+            left = null;
+            right = null;
+
             //define the front positions for each model
             for (float f : railOffsets){
                 if (f==0f || !TrainsInMotion.proxy.isClient()){
                     continue;
+                }
+                //set the offsets for ballast and ties
+                if (left ==null){
+                    left = f;
+                } else if (f<left){
+                    left=f;
+                }
+                if (right ==null){
+                    right = f;
+                } else if (f>right){
+                    right=f;
                 }
                 offsetInner = RailUtility.rotatePoint(new double[]{0,0,-0.0625+f}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
                 offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625+f}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
@@ -188,8 +273,47 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                         },
                         new float[]{
                                 (float)(offsetOuter[0]+points.get(i)[0]), (float)(offsetOuter[1]+points.get(i)[1]), (float)(offsetOuter[2]+points.get(i)[2])
-                        }
+                        },tile, (byte)0
                 ));
+            }
+
+
+            if ( left!=null){ //checking if left is null is technically faster than seeing if the array of rails has more than 0 entries
+                //this is used for texture tiling along the path
+                if (startEndnd[1]>0.029f){
+                    startEndnd[1]=0;
+                }
+                startEndnd[0]=startEndnd[1];
+                startEndnd[1]+=(Math.abs(dX)+Math.abs(dZ)) *0.0155f;
+                if (startEndnd[1]>0.03f){
+                    startEndnd[1]=0.03f;
+                }
+
+                //this segments it horizontally for tiling.
+                length = (int)(((Math.abs(left)+Math.abs(right))*1.6)+0.5f);//cast as an int, lazy rounding down to whole number.
+                inner =((Math.abs(left)+Math.abs(right))*1.6f);
+                if(length==0){
+                    length=1;
+                    inner=1F;
+                }
+
+                //this actually gens the parts
+                for(int ii=0; ii<length;ii++) {
+                    offsetInner = RailUtility.rotatePoint(new double[]{0, 0, (-inner * 0.5f) + ((inner / length) * (ii))}, 0, (float) Math.toDegrees(Math.atan2(dZ, dX)), 0);
+                    offsetOuter = RailUtility.rotatePoint(new double[]{0, 0, (-inner * 0.5f) + ((inner / length) * (ii + 1))}, 0, (float) Math.toDegrees(Math.atan2(dZ, dX)), 0);
+
+                    ModelRailSegment.subModel model = seg.genNewSubModel(
+                            new float[]{
+                                    (float) (offsetInner[0] + points.get(i)[0]), (float) (offsetInner[1] + points.get(i)[1]), (float) (offsetInner[2] + points.get(i)[2])
+                            },
+                            new float[]{
+                                    (float) (offsetOuter[0] + points.get(i)[0]), (float) (offsetOuter[1] + points.get(i)[1]), (float) (offsetOuter[2] + points.get(i)[2])
+                            }, tile, (byte) 1
+                    );
+                    model.offset[0] = startEndnd[0];
+                    model.offset[1] = startEndnd[1];
+                    seg.models.add(model);
+                }
             }
 
             segments.add(seg);
@@ -213,11 +337,4 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         }
         return segments;
     }
-
-
-/* three point bezier
-                        (Math.pow(1 - t, 2) * P1.xCoord) + (2 * (1 - t) * t * P2.xCoord) + ((Math.pow(t, 2) * P3.xCoord)),//X
-                        (Math.pow(1 - t, 2) * P1.yCoord) + (2 * (1 - t) * t * P2.yCoord) + ((Math.pow(t, 2) * P3.yCoord)),//Y
-                        (Math.pow(1 - t, 2) * P1.zCoord) + (2 * (1 - t) * t * P2.zCoord) + ((Math.pow(t, 2) * P3.zCoord)),//X
- */
 }

@@ -2,6 +2,7 @@ package ebf.tim.blocks;
 
 import ebf.tim.blocks.rails.RailVanillaShapes;
 import ebf.tim.models.rails.ModelRailSegment;
+import net.minecraft.item.Item;
 import tmt.Tessellator;
 import net.minecraft.block.Block;
 import net.minecraft.crash.CrashReportCategory;
@@ -20,6 +21,12 @@ public class RailTileEntity extends TileEntity {
 
     private AxisAlignedBB boundingBox = null;
     private List<?extends ModelRailSegment> path[] = null;
+    //management variables
+    public Block ballast = null;
+    public Block ties = null;
+    public Item ingot;
+    //render data
+    public int metal = 0xcccccc;
 
     public float getRailSpeed(){
         float speed =0.4f;
@@ -28,7 +35,6 @@ public class RailTileEntity extends TileEntity {
         return speed;
     }
 
-    //todo rework this list so its not an array of lists, we only ever get a single list anyway!
     @SafeVarargs
     public final void setRenderShape(List<?extends ModelRailSegment> ... newShape){
 
@@ -49,8 +55,7 @@ public class RailTileEntity extends TileEntity {
             }
                 //Tessellator.bindTexture(texture);
             GL11.glPushMatrix();
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-            //GL11.glDisable(GL11.GL_LIGHTING);
+            GL11.glDisable(GL11.GL_LIGHTING);
 
             //RenderHelper.enableGUIStandardItemLighting();
             //int color = Minecraft.getMinecraft().renderEngine.getTexture().getGlTextureId();
@@ -64,13 +69,12 @@ public class RailTileEntity extends TileEntity {
                 for (ModelRailSegment point : railSegments) {
 
                     for(ModelRailSegment.subModel model : point.models) {
-                        model.render(tessellator, 0, i == 0, i == last);
+                        model.render(tessellator, i == 0, i == last, ballast, ties);
                     }
                     i++;
                 }
             }
-            //GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            GL11.glEnable(GL11.GL_LIGHTING);
             GL11.glPopMatrix();
 
         } else {super.func_145828_a(report);}
@@ -100,56 +104,56 @@ public class RailTileEntity extends TileEntity {
                 //Z straight
                 case 0: {
                     setRenderShape(
-                            RailVanillaShapes.vanillaZStraight(worldObj, xCoord, yCoord, zCoord, gauge750mm));
+                            RailVanillaShapes.vanillaZStraight(worldObj, xCoord, yCoord, zCoord, gauge750mm, this));
                     return;
                 }
                 //X straight
                 case 1: {
                     setRenderShape(
-                            RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord, gauge750mm));
+                            RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord, gauge750mm, this));
                     return;
                 }
 
                 //curves
                 case 9: {
                     setRenderShape(
-                            RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord, gauge750mm));
+                            RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord, gauge750mm, this));
                     return;
                 }
                 case 8: {
                     setRenderShape(
-                            RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord, gauge750mm));
+                            RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord, gauge750mm, this));
                     return;
                 }
                 case 7: {
                     setRenderShape(
-                            RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord, gauge750mm));
+                            RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord, gauge750mm, this));
                     return;
                 }
                 case 6: {
-                    setRenderShape(RailVanillaShapes.vanillaCurve6(worldObj, xCoord, yCoord, zCoord, gauge750mm));
+                    setRenderShape(RailVanillaShapes.vanillaCurve6(worldObj, xCoord, yCoord, zCoord, gauge750mm, this));
                     return;
                 }
                 //Z slopes
                 case 5 :{
                     setRenderShape(
-                            RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord, gauge750mm));
+                            RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord, gauge750mm, this));
                     return;
                 }
                 case 4 :{
                     setRenderShape(
-                            RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord, gauge750mm));
+                            RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord, gauge750mm, this));
                     return;
                 }
                 //X slopes
                 case 2 :{
                     setRenderShape(
-                            RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord, gauge750mm));
+                            RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord, gauge750mm, this));
                     return;
                 }
                 case 3 :{
                     setRenderShape(
-                            RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord, gauge750mm));
+                            RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord, gauge750mm, this));
                     return;
                 }
             }
