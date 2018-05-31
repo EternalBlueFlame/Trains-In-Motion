@@ -124,9 +124,9 @@ public class GroupedModelRender {
             for (ModelRendererTurbo block : boxRefrence) {
                 GL11.glPushMatrix();
                 //define position from model
-                GL11.glTranslated(((block.offsetX + block.rotationPointX) / 16),
-                        ((block.offsetY + block.rotationPointY) / 16) -0.06,
-                        ((block.offsetZ + block.rotationPointZ) / 16) +0.06);
+                GL11.glTranslated(((block.rotationPointX) / 16),
+                        ((block.rotationPointY) / 16) -0.06,
+                        ((block.rotationPointZ) / 16) +0.06);
                 //define the rotation from the model
                 GL11.glRotated(block.rotateAngleX * RailUtility.degreesD, 1, 0, 0);
                 GL11.glRotated(block.rotateAngleY * RailUtility.degreesD, 0, 1, 0);

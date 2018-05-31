@@ -13,7 +13,7 @@ public class TechneModelRenderer extends ModelRendererTurbo {
     /**define the part with no texture offset, but using a static texture size of 512x512 and a defined name.*/
     public TechneModelRenderer(ModelBase modelBase, String name) {
         super(modelBase, name);
-        this.setTextureSize(staticTextureSize,staticTextureSize);
+        this.textureWidth = this.textureHeight = staticTextureSize;
     }
     /**define the part with a texture offset, but using a static name and texture size of 512x512*/
     public TechneModelRenderer(ModelBase modelBase, int textureOffsetX, int textureOffsetY) {
@@ -28,8 +28,7 @@ public class TechneModelRenderer extends ModelRendererTurbo {
 
     /**
      * <h2>set Rotation point</h2>
-     * this set's the rotation point with the offsets defined in
-     * @see #addBox(float, float, float, float, float, float)
+     * this set's the rotation point with the offsets
      */
     @Override
     public void setRotationPoint(float pointX, float pointY, float pointZ) {

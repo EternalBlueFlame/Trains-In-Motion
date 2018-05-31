@@ -190,32 +190,32 @@ public class ParticleFX {
         //set the position
         GL11.glTranslated(posX - entity.posX, posY - entity.posY, posZ - entity.posZ);
         //now actually render the sides.
-        tessellator.setNormal(0, 0, -1);
+        //tessellator.setNormal(0, 0, -1);
         tessellator.addVertex(entity.boundingBoxF[0], entity.boundingBoxF[3], entity.boundingBoxF[4]);
         tessellator.addVertex(entity.boundingBoxF[1], entity.boundingBoxF[3], entity.boundingBoxF[4]);
         tessellator.addVertex(entity.boundingBoxF[1], entity.boundingBoxF[2], entity.boundingBoxF[4]);
         tessellator.addVertex(entity.boundingBoxF[0], entity.boundingBoxF[2], entity.boundingBoxF[4]);
-        tessellator.setNormal(0, 0, 1);
+        //tessellator.setNormal(0, 0, 1);
         tessellator.addVertex(entity.boundingBoxF[0], entity.boundingBoxF[2], entity.boundingBoxF[5]);
         tessellator.addVertex(entity.boundingBoxF[1], entity.boundingBoxF[2], entity.boundingBoxF[5]);
         tessellator.addVertex(entity.boundingBoxF[1], entity.boundingBoxF[3], entity.boundingBoxF[5]);
         tessellator.addVertex(entity.boundingBoxF[0], entity.boundingBoxF[3], entity.boundingBoxF[5]);
-        tessellator.setNormal(0, -1, 0);
+        //tessellator.setNormal(0, -1, 0);
         tessellator.addVertex(entity.boundingBoxF[0], entity.boundingBoxF[2], entity.boundingBoxF[4]);
         tessellator.addVertex(entity.boundingBoxF[1], entity.boundingBoxF[2], entity.boundingBoxF[4]);
         tessellator.addVertex(entity.boundingBoxF[1], entity.boundingBoxF[2], entity.boundingBoxF[5]);
         tessellator.addVertex(entity.boundingBoxF[0], entity.boundingBoxF[2], entity.boundingBoxF[5]);
-        tessellator.setNormal(0, 1, 0);
+        //tessellator.setNormal(0, 1, 0);
         tessellator.addVertex(entity.boundingBoxF[0], entity.boundingBoxF[3], entity.boundingBoxF[5]);
         tessellator.addVertex(entity.boundingBoxF[1], entity.boundingBoxF[3], entity.boundingBoxF[5]);
         tessellator.addVertex(entity.boundingBoxF[1], entity.boundingBoxF[3], entity.boundingBoxF[4]);
         tessellator.addVertex(entity.boundingBoxF[0], entity.boundingBoxF[3], entity.boundingBoxF[4]);
-        tessellator.setNormal(-1, 0, 0);
+        //tessellator.setNormal(-1, 0, 0);
         tessellator.addVertex(entity.boundingBoxF[0], entity.boundingBoxF[2], entity.boundingBoxF[5]);
         tessellator.addVertex(entity.boundingBoxF[0], entity.boundingBoxF[3], entity.boundingBoxF[5]);
         tessellator.addVertex(entity.boundingBoxF[0], entity.boundingBoxF[3], entity.boundingBoxF[4]);
         tessellator.addVertex(entity.boundingBoxF[0], entity.boundingBoxF[2], entity.boundingBoxF[4]);
-        tessellator.setNormal(1, 0, 0);
+        //tessellator.setNormal(1, 0, 0);
         tessellator.addVertex(entity.boundingBoxF[1], entity.boundingBoxF[2], entity.boundingBoxF[4]);
         tessellator.addVertex(entity.boundingBoxF[1], entity.boundingBoxF[3], entity.boundingBoxF[4]);
         tessellator.addVertex(entity.boundingBoxF[1], entity.boundingBoxF[3], entity.boundingBoxF[5]);

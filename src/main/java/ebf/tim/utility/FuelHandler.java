@@ -93,7 +93,7 @@ public class FuelHandler{
 			burnTime--;
 		}
 		//if there's a fluid item in the slot and the train can consume the entire thing
-		if (train.getStackInSlot(1) != null &&
+		if (train.getStackInSlot(1) != null && FluidContainerRegistry.getFluidForFilledItem(train.getStackInSlot(1)) !=null &&
 				train.fill(null, isUseableFluid(train.getStackInSlot(1), train), false) >= FluidContainerRegistry.getFluidForFilledItem(train.getStackInSlot(1)).amount) {
 			train.fill(null, isUseableFluid(train.getStackInSlot(1), train), true);
 			if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {

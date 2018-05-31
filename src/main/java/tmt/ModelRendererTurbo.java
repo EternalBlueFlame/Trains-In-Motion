@@ -26,7 +26,7 @@ import java.util.*;
  * @license http://fexcraft.net/license?id=tmt
  *
  */
-public class ModelRendererTurbo extends ModelRenderer {
+public class ModelRendererTurbo {
 
     private PositionTransformVertex vertices[];
     private TexturedPolygon faces[];
@@ -44,7 +44,6 @@ public class ModelRendererTurbo extends ModelRenderer {
     public boolean field_1402_i;
     public boolean forcedRecompile;
     public boolean useLegacyCompiler;
-    public List<?> childModels;
     public final String boxName;
     public boolean isShape = false;
     
@@ -61,11 +60,22 @@ public class ModelRendererTurbo extends ModelRenderer {
     public float xScale;
     public float yScale;
     public float zScale;
+
+    //replaces reliance on ModelRenderer
+    public float textureWidth=0;
+    public float textureHeight=0;
+
+    public float rotateAngleX=0;
+    public float rotateAngleY=0;
+    public float rotateAngleZ=0;
+
+    public float rotationPointX=0;
+    public float rotationPointY=0;
+    public float rotationPointZ=0;
     
 	private static final float pi = (float)Math.PI;
 	
 	public ModelRendererTurbo(ModelBase modelbase, String s){
-		super(modelbase, s);
     	flip = false;
         compiled = false;
         displayList = 0;
@@ -1449,6 +1459,19 @@ public class ModelRendererTurbo extends ModelRenderer {
         rotationPointY = y;
         rotationPointZ = z;
     }
+
+    /**
+     * Sets the rotation point of the shape, relative to the model's origins. Note that changing
+     * the offsets will not change the pivot of the model.
+     * @param x the x-rotation point of the shape
+     * @param y the y-rotation point of the shape
+     * @param z the z-rotation point of the shape
+     */
+    public void setRotationPoint(float x, float y, float z){
+        rotationPointX = x;
+        rotationPointY = y;
+        rotationPointZ = z;
+    }
     
     /**
      * Mirrors the model in any direction.
@@ -1631,31 +1654,15 @@ public class ModelRendererTurbo extends ModelRenderer {
                 GL11.glRotatef(rotateAngleX * 57.29578F, 1.0F, 0.0F, 0.0F);
             }
             callDisplayList();
-            if(childModels != null){
-                System.out.println("sware to drunk im not god theres actually" + childModels.size());
-                for(Object child : childModels){
-                    ((ModelRenderer)child).render(scale);
-                }
-            }
             GL11.glPopMatrix();
         } else
         if(rotationPointX != 0.0F || rotationPointY != 0.0F || rotationPointZ != 0.0F){
             GL11.glTranslatef(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
             callDisplayList();
-            if(childModels != null){
-                for(Object child : childModels){
-                    ((ModelRenderer)child).render(scale);
-                }
-            }
             GL11.glTranslatef(-rotationPointX * scale, -rotationPointY * scale, -rotationPointZ * scale);
         }
         else{
         	callDisplayList();
-        	if(childModels != null){
-                for(Object child : childModels){
-                    ((ModelRenderer)child).render(scale);
-                }
-            }
         }
     }
     
@@ -1710,7 +1717,7 @@ public class ModelRendererTurbo extends ModelRenderer {
             GL11.glTranslatef(rotationPointX * f, rotationPointY * f, rotationPointZ * f);
         }
     }
-    
+
     private void callDisplayList(){
     	if(useLegacyCompiler){
     		GL11.glCallList(displayList);
@@ -1734,14 +1741,13 @@ public class ModelRendererTurbo extends ModelRenderer {
     	if(useLegacyCompiler){
     		compileLegacyDisplayList(scale, isTextured);
     	}
-    	else{    		
-    		Collection<TextureGroup> textures = textureGroup.values();
-    		Iterator<TextureGroup> itr = textures.iterator();
+    	else{
+    		Iterator<TextureGroup> itr = textureGroup.values().iterator();
     		displayListArray = new int[textureGroup.size()];
+            Tessellator tessellator = Tessellator.getInstance();
     		for(int i = 0; itr.hasNext(); i++){
     			displayListArray[i] = GLAllocation.generateDisplayLists(1);
     			GL11.glNewList(displayListArray[i], GL11.GL_COMPILE);
-    			Tessellator tessellator = Tessellator.getInstance();
     			TextureGroup usedGroup = itr.next();
     			for(int j = 0; j < usedGroup.poly.size(); j++){
     				usedGroup.poly.get(j).draw(tessellator, scale, isTextured);
