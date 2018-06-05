@@ -3,7 +3,7 @@ package ebf.tim.models;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.util.ResourceLocation;
-import tmt.ModelBase;
+import fexcraft.tmt.slim.ModelBase;
 
 /**
  * <h1>New Bogie</h1>

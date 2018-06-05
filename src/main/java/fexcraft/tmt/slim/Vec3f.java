@@ -1,4 +1,4 @@
-package tmt;
+package fexcraft.tmt.slim;
 
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;

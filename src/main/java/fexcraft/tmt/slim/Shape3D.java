@@ -1,4 +1,4 @@
-package tmt;
+package fexcraft.tmt.slim;
 
 public class Shape3D {
 	

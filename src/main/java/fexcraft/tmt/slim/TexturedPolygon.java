@@ -1,4 +1,4 @@
-package tmt;
+package fexcraft.tmt.slim;
 
 import org.lwjgl.opengl.GL11;
 

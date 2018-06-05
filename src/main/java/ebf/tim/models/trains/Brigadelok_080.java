@@ -11,8 +11,8 @@ package ebf.tim.models.trains;
 
 import ebf.tim.models.StaticModelAnimator;
 import net.minecraft.entity.Entity;
-import tmt.ModelBase;
-import tmt.ModelRendererTurbo;
+import fexcraft.tmt.slim.ModelBase;
+import fexcraft.tmt.slim.ModelRendererTurbo;
 
 public class Brigadelok_080 extends ModelBase
 {

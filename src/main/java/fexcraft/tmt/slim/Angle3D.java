@@ -1,4 +1,4 @@
-package tmt;
+package fexcraft.tmt.slim;
 
 /**
  * This class handles angles. Basically all it does it store angles. You can

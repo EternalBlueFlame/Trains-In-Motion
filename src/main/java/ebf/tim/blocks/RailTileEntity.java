@@ -3,7 +3,7 @@ package ebf.tim.blocks;
 import ebf.tim.blocks.rails.RailVanillaShapes;
 import ebf.tim.models.rails.ModelRailSegment;
 import net.minecraft.item.Item;
-import tmt.Tessellator;
+import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.block.Block;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.init.Blocks;

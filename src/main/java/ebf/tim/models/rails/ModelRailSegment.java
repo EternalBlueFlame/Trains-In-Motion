@@ -18,7 +18,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
-import tmt.Tessellator;
+import fexcraft.tmt.slim.Tessellator;
 
 import java.util.ArrayList;
 import java.util.List;

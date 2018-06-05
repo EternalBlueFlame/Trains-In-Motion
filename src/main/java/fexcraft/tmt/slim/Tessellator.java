@@ -1,4 +1,4 @@
-package tmt;
+package fexcraft.tmt.slim;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

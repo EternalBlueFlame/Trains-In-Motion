@@ -11,7 +11,7 @@ import ebf.tim.items.ItemKey;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.ParticleFX;
 import ebf.tim.models.TransportRenderData;
-import tmt.Vec3d;
+import fexcraft.tmt.slim.Vec3d;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.*;
@@ -36,7 +36,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.*;
-import tmt.ModelBase;
+import fexcraft.tmt.slim.ModelBase;
 
 import javax.annotation.Nullable;
 import java.util.*;

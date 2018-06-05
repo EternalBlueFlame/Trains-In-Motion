@@ -1,4 +1,4 @@
-package tmt;
+package fexcraft.tmt.slim;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

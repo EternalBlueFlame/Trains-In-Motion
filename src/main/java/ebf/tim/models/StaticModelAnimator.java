@@ -1,7 +1,7 @@
 package ebf.tim.models;
 
 import ebf.tim.utility.RailUtility;
-import tmt.ModelRendererTurbo;
+import fexcraft.tmt.slim.ModelRendererTurbo;
 
 import static ebf.tim.utility.RailUtility.degreesF;
 

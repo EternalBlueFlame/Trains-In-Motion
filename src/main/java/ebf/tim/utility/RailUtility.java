@@ -10,7 +10,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
-import tmt.Vec3d;
+import fexcraft.tmt.slim.Vec3d;
 import zoranodensha.api.structures.tracks.ITrackBase;
 
 import java.util.*;

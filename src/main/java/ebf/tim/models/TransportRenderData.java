@@ -1,8 +1,8 @@
 package ebf.tim.models;
 
 
-import tmt.ModelBase;
-import tmt.ModelRendererTurbo;
+import fexcraft.tmt.slim.ModelBase;
+import fexcraft.tmt.slim.ModelRendererTurbo;
 
 import java.util.ArrayList;
 import java.util.List;

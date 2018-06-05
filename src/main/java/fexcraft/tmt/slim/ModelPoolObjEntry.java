@@ -1,4 +1,4 @@
-package tmt;
+package fexcraft.tmt.slim;
 
 import java.io.BufferedReader;
 import java.io.File;

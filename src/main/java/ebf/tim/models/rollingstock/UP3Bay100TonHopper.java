@@ -13,8 +13,8 @@ package ebf.tim.models.rollingstock;
 
 import ebf.tim.models.GroupedModelRender;
 import net.minecraft.entity.Entity;
-import tmt.ModelBase;
-import tmt.ModelRendererTurbo;
+import fexcraft.tmt.slim.ModelBase;
+import fexcraft.tmt.slim.ModelRendererTurbo;
 
 public class UP3Bay100TonHopper extends ModelBase {
 	private static final int textureX = 256;

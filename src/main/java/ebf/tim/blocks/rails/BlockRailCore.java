@@ -4,23 +4,18 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.models.rails.*;
 import ebf.tim.utility.ClientProxy;
-import ebf.tim.utility.CommonProxy;
 import net.minecraft.block.Block;
-import tmt.Vec3d;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.block.BlockRail;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import tmt.Vec3f;
+import fexcraft.tmt.slim.Vec3f;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 

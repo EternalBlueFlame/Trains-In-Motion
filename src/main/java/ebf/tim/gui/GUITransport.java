@@ -4,7 +4,7 @@ import codechicken.nei.NEIClientConfig;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
-import tmt.Tessellator;
+import fexcraft.tmt.slim.Tessellator;
 import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.ClientProxy;

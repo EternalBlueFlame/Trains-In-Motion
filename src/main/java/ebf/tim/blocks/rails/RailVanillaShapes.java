@@ -2,11 +2,9 @@ package ebf.tim.blocks.rails;
 
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.models.rails.ModelRailSegment;
-import ebf.tim.utility.RailUtility;
 import net.minecraft.util.MathHelper;
-import tmt.Vec3d;
 import net.minecraft.world.World;
-import tmt.Vec3f;
+import fexcraft.tmt.slim.Vec3f;
 
 import java.util.List;
 
@@ -394,7 +392,7 @@ public class RailVanillaShapes {
     /**
      * defines a path based on the provided x/y/z vectors.
      * this is intended for use with
-     * @see BlockRailCore#quadGenModel(tmt.Vec3f, tmt.Vec3f, tmt.Vec3f, tmt.Vec3f, float[], float, RailTileEntity)
+     * @see BlockRailCore#quadGenModel(Vec3f, Vec3f, Vec3f, Vec3f, float[], float, RailTileEntity)
      * @param yaw rotates the path if it's not 0
      * @return
      */
@@ -431,7 +429,7 @@ public class RailVanillaShapes {
     /**
      * defines a path based on the provided x/y/z vectors.
      * this is intended for use with
-     * @see BlockRailCore#triGenModel(tmt.Vec3f, tmt.Vec3f, tmt.Vec3f, float[], float, RailTileEntity)
+     * @see BlockRailCore#triGenModel(Vec3f, Vec3f, Vec3f, float[], float, RailTileEntity)
      * @param yaw rotates the path if it's not 0
      * @return
      */

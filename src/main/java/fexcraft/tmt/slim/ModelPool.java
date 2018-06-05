@@ -1,4 +1,4 @@
-package tmt;
+package fexcraft.tmt.slim;
 
 import cpw.mods.fml.common.Loader;
 import org.apache.commons.io.IOUtils;

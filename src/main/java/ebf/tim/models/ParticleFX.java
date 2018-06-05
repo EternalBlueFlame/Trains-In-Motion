@@ -4,7 +4,7 @@ import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.util.AxisAlignedBB;
 import org.lwjgl.opengl.GL11;
-import tmt.Tessellator;
+import fexcraft.tmt.slim.Tessellator;
 
 import java.util.ArrayList;
 import java.util.List;
