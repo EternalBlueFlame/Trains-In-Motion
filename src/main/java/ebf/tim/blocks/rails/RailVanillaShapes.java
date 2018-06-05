@@ -25,30 +25,37 @@ public class RailVanillaShapes {
                 0,0, 0,
                 0,0, -0.5f
         );
+        float blockLength=1;
 
 
         //intersections
         if(checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,1},{xCoord, yCoord,zCoord+2,0}})){
             coords[0]=rotateYaw(0,0,0,1);
+            blockLength+=0.5f;
         }
         if(checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,1},{xCoord, yCoord,zCoord-2,0}})){
             coords[2]=rotateYaw(0,0,0,-1);
+            blockLength+=0.5f;
         }
         //cover curve blending
         if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,7},{xCoord-1, yCoord,zCoord-1,9}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,6},{xCoord+1, yCoord,zCoord-1,8}})){
             coords[2]=rotateYaw(0,0,0,0f);
             coords[1]=rotateYaw(0,0,0,0.25f);
+            blockLength-=0.25f;
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,9}, {xCoord+1, yCoord,zCoord+1,7}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,8},{xCoord-1, yCoord,zCoord+1,6}})){
             coords[0]=rotateYaw(0,0,0,0f);
             coords[1]=rotateYaw(0,0,0,-0.25f);
+            blockLength-=0.25f;
         }else if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,7 }}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,6}})){
             coords[0]=rotateYaw(0,0,0,1.5f);
+            blockLength+=1f;
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,9}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,8}})) {
             coords[2]=rotateYaw(0,0,0,-1.5f);
+            blockLength+=1f;
         }
 
 
@@ -66,7 +73,7 @@ public class RailVanillaShapes {
             coords[2].yCoord = -0.15f;
         }
 
-        return BlockRailCore.triGenModel(coords[0],coords[1], coords[2], gauge, 1, tile);
+        return BlockRailCore.triGenModel(coords[0],coords[1], coords[2], gauge, blockLength, tile);
     }
 
     public static List<?extends ModelRailSegment> vanillaXStraight(World worldObj, int xCoord, int yCoord, int zCoord, float[] gauge, RailTileEntity tile){
@@ -75,13 +82,16 @@ public class RailVanillaShapes {
                 0f,0,0,
                 0.5f,0,0
         );
+        float blockLength=1;
 
         //intersections
         if(checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,0},{xCoord-2, yCoord,zCoord,1}})){
             coords[0]=rotateYaw(0,-1,0,0);
+            blockLength+=0.5f;
         }
         if(checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,0},{xCoord+2, yCoord,zCoord,1}})){
             coords[2]=rotateYaw(0,1,0,0);
+            blockLength+=0.5f;
         }
 
 
@@ -91,17 +101,21 @@ public class RailVanillaShapes {
 
             coords[0]=rotateYaw(0,0,0,0);
             coords[1]=rotateYaw(0,0.25f,0,0);
+            blockLength-=0.25f;
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,7}, {xCoord+1, yCoord,zCoord+1,9}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,8},{xCoord+1, yCoord,zCoord-1,6}})){
 
             coords[2]=rotateYaw(0,0,0,0);
             coords[1]=rotateYaw(0,-0.25f,0,0);
+            blockLength-=0.25f;
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,9}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,6}})){
             coords[2]=rotateYaw(0,1.5f,0,0);
+            blockLength+=1f;
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,7}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,8}})){
             coords[0]=rotateYaw(0,1.5f,0,0);
+            blockLength+=1f;
         }
 
         //slopes
@@ -119,7 +133,7 @@ public class RailVanillaShapes {
         }
 
 
-        return BlockRailCore.triGenModel(coords[0],coords[1], coords[2], gauge, 1, tile);
+        return BlockRailCore.triGenModel(coords[0],coords[1], coords[2], gauge, blockLength, tile);
     }
 
 
@@ -154,7 +168,7 @@ public class RailVanillaShapes {
             coords[0].yCoord = 0.15f;
         }
 
-        return BlockRailCore.triGenModel(coords[0],coords[1], coords[2], gauge, 1, tile);
+        return BlockRailCore.triGenModel(coords[0],coords[1], coords[2], gauge, 0.75f, tile);
     }
 
     public static List<?extends ModelRailSegment> vanillaCurve8(World worldObj, int xCoord, int yCoord, int zCoord, float[] gauge, RailTileEntity tile){
@@ -193,7 +207,7 @@ public class RailVanillaShapes {
             coords[2].yCoord = -0.15f;
         }
 
-        return BlockRailCore.triGenModel(coords[0],coords[1], coords[2], gauge, 1, tile);
+        return BlockRailCore.triGenModel(coords[0],coords[1], coords[2], gauge, 0.75f, tile);
     }
 
 

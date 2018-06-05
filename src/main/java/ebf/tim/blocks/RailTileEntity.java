@@ -24,7 +24,11 @@ public class RailTileEntity extends TileEntity {
     //management variables
     public Block ballast = null;
     public Block ties = null;
+    public Block wires = null;
     public Item ingot;
+    public int snow=0;
+    public int timer=0;
+    public int overgrowth=0;
     //render data
     public int metal = 0xcccccc;
 
@@ -37,9 +41,7 @@ public class RailTileEntity extends TileEntity {
 
     @SafeVarargs
     public final void setRenderShape(List<?extends ModelRailSegment> ... newShape){
-
             path = newShape;
-
     }
 
     private static final double[] color = {
