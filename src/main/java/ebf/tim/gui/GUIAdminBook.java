@@ -1,46 +1,22 @@
 package ebf.tim.gui;
 
-import codechicken.nei.NEIClientConfig;
 import ebf.tim.TrainsInMotion;
-import ebf.tim.entities.EntityTrainCore;
-import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.items.ItemAdminBook;
-import ebf.tim.networking.PacketKeyPress;
-import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
-import net.minecraftforge.fluids.FluidRegistry;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import org.w3c.dom.Document;
-import tmt.Tessellator;
+import fexcraft.tmt.slim.Tessellator;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static ebf.tim.TrainsInMotion.transportTypes.PASSENGER;
 
 /**
  * <h1>Transport GUI</h1>

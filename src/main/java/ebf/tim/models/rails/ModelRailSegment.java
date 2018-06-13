@@ -27,7 +27,7 @@ import java.util.Random;
 public class ModelRailSegment
 {
 
-	private static float heightOffset=0.05f;
+	private static float heightOffset=0.03f;
 	public float[] position = new float[]{0,0,0};
 	public float[] zOffset = null;
 	public List<subModel> models = new ArrayList<>();
@@ -420,7 +420,7 @@ public class ModelRailSegment
 
 			GL11.glColor3f(0.65f,0.65f,0.65f);
 
-			GL11.glTranslated(0,0.225,0);
+			GL11.glTranslated(0,0.18,0);
 			tessellator.startDrawing(GL11.GL_QUAD_STRIP);
 
 			//top inner
@@ -440,7 +440,7 @@ public class ModelRailSegment
 			tessellator.addVertex(lastPositionInner[0],lastPositionInner[1],lastPositionInner[2]);
 
 			tessellator.arrayEnabledDraw();
-			GL11.glTranslated(0,0.1,0);
+			GL11.glTranslated(0,0.07,0);
 			GL11.glColor3f(0.7f,0.7f,0.7f);
 			tessellator.startDrawing(GL11.GL_QUAD_STRIP);
 
@@ -463,7 +463,7 @@ public class ModelRailSegment
 			tessellator.arrayEnabledDraw();
 
 
-			GL11.glTranslated(0,-0.05,0);
+			GL11.glTranslated(0,-0.03,0);
 			GL11.glColor3f(0.6f,0.6f,0.6f);
 			GL11.glPushMatrix();
 			//GL11.glScaled(0.75,1,1);
@@ -477,11 +477,11 @@ public class ModelRailSegment
 			tessellator.addVertex(positionOuter[0]-(zOffset[0]*0.5f),positionOuter[1], positionOuter[2]-(zOffset[2]*0.5f));
 			tessellator.addVertex(lastPositionOuter[0]-(zOffset[0]*0.5f),lastPositionOuter[1],lastPositionOuter[2]-(zOffset[2]*0.5f));
 			//bottom outer
-			tessellator.addVertex(positionOuter[0]-(zOffset[0]*0.5f),positionOuter[1]-heightOffset, positionOuter[2]-(zOffset[2]*0.5f));
-			tessellator.addVertex(lastPositionOuter[0]-(zOffset[0]*0.5f),lastPositionOuter[1]-heightOffset,lastPositionOuter[2]-(zOffset[2]*0.5f));
+			tessellator.addVertex(positionOuter[0]-(zOffset[0]*0.5f),positionOuter[1]-0.04f, positionOuter[2]-(zOffset[2]*0.5f));
+			tessellator.addVertex(lastPositionOuter[0]-(zOffset[0]*0.5f),lastPositionOuter[1]-0.04f,lastPositionOuter[2]-(zOffset[2]*0.5f));
 			//bottom inner
-			tessellator.addVertex(positionInner[0]+(zOffset[0]*0.5f),positionInner[1]-heightOffset, positionInner[2]+(zOffset[2]*0.5f));
-			tessellator.addVertex(lastPositionInner[0]+(zOffset[0]*0.5f),lastPositionInner[1]-heightOffset,lastPositionInner[2]+(zOffset[2]*0.5f));
+			tessellator.addVertex(positionInner[0]+(zOffset[0]*0.5f),positionInner[1]-0.04f, positionInner[2]+(zOffset[2]*0.5f));
+			tessellator.addVertex(lastPositionInner[0]+(zOffset[0]*0.5f),lastPositionInner[1]-0.04f,lastPositionInner[2]+(zOffset[2]*0.5f));
 			//top inner
 			tessellator.addVertex(positionInner[0]+(zOffset[0]*0.5f),positionInner[1], positionInner[2]+(zOffset[2]*0.5f));
 			tessellator.addVertex(lastPositionInner[0]+(zOffset[0]*0.5f),lastPositionInner[1],lastPositionInner[2]+(zOffset[2]*0.5f));
@@ -490,7 +490,7 @@ public class ModelRailSegment
 			//GL11.glScaled(1.325,1,1);
 
 			GL11.glColor3f(0.7f,0.7f,0.7f);
-			GL11.glTranslated(0,0.05,0);
+			GL11.glTranslated(0,0.03,0);
 			//front and back only if its at the end of the list.
 			if (isFront){
 				//top
@@ -503,7 +503,7 @@ public class ModelRailSegment
 
 				//bottom
 				tessellator.startDrawing(GL11.GL_QUADS);
-				GL11.glTranslated(0,-0.1,0);
+				GL11.glTranslated(0,-0.07,0);
 				GL11.glColor3f(0.65f,0.65f,0.65f);
 				tessellator.addVertex(positionInner[0],positionInner[1], positionInner[2]);
 				tessellator.addVertex(positionOuter[0],positionOuter[1], positionOuter[2]);
@@ -513,12 +513,12 @@ public class ModelRailSegment
 
 				//middle
 				tessellator.startDrawing(GL11.GL_QUADS);
-				GL11.glTranslated(0,0.05,0);
+				GL11.glTranslated(0,0.04,0);
 				GL11.glColor3f(0.6f,0.6f,0.6f);
 				tessellator.addVertex(positionInner[0]+(zOffset[0]*0.5f),positionInner[1], positionInner[2]+(zOffset[2]*0.5f));
 				tessellator.addVertex(positionOuter[0]-(zOffset[0]*0.5f),positionOuter[1], positionOuter[2]-(zOffset[2]*0.5f));
-				tessellator.addVertex(positionOuter[0]-(zOffset[0]*0.5f),positionOuter[1]-heightOffset, positionOuter[2]-(zOffset[2]*0.5f));
-				tessellator.addVertex(positionInner[0]+(zOffset[0]*0.5f),positionInner[1]-heightOffset, positionInner[2]+(zOffset[2]*0.5f));
+				tessellator.addVertex(positionOuter[0]-(zOffset[0]*0.5f),positionOuter[1]-0.04f, positionOuter[2]-(zOffset[2]*0.5f));
+				tessellator.addVertex(positionInner[0]+(zOffset[0]*0.5f),positionInner[1]-0.04f, positionInner[2]+(zOffset[2]*0.5f));
 				tessellator.arrayEnabledDraw();
 			} else if(isEnd){
 				//top
@@ -531,22 +531,22 @@ public class ModelRailSegment
 
 				//bottom
 				tessellator.startDrawing(GL11.GL_QUADS);
-				GL11.glTranslated(0,-0.1,0);
+				GL11.glTranslated(0,-0.07,0);
 				GL11.glColor3f(0.65f,0.65f,0.65f);
-				tessellator.addVertex(lastPositionInner[0],lastPositionInner[1], lastPositionInner[2]);
 				tessellator.addVertex(lastPositionOuter[0],lastPositionOuter[1], lastPositionOuter[2]);
-				tessellator.addVertex(lastPositionOuter[0],lastPositionOuter[1]-heightOffset, lastPositionOuter[2]);
+				tessellator.addVertex(lastPositionInner[0],lastPositionInner[1], lastPositionInner[2]);
 				tessellator.addVertex(lastPositionInner[0],lastPositionInner[1]-heightOffset, lastPositionInner[2]);
+				tessellator.addVertex(lastPositionOuter[0],lastPositionOuter[1]-heightOffset, lastPositionOuter[2]);
 				tessellator.arrayEnabledDraw();
 
 				//middle
 				tessellator.startDrawing(GL11.GL_QUADS);
-				GL11.glTranslated(0,0.05,0);
+				GL11.glTranslated(0,0.04,0);
 				GL11.glColor3f(0.6f,0.6f,0.6f);
-				tessellator.addVertex(lastPositionInner[0]+(zOffset[0]*0.5f),lastPositionInner[1], lastPositionInner[2]+(zOffset[2]*0.5f));
 				tessellator.addVertex(lastPositionOuter[0]-(zOffset[0]*0.5f),lastPositionOuter[1], lastPositionOuter[2]-(zOffset[2]*0.5f));
-				tessellator.addVertex(lastPositionOuter[0]-(zOffset[0]*0.5f),lastPositionOuter[1]-heightOffset, lastPositionOuter[2]-(zOffset[2]*0.5f));
-				tessellator.addVertex(lastPositionInner[0]+(zOffset[0]*0.5f),lastPositionInner[1]-heightOffset, lastPositionInner[2]+(zOffset[2]*0.5f));
+				tessellator.addVertex(lastPositionInner[0]+(zOffset[0]*0.5f),lastPositionInner[1], lastPositionInner[2]+(zOffset[2]*0.5f));
+				tessellator.addVertex(lastPositionInner[0]+(zOffset[0]*0.5f),lastPositionInner[1]-0.04f, lastPositionInner[2]+(zOffset[2]*0.5f));
+				tessellator.addVertex(lastPositionOuter[0]-(zOffset[0]*0.5f),lastPositionOuter[1]-0.04f, lastPositionOuter[2]-(zOffset[2]*0.5f));
 				tessellator.arrayEnabledDraw();
 			}
 		}

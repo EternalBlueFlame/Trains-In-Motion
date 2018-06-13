@@ -9,6 +9,7 @@ import ebf.tim.utility.RailUtility;
 import net.minecraft.block.BlockRail;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
@@ -24,8 +25,11 @@ import java.util.Random;
  */
 public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
-    private boolean hasTicked = true;
+    RailTileEntity tile = null;
 
+    public boolean hasTileEntity(int metadata) {
+        return true;
+    }
     @Override
     public int tickRate(World world){return 10;}
 
@@ -41,6 +45,9 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
     @Override
+    public boolean getTickRandomly(){return true;}
+
+    @Override
     public int getRenderType() {
         return -1;
     }
@@ -50,15 +57,16 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public float getRailMaxSpeed(World world, EntityMinecart cart, int y, int x, int z){
-        //if (world.getTileEntity(x,y,z) instanceof RailTileEntity){
-        //    return ((RailTileEntity) world.getTileEntity(x,y,z)).getRailSpeed();
-        //}todo: do this in the rail, the tile entity should only be an intermediate for the block to save
-        return 0.4f;
+        return getTile(world, x, y, z)!=null?getTile(world, x, y, z).getRailSpeed():0.4f;
     }
 
     @Override
     public TileEntity createNewTileEntity(World world, int meta){
-        setTickRandomly(true);
+        return new RailTileEntity();
+    }
+
+    @Override
+    public TileEntity createTileEntity(World world, int metadata){
         return new RailTileEntity();
     }
 
@@ -109,13 +117,16 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public void randomDisplayTick(World worldObj, int xCoord, int yCoord, int zCoord, Random p_149674_5_) {
-        super.randomDisplayTick(worldObj, xCoord, yCoord, zCoord, p_149674_5_);
+        //super.randomDisplayTick(worldObj, xCoord, yCoord, zCoord, p_149674_5_);
     }
 
 
     @Override
     public void updateTick(World worldObj, int xCoord, int yCoord, int zCoord, Random p_149674_5_) {
-        super.updateTick(worldObj, xCoord,yCoord,zCoord,p_149674_5_);
+        //super.updateTick(worldObj, xCoord,yCoord,zCoord,p_149674_5_);
+        if(!worldObj.isRemote && getTile(worldObj,xCoord,yCoord,zCoord) ==null){
+            tile = (RailTileEntity) worldObj.getChunkProvider().loadChunk(xCoord >> 4,zCoord >>4).func_150806_e(xCoord,yCoord,zCoord);
+        }
     }
 
 
@@ -128,19 +139,25 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     //stuff from block container to make tile entity more reliable.
     @Override
-    public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_)
-    {
+    public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_) {
         super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
         p_149749_1_.removeTileEntity(p_149749_2_, p_149749_3_, p_149749_4_);
     }
     @Override
-    public boolean onBlockEventReceived(World p_149696_1_, int p_149696_2_, int p_149696_3_, int p_149696_4_, int p_149696_5_, int p_149696_6_)
-    {
+    public boolean onBlockEventReceived(World p_149696_1_, int p_149696_2_, int p_149696_3_, int p_149696_4_, int p_149696_5_, int p_149696_6_) {
         super.onBlockEventReceived(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_, p_149696_5_, p_149696_6_);
-        TileEntity tileentity = p_149696_1_.getTileEntity(p_149696_2_, p_149696_3_, p_149696_4_);
-        return tileentity != null && tileentity.receiveClientEvent(p_149696_5_, p_149696_6_);
+        return getTile(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_) != null && getTile(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_).receiveClientEvent(p_149696_5_, p_149696_6_);
     }
 
+    public RailTileEntity getTile(World worldObj, int x, int y, int z){
+        if(tile !=null){
+            return tile;
+        } else if (worldObj.getTileEntity(x,y,z) instanceof RailTileEntity) {
+            return tile = (RailTileEntity) worldObj.getTileEntity(x,y,z);
+        } else {
+            return null;
+        }
+    }
 
 
     /**
@@ -322,7 +339,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             * Ballast
             * -----------------------------------------------------
              */
-                if (true) { //checking if left is null is technically faster than seeing if the array of rails has more than 0 entries
+                if (tile.ballast !=null) { //checking if left is null is technically faster than seeing if the array of rails has more than 0 entries
 
 
                     //this actually gens the parts
@@ -347,25 +364,15 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             segments.add(seg);
         }
 
-        for(i=1; i<tiePoints.size()-2;i++) {
+        if (tile.getWorldObj().isRemote && left!=null && segments.size() > 0 && tile.ties != null) {
         /*
         * -----------------------------------------------------
         * Ties
         * -----------------------------------------------------
          */
-            if (left!=null && segments.size()>0) { //checking if left is null is technically faster than seeing if the array of rails has more than 0 entries
-
-                dX = tiePoints.get(i-1)[0] - (tiePoints.get(i + 1)[0]);
-                dZ = tiePoints.get(i-1)[2] - (tiePoints.get(i + 1)[2]);
-                //this is used for texture tiling along the path
-                if (startEndnd[1] > 0.029f) {
-                    startEndnd[1] = 0;
-                }
-                startEndnd[0] = startEndnd[1];
-                startEndnd[1] += (Math.abs(dX) + Math.abs(dZ)) * 0.0155f;
-                if (startEndnd[1] > 0.03f) {
-                    startEndnd[1] = 0.03f;
-                }
+            for (i = 1; i < tiePoints.size() - 2; i++) {
+                dX = tiePoints.get(i - 1)[0] - (tiePoints.get(i + 1)[0]);
+                dZ = tiePoints.get(i - 1)[2] - (tiePoints.get(i + 1)[2]);
 
                 //this segments it horizontally for tiling.
                 length = (int) (((Math.abs(left) + Math.abs(right)) * 1.6) + 0.5f);//cast as an int, lazy rounding down to whole number.
@@ -374,17 +381,19 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                     length = 1;
                     inner = 1F;
                 }
+                float zBufferFix;
+                Random r = new Random();
                 //this actually gens the parts
                 for (int ii = 0; ii < length; ii++) {
                     offsetInner = RailUtility.rotatePoint(new double[]{-0.06, 0, (-inner * 0.49f) + ((inner / length) * (ii))}, 0, (float) Math.toDegrees(Math.atan2(dZ, dX)), 0);
                     offsetOuter = RailUtility.rotatePoint(new double[]{-0.06, 0, (-inner * 0.51f) + ((inner / length) * (ii + 1))}, 0, (float) Math.toDegrees(Math.atan2(dZ, dX)), 0);
-
+                    zBufferFix = (float) r.nextInt(10000) * 0.0000001f;
                     ModelRailSegment.subModel model = segments.get(0).genNewSubModel(
                             new float[]{
-                                    (float) (offsetInner[0] + tiePoints.get(i)[0]), (float) (offsetInner[1] + tiePoints.get(i)[1]), (float) (offsetInner[2] + tiePoints.get(i)[2])
+                                    (float) (offsetInner[0] + tiePoints.get(i)[0]), (float) (offsetInner[1] + tiePoints.get(i)[1]) + zBufferFix, (float) (offsetInner[2] + tiePoints.get(i)[2])
                             },
                             new float[]{
-                                    (float) (offsetOuter[0] + tiePoints.get(i)[0]), (float) (offsetOuter[1] + tiePoints.get(i)[1]), (float) (offsetOuter[2] + tiePoints.get(i)[2])
+                                    (float) (offsetOuter[0] + tiePoints.get(i)[0]), (float) (offsetOuter[1] + tiePoints.get(i)[1]) + zBufferFix, (float) (offsetOuter[2] + tiePoints.get(i)[2])
                             }, tile, (byte) 2
                     );
 
@@ -392,19 +401,19 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                     offsetOuter = RailUtility.rotatePoint(new double[]{-0.18, 0, (-inner * 0.51f) + ((inner / length) * (ii + 1))}, 0, (float) Math.toDegrees(Math.atan2(dZ, dX)), 0);
 
                     model.lastPositionInner = new float[]{
-                            (float) (offsetInner[0] + tiePoints.get(i)[0]), (float) (offsetInner[1] + tiePoints.get(i)[1]), (float) (offsetInner[2] + tiePoints.get(i)[2])
+                            (float) (offsetInner[0] + tiePoints.get(i)[0]), (float) (offsetInner[1] + tiePoints.get(i)[1]) + zBufferFix, (float) (offsetInner[2] + tiePoints.get(i)[2])
                     };
                     model.lastPositionOuter = new float[]{
-                            (float) (offsetOuter[0] + tiePoints.get(i)[0]), (float) (offsetOuter[1] + tiePoints.get(i)[1]), (float) (offsetOuter[2] + tiePoints.get(i)[2])
+                            (float) (offsetOuter[0] + tiePoints.get(i)[0]), (float) (offsetOuter[1] + tiePoints.get(i)[1]) + zBufferFix, (float) (offsetOuter[2] + tiePoints.get(i)[2])
                     };
 
 
                     model.offset[0] = startEndnd[0];
                     model.offset[1] = startEndnd[1];
-                    if (ii==0){
-                        model.offset[2] = ii==length-1? 3:1;
+                    if (ii == 0) {
+                        model.offset[2] = ii == length - 1 ? 3 : 1;
                     } else {
-                        model.offset[2] = ii==length-1? 2:0;
+                        model.offset[2] = ii == length - 1 ? 2 : 0;
                     }
                     segments.get(0).models.add(model);
                 }

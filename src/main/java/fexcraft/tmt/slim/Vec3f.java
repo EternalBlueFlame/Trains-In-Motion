@@ -3,12 +3,15 @@ package fexcraft.tmt.slim;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
+import java.io.Serializable;
+
 /**
  * basically the same as Vec3D, but a float. Usually used for storing rotations.
  * @author Ferdinand
  */
 
-public class Vec3f {
+
+public class Vec3f implements Serializable {
 
     public float xCoord;
     public float yCoord;
