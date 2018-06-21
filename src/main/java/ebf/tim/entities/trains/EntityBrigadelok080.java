@@ -3,6 +3,7 @@ package ebf.tim.entities.trains;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
+import ebf.tim.api.SkinRegistry;
 import ebf.tim.api.TrainBase;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
@@ -74,12 +75,21 @@ public class EntityBrigadelok080 extends TrainBase {
     }
     public EntityBrigadelok080(World world){
         super(world);
-        //add the textures here
-        if(TrainsInMotion.proxy.isClient() && ClientProxy.useHDSkins){
-            addTransportSkins(new ResourceLocation[]{URIRegistry.HD_MODEL_TRAIN_TEXTURE.getResource("brigadelok_080.png")});
-        } else {
-            addTransportSkins(new ResourceLocation[]{URIRegistry.MODEL_TRAIN_TEXTURE.getResource("brigadelok_080.png")});
-        }
+    }
+
+    public String transportName(){return "Henschel Brigadelok";}
+    public String transportcountry(){return "Germany";}
+    public int transportYear(){return 1918;}
+    public String transportEra(){return "Steam";}
+    public float transportTopSpeed(){return 70.81f;}
+    public boolean isFictional(){return false;}
+    public float transportTractiveEffort(){return 0;}
+    public float transportMetricHorsePower(){return 0;}
+
+
+    public void registerSkins(){
+        SkinRegistry.addSkin(this.getClass(),TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png", null,
+        "default", "The standard design used by Germany in WWI");
     }
 
     /*

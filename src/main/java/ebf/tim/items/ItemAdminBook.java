@@ -48,9 +48,7 @@ import java.util.UUID;
  */
 public class ItemAdminBook extends Item{
 
-    public ItemAdminBook(){
-        setCreativeTab(TrainsInMotion.creativeTab);
-    }
+    public ItemAdminBook(){ }
 
     /**
      * <h2>Description text</h2>

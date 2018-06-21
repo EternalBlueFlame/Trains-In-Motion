@@ -8,6 +8,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import fexcraft.tmt.slim.Vec3d;
@@ -40,6 +41,15 @@ public class RailUtility {
     }
 
 
+
+    public static String translate(String text){
+        if (StatCollector.translateToLocal(text).equals(text)){
+            DebugUtil.println("Missing lang entry for: " +text);
+            return text;
+        } else {
+            return StatCollector.translateToLocal(text);
+        }
+    }
 
 
     /**

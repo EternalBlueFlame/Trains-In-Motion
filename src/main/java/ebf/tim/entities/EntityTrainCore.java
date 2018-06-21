@@ -281,8 +281,10 @@ public class EntityTrainCore extends GenericRailTransport {
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
      */
     /**gets the max speed of the transport in blocks per second*/
+    @Deprecated
     public float getMaxSpeed(){return 0;}
     /**gets the acceleration rate of the train*/
+    @Deprecated
     public float getHorsePower(){return 100f;}
     /**gets the resource location for the horn sound*/
     public ResourceLocation getHorn(){return null;}

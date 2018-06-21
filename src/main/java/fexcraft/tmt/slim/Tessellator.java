@@ -2,20 +2,41 @@ package fexcraft.tmt.slim;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.TrainsInMotion;
 import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.DebugUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import sun.applet.Main;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL14.GL_DEPTH_COMPONENT24;
 
 /**
 * @Author EternalBlueFlame
@@ -53,6 +74,8 @@ public class Tessellator{
 			isQuad = false;
 			verts =0;
 		}
+		//GL11.glColor4f(255, 255, 255, 255);//fixes alpha layering bugs with other mods that don't clear their GL cache
+		//todo call this from the actual render rather than tessellation, it breaks the recolor system here.
 	}
 
 	/**
@@ -182,5 +205,82 @@ public class Tessellator{
 			GL11.glBindTexture(GL_TEXTURE_2D, id);
 		}
 	}
-	
+
+
+	private static Map<ResourceLocation, int[]> tmtTextureMap = new HashMap<>();
+
+	public static int[] loadTexture(ResourceLocation resource){
+		int[] texture = tmtTextureMap.get(resource);
+
+		bindTexture(resource);
+		if(texture==null){
+			int width =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
+			int height =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
+
+			int format = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT);
+			ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * (format == GL_RGB?3:4));
+
+			GL11.glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, buffer);
+
+			texture = new int[((width*height)*4)+2];
+			texture[0]=width;
+			texture[1]=height;
+			for (int i=2; i<((width*height)*(format == GL_RGB?3:4))-2; i+=(format == GL_RGB?3:4)){
+				texture[i+3]=format==GL_RGB?0xFF:buffer.get(i+3) & 0xFF;//alpha
+				texture[i+2]=buffer.get(i+2);//Red
+				texture[i+1]=buffer.get(i+1);//Green
+				texture[i]=buffer.get(i);//Blue
+			}
+			tmtTextureMap.put(resource, texture);
+		}
+
+		return texture;
+	}
+
+	private static ByteBuffer renderPixels = ByteBuffer.allocateDirect((4096*4096)*4);
+	private static int i,ii, length;
+	private static int[] RGBint, pixels;
+	private static final byte fullAlpha=(byte)0;
+	public static void maskColors(ResourceLocation textureURI, List<int[]> colors){
+		pixels = loadTexture(textureURI);
+
+		if (colors==null){
+			return;//skip recolor if there are no colors
+		}
+		length = ((pixels[0]*pixels[1])*4)-4;
+
+		for(i=0; i<length; i+=4) {
+			if (pixels[i+3] == fullAlpha){
+				continue;//skip pixels with no color
+			}
+			renderPixels.put(i+3, b(pixels[i+3]));//alpha is always from host texture.
+			//for each set of recoloring
+			for(ii=0;ii<colors.size();ii++) {
+				RGBint=colors.get(ii);
+				//if it's within 10 RGB, add the actual color we want to the differences
+				if (colorInRange(pixels[i] & 0xFF,pixels[i+1] & 0xFF,pixels[i+2] & 0xFF,
+						RGBint[0] & 0xFF, (RGBint[0] >> 8) & 0xFF, (RGBint[0] >> 16) & 0xFF)){
+					renderPixels.put(i, b(RGBint[1]));
+					renderPixels.put(i+1, b(RGBint[1] >> 8));
+					renderPixels.put(i+2, b(RGBint[1] >> 16));
+				} else {
+					renderPixels.put(i, b(pixels[i]));
+					renderPixels.put(i+1, b(pixels[i+1]));
+					renderPixels.put(i+2, b(pixels[i+2]));
+				}
+			}
+		}
+
+		glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, pixels[0], pixels[1], GL_RGBA, GL_UNSIGNED_BYTE, renderPixels);
+		renderPixels.clear();//reset the buffer to all 0's.
+	}
+
+	//most compilers should process this type of function faster than a normal typecast.
+	public static byte b(int i){return (byte) i;}
+
+	public static boolean colorInRange(int r, int g, int b, int oldR, int oldG, int oldB){
+		return oldR-r>-15 && oldR-r <15 &&
+				oldG-g>-15 && oldG-g <15 &&
+				oldB-b>-15 && oldB-b <15;
+	}
 }

@@ -993,6 +993,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public List<Double> getRenderBogieOffsets(){return new ArrayList<>();}
     /**returns the type of transport, for a list of options:
      * @see TrainsInMotion.transportTypes */
+    @Deprecated
     public TrainsInMotion.transportTypes getType(){return null;}
     /**returns the rider offsets, each of the outer arrays represents a new rider seat,
      * the first value of the double[] inside that represents length from center in blocks.
@@ -1001,19 +1002,24 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public double[][] getRiderOffsets(){return new double[][]{{0,0,0}};}
     /**returns the positions for the hitbox, they are defined by length from center.
      * must have at least 4 hitboxes, the first and last values are used for coupling positions*/
+    @Deprecated
     public double[][] getHitboxPositions(){return new double[][]{{-1.6,0,0},{1,0,0},{0,0,0},{1,0,0},{1.6,0,0}};}
     /**returns the item of the transport, this should be a static value in the transport's class.*/
+    @Deprecated
     public Item getItem(){return null;}
     /**defines the size of the inventory, not counting any special slots like for fuel.
      * @see TrainsInMotion.inventorySizes*/
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.FREIGHT_ONE;}
     /**defines the offset for the lamp in X/Y/Z*/
+    @Deprecated
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
     /**defines the radius in microblocks that the pistons animate*/
     public float getPistonOffset(){return 0;}
     /**defines smoke positions, the outer array defines each new smoke point, the inner arrays define the X/Y/Z*/
+    @Deprecated
     public float[][] getSmokeOffset(){return new float[0][0];}
     /**defines the length from center of the transport, thus is used for the motion calculation*/
+    @Deprecated
     public int getLengthFromCenter(){return 1;}
     /**defines the render scale, minecraft's default is 0.0625*/
     public float getRenderScale(){return 0.0625f;}
