@@ -184,6 +184,9 @@ public class Tessellator{
 	 * @param textureURI
 	 */
 	public static void bindTexture(ResourceLocation textureURI) {
+		if (textureURI == null){
+			return;
+		}
 		if(ClientProxy.ForceTextureBinding) {
 			ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
 			if (object == null) {
@@ -243,10 +246,6 @@ public class Tessellator{
 	private static final byte fullAlpha=(byte)0;
 	public static void maskColors(ResourceLocation textureURI, List<int[]> colors){
 		pixels = loadTexture(textureURI);
-
-		if (colors==null){
-			return;//skip recolor if there are no colors
-		}
 		length = ((pixels[0]*pixels[1])*4)-4;
 
 		for(i=0; i<length; i+=4) {
@@ -255,23 +254,29 @@ public class Tessellator{
 			}
 			renderPixels.put(i+3, b(pixels[i+3]));//alpha is always from host texture.
 			//for each set of recoloring
-			for(ii=0;ii<colors.size();ii++) {
-				RGBint=colors.get(ii);
-				//if it's within 10 RGB, add the actual color we want to the differences
-				if (colorInRange(pixels[i] & 0xFF,pixels[i+1] & 0xFF,pixels[i+2] & 0xFF,
-						RGBint[0] & 0xFF, (RGBint[0] >> 8) & 0xFF, (RGBint[0] >> 16) & 0xFF)){
-					renderPixels.put(i, b(RGBint[1]));
-					renderPixels.put(i+1, b(RGBint[1] >> 8));
-					renderPixels.put(i+2, b(RGBint[1] >> 16));
-				} else {
-					renderPixels.put(i, b(pixels[i]));
-					renderPixels.put(i+1, b(pixels[i+1]));
-					renderPixels.put(i+2, b(pixels[i+2]));
+			if (colors!=null) {
+				for (ii = 0; ii < colors.size(); ii++) {
+					RGBint = colors.get(ii);
+					//if it's within 10 RGB, add the actual color we want to the differences
+					if (colorInRange(pixels[i] & 0xFF, pixels[i + 1] & 0xFF, pixels[i + 2] & 0xFF,
+							RGBint[0] & 0xFF, (RGBint[0] >> 8) & 0xFF, (RGBint[0] >> 16) & 0xFF)) {
+						renderPixels.put(i, b(RGBint[1]));
+						renderPixels.put(i + 1, b(RGBint[1] >> 8));
+						renderPixels.put(i + 2, b(RGBint[1] >> 16));
+					} else {
+						renderPixels.put(i, b(pixels[i]));
+						renderPixels.put(i + 1, b(pixels[i + 1]));
+						renderPixels.put(i + 2, b(pixels[i + 2]));
+					}
 				}
+			} else {
+				renderPixels.put(i, b(pixels[i]));
+				renderPixels.put(i + 1, b(pixels[i + 1]));
+				renderPixels.put(i + 2, b(pixels[i + 2]));
 			}
 		}
 
-		glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, pixels[0], pixels[1], GL_RGBA, GL_UNSIGNED_BYTE, renderPixels);
+		//glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, pixels[0], pixels[1], GL_RGBA, GL_UNSIGNED_BYTE, renderPixels);
 		renderPixels.clear();//reset the buffer to all 0's.
 	}
 

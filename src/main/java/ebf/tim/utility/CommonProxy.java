@@ -30,6 +30,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fluids.BlockFluidBase;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -124,9 +125,9 @@ public class CommonProxy implements IGuiHandler {
     /**the diesel fluid block*/
     public static BlockTrainFluid blockFluidDiesel;
     /**the oil fluid*/
-    public static final Fluid fluidOil = new Fluid("Oil");
+    public static Fluid fluidOil = new Fluid("Oil");
     /**the diesel fluid*/
-    public static final Fluid fluidDiesel = new Fluid("Diesel");
+    public static Fluid fluidDiesel = new Fluid("Diesel");
     /**the oil bucket*/
     public static ItemBucket bucketOil;
     /**the diesel bucket*/
@@ -146,8 +147,12 @@ public class CommonProxy implements IGuiHandler {
      */
     public void register() {
 
-        RegisterFluid(fluidOil, blockFluidOil, bucketOil, "oil",false, 700, MapColor.blackColor, TrainsInMotion.creativeTab);
-        RegisterFluid(fluidDiesel, blockFluidDiesel, bucketDiesel, "diesel",false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
+        fluidOil = RegisterFluid(fluidOil, "oil", false, 700);
+        blockFluidOil = RegisterFluidBlock(fluidOil, "oil", MapColor.blackColor);
+        bucketOil = RegisterFluidBucket(fluidOil, blockFluidOil, "oil", TrainsInMotion.creativeTab);
+        fluidDiesel = RegisterFluid(fluidDiesel, "diesel", false, 500);
+        blockFluidDiesel = RegisterFluidBlock(fluidDiesel, "diesel", MapColor.sandColor);
+        bucketDiesel = RegisterFluidBucket(fluidDiesel, blockFluidDiesel, "diesel", TrainsInMotion.creativeTab);
 
         RegisterItem(new ItemAdminBook(), "adminbook", "adminbook", TrainsInMotion.creativeTab, null);
 
@@ -164,23 +169,30 @@ public class CommonProxy implements IGuiHandler {
                 "I I", "IWI", "IWI", 'W', Blocks.planks, 'I', Items.iron_ingot);
     }
 
-
-    public static void RegisterFluid(Fluid fluid, Block block, Item bucket, String unlocalizedName, boolean isGaseous, int density, MapColor color, CreativeTabs tab){
-        fluid.setUnlocalizedName(unlocalizedName).setBlock(block).setGaseous(isGaseous).setDensity(density);
+    public static Fluid RegisterFluid(Fluid fluid, String unlocalizedName, boolean isGaseous, int density){
+        fluid.setUnlocalizedName(unlocalizedName).setGaseous(isGaseous).setDensity(density);
         FluidRegistry.registerFluid(fluid);
-
         if (TrainsInMotion.proxy.isClient() && fluid.getUnlocalizedName().equals(StatCollector.translateToLocal(fluid.getUnlocalizedName()))){
             DebugUtil.println("Fluid missing lang entry: " + fluid.getUnlocalizedName());
         }
 
-        block = new BlockTrainFluid(fluid, new MaterialLiquid(color));
+        return fluid;
+    }
+
+    public static BlockTrainFluid RegisterFluidBlock(Fluid fluid, String unlocalizedName, MapColor color){
+        BlockTrainFluid block = new BlockTrainFluid(fluid, new MaterialLiquid(color));
         block.setBlockName("block."+unlocalizedName);
         GameRegistry.registerBlock(block, "block."+unlocalizedName);
         if (TrainsInMotion.proxy.isClient() && block.getUnlocalizedName().equals(StatCollector.translateToLocal(block.getUnlocalizedName()))){
             DebugUtil.println("Block missing lang entry: " + block.getUnlocalizedName());
         }
 
-        bucket = new ItemBucket(block);
+        fluid.setBlock(block);
+        return block;
+    }
+
+    public static ItemBucket RegisterFluidBucket(Fluid fluid, Block block, String unlocalizedName, CreativeTabs tab){
+        ItemBucket bucket = new ItemBucket(block);
         bucket.setCreativeTab(tab).setUnlocalizedName("item." + unlocalizedName + ".bucket").setContainerItem(Items.bucket);
         GameRegistry.registerItem(bucket, "fluid." + unlocalizedName + ".bucket");
         if (TrainsInMotion.proxy.isClient() && bucket.getUnlocalizedName().equals(StatCollector.translateToLocal(block.getUnlocalizedName()))){
@@ -188,7 +200,10 @@ public class CommonProxy implements IGuiHandler {
         }
 
         FluidContainerRegistry.registerFluidContainer(fluid, new ItemStack(bucket), new ItemStack(Items.bucket));
+        return bucket;
     }
+
+
 
     public static Item RegisterItem(Item itm, String name, String unlocalizedName, @Nullable CreativeTabs tab, @Nullable Item container){
         if (tab!=null) {

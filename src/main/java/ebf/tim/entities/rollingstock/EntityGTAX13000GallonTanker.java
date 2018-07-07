@@ -33,7 +33,7 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
     public static final String[] itemDescription = new String[]{
             "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 4" + StatCollector.translateToLocal("menu.item.tons"),
             "\u00A77" + StatCollector.translateToLocal("menu.item.sizeof") +": 13.4" + StatCollector.translateToLocal("gui.buckets")};
-    public static final Item thisItem = new ItemTransport(itemDescription, EntityGTAX13000GallonTanker.class).setUnlocalizedName("gatx13000gallontanker");
+    public static final Item thisItem = new ItemTransport(new EntityGTAX13000GallonTanker(null)).setUnlocalizedName("gatx13000gallontanker");
 
     public EntityGTAX13000GallonTanker(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);
@@ -49,7 +49,7 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
     @Override
     public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-2.1D, 2.1D);}
     @Override
-    public int getLengthFromCenter(){return 2;}
+    public int bogieLengthFromCenter(){return 2;}
 
     @Override
     public float getRenderScale() {

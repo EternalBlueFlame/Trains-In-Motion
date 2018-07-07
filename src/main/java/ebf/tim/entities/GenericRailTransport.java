@@ -7,10 +7,12 @@ import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
+import ebf.tim.api.SkinRegistry;
 import ebf.tim.items.ItemKey;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.ParticleFX;
 import ebf.tim.models.TransportRenderData;
+import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.Vec3d;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.NBTKeys;
@@ -119,8 +121,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     float prevRotationRoll;
     /**/
     float rotationRoll;
-    /***/
-    private List<ResourceLocation> transportSkins = new ArrayList<ResourceLocation>();
     public int forceBackupTimer =0;
 
     public boolean hasTrain=false;
@@ -199,7 +199,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this.dataWatcher.addObject(20, 0);//tankA
         this.dataWatcher.addObject(21, 0);//front linked transport
         this.dataWatcher.addObject(22, 0);//back linked transport
-        this.dataWatcher.addObject(24, 0);//currently used texture
+        this.dataWatcher.addObject(24, getDefaultTexture().getResourceDomain()+":"+getDefaultTexture().getResourcePath());//currently used texture
         if (getSizeInventory()>0 && inventory == null) {
             inventory = new ArrayList<ItemStackSlot>();
             int slot=0;
@@ -409,6 +409,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         }
         //load owner
         owner = new UUID(tag.getLong(NBTKeys.ownerMost),tag.getLong(NBTKeys.ownerLeast));
+
+        dataWatcher.updateObject(24, tag.getString(NBTKeys.skinURI));
+
         //load bogie velocities
         frontVelocityX = tag.getDouble(NBTKeys.frontBogieX);
         frontVelocityZ = tag.getDouble(NBTKeys.frontBogieZ);
@@ -454,6 +457,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         //owner
         tag.setLong(NBTKeys.ownerMost, owner.getMostSignificantBits());
         tag.setLong(NBTKeys.ownerLeast, owner.getLeastSignificantBits());
+
+        tag.setString(NBTKeys.skinURI, dataWatcher.getWatchableObjectString(24));
 
         //bogie velocities
         tag.setDouble(NBTKeys.frontBogieX, frontVelocityX);
@@ -567,12 +572,12 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         //always be sure the bogies exist on client and server.
         if (!worldObj.isRemote && (frontBogie == null || backBogie == null)) {
             //spawn frontLinkedTransport bogie
-            vectorCache[1][0] = getLengthFromCenter();
+            vectorCache[1][0] = bogieLengthFromCenter();
             vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
             frontBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId(), true);
             frontBogie.setVelocity(frontVelocityX,0,frontVelocityZ);
             //spawn backLinkedTransport bogie
-            vectorCache[1][0] = -getLengthFromCenter();
+            vectorCache[1][0] = -bogieLengthFromCenter();
             vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
             backBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId(), false);
             backBogie.setVelocity(backVelocityX, 0, backVelocityZ);
@@ -612,10 +617,10 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
             if (ticksExisted %2 ==0) {
                 //align bogies
-                vectorCache[1][0]= getLengthFromCenter();
+                vectorCache[1][0]= bogieLengthFromCenter();
                 vectorCache[0] = rotatePoint(vectorCache[1], rotationPitch, rotationYaw, 0.0f);
                 frontBogie.setPosition(vectorCache[0][0] + posX, frontBogie.posY, vectorCache[0][2] + posZ);
-                vectorCache[1][0]= -getLengthFromCenter();
+                vectorCache[1][0]= -bogieLengthFromCenter();
                 vectorCache[0] = rotatePoint(vectorCache[1], rotationPitch, rotationYaw, 0.0f);
                 backBogie.setPosition(vectorCache[0][0] + posX, backBogie.posY, vectorCache[0][2] + posZ);
             }
@@ -728,24 +733,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 lamp.ShouldUpdate(worldObj, RailUtility.rotatePoint(vectorCache[0], rotationPitch, rotationYaw, 0));
             }
 
-            //update the particles here rather than on render tick, it's not as smooth, but close enough and far less CPU use.
-            if (ClientProxy.EnableSmokeAndSteam && getSmokeOffset() != null) {
-                int itteration = 0;
-                int maxSpawnThisTick = 0;
-                for (float[] smoke : getSmokeOffset()) {
-                    for (int i = 0; i < smoke[4]; i++) {
-                        //we only want to spawn at most 5 particles per tick.
-                        //this helps make them spawn more evenly rather than all at once. It also helps prevent a lot of lag.
-                        if (getBoolean(boolValues.RUNNING) && particles.size() <= itteration && maxSpawnThisTick < 5) {
-                            particles.add(new ParticleFX(this, smoke[3], smoke));
-                            maxSpawnThisTick++;
-                        } else if (maxSpawnThisTick == 0 && particles.size() > itteration) {
-                            //if the particles have finished spawning in, move them.
-                            particles.get(itteration).onUpdate(getBoolean(boolValues.RUNNING));
-                        }
-                        itteration++;
-                    }
-                }
+
+            if (ClientProxy.EnableSmokeAndSteam || getParticles().size()>0) {
+                ParticleFX.updateParticleItterator(getParticles(), getBoolean(boolValues.RUNNING) || true);
             }
         }
     }
@@ -1018,9 +1008,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**defines smoke positions, the outer array defines each new smoke point, the inner arrays define the X/Y/Z*/
     @Deprecated
     public float[][] getSmokeOffset(){return new float[0][0];}
-    /**defines the length from center of the transport, thus is used for the motion calculation*/
-    @Deprecated
-    public int getLengthFromCenter(){return 1;}
+    /**defines the length from center of the transport's bogies, thus is used for the motion calculation*/
+    public int bogieLengthFromCenter(){return 1;}
     /**defines the render scale, minecraft's default is 0.0625*/
     public float getRenderScale(){return 0.0625f;}
     /**defines if the transport is explosion resistant*/
@@ -1052,26 +1041,48 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
     public Bogie[] getBogieModels(){return null;}
 
-    public ResourceLocation getTexture(int index){
-        return (index> transportSkins.size() || transportSkins.size()==0?new ResourceLocation(MODID, "null.png"):transportSkins.get(index));
+    public ResourceLocation getDefaultTexture(){
+        return new ResourceLocation("");
     }
 
-    public void addTransportSkins(ResourceLocation[] skins){
-        for(ResourceLocation skin : skins){
-            if (skin != null && skin.getResourceDomain() == null){
-                transportSkins.add(new ResourceLocation(MODID, skin.getResourcePath()));
-            } else if (skin!= null) {
-                if (transportSkins == null){
-                    transportSkins = Collections.singletonList(skin);
-                } else {
-                    transportSkins.add(skin);
-                }
-            }
-        }
+    public ResourceLocation getTexture(){
+        return null;
     }
+
+    public ItemStack[] getRecipie(){return null;}
+
+    public void registerSkins(){};
 
     public List<? extends ModelBase> getModel(){return new ArrayList<ModelBase>();}
 
+
+    public String transportName(){return "Fugidsnot";}
+
+    public String transportcountry(){return "Void";}
+
+    public int transportYear(){return -1;}
+
+    public String transportEra(){return "Magic";}
+
+    public float transportTopSpeed(){return 0;}
+
+    public boolean isFictional(){return false;}
+
+    public float transportTractiveEffort(){return 0;}
+
+    public float transportMetricHorsePower(){return 0;}
+
+    public float transportPullingPower(){return 0;}
+
+    public String[] additionalItemText(){return null;}
+
+    @SideOnly(Side.CLIENT)
+    public boolean isAnimationTag(String name){return false;}
+
+
+    public List<ParticleFX> getParticles(){
+        return renderData.particles;
+    }
 
     /*
      * <h1>Inventory management</h1>

@@ -29,6 +29,11 @@ public class NBTKeys {
     /**used for the accelerator in EntityTrainCore*/
     public static final String accelerator = "train.accelerator";
 
+    /**used for the skin's MODID in GenericRailTransport*/
+    public static final String skinMODID = "extended.skin.modid";
+    /**used for the skin's URI in GenericRailTransport*/
+    public static final String skinURI = "extended.skin.uri";
+
     //UUID's
     /**the most significant bits for the frontLinkedTransport in GenericRailTransport*/
     public static final String frontLinkMost = "extended.frontLinkedTransport.most";

@@ -2,14 +2,18 @@ package fexcraft.tmt.slim;
 
 import net.minecraft.entity.Entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
 * Replaces the old `ModelBase` in this package.
 * @Author Ferdinand Calo' (FEX___96)
 */
 
-public abstract class Model<T> extends net.minecraft.client.model.ModelBase {
+public abstract class Model<T> {
 	
 	public static final Model<Object> EMPTY;
+	public List<ModelRendererTurbo> boxList = new ArrayList<>();
 	static {
 		EMPTY = new Model<Object>(){
 			@Override public void render(){}
@@ -45,6 +49,8 @@ public abstract class Model<T> extends net.minecraft.client.model.ModelBase {
 			mod.rotationPointZ += z;
 		}
 	}
+
+	public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5){}
 	
 	public abstract void translateAll(float x, float y, float z);
 	

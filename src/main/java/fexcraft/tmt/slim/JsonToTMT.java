@@ -44,7 +44,7 @@ public class JsonToTMT {
 	public static final String[] topscale = new String[]{"top_scale", "topscale", "ts"};
 	public static final String[] direction = new String[]{"direction", "dir", "facing"};
 	
-	public final static ModelRendererTurbo parse(net.minecraft.client.model.ModelBase base, JsonObject obj, int tx, int ty){
+	public final static ModelRendererTurbo parse(ModelBase base, JsonObject obj, int tx, int ty){
 		ModelRendererTurbo model = new ModelRendererTurbo(base, get(texturex, obj, idef), get(texturey, obj, idef), tx, ty);
 		//
 		float x = get(offx, obj, def);
@@ -94,7 +94,7 @@ public class JsonToTMT {
 		return model;
 	}
 
-	public final static ModelRendererTurbo[] parse(net.minecraft.client.model.ModelBase base, JsonArray array, int tx, int ty){
+	public final static ModelRendererTurbo[] parse(ModelBase base, JsonArray array, int tx, int ty){
 		if(array != null){
 			ModelRendererTurbo[] model = new ModelRendererTurbo[array.size()];
 			for(int i = 0; i < array.size(); i++){
@@ -105,7 +105,7 @@ public class JsonToTMT {
 		return new ModelRendererTurbo[0];
 	}
 
-	public final static ModelRendererTurbo[] parse(net.minecraft.client.model.ModelBase base, String string, JsonObject object, int tx, int ty){
+	public final static ModelRendererTurbo[] parse(ModelBase base, String string, JsonObject object, int tx, int ty){
 		if(base == null){
 			/*unavailable import, could be easily replaced with generic debugger later on
 			if(Static.dev()){

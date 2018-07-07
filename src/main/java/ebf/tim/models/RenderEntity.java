@@ -1,5 +1,6 @@
 package ebf.tim.models;
 
+import ebf.tim.api.SkinRegistry;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.RailUtility;
@@ -14,6 +15,10 @@ import org.lwjgl.opengl.GL11;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.Tessellator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * <h2>Entity Rendering</h2>
@@ -83,29 +88,34 @@ public class RenderEntity extends Render {
             //cache animating parts
             if (ClientProxy.EnableAnimations) {
                 boolean isAdded;
+                String[] density;
                 for (ModelBase part : entity.renderData.modelList) {
-                    for (Object box : part.boxList) {
-                        if (box instanceof ModelRendererTurbo) {
-                            ModelRendererTurbo render = ((ModelRendererTurbo) box);
-                            if (render.boxName ==null){continue;}
-                            //attempt to cache the parts for the main transport model
-                            if (StaticModelAnimator.canAdd(render)) {
-                                entity.renderData.animatedPart.add(new StaticModelAnimator(render));
-                            } else if (GroupedModelRender.canAdd(render)) {
-                                //if it's a grouped render we have to figure out if we already have a group for this or not.
-                                isAdded = false;
-                                for (GroupedModelRender cargo : entity.renderData.blockCargoRenders) {
-                                    if (cargo.getGroupName().equals(render.boxName)) {
-                                        cargo.add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render));
-                                        isAdded = true;
-                                        break;
-                                    }
+                    for (ModelRendererTurbo render : part.boxList) {
+                        if (render.boxName ==null){continue;}
+                        //attempt to cache the parts for the main transport model
+                        if (StaticModelAnimator.canAdd(render) || entity.isAnimationTag(render.boxName)) {
+                            entity.renderData.animatedPart.add(new StaticModelAnimator(render));
+                        } else if (GroupedModelRender.canAdd(render)) {
+                            //if it's a grouped render we have to figure out if we already have a group for this or not.
+                            isAdded = false;
+                            for (GroupedModelRender cargo : entity.renderData.blockCargoRenders) {
+                                if (cargo.getGroupName().equals(render.boxName)) {
+                                    cargo.add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render));
+                                    isAdded = true;
+                                    break;
                                 }
-                                if (!isAdded) {
-                                    entity.renderData.blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render)));
-                                }
-                                render.showModel = false;
                             }
+                            if (!isAdded) {
+                                entity.renderData.blockCargoRenders.add(new GroupedModelRender().add(render, GroupedModelRender.isBlock(render), GroupedModelRender.isScaled(render)));
+                            }
+                            render.showModel = false;
+                        }
+                        if(ParticleFX.isParticle(render.boxName)){
+                            density = ParticleFX.parseData(render.boxName);
+                            entity.renderData.particles = ParticleFX.newParticleItterator(Integer.parseInt(density[0].trim())*20,
+                                    Integer.parseInt(density[1].trim(), 16),
+                                    render.rotationPointX*0.0625f, render.rotationPointY*-0.0625f, render.rotationPointZ*0.0625f,
+                                    entity );
                         }
                     }
                 }
@@ -125,6 +135,10 @@ public class RenderEntity extends Render {
 
 
 
+        GL11.glEnable(GL11.GL_VERTEX_ARRAY);
+        GL11.glEnable(GL11.GL_TEXTURE_COORD_ARRAY);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         GL11.glPushMatrix();
         //set the render position
@@ -168,7 +182,7 @@ public class RenderEntity extends Render {
          */
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
         for(ModelBase model : entity.renderData.modelList) {
-            Tessellator.bindTexture(entity.getTexture(entity.getDataWatcher().getWatchableObjectInt(24)));
+            Tessellator.maskColors(entity.getTexture(), null);
             model.render(null, 0, 0, 0, 0, 0, 0.0625f);
         }
 
@@ -212,9 +226,18 @@ public class RenderEntity extends Render {
         }
 
 
+
+
+
         //render the particles, if there are any.
-        for(ParticleFX particle : entity.particles){
+        for(ParticleFX particle : entity.renderData.particles){
+            GL11.glPushMatrix();
             ParticleFX.doRender(particle, x,y,z);
+            GL11.glPopMatrix();
         }
+
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glDisable(GL11.GL_TEXTURE_COORD_ARRAY);
+        GL11.glDisable(GL11.GL_VERTEX_ARRAY);
     }
 }

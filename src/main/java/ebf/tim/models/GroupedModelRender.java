@@ -1,5 +1,6 @@
 package ebf.tim.models;
 
+import ebf.tim.api.SkinRegistry;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.RailUtility;
@@ -140,7 +141,7 @@ public class GroupedModelRender {
             GL11.glPopMatrix();
         } else {
             //render the geometry normally if it's not a block.
-            Tessellator.bindTexture(transport.getTexture(transport.getDataWatcher().getWatchableObjectInt(24)));
+            Tessellator.bindTexture(transport.getTexture());
             int liveryIndex=-1;
             String lastLivery="";
             for (ModelRendererTurbo block : boxRefrence) {

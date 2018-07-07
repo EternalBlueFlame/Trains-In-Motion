@@ -3,6 +3,7 @@ package ebf.tim.registry;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import ebf.tim.TrainsInMotion;
+import ebf.tim.api.SkinRegistry;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.entities.rollingstock.EntityGTAX13000GallonTanker;
 import ebf.tim.entities.rollingstock.EntityPullmansPalace;
@@ -44,12 +45,14 @@ public class TransportRegistry {
                     registry.getItem().getUnlocalizedName().replace("item","entity"),
                     index+entityIDOffset, TrainsInMotion.instance, 60, 1, true);
             GameRegistry.registerItem(registry.getItem(), registry.getItem().getUnlocalizedName().substring(5));
+            registry.registerSkins();
             index++;
             registry = listTrains(index);
         }
     }
 
 
+    @Deprecated
     public static ItemStack[] listRecipies(int index) {
         switch (index) {
             case 0: {return new ItemStack[]{

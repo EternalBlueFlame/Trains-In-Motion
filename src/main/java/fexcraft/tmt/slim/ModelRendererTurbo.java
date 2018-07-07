@@ -1,7 +1,6 @@
 package fexcraft.tmt.slim;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.MathHelper;
@@ -43,7 +42,7 @@ public class ModelRendererTurbo {
     public boolean field_1402_i;
     public boolean forcedRecompile;
     public boolean useLegacyCompiler;
-    public final String boxName;
+    public String boxName = null;
     public boolean isShape = false;
     
     private String defaultTexture;
@@ -90,6 +89,9 @@ public class ModelRendererTurbo {
         boxName = s;
         defaultTexture = "";
         useLegacyCompiler = true;
+        if (modelbase!=null) {
+            modelbase.boxList.add(this);
+        }
 	}
 	
 	public ModelRendererTurbo(ModelBase modelbase){

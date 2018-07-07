@@ -158,6 +158,7 @@ public class TrainsInMotion {
         TrainsInMotion.keyChannel.registerMessage(ItemAdminBook.PacketAdminBookClient.Handler.class, ItemAdminBook.PacketAdminBookClient.class, 5, Side.SERVER);
 
 
+        proxy.register();
         //register the worldgen
         GameRegistry.registerWorldGenerator(new OreGen(), 0);
         //register the event handler
@@ -166,7 +167,6 @@ public class TrainsInMotion {
 
         //register GUI, model renders, Keybinds, client only blocks, and HUD
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
-        proxy.register();
     }
 
 }

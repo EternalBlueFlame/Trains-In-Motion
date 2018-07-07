@@ -11,8 +11,10 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,18 +26,40 @@ import java.util.UUID;
 public class ItemTransport extends Item {
 
     /**the list of strings to use for the item description*/
-    private final String[] subtext;
+    private final List<String> subtext = new ArrayList<>();
     /**the class for the entity*/
     private final Class<? extends GenericRailTransport> transport;
 
     /**the main constructor.
-     * @param information the list of strings to use for the item description
      * @param cart the class for the entity*/
-    public ItemTransport(String[] information, Class<? extends GenericRailTransport> cart) {
+    public ItemTransport(GenericRailTransport cart) {
         super();
-        subtext = information;
+        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.era") +  ": " + RailUtility.translate(cart.transportEra()));
+        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.year") +": " + cart.transportYear());
+        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.country") + ": " + RailUtility.translate(cart.transportcountry()));
+        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.weight") +": " + cart.weightKg() + "kg");
+        if (cart.transportTopSpeed()!=0){
+            subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.speed") +": " + cart.transportTopSpeed() +"km");
+            subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.pullingpower") +": "+ cart.transportPullingPower() +" " + RailUtility.translate("menu.item.tons"));
+
+            if (cart.transportMetricHorsePower() !=0){
+                subtext.add(EnumChatFormatting.GREEN +RailUtility.translate("menu.item.mhp") +": " + cart.weightKg());
+            }
+            if (cart.transportTractiveEffort() != 0){
+                subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.tractiveeffort") +": " + cart.weightKg() + "lbf");
+            }
+        }
+        if (cart.isFictional()){
+            subtext.add(RailUtility.translate(EnumChatFormatting.BLUE + "menu.item.fictional"));
+        }
+
+        if (cart.additionalItemText()!=null){
+            for (String s : cart.additionalItemText()) {
+                subtext.add(EnumChatFormatting.LIGHT_PURPLE  +s);
+            }
+        }
         //if we did this anywhere else it would error. why it is fine here I will never know. But I'm gonna abuse that.
-        transport = cart;
+        transport = cart.getClass();
         setCreativeTab(TrainsInMotion.creativeTab);
     }
 
@@ -50,7 +74,7 @@ public class ItemTransport extends Item {
     @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par3List, boolean par4) {
-        for(String str : subtext){par3List.add(str);}
+        par3List.addAll(subtext);
     }
 
     /**

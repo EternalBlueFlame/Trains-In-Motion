@@ -37,7 +37,7 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[13] = new ModelRendererTurbo(this, 193, 17, textureXY, textureXY); // Box 14
 		brigadelok_080Model[14] = new ModelRendererTurbo(this, 209, 17, textureXY, textureXY); // Box 15
 		brigadelok_080Model[15] = new ModelRendererTurbo(this, 225, 17, textureXY, textureXY); // Box 16
-		brigadelok_080Model[16] = new ModelRendererTurbo(this, 241, 17, textureXY, textureXY); // Box 17
+		brigadelok_080Model[16] = new ModelRendererTurbo(this, 241, 17, textureXY, textureXY, "smoke 3 232323"); // Box 17
 		brigadelok_080Model[17] = new ModelRendererTurbo(this, 209, 25, textureXY, textureXY); // Box 18
 		brigadelok_080Model[18] = new ModelRendererTurbo(this, 1, 33, textureXY, textureXY); // Box 19
 		brigadelok_080Model[19] = new ModelRendererTurbo(this, 25, 33, textureXY, textureXY); // Box 20

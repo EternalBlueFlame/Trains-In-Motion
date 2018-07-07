@@ -57,13 +57,8 @@ public class EntityBrigadelok080 extends TrainBase {
      *     The last part defines the unlocalized name, this is used for the item name, entity name, and language file entries.
      */
 
-    private static final String[] itemDescription = new String[]{
-            "\u00A77" + StatCollector.translateToLocal("menu.item.era") +  ": " + StatCollector.translateToLocal("menu.steam"),
-            "\u00A77" + StatCollector.translateToLocal("menu.item.year") +": 1918",
-            "\u00A77" + StatCollector.translateToLocal("menu.item.country") + ": " + StatCollector.translateToLocal("menu.item.germany"),
-            "\u00A77" + StatCollector.translateToLocal("menu.item.speed") +": 70.81km",
-            "\u00A77" + StatCollector.translateToLocal("menu.item.pullingpower") +": ??? " + StatCollector.translateToLocal("menu.item.tons")};
-    public static final Item thisItem = new ItemTransport(itemDescription, EntityBrigadelok080.class).setUnlocalizedName("brigadelok080");
+
+    public static final Item thisItem = new ItemTransport(new EntityBrigadelok080(null) ).setUnlocalizedName("brigadelok080");
 
     /**
      * these basic constructors only need to have their names changed to that of this class, that is assuming your editor doesn't automatically do that.
@@ -77,16 +72,29 @@ public class EntityBrigadelok080 extends TrainBase {
         super(world);
     }
 
+    @Override
     public String transportName(){return "Henschel Brigadelok";}
+    @Override
     public String transportcountry(){return "Germany";}
+    @Override
     public int transportYear(){return 1918;}
+    @Override
     public String transportEra(){return "Steam";}
+    @Override
     public float transportTopSpeed(){return 70.81f;}
+    @Override
     public boolean isFictional(){return false;}
+    @Override
     public float transportTractiveEffort(){return 0;}
+    @Override
     public float transportMetricHorsePower(){return 0;}
 
 
+    @Override
+    public ResourceLocation getDefaultTexture(){
+        return new ResourceLocation(TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png");
+    }
+    @Override
     public void registerSkins(){
         SkinRegistry.addSkin(this.getClass(),TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png", null,
         "default", "The standard design used by Germany in WWI");
@@ -187,7 +195,7 @@ public class EntityBrigadelok080 extends TrainBase {
     public float[][] getSmokeOffset(){return new float[][]{{-1,0,0.5f,0xB2B2B2,30},{-1,0,-0.5f,0xB2B2B2,30},{-1.4f,2f,0,0x3C3C3C,500}};}
 
     @Override
-    public int getLengthFromCenter() {
+    public int bogieLengthFromCenter() {
         return 1;
     }
 
@@ -250,6 +258,11 @@ public class EntityBrigadelok080 extends TrainBase {
      */
     public Item getItem(){
         return thisItem;
+    }
+
+    @Override
+    public ResourceLocation getTexture(){
+        return SkinRegistry.getTexture(this.getClass(), this.dataWatcher.getWatchableObjectString(24));
     }
 
     @Override

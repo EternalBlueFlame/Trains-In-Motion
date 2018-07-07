@@ -54,7 +54,11 @@ public class TexturedPolygon {
 				tessellator.addVertex(positionTexturevertex.vector3F.xCoord * f, positionTexturevertex.vector3F.yCoord * f, positionTexturevertex.vector3F.zCoord * f);
 			}
 		}
-        tessellator.draw();
+		if(!GL11.glGetBoolean(GL11.GL_VERTEX_ARRAY)) {
+			tessellator.draw();
+		} else {
+			tessellator.arrayEnabledDraw();
+		}
     }
 
 
