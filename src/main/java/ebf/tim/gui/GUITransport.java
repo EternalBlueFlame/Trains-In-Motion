@@ -14,18 +14,28 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.*;
 import net.minecraftforge.fluids.FluidRegistry;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import static ebf.tim.TrainsInMotion.transportTypes.PASSENGER;
 
@@ -34,7 +44,7 @@ import static ebf.tim.TrainsInMotion.transportTypes.PASSENGER;
  * used to draw the GUI for trains and rollingstock (the menu with the inventory).
  * @author Eternal Blue Flame
  */
-public class GUITransport extends GuiContainer {
+public class GUITransport extends GuiScreen {
 
     /**a reference to the resource location of the vanilla furnace texture, this also gets overridden by texturepacks*/
     private static final ResourceLocation vanillaInventory =
@@ -54,7 +64,44 @@ public class GUITransport extends GuiContainer {
     private static final float guiScaler = 0.00390625F;
     /**the center position for the inventory render*/
     private int yCenter=0;
-    private Boolean NEIEnabled = null;
+
+    //todo: inherited from GuiContainer, useless data, depreciate.
+    /** Starting X position for the Gui. Inconsistent use for Gui backgrounds. */
+    protected int guiLeft;
+    /** Starting Y position for the Gui. Inconsistent use for Gui backgrounds. */
+    protected int guiTop;
+    /** The X size of the inventory window in pixels. */
+    protected int xSize = 176;
+    /** The Y size of the inventory window in pixels. */
+    protected int ySize = 166;
+    private Slot theSlot;
+    /** Used when touchscreen is enabled. */
+    private Slot clickedSlot;
+    /** Used when touchscreen is enabled. */
+    private boolean isRightMouseClick;
+    /** Used when touchscreen is enabled */
+    private ItemStack draggedStack;
+    private int field_147011_y;
+    private int field_147010_z;
+    private Slot returningStackDestSlot;
+    private long returningStackTime;
+    /** Used when touchscreen is enabled */
+    private ItemStack returningStack;
+    private Slot field_146985_D;
+    private long field_146986_E;
+    protected final Set field_147008_s = new HashSet();
+    protected boolean field_147007_t;
+    private int field_146987_F;
+    private int field_146988_G;
+    private boolean field_146995_H;
+    private int field_146996_I;
+    private long field_146997_J;
+    private Slot field_146998_K;
+    private int field_146992_L;
+    private boolean field_146993_M;
+    private ItemStack field_146994_N;
+
+    public Container inventorySlots;
 
     public static final DecimalFormat decimal = new DecimalFormat("#.##");
 
@@ -65,13 +112,14 @@ public class GUITransport extends GuiContainer {
      * @see TileEntitySlotManager
      */
     public GUITransport(InventoryPlayer inventoryPlayer, GenericRailTransport entity) {
-        super(new TransportSlotManager(inventoryPlayer, entity));
+        super();
+        inventorySlots =new TransportSlotManager(inventoryPlayer, entity);
         player = inventoryPlayer.player;
         transport = entity;
     }
 
 
-    @Override
+
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
         //draw the text for trains
         if (transport instanceof EntityTrainCore) {
@@ -94,7 +142,6 @@ public class GUITransport extends GuiContainer {
      * xSize, ySize, width, and height are defined in the super
      * @see GuiContainer
      */
-    @Override
     protected void drawGuiContainerBackgroundLayer(float par1, int mouseX, int mouseY) {
         //draw the gui background color
         GL11.glPushMatrix();
@@ -122,6 +169,115 @@ public class GUITransport extends GuiContainer {
     @Override
     public void drawScreen(int mouseX, int mouseY, float par3){
         super.drawScreen(mouseX, mouseY, par3);
+
+        ////todo: inherited from GuiContainer, depreciate due to inefficiency.
+        this.drawDefaultBackground();
+        int k = this.guiLeft;
+        int l = this.guiTop;
+        this.drawGuiContainerBackgroundLayer(par3, mouseX, mouseY);
+        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+        RenderHelper.disableStandardItemLighting();
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
+        super.drawScreen(mouseX, mouseY, par3);
+        RenderHelper.enableGUIStandardItemLighting();
+        GL11.glPushMatrix();
+        GL11.glTranslatef((float)k, (float)l, 0.0F);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+        this.theSlot = null;
+        short short1 = 240;
+        short short2 = 240;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)short1 / 1.0F, (float)short2 / 1.0F);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        int k1;
+
+        for (int i1 = 0; i1 < this.inventorySlots.inventorySlots.size(); ++i1)
+        {
+            Slot slot = (Slot)this.inventorySlots.inventorySlots.get(i1);
+            this.func_146977_a(slot);
+
+            if (this.isMouseOverSlot(slot, mouseX, mouseY) && slot.func_111238_b())
+            {
+                this.theSlot = slot;
+                GL11.glDisable(GL11.GL_LIGHTING);
+                GL11.glDisable(GL11.GL_DEPTH_TEST);
+                int j1 = slot.xDisplayPosition;
+                k1 = slot.yDisplayPosition;
+                GL11.glColorMask(true, true, true, false);
+                this.drawGradientRect(j1, k1, j1 + 16, k1 + 16, -2130706433, -2130706433);
+                GL11.glColorMask(true, true, true, true);
+                GL11.glEnable(GL11.GL_LIGHTING);
+                GL11.glEnable(GL11.GL_DEPTH_TEST);
+            }
+        }
+
+        //Forge: Force lighting to be disabled as there are some issue where lighting would
+        //incorrectly be applied based on items that are in the inventory.
+        GL11.glDisable(GL11.GL_LIGHTING);
+        this.drawGuiContainerForegroundLayer(mouseX, mouseY);
+        GL11.glEnable(GL11.GL_LIGHTING);
+        InventoryPlayer inventoryplayer = this.mc.thePlayer.inventory;
+        ItemStack itemstack = this.draggedStack == null ? inventoryplayer.getItemStack() : this.draggedStack;
+
+        if (itemstack != null)
+        {
+            byte b0 = 8;
+            k1 = this.draggedStack == null ? 8 : 16;
+            String s = null;
+
+            if (this.draggedStack != null && this.isRightMouseClick)
+            {
+                itemstack = itemstack.copy();
+                itemstack.stackSize = MathHelper.ceiling_float_int((float)itemstack.stackSize / 2.0F);
+            }
+            else if (this.field_147007_t && this.field_147008_s.size() > 1)
+            {
+                itemstack = itemstack.copy();
+                itemstack.stackSize = this.field_146996_I;
+
+                if (itemstack.stackSize == 0)
+                {
+                    s = "" + EnumChatFormatting.YELLOW + "0";
+                }
+            }
+
+            this.drawItemStack(itemstack, mouseX - k - b0, mouseY - l - k1, s);
+        }
+
+        if (this.returningStack != null)
+        {
+            float f1 = (float)(Minecraft.getSystemTime() - this.returningStackTime) / 100.0F;
+
+            if (f1 >= 1.0F)
+            {
+                f1 = 1.0F;
+                this.returningStack = null;
+            }
+
+            k1 = this.returningStackDestSlot.xDisplayPosition - this.field_147011_y;
+            int j2 = this.returningStackDestSlot.yDisplayPosition - this.field_147010_z;
+            int l1 = this.field_147011_y + (int)((float)k1 * f1);
+            int i2 = this.field_147010_z + (int)((float)j2 * f1);
+            this.drawItemStack(this.returningStack, l1, i2, (String)null);
+        }
+
+        GL11.glPopMatrix();
+
+        if (inventoryplayer.getItemStack() == null && this.theSlot != null && this.theSlot.getHasStack())
+        {
+            ItemStack itemstack1 = this.theSlot.getStack();
+            this.renderToolTip(itemstack1, mouseX, mouseY);
+        }
+
+        GL11.glEnable(GL11.GL_LIGHTING);
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        RenderHelper.enableStandardItemLighting();
+        //end of inherited from GuiContainer
+
+
+
+
         if (transport.getType().isTrain()) {
             secondTankFluid = transport.getDataWatcher().getWatchableObjectInt(14);
 
@@ -162,6 +318,156 @@ public class GUITransport extends GuiContainer {
     }
 
 
+    @Deprecated //inherited from GuiContainer, inefficient.
+    private void func_146977_a(Slot p_146977_1_)
+    {
+        int i = p_146977_1_.xDisplayPosition;
+        int j = p_146977_1_.yDisplayPosition;
+        ItemStack itemstack = p_146977_1_.getStack();
+        boolean flag = false;
+        boolean flag1 = p_146977_1_ == this.clickedSlot && this.draggedStack != null && !this.isRightMouseClick;
+        ItemStack itemstack1 = this.mc.thePlayer.inventory.getItemStack();
+        String s = null;
+
+        if (p_146977_1_ == this.clickedSlot && this.draggedStack != null && this.isRightMouseClick && itemstack != null)
+        {
+            itemstack = itemstack.copy();
+            itemstack.stackSize /= 2;
+        }
+        else if (this.field_147007_t && this.field_147008_s.contains(p_146977_1_) && itemstack1 != null)
+        {
+            if (this.field_147008_s.size() == 1)
+            {
+                return;
+            }
+
+            if (Container.func_94527_a(p_146977_1_, itemstack1, true) && this.inventorySlots.canDragIntoSlot(p_146977_1_))
+            {
+                itemstack = itemstack1.copy();
+                flag = true;
+                Container.func_94525_a(this.field_147008_s, this.field_146987_F, itemstack, p_146977_1_.getStack() == null ? 0 : p_146977_1_.getStack().stackSize);
+
+                if (itemstack.stackSize > itemstack.getMaxStackSize())
+                {
+                    s = EnumChatFormatting.YELLOW + "" + itemstack.getMaxStackSize();
+                    itemstack.stackSize = itemstack.getMaxStackSize();
+                }
+
+                if (itemstack.stackSize > p_146977_1_.getSlotStackLimit())
+                {
+                    s = EnumChatFormatting.YELLOW + "" + p_146977_1_.getSlotStackLimit();
+                    itemstack.stackSize = p_146977_1_.getSlotStackLimit();
+                }
+            }
+            else
+            {
+                this.field_147008_s.remove(p_146977_1_);
+                this.func_146980_g();
+            }
+        }
+
+        this.zLevel = 100.0F;
+        itemRender.zLevel = 100.0F;
+
+        if (itemstack == null)
+        {
+            IIcon iicon = p_146977_1_.getBackgroundIconIndex();
+
+            if (iicon != null)
+            {
+                GL11.glDisable(GL11.GL_LIGHTING);
+                GL11.glEnable(GL11.GL_BLEND); // Forge: Blending needs to be enabled for this.
+                this.mc.getTextureManager().bindTexture(TextureMap.locationItemsTexture);
+                this.drawTexturedModelRectFromIcon(i, j, iicon, 16, 16);
+                GL11.glDisable(GL11.GL_BLEND); // Forge: And clean that up
+                GL11.glEnable(GL11.GL_LIGHTING);
+                flag1 = true;
+            }
+        }
+
+        if (!flag1)
+        {
+            if (flag)
+            {
+                drawRect(i, j, i + 16, j + 16, -2130706433);
+            }
+
+            GL11.glEnable(GL11.GL_DEPTH_TEST);
+            itemRender.renderItemAndEffectIntoGUI(this.fontRendererObj, this.mc.getTextureManager(), itemstack, i, j);
+            itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, this.mc.getTextureManager(), itemstack, i, j, s);
+        }
+
+        itemRender.zLevel = 0.0F;
+        this.zLevel = 0.0F;
+    }
+
+
+    //todo, for the love of god, why are these two different functions? inherited from GuiContainer, inefficient.
+    @Deprecated
+    private boolean isMouseOverSlot(Slot p_146981_1_, int p_146981_2_, int p_146981_3_)
+    {
+        return this.func_146978_c(p_146981_1_.xDisplayPosition, p_146981_1_.yDisplayPosition, 16, 16, p_146981_2_, p_146981_3_);
+    }
+    @Deprecated
+    protected boolean func_146978_c(int p_146978_1_, int p_146978_2_, int p_146978_3_, int p_146978_4_, int p_146978_5_, int p_146978_6_)
+    {
+        int k1 = this.guiLeft;
+        int l1 = this.guiTop;
+        p_146978_5_ -= k1;
+        p_146978_6_ -= l1;
+        return p_146978_5_ >= p_146978_1_ - 1 && p_146978_5_ < p_146978_1_ + p_146978_3_ + 1 && p_146978_6_ >= p_146978_2_ - 1 && p_146978_6_ < p_146978_2_ + p_146978_4_ + 1;
+    }
+
+
+    //todo: inherited from GuiContainer, inefficient.
+    @Deprecated
+    private void drawItemStack(ItemStack p_146982_1_, int p_146982_2_, int p_146982_3_, String p_146982_4_)
+    {
+        GL11.glTranslatef(0.0F, 0.0F, 32.0F);
+        this.zLevel = 200.0F;
+        itemRender.zLevel = 200.0F;
+        FontRenderer font = null;
+        if (p_146982_1_ != null) font = p_146982_1_.getItem().getFontRenderer(p_146982_1_);
+        if (font == null) font = fontRendererObj;
+        itemRender.renderItemAndEffectIntoGUI(font, this.mc.getTextureManager(), p_146982_1_, p_146982_2_, p_146982_3_);
+        itemRender.renderItemOverlayIntoGUI(font, this.mc.getTextureManager(), p_146982_1_, p_146982_2_, p_146982_3_ - (this.draggedStack == null ? 0 : 8), p_146982_4_);
+        this.zLevel = 0.0F;
+        itemRender.zLevel = 0.0F;
+    }
+
+
+    //todo: inherited from GuiContainer, inefficient.
+    @Deprecated
+    private void func_146980_g()
+    {
+        ItemStack itemstack = this.mc.thePlayer.inventory.getItemStack();
+
+        if (itemstack != null && this.field_147007_t)
+        {
+            this.field_146996_I = itemstack.stackSize;
+            ItemStack itemstack1;
+            int i;
+
+            for (Iterator iterator = this.field_147008_s.iterator(); iterator.hasNext(); this.field_146996_I -= itemstack1.stackSize - i)
+            {
+                Slot slot = (Slot)iterator.next();
+                itemstack1 = itemstack.copy();
+                i = slot.getStack() == null ? 0 : slot.getStack().stackSize;
+                Container.func_94525_a(this.field_147008_s, this.field_146987_F, itemstack1, i);
+
+                if (itemstack1.stackSize > itemstack1.getMaxStackSize())
+                {
+                    itemstack1.stackSize = itemstack1.getMaxStackSize();
+                }
+
+                if (itemstack1.stackSize > slot.getSlotStackLimit())
+                {
+                    itemstack1.stackSize = slot.getSlotStackLimit();
+                }
+            }
+        }
+    }
+
 
     /**
      * <h2>GUI initialization</h2>
@@ -171,6 +477,9 @@ public class GUITransport extends GuiContainer {
     public void initGui() {
         super.initGui();
 
+        this.mc.thePlayer.openContainer = this.inventorySlots;
+        this.guiLeft = (this.width - this.xSize) / 2;
+        this.guiTop = (this.height - this.ySize) / 2;
 
         yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
         //generic to all
@@ -195,7 +504,6 @@ public class GUITransport extends GuiContainer {
             this.buttonList.add(new GUIButton(9, guiLeft + 256, guiTop + 166, 18, 18, "horn"));
 
         }
-        initNEI();
     }
 
     /**
@@ -390,26 +698,6 @@ public class GUITransport extends GuiContainer {
         font.drawString(string,x,y,color);
     }
 
-    @cpw.mods.fml.common.Optional.Method(modid = "NotEnoughItems")
-    private void initNEI(){
-        NEIEnabled = NEIClientConfig.isEnabled();
-        NEIClientConfig.setEnabled(!NEIClientConfig.isHidden());
-    }
-
-    //NEI support for GUI because when it's hidden the widgets remain and you can't click through them, so we have to disable NEI when you hide it..
-    @cpw.mods.fml.common.Optional.Method(modid = "NotEnoughItems")
-    @Override
-    protected void keyTyped(char p_73869_1_, int p_73869_2_) {
-
-        if (Keyboard.isKeyDown(NEIClientConfig.getKeyBinding("gui.hide"))) {
-            NEIClientConfig.setEnabled(NEIClientConfig.isHidden());
-        }
-        if (p_73869_2_ == 1 || p_73869_2_ == this.mc.gameSettings.keyBindInventory.getKeyCode()){
-            NEIClientConfig.setEnabled(NEIEnabled);
-        }
-
-        super.keyTyped(p_73869_1_, p_73869_2_);
-    }
 
     /**
      * <h2>Draw Texture</h2>

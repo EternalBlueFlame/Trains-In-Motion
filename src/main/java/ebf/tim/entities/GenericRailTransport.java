@@ -217,7 +217,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         if (getInventorySize().getRow()>0) {
             int index=40;
             for(int r=0; r<getInventorySize().getRow(); r++){
-                for (int c=0;c<10;c++){
+                for (int c=0;c<9;c++){
                     inventory.add(new ItemStackSlot(this, index, -97 + (c * 18), -19 + (r * 18) + ((int)((11 - getInventorySize().getRow()) * 0.5f) * 18)));
                     index++;
                 }
