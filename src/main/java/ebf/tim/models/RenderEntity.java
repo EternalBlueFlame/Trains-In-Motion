@@ -122,10 +122,8 @@ public class RenderEntity extends Render {
                 //cache the animating parts for bogies.
                 if (entity.getBogieModels() != null) {
                     for (Bogie bogie : entity.getBogieModels()) {
-                        for (Object box : bogie.bogieModel.boxList) {
-                            if (box instanceof ModelRendererTurbo) {
-                                entity.renderData.animatedPart.add(new StaticModelAnimator(((ModelRendererTurbo) box)));
-                            }
+                        for (ModelRendererTurbo box : bogie.bogieModel.boxList) {
+                            entity.renderData.animatedPart.add(new StaticModelAnimator(box));
                         }
                     }
                 }
@@ -215,10 +213,8 @@ public class RenderEntity extends Render {
                     GL11.glRotatef(-entity.renderData.bogieRenders[i].rotationYaw - 180f,0.0f,1.0f,0);
                     GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
                     //render the geometry
-                    for (Object modelBogiePart : entity.renderData.bogieRenders[i].bogieModel.boxList) {
-                        if (modelBogiePart instanceof ModelRendererTurbo) {
-                            ((ModelRendererTurbo) modelBogiePart).render();
-                        }
+                    for (ModelRendererTurbo modelBogiePart : entity.renderData.bogieRenders[i].bogieModel.boxList) {
+                            modelBogiePart.render();
                     }
                     GL11.glPopMatrix();
                 }

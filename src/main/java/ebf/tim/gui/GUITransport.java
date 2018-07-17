@@ -78,13 +78,10 @@ public class GUITransport extends GuiContainer {
             drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
             drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 110, 72, 16777215);
             //draw the text for transports with large inventories
-        } else if (transport.getType() != PASSENGER && transport.getInventorySize().getRow()>5) {
-            drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
+        } else if (transport.getType() != PASSENGER ) {
+            drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30 + yCenter, 16777215);
             drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 110, 70, 16777215);
             //draw the text for everything but the passenger car
-        } else if (transport.getType() != PASSENGER){
-            drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), 8, 66-(transport.getInventorySize().getRow()*18), 16777215);
-            drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 8, 80, 16777215);
         }
     }
 
@@ -120,7 +117,6 @@ public class GUITransport extends GuiContainer {
      * <h2>Draw upper layer</h2>
      * this draws the upper layer of the GUI, and handles things like the tooltips.
      * Most of this is just checking if the cursor position is in the correct place for displaying tooltips.
-     * TODO: maps are disabled
      * TODO: maps are disabled
      */
     @Override
@@ -177,38 +173,27 @@ public class GUITransport extends GuiContainer {
 
 
         yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
-        if (!(transport instanceof EntityTrainCore) && transport.getInventorySize().getRow()<6) {
-            //generic to all
-            if (player.getDisplayName().equals(transport.getOwnerName())) {
-                this.buttonList.add(new GUIButton(13, guiLeft + 8, guiTop + 174, 18, 18, "unlink"));
-                this.buttonList.add(new GUIButton(12, guiLeft + 62, guiTop + 174, 18, 18, "dropkey"));
+        //generic to all
+        if (player.getDisplayName().equals(transport.getOwnerName())) {
+            this.buttonList.add(new GUIButton(13, guiLeft +112, guiTop + 166, 18, 18, "unlink"));
+            this.buttonList.add(new GUIButton(12, guiLeft + 166, guiTop + 166, 18, 18, "dropkey"));
+        }
+        this.buttonList.add(new GUIButton(6, guiLeft + 130, guiTop + 166, 18, 18, "locked"));
+        this.buttonList.add(new GUIButton(7, guiLeft + 148, guiTop + 166, 18, 18, "coupler"));
+        if (transport.getLampOffset().yCoord>1) {
+            this.buttonList.add(new GUIButton(5, guiLeft + 238, guiTop + 166, 18, 18, "lamp"));
+        }
+        this.buttonList.add(new GUIButton(4, guiLeft + 220, guiTop + 166, 18, 18, "brake"));
+        //train specific
+        if (transport instanceof EntityTrainCore) {
+            if (player.capabilities.isCreativeMode) {
+                this.buttonList.add(new GUIButton(10, guiLeft + 184, guiTop + 166, 18, 18, "creative"));
             }
-            this.buttonList.add(new GUIButton(6, guiLeft + 26, guiTop + 174, 18, 18, "locked"));
-            this.buttonList.add(new GUIButton(7, guiLeft + 44, guiTop + 174, 18, 18, "coupler"));
-            this.buttonList.add(new GUIButton(4, guiLeft + 80, guiTop + 174, 18, 18, "brake"));
-        } else {
-            //generic to all
-            if (player.getDisplayName().equals(transport.getOwnerName())) {
-                this.buttonList.add(new GUIButton(13, guiLeft +112, guiTop + 166, 18, 18, "unlink"));
-                this.buttonList.add(new GUIButton(12, guiLeft + 166, guiTop + 166, 18, 18, "dropkey"));
+            if (transport.getType() != TrainsInMotion.transportTypes.STEAM) {
+                this.buttonList.add(new GUIButton(8, guiLeft + 202, guiTop + 166, 18, 18, "running"));
             }
-            this.buttonList.add(new GUIButton(6, guiLeft + 130, guiTop + 166, 18, 18, "locked"));
-            this.buttonList.add(new GUIButton(7, guiLeft + 148, guiTop + 166, 18, 18, "coupler"));
-            if (transport.getLampOffset().yCoord>1) {
-                this.buttonList.add(new GUIButton(5, guiLeft + 238, guiTop + 166, 18, 18, "lamp"));
-            }
-            this.buttonList.add(new GUIButton(4, guiLeft + 220, guiTop + 166, 18, 18, "brake"));
-            //train specific
-            if (transport instanceof EntityTrainCore) {
-                if (player.capabilities.isCreativeMode) {
-                    this.buttonList.add(new GUIButton(10, guiLeft + 184, guiTop + 166, 18, 18, "creative"));
-                }
-                if (transport.getType() != TrainsInMotion.transportTypes.STEAM) {
-                    this.buttonList.add(new GUIButton(8, guiLeft + 202, guiTop + 166, 18, 18, "running"));
-                }
-                this.buttonList.add(new GUIButton(9, guiLeft + 256, guiTop + 166, 18, 18, "horn"));
+            this.buttonList.add(new GUIButton(9, guiLeft + 256, guiTop + 166, 18, 18, "horn"));
 
-            }
         }
         initNEI();
     }
@@ -309,6 +294,7 @@ public class GUITransport extends GuiContainer {
     /**
      * <h2>Render Passenger GUI</h2>
      * basically the same as
+     * todo: set this up just to render the passenger icons and empty seats above the player inventory
      */
     private void renderPassengerInventory(Minecraft mc){
 
@@ -341,14 +327,11 @@ public class GUITransport extends GuiContainer {
     /**
      * <h2>Render Freight GUI</h2>
      * NOTE: this is only designed for inventory sized with 9 columns.
+     * todo: rework this for just rendering inventory for the transport, clone it for the player.
      */
     private void renderFreightInventory(Minecraft mc){
         mc.getTextureManager().bindTexture(vanillaChest);
         //draw the player inventory and toolbar background.
-        if (transport.getInventorySize().getRow()<6){
-            drawTexturedRect(guiLeft, guiTop+77-(transport.getInventorySize().getRow()*18)-17, 0, 0, 176, transport.getInventorySize().getRow() * 18 + 17);
-            drawTexturedRect(guiLeft, guiTop+77, 0, 126, 176, 96);
-        } else {
             drawTexturedRect(guiLeft-105, guiTop-37+yCenter, 0, 0, 176, 17);//top
             for(int i=0; i<transport.getInventorySize().getRow(); i++){
                 drawTexturedRect(guiLeft-105, i*18+ (guiTop-20)+yCenter, 0, 17, 176, 18);
@@ -357,13 +340,13 @@ public class GUITransport extends GuiContainer {
 
             drawTexturedRect(guiLeft+105, guiTop+64, 0, 0, 176,  16);//top
             drawTexturedRect(guiLeft+105,   guiTop+70, 0, 126, 176, 96);//actual inventory
-        }
     }
 
 
     /**
      * <h2>Render Tanker GUI</h2>
      * basically the same as
+     * todo: make this an optional that renders where the train UI would normally render
      */
     private void renderTankerInventory(Minecraft mc){
         //draw the player inventory and toolbar background.
@@ -384,6 +367,7 @@ public class GUITransport extends GuiContainer {
         drawTexturedRect(guiLeft+150, guiTop + 44, 54, 51, 20,20);
     }
 
+    //todo: really? this is the best method on hand for outlined font?
     public static void drawTextOutlined(FontRenderer font, String string, int x, int y, int color){
         //bottom left
         font.drawString(string, x-1, y+1, 0);

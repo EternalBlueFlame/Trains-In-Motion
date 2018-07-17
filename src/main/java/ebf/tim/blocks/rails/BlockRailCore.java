@@ -280,7 +280,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             //define the offset for model modifications.
             dX = points.get(i-1)[0] - (points.get(i + 1)[0]);
             dZ = points.get(i-1)[2] - (points.get(i + 1)[2]);
-            offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
+            offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625}, 0,RailUtility.atan2degreesf(dZ,dX),0);
             seg.zOffset = new float[]{(float)offsetOuter[0],(float)offsetOuter[1],(float)offsetOuter[2]};
 
             left = null;
@@ -302,8 +302,8 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 } else if (f>right){
                     right=f;
                 }
-                offsetInner = RailUtility.rotatePoint(new double[]{0,0,-0.0625+f}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
-                offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625+f}, 0,(float)Math.toDegrees(Math.atan2(dZ,dX)),0);
+                offsetInner = RailUtility.rotatePoint(new double[]{0,0,-0.0625+f}, 0,RailUtility.atan2degreesf(dZ,dX),0);
+                offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625+f}, 0,RailUtility.atan2degreesf(dZ,dX),0);
 
                 seg.models.add(seg.genNewSubModel(
                         new float[]{
@@ -344,8 +344,8 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
                     //this actually gens the parts
                     for (int ii = 0; ii < length; ii++) {
-                        offsetInner = RailUtility.rotatePoint(new double[]{0, 0, (-inner * 0.5f) + ((inner / length) * (ii))}, 0, (float) Math.toDegrees(Math.atan2(dZ, dX)), 0);
-                        offsetOuter = RailUtility.rotatePoint(new double[]{0, 0, (-inner * 0.5f) + ((inner / length) * (ii + 1))}, 0, (float) Math.toDegrees(Math.atan2(dZ, dX)), 0);
+                        offsetInner = RailUtility.rotatePoint(new double[]{0, 0, (-inner * 0.5f) + ((inner / length) * (ii))}, 0, RailUtility.atan2degreesf(dZ, dX), 0);
+                        offsetOuter = RailUtility.rotatePoint(new double[]{0, 0, (-inner * 0.5f) + ((inner / length) * (ii + 1))}, 0, RailUtility.atan2degreesf(dZ, dX), 0);
 
                         ModelRailSegment.subModel model = seg.genNewSubModel(
                                 new float[]{
@@ -385,8 +385,8 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 Random r = new Random();
                 //this actually gens the parts
                 for (int ii = 0; ii < length; ii++) {
-                    offsetInner = RailUtility.rotatePoint(new double[]{-0.06, 0, (-inner * 0.49f) + ((inner / length) * (ii))}, 0, (float) Math.toDegrees(Math.atan2(dZ, dX)), 0);
-                    offsetOuter = RailUtility.rotatePoint(new double[]{-0.06, 0, (-inner * 0.51f) + ((inner / length) * (ii + 1))}, 0, (float) Math.toDegrees(Math.atan2(dZ, dX)), 0);
+                    offsetInner = RailUtility.rotatePoint(new double[]{-0.06, 0, (-inner * 0.49f) + ((inner / length) * (ii))}, 0, RailUtility.atan2degreesf(dZ, dX), 0);
+                    offsetOuter = RailUtility.rotatePoint(new double[]{-0.06, 0, (-inner * 0.51f) + ((inner / length) * (ii + 1))}, 0, RailUtility.atan2degreesf(dZ, dX), 0);
                     zBufferFix = (float) r.nextInt(10000) * 0.0000001f;
                     ModelRailSegment.subModel model = segments.get(0).genNewSubModel(
                             new float[]{
@@ -397,8 +397,8 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                             }, tile, (byte) 2
                     );
 
-                    offsetInner = RailUtility.rotatePoint(new double[]{-0.18, 0, (-inner * 0.49f) + ((inner / length) * (ii))}, 0, (float) Math.toDegrees(Math.atan2(dZ, dX)), 0);
-                    offsetOuter = RailUtility.rotatePoint(new double[]{-0.18, 0, (-inner * 0.51f) + ((inner / length) * (ii + 1))}, 0, (float) Math.toDegrees(Math.atan2(dZ, dX)), 0);
+                    offsetInner = RailUtility.rotatePoint(new double[]{-0.18, 0, (-inner * 0.49f) + ((inner / length) * (ii))}, 0, RailUtility.atan2degreesf(dZ, dX), 0);
+                    offsetOuter = RailUtility.rotatePoint(new double[]{-0.18, 0, (-inner * 0.51f) + ((inner / length) * (ii + 1))}, 0, RailUtility.atan2degreesf(dZ, dX), 0);
 
                     model.lastPositionInner = new float[]{
                             (float) (offsetInner[0] + tiePoints.get(i)[0]), (float) (offsetInner[1] + tiePoints.get(i)[1]) + zBufferFix, (float) (offsetInner[2] + tiePoints.get(i)[2])

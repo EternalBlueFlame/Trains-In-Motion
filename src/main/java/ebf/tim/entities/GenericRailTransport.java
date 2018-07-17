@@ -25,6 +25,8 @@ import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -51,12 +53,13 @@ import static ebf.tim.utility.RailUtility.rotatePoint;
  * this is the base for all trains and rollingstock.
  * @author Eternal Blue Flame
  */
-public class GenericRailTransport extends EntityMinecart implements IEntityAdditionalSpawnData, IEntityMultiPart, IInventory, IFluidHandler, IFluidCart {
+public class GenericRailTransport extends EntityMinecart implements IEntityAdditionalSpawnData, IInventory, IEntityMultiPart, IFluidHandler, IFluidCart {
 
     /*
      * <h2>variables</h2>
      */
     /**defines the lamp, and it's management*/
+    @Deprecated //lamp should be handled by render like particles
     public LampHandler lamp = new LampHandler();
     /**defines the colors, the outer array is for each different color, and the inner int[] is for the RGB color*/
     public int[][] colors = new int[][]{{0,0,0},{0,0,0},{0,0,0}};
@@ -83,8 +86,10 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**the destination for routing*/
     public String destination ="";
     /**the key item for the entity*/
+    @Deprecated //tickets and keys should only have to get this entity's UUID, this shouldn't need to keep a copy of the items
     public ItemStackSlot key;
     /**the ticket item for the transport*/
+    @Deprecated
     public ItemStackSlot ticket;
     /**used to initialize a laege number of variables that are used to calculate everything from movement to linking.
      * this is so we don't have to initialize each of these variables every tick, saves CPU.*/
@@ -111,8 +116,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public double backVelocityX=0;
     /**The Z velocity of the back bogie*/
     public double backVelocityZ=0;
-    /**a list of the particles the transport is managing*/
-    public List<ParticleFX> particles = new ArrayList<>();
     /**Used to be sure we only say once that the transport has been derailed*/
     private boolean displayDerail = false;
     /*this is cached so we can keep the hitbox handler running even when derailed.*/
@@ -167,6 +170,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         super(world);
         setSize(1,2);
         ignoreFrustumCheck = true;
+        inventory = new ArrayList<>();
+        initInventorySlots();
     }
     public GenericRailTransport(UUID owner, World world, double xPos, double yPos, double zPos){
         super(world);
@@ -179,6 +184,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         key.setSlotContents(new ItemStack(new ItemKey(entityUniqueID, getItem().getUnlocalizedName())));
         setSize(1,2);
         ignoreFrustumCheck = true;
+        inventory = new ArrayList<>();
+        initInventorySlots();
     }
 
     /**
@@ -199,18 +206,31 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this.dataWatcher.addObject(20, 0);//tankA
         this.dataWatcher.addObject(21, 0);//front linked transport
         this.dataWatcher.addObject(22, 0);//back linked transport
-        this.dataWatcher.addObject(24, getDefaultTexture().getResourceDomain()+":"+getDefaultTexture().getResourcePath());//currently used texture
-        if (getSizeInventory()>0 && inventory == null) {
-            inventory = new ArrayList<ItemStackSlot>();
-            int slot=0;
-            while (inventory.size()<getSizeInventory()){
-                inventory.add(new ItemStackSlot(this, slot));
-                slot++;
+        this.dataWatcher.addObject(24, getDefaultTexture().getResourceDomain()+":"+getDefaultTexture().getResourcePath());//currently used
+    }
+
+    /**
+     * override this to customize the inventory slots.
+     * call this in the override if you just want to add more slots to the existing planned inventory size
+     */
+    public void initInventorySlots(){
+        if (getInventorySize().getRow()>0) {
+            int index=40;
+            for(int r=0; r<getInventorySize().getRow(); r++){
+                for (int c=0;c<10;c++){
+                    inventory.add(new ItemStackSlot(this, index, -97 + (c * 18), -19 + (r * 18) + ((int)((11 - getInventorySize().getRow()) * 0.5f) * 18)));
+                    index++;
+                }
             }
         }
     }
 
-
+    /**
+     * use this if you plan to implement a custom Gui and Container in your own client/common proxy.
+     */
+    public boolean hasCustomGUI(){
+        return false;
+    }
 
     /*
      * <h2>base entity overrides</h2>
@@ -245,7 +265,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                     (frontBogie.posY + backBogie.posY) * 0.5D,
                     (frontBogie.posZ + backBogie.posZ) * 0.5D);
 
-            setRotation((float)Math.toDegrees(Math.atan2(
+            setRotation((float)Math.toDegrees(RailUtility.atan2f(
                     frontBogie.posZ - backBogie.posZ,
                     frontBogie.posX - backBogie.posX)),
                     MathHelper.floor_double(Math.acos(frontBogie.posY / backBogie.posY)*RailUtility.degreesD));
@@ -429,14 +449,20 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
         }
 
+        inventory = new ArrayList<>();
+        initInventorySlots();
+
+        NBTTagCompound invTag;
+
         if (getSizeInventory()>0) {
-            for (int i = 0; i < getSizeInventory(); i++) {
-                NBTTagCompound tagCompound = tag.getCompoundTag(NBTKeys.inventoryItem +i);
-                if (tagCompound != null){
-                    setInventorySlotContents(i, ItemStack.loadItemStackFromNBT(tagCompound));
+            for (int i=0;i<getSizeInventory();i++) {
+                invTag = tag.getCompoundTag("transportinv."+i);
+                if (invTag!=null) {
+                    inventory.get(i).setSlotContents(ItemStack.loadItemStackFromNBT(invTag));
                 }
             }
         }
+
 
         updateWatchers = true;
     }
@@ -477,19 +503,15 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
         }
 
-        if (getSizeInventory()>0 && inventory == null) {
-            inventory = new ArrayList<ItemStackSlot>();
-            int slot=0;
-            while (inventory.size()<getSizeInventory()){
-                inventory.add(new ItemStackSlot(this, slot));
-                slot++;
-            }
-        }
-        if (getSizeInventory()>0 && inventory.size()>0) {
-            for (int i =0; i< getSizeInventory(); i++) {
-                if (inventory.get(i).getHasStack()) {
-                    tag.setTag(NBTKeys.inventoryItem + i, inventory.get(i).writeToNBT());
+        NBTTagCompound invTag;
+
+        if (inventory!=null) {
+            for (int i=0;i<getSizeInventory();i++) {
+                invTag = new NBTTagCompound();
+                if(inventory.get(i)!=null && inventory.get(i).getStack()!=null) {
+                    inventory.get(i).getStack().writeToNBT(invTag);
                 }
+                tag.setTag("transportinv."+i, invTag);
             }
         }
 
@@ -522,7 +544,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 ((frontBogie.posY + backBogie.posY) * 0.5D),
                 ((frontBogie.posZ + backBogie.posZ) * 0.5D));
 
-        setRotation((float)Math.toDegrees(Math.atan2(
+        setRotation((RailUtility.atan2degreesf(
                 frontBogie.posZ - backBogie.posZ,
                 frontBogie.posX - backBogie.posX)),
                 MathHelper.floor_double(Math.acos(frontBogie.posY / backBogie.posY)*RailUtility.degreesD),
@@ -782,14 +804,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             vectorCache[5][2] = vectorCache[4][2] / distance;
 
             if (linkedTransport.frontLinkedID != null && linkedTransport.frontLinkedID == this.getEntityId()) {
-                distance -= Math.abs(linkedTransport.getHitboxPositions()[0][0]);
+                distance -= Math.abs(linkedTransport.getHitboxSize()[0]*-0.5);
             } else {
-                distance -= Math.abs(linkedTransport.getHitboxPositions()[linkedTransport.getHitboxPositions().length - 1][0]);
+                distance -= Math.abs(linkedTransport.getHitboxSize()[0]*0.5);
             }
             if (this.frontLinkedID != null && this.frontLinkedID == linkedTransport.getEntityId()) {
-                distance -= Math.abs(this.getHitboxPositions()[0][0]);
+                distance -= Math.abs(this.getHitboxSize()[0]*-0.5);
             } else {
-                distance -= Math.abs(this.getHitboxPositions()[this.getHitboxPositions().length - 1][0]);
+                distance -= Math.abs(this.getHitboxSize()[0]*0.5);
             }
 
             vectorCache[3][0] = 0.3 * distance * vectorCache[4][0];
@@ -992,13 +1014,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public double[][] getRiderOffsets(){return new double[][]{{0,0,0}};}
     /**returns the positions for the hitbox, they are defined by length from center.
      * must have at least 4 hitboxes, the first and last values are used for coupling positions*/
-    @Deprecated
-    public double[][] getHitboxPositions(){return new double[][]{{-1.6,0,0},{1,0,0},{0,0,0},{1,0,0},{1.6,0,0}};}
+    public double[] getHitboxSize(){return new double[]{3.2, 2,1};}
     /**returns the item of the transport, this should be a static value in the transport's class.*/
     @Deprecated
     public Item getItem(){return null;}
     /**defines the size of the inventory, not counting any special slots like for fuel.
      * @see TrainsInMotion.inventorySizes*/
+    @Deprecated //todo: why the hell don't i just use an int???
     public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.FREIGHT_ONE;}
     /**defines the offset for the lamp in X/Y/Z*/
     @Deprecated
@@ -1097,19 +1119,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      */
     @Override
     public int getSizeInventory() {
-        int size =0;
-        switch (getType()){
-            case NUCLEAR_STEAM: case STEAM:case TANKER:{
-                size=2;break;
-            }
-            case DIESEL:case ELECTRIC:case NUCLEAR_ELECTRIC:case TENDER:{
-                size=1;break;
-            }
-        }
-        if (getRiderOffsets() != null && getRiderOffsets().length >1){
-            size++;
-        }
-        return 1+ size+ (9 * getInventorySize().getRow());
+        return inventory.size();
     }
 
     /**

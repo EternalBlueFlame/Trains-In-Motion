@@ -167,6 +167,8 @@ public class EntityBrigadelok080 extends TrainBase {
      */
     @Override
     public double[][] getHitboxPositions(){return new double[][]{{-1.75d,0.25d,0d},{-1.15d,0.25d,0d},{0d,0.25d,0d},{1.15d, 0.25d,0d},{1.75d,0.25d,0d}};}
+
+
     /**
      * <h2>Lamp offset</h2>
      * @return defines the offset for the lamp in blocks.

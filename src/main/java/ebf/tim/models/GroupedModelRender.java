@@ -133,7 +133,7 @@ public class GroupedModelRender {
                 GL11.glRotated(block.rotateAngleY * RailUtility.degreesD, 0, 1, 0);
                 GL11.glRotated((block.rotateAngleZ * RailUtility.degreesD)+90, 0, 0, 1);
                 //define scale based on the model
-                GL11.glScaled(block.xScale - 0.0175, block.yScale - 0.0175, block.zScale - 0.0175);
+                GL11.glScaled((block.xScale - 0.0175)*0.0625f, (block.yScale - 0.0175)*0.0625f, (block.zScale - 0.0175)*0.0625f);
                 //now actually render the block.
                 field_147909_c.renderBlockAsItem( Block.getBlockFromItem(blockStack.getItem()), blockStack.getItemDamage(), 1.0f);
                 GL11.glPopMatrix();

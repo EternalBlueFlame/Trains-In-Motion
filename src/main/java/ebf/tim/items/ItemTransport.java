@@ -86,9 +86,11 @@ public class ItemTransport extends Item {
     public boolean onItemUse(ItemStack itemStack, EntityPlayer playerEntity, World worldObj, int posX, int posY, int posZ, int blockSide, float pointToRayX, float pointToRayY, float pointToRayZ) {
         try {
             if(RailUtility.placeOnRail(transport.getConstructor(UUID.class, World.class, double.class, double.class, double.class).newInstance(playerEntity.getGameProfile().getId(), worldObj, posX + 0.5D, posY, posZ + 0.5D), playerEntity, worldObj, posX, posY, posZ)){
-                itemStack.stackSize--;
-                if (itemStack.stackSize<=0){
-                    itemStack=null;
+                if (!playerEntity.capabilities.isCreativeMode) {
+                    itemStack.stackSize--;
+                    if (itemStack.stackSize <= 0) {
+                        itemStack = null;
+                    }
                 }
                 return true;
             }

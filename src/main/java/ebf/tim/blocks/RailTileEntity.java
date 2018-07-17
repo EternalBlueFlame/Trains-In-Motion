@@ -1,42 +1,27 @@
 package ebf.tim.blocks;
 
-import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameData;
-import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.blocks.rails.RailVanillaShapes;
 import ebf.tim.models.rails.ModelRailSegment;
 import fexcraft.tmt.slim.Vec3f;
 import net.minecraft.block.BlockRailBase;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
 import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.block.Block;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
-import scala.reflect.internal.Trees;
-import sun.misc.BASE64Encoder;
 
 import javax.annotation.Nullable;
-import java.beans.XMLEncoder;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 public class RailTileEntity extends TileEntity {
@@ -48,7 +33,7 @@ public class RailTileEntity extends TileEntity {
     public Block ballast = null;
     public Block ties = null;
     public Block wires = null;
-    public Item ingot;
+    public Block rail;
     public int snow=0;
     public int timer=0;
     public int overgrowth=0;
@@ -59,11 +44,6 @@ public class RailTileEntity extends TileEntity {
         return 0.4f;
     }
 
-    private static final double[] color = {
-            (Blocks.iron_block.getMapColor(0).colorValue >> 16 & 0xFF)* 0.00392156863,
-            (Blocks.iron_block.getMapColor(0).colorValue >> 8 & 0xFF)* 0.00392156863,
-            (Blocks.iron_block.getMapColor(0).colorValue & 0xFF)* 0.00392156863
-    };
 
     public void func_145828_a(@Nullable CrashReportCategory report)  {
         if (report == null) {
@@ -77,7 +57,7 @@ public class RailTileEntity extends TileEntity {
                 for (ModelRailSegment point : path) {
 
                     for (ModelRailSegment.subModel model : point.models) {
-                        model.render(Tessellator.getInstance(), i == 0, i == last, ballast, ties);
+                        model.render(Tessellator.getInstance(), i == 0, i == last, ballast, ties, Blocks.iron_block);
                     }
                     i++;
                 }
@@ -244,7 +224,7 @@ public class RailTileEntity extends TileEntity {
         super.writeToNBT(tag);
         tag.setString("ballast", ballast!=null?ballast.delegate.name():"null");
         tag.setString("ties", ties!=null?ties.delegate.name():"null");
-        tag.setString("rail", ingot!=null?ingot.delegate.name():"null");
+        tag.setString("rail", rail !=null? rail.delegate.name():"null");
         tag.setString("wires", wires!=null?wires.delegate.name():"null");
         try {
             ByteArrayOutputStream bo = new ByteArrayOutputStream();
@@ -287,7 +267,7 @@ public class RailTileEntity extends TileEntity {
         if (tag.hasKey("rail")) {
             s = tag.getString("rail");
             if (!s.equals("null")) {
-                ingot = GameData.getItemRegistry().getObject(s);
+                rail = GameData.getBlockRegistry().getObject(s);
             }
         }
 

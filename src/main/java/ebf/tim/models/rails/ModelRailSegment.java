@@ -46,6 +46,7 @@ public class ModelRailSegment
 			offset = new float[]{new Random().nextInt(4),0,0};
 			host = hostObj;
 			type = partID;
+			textureColorOffset= new Random().nextInt(10)-5;
 
 		}
 		public float[] positionInner = null;
@@ -54,10 +55,14 @@ public class ModelRailSegment
 		public float[] lastPositionOuter = null;
 		public float offset[];
 		public byte type =0;
+		int textureColorOffset=0;
 
-		public void render(Tessellator tessellator, boolean isFront, boolean isEnd, Block ballast, Block ties) {
+		public void render(Tessellator tessellator, boolean isFront, boolean isEnd, Block ballast, Block ties, Block rail) {
 			if (positionOuter != null && positionInner != null && lastPositionOuter!=null && lastPositionInner != null) {
-
+				int color = 0xCBCDCD;
+				if (rail!=null){
+					color=rail.getMapColor(0).colorValue;
+				}
 				GL11.glPushMatrix();
 
 				//set the color with the tint.   * 0.00392156863 is the same as /255, but multiplication is more efficient than division and doesn't fry on 0.
@@ -74,7 +79,12 @@ public class ModelRailSegment
 							}
 							default: {
 								GL11.glDisable(GL11.GL_TEXTURE_2D);
+								GL11.glColor3f(
+										((color >> 16 & 0xFF)+textureColorOffset)* 0.00392156863f,
+										((color >> 8 & 0xFF))+textureColorOffset* 0.00392156863f,
+										((color & 0xFF))+textureColorOffset* 0.00392156863f);
 								model3DMC(tessellator, isFront, isEnd);
+								GL11.glColor3f(1,1,1);
 								GL11.glEnable(GL11.GL_TEXTURE_2D);
 							}
 						}
@@ -83,16 +93,21 @@ public class ModelRailSegment
 					case 2: {
 						switch (type) {
 							case 1: {
-								model3DBallast(tessellator, Blocks.gravel);
+								model3DBallast(tessellator, ballast);
 								break;
 							}
 							case 2:{
-								model3DTies(tessellator, Blocks.log);
+								model3DTies(tessellator, ties);
 								break;
 							}
 							default: {
 								GL11.glDisable(GL11.GL_TEXTURE_2D);
+								GL11.glColor3f(
+										((color >> 16 & 0xFF)+textureColorOffset)* 0.00392156863f,
+										((color >> 8 & 0xFF))+textureColorOffset* 0.00392156863f,
+										((color & 0xFF))+textureColorOffset* 0.00392156863f);
 								modelTiM(tessellator, isFront, isEnd);
+								GL11.glColor3f(1,1,1);
 								GL11.glEnable(GL11.GL_TEXTURE_2D);
 							}
 						}
@@ -106,7 +121,12 @@ public class ModelRailSegment
 							}
 							default: {
 								GL11.glDisable(GL11.GL_TEXTURE_2D);
+								GL11.glColor3f(
+										((color >> 16 & 0xFF)+textureColorOffset)* 0.00392156863f,
+										((color >> 8 & 0xFF))+textureColorOffset* 0.00392156863f,
+										((color & 0xFF))+textureColorOffset* 0.00392156863f);
 								modelTC(tessellator, isFront, isEnd);
+								GL11.glColor3f(1,1,1);
 								GL11.glEnable(GL11.GL_TEXTURE_2D);
 							}
 						}
@@ -121,7 +141,12 @@ public class ModelRailSegment
 							}
 							default:{
 								GL11.glDisable(GL11.GL_TEXTURE_2D);
+								GL11.glColor3f(
+										((color >> 16 & 0xFF)+textureColorOffset)* 0.00392156863f,
+										((color >> 8 & 0xFF))+textureColorOffset* 0.00392156863f,
+										((color & 0xFF))+textureColorOffset* 0.00392156863f);
 								modelPotato(tessellator);
+								GL11.glColor3f(1,1,1);
 								GL11.glEnable(GL11.GL_TEXTURE_2D);
 							}
 						}

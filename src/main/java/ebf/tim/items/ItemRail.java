@@ -58,7 +58,14 @@ public class ItemRail extends Item implements ITrackItem {
     @Override
     public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int meta, float p_77648_8_, float p_77648_9_, float p_77648_10_) {
         if (!world.isRemote) {
-            return placeTrack(stack, world, x, y, z);
+            boolean placed = placeTrack(stack, world, x, y, z);
+            if(placed && !player.capabilities.isCreativeMode){
+                stack.stackSize--;
+                if(stack.stackSize<=0){
+                    stack=null;
+                }
+            }
+            return placed;
         } else {
             return true;
         }
@@ -75,17 +82,15 @@ public class ItemRail extends Item implements ITrackItem {
     public boolean placeTrack(ItemStack stack, World world, int x, int y, int z){
         net.minecraft.block.Block block = world.getBlock(x, y, z);
 
-        if (!(World.doesBlockHaveSolidTopSurface(world ,x, y - 1, z))){
+        if (!(World.doesBlockHaveSolidTopSurface(world ,x, y, z))){
             return false;
         }
 
-        if(block.isReplaceable(world, x, y, z) || block instanceof BlockFlower || block == Blocks.double_plant || block instanceof BlockMushroom){
-                block.dropBlockAsItem(world, x, y, z, world.getBlockMetadata(x, y, z), 0);
-        } else {
-            return false;
+        if(block.isReplaceable(world, x, y+1, z) || block instanceof BlockFlower || block == Blocks.double_plant || block instanceof BlockMushroom){
+                block.dropBlockAsItem(world, x, y+1, z, world.getBlockMetadata(x, y+1, z), 0);
         }
 
-        world.setBlock(x, y, z, getPlacedBlock(), 0/*no meta, let the block figure that out*/, 3 /*force update and re-render*/);
+        world.setBlock(x, y+1, z, getPlacedBlock(), 0/*no meta, let the block figure that out*/, 3 /*force update and re-render*/);
         return true;
     }
 
@@ -127,7 +132,7 @@ public class ItemRail extends Item implements ITrackItem {
         /**loads the entity's save file*/
         @Override
         public void readFromNBT(NBTTagCompound tag) {
-            railIngot=tag.getString("ingot");
+            railIngot=tag.getString("rail");
             ballast=tag.getString("ballast");
             ties=tag.getString("ties");
             wires=tag.getString("wires");
@@ -136,7 +141,7 @@ public class ItemRail extends Item implements ITrackItem {
         /**saves the entity to server world*/
         @Override
         public void writeToNBT(NBTTagCompound tag) {
-            tag.setString("ingot", railIngot);
+            tag.setString("rail", railIngot);
             tag.setString("ballast", ballast);
             tag.setString("ties", ties);
             tag.setString("wires", wires);

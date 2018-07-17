@@ -22,6 +22,17 @@ import java.util.Set;
 public class TransportSlotManager extends net.minecraft.inventory.Container {
 
     private GenericRailTransport railTransport;
+
+    private List<ItemStackSlot> inventory = new ArrayList<>();
+
+    //todo: add support for some way to define slot filters
+    public void addSlots(ItemStackSlot slot){
+        slot.slotNumber = inventory.size();
+        this.inventory.add(slot);
+        this.inventorySlots.add(slot);
+        this.inventoryItemStacks.add(null);
+    }
+
     /**
      * <h2>Server-side inventory GUI for trains and rollingstock</h2>
      * works as the middleman between the client GUI and the entity on client and server.
@@ -34,75 +45,50 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
             railTransport = entityTrain;
         }
 
-        int slot=0;
-        if (railTransport.inventory == null) {
-            railTransport.inventory = new ArrayList<ItemStackSlot>();
-            while (railTransport.inventory.size()<railTransport.getSizeInventory()){
-                railTransport.inventory.add(new ItemStackSlot(railTransport,slot));
-                slot++;
-            }
-        }
-        slot=0;
         if (railTransport.getType() != TrainsInMotion.transportTypes.PASSENGER) {
             //player toolbar
             for (int iT = 0; iT < 9; iT++) {
-                if (railTransport instanceof EntityTrainCore || railTransport.getInventorySize().getRow() > 5) {
-                    addSlotToContainer(new ItemStackSlot(iinventory, iT).setCoords( 113 + (iT * 18), 142).setSlotID(slot));
-                } else {
-                    addSlotToContainer(new ItemStackSlot(iinventory, iT).setCoords( 8 + (iT * 18), 149).setSlotID(slot));
-                }
-                slot++;
+                addSlots(new ItemStackSlot(iinventory, iT).setCoords( 113 + (iT * 18), 142));
             }
             //player inventory
             for (int ic = 0; ic < 9; ic++) {
                 for (int ir = 0; ir < 3; ir++) {
-                    if (railTransport instanceof EntityTrainCore || railTransport.getInventorySize().getRow() > 5) {
-                        addSlotToContainer(new ItemStackSlot(iinventory, (((ir * 9) + ic) + 9)).setCoords(113 + (ic * 18), 84 + (ir * 18)).setSlotID(slot));
-                    } else {
-                        addSlotToContainer(new ItemStackSlot(iinventory, (((ir * 9) + ic) + 9)).setCoords( 8 + (ic * 18), 91 + (ir * 18)).setSlotID(slot));
-                    }
-                    slot++;
+                    addSlots(new ItemStackSlot(iinventory, (((ir * 9) + ic) + 9)).setCoords(113 + (ic * 18), 84 + (ir * 18)));
                 }
             }
         }
-        int transportSlot=0;
         //cover trains
         if (entityTrain instanceof EntityTrainCore) {
             //burnHeat slot
-            addSlotToContainer(railTransport.inventory.get(0).setCoords(114,32).setSlotID(slot).setSlot(transportSlot));
-            slot++;transportSlot++;
+            //todo: define this in the trains, probably through a generic function call.
+            addSlots(railTransport.inventory.get(0).setCoords(114,32));
         }
 
+    //todo: define this in the stock, probably through a generic function call.
         switch (entityTrain.getType()){
             case TANKER:{
-                addSlotToContainer(railTransport.inventory.get(0).setCoords(72, -28).setSlotID(slot).setSlot(transportSlot));
-                slot++;transportSlot++;
-                addSlotToContainer(railTransport.inventory.get(1).setCoords(152, 46).setSlotID(slot).setSlot(transportSlot));
-                slot++;transportSlot++;
+                //todo:reposition these so it fits in a menu area above the player inventory
+                addSlots(railTransport.inventory.get(0).setCoords(72, -28));
+                addSlots(railTransport.inventory.get(1).setCoords(152, 46));
                 break;
             }
             case STEAM:case NUCLEAR_STEAM:{
-                addSlotToContainer(railTransport.inventory.get(1).setCoords(150, 32).setSlotID(slot).setSlot(transportSlot));
-                slot++;
+                //todo: define this in the trains, probably through a generic function call.
+                addSlots(railTransport.inventory.get(1).setCoords(150, 32));
                 break;
             }
         }
-        if (railTransport.getInventorySize().getRow()>0) {
-            int yCenter = (int) ((11 - entityTrain.getInventorySize().getRow()) * 0.5f) * 18;
-            //transport inventory
-            for (int ia = 0; ia > -entityTrain.getInventorySize().getRow(); ia--) {
-                for (int ib = 0; ib < 9; ib++) {
-                    if (entityTrain instanceof EntityTrainCore || entityTrain.getInventorySize().getRow() > 5) {
-                        addSlotToContainer(railTransport.inventory.get(slot-35).setCoords(-97 + (ib * 18), (ia * 18) + (yCenter) - 19).setSlotID(slot).setSlot(transportSlot));
-                    } else {
-                        addSlotToContainer(railTransport.inventory.get(slot-35).setCoords(8 + (ib * 18), 60 + (ia * 18)).setSlotID(slot).setSlot(transportSlot));
-                    }
 
-                    slot++;transportSlot++;
-                }
-            }
+        for(ItemStackSlot s : entityTrain.inventory){
+            addSlots(s);
         }
     }
+
+    @Override
+    public Slot getSlot(int p_75139_1_) {
+        return p_75139_1_>inventory.size()?null:this.inventory.get(p_75139_1_);
+    }
+
 
     /**
      * <h2>Inventory sorting and shift-clicking</h2>
@@ -113,101 +99,14 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     @Override
     @Deprecated
     public ItemStack transferStackInSlot(EntityPlayer player, int index) {
-        ItemStack itemstack = null;
-        Slot slot = (Slot)this.inventorySlots.get(index);
-
-        if (slot != null && slot.getHasStack()) {
-            itemstack = slot.getStack().copy();
-            if (index < railTransport.getSizeInventory()-1) {
-                if (!this.mergeItemStack(itemstack, 0, this.inventorySlots.size(), true)) {
-                    slot.putStack(null);
-                   return null;
-                }
-            } else if (!this.mergeItemStack(itemstack, railTransport.getSizeInventory(),this.inventorySlots.size(), false)) {
-                slot.putStack(null);
-                return null;
-            }
-            slot.putStack(null);
-        }
-        return itemstack;
+        DebugUtil.println("something is using transfer stack, this is bad");
+        return null;
     }
 
     /**modified from 1.7.10 version to check if the item is valid for the slot*/
     @Override
     protected boolean mergeItemStack(ItemStack itemStack, int startIndex, int endIndex, boolean reverseDirection) {
         DebugUtil.println("something is using merge stack, this is bad");
-        int k = reverseDirection? endIndex-1:startIndex;
-
-        Slot slot;
-        ItemStack itemstack1;
-
-        if (itemStack.isStackable()) {
-            while (itemStack.stackSize > 0 && (!reverseDirection && k < endIndex || reverseDirection && k >= startIndex)) {
-                slot = (Slot)this.inventorySlots.get(k);
-                itemstack1 = slot.getStack();
-
-                if (slot.isItemValid(itemStack) && itemstack1 != null && itemstack1.getItem() == itemStack.getItem() && (!itemStack.getHasSubtypes() ||
-                        itemStack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(itemStack, itemstack1)) {
-                    int l = itemstack1.stackSize + itemStack.stackSize;
-
-                    if (l <= itemStack.getMaxStackSize() && l <= slot.getSlotStackLimit()) {
-                        itemStack.stackSize = 0;
-                        itemstack1.stackSize = l;
-                        slot.onSlotChanged();
-                        return true;
-                    }
-                    else if (itemstack1.stackSize < itemStack.getMaxStackSize() && l <= slot.getSlotStackLimit()) {
-                        itemStack.stackSize -= (slot.getSlotStackLimit()>= itemStack.getMaxStackSize()?(itemStack.getMaxStackSize() - itemstack1.stackSize): (slot.getSlotStackLimit() - itemstack1.stackSize));
-                        itemstack1.stackSize = (slot.getSlotStackLimit()>= itemStack.getMaxStackSize()?itemStack.getMaxStackSize():slot.getSlotStackLimit());
-                        slot.onSlotChanged();
-                        return true;
-                    }
-                }
-
-                if (reverseDirection) {
-                    --k;
-                } else {
-                    ++k;
-                }
-            }
-        }
-
-        if (itemStack.stackSize > 0) {
-            if (reverseDirection) {
-                k = endIndex - 1;
-            } else {
-                k = startIndex;
-            }
-
-            while (!reverseDirection && k < endIndex || reverseDirection && k >= startIndex) {
-                slot = (Slot)this.inventorySlots.get(k);
-                itemstack1 = slot.getStack();
-
-                if (itemstack1 == null && slot.isItemValid(itemStack)) {
-                    if (itemStack.stackSize < slot.getSlotStackLimit()) {
-                        slot.putStack(itemStack.copy());
-                        slot.onSlotChanged();
-                        itemStack.stackSize = 0;
-                        return true;
-                    } else {
-                        slot.putStack(new ItemStack(itemStack.getItem(), slot.getSlotStackLimit()));
-                        slot.onSlotChanged();
-                        itemStack.stackSize -=slot.getSlotStackLimit();
-                        if (itemStack.stackSize <1){
-                            return true;
-                        }
-                    }
-                }
-
-                if (reverseDirection) {
-                    --k;
-                }
-                else {
-                    ++k;
-                }
-            }
-        }
-
         return false;
     }
 
@@ -221,7 +120,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
 
 
     private ItemStackSlot getSlotByID(int id){
-        for(ItemStackSlot slot: (List<ItemStackSlot>)inventorySlots){
+        for(ItemStackSlot slot: inventory){
             if (slot.getSlotID() ==id){
                 return slot;
             }
@@ -271,6 +170,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                 break;
             }
             case 1:{/*ClickType.QUICK_MOVE    aka shift click*/
+                //todo: rework this schenario to better fit in with the new slot numbering systems
                 if (slot == null) {
                     return null;
                 }
@@ -289,7 +189,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
 
                 //its in player inventory
                 if(slotId>35){
-                    for(ItemStackSlot s : (List<ItemStackSlot>)inventorySlots){
+                    for(ItemStackSlot s : inventory){
                         if(s.getSlotID() == slotId){continue;}
                         slot.setSlotContents(s.mergeStack(slot.getStack()));
                         if (slot.getStack() == null){return null;}
@@ -300,7 +200,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                         slot.setSlotContents(s.mergeStack(slot.getStack()));
                         if (slot.getStack() == null){return null;}
                     }
-                    for(ItemStackSlot s : (List<ItemStackSlot>)inventorySlots){
+                    for(ItemStackSlot s : inventory){
                         if(s.getSlotID() == slotId){continue;}
                         slot.setSlotContents(s.mergeStack(slot.getStack()));
                         if (slot.getStack() == null){return null;}
@@ -409,11 +309,11 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                     ItemStack itemstack1 = inventoryplayer.getItemStack();
 
                     if (itemstack1 != null && (slot == null || !slot.getHasStack() || !slot.canTakeStack(player))) {
-                        int i = dragType == 0 ? 0 : this.inventorySlots.size() - 1;
+                        int i = dragType == 0 ? 0 : this.inventory.size() - 1;
                         int j = dragType == 0 ? 1 : -1;
 
                         for (int k = 0; k < 2; ++k) {
-                            for (int l = i; l >= 0 && l < this.inventorySlots.size() && itemstack1.stackSize < itemstack1.getMaxStackSize(); l += j) {
+                            for (int l = i; l >= 0 && l < this.inventory.size() && itemstack1.stackSize < itemstack1.getMaxStackSize(); l += j) {
                                 Slot slot1 = getSlotByID(l);
 
                                 if (slot1 != null && slot1.getHasStack() && canAddItemToSlot(slot1, itemstack1) && slot1.canTakeStack(player)) {
@@ -461,23 +361,6 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     }
 
     /*a modified replica of the 1.12 version*/
-    public static void computeStackSize(Set<Slot> dragSlotsIn, int dragModeIn, ItemStack stack, int slotStackSize) {
-        switch (dragModeIn) {
-            case 0: {
-                stack.stackSize = (MathHelper.floor_float(stack.stackSize / dragSlotsIn.size()));
-                break;
-            }
-            case 1: {
-                stack.stackSize = 1;
-                break;
-            }
-            case 2: {
-                stack.stackSize = (stack.getMaxStackSize());
-            }
-        }
-        stack.stackSize +=(slotStackSize);
-    }
-
     public static void computeStackSize(List<ItemStackSlot> dragSlotsIn, int dragModeIn, ItemStack stack, int slotStackSize) {
         switch (dragModeIn) {
             case 0: {
@@ -494,18 +377,6 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         }
         stack.stackSize +=(slotStackSize);
     }
-
-    /*a modified replica of the 1.12 version*/
-    public static boolean areItemStackTagsEqual(ItemStack stackA, ItemStack stackB) {
-        if (stackA == null && stackB == null) {
-            return true;
-        } else if (stackA != null && stackB != null) {
-            return !(stackA.stackTagCompound == null && stackB.stackTagCompound != null) && (stackA.stackTagCompound == null || stackA.stackTagCompound.equals(stackB.stackTagCompound));
-        } else {
-            return false;
-        }
-    }
-
 
 
     @Override

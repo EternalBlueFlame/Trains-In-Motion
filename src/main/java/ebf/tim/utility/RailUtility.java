@@ -60,12 +60,12 @@ public class RailUtility {
      * @param z
      * @return angle in radians
      */
-    public static float atan2f(float x, float z) {
+    public static float atan2f(double x, double z) {
         float pi =-3.141592653f;
         float multiplier = 1.0f;
 
-        if (z < 0.0f) {
-            if (x < 0.0f) {
+        if (z < 0.0d) {
+            if (x < 0.0d) {
                 z = -z;
                 x = -x;
             } else {
@@ -74,7 +74,7 @@ public class RailUtility {
             }
 
         } else {
-            if (x < 0.0f) {
+            if (x < 0.0d) {
                 x = -x;
                 multiplier = -1.0f;
             }
@@ -82,8 +82,12 @@ public class RailUtility {
             pi = 0.0f;
         }
 
-        float invDiv = 1.0f / (((z < x) ? x : z) * (1.0f / (ATAN2_SQRT - 1)));
+        double invDiv = 1.0D / (((z < x) ? x : z) * (1.0D / (ATAN2_SQRT - 1)));
         return (atan2[(int)(x * invDiv) * ATAN2_SQRT + (int)(z * invDiv)] + pi) * multiplier;
+    }
+
+    public static float atan2degreesf(double x, double y){
+        return atan2f(x,y)*57.295779514f;
     }
 
     private static final int ATAN2_SQRT = (int) Math.sqrt(1024);

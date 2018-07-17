@@ -1,6 +1,7 @@
 package ebf.tim.utility;
 
 import ebf.tim.entities.GenericRailTransport;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -8,6 +9,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Eternal Blue Flame
  * TODO: add support for tile entities post 0.2.7.
@@ -19,6 +26,12 @@ public class ItemStackSlot extends Slot {
 
     public ItemStackSlot(IInventory host, int slot){
         super(host, slot, 0,0);
+    }
+
+    public ItemStackSlot(IInventory host, int slot, int x, int y){
+        super(host, slot, 0,0);
+        xDisplayPosition=x;
+        yDisplayPosition=y;
     }
 
     public ItemStackSlot setCoords(int x, int y){
@@ -75,8 +88,8 @@ public class ItemStackSlot extends Slot {
         return itemStack;
     }
 
-    public boolean setSlotContents(ItemStack stack){
-        if (isItemValid(stack)) {
+    public boolean setSlotContents(@Nullable ItemStack stack){
+        if (isItemValid(stack) || stack == null) {
             if (!(inventory instanceof GenericRailTransport)) {
                 inventory.setInventorySlotContents(slotNumber, stack);
             } else {

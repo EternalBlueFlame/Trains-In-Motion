@@ -119,12 +119,12 @@ public class HitboxHandler {
         Entity entity;
         MultipartHitbox tempBox;
         //Be sure the transport has hitboxes
-        for (int iteration = 0; iteration < transport.getHitboxPositions().length; iteration++) {
+        for (int iteration = 0; iteration < transport.getHitboxSize()[0]; iteration++) {
             //todo add to a vector cache
-            vectorCache[2] = RailUtility.rotatePoint(transport.getHitboxPositions()[iteration], transport.rotationPitch, transport.rotationYaw, 0);
+            vectorCache[2] = RailUtility.rotatePoint(new double[]{(transport.getHitboxSize()[0]*0.5)-iteration,0,0}, transport.rotationPitch, transport.rotationYaw, 0);
             if (hitboxList.size() <= iteration || transport.ticksExisted == 0) {
                 hitboxList.add(new MultipartHitbox(transport, transport, vectorCache[2][0] + transport.posX, vectorCache[2][1] + transport.posY, vectorCache[2][2] + transport.posZ,
-                        (iteration==0 || iteration == transport.getHitboxPositions().length-1)));
+                        (iteration==0 || iteration >= transport.getHitboxSize()[0])));
                 transport.worldObj.spawnEntityInWorld(hitboxList.get(iteration));
             } else {
                 hitboxList.get(iteration).setLocationAndAngles(vectorCache[2][0] + transport.posX, vectorCache[2][1] + transport.posY, vectorCache[2][2] + transport.posZ, transport.rotationYaw, transport.rotationPitch);
