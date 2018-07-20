@@ -1,9 +1,13 @@
 package ebf.tim.blocks.rails;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.RailTileEntity;
+import ebf.tim.items.ItemRail;
 import ebf.tim.models.rails.*;
 import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.CommonProxy;
 import net.minecraft.block.Block;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.block.BlockRail;
@@ -11,10 +15,13 @@ import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import fexcraft.tmt.slim.Vec3f;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +33,12 @@ import java.util.Random;
 public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     RailTileEntity tile = null;
+
+
+    public BlockRailCore(){
+        setCreativeTab(null);
+    }
+
 
     public boolean hasTileEntity(int metadata) {
         return true;
@@ -114,6 +127,27 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         return meta;
     }
 
+    @Override
+    public Material getMaterial(){
+        return Material.circuits;//tells the world not to let entities spawn on it, or things be placed on top of it.
+    }
+
+    @Override
+    public boolean canPlaceBlockAt(World p_149742_1_, int p_149742_2_, int p_149742_3_, int p_149742_4_) {
+        return true;
+    }
+
+    @Override
+    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
+    {
+        return new ItemRail();
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_) {
+        return new ItemRail();
+    }
 
     @Override
     public void randomDisplayTick(World worldObj, int xCoord, int yCoord, int zCoord, Random p_149674_5_) {

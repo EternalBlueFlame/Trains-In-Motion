@@ -155,7 +155,6 @@ public class CommonProxy implements IGuiHandler {
         bucketDiesel = RegisterFluidBucket(fluidDiesel, blockFluidDiesel, "diesel", TrainsInMotion.creativeTab);
 
         RegisterItem(new ItemAdminBook(), "adminbook", "adminbook", TrainsInMotion.creativeTab, null);
-
         RegisterBlock(railBlock, "block.timrail", "block.timrail", null);
 
         GameRegistry.registerTileEntity(TileEntityStorage.class, "StorageEntity");
@@ -165,7 +164,7 @@ public class CommonProxy implements IGuiHandler {
         addRecipe(new ItemStack(RegisterBlock(trainTable, "block.traintable", "block.traintable", TrainsInMotion.creativeTab),1),
                 "WWW", "WIW", "WWW", 'W', Blocks.planks, 'I', Items.iron_ingot);
 
-        addRecipe(new ItemStack(RegisterItem(new ItemRail(), "item.timrail","item.timrail",TrainsInMotion.creativeTab, null), 1),
+        addRecipe(new ItemStack(RegisterItem(railItem, "item.timrail", "item.timrail", TrainsInMotion.creativeTab, null), 1),
                 "I I", "IWI", "IWI", 'W', Blocks.planks, 'I', Items.iron_ingot);
     }
 
