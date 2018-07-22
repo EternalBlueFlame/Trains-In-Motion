@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.WorldSavedData;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,11 +20,20 @@ import java.util.UUID;
 public class ItemKey extends Item{
 
     public ItemKey(UUID host, String entityName){
-        data.host = host;
-        data.hostname = entityName;
+        data.host.add(host);
+        data.hostname.add(entityName);
+    }
+
+    public void addHost(UUID host, String entityName){
+        data.host.add(host);
+        data.hostname.add(entityName);
     }
 
     private KeySaveData data = new KeySaveData("ItemKey");
+
+    public List<UUID> getHostList(){
+        return data.host;
+    }
 
     /**
      * <h2>Description text</h2>
@@ -36,21 +46,24 @@ public class ItemKey extends Item{
         if (this instanceof ItemTicket){
             stringList.add("This ticket is for: ");
         } else {
-            stringList.add("This key belongs to a: ");
+            stringList.add("This key unlocks: ");
         }
-        stringList.add(data.hostname);
+        for (int i=0; i<data.hostname.size(); i++) {
+            stringList.add(data.hostname.get(i));
+            stringList.add(data.host.get(i));
+        }
     }
 
 
-    public UUID getTransport(){
+    public List<UUID> getTransport(){
         return data.host;
     }
 
     private class KeySaveData extends WorldSavedData{
         /**the UUID from server for the entity this belongs to, this will be compared to a key item in the entity, rather than the entity itself due to different UUID's on client and server.*/
-        private UUID host;
+        private List<UUID> host = new ArrayList<>();
         /**the name of the host that's displayed, This isn't used for anything more than saving us from having to search the world for an entity, that probably isn't loaded, just to get it's name.*/
-        private String hostname;
+        private List<String> hostname = new ArrayList<>();
 
         public KeySaveData(String name){
             super(name);
@@ -63,17 +76,23 @@ public class ItemKey extends Item{
         /**loads the entity's save file*/
         @Override
         public void readFromNBT(NBTTagCompound tag) {
-            host = new UUID(tag.getLong("key.most"), tag.getLong("key.least"));
-            hostname = tag.getString("key.parent");
+            int arrayLength = tag.getInteger("locks");
+            for (int i=0; i<arrayLength; i++) {
+                host.add(new UUID(tag.getLong("key.most."+i), tag.getLong("key.least."+i)));
+                hostname.add(tag.getString("key.parent."+i));
+            }
 
         }
 
         /**saves the entity to server world*/
         @Override
         public void writeToNBT(NBTTagCompound tag) {
-            tag.setLong("key.most", host.getMostSignificantBits());
-            tag.setLong("key.least", host.getLeastSignificantBits());
-            tag.setString("key.parent", hostname);
+            tag.setInteger("locks", host.size());
+            for (int i=0; i<host.size(); i++) {
+                tag.setLong("key.most."+i, host.get(i).getMostSignificantBits());
+                tag.setLong("key.least."+i, host.get(i).getLeastSignificantBits());
+                tag.setString("key.parent."+i, hostname.get(i));
+            }
 
 
         }

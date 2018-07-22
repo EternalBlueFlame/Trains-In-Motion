@@ -76,6 +76,7 @@ public class TrainsInMotion {
      */
 
      /**define the transport types*/
+     @Deprecated //obsolete in favor of interfaces or type classes
     public enum transportTypes {
         STEAM,DIESEL,HYDROGEN_DIESEL,ELECTRIC,NUCLEAR_STEAM,NUCLEAR_ELECTRIC, //trains
         PASSENGER, FREIGHT, HOPPER, TANKER, WORKCAR, SLUG, B_UNIT, //generic rollingstock
@@ -93,19 +94,8 @@ public class TrainsInMotion {
              return this == TANKER || this == LAVATANKER || this == OILCAR || this == FUELTANKER;
          }
     }
-    /**define the inventory size values, this lets us get values to define rows and columns rather than just overall size.*/
-    public enum inventorySizes{NULL(0), CRAFTING(1),
-        FREIGHT_ONE(1), FREIGHT_TWO(2), FREIGHT_THREE(3), FREIGHT_FOUR(4), FREIGHT_FIVE(5), FREIGHT_SIX(6),
-        FREIGHT_SEVEN(7), FREIGHT_EIGHT(8), FREIGHT_NINE(9), FREIGHT_TEN(10), FREIGHT_ELEVEN(11);
-        private int row;
-        inventorySizes(int row){
-            this.row = row;
-        }
-        public int getRow() {
-            return row;
-        }
-    }
     /**defines the type of block, so that way our generic block classes can change the functionality without needing a bunch of different classes.*/
+    @Deprecated //obsolete in favor of interfaces or type classes
     public enum blockTypes {
         CRAFTING, CONTAINER, COSMETIC, SWITCH
     }

@@ -85,7 +85,7 @@ public class EntityPullmansPalace extends RollingstockBase {
      * <h2>Inventory Size</h2>
      */
     @Override
-    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.NULL;}
+    public int getInventoryRows(){return 0;}
     /**
      * <h2>Type</h2>
      */

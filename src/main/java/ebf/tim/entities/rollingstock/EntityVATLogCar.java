@@ -92,7 +92,7 @@ public class EntityVATLogCar extends RollingstockBase {
      * <h2>Inventory Size</h2>
      */
     @Override
-    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.FREIGHT_THREE;}
+    public int getInventoryRows(){return 3;}
     /**
      * <h2>Type</h2>
      */

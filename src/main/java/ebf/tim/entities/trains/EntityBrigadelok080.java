@@ -126,7 +126,7 @@ public class EntityBrigadelok080 extends TrainBase {
      * @return the size of the inventory not counting any fuel or crafting slots, those are defined by the type.
      */
     @Override
-    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.FREIGHT_ONE;}
+    public int getInventoryRows(){return 1;}
     /**
      * <h2>Type</h2>
      * @return the type which will define it's features, GUI, a degree of storage (like crafting slots), and a number of other things.

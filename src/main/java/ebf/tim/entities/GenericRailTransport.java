@@ -7,12 +7,11 @@ import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
-import ebf.tim.api.SkinRegistry;
 import ebf.tim.items.ItemKey;
+import ebf.tim.items.ItemTicket;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.ParticleFX;
 import ebf.tim.models.TransportRenderData;
-import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.Vec3d;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.NBTKeys;
@@ -25,8 +24,6 @@ import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -45,7 +42,6 @@ import fexcraft.tmt.slim.ModelBase;
 import javax.annotation.Nullable;
 import java.util.*;
 
-import static ebf.tim.TrainsInMotion.MODID;
 import static ebf.tim.utility.RailUtility.rotatePoint;
 
 /**
@@ -85,12 +81,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public String ownerName ="";
     /**the destination for routing*/
     public String destination ="";
-    /**the key item for the entity*/
-    @Deprecated //tickets and keys should only have to get this entity's UUID, this shouldn't need to keep a copy of the items
-    public ItemStackSlot key;
-    /**the ticket item for the transport*/
-    @Deprecated
-    public ItemStackSlot ticket;
     /**used to initialize a laege number of variables that are used to calculate everything from movement to linking.
      * this is so we don't have to initialize each of these variables every tick, saves CPU.*/
     protected double[][] vectorCache = new double[8][3];
@@ -180,8 +170,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         posX = xPos;
         posZ = zPos;
         this.owner = owner;
-        key = new ItemStackSlot(this, -1);
-        key.setSlotContents(new ItemStack(new ItemKey(entityUniqueID, getItem().getUnlocalizedName())));
         setSize(1,2);
         ignoreFrustumCheck = true;
         inventory = new ArrayList<>();
@@ -214,11 +202,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * call this in the override if you just want to add more slots to the existing planned inventory size
      */
     public void initInventorySlots(){
-        if (getInventorySize().getRow()>0) {
+        if (getInventoryRows()>0) {
             int index=40;
-            for(int r=0; r<getInventorySize().getRow(); r++){
+            for(int r = 0; r< getInventoryRows(); r++){
                 for (int c=0;c<9;c++){
-                    inventory.add(new ItemStackSlot(this, index, -97 + (c * 18), -19 + (r * 18) + ((int)((11 - getInventorySize().getRow()) * 0.5f) * 18)));
+                    inventory.add(new ItemStackSlot(this, index, -97 + (c * 18), -19 + (r * 18) + ((int)((11 - getInventoryRows()) * 0.5f) * 18)));
                     index++;
                 }
             }
@@ -608,7 +596,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
             if (getRiderOffsets() != null && getRiderOffsets().length >1 && seats.size()<getRiderOffsets().length) {
                 for (int i = 0; i < getRiderOffsets().length - 1; i++) {
-                    EntitySeat seat = new EntitySeat(worldObj, posX, posY, posZ, getEntityId(), i);
+                    EntitySeat seat = new EntitySeat(worldObj, posX, posY, posZ, getRiderOffsets()[i][3], getRiderOffsets()[i][4],getRiderOffsets()[i][5], getEntityId(), i);
                     worldObj.spawnEntityInWorld(seat);
                     seats.add(seat);
                 }
@@ -878,41 +866,38 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }case 10:{ //Toggle transport creative mode
                 setBoolean(boolValues.CREATIVE, !getBoolean(boolValues.CREATIVE));
                 return true;
-            }case 12:{ //drop key to transport
-                entityDropItem(key.getStack(), 1);
-                return true;
             }case 13:{ //unlink transports
-                Entity transport;
+                GenericRailTransport transport;
                 //frontLinkedTransport
                 if (frontLinkedID != null){
-                    transport = worldObj.getEntityByID(frontLinkedID);
-                    if (transport instanceof GenericRailTransport){
-                        if(((GenericRailTransport) transport).frontLinkedID == this.getEntityId()){
-                            ((GenericRailTransport) transport).frontLinkedTransport = null;
-                            ((GenericRailTransport) transport).frontLinkedID = null;
+                    transport = (worldObj.getEntityByID(frontLinkedID) instanceof GenericRailTransport)?(GenericRailTransport) worldObj.getEntityByID(frontLinkedID):null;
+                    if (transport != null){
+                        if(transport.frontLinkedID == this.getEntityId()){
+                            transport.frontLinkedTransport = null;
+                            transport.frontLinkedID = null;
                         } else {
-                            ((GenericRailTransport) transport).backLinkedTransport = null;
-                            ((GenericRailTransport) transport).backLinkedID = null;
+                            transport.backLinkedTransport = null;
+                            transport.backLinkedID = null;
                         }
                         frontLinkedTransport = null;
                         frontLinkedID = null;
-                        ((GenericRailTransport) transport).updateWatchers = true;
+                        transport.updateWatchers = true;
                     }
                 }
                 //backLinkedTransport
                 if (backLinkedID != null){
-                    transport = worldObj.getEntityByID(backLinkedID);
-                    if (transport instanceof GenericRailTransport){
-                        if(((GenericRailTransport) transport).frontLinkedID == this.getEntityId()){
-                            ((GenericRailTransport) transport).frontLinkedTransport = null;
-                            ((GenericRailTransport) transport).frontLinkedID = null;
+                    transport = (worldObj.getEntityByID(backLinkedID) instanceof GenericRailTransport)?(GenericRailTransport) worldObj.getEntityByID(backLinkedID):null;
+                    if (transport != null){
+                        if(transport.frontLinkedID == this.getEntityId()){
+                            transport.frontLinkedTransport = null;
+                            transport.frontLinkedID = null;
                         } else {
-                            ((GenericRailTransport) transport).backLinkedTransport = null;
-                            ((GenericRailTransport) transport).backLinkedID = null;
+                            transport.backLinkedTransport = null;
+                            transport.backLinkedID = null;
                         }
                         backLinkedTransport = null;
                         backLinkedID = null;
-                        ((GenericRailTransport) transport).updateWatchers = true;
+                        transport.updateWatchers = true;
                     }
                 }
                 return true;
@@ -940,15 +925,15 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             return true;
         }
 
-        //if the key is needed, like for trains and freight
-        if (getBoolean(boolValues.LOCKED) && player.inventory.hasItem(key.getItem())) {
-            return true;
-        }
         //if a ticket is needed like for passenger cars
         if(getBoolean(boolValues.LOCKED) && getRiderOffsets().length>1){
             for(ItemStack stack : player.inventory.mainInventory){
-                if(ticket.equals(stack)){
-                    return true;
+                if(stack.getItem() instanceof ItemKey){
+                    for(UUID id : ((ItemTicket) stack.getItem()).getHostList()){
+                        if (id == this.entityUniqueID){
+                            return true;
+                        }
+                    }
                 }
             }
             return false;
@@ -1011,17 +996,15 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * the first value of the double[] inside that represents length from center in blocks.
      * the second represents height offset in blocks
      * the third value is for the horizontal offset*/
-    public double[][] getRiderOffsets(){return new double[][]{{0,0,0}};}
+    public double[][] getRiderOffsets(){return new double[][]{{0,0,0,0,0,0}};}
     /**returns the positions for the hitbox, they are defined by length from center.
      * must have at least 4 hitboxes, the first and last values are used for coupling positions*/
     public double[] getHitboxSize(){return new double[]{3.2, 2,1};}
     /**returns the item of the transport, this should be a static value in the transport's class.*/
     @Deprecated
     public Item getItem(){return null;}
-    /**defines the size of the inventory, not counting any special slots like for fuel.
-     * @see TrainsInMotion.inventorySizes*/
-    @Deprecated //todo: why the hell don't i just use an int???
-    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.FREIGHT_ONE;}
+    /**defines the size of the inventory, not counting any special slots like for fuel.*/
+    public int getInventoryRows(){return 0;}
     /**defines the offset for the lamp in X/Y/Z*/
     @Deprecated
     public Vec3d getLampOffset(){return new Vec3d(0,0,0);}

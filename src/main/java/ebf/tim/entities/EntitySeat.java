@@ -35,15 +35,20 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
     /**used to replace the client only velocity in forge that have private access.*/
     protected double cartVelocityZ =0;
 
+    public float rotationRoll =0;
+
     public EntitySeat(World world) {
         super(world);
     }
 
-    public EntitySeat(World world, double xPos, double yPos, double zPos, int parent, int seatNumber) {
+    public EntitySeat(World world, double xPos, double yPos, double zPos, double pitch, double yaw, double roll, int parent, int seatNumber) {
         super(world);
         this.posX = xPos;
         this.posY = yPos;
         this.posZ = zPos;
+        this.rotationPitch = (float)pitch;
+        this.rotationYaw = (float)yaw;
+        this.rotationRoll = (float)roll;
         parentId = parent;
         this.seatNumber = seatNumber;
     }

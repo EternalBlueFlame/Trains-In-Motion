@@ -76,7 +76,7 @@ public abstract class RollingstockBase extends EntityRollingStockCore{
      *
      * @see TrainsInMotion.inventorySizes
      */
-    public abstract TrainsInMotion.inventorySizes getInventorySize();
+    public abstract int getInventoryRows();
 
     /**
      * defines the offset for the lamp in X/Y/Z

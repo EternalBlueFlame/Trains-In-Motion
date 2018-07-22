@@ -62,7 +62,7 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
     }
 
     @Override
-    public TrainsInMotion.inventorySizes getInventorySize(){return TrainsInMotion.inventorySizes.NULL;}
+    public int getInventoryRows(){return 0;}
     @Override
     public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.TANKER;}
     @Override

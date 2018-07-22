@@ -1,6 +1,5 @@
 package ebf.tim.gui;
 
-import codechicken.nei.NEIClientConfig;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
@@ -27,7 +26,6 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
 import net.minecraftforge.fluids.FluidRegistry;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -481,7 +479,7 @@ public class GUITransport extends GuiScreen {
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
 
-        yCenter = (int)((11-transport.getInventorySize().getRow())*0.5f)*18;
+        yCenter = (int)((11-transport.getInventoryRows())*0.5f)*18;
         //generic to all
         if (player.getDisplayName().equals(transport.getOwnerName())) {
             this.buttonList.add(new GUIButton(13, guiLeft +112, guiTop + 166, 18, 18, "unlink"));
@@ -570,10 +568,10 @@ public class GUITransport extends GuiScreen {
 
         mc.getTextureManager().bindTexture(vanillaChest);
         drawTexturedRect(guiLeft-105, guiTop-37+yCenter, 0, 0, 176, 17);//top
-        for(int i=0; i<transport.getInventorySize().getRow(); i++){
+        for(int i = 0; i<transport.getInventoryRows(); i++){
             drawTexturedRect(guiLeft-105, i*18+ (guiTop-20)+yCenter, 0, 17, 176, 18);
         }
-        drawTexturedRect(guiLeft-105,(transport.getInventorySize().getRow())*18+ (guiTop-20)+yCenter, 0, 215, 176, 8);//bottom
+        drawTexturedRect(guiLeft-105,(transport.getInventoryRows())*18+ (guiTop-20)+yCenter, 0, 215, 176, 8);//bottom
 
 
 
@@ -641,10 +639,10 @@ public class GUITransport extends GuiScreen {
         mc.getTextureManager().bindTexture(vanillaChest);
         //draw the player inventory and toolbar background.
             drawTexturedRect(guiLeft-105, guiTop-37+yCenter, 0, 0, 176, 17);//top
-            for(int i=0; i<transport.getInventorySize().getRow(); i++){
+            for(int i = 0; i<transport.getInventoryRows(); i++){
                 drawTexturedRect(guiLeft-105, i*18+ (guiTop-20)+yCenter, 0, 17, 176, 18);
             }
-            drawTexturedRect(guiLeft-105,(transport.getInventorySize().getRow())*18+ (guiTop-20)+yCenter, 0, 215, 176, 8);//bottom
+            drawTexturedRect(guiLeft-105,(transport.getInventoryRows())*18+ (guiTop-20)+yCenter, 0, 215, 176, 8);//bottom
 
             drawTexturedRect(guiLeft+105, guiTop+64, 0, 0, 176,  16);//top
             drawTexturedRect(guiLeft+105,   guiTop+70, 0, 126, 176, 96);//actual inventory
