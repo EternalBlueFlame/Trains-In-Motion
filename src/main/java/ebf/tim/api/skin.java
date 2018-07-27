@@ -1,6 +1,7 @@
 package ebf.tim.api;
 
 import net.minecraft.util.ResourceLocation;
+import scala.actors.threadpool.Arrays;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -12,10 +13,10 @@ public class skin {
     public String name;
     public String description;
 
-    public skin(ResourceLocation texture, @Nullable List<int[]> recolor, String skinName, String skinDescription){
+    public skin(ResourceLocation texture, @Nullable int[][] recolor, String skinName, String skinDescription){
         this.texture=texture;
         name=skinName;
         description=skinDescription;
-        partialRecolors = recolor;
+        partialRecolors = recolor==null?null:Arrays.asList(recolor);
     }
 }

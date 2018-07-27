@@ -3,8 +3,8 @@ package ebf.tim.gui;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.networking.PacketInteract;
 import fexcraft.tmt.slim.Tessellator;
-import ebf.tim.networking.PacketKeyPress;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.TileEntitySlotManager;
@@ -26,6 +26,7 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
 import net.minecraftforge.fluids.FluidRegistry;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -510,7 +511,375 @@ public class GUITransport extends GuiScreen {
      */
     @Override
     public void actionPerformed(GuiButton button) {
-        TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(button.id, transport.getEntityId()));
+        TrainsInMotion.keyChannel.sendToServer(new PacketInteract(button.id, transport.getEntityId()));
+    }
+
+    @Override
+    protected void keyTyped(char p_73869_1_, int p_73869_2_)
+    {
+        if (p_73869_2_ == 1 || p_73869_2_ == this.mc.gameSettings.keyBindInventory.getKeyCode())
+        {
+            this.mc.thePlayer.closeScreen();
+        }
+
+        this.checkHotbarKeys(p_73869_2_);
+
+        if (this.theSlot != null && this.theSlot.getHasStack())
+        {
+            if (p_73869_2_ == this.mc.gameSettings.keyBindPickBlock.getKeyCode())
+            {
+                this.handleMouseClick(this.theSlot, this.theSlot.slotNumber, 0, 3);
+            }
+            else if (p_73869_2_ == this.mc.gameSettings.keyBindDrop.getKeyCode())
+            {
+                this.handleMouseClick(this.theSlot, this.theSlot.slotNumber, isCtrlKeyDown() ? 1 : 0, 4);
+            }
+        }
+    }
+
+    protected boolean checkHotbarKeys(int p_146983_1_)
+    {
+        if (this.mc.thePlayer.inventory.getItemStack() == null && this.theSlot != null)
+        {
+            for (int j = 0; j < 9; ++j)
+            {
+                if (p_146983_1_ == this.mc.gameSettings.keyBindsHotbar[j].getKeyCode())
+                {
+                    this.handleMouseClick(this.theSlot, this.theSlot.slotNumber, j, 2);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    protected void handleMouseClick(Slot p_146984_1_, int p_146984_2_, int p_146984_3_, int p_146984_4_)
+    {
+        if (p_146984_1_ != null)
+        {
+            p_146984_2_ = p_146984_1_.slotNumber;
+        }
+
+        this.mc.playerController.windowClick(this.inventorySlots.windowId, p_146984_2_, p_146984_3_, p_146984_4_, this.mc.thePlayer);
+    }
+
+    private Slot getSlotAtPosition(int p_146975_1_, int p_146975_2_)
+    {
+        for (int k = 0; k < this.inventorySlots.inventorySlots.size(); ++k)
+        {
+            Slot slot = (Slot)this.inventorySlots.inventorySlots.get(k);
+
+            if (this.isMouseOverSlot(slot, p_146975_1_, p_146975_2_))
+            {
+                return slot;
+            }
+        }
+
+        return null;
+    }
+    @Override
+    protected void mouseClicked(int p_73864_1_, int p_73864_2_, int p_73864_3_)
+    {
+        super.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
+        boolean flag = p_73864_3_ == this.mc.gameSettings.keyBindPickBlock.getKeyCode() + 100;
+        Slot slot = this.getSlotAtPosition(p_73864_1_, p_73864_2_);
+        long l = Minecraft.getSystemTime();
+        this.field_146993_M = this.field_146998_K == slot && l - this.field_146997_J < 250L && this.field_146992_L == p_73864_3_;
+        this.field_146995_H = false;
+
+        if (p_73864_3_ == 0 || p_73864_3_ == 1 || flag)
+        {
+            int i1 = this.guiLeft;
+            int j1 = this.guiTop;
+            boolean flag1 = p_73864_1_ < i1 || p_73864_2_ < j1 || p_73864_1_ >= i1 + this.xSize || p_73864_2_ >= j1 + this.ySize;
+            int k1 = -1;
+
+            if (slot != null)
+            {
+                k1 = slot.slotNumber;
+            }
+
+            if (flag1)
+            {
+                k1 = -999;
+            }
+
+            if (this.mc.gameSettings.touchscreen && flag1 && this.mc.thePlayer.inventory.getItemStack() == null)
+            {
+                this.mc.displayGuiScreen((GuiScreen)null);
+                return;
+            }
+
+            if (k1 != -1)
+            {
+                if (this.mc.gameSettings.touchscreen)
+                {
+                    if (slot != null && slot.getHasStack())
+                    {
+                        this.clickedSlot = slot;
+                        this.draggedStack = null;
+                        this.isRightMouseClick = p_73864_3_ == 1;
+                    }
+                    else
+                    {
+                        this.clickedSlot = null;
+                    }
+                }
+                else if (!this.field_147007_t)
+                {
+                    if (this.mc.thePlayer.inventory.getItemStack() == null)
+                    {
+                        if (p_73864_3_ == this.mc.gameSettings.keyBindPickBlock.getKeyCode() + 100)
+                        {
+                            this.handleMouseClick(slot, k1, p_73864_3_, 3);
+                        }
+                        else
+                        {
+                            boolean flag2 = k1 != -999 && (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54));
+                            byte b0 = 0;
+
+                            if (flag2)
+                            {
+                                this.field_146994_N = slot != null && slot.getHasStack() ? slot.getStack() : null;
+                                b0 = 1;
+                            }
+                            else if (k1 == -999)
+                            {
+                                b0 = 4;
+                            }
+
+                            this.handleMouseClick(slot, k1, p_73864_3_, b0);
+                        }
+
+                        this.field_146995_H = true;
+                    }
+                    else
+                    {
+                        this.field_147007_t = true;
+                        this.field_146988_G = p_73864_3_;
+                        this.field_147008_s.clear();
+
+                        if (p_73864_3_ == 0)
+                        {
+                            this.field_146987_F = 0;
+                        }
+                        else if (p_73864_3_ == 1)
+                        {
+                            this.field_146987_F = 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        this.field_146998_K = slot;
+        this.field_146997_J = l;
+        this.field_146992_L = p_73864_3_;
+    }
+
+    /**
+     * Called when a mouse button is pressed and the mouse is moved around. Parameters are : mouseX, mouseY,
+     * lastButtonClicked & timeSinceMouseClick.
+     */
+    @Override
+    protected void mouseClickMove(int p_146273_1_, int p_146273_2_, int p_146273_3_, long p_146273_4_)
+    {
+        Slot slot = this.getSlotAtPosition(p_146273_1_, p_146273_2_);
+        ItemStack itemstack = this.mc.thePlayer.inventory.getItemStack();
+
+        if (this.clickedSlot != null && this.mc.gameSettings.touchscreen)
+        {
+            if (p_146273_3_ == 0 || p_146273_3_ == 1)
+            {
+                if (this.draggedStack == null)
+                {
+                    if (slot != this.clickedSlot)
+                    {
+                        this.draggedStack = this.clickedSlot.getStack().copy();
+                    }
+                }
+                else if (this.draggedStack.stackSize > 1 && slot != null && Container.func_94527_a(slot, this.draggedStack, false))
+                {
+                    long i1 = Minecraft.getSystemTime();
+
+                    if (this.field_146985_D == slot)
+                    {
+                        if (i1 - this.field_146986_E > 500L)
+                        {
+                            this.handleMouseClick(this.clickedSlot, this.clickedSlot.slotNumber, 0, 0);
+                            this.handleMouseClick(slot, slot.slotNumber, 1, 0);
+                            this.handleMouseClick(this.clickedSlot, this.clickedSlot.slotNumber, 0, 0);
+                            this.field_146986_E = i1 + 750L;
+                            --this.draggedStack.stackSize;
+                        }
+                    }
+                    else
+                    {
+                        this.field_146985_D = slot;
+                        this.field_146986_E = i1;
+                    }
+                }
+            }
+        }
+        else if (this.field_147007_t && slot != null && itemstack != null && itemstack.stackSize > this.field_147008_s.size() && Container.func_94527_a(slot, itemstack, true) && slot.isItemValid(itemstack) && this.inventorySlots.canDragIntoSlot(slot))
+        {
+            this.field_147008_s.add(slot);
+            this.func_146980_g();
+        }
+    }
+
+
+    @Override
+    protected void mouseMovedOrUp(int p_146286_1_, int p_146286_2_, int p_146286_3_)
+    {
+        super.mouseMovedOrUp(p_146286_1_, p_146286_2_, p_146286_3_); //Forge, Call parent to release buttons
+        Slot slot = this.getSlotAtPosition(p_146286_1_, p_146286_2_);
+        int l = this.guiLeft;
+        int i1 = this.guiTop;
+        boolean flag = p_146286_1_ < l || p_146286_2_ < i1 || p_146286_1_ >= l + this.xSize || p_146286_2_ >= i1 + this.ySize;
+        int j1 = -1;
+
+        if (slot != null)
+        {
+            j1 = slot.slotNumber;
+        }
+
+        if (flag)
+        {
+            j1 = -999;
+        }
+
+        Slot slot1;
+        Iterator iterator;
+
+        if (this.field_146993_M && slot != null && p_146286_3_ == 0 && this.inventorySlots.func_94530_a((ItemStack)null, slot))
+        {
+            if (isShiftKeyDown())
+            {
+                if (slot != null && slot.inventory != null && this.field_146994_N != null)
+                {
+                    iterator = this.inventorySlots.inventorySlots.iterator();
+
+                    while (iterator.hasNext())
+                    {
+                        slot1 = (Slot)iterator.next();
+
+                        if (slot1 != null && slot1.canTakeStack(this.mc.thePlayer) && slot1.getHasStack() && slot1.inventory == slot.inventory && Container.func_94527_a(slot1, this.field_146994_N, true))
+                        {
+                            this.handleMouseClick(slot1, slot1.slotNumber, p_146286_3_, 1);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                this.handleMouseClick(slot, j1, p_146286_3_, 6);
+            }
+
+            this.field_146993_M = false;
+            this.field_146997_J = 0L;
+        }
+        else
+        {
+            if (this.field_147007_t && this.field_146988_G != p_146286_3_)
+            {
+                this.field_147007_t = false;
+                this.field_147008_s.clear();
+                this.field_146995_H = true;
+                return;
+            }
+
+            if (this.field_146995_H)
+            {
+                this.field_146995_H = false;
+                return;
+            }
+
+            boolean flag1;
+
+            if (this.clickedSlot != null && this.mc.gameSettings.touchscreen)
+            {
+                if (p_146286_3_ == 0 || p_146286_3_ == 1)
+                {
+                    if (this.draggedStack == null && slot != this.clickedSlot)
+                    {
+                        this.draggedStack = this.clickedSlot.getStack();
+                    }
+
+                    flag1 = Container.func_94527_a(slot, this.draggedStack, false);
+
+                    if (j1 != -1 && this.draggedStack != null && flag1)
+                    {
+                        this.handleMouseClick(this.clickedSlot, this.clickedSlot.slotNumber, p_146286_3_, 0);
+                        this.handleMouseClick(slot, j1, 0, 0);
+
+                        if (this.mc.thePlayer.inventory.getItemStack() != null)
+                        {
+                            this.handleMouseClick(this.clickedSlot, this.clickedSlot.slotNumber, p_146286_3_, 0);
+                            this.field_147011_y = p_146286_1_ - l;
+                            this.field_147010_z = p_146286_2_ - i1;
+                            this.returningStackDestSlot = this.clickedSlot;
+                            this.returningStack = this.draggedStack;
+                            this.returningStackTime = Minecraft.getSystemTime();
+                        }
+                        else
+                        {
+                            this.returningStack = null;
+                        }
+                    }
+                    else if (this.draggedStack != null)
+                    {
+                        this.field_147011_y = p_146286_1_ - l;
+                        this.field_147010_z = p_146286_2_ - i1;
+                        this.returningStackDestSlot = this.clickedSlot;
+                        this.returningStack = this.draggedStack;
+                        this.returningStackTime = Minecraft.getSystemTime();
+                    }
+
+                    this.draggedStack = null;
+                    this.clickedSlot = null;
+                }
+            }
+            else if (this.field_147007_t && !this.field_147008_s.isEmpty())
+            {
+                this.handleMouseClick((Slot)null, -999, Container.func_94534_d(0, this.field_146987_F), 5);
+                iterator = this.field_147008_s.iterator();
+
+                while (iterator.hasNext())
+                {
+                    slot1 = (Slot)iterator.next();
+                    this.handleMouseClick(slot1, slot1.slotNumber, Container.func_94534_d(1, this.field_146987_F), 5);
+                }
+
+                this.handleMouseClick((Slot)null, -999, Container.func_94534_d(2, this.field_146987_F), 5);
+            }
+            else if (this.mc.thePlayer.inventory.getItemStack() != null)
+            {
+                if (p_146286_3_ == this.mc.gameSettings.keyBindPickBlock.getKeyCode() + 100)
+                {
+                    this.handleMouseClick(slot, j1, p_146286_3_, 3);
+                }
+                else
+                {
+                    flag1 = j1 != -999 && (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54));
+
+                    if (flag1)
+                    {
+                        this.field_146994_N = slot != null && slot.getHasStack() ? slot.getStack() : null;
+                    }
+
+                    this.handleMouseClick(slot, j1, p_146286_3_, flag1 ? 1 : 0);
+                }
+            }
+        }
+
+        if (this.mc.thePlayer.inventory.getItemStack() == null)
+        {
+            this.field_146997_J = 0L;
+        }
+
+        this.field_147007_t = false;
     }
 
     /**

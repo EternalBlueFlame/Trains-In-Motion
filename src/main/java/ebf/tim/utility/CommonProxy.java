@@ -12,7 +12,9 @@ import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.gui.GUIAdminBook;
 import ebf.tim.items.ItemAdminBook;
+import ebf.tim.items.ItemKey;
 import ebf.tim.items.ItemRail;
+import ebf.tim.items.ItemTicket;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -159,6 +161,9 @@ public class CommonProxy implements IGuiHandler {
 
         GameRegistry.registerTileEntity(TileEntityStorage.class, "StorageEntity");
         GameRegistry.registerTileEntity(RailTileEntity.class, "TiMRailEntity");
+
+        RegisterItem(new ItemKey(), "transportkey","transportkey", TrainsInMotion.creativeTab, null);
+        RegisterItem(new ItemTicket(), "transportticket","transportticket", TrainsInMotion.creativeTab, null);
 
         //register the train crafting table
         addRecipe(new ItemStack(RegisterBlock(trainTable, "block.traintable", "block.traintable", TrainsInMotion.creativeTab),1),

@@ -12,7 +12,7 @@ public class SkinRegistry {
 
     public static Map<String, Map<String, skin>> transports = new HashMap<String, Map<String, skin>>();
 
-    public static void addSkin(Class c,String modid, String textureURI, @Nullable List<int[]> recolor, String skinName, String skinDescription){
+    public static void addSkin(Class c,String modid, String textureURI, @Nullable int[][] recolor, String skinName, String skinDescription){
         if (!transports.containsKey(c.getName())){
             transports.put(c.getName(), new HashMap<String, skin>());
             //add the default/null skin

@@ -2,10 +2,15 @@ package ebf.tim.items;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.TrainsInMotion;
+import ebf.tim.api.SkinRegistry;
+import ebf.tim.models.rollingstock.VATLogCar;
+import ebf.tim.utility.DebugUtil;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
 
 import java.util.ArrayList;
@@ -19,20 +24,47 @@ import java.util.UUID;
  */
 public class ItemKey extends Item{
 
-    public ItemKey(UUID host, String entityName){
-        data.host.add(host);
-        data.hostname.add(entityName);
+    public Integer selectedEntity=null;
+
+    public ItemKey(){}
+
+
+
+    public static void addHost(ItemStack stack, UUID host, String entityName){
+        DebugUtil.println(host.toString(), entityName);
+        if(stack.stackTagCompound ==null && stack.getItem() instanceof ItemKey){
+            stack.stackTagCompound = new NBTTagCompound();
+        }
+
+        int length= stack.stackTagCompound.hasKey("hostlength")?stack.stackTagCompound.getInteger("hostlength"):0;
+        stack.stackTagCompound.setLong("key.most."+length, host.getMostSignificantBits());
+        stack.stackTagCompound.setLong("key.least."+length, host.getLeastSignificantBits());
+        stack.stackTagCompound.setString("key.parent."+length, entityName);
+        length++;
+        stack.stackTagCompound.setInteger("hostlength", length);
     }
 
-    public void addHost(UUID host, String entityName){
-        data.host.add(host);
-        data.hostname.add(entityName);
+    public static List<UUID> getHostList(ItemStack stack){
+        if(stack!=null && stack.stackTagCompound!=null) {
+            List<UUID> entries = new ArrayList<>();
+            int length = stack.stackTagCompound.hasKey("hostlength") ? stack.stackTagCompound.getInteger("hostlength") : 0;
+            for (int i = 0; i < length; i++) {
+                entries.add(new UUID(stack.stackTagCompound.getLong("key.most." + i), stack.stackTagCompound.getLong("key.least." + i)));
+            }
+            return entries;
+        }
+        return null;
     }
-
-    private KeySaveData data = new KeySaveData("ItemKey");
-
-    public List<UUID> getHostList(){
-        return data.host;
+    public static List<String> getHostNames(ItemStack stack){
+        if(stack!=null && stack.stackTagCompound!=null) {
+            List<String> entries = new ArrayList<>();
+            int length= stack.stackTagCompound.hasKey("hostlength")?stack.stackTagCompound.getInteger("hostlength"):0;
+            for(int i=0;i<length;i++){
+                entries.add(stack.stackTagCompound.getString("key.parent."+i));
+            }
+            return entries;
+        }
+        return null;
     }
 
     /**
@@ -42,59 +74,20 @@ public class ItemKey extends Item{
      * We can cover the key and ticket description here, to simplify other classes.
      */
     @SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack thisStack, EntityPlayer player, List stringList, boolean p_77624_4_) {
+    public void addInformation(ItemStack stack, EntityPlayer player, List stringList, boolean p_77624_4_) {
+        if(stack!=null && stack.stackTagCompound!=null) {
         if (this instanceof ItemTicket){
             stringList.add("This ticket is for: ");
         } else {
             stringList.add("This key unlocks: ");
         }
-        for (int i=0; i<data.hostname.size(); i++) {
-            stringList.add(data.hostname.get(i));
-            stringList.add(data.host.get(i));
-        }
-    }
+        List<UUID> hosts = getHostList(stack);
+        List<String> names = getHostNames(stack);
 
-
-    public List<UUID> getTransport(){
-        return data.host;
-    }
-
-    private class KeySaveData extends WorldSavedData{
-        /**the UUID from server for the entity this belongs to, this will be compared to a key item in the entity, rather than the entity itself due to different UUID's on client and server.*/
-        private List<UUID> host = new ArrayList<>();
-        /**the name of the host that's displayed, This isn't used for anything more than saving us from having to search the world for an entity, that probably isn't loaded, just to get it's name.*/
-        private List<String> hostname = new ArrayList<>();
-
-        public KeySaveData(String name){
-            super(name);
-        }
-
-        /**
-         * <h2> Data Syncing and Saving </h2>
-         * NBT is save data, which only happens on server.
-         */
-        /**loads the entity's save file*/
-        @Override
-        public void readFromNBT(NBTTagCompound tag) {
-            int arrayLength = tag.getInteger("locks");
-            for (int i=0; i<arrayLength; i++) {
-                host.add(new UUID(tag.getLong("key.most."+i), tag.getLong("key.least."+i)));
-                hostname.add(tag.getString("key.parent."+i));
+            int length = stack.stackTagCompound.hasKey("hostlength") ? stack.stackTagCompound.getInteger("hostlength") : 0;
+            for (int i = 0; i < length; i++) {
+                stringList.add(names.get(i) + " : " + hosts.get(i).toString());
             }
-
-        }
-
-        /**saves the entity to server world*/
-        @Override
-        public void writeToNBT(NBTTagCompound tag) {
-            tag.setInteger("locks", host.size());
-            for (int i=0; i<host.size(); i++) {
-                tag.setLong("key.most."+i, host.get(i).getMostSignificantBits());
-                tag.setLong("key.least."+i, host.get(i).getLeastSignificantBits());
-                tag.setString("key.parent."+i, hostname.get(i));
-            }
-
-
         }
     }
 }

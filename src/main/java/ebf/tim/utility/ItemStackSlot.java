@@ -198,7 +198,7 @@ public class ItemStackSlot extends Slot {
      */
     @Override
     public boolean canTakeStack(EntityPlayer p_82869_1_) {
-        return !(inventory instanceof GenericRailTransport) || ((GenericRailTransport) inventory).getPermissions(p_82869_1_, false);
+        return !(inventory instanceof GenericRailTransport) || ((GenericRailTransport) inventory).getPermissions(p_82869_1_, false, false);
     }
 
     /**

@@ -132,6 +132,8 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     @Override
     public ItemStack slotClick(int slotId, int dragType, int clickTypeIn, EntityPlayer player) {
 
+        System.out.println("slot " + slotId + " clicked with type "+ dragType +":" +clickTypeIn);
+
         if (clickTypeIn == 4){
             clickTypeIn = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT) ? 1 ://cover shift click
                     player.inventory.getItemStack() != null ? 4 : //cover if the cursor is carrying an item
@@ -393,6 +395,6 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
      */
     @Override
     public boolean canInteractWith(EntityPlayer player) {
-        return !railTransport.isDead && railTransport.getPermissions(player, railTransport instanceof EntityTrainCore);
+        return !railTransport.isDead && railTransport.getPermissions(player, railTransport instanceof EntityTrainCore, false);
     }
 }

@@ -10,8 +10,7 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.networking.PacketKeyPress;
-import ebf.tim.networking.PacketMount;
+import ebf.tim.networking.PacketInteract;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.crash.CrashReport;
@@ -19,15 +18,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ReportedException;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import org.lwjgl.input.Keyboard;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -41,7 +37,7 @@ public class EventManager {
      * <h2>Keybind management</h2>
      * manages key pressed or released, since 1.7.10 has no direct support for key released we have to do it directly through LWJGL.
      * Most cases just send a packet to manage things
-     * @see PacketKeyPress
+     * @see PacketInteract
      *
      * Credit to Ferdinand for help with this function.
      *
@@ -54,28 +50,28 @@ public class EventManager {
         if (player.ridingEntity instanceof GenericRailTransport || player.ridingEntity instanceof EntitySeat) {
             //for lamp
             if (ClientProxy.KeyLamp.isPressed()) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(0, player.ridingEntity.getEntityId()));
+                TrainsInMotion.keyChannel.sendToServer(new PacketInteract(0, player.ridingEntity.getEntityId()));
                 ((GenericRailTransport) player.ridingEntity).setBoolean(GenericRailTransport.boolValues.LAMP, !((GenericRailTransport) player.ridingEntity).getBoolean(GenericRailTransport.boolValues.LAMP));
             }
             //for inventory
             if (ClientProxy.KeyInventory.isPressed()) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, player.ridingEntity.getEntityId()));
+                TrainsInMotion.keyChannel.sendToServer(new PacketInteract(1, player.ridingEntity.getEntityId()));
             }
             if (player.ridingEntity instanceof EntityTrainCore) {
                 //for speed change
                 if (FMLClientHandler.instance().getClient().gameSettings.keyBindForward.isPressed()) {
-                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(2, player.ridingEntity.getEntityId()));
+                    TrainsInMotion.keyChannel.sendToServer(new PacketInteract(2, player.ridingEntity.getEntityId()));
                 } else if (FMLClientHandler.instance().getClient().gameSettings.keyBindBack.getIsKeyPressed()) {
-                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(3, player.ridingEntity.getEntityId()));
+                    TrainsInMotion.keyChannel.sendToServer(new PacketInteract(3, player.ridingEntity.getEntityId()));
                 } else if (ClientProxy.KeyHorn.isPressed()){
-                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(9, player.ridingEntity.getEntityId()));
+                    TrainsInMotion.keyChannel.sendToServer(new PacketInteract(9, player.ridingEntity.getEntityId()));
                 } else if (FMLClientHandler.instance().getClient().gameSettings.keyBindJump.isPressed()){
-                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(16, player.ridingEntity.getEntityId()));
+                    TrainsInMotion.keyChannel.sendToServer(new PacketInteract(16, player.ridingEntity.getEntityId()));
                 }
 
                 //manage key release events
                 if (Keyboard.getEventKey() == FMLClientHandler.instance().getClient().gameSettings.keyBindJump.getKeyCode() && !Keyboard.getEventKeyState()){
-                    TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(15, player.ridingEntity.getEntityId()));
+                    TrainsInMotion.keyChannel.sendToServer(new PacketInteract(15, player.ridingEntity.getEntityId()));
                 }
             }
         } else {
@@ -145,23 +141,23 @@ public class EventManager {
      * <h2>Entity Interaction</h2>
      * this client event manages when the player tries to interact with the transport to ride it, or use an item on it.
      */
+    /*
     @SubscribeEvent
     @SuppressWarnings("unused")
     public void entityInteractEvent(EntityInteractEvent event) {
+        DebugUtil.println(event.target.getClass().getName(), event.target.worldObj.isRemote);
         //be sure the target is a transport hitbox
         if (event.target instanceof HitboxHandler.MultipartHitbox && event.entity.worldObj.isRemote) {
-
-            //TODO: if(event.entityPlayer.getHeldItem() instanceof stakeItem) {do linking/unlinking stuff;}
             //if the rider offsets weren't null, try and mount
             if (((HitboxHandler.MultipartHitbox) event.target).parent.getRiderOffsets() != null) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketMount(((HitboxHandler.MultipartHitbox) event.target).parent.getEntityId()));
+                TrainsInMotion.keyChannel.sendToServer(new PacketInteract(((HitboxHandler.MultipartHitbox) event.target).parent.getEntityId()));
                 //if they were null, try and open the inventory
             } else {
-                TrainsInMotion.keyChannel.sendToServer(new PacketKeyPress(1, ((HitboxHandler.MultipartHitbox) event.target).parent.getEntityId()));
+                TrainsInMotion.keyChannel.sendToServer(new PacketInteract(1, ((HitboxHandler.MultipartHitbox) event.target).parent.getEntityId()));
             }
 
         }
-    }
+    }*/
 
 
     /**

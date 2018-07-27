@@ -130,7 +130,7 @@ public class FuelHandler{
 			} else if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)){
 				train.worldObj.createExplosion(train, train.posX, train.posY, train.posZ, 5f, false);
 				train.dropItem(train.getItem(), 1);
-				train.attackEntityFromPart(null, new EntityDamageSource("overheat", train),100);
+				train.attackEntityFrom(new EntityDamageSource("overheat", train),100);
 			}
 			train.setBoolean(GenericRailTransport.boolValues.RUNNING, true);
 		} else {

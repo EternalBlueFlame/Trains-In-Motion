@@ -12,6 +12,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EntityDamageSource;
@@ -40,12 +41,16 @@ public class HitboxHandler {
      * The hitboxes also need to be moved every onUpdate, for trains this is handled in
      * @see HitboxHandler#getCollision(GenericRailTransport)
      */
-    public class MultipartHitbox extends EntityDragonPart{
+    public class MultipartHitbox extends Entity{
         /**reference to the parent entity of this hitbox*/
         public GenericRailTransport parent;
         /**initializer for entity hitbox*/
-        public MultipartHitbox(IEntityMultiPart host, GenericRailTransport parent, double posX, double posY , double posZ, boolean small){
-            super(host, "hitboxGeneric", small?0.2f:1,small?0.1f:2);
+        public MultipartHitbox(Entity host, GenericRailTransport parent, double posX, double posY , double posZ, boolean small){
+            super(host.worldObj);
+
+            this.setSize(small?0.2f:1, small?0.1f:2);
+
+
             this.parent = parent;
             this.posX = posX;
             this.posY = posY;
@@ -62,6 +67,10 @@ public class HitboxHandler {
                 this.boundingBox.maxZ = posZ + 0.45;
             }
         }
+        protected void readEntityFromNBT(NBTTagCompound p_70037_1_) {}
+        protected void writeEntityToNBT(NBTTagCompound p_70014_1_) {}
+        protected void entityInit() {}
+
         @Override
         public AxisAlignedBB getBoundingBox(){
             return boundingBox;
@@ -82,6 +91,11 @@ public class HitboxHandler {
         @SideOnly(Side.CLIENT)
         public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
             this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
+        }
+        @Override
+        public boolean interactFirst(EntityPlayer p_130002_1_) {
+            DebugUtil.println(worldObj.isRemote, parent==null);
+            return this.parent.interactFirst(p_130002_1_);
         }
         /**disables reading from NBT*/
         @Override

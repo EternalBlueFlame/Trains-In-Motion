@@ -9,6 +9,8 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 /**
@@ -28,14 +30,8 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
     public int parentId = 0;
     /**used to define which index the seat is supposed to be at*/
     private int seatNumber =0;
-    /**used to replace the client only velocity in forge that have private access.*/
-    protected double cartVelocityX =0;
-    /**used to replace the client only velocity in forge that have private access.*/
-    protected double cartVelocityY =0;
-    /**used to replace the client only velocity in forge that have private access.*/
-    protected double cartVelocityZ =0;
 
-    public float rotationRoll =0;
+    public Vec3 rotation =null;
 
     public EntitySeat(World world) {
         super(world);
@@ -46,9 +42,9 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
         this.posX = xPos;
         this.posY = yPos;
         this.posZ = zPos;
-        this.rotationPitch = (float)pitch;
-        this.rotationYaw = (float)yaw;
-        this.rotationRoll = (float)roll;
+        if (pitch!=0 || yaw !=0) {
+            rotation = Vec3.createVectorHelper(pitch, yaw, roll);
+        }
         parentId = parent;
         this.seatNumber = seatNumber;
     }
@@ -109,6 +105,11 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
     @Override
     protected void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_) {}
 
+    @Override
+    public Vec3 getLookVec() {
+        return rotation;
+    }
+
     /**
      * <h2>Spawn Data</h2>
      * Small networking check to add the seat to the host train/rollingstock. Or to remove the seat from the world if the host doesn't exist.
@@ -142,15 +143,12 @@ public class EntitySeat extends Entity implements IEntityAdditionalSpawnData {
         posX = x;
         posY = y;
         posZ = z;
-        motionX = cartVelocityX;
-        motionY = cartVelocityY;
-        motionZ = cartVelocityZ;
     }
     @Override
     public void setVelocity(double x, double y, double z) {
-        cartVelocityX = motionX = x;
-        cartVelocityY = motionY = y;
-        cartVelocityZ = motionZ = z;
+        motionX = x;
+        motionY = y;
+        motionZ = z;
     }
 
 }

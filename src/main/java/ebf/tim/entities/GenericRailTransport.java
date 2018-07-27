@@ -12,6 +12,8 @@ import ebf.tim.items.ItemTicket;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.ParticleFX;
 import ebf.tim.models.TransportRenderData;
+import ebf.tim.networking.PacketInteract;
+import ebf.tim.networking.PacketKeyPress;
 import fexcraft.tmt.slim.Vec3d;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.NBTKeys;
@@ -19,9 +21,8 @@ import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.IEntityMultiPart;
-import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -49,7 +50,7 @@ import static ebf.tim.utility.RailUtility.rotatePoint;
  * this is the base for all trains and rollingstock.
  * @author Eternal Blue Flame
  */
-public class GenericRailTransport extends EntityMinecart implements IEntityAdditionalSpawnData, IInventory, IEntityMultiPart, IFluidHandler, IFluidCart {
+public class GenericRailTransport extends EntityMinecart implements IEntityAdditionalSpawnData, IInventory, IFluidHandler, IFluidCart {
 
     /*
      * <h2>variables</h2>
@@ -135,7 +136,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * @see #setBoolean(boolValues, boolean)
      */
     private BitList bools = new BitList();
-    public enum boolValues{BRAKE(0), LOCKED(1), LAMP(2), CREATIVE(3), COUPLINGFRONT(4), COUPLINGBACK(5), WHITELIST(6), RUNNING(7), DERAILED(8), PARKING(9);
+    public enum boolValues{BRAKE(0), LOCKED(1), LAMP(2), CREATIVE(3), COUPLINGFRONT(4), COUPLINGBACK(5), WHITELIST(6), RUNNING(7), DERAILED(8);
         public int index;
         boolValues(int index){this.index = index;}
     }
@@ -162,6 +163,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         ignoreFrustumCheck = true;
         inventory = new ArrayList<>();
         initInventorySlots();
+        if(world!=null) {
+            boundingBox.setBounds(0.0D, 0.0D, 0.0D, 1.0D, 2.0D, 1.0D);
+        }
     }
     public GenericRailTransport(UUID owner, World world, double xPos, double yPos, double zPos){
         super(world);
@@ -174,6 +178,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         ignoreFrustumCheck = true;
         inventory = new ArrayList<>();
         initInventorySlots();
+        if(world!=null) {
+            boundingBox.setBounds(0.0D, 0.0D, 0.0D, 1.0D, 2.0D, 1.0D);
+        }
     }
 
     /**
@@ -229,21 +236,15 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public boolean canBePushed() {return false;}
     @Override
     public int getMinecartType(){return 10002;}
-    /**returns the world object for IEntityMultipart*/
-    @Override
-    public World func_82194_d(){return worldObj;}
-    /**returns the hitboxes of the entity as an array rather than a list*/
-    @Override
-    public Entity[] getParts(){return hitboxHandler.hitboxList.toArray(new HitboxHandler.MultipartHitbox[hitboxHandler.hitboxList.size()]);}
     /**returns the hitbox of this entity, we dont need that so return null*/
     @Override
-    public AxisAlignedBB getBoundingBox(){return null;}
+    public AxisAlignedBB getBoundingBox(){return boundingBox;}
     /**returns the hitbox of this entity, we dont need that so return null*/
     @Override
-    public AxisAlignedBB getCollisionBox(Entity collidedWith){return null;}
+    public AxisAlignedBB getCollisionBox(Entity collidedWith){return collidedWith.boundingBox;}
     /**returns if this can be collided with, we don't use this so return false*/
     @Override
-    public boolean canBeCollidedWith() {return false;}
+    public boolean canBeCollidedWith() {return true;}
     /**client only positioning of the transport, this should help to smooth the movement*/
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
@@ -263,16 +264,144 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this.setRotation(p_70056_7_, p_70056_8_);
     }
 
+    @Override
+    public void moveEntity(double p_70091_1_, double p_70091_3_, double p_70091_5_){
+        System.out.println("this is actually used???");
+        super.moveEntity(p_70091_1_,p_70091_3_, p_70091_5_);
+    }
+
+    @Override
+    public boolean interactFirst(EntityPlayer p_130002_1_) {
+        return worldObj.isRemote?interact(p_130002_1_,false,false, -1):super.interactFirst(p_130002_1_);
+    }
+
+    public boolean interact(EntityPlayer player, boolean isFront, boolean isBack, int key) {
+        if (worldObj.isRemote) {
+            TrainsInMotion.keyChannel.sendToServer(new PacketInteract(key, getEntityId()));
+        } else {
+            //check if the player has permission first.
+            if (!getPermissions(player, false, false)) {
+                player.addChatMessage(new ChatComponentText(RailUtility.translate("You don't have permission to do that.")));
+                return false;
+            }
+            switch (key){
+                case -1: {//right click
+                    if (player.getHeldItem() != null) {
+                        if (player.getHeldItem().getItem() instanceof ItemKey) {
+                            if (ItemKey.getHostList(player.getHeldItem()) !=null) {
+                                for (UUID transport : ItemKey.getHostList(player.getHeldItem())) {
+                                    if (transport.equals(getPersistentID())) {
+                                        return true;//end the function here if it already has the key.
+                                    }
+                                }
+                            }
+                            if(((ItemKey) player.getHeldItem().getItem()).selectedEntity ==null || ((ItemKey) player.getHeldItem().getItem()).selectedEntity != getEntityId()){
+                                ((ItemKey) player.getHeldItem().getItem()).selectedEntity = getEntityId();
+                                player.addChatComponentMessage(new ChatComponentText(
+                                        RailUtility.translate("Click again to add the ") + transportName() +
+                                                RailUtility.translate(" to the Item's list.")
+
+                                ));
+                                return true;//end the function here if it already has the key.
+                            } else {
+                                ItemKey.addHost(player.getHeldItem(), getPersistentID(), transportName());
+                                player.addChatComponentMessage(new ChatComponentText(
+                                        RailUtility.translate("added ") + transportName() +
+                                                RailUtility.translate(" to the Item's list.")
+
+                                ));
+                                ((ItemKey) player.getHeldItem().getItem()).selectedEntity=null;
+                                return true;//end the function here if it already has the key.
+                            }
+                        }
+                        //TODO: else if(player.getHeldItem() instanceof stakeItem) {do linking/unlinking stuff dependant on if it was front or not;}
+                    }
+                    //be sure the player has permission to enter the transport, and that the transport has the main seat open.
+                    if (getRiderOffsets() != null && riddenByEntity == null && getPermissions(player, false, true)) {
+                        player.mountEntity(this);
+                        return true;
+                        //if the player had permission but the main seat isnt open, check for seat entities to mount.
+                    } else {
+                        for (EntitySeat seat : seats) {
+                            if (seat.riddenByEntity == null && getPermissions(player, false, true)) {
+                                player.mountEntity(seat);
+                                return true;
+                            }
+                        }
+                    }
+                }
+                case 1:{ //open GUI
+                    player.openGui(TrainsInMotion.instance, getEntityId(), worldObj, 0, 0, 0);
+                }case 15: {//toggle brake
+                    setBoolean(boolValues.BRAKE, !getBoolean(boolValues.BRAKE));
+                    return true;
+                }case 5: { //Toggle lamp
+                    setBoolean(boolValues.LAMP, !getBoolean(boolValues.LAMP));
+                    return true;
+                }case 6:{ //Toggle locked
+                    setBoolean(boolValues.LOCKED, !getBoolean(boolValues.LOCKED));
+                    return true;
+                }case 10:{ //Toggle transport creative mode
+                    setBoolean(boolValues.CREATIVE, !getBoolean(boolValues.CREATIVE));
+                    return true;
+                }case 7:{ //Toggle coupling for both ends
+                    boolean toset = !getBoolean(boolValues.COUPLINGFRONT);
+                    setBoolean(boolValues.COUPLINGFRONT, toset);
+                    setBoolean(boolValues.COUPLINGBACK, toset);
+                    return true;
+                }case 13:{ //unlink transports
+                    GenericRailTransport transport;
+                    //frontLinkedTransport
+                    if (frontLinkedID != null){
+                        transport = (worldObj.getEntityByID(frontLinkedID) instanceof GenericRailTransport)?(GenericRailTransport) worldObj.getEntityByID(frontLinkedID):null;
+                        if (transport != null){
+                            if(transport.frontLinkedID == this.getEntityId()){
+                                transport.frontLinkedTransport = null;
+                                transport.frontLinkedID = null;
+                            } else {
+                                transport.backLinkedTransport = null;
+                                transport.backLinkedID = null;
+                            }
+                            frontLinkedTransport = null;
+                            frontLinkedID = null;
+                            transport.updateWatchers = true;
+                        }
+                    }
+                    //backLinkedTransport
+                    if (backLinkedID != null){
+                        transport = (worldObj.getEntityByID(backLinkedID) instanceof GenericRailTransport)?(GenericRailTransport) worldObj.getEntityByID(backLinkedID):null;
+                        if (transport != null){
+                            if(transport.frontLinkedID == this.getEntityId()){
+                                transport.frontLinkedTransport = null;
+                                transport.frontLinkedID = null;
+                            } else {
+                                transport.backLinkedTransport = null;
+                                transport.backLinkedID = null;
+                            }
+                            backLinkedTransport = null;
+                            backLinkedID = null;
+                            transport.updateWatchers = true;
+                        }
+                    }
+                    return true;
+                }
+            }
+        }
+
+        return super.interactFirst(player);
+
+    }
+
+    @Override
+    public int getEntityId(){
+        return super.getEntityId();
+    }
 
     /**
      * <h2>damage and destruction</h2>
      * attackEntityFromPart is called when one of the hitboxes of the entity has taken damage of some form.
      * the damage done is handled manually so we can compensate for basically everything, and if health is 0 or lower, we destroy the entity part by part, leaving the main part of the entity for last.
      */
-    @Override
-    public boolean attackEntityFromPart(EntityDragonPart part, DamageSource damageSource, float damage){
-        return attackEntityFrom(damageSource, damage);
-    }
     @Override
     public boolean attackEntityFrom(DamageSource damageSource, float p_70097_2_){
         if (damageSource.getEntity() instanceof GenericRailTransport){
@@ -329,7 +458,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             seat.worldObj.removeEntity(seat);
         }
         //remove hitboxes
-        for (EntityDragonPart hitbox : hitboxHandler.hitboxList){
+        for (Entity hitbox : hitboxHandler.hitboxList){
             hitbox.setDead();
             TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId(),false));
             hitbox.worldObj.removeEntity(hitbox);
@@ -357,7 +486,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         }
 
     }
-
 
     /*
      * <h3>add bogies and seats</h3>
@@ -512,13 +640,16 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
 
     public void updatePosition(){
+
+        this.boundingBox.setBounds(posX-0.5,posY,posZ-0.5, posX+0.5,posY+2, posZ+0.5);
+
         if (collision) {
             frontBogie.setVelocity(-frontBogie.motionX,-frontBogie.motionY,-frontBogie.motionZ);
             backBogie.setVelocity(-backBogie.motionX,-backBogie.motionY,-backBogie.motionZ);
         }
-        setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.RUNNING), getType().isTrain() || hasTrain, getBoolean(boolValues.PARKING),
+        setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.RUNNING), getType().isTrain() || hasTrain, getBoolean(boolValues.BRAKE),
                 weightKg() * (frontBogie.isOnSlope?1.5f:1) * (backBogie.isOnSlope?2:1), frontLinkedID!=null || backLinkedID!=null));
-        setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.RUNNING), getType().isTrain() || hasTrain, getBoolean(boolValues.PARKING),
+        setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.RUNNING), getType().isTrain() || hasTrain, getBoolean(boolValues.BRAKE),
                 weightKg() * (frontBogie.isOnSlope?1.5f:1) * (backBogie.isOnSlope?2:1), frontLinkedID!=null || backLinkedID!=null));
         motionX = frontVelocityX = frontBogie.motionX;
         motionZ = frontVelocityZ = frontBogie.motionZ;
@@ -612,7 +743,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
          *
          * this stops updating if the transport derails. Why update positions of something that doesn't move? We compensate for first tick to be sure hitboxes, bogies, etc, spawn on join.
          */
-        collision = hitboxHandler.getCollision(this);
+        //collision = hitboxHandler.getCollision(this);
         if (frontBogie!=null && backBogie != null && (!getBoolean(boolValues.DERAILED) || ticksExisted==1)){
             //handle movement.
             if (!worldObj.isRemote && !(this instanceof EntityTrainCore)) {
@@ -834,79 +965,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     }
 
     /**
-     * <h2>Packet use</h2>
-     * used to run functionality on server defined by a key press on the client.
-     * sent to server by
-     * @see ebf.tim.networking.PacketKeyPress
-     * through
-     * @see EventManager#onClientKeyPress(InputEvent.KeyInputEvent)
-     */
-    public boolean ProcessPacket(int functionID){
-        switch (functionID){
-            case 4:{ //Toggle brake
-                setBoolean(boolValues.PARKING, !getBoolean(boolValues.PARKING));
-                return true;
-            }case 15: {
-                setBoolean(boolValues.BRAKE, false);
-                return true;
-            }case 16: {
-                setBoolean(boolValues.BRAKE, true);
-                return true;
-            }case 5: { //Toggle lamp
-                setBoolean(boolValues.LAMP, !getBoolean(boolValues.LAMP));
-                return true;
-            }case 6:{ //Toggle locked
-                setBoolean(boolValues.LOCKED, !getBoolean(boolValues.LOCKED));
-                return true;
-            }case 7:{ //Toggle coupling
-                boolean toset = !getBoolean(boolValues.COUPLINGFRONT);
-                setBoolean(boolValues.COUPLINGFRONT, toset);
-                setBoolean(boolValues.COUPLINGBACK, toset);
-                return true;
-            }case 10:{ //Toggle transport creative mode
-                setBoolean(boolValues.CREATIVE, !getBoolean(boolValues.CREATIVE));
-                return true;
-            }case 13:{ //unlink transports
-                GenericRailTransport transport;
-                //frontLinkedTransport
-                if (frontLinkedID != null){
-                    transport = (worldObj.getEntityByID(frontLinkedID) instanceof GenericRailTransport)?(GenericRailTransport) worldObj.getEntityByID(frontLinkedID):null;
-                    if (transport != null){
-                        if(transport.frontLinkedID == this.getEntityId()){
-                            transport.frontLinkedTransport = null;
-                            transport.frontLinkedID = null;
-                        } else {
-                            transport.backLinkedTransport = null;
-                            transport.backLinkedID = null;
-                        }
-                        frontLinkedTransport = null;
-                        frontLinkedID = null;
-                        transport.updateWatchers = true;
-                    }
-                }
-                //backLinkedTransport
-                if (backLinkedID != null){
-                    transport = (worldObj.getEntityByID(backLinkedID) instanceof GenericRailTransport)?(GenericRailTransport) worldObj.getEntityByID(backLinkedID):null;
-                    if (transport != null){
-                        if(transport.frontLinkedID == this.getEntityId()){
-                            transport.frontLinkedTransport = null;
-                            transport.frontLinkedID = null;
-                        } else {
-                            transport.backLinkedTransport = null;
-                            transport.backLinkedID = null;
-                        }
-                        backLinkedTransport = null;
-                        backLinkedID = null;
-                        transport.updateWatchers = true;
-                    }
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * <h2>Permissions handler</h2>
      * Used to check if the player has permission to do whatever it is the player is trying to do. Yes I could be more vague with that.
      *
@@ -914,9 +972,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * @param driverOnly can this action only be done by the driver/conductor?
      * @return if the player has permission to continue
      */
-    public boolean getPermissions(EntityPlayer player, boolean driverOnly) {
+    public boolean getPermissions(EntityPlayer player, boolean driverOnly, boolean decreaseTicketStack) {
         //if this requires the player to be the driver, and they aren't, just return false before we even go any further.
-        if (driverOnly && player.getEntityId() != this.riddenByEntity.getEntityId()){
+        if (player ==null || (driverOnly && riddenByEntity!=null && player.getEntityId() != this.riddenByEntity.getEntityId())){
             return false;
         }
 
@@ -925,12 +983,18 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             return true;
         }
 
-        //if a ticket is needed like for passenger cars
+        //if a ticket is needed, like for passenger cars
         if(getBoolean(boolValues.LOCKED) && getRiderOffsets().length>1){
             for(ItemStack stack : player.inventory.mainInventory){
                 if(stack.getItem() instanceof ItemKey){
-                    for(UUID id : ((ItemTicket) stack.getItem()).getHostList()){
+                    for(UUID id : ItemKey.getHostList(stack)){
                         if (id == this.entityUniqueID){
+                            if(stack.getItem() instanceof ItemTicket &&decreaseTicketStack) {
+                                stack.stackSize--;
+                                if (stack.stackSize<=0){
+                                    stack=null;
+                                }
+                            }
                             return true;
                         }
                     }
@@ -1160,7 +1224,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * if it's a tile entity, it's just another null check to be sure no one crashes.
      */
     @Override
-    public boolean isUseableByPlayer(EntityPlayer p_70300_1_) {return getPermissions(p_70300_1_, false);}
+    public boolean isUseableByPlayer(EntityPlayer p_70300_1_) {return getPermissions(p_70300_1_, false, false);}
 
     /**
      * <h2>filter slots</h2>
