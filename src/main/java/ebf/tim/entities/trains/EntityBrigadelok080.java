@@ -227,7 +227,7 @@ public class EntityBrigadelok080 extends TrainBase {
      * <h2>Fluid Tank Capacity</h2>
      */
     @Override
-    public int getTankCapacity(){return 9161;}
+    public int[] getTankCapacity(){return new int[]{9161, 800};}
 
     @Override
     public int getRFCapacity() {

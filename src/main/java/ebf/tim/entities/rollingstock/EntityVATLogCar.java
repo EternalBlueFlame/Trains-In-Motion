@@ -64,8 +64,8 @@ public class EntityVATLogCar extends RollingstockBase {
     }
 
     @Override
-    public int getTankCapacity() {
-        return 0;
+    public int[] getTankCapacity() {
+        return null;
     }
 
     @Override

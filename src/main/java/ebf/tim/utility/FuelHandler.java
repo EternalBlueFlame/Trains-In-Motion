@@ -29,6 +29,7 @@ public class FuelHandler{
 	private float burnTime =0;
 	private float burnTimeMax =0;
 	/**the steam tank, used for steam and nuclear steam trains*/
+	@Deprecated //use another fluid tank instead
 	public int steamTank=0;
 	public float heatC =21;
 
@@ -118,13 +119,13 @@ public class FuelHandler{
 		if (heatC >100){
 			int steam = (int)Math.floor(
 					((heatC-100)*0.015f) * //calculate heat from burnHeat
-							(train.getTankAmount()*0.005f) //calculate surface area of water
+							(train.getTankInfo(null)[0].fluid.amount*0.005f) //calculate surface area of water
 			);
 			//drain fluid
 			if (train.drain(null, steam!=0?steam/3:0,true)!= null) {
 				steamTank +=steam*0.9f;//compensate for water impurities
-				if(steamTank>train.getTankCapacity()){//in TiM it needs to be  > getTankCapacity-getTankAmount.
-					steamTank= train.getTankCapacity();
+				if(steamTank>train.getTankCapacity()[1]){//in TiM it needs to be  > getTankCapacity-getTankAmount.
+					steamTank= train.getTankCapacity()[1];
 				}
 				//if no fluid left and not creative mode, explode.
 			} else if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)){

@@ -10,6 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -103,7 +104,17 @@ public class EntityTrainCore extends GenericRailTransport {
     public void entityInit(){
         super.entityInit();
         this.dataWatcher.addObject(18, 0);//accelerator
+        this.dataWatcher.addObject(14, 0);//accelerator
         this.updateWatchers = true;
+    }
+
+    @Override
+    public void initInventorySlots(){
+        super.initInventorySlots();
+        inventory.add(fuelSlot());
+        if(getTankInfo(ForgeDirection.UNKNOWN).length>1){
+            inventory.add(waterSlot());
+        }
     }
 
 
@@ -234,8 +245,8 @@ public class EntityTrainCore extends GenericRailTransport {
             //twice a second, re-calculate the speed.
             if(ticksExisted %10==0){
                 //stop calculation if it can't move
-                if (((getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM || getType() == TrainsInMotion.transportTypes.STEAM) && fuelHandler.steamTank< getTankCapacity()*0.25)//check for steam fuel
-                        || (getType() == TrainsInMotion.transportTypes.ELECTRIC && getTankAmount()<1)//check for electric fuel
+                if (((getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM || getType() == TrainsInMotion.transportTypes.STEAM) && fuelHandler.steamTank< getTankCapacity()[1]*0.25)//check for steam fuel
+                        || (getType() == TrainsInMotion.transportTypes.ELECTRIC && getTankInfo(null)[1].fluid.amount<1)//check for electric fuel
                 ) {
                     vectorCache[7][0] = 0;
                     setBoolean(boolValues.RUNNING, false);

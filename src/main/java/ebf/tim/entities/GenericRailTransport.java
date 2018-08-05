@@ -13,7 +13,6 @@ import ebf.tim.models.Bogie;
 import ebf.tim.models.ParticleFX;
 import ebf.tim.models.TransportRenderData;
 import ebf.tim.networking.PacketInteract;
-import ebf.tim.networking.PacketKeyPress;
 import fexcraft.tmt.slim.Vec3d;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.NBTKeys;
@@ -88,7 +87,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**the health of the entity, similar to that of EntityLiving*/
     private int health = 20;
     /**the fluidTank tank*/
-    private FluidStack fluidTank = null;
+    private FluidTankInfo[] fluidTank = null;
+    /**local cache for fluid tanks, tocheck if parsing is necessary or not*/
+    private String fluidCache="";
     /**the list of items used for the inventory and crafting slots.*/
     public List<ItemStackSlot> inventory = null;
     /**whether or not this needs to update the datawatchers*/
@@ -192,13 +193,12 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     @Override
     public void entityInit(){
         this.dataWatcher.addObject(13, 0);//train fuel consumption current
-        this.dataWatcher.addObject(14, 0);//train steam, or rollingstock fluid ID (so client can show fluid name)
+        this.dataWatcher.addObject(20, "");//fluid tank data
         this.dataWatcher.addObject(15, 0);//train heat
         this.dataWatcher.addObject(17, 0);//booleans
         //18 is used by EntityTrainCore
         //19 is used by the core minecart
         this.dataWatcher.addObject(23, "");//owner
-        this.dataWatcher.addObject(20, 0);//tankA
         this.dataWatcher.addObject(21, 0);//front linked transport
         this.dataWatcher.addObject(22, 0);//back linked transport
         this.dataWatcher.addObject(24, getDefaultTexture().getResourceDomain()+":"+getDefaultTexture().getResourcePath());//currently used
@@ -218,6 +218,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 }
             }
         }
+    }
+
+    public ItemStackSlot fuelSlot(){
+        return new ItemStackSlot(this, 400,114,32);
+    }
+    public ItemStackSlot waterSlot(){
+        return new ItemStackSlot(this, 401,150,32);
     }
 
     /**
@@ -556,12 +563,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
         rotationRoll = tag.getFloat(NBTKeys.rotationRoll);
         prevRotationRoll = tag.getFloat(NBTKeys.prevRotationRoll);
-        //load tanks
-        if (getTankCapacity() >0) {
-            if(tag.hasKey("FluidName")) {
-                fluidTank = FluidStack.loadFluidStackFromNBT(tag);
-            } else {
-                fluidTank = null;
+
+        fluidTank= new FluidTankInfo[getTankCapacity().length];
+        for(int i=0; i<getTankCapacity().length-1; i++){
+            if(tag.hasKey("tanks." +i)){
+                fluidTank[i]= new FluidTankInfo(FluidStack.loadFluidStackFromNBT(tag.getCompoundTag("tanks." +i)), getTankCapacity()[i]);
             }
         }
 
@@ -612,13 +618,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         tag.setFloat(NBTKeys.prevRotationRoll, prevRotationRoll);
 
 
-        //tanks
-        if (getTankCapacity() >0){
-            if (fluidTank != null) {
-                fluidTank.writeToNBT(tag);
+        for(int i=0; i<getTankInfo(null).length-1;i++){
+            if(getTankInfo(null) !=null) {
+                NBTTagCompound tank = new NBTTagCompound();
+                getTankInfo(null)[i].fluid.writeToNBT(tank);
+                tag.setTag("tanks." + i, tank);
             }
         }
-
         NBTTagCompound invTag;
 
         if (inventory!=null) {
@@ -806,10 +812,23 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
 
             if(updateWatchers){
-                dataWatcher.updateObject(20, fluidTank==null?0:fluidTank.amount);
-                if (!getType().isTrain()) {
-                    dataWatcher.updateObject(14, fluidTank == null ? -1 : fluidTank.getFluidID());
+                StringBuilder tanks = new StringBuilder();
+                for(int i=0; i<getTankCapacity().length-1;i++) {
+                    //todo: these should NEVER be null
+                    if(getTankInfo(null)[i] !=null && getTankInfo(null)[i].fluid !=null) {
+                        tanks.append(getTankInfo(null)[i].fluid.amount);
+                        tanks.append(",");
+                        tanks.append(getTankInfo(null)[i].fluid.getFluid().getName());
+                        tanks.append(";");
+                    } else {
+                        tanks.append(0);
+                        tanks.append(",");
+                        tanks.append(FluidRegistry.WATER.getName());
+                        tanks.append(";");
+                    }
                 }
+
+                this.dataWatcher.updateObject(20, tanks.toString());
                 this.dataWatcher.updateObject(23, ownerName);
                 this.dataWatcher.updateObject(17, bools.toInt());
                 this.dataWatcher.updateObject(21, frontLinkedID!=null?frontLinkedID:-1);
@@ -817,6 +836,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
         }
 
+        //todo:why is this only for stock? and do we actually need to do this..? the "checked" variable isn't even used...
         if (!(this instanceof EntityTrainCore) && ticksExisted %60 ==0){
             GenericRailTransport front = null;
             boolean hasReversed = false;
@@ -1027,25 +1047,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         return null;
     }
 
-
-    @Override
-    public boolean canPassFluidRequests(Fluid fluid){
-        return getTankCapacity() !=0;
-    }
-
-    @Override
-    public boolean canAcceptPushedFluid(EntityMinecart requester, Fluid fluid){
-        return false;
-    }
-
-    @Override
-    public boolean canProvidePulledFluid(EntityMinecart requester, Fluid fluid){
-        return getTankCapacity()!=0 && canDrain(ForgeDirection.UNKNOWN, fluid);
-    }
-
-    @Override
-    public void setFilling(boolean filling){}
-
     /*
      * <h2>Inherited variables</h2>
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
@@ -1086,7 +1087,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**defines the capacity of the fluidTank tank.
      * Usually value is 10,000 *the cubic meter capacity, so 242 gallons, is 0.9161 cubic meters, which is 9161 tank capacity
      *NOTE if this is used for a train, minimum value should be 1100, which is just a little over a single bucket to allow prevention of overheating.*/
-    public int getTankCapacity(){return 0;}
+    public int[] getTankCapacity(){return new int[]{0};}
+    public String[] getTankFilters(){return new String[]{""};}
     /**defines the capacity of the RF storage, intended for electric rollingstock that store power for the train.*/
     public int getRFCapacity(){return 0;}
     /**defines the ID of the owner*/
@@ -1344,30 +1346,71 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /*
      * <h1>Fluid Management</h1>
      */
-    /**Returns true if the given fluid can be extracted.*/
-    @Override
-    public boolean canDrain(@Nullable ForgeDirection from, Fluid resource){return fluidTank != null && getTankAmount()>0 && (fluidTank.getFluid() == resource || resource == null);}
-    /**Returns true if the given fluid can be inserted into the fluid tank.*/
-    @Override
-    public boolean canFill(@Nullable ForgeDirection from, Fluid resource){return getTankCapacity()>0 && resource!=null && (fluidTank == null || fluidTank.getFluid() == resource);}
     //attempt to drain a set amount
+    //todo maybe this should cover all tanks...?
     @Override
     public FluidStack drain(@Nullable ForgeDirection from, int drain, boolean doDrain){
-        if (!canDrain(null,null)){
+        if (getTankInfo(null)[0].fluid.amount<1){
             return null;
         } else {
-            int amountToDrain = getTankAmount() < drain?getTankAmount():drain;
+            int amountToDrain = getTankInfo(null)[0].fluid.amount < drain?getTankInfo(null)[0].fluid.amount:drain;
             if (doDrain){
-                if (amountToDrain == getTankAmount()) {
-                    fluidTank = null;
+                if (amountToDrain == getTankInfo(null)[0].fluid.amount) {
+                    getTankInfo(null)[0] = null;
                     updateWatchers=true;
                 } else {
-                    fluidTank.amount -= amountToDrain;
+                    getTankInfo(null)[0].fluid.amount -= amountToDrain;
                     updateWatchers=true;
                 }
             }
-            return fluidTank!=null?new FluidStack(fluidTank.getFluid(), amountToDrain):null;
+            return getTankInfo(null)[0]!=null?new FluidStack(getTankInfo(null)[0].fluid.getFluid(), amountToDrain):null;
         }
+    }
+
+
+    @Override
+    public boolean canPassFluidRequests(Fluid fluid){
+        return canDrain(null, fluid) || canFill(null, fluid);
+    }
+
+    @Override
+    public boolean canAcceptPushedFluid(EntityMinecart requester, Fluid fluid){
+        return canFill(null, fluid);
+    }
+
+    @Override
+    public boolean canProvidePulledFluid(EntityMinecart requester, Fluid fluid){
+        return canDrain(ForgeDirection.UNKNOWN, fluid);
+    }
+
+    @Override
+    public void setFilling(boolean filling){}
+
+    /**Returns true if the given fluid can be extracted.*/
+    @Override
+    public boolean canDrain(@Nullable ForgeDirection from, Fluid resource){
+        for(FluidTankInfo stack : getTankInfo(null)) {
+            if (stack.fluid.amount > 0 && (resource == null || stack.fluid.getFluid() == resource)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    /**Returns true if the given fluid can be inserted into the fluid tank.*/
+    @Override
+    public boolean canFill(@Nullable ForgeDirection from, Fluid resource){
+        int check=0;
+        for(FluidTankInfo stack : getTankInfo(null)) {
+            if(getTankFilters()==null || getTankFilters()[check]==null || (getTankFilters()[check].length()<2 && !getTankFilters()[check].contains(resource.getName()))){
+                continue;
+            } else {
+                check++;
+            }
+            if (stack.fluid.amount < stack.capacity && (resource == null || stack.fluid.amount<1 || stack.fluid.getFluid() == resource)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**drain with a fluidStack, this is mostly a redirect to
@@ -1375,47 +1418,83 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      */
     @Override
     public FluidStack drain(@Nullable ForgeDirection from, FluidStack resource, boolean doDrain){
-        return drain(from, resource.amount,doDrain);
-    }
-    /**returns the amount of fluid in the tank. 0 if the tank is null*/
-    public int getTankAmount(){
-        if(worldObj.isRemote){
-            return this.dataWatcher.getWatchableObjectInt(20);
-        } else {
-            return fluidTank != null ? fluidTank.amount : 0;
+        int leftoverDrain=resource.amount;
+        for(FluidTankInfo stack : getTankInfo(null)) {
+            if (stack.fluid.amount > 0 && stack.fluid.getFluid() == resource.getFluid()) {
+                if(leftoverDrain>stack.fluid.amount){
+                    leftoverDrain-=stack.fluid.amount;
+                    if(doDrain){
+                        stack.fluid.amount=0;
+                    }
+                } else {
+                    if(doDrain){
+                        stack.fluid.amount-=leftoverDrain;
+                    }
+                    return null;
+                }
+            }
         }
+        resource.amount=leftoverDrain;
+        return resource;
+
     }
 
     /**checks if the fluid can be put into the tank, and if doFill is true, will actually attempt to add the fluid to the tank.
      * @return the amount of fluid that was or could be put into the tank.*/
     @Override
     public int fill(@Nullable ForgeDirection from, FluidStack resource, boolean doFill){
-        //if the tank has no capacity, or the filter prevents this fluid, or the fluid in the tank already isn't the same.
-        if (resource==null || !canFill(null, resource.getFluid())){
-            return 0;
-        }
-        int amountToFill;
-        //if the tank is null, figure out how much fluid to add based on tank capacity.
-        if (fluidTank == null){
-            amountToFill = getTankCapacity() < resource.amount?getTankCapacity():resource.amount;
-            if (doFill) {
-                fluidTank = new FluidStack(resource.getFluid(), amountToFill);
-                updateWatchers=true;
+
+        int leftoverDrain=resource.amount;
+        int check=0;
+        for(FluidTankInfo stack : getTankInfo(null)) {
+            if(getTankFilters()==null || getTankFilters()[check]==null || (getTankFilters()[check].length()<2 && !getTankFilters()[check].contains(resource.getFluid().getName()))){
+                continue;
+            } else {
+                check++;
             }
-            //if the tank isn't null, we also have to check the amount already in the tank
-        } else {
-            amountToFill = getTankCapacity() -getTankAmount() < resource.amount?getTankCapacity()-getTankAmount():resource.amount;
-            if (doFill){
-                fluidTank.amount += amountToFill;
-                updateWatchers=true;
+            if (stack.fluid.amount > 0 && (resource.getFluid() == null || stack.fluid.getFluid() == resource.getFluid())) {
+                if(leftoverDrain>stack.capacity){
+                    leftoverDrain-=stack.capacity-stack.fluid.amount;
+                    if(doFill){
+                        stack.fluid.amount=stack.capacity;
+                    }
+                } else {
+                    if(doFill){
+                        stack.fluid.amount+=leftoverDrain;
+                    }
+                    return leftoverDrain;
+                }
             }
+            //todo: else if a tank has 0 in it, fill that and set the fluid.
         }
-        return amountToFill;
+        return leftoverDrain;
     }
     /**returns the list of fluid tanks and their capacity.*/
     @Override
     public FluidTankInfo[] getTankInfo(ForgeDirection from){
-        return new FluidTankInfo[]{new FluidTankInfo(fluidTank!=null?fluidTank:new FluidStack(FluidRegistry.WATER,0), getTankCapacity())};
+        if (fluidTank==null) {
+            //initialize tanks
+            FluidTankInfo[] tanks = new FluidTankInfo[getTankCapacity().length];
+            for (int i = 0; i < getTankCapacity().length - 1; i++) {
+                tanks[i] = new FluidTankInfo(new FluidStack(FluidRegistry.WATER, 0), getTankCapacity()[i]);
+            }
+            fluidTank = tanks;
+        }
+        //if its server, remake when null, otherwise remake if changed, this is called every frame when a GUI is up and/or if the model needs to render it so cache VERY important.
+        if(worldObj!=null && worldObj.isRemote && fluidCache.equals("") || !fluidCache.equals(dataWatcher.getWatchableObjectString(20))){
+
+            //actually put in the data
+            fluidCache = dataWatcher.getWatchableObjectString(20);
+            if (fluidCache.length()>3) {
+                String[] fluids = fluidCache.split(";");
+                for (int i = 0; i < getTankCapacity().length-1; i++) {
+                    String[] data = fluids[i].split(",");
+                    fluidTank[i] = new FluidTankInfo(new FluidStack(FluidRegistry.getFluid(data[1]), Integer.parseInt(data[0])), getTankCapacity()[i]);
+                }
+            }
+        }
+
+        return fluidTank;
     }
 
     /*

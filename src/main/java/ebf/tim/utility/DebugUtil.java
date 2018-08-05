@@ -44,6 +44,11 @@ public class DebugUtil {
 		}
 	}
 
+
+	public static void printStackTrace(){
+		DebugUtil.println(Thread.currentThread().getStackTrace());
+	}
+
 	/**
 	 * Generic logging method, meant for using an actual minecraft logger;
 	 * @param obj the object to be logged or string

@@ -30,6 +30,8 @@ public class ItemStackSlot extends Slot {
 
     public ItemStackSlot(IInventory host, int slot, int x, int y){
         super(host, slot, 0,0);
+        setSlot(slot);
+        slotID=slot;
         xDisplayPosition=x;
         yDisplayPosition=y;
     }
@@ -209,6 +211,7 @@ public class ItemStackSlot extends Slot {
      */
     @Override
     public int getSlotIndex() { return slotNumber; }
+
 
     public int getSlotID(){return slotID;}
 }

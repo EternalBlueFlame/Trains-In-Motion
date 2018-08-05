@@ -106,7 +106,7 @@ public abstract class TrainBase extends EntityTrainCore{
      * Usually value is 10,000 *the cubic meter capacity, so 242 gallons, is 0.9161 cubic meters, which is 9161 tank capacity
      * NOTE if this is used for a train, minimum value should be 1100, which is just a little over a single bucket to allow prevention of overheating.
      */
-    public abstract int getTankCapacity();
+    public abstract int[] getTankCapacity();
 
     /**
      * defines the capacity of the RF storage, intended for electric rollingstock that store power for the train.
