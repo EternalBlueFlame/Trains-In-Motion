@@ -26,12 +26,14 @@ public class ItemStackSlot extends Slot {
 
     public ItemStackSlot(IInventory host, int slot){
         super(host, slot, 0,0);
+        slotNumber=slot;
+        slotID=slot;
     }
 
     public ItemStackSlot(IInventory host, int slot, int x, int y){
         super(host, slot, 0,0);
-        setSlot(slot);
         slotID=slot;
+        slotNumber=slot;
         xDisplayPosition=x;
         yDisplayPosition=y;
     }

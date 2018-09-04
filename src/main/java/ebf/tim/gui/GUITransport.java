@@ -4,28 +4,33 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.networking.PacketInteract;
-import ebf.tim.utility.ItemStackSlot;
+import ebf.tim.utility.*;
 import fexcraft.tmt.slim.Tessellator;
 import ebf.tim.registry.URIRegistry;
-import ebf.tim.utility.ClientProxy;
-import ebf.tim.utility.TileEntitySlotManager;
-import ebf.tim.utility.TransportSlotManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidRegistry;
 import org.lwjgl.input.Keyboard;
@@ -67,6 +72,8 @@ public class GUITransport extends GuiContainer {
     private int yCenter=0;
 
     public static final DecimalFormat decimal = new DecimalFormat("#.##");
+    /**cache a string for more efficient use rather than concurrent adding*/
+    private StringBuilder stringCache = new StringBuilder();
 
     /**
      * <h2>GUI initialization</h2>
@@ -97,11 +104,7 @@ public class GUITransport extends GuiContainer {
         }
         if (transport instanceof EntityTrainCore){
             //draw train fluid tanks and firebox or whatever
-            //renderTrainInventory(mc);
-        } else if (transport.getTankInfo(ForgeDirection.UNKNOWN).length>0) {
-            //more or less same as the train but the tank gets a bigger sideways graphic because there's only one and no other complex slots
-            //todo could make it work like the freight inventory, tiling vertically, so it can have more than one tank. and maybe even make a second column if it gets nuts.
-            renderTankerInventory(mc);
+            renderTrainInventory(mc);
         }
 
         //render custom slots. this can cover everything from the fuel slots to crafting slots.
@@ -110,6 +113,10 @@ public class GUITransport extends GuiContainer {
             if (s.getSlotID()>=400){
                 drawTexturedRect(s.xDisplayPosition+guiLeft-2, s.yDisplayPosition+guiTop-2, 54, 51, 20, 20);
             }
+        }
+
+        if (transport.getTankCapacity().length>0) {
+            renderTankerInventory(mc, mouseX, mouseY);
         }
 
         //todo:there needs to be some way for custom GUI's from the train's class without breaking it's ability to be defined on server too.
@@ -137,16 +144,8 @@ public class GUITransport extends GuiContainer {
 
         //draw the text that goes over everything
 
-        //draw the text for trains
-        if (transport instanceof EntityTrainCore) {
-            drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
-            drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 110, 72, 16777215);
-            //draw the text for transports with large inventories
-        } else {
-            drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30 + yCenter, 16777215);
-            drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), 110, 70, 16777215);
-            //draw the text for everything but the passenger car
-        }
+        drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
+        drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), guiLeft+120, guiTop+70, 16777215);
 
         //draw the hover text for the buttons.
         for (Object o : buttonList){
@@ -154,47 +153,12 @@ public class GUITransport extends GuiContainer {
                 drawHoveringText(((GUIButton)o).getDisplayString(transport), mouseX, mouseY, mc.fontRenderer);
             }
         }
-
-
-        //todo toss all the following stuff
-        /*
-        if (transport.getType().isTrain()) {
-            secondTankFluid = transport.getDataWatcher().getWatchableObjectInt(14);
-
-            if ((mouseX >= guiLeft + 210 && mouseX <= guiLeft + 226 && mouseY >= guiTop - 14 && mouseY <= guiTop + 50)) {
-                drawHoveringText(Arrays.asList(tankType(true), transport.getTankAmount() * 0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity() * 0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
-            }
-            //draw the steam tank hover text
-            if ((transport.getType() == TrainsInMotion.transportTypes.STEAM || transport.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM)) {
-                GL11.glPushMatrix();
-                drawTextOutlined(fontRendererObj, decimal.format(transport.getDataWatcher().getWatchableObjectInt(15)*0.01f) + "C°", guiLeft +205, guiTop +72, 16777215);
-                GL11.glPopMatrix();
-                if ((mouseY >= guiTop - 14 && mouseY <= guiTop + 20) &&
-                        ((mouseX >= guiLeft + 178 && mouseX <= guiLeft + 196) || (mouseX >= guiLeft + 240 && mouseX <= guiLeft + 258))) {
-                    drawHoveringText(Arrays.asList(tankType(false), secondTankFluid * 0.001f + StatCollector.translateToLocal("gui.of") + transport.getTankCapacity() * 0.001f, StatCollector.translateToLocal("gui.buckets")), mouseX, mouseY, fontRendererObj);
-                }
-            }
-        } else if (transport.getType().isTanker()){
-            //drawTexturedRect(guiLeft+28, guiTop, 0, 0, 100, 64, 16, 16);
-            if(mouseY> guiTop && mouseY< guiTop +64 && mouseX> guiLeft +28 &&mouseX < guiLeft +128){
-
-                drawHoveringText(Arrays.asList(
-                        (transport.getTankAmount()==0?
-                                "0 " + StatCollector.translateToLocal("gui.buckets"):
-                                ((transport.getTankAmount() * 0.001f) + " " + StatCollector.translateToLocal(FluidRegistry.getFluid(transport.getDataWatcher().getWatchableObjectInt(14)).getUnlocalizedName()) + " " + StatCollector.translateToLocal("gui.buckets"))
-                        ),
-                        StatCollector.translateToLocal("gui.of") + (transport.getTankCapacity() * 0.001f) + StatCollector.translateToLocal("gui.buckets")
-                ),mouseX, mouseY, fontRendererObj);
-            }
-        }*/
-
-
     }
 
 
     /**
      * <h2>GUI initialization</h2>
-     * the super defines the screen size and scale. beyond that we just initialize th buttons and their positions
+     * the super defines the screen size and scdrawCreativeTabHoveringText("0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX, mouseY);ale. beyond that we just initialize th buttons and their positions
      */
     @Override
     public void initGui() {
@@ -265,10 +229,6 @@ public class GUITransport extends GuiContainer {
      *           todo: rework this just to render the train's fluid tanks and firebox
      */
     private void renderTrainInventory(Minecraft mc){
-        //main background TODO disabled until we actually have an image for it.
-        //draw the background
-        //drawTexturedRect((width - xSize) / 2, (height - ySize) / 2, 0, 0, xSize, ySize);
-
         //bind the inventory image which we use the slot images and inventory image from.
         mc.getTextureManager().bindTexture(vanillaInventory);
         //icon for furnace fuel
@@ -280,43 +240,9 @@ public class GUITransport extends GuiContainer {
             drawTexturedRect(guiLeft + 113, guiTop + 16 - i1, 176, 14 - i1, 16, i1);
         }
 
-        //slot for fuel
-        drawTexturedRect(guiLeft+112, guiTop + 30, 54, 51, 20, 20);
-        //slot for water
-        drawTexturedRect(guiLeft+148, guiTop + 30, 54, 51, 20, 20);
+        drawTextOutlined(fontRendererObj, "heat: " + transport.getDataWatcher().getWatchableObjectInt(13), 10, 70, 16777215);
+        drawTextOutlined(fontRendererObj, "burn fuel: " + ((EntityTrainCore)transport).fuelHandler.heatC, 10, 80, 16777215);
 
-        //draw the player inventory and toolbar background.
-        drawTexturedRect(guiLeft+105, guiTop+ 74, 0, 74, 176, 100);
-        drawTexturedRect(guiLeft+105, guiTop+ 68, 0, 0, 176, 6);
-
-        mc.getTextureManager().bindTexture(vanillaChest);
-        drawTexturedRect(guiLeft-105, guiTop-37+yCenter, 0, 0, 176, 17);//top
-        for(int i = 0; i<transport.getInventoryRows(); i++){
-            drawTexturedRect(guiLeft-105, i*18+ (guiTop-20)+yCenter, 0, 17, 176, 18);
-        }
-        drawTexturedRect(guiLeft-105,(transport.getInventoryRows())*18+ (guiTop-20)+yCenter, 0, 215, 176, 8);//bottom
-
-
-
-        //draw the tanks
-        Tessellator.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
-        //liquid fuel tank
-        drawTexturedRect(guiLeft + 210, guiTop - 14, 0, 0, 18, 64, 16, 16);
-        if (transport.getTankInfo(null)[0].fluid.amount>0) {
-            //draw the water tank
-            int liquid = Math.abs((transport.getTankInfo(null)[0].fluid.amount * 64) / transport.getTankCapacity()[0]);
-            drawTexturedRect(guiLeft+ 210, guiTop + 50 - liquid, 16,0, 18, liquid, 16, 16);
-        }
-        //steam tank
-        if (transport.getType() == TrainsInMotion.transportTypes.STEAM || transport.getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM) {
-            drawTexturedRect(guiLeft + 178, guiTop-14, 0, 0, 18, 30, 16, 16);
-            drawTexturedRect(guiLeft + 240, guiTop-14, 0, 0, 18, 30, 16, 16);
-            if (transport.getTankInfo(null).length>1) {
-                int liquid3 = Math.abs((transport.getTankInfo(null)[1].fluid.amount * 30) / transport.getTankCapacity()[1]);
-                drawTexturedRect(guiLeft+178, guiTop +16 - liquid3, 32,0, 18, liquid3, 16, 16);
-                drawTexturedRect(guiLeft+240, guiTop +16 - liquid3, 32,0, 18, liquid3, 16, 16);
-            }
-        }
     }
 
 
@@ -360,14 +286,14 @@ public class GUITransport extends GuiContainer {
     private void renderFreightInventory(Minecraft mc){
         mc.getTextureManager().bindTexture(vanillaChest);
         //draw the player inventory and toolbar background.
-            drawTexturedRect(guiLeft-105, guiTop-37+yCenter, 0, 0, 176, 17);//top
-            for(int i = 0; i<transport.getInventoryRows(); i++){
-                drawTexturedRect(guiLeft-105, i*18+ (guiTop-20)+yCenter, 0, 17, 176, 18);
-            }
-            drawTexturedRect(guiLeft-105,(transport.getInventoryRows())*18+ (guiTop-20)+yCenter, 0, 215, 176, 8);//bottom
+        drawTexturedRect(guiLeft-105, guiTop-37+yCenter, 0, 0, 176, 17);//top
+        for(int i = 0; i<transport.getInventoryRows(); i++){
+            drawTexturedRect(guiLeft-105, i*18+ (guiTop-20)+yCenter, 0, 17, 176, 18);
+        }
+        drawTexturedRect(guiLeft-105,(transport.getInventoryRows())*18+ (guiTop-20)+yCenter, 0, 215, 176, 8);//bottom
 
-            drawTexturedRect(guiLeft+105, guiTop+64, 0, 0, 176,  16);//top
-            drawTexturedRect(guiLeft+105,   guiTop+70, 0, 126, 176, 96);//actual inventory
+        drawTexturedRect(guiLeft+105, guiTop+64, 0, 0, 176,  16);//top
+        drawTexturedRect(guiLeft+105,   guiTop+70, 0, 126, 176, 96);//actual inventory
     }
 
 
@@ -376,26 +302,103 @@ public class GUITransport extends GuiContainer {
      * basically the same as
      * todo: have this render the fluids in a column similar to inventory rows.
      */
-    private void renderTankerInventory(Minecraft mc){
-        //draw the player inventory and toolbar background.
-        mc.getTextureManager().bindTexture(vanillaChest);
-        drawTexturedRect(guiLeft, guiTop+ 79, 0, 128, 176, 94);
-        drawTexturedRect(guiLeft, guiTop+ 76, 0, 0, 176, 8);
+    private void renderTankerInventory(Minecraft mc, int mouseX, int mouseY){
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        for(int i=0; i<transport.getTankCapacity().length;i++) {
+            //System.out.println(transport.getTankInfo(null).length + ":" + transport.getTankCapacity().length +":" +i);
+            //draw the player inventory and toolbar background.
+            Tessellator.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
+            drawTexturedRect(guiLeft+186, guiTop+40+(-20*i), 16, 0, 90, 18, 16, 16);
 
-        Tessellator.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
-        drawTexturedRect(guiLeft+28, guiTop, 0, 0, 100, 64, 16, 16);
-        if (transport.getTankInfo(null)[0].fluid.amount> 0) {
-            //draw the water tank
-            int liquid = Math.abs((transport.getTankInfo(null)[0].fluid.amount * 64) / transport.getTankCapacity()[0]);
-            drawTexturedRect(guiLeft+ 28, guiTop + 64 - liquid, 16,0, 100, liquid, 16, 16);
+            if(transport.getTankInfo(null)[i]!=null && transport.getTankInfo(null)[i].fluid.amount> 0) {
+                float liquid = transport.getTankInfo(null)[i].fluid.amount;
+                if(liquid!=0){
+                    liquid/=transport.getTankInfo(null)[i].capacity;
+                }
+                GL11.glPushMatrix();
+
+                GL11.glColor4f(1,1,1,0.5f);
+                GL11.glTranslatef(guiLeft + 186, guiTop+40+(-20*i),0);
+                GL11.glScalef(0.125f+liquid,1.125f,1);
+                //render fluid overlay
+                if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
+                        new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
+                        true, zLevel, 0, 0)) {
+                    RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
+                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
+                }
+                GL11.glTranslatef(16,0,0);
+                if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
+                        new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
+                        true, zLevel, 0, 0)) {
+                    RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
+                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
+                }
+                GL11.glTranslatef(16,0,0);
+                if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
+                        new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
+                        true, zLevel, 0, 0)) {
+                    RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
+                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
+                }
+                GL11.glTranslatef(16,0,0);
+                if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
+                        new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
+                        true, zLevel, 0, 0)) {
+                    RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
+                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
+                }
+                GL11.glTranslatef(16,0,0);
+                if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
+                        new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
+                        true, zLevel, 0, 0)) {
+                    RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
+                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
+                }
+
+                GL11.glDisable(GL11.GL_LIGHTING);
+                GL11.glColor4f(1,1,1,1);
+
+                GL11.glPopMatrix();
+            }
+
+
+
         }
 
-        mc.getTextureManager().bindTexture(vanillaInventory);
-        drawTexturedRect(guiLeft+70, guiTop - 30, 54, 51, 20,20);
-        drawTexturedRect(guiLeft+150, guiTop + 44, 54, 51, 20,20);
+
+        for(int i=0; i<transport.getTankInfo(null).length;i++) {
+            if(isMouseInRect(mouseX, mouseY,guiLeft+186, guiTop+40+(-20*i), 90, 18)) {
+                if (transport.getTankInfo(null)[i].fluid.amount>0) {
+                    drawCreativeTabHoveringText(transport.getTankInfo(null)[i].fluid.getLocalizedName() + " " +
+                                    transport.getTankInfo(null)[i].fluid.amount+"mb/"+ transport.getTankInfo(null)[i].capacity+"mb", mouseX, mouseY);
+
+                } else {
+                    if(transport.getTankFilters(i).length>1){
+                        drawCreativeTabHoveringText(", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX, mouseY);
+
+                    } else if (transport.getTankFilters(i).length==1) {
+                        drawCreativeTabHoveringText(transport.getTankFilters(i)[0] + ", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX, mouseY);
+                    } else{
+                        drawCreativeTabHoveringText("0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX, mouseY);
+                    }
+                }
+                GL11.glDisable(GL11.GL_LIGHTING);
+                GL11.glColor4f(1,1,1,1);
+            }
+        }
+
+        GL11.glDisable(GL11.GL_BLEND);
+    }
+
+
+    public static boolean isMouseInRect(int mouseX, int mouseY, int x, int y, int width, int height){
+        return (mouseY >= y && mouseY <= y+height) && (mouseX >= x && mouseX <= x+width);
     }
 
     //todo: really? this is the best method on hand for outlined font?
+    @Deprecated
     public static void drawTextOutlined(FontRenderer font, String string, int x, int y, int color){
         //bottom left
         font.drawString(string, x-1, y+1, 0);

@@ -35,17 +35,17 @@ public class EntityTrainCore extends GenericRailTransport {
 
 
     /*
-    * <h2> Base train Constructor</h2>
-    */
+     * <h2> Base train Constructor</h2>
+     */
 
     /** default constructor for all trains, server only.
-    * Usually this is the one you would reference unless you need to do something only on client.
-    * @param owner the owner profile, used to define owner of the entity,
-    * @param world the world to spawn the entity in, used in super's super.
-    * @param xPos the x position to spawn entity at, used in super's super.
-    * @param yPos the y position to spawn entity at, used in super's super.
-    * @param zPos the z position to spawn entity at, used in super's super.
-    */
+     * Usually this is the one you would reference unless you need to do something only on client.
+     * @param owner the owner profile, used to define owner of the entity,
+     * @param world the world to spawn the entity in, used in super's super.
+     * @param xPos the x position to spawn entity at, used in super's super.
+     * @param yPos the y position to spawn entity at, used in super's super.
+     * @param zPos the z position to spawn entity at, used in super's super.
+     */
     public EntityTrainCore(UUID owner, World world, double xPos, double yPos, double zPos){
         super(owner, world, xPos, yPos, zPos);
     }
@@ -67,7 +67,7 @@ public class EntityTrainCore extends GenericRailTransport {
     /**reads the data sent from client on entity spawn*/
     @Override
     public void readSpawnData(ByteBuf additionalData) {
-    super.readSpawnData(additionalData);
+        super.readSpawnData(additionalData);
         accelerator = additionalData.readInt();
         fuelHandler.heatC = additionalData.readFloat();
     }
@@ -84,7 +84,6 @@ public class EntityTrainCore extends GenericRailTransport {
         super.readEntityFromNBT(tag);
         accelerator = tag.getInteger(NBTKeys.accelerator);
         this.fuelHandler.heatC = tag.getFloat(NBTKeys.transportFuel);
-        this.fuelHandler.steamTank = tag.getInteger(NBTKeys.transportSteam);
         vectorCache[7][0] = tag.getDouble(NBTKeys.trainSpeed);
 
 
@@ -95,7 +94,6 @@ public class EntityTrainCore extends GenericRailTransport {
         super.writeEntityToNBT(tag);
         tag.setInteger(NBTKeys.accelerator, accelerator);
         tag.setFloat(NBTKeys.transportFuel, fuelHandler.heatC);
-        tag.setInteger(NBTKeys.transportSteam, fuelHandler.steamTank);
         tag.setDouble(NBTKeys.trainSpeed, vectorCache[7][0]);
 
     }
@@ -104,7 +102,6 @@ public class EntityTrainCore extends GenericRailTransport {
     public void entityInit(){
         super.entityInit();
         this.dataWatcher.addObject(18, 0);//accelerator
-        this.dataWatcher.addObject(14, 0);//accelerator
         this.updateWatchers = true;
     }
 
@@ -133,7 +130,7 @@ public class EntityTrainCore extends GenericRailTransport {
         if (transportMetricHorsePower()<1){
             return ((transportTractiveEffort() *
                     (Math.abs(motionX)+Math.abs(motionZ))<1?1f:(float)(Math.abs(motionX)+Math.abs(motionZ)))
-                            *0.0318309886f) * (accelerator*0.166666667f);
+                    *0.0318309886f) * (accelerator*0.166666667f);
         } else {
             return transportMetricHorsePower() * (accelerator*0.166666667f);
         }
@@ -245,7 +242,7 @@ public class EntityTrainCore extends GenericRailTransport {
             //twice a second, re-calculate the speed.
             if(ticksExisted %10==0){
                 //stop calculation if it can't move
-                if (((getType() == TrainsInMotion.transportTypes.NUCLEAR_STEAM || getType() == TrainsInMotion.transportTypes.STEAM) && fuelHandler.steamTank< getTankCapacity()[1]*0.25)//check for steam fuel
+                if ((getTankInfo(null)[1]!=null && getTankInfo(null)[1].fluid.amount< getTankCapacity()[1]*0.25)//check for steam fuel
                         || (getType() == TrainsInMotion.transportTypes.ELECTRIC && getTankInfo(null)[1].fluid.amount<1)//check for electric fuel
                 ) {
                     vectorCache[7][0] = 0;

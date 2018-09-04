@@ -205,7 +205,9 @@ public class Tessellator{
 				id=object.getGlTextureId();
 				tmtMap.put(textureURI, id);
 			}
-			GL11.glBindTexture(GL_TEXTURE_2D, id);
+			if(GL11.glGetInteger(GL_TEXTURE_2D) !=id) {
+				GL11.glBindTexture(GL_TEXTURE_2D, id);
+			}
 		}
 	}
 

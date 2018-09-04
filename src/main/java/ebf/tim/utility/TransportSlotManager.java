@@ -27,12 +27,9 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
 
     //todo: add support for some way to define slot filters
     public void addSlots(ItemStackSlot slot){
-        if (slot.inventory instanceof InventoryPlayer) {
-            slot.slotNumber = inventory.size();
-        }
         this.inventory.add(slot);
         this.inventorySlots.add(slot);
-        this.inventoryItemStacks.add(null);
+        this.inventoryItemStacks.add(slot.getStack());
     }
 
     /**
@@ -46,26 +43,30 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         if (railTransport == null) {
             railTransport = entityTrain;
         }
-
+        int s=0;
+        for(ItemStackSlot slot : entityTrain.inventory){
+            s++;
+            addSlots(slot);
+        }
+        s=0;
         //player toolbar
         for (int iT = 0; iT < 9; iT++) {
-            addSlots(new ItemStackSlot(iinventory, -1).setCoords( 113 + (iT * 18), 142));
+            addSlots(new ItemStackSlot(iinventory, s).setCoords( 113 + (iT * 18), 142));
+            s++;
         }
         //player inventory
         for (int ic = 0; ic < 3; ic++) {
             for (int ir = 0; ir < 9; ir++) {
-                addSlots(new ItemStackSlot(iinventory, -1).setCoords(113 + (ir * 18), 84 + (ic * 18)));
+                addSlots(new ItemStackSlot(iinventory, s).setCoords(113 + (ir * 18), 84 + (ic * 18)));
+                s++;
             }
         }
 
-        for(ItemStackSlot s : entityTrain.inventory){
-            addSlots(s);
-        }
     }
 
     @Override
     public Slot getSlot(int p_75139_1_) {
-        return p_75139_1_>inventory.size()?null:this.inventory.get(p_75139_1_);
+        return this.inventory.get(p_75139_1_);
     }
 
 
@@ -110,6 +111,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     /*a heavily modified replica of the 1.12 version*/
     @Override
     public ItemStack slotClick(int slotId, int dragType, int clickTypeIn, EntityPlayer player) {
+        DebugUtil.println(slotId);
 
         //DebugUtil.println("slot " + slotId + " clicked with type "+ dragType +":" +clickTypeIn);
 

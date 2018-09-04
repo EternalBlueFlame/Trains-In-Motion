@@ -29,8 +29,6 @@ public class FuelHandler{
 	private float burnTime =0;
 	private float burnTimeMax =0;
 	/**the steam tank, used for steam and nuclear steam trains*/
-	@Deprecated //use another fluid tank instead
-	public int steamTank=0;
 	public float heatC =21;
 
 	public float maxHeat(GenericRailTransport transport){
@@ -77,14 +75,17 @@ public class FuelHandler{
 	 */
 	public void manageSteam(EntityTrainCore train){
 		//manage solid burnHeat
+		ItemStackSlot slotId=train.getSlotIndexByID(400);
+		//DebugUtil.println(slotId, (slotId==null?"null":slotId.getDisplayName()),
+		//		train.getSlotIndexByID(401), (train.getStackInSlot(train.getSlotIndexByID(401))==null?"null":train.getStackInSlot(train.getSlotIndexByID(401)).getDisplayName()));
 		if (burnTime <1){
 			burnTime=0;
-			if (train.getStackInSlot(0) != null) {
-				burnHeat = (int) (TileEntityFurnace.getItemBurnTime(train.getStackInSlot(0)) * train.getEfficiency());
+			if (slotId != null && TileEntityFurnace.getItemBurnTime(slotId.getStack())>0) {
+				burnHeat = (int) (TileEntityFurnace.getItemBurnTime(slotId.getStack()) * train.getEfficiency());
 				burnTime = MathHelper.ceiling_double_int(burnHeat *0.1);
 				burnTimeMax = burnTime;
 				if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
-					train.decrStackSize(0, 1);
+					slotId.decrStackSize(1);
 				}
 			} else {
 				burnHeat = 0;
@@ -93,12 +94,19 @@ public class FuelHandler{
 		} else {
 			burnTime--;
 		}
+
+		slotId=train.getSlotIndexByID(401);
 		//if there's a fluid item in the slot and the train can consume the entire thing
-		if (train.getStackInSlot(1) != null && FluidContainerRegistry.getFluidForFilledItem(train.getStackInSlot(1)) !=null &&
-				train.fill(null, isUseableFluid(train.getStackInSlot(1), train), false) >= FluidContainerRegistry.getFluidForFilledItem(train.getStackInSlot(1)).amount) {
-			train.fill(null, isUseableFluid(train.getStackInSlot(1), train), true);
+
+		if (slotId != null && FluidContainerRegistry.getFluidForFilledItem(slotId.getStack()) !=null) {
+			DebugUtil.println(train.fill(null, isUseableFluid(slotId.getStack(), train), false), FluidContainerRegistry.getFluidForFilledItem(slotId.getStack()).amount);
+		}
+		if (slotId != null && FluidContainerRegistry.getFluidForFilledItem(slotId.getStack()) !=null &&
+				train.fill(null, isUseableFluid(slotId.getStack(), train), false) == 0) {
+
+			train.fill(null, isUseableFluid(slotId.getStack(), train), true);
 			if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
-				train.decrStackSize(1, 1);
+				slotId.decrStackSize(1);
 				train.addItem(new ItemStack(Items.bucket));
 			}
 		}
@@ -123,10 +131,12 @@ public class FuelHandler{
 			);
 			//drain fluid
 			if (train.drain(null, steam!=0?steam/3:0,true)!= null) {
-				steamTank +=steam*0.9f;//compensate for water impurities
-				if(steamTank>train.getTankCapacity()[1]){//in TiM it needs to be  > getTankCapacity-getTankAmount.
-					steamTank= train.getTankCapacity()[1];
-				}
+				train.fill(null, new FluidStack(FluidRegistry.LAVA, (int)(steam*0.9f)), true);
+				DebugUtil.println("filling lava " + (int)(steam*0.9f));
+				//train.getTankInfo(null)[1].fluid.amount +=steam*0.9f;//compensate for water impurities
+				//if(train.getTankInfo(null)[1].fluid !=null && train.getTankInfo(null)[1].fluid.amount>train.getTankCapacity()[1]){
+				//todo: tell train to render more steam particles
+				//}
 				//if no fluid left and not creative mode, explode.
 			} else if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)){
 				train.worldObj.createExplosion(train, train.posX, train.posY, train.posZ, 5f, false);
@@ -138,14 +148,13 @@ public class FuelHandler{
 			train.setBoolean(GenericRailTransport.boolValues.RUNNING, false);
 		}
 
-		if (steamTank >0) {
+		if (train.getTankInfo(null)[1] !=null && train.getTankInfo(null)[1].fluid.amount >0) {
 			//steam is expelled through the pistons to push them back and forth, but even when the accelerator is off, a degree of steam is still escaping.
-			steamTank -= (5 * train.getEfficiency()) * ((train.accelerator) * train.getEfficiency()) * 0.55;
+			train.getTankInfo(null)[1].fluid.amount -= (5 * train.getEfficiency()) * ((train.accelerator) * train.getEfficiency()) * 0.55;
 		}
 
 		//update the datawatchers so client can display the info on the GUI.
 		train.getDataWatcher().updateObject(13, burnTime>0?(int)((burnTime/ burnTimeMax)*18):0);
-		train.getDataWatcher().updateObject(14, steamTank);
 		train.getDataWatcher().updateObject(15, MathHelper.floor_float(heatC * 100f));
 	}
 
@@ -196,7 +205,7 @@ public class FuelHandler{
 			}
 			//drain from top slot
 			else if (transport.getStackInSlot(1) == null && isUseableFluid(transport.getStackInSlot(0), transport) == null &&
-				transport.drain(null, 1000, false) != null && transport.drain(null, 1000, false).amount >= 1000){
+					transport.drain(null, 1000, false) != null && transport.drain(null, 1000, false).amount >= 1000){
 				transport.setInventorySlotContents(1, FluidContainerRegistry.fillFluidContainer(transport.drain(null, 1000, false), transport.getStackInSlot(0)));
 				if (transport.getStackInSlot(0).stackSize == 1) {
 					transport.setInventorySlotContents(0, null);

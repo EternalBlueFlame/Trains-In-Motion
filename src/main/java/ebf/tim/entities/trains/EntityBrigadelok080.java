@@ -240,8 +240,15 @@ public class EntityBrigadelok080 extends TrainBase {
      * for instance if you have a wooden tanker car, you can deny fluids that are fire sources (like lava).
      */
     @Override
-    public boolean canFill(@Nullable ForgeDirection from, Fluid resource){
-        return resource== FluidRegistry.WATER && super.canFill(from, resource);
+    public String[] getTankFilters(int tank){
+        switch (tank){
+            case 0:{
+                return new String[]{FluidRegistry.WATER.getName()};
+            }
+            default:{
+                return new String[]{FluidRegistry.LAVA.getName()};
+            }
+        }
     }
 
     /**

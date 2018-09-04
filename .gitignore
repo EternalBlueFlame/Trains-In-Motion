@@ -34,3 +34,4 @@ run
 lib
 /.nb-gradle/
 *.tmp
+src/main/java/ebf/tim/utility/DoNotInclude.java
