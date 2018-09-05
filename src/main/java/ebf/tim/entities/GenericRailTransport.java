@@ -1505,11 +1505,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 for (int i = 0; i < getTankCapacity().length; i++) {
                     String[] data = fluids[i].split(",");
                     fluidTank[i] = new FluidTankInfo(new FluidStack(FluidRegistry.getFluid(data[1]), Integer.parseInt(data[0])), getTankCapacity()[i]);
-                    if (fluidTank[i] == null){
-                        DebugUtil.println("????", data[1], data[0], getTankCapacity()[i]);
-                    } else {
-                        DebugUtil.println("setting cache " + i, fluidTank[i].fluid.amount,fluidTank[i].fluid.fluid!=null);
-                    }
                 }
             }
         }

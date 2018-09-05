@@ -50,7 +50,7 @@ import static ebf.tim.TrainsInMotion.transportTypes.PASSENGER;
  * used to draw the GUI for trains and rollingstock (the menu with the inventory).
  * @author Eternal Blue Flame
  */
-public class GUITransport extends GuiContainer {
+public class GUITransport extends GUIContainerNoNEI {
 
     /**a reference to the resource location of the vanilla furnace texture, this also gets overridden by texturepacks*/
     private static final ResourceLocation vanillaInventory =
@@ -396,6 +396,11 @@ public class GUITransport extends GuiContainer {
     public static boolean isMouseInRect(int mouseX, int mouseY, int x, int y, int width, int height){
         return (mouseY >= y && mouseY <= y+height) && (mouseX >= x && mouseX <= x+width);
     }
+
+    protected void mouseMovedOrUp(int p_146286_1_, int p_146286_2_, int p_146286_3_) {
+        super.mouseMovedOrUp(p_146286_1_, p_146286_2_, p_146286_3_);
+    }
+
 
     //todo: really? this is the best method on hand for outlined font?
     @Deprecated

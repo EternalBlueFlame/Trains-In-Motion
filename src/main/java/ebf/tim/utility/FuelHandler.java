@@ -132,7 +132,6 @@ public class FuelHandler{
 			//drain fluid
 			if (train.drain(null, steam!=0?steam/3:0,true)!= null) {
 				train.fill(null, new FluidStack(FluidRegistry.LAVA, (int)(steam*0.9f)), true);
-				DebugUtil.println("filling lava " + (int)(steam*0.9f));
 				//train.getTankInfo(null)[1].fluid.amount +=steam*0.9f;//compensate for water impurities
 				//if(train.getTankInfo(null)[1].fluid !=null && train.getTankInfo(null)[1].fluid.amount>train.getTankCapacity()[1]){
 				//todo: tell train to render more steam particles
