@@ -565,7 +565,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         prevRotationRoll = tag.getFloat(NBTKeys.prevRotationRoll);
 
         fluidTank= new FluidTankInfo[getTankCapacity().length];
-        for(int i=0; i<getTankCapacity().length-1; i++){
+        for(int i=0; i<getTankCapacity().length; i++){
             if(tag.hasKey("tanks." +i)){
                 fluidTank[i]= new FluidTankInfo(FluidStack.loadFluidStackFromNBT(tag.getCompoundTag("tanks." +i)), getTankCapacity()[i]);
             }
@@ -618,7 +618,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         tag.setFloat(NBTKeys.prevRotationRoll, prevRotationRoll);
 
 
-        for(int i=0; i<getTankInfo(null).length-1;i++){
+        for(int i=0; i<getTankInfo(null).length;i++){
             if(getTankInfo(null) !=null) {
                 NBTTagCompound tank = new NBTTagCompound();
                 getTankInfo(null)[i].fluid.writeToNBT(tank);

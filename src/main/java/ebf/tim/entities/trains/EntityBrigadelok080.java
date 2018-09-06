@@ -17,11 +17,14 @@ import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.FuelHandler;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 
 import javax.annotation.Nullable;
@@ -248,6 +251,17 @@ public class EntityBrigadelok080 extends TrainBase {
             default:{
                 return new String[]{FluidRegistry.LAVA.getName()};
             }
+        }
+    }
+
+    //todo: maybe make some util functions or something to simplify this stuff?
+    //seems kinda complicated for something that should be the difficulty of a config file.
+    @Override
+    public boolean isItemValidForSlot(int slot, ItemStack stack){
+        switch (slot){
+            case 400:{return TileEntityFurnace.getItemBurnTime(stack)>0;}
+            case 401:{return FluidContainerRegistry.getFluidForFilledItem(stack)!=null && canFill(null, FluidContainerRegistry.getFluidForFilledItem(stack).getFluid());}
+            default:{return true;}
         }
     }
 

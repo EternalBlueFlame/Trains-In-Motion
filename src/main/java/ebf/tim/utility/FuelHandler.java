@@ -97,10 +97,6 @@ public class FuelHandler{
 
 		slotId=train.getSlotIndexByID(401);
 		//if there's a fluid item in the slot and the train can consume the entire thing
-
-		if (slotId != null && FluidContainerRegistry.getFluidForFilledItem(slotId.getStack()) !=null) {
-			DebugUtil.println(train.fill(null, isUseableFluid(slotId.getStack(), train), false), FluidContainerRegistry.getFluidForFilledItem(slotId.getStack()).amount);
-		}
 		if (slotId != null && FluidContainerRegistry.getFluidForFilledItem(slotId.getStack()) !=null &&
 				train.fill(null, isUseableFluid(slotId.getStack(), train), false) == 0) {
 

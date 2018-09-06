@@ -134,7 +134,7 @@ public class ItemStackSlot extends Slot {
      */
     @Override
     public boolean isItemValid(ItemStack p_75214_1_) {
-        return !(inventory instanceof GenericRailTransport) || inventory.isItemValidForSlot(getSlotID(), p_75214_1_);
+        return inventory.isItemValidForSlot(getSlotID(), p_75214_1_);
     }
 
     /**

@@ -111,9 +111,6 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     /*a heavily modified replica of the 1.12 version*/
     @Override
     public ItemStack slotClick(int slotId, int dragType, int clickTypeIn, EntityPlayer player) {
-        DebugUtil.println(slotId);
-
-        //DebugUtil.println("slot " + slotId + " clicked with type "+ dragType +":" +clickTypeIn);
 
         if (clickTypeIn == 4){
             clickTypeIn = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT) ? 1 ://cover shift click
@@ -153,7 +150,6 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                 break;
             }
             case 1:{/*ClickType.QUICK_MOVE    aka shift click*/
-                //todo: rework this schenario to better fit in with the new slot numbering systems
                 if (slot == null) {
                     return null;
                 }
