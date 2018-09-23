@@ -185,7 +185,7 @@ public class Tessellator{
 	 */
 	public static void bindTexture(ResourceLocation textureURI) {
 		if (textureURI == null){
-			return;
+			textureURI= new ResourceLocation(TrainsInMotion.MODID,"nullTrain");
 		}
 		if(ClientProxy.ForceTextureBinding) {
 			ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);

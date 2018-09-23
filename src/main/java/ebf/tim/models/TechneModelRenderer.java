@@ -31,10 +31,11 @@ public class TechneModelRenderer extends ModelRendererTurbo {
      * this set's the rotation point with the offsets
      */
     @Override
-    public void setRotationPoint(float pointX, float pointY, float pointZ) {
+    public ModelRendererTurbo setRotationPoint(float pointX, float pointY, float pointZ) {
             this.rotationPointX = pointX;
             this.rotationPointY = pointY-15;
             this.rotationPointZ = pointZ;
+            return this;
     }
 
 }

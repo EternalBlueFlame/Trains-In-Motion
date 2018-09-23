@@ -2,6 +2,7 @@ package ebf.tim.entities;
 
 import ebf.tim.TrainsInMotion;
 import ebf.tim.registry.NBTKeys;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.FuelHandler;
 import ebf.tim.utility.RailUtility;
 import io.netty.buffer.ByteBuf;
@@ -28,8 +29,6 @@ public class EntityTrainCore extends GenericRailTransport {
     public FuelHandler fuelHandler = new FuelHandler();
     /**defines the speed percentage the user is attempting to apply.*/
     public int accelerator =0;
-
-    public double excessTorque =0;
 
 
 
@@ -115,25 +114,38 @@ public class EntityTrainCore extends GenericRailTransport {
     }
 
 
-    /**
-     * <h2>Max speed</h2>
-     * @return the value of the max speed in blocks per second(km/h * 0.277778) scaled to the size (1/7.68)
-     * for example if the train speed is 25, the calculation would be ((25*0.277778)* 0.130208333) = 0.90422525
-     * or simplified to 25 * 0.0361690103 = 0.90422525
-     */
-    public float getProcessedMaxSpeed(){
-        return (getMaxSpeed() * 0.0361690103f);
+    //in newtons
+    public float getPower(){
+        if (transportTractiveEffort()<1f){
+            //2650 is a conversion factor for newtons, and 0.72 is a rough estimate for efficiency
+            return 2650f*((0.72f*
+                    (transportMetricHorsePower()*getAcceleratiorPercentage()))/
+                    getVelocity());
+        } else {
+            //standard tractive effort to newtons
+            return 4.4482216f*(transportTractiveEffort()*getAcceleratiorPercentage());
+        }
+    }
+    //gets the max power output to estimate how much the train can support of it's own weight
+    public float getMaxPower(){
+        if (transportTractiveEffort()<1f){
+            //2650 is a conversion factor for newtons, and 0.72 is a rough estimate for efficiency
+            return 2650f*((0.72f*
+                    (transportMetricHorsePower()*0.05f))/
+                    getVelocity());
+        } else {
+            //standard tractive effort to newtons
+            return 4.4482216f*(transportTractiveEffort()*0.05f);
+        }
     }
 
-
-    public float getPower(){
-        if (transportMetricHorsePower()<1){
-            return ((transportTractiveEffort() *
-                    (Math.abs(motionX)+Math.abs(motionZ))<1?1f:(float)(Math.abs(motionX)+Math.abs(motionZ)))
-                    *0.0318309886f) * (accelerator*0.166666667f);
-        } else {
-            return transportMetricHorsePower() * (accelerator*0.166666667f);
-        }
+    //returns the current speed
+    public float getVelocity(){
+        return (Math.abs(motionX)+Math.abs(motionZ))==0?0.01f:(float)(Math.abs(motionX)+Math.abs(motionZ));
+    }
+    //gets the throttle position as a percentage with 1 as max and -1 as max reverse
+    public float getAcceleratiorPercentage(){
+        return (accelerator*0.16666666666f)*0.05f;
     }
 
     /**
@@ -143,9 +155,10 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     public void calculateAcceleration(){
         boolean hasReversed = false;
-        float weight = weightKg() * (getBoolean(boolValues.BRAKE)?4:1) * (frontBogie.isOnSlope?2:1) * (backBogie.isOnSlope?2:1);
-        float hp = getPower();
-        float tractiveWeight=weight;
+        float weight=weightKg() * (getBoolean(boolValues.BRAKE)?2:1);
+        float pullingWeight=weight;
+        float powerNewtons = getPower();
+        float maxPowerNewtons = getMaxPower();
         List<GenericRailTransport> checked = new ArrayList<>();
         checked.add(this);
         GenericRailTransport front = null;
@@ -156,14 +169,16 @@ public class EntityTrainCore extends GenericRailTransport {
             hasReversed = true;
         }
 
+        //todo: this should probably be cached so it only has to check every few ticks, like the fuel update for example.
         while(front != null){
             //calculate the speed modification
             if(!(front instanceof EntityTrainCore) && front.weightKg()!=0){
                 weight+= front.weightKg() * (getBoolean(boolValues.BRAKE)?2:1) * (front.frontBogie.isOnSlope?2:1) * (front.backBogie.isOnSlope?2:1);
             } else if (front instanceof EntityTrainCore) {
-                hp += front.getBoolean(boolValues.RUNNING)?((EntityTrainCore)front).getPower()*0.75f:0;
+                powerNewtons += front.getBoolean(boolValues.RUNNING)?((EntityTrainCore)front).getPower()*0.75f:0;
+                maxPowerNewtons += front.getBoolean(boolValues.RUNNING)?((EntityTrainCore)front).getMaxPower()*0.75f:0;
                 weight+= front.weightKg() * (getBoolean(boolValues.BRAKE)?4:1) * (front.frontBogie.isOnSlope?2:1) * (front.backBogie.isOnSlope?2:1);
-                tractiveWeight+= front.weightKg() * (getBoolean(boolValues.BRAKE)?4:1) * (front.frontBogie.isOnSlope?2:1) * (front.backBogie.isOnSlope?2:1);
+                pullingWeight +=front.weightKg() * (getBoolean(boolValues.BRAKE)?4:1) * (front.frontBogie.isOnSlope?2:1) * (front.backBogie.isOnSlope?2:1);
             }
 
             //add the one we just used to the checked list
@@ -195,14 +210,25 @@ public class EntityTrainCore extends GenericRailTransport {
 
 
 
-        //745.7 converts watts to horsepower, but considering the scale, it should be substantially less
+
         if (accelerator !=0) {
-            //speed is the calculated horse power divided by weight, divided by the percentage of current speed of max.
-            //the maximum value of the above is 1, which is multiplied times the horse power converted to watts, anything over the 1 is wheel slippage.
-            excessTorque = ((hp/weight) * 0.7457)/((Math.abs(motionX) + Math.abs(motionZ))/getMaxSpeed());
-            vectorCache[7][0] += ((hp/weight) * 0.7457);
+            //speed is defined by the power in newtons divided by the weight, divided by the number of ticks in a second.
+            if(powerNewtons!=0) {
+                //745.7 converts to watts, which seems more accurate.
+                vectorCache[7][0] += ((powerNewtons/weight)/745.7);//applied power
+
+
+                vectorCache[7][1]=Math.abs((maxPowerNewtons/pullingWeight)/745.7)-Math.abs(vectorCache[7][0]);//max power produced without drag, minus the current power
+                if(vectorCache[7][1]>0.005){
+                    //todo: add sparks to animator.
+                    vectorCache[7][0] -= ((powerNewtons/weight)/745.7)*0.5f;
+                }
+
+
+            }
+
         } else {
-            excessTorque =0;
+            vectorCache[7][1]=0;
             if (vectorCache[7][0]>0) {
                 vectorCache[7][0] *= (1 - (0.005* (weight * 0.0007457)));
                 if (vectorCache[7][0] <0){
@@ -215,14 +241,14 @@ public class EntityTrainCore extends GenericRailTransport {
                 }
             }
         }
-        if (vectorCache[7][0]>-0.005 && vectorCache[7][0]<0.005){
-            vectorCache[7][0] = 0;
+        if (vectorCache[7][0]>-0.0005 && vectorCache[7][0]<0.0005){
+            //vectorCache[7][0] = 0;
         }
 
-        if (vectorCache[7][0] > getProcessedMaxSpeed()){
-            vectorCache[7][0] = getProcessedMaxSpeed();
-        } else if (vectorCache[7][0] < -getProcessedMaxSpeed()){
-            vectorCache[7][0] = -getProcessedMaxSpeed();
+        if (vectorCache[7][0] > transportTopSpeed()*0.0138889){
+            vectorCache[7][0] = transportTopSpeed()*0.0138889;
+        } else if (vectorCache[7][0] < (-transportTopSpeed()*0.0138889)*0.5){
+            vectorCache[7][0] = (-transportTopSpeed()*0.0138889)*0.5;
         }
 
 
@@ -309,16 +335,10 @@ public class EntityTrainCore extends GenericRailTransport {
      * <h2>Inherited variables</h2>
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
      */
-    /**gets the max speed of the transport in blocks per second*/
-    @Deprecated
-    public float getMaxSpeed(){return 0;}
-    /**gets the acceleration rate of the train*/
-    @Deprecated
-    public float getHorsePower(){return 100f;}
     /**gets the resource location for the horn sound*/
     public ResourceLocation getHorn(){return null;}
     /**gets the resource location for the running/chugging sound*/
-    public ResourceLocation getRunning(){return null;}
+    public ResourceLocation getRunningSound(){return null;}
     /**gets the multiplication of fuel consumption, 1 is normal, 2 would be double, 1.5 would be halfway between the two, etc.*/
     public float getEfficiency(){return 1;}
 

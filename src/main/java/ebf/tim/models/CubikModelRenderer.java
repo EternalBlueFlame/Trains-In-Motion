@@ -54,10 +54,11 @@ public class CubikModelRenderer extends ModelRendererTurbo {
      * @see #addBox(float, float, float, float, float, float)
      */
     @Override
-    public void setRotationPoint(float pointX, float pointY, float pointZ) {
+    public ModelRendererTurbo setRotationPoint(float pointX, float pointY, float pointZ) {
             this.rotationPointX = pointX+ Math.copySign(width,1);
             this.rotationPointY = pointY+Math.copySign(height,1);
             this.rotationPointZ = pointZ+Math.copySign(depth,1);
+            return this;
     }
 
 }

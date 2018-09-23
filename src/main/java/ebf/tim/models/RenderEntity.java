@@ -114,7 +114,7 @@ public class RenderEntity extends Render {
                             density = ParticleFX.parseData(render.boxName);
                             entity.renderData.particles = ParticleFX.newParticleItterator(Integer.parseInt(density[0].trim())*20,
                                     Integer.parseInt(density[1].trim(), 16),
-                                    render.rotationPointX*0.0625f, render.rotationPointY*-0.0625f, render.rotationPointZ*0.0625f,
+                                    (render.rotationPointX*0.0625f), (render.rotationPointY*-0.0625f), (render.rotationPointZ*0.0625f),
                                     entity );
                         }
                     }
@@ -150,15 +150,14 @@ public class RenderEntity extends Render {
          * Be sure animations are enabled in user settings, then check of there is something to animate.
          * if there is, then calculate the vectors and apply the animations
          */
-        if (!Minecraft.getMinecraft().isGamePaused() &&ClientProxy.EnableAnimations && entity.backBogie!=null &&
-                (entity.backBogie.motionX > 0.03 || entity.backBogie.motionX < -0.03 || entity.backBogie.motionZ > 0.03 || entity.backBogie.motionZ < -0.03)) {
+        if (!Minecraft.getMinecraft().isGamePaused() &&ClientProxy.EnableAnimations &&
+                (entity.frontVelocityX > 0.0003 || entity.frontVelocityX < -0.0003 || entity.frontVelocityZ > 0.0003 || entity.frontVelocityZ < -0.0003)) {
             if (entity.renderData.wheelPitch >= 6.2831855f || entity.renderData.wheelPitch <=-6.2831855f) {
                 entity.renderData.wheelPitch -= Math.copySign(6.2831855f, entity.renderData.wheelPitch);
             }
             //define the rotation angle, if it's going fast enough.
-            entity.renderData.wheelPitch += ((Math.sqrt(entity.backBogie.motionX * entity.backBogie.motionX) + Math.sqrt(entity.backBogie.motionZ * entity.backBogie.motionZ))*0.08f);
+            entity.renderData.wheelPitch += (((entity.frontVelocityX * entity.frontVelocityX) + (entity.frontVelocityZ * entity.frontVelocityZ))*0.075f);
 
-            entity.renderData.wheelPitch +=0.003;
             if (entity.renderData.wheelPitch != entity.renderData.lastWheelPitch) {
                 entity.renderData.lastWheelPitch =entity.renderData.wheelPitch;
                 //if it's actually moving, then define the new position

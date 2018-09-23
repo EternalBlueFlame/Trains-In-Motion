@@ -126,12 +126,11 @@ public class FuelHandler{
 							(train.getTankInfo(null)[0].fluid.amount*0.005f) //calculate surface area of water
 			);
 			//drain fluid
-			if (train.drain(null, steam!=0?steam/3:0,true)!= null) {
-				train.fill(null, new FluidStack(FluidRegistry.LAVA, (int)(steam*0.9f)), true);
-				//train.getTankInfo(null)[1].fluid.amount +=steam*0.9f;//compensate for water impurities
-				//if(train.getTankInfo(null)[1].fluid !=null && train.getTankInfo(null)[1].fluid.amount>train.getTankCapacity()[1]){
-				//todo: tell train to render more steam particles
-				//}
+			if (train.drain(null, steam!=0?steam/5:0,true)!= null) {
+				float escaping =Math.abs(train.accelerator) * (train.getTankInfo(null)[1].capacity*0.01f);
+				escaping+=train.fill(null, new FluidStack(FluidRegistry.LAVA, (int)(-escaping+steam*0.9f)), true);
+				//todo: tell train to render more steam particles based on escaping steam
+
 				//if no fluid left and not creative mode, explode.
 			} else if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)){
 				train.worldObj.createExplosion(train, train.posX, train.posY, train.posZ, 5f, false);
@@ -141,6 +140,7 @@ public class FuelHandler{
 			train.setBoolean(GenericRailTransport.boolValues.RUNNING, true);
 		} else {
 			train.setBoolean(GenericRailTransport.boolValues.RUNNING, false);
+			train.accelerator=0;
 		}
 
 		if (train.getTankInfo(null)[1] !=null && train.getTankInfo(null)[1].fluid.amount >0) {

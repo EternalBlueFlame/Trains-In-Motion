@@ -87,9 +87,14 @@ public class GUITransport extends GUIContainerNoNEI {
         transport = entity;
     }
 
-    /*just here  as a placeholder to keep vanilla from using this method, we don't need it*/
+    /*Anything that uses tooltips needs to be rendered during this phase*/
     @Override
-    protected void drawGuiContainerForegroundLayer(int param1, int param2) {}
+    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+
+        if (transport.getTankCapacity().length>0) {
+            renderTankerInventory(mc, mouseX, mouseY);
+        }
+    }
 
     /*we draw the GUI here so it's under the item render*/
     @Override
@@ -115,9 +120,7 @@ public class GUITransport extends GUIContainerNoNEI {
             }
         }
 
-        if (transport.getTankCapacity().length>0) {
-            renderTankerInventory(mc, mouseX, mouseY);
-        }
+
 
         //todo:there needs to be some way for custom GUI's from the train's class without breaking it's ability to be defined on server too.
 
@@ -309,7 +312,7 @@ public class GUITransport extends GUIContainerNoNEI {
             //System.out.println(transport.getTankInfo(null).length + ":" + transport.getTankCapacity().length +":" +i);
             //draw the player inventory and toolbar background.
             Tessellator.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
-            drawTexturedRect(guiLeft+186, guiTop+40+(-20*i), 16, 0, 90, 18, 16, 16);
+            drawTexturedRect(186, 40+(-20*i), 16, 0, 90, 18, 16, 16);
 
             if(transport.getTankInfo(null)[i]!=null && transport.getTankInfo(null)[i].fluid.amount> 0) {
                 float liquid = transport.getTankInfo(null)[i].fluid.amount;
@@ -319,7 +322,7 @@ public class GUITransport extends GUIContainerNoNEI {
                 GL11.glPushMatrix();
 
                 GL11.glColor4f(1,1,1,0.5f);
-                GL11.glTranslatef(guiLeft + 186, guiTop+40+(-20*i),0);
+                GL11.glTranslatef(186, 40+(-20*i),0);
                 GL11.glScalef(0.125f+liquid,1.125f,1);
                 //render fluid overlay
                 if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
@@ -372,16 +375,16 @@ public class GUITransport extends GUIContainerNoNEI {
             if(isMouseInRect(mouseX, mouseY,guiLeft+186, guiTop+40+(-20*i), 90, 18)) {
                 if (transport.getTankInfo(null)[i].fluid.amount>0) {
                     drawCreativeTabHoveringText(transport.getTankInfo(null)[i].fluid.getLocalizedName() + " " +
-                                    transport.getTankInfo(null)[i].fluid.amount+"mb/"+ transport.getTankInfo(null)[i].capacity+"mb", mouseX, mouseY);
+                                    transport.getTankInfo(null)[i].fluid.amount+"mb/"+ transport.getTankInfo(null)[i].capacity+"mb", mouseX-guiLeft, mouseY-guiTop);
 
                 } else {
                     if(transport.getTankFilters(i).length>1){
-                        drawCreativeTabHoveringText(", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX, mouseY);
+                        drawCreativeTabHoveringText(", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX-guiLeft, mouseY-guiTop);
 
                     } else if (transport.getTankFilters(i).length==1) {
-                        drawCreativeTabHoveringText(transport.getTankFilters(i)[0] + ", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX, mouseY);
+                        drawCreativeTabHoveringText(transport.getTankFilters(i)[0] + ", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX-guiLeft, mouseY-guiTop);
                     } else{
-                        drawCreativeTabHoveringText("0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX, mouseY);
+                        drawCreativeTabHoveringText("0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX-guiLeft, mouseY-guiTop);
                     }
                 }
                 GL11.glDisable(GL11.GL_LIGHTING);

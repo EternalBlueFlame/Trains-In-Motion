@@ -92,9 +92,6 @@ public class ParticleFX {
     }
 
     public static void updateParticleItterator(List<ParticleFX> particles, boolean hostIsRunning){
-        if (!hostIsRunning){
-            return;
-        }
         int index=0;
         for (ParticleFX p : particles){
             p.onUpdate(hostIsRunning, index*(150f/particles.size()));
@@ -237,6 +234,7 @@ public class ParticleFX {
 
     }
 
-    public static ModelRendererTurbo particle = new ModelRendererTurbo(null, 0, 0, 32, 32).addBox(-2F, -2F, -2F, 4, 4, 4);
+    public static ModelRendererTurbo particle = new ModelRendererTurbo(null, 0, 0, 32, 32)
+            .addBox(0,0,0, 4, 4, 4).setRotationPoint(-2F, 0F, -2F);
 
 }

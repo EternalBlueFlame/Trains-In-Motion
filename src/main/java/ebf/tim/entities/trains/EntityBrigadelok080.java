@@ -84,13 +84,9 @@ public class EntityBrigadelok080 extends TrainBase {
     @Override
     public String transportEra(){return "Steam";}
     @Override
-    public float transportTopSpeed(){return 70.81f;}
-    @Override
     public boolean isFictional(){return false;}
     @Override
     public float transportTractiveEffort(){return 0;}
-    @Override
-    public float transportMetricHorsePower(){return 0;}
 
 
     @Override
@@ -112,11 +108,10 @@ public class EntityBrigadelok080 extends TrainBase {
 
     /**
      * <h2>Max speed</h2>
-     * <h4>TRAINS ONLY.</h4>
      * @return the value of the max speed in km/h
      */
     @Override
-    public float getMaxSpeed(){return 25;}
+    public float transportTopSpeed(){return 70.81f;}
     /**
      * <h2>Bogie Offset</h2>
      * @return the list of offsets for the bogies, 0 being the center. negative values are towards the front of the train.
@@ -156,10 +151,10 @@ public class EntityBrigadelok080 extends TrainBase {
     /**
      * <h2>Acceleration</h2>
      * <h4>TRAINS ONLY.</h4>
-     * @return defines the acceleration that is applied to the train in blocks per second.
+     * @return defines the acceleration.
      */
     @Override
-    public float getHorsePower(){return 75f;}
+    public float transportMetricHorsePower(){return 75f;}
 
     @Override
     public float weightKg(){return 10886.2169f;}
@@ -302,5 +297,5 @@ public class EntityBrigadelok080 extends TrainBase {
     public ResourceLocation getHorn(){return URIRegistry.SOUND_HORN.getResource("h080brigadelok.ogg");}
     @SideOnly(Side.CLIENT)
     @Override
-    public ResourceLocation getRunning(){return URIRegistry.SOUND_RUNNING.getResource("r080brigadelok.ogg");}
+    public ResourceLocation getRunningSound(){return URIRegistry.SOUND_RUNNING.getResource("r080brigadelok.ogg");}
 }

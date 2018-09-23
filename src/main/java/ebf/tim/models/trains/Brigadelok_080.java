@@ -20,7 +20,7 @@ public class Brigadelok_080 extends ModelBase
 
 	public Brigadelok_080()
 	{
-		brigadelok_080Model = new ModelRendererTurbo[111];
+		brigadelok_080Model = new ModelRendererTurbo[112];
 		brigadelok_080Model[0] = new ModelRendererTurbo(this, 1, 1, textureXY, textureXY); // Box 0
 		brigadelok_080Model[1] = new ModelRendererTurbo(this, 73, 1, textureXY, textureXY); // Box 2
 		brigadelok_080Model[2] = new ModelRendererTurbo(this, 153, 1, textureXY, textureXY); // Box 3
@@ -37,7 +37,7 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[13] = new ModelRendererTurbo(this, 193, 17, textureXY, textureXY); // Box 14
 		brigadelok_080Model[14] = new ModelRendererTurbo(this, 209, 17, textureXY, textureXY); // Box 15
 		brigadelok_080Model[15] = new ModelRendererTurbo(this, 225, 17, textureXY, textureXY); // Box 16
-		brigadelok_080Model[16] = new ModelRendererTurbo(this, 241, 17, textureXY, textureXY, "smoke 3 232323"); // Box 17
+		brigadelok_080Model[16] = new ModelRendererTurbo(this, 241, 17, textureXY, textureXY); // Box 17
 		brigadelok_080Model[17] = new ModelRendererTurbo(this, 209, 25, textureXY, textureXY); // Box 18
 		brigadelok_080Model[18] = new ModelRendererTurbo(this, 1, 33, textureXY, textureXY); // Box 19
 		brigadelok_080Model[19] = new ModelRendererTurbo(this, 25, 33, textureXY, textureXY); // Box 20
@@ -132,6 +132,7 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[108] = new ModelRendererTurbo(this, 65, 121, textureXY, textureXY); // Box 109
 		brigadelok_080Model[109] = new ModelRendererTurbo(this, 209, 57, textureXY, textureXY); // Box 110
 		brigadelok_080Model[110] = new ModelRendererTurbo(this, 59, 38, textureXY, textureXY); // Box 111
+		brigadelok_080Model[111] = new ModelRendererTurbo(this, 0, 0, textureXY, textureXY, "smoke 3 232323"); // Box 112
 
 		brigadelok_080Model[0].addBox(0F, 0F, 0F, 32, 10, 3, 0F); // Box 0
 		brigadelok_080Model[0].setRotationPoint(-25F, -8.5F, -1.5F);
@@ -471,6 +472,9 @@ public class Brigadelok_080 extends ModelBase
 		brigadelok_080Model[110].addBox(0F, 0F, 0F, 1, 3, 3, 0F); // Box 111
 		brigadelok_080Model[110].setRotationPoint(-26.5F, 5F, -1.5F);
 
+		brigadelok_080Model[111].addBox(0F, 0F, 0F, 1, 1, 1, 0F); // Box 17
+		brigadelok_080Model[111].setRotationPoint(-24F, -34F, -1.5F);
+
 		fixRotation(brigadelok_080Model, false, true, true);
 
 	}
@@ -478,7 +482,7 @@ public class Brigadelok_080 extends ModelBase
 	@Override
 	public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5)
 	{
-		for(int i = 0; i < 111; i++)
+		for(int i = 0; i < 112; i++)
 		{
 			brigadelok_080Model[i].render(f5);
 		}

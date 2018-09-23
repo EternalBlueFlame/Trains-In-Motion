@@ -1468,10 +1468,11 @@ public class ModelRendererTurbo {
      * @param y the y-rotation point of the shape
      * @param z the z-rotation point of the shape
      */
-    public void setRotationPoint(float x, float y, float z){
+    public ModelRendererTurbo setRotationPoint(float x, float y, float z){
         rotationPointX = x;
         rotationPointY = y;
         rotationPointZ = z;
+        return this;
     }
     
     /**

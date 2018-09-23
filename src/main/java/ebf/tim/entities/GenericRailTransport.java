@@ -733,7 +733,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
             if (getRiderOffsets() != null && getRiderOffsets().length >1 && seats.size()<getRiderOffsets().length) {
                 for (int i = 0; i < getRiderOffsets().length - 1; i++) {
-                    EntitySeat seat = new EntitySeat(worldObj, posX, posY, posZ, getRiderOffsets()[i][3], getRiderOffsets()[i][4],getRiderOffsets()[i][5], getEntityId(), i);
+                    EntitySeat seat = new EntitySeat(worldObj, posX, posY, posZ, getRiderOffsets()[i][0], getRiderOffsets()[i][1],getRiderOffsets()[i][2], getEntityId(), i);
                     worldObj.spawnEntityInWorld(seat);
                     seats.add(seat);
                 }
@@ -896,7 +896,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
 
             if (ClientProxy.EnableSmokeAndSteam || getParticles().size()>0) {
-                ParticleFX.updateParticleItterator(getParticles(), getBoolean(boolValues.RUNNING) || true);
+                ParticleFX.updateParticleItterator(getParticles(), getBoolean(boolValues.RUNNING));
             }
         }
     }
@@ -1433,7 +1433,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 }
             }
         }
-        resource.amount=leftoverDrain;
         return resource;
 
     }
@@ -1460,25 +1459,31 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 }
             }
             if (getTankInfo(null)[stack]!=null && (
-                    resource.getFluid() == null || getTankInfo(null)[stack].fluid.getFluid() == resource.getFluid() || getTankInfo(null)[stack].fluid.amount ==0)
-            ) {
+                    resource.getFluid() == null || getTankInfo(null)[stack].fluid.getFluid() == resource.getFluid() ||
+                            getTankInfo(null)[stack].fluid.amount ==0)) {
+
                 if(leftoverDrain+getTankInfo(null)[stack].fluid.amount>getTankInfo(null)[stack].capacity){
                     leftoverDrain-=getTankInfo(null)[stack].capacity-getTankInfo(null)[stack].fluid.amount;
                     if(doFill){
-                        getTankInfo(null)[stack] = new FluidTankInfo(new FluidStack(resource.fluid, getTankInfo(null)[stack].capacity), getTankInfo(null)[stack].capacity);
+                        getTankInfo(null)[stack] = new FluidTankInfo(
+                                new FluidStack(resource.fluid, getTankInfo(null)[stack].capacity), getTankInfo(null)[stack].capacity);
+                    }
+                } else if (leftoverDrain+getTankInfo(null)[stack].fluid.amount<0){
+                    leftoverDrain-=getTankInfo(null)[stack].fluid.amount-resource.amount;
+                    if(doFill){
+                        getTankInfo(null)[stack] = new FluidTankInfo(
+                                new FluidStack(getTankInfo(null)[stack].fluid, 0), getTankInfo(null)[stack].capacity);
                     }
                 } else {
                     if(doFill){
-                        getTankInfo(null)[stack] = new FluidTankInfo(new FluidStack(resource.fluid, getTankInfo(null)[stack].fluid.amount+leftoverDrain),
+                        getTankInfo(null)[stack] = new FluidTankInfo(
+                                new FluidStack(resource.fluid, getTankInfo(null)[stack].fluid.amount+leftoverDrain),
                                 getTankInfo(null)[stack].capacity);
                     }
-
                     leftoverDrain=0;
                 }
-                return leftoverDrain;
-            } else {
-                if(getTankInfo(null)[stack]!=null ) {
-                    DebugUtil.println( resource.getFluid() == null, getTankInfo(null)[stack].fluid.getFluid() == resource.getFluid(), getTankInfo(null)[stack].fluid.amount ==0);
+                if(leftoverDrain==0){
+                    return 0;
                 }
             }
         }
@@ -1487,6 +1492,10 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**returns the list of fluid tanks and their capacity.*/
     @Override
     public FluidTankInfo[] getTankInfo(ForgeDirection from){
+        if(getTankCapacity()==null || getTankCapacity().length ==0){
+            return new FluidTankInfo[]{};
+        }
+
         if (fluidTank==null || fluidTank.length<getTankCapacity().length) {
             //initialize tanks
             FluidTankInfo[] tanks = new FluidTankInfo[getTankCapacity().length];
