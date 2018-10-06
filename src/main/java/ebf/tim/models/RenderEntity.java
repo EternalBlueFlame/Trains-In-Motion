@@ -3,6 +3,7 @@ package ebf.tim.models;
 import ebf.tim.api.SkinRegistry;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
@@ -110,12 +111,12 @@ public class RenderEntity extends Render {
                             }
                             render.showModel = false;
                         }
-                        if(ParticleFX.isParticle(render.boxName)){
+                        if(ParticleFX.getParticleIDFronName(render.boxName)!=-1){
                             density = ParticleFX.parseData(render.boxName);
                             entity.renderData.particles = ParticleFX.newParticleItterator(Integer.parseInt(density[0].trim())*20,
                                     Integer.parseInt(density[1].trim(), 16),
-                                    (render.rotationPointX*0.0625f), (render.rotationPointY*-0.0625f), (render.rotationPointZ*0.0625f),
-                                    entity );
+                                    render.rotationPointX, render.rotationPointY, render.rotationPointZ,
+                                    entity, render.boxName);
                         }
                     }
                 }
@@ -156,7 +157,7 @@ public class RenderEntity extends Render {
                 entity.renderData.wheelPitch -= Math.copySign(6.2831855f, entity.renderData.wheelPitch);
             }
             //define the rotation angle, if it's going fast enough.
-            entity.renderData.wheelPitch += (((entity.frontVelocityX * entity.frontVelocityX) + (entity.frontVelocityZ * entity.frontVelocityZ))*0.075f);
+            entity.renderData.wheelPitch += (((entity.frontVelocityX * entity.frontVelocityX) + (entity.frontVelocityZ * entity.frontVelocityZ))*0.1f);
 
             if (entity.renderData.wheelPitch != entity.renderData.lastWheelPitch) {
                 entity.renderData.lastWheelPitch =entity.renderData.wheelPitch;

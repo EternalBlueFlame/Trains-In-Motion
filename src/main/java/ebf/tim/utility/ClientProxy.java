@@ -8,7 +8,6 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ebf.tim.blocks.RailTileEntity;
-import ebf.tim.blocks.LampBlock;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
@@ -46,7 +45,6 @@ import java.util.List;
  * @author Eternal Blue Flame
  */
 public class ClientProxy extends CommonProxy {
-    public static List<GenericRailTransport> carts = new ArrayList<GenericRailTransport>();
 
     public static double[][] devSplineModification = {{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
     public static int devSplineCurrentPoint=0;
@@ -167,9 +165,6 @@ public class ClientProxy extends CommonProxy {
         KeyInventory.setKeyCode(config.getInt("InventoryKeybind", "Keybinds (Client only)", Keyboard.KEY_I, 0, 0, ""));
     }
 
-    /**the client only lamp block*/
-    public static Block lampBlock= new LampBlock();
-
     /**
      * <h2>Client Register</h2>
      * Used for registering client only functions and redirecting registering the items in the train registry with their own textures and models.
@@ -177,8 +172,6 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void register() {
         super.register();
-        GameRegistry.registerBlock(lampBlock, "lampblock");
-        lampBlock.setLightLevel(1f);
 
         //register the fluid icons
         fluidOil.setIcons(BlockLiquid.getLiquidIcon("water_still"), BlockLiquid.getLiquidIcon("water_flow"));
@@ -259,28 +252,4 @@ public class ClientProxy extends CommonProxy {
             return null;
         }
     };
-
-    /**
-     * <h2> Forced Dynamic Lighting </h2>
-     *
-     * this is used to force events from the main thread of the mod, it can create a lot of lag sometimes.
-     *
-     * Used to force lighting updates (if enabled in config).
-     * It also only updates if it's actually needed, to help preserve what performance we can because of how much lag this can create.
-     * Because this is a client only method, it creates no overhead on the server.
-     *
-     * @param tick the client tick event from the main thread
-     */
-    @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent tick) {
-        if (EnableLights && tick.phase == TickEvent.Phase.END && carts.size() > 0) {
-            if (Minecraft.getMinecraft().theWorld != null) {
-                for (GenericRailTransport cart : carts) {
-                    if (cart != null) {
-                        Minecraft.getMinecraft().theWorld.updateLightByType(EnumSkyBlock.Block, cart.lamp.X, cart.lamp.Y, cart.lamp.Z);
-                    }
-                }
-            }
-        }
-    }
 }

@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 public class ModelBase extends Model<Object> {
 	
 	public ModelRendererTurbo base[] = new ModelRendererTurbo[0];
+	public ModelRendererTurbo bodyModel[] = new ModelRendererTurbo[0];
 	public ModelRendererTurbo open[] = new ModelRendererTurbo[0];
 	public ModelRendererTurbo closed[] = new ModelRendererTurbo[0];
 	public ModelRendererTurbo r1[] = new ModelRendererTurbo[0];
@@ -36,12 +37,15 @@ public class ModelBase extends Model<Object> {
 		render(r7);
 		render(r8);
 		render(r9);
+		render(bodyModel);
 	}
 
 	@Override
 	public void render(Object type, Entity ent){
 		render();
 	}
+	@Override
+	public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5) {render();}
 	
 	@Override
 	public void translateAll(float x, float y, float z){

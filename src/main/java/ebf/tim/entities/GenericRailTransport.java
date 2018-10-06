@@ -54,9 +54,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /*
      * <h2>variables</h2>
      */
-    /**defines the lamp, and it's management*/
-    @Deprecated //lamp should be handled by render like particles
-    public LampHandler lamp = new LampHandler();
     /**defines the colors, the outer array is for each different color, and the inner int[] is for the RGB color*/
     public int[][] colors = new int[][]{{0,0,0},{0,0,0},{0,0,0}};
     /**the server-sided persistent UUID of the owner*/
@@ -690,8 +687,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * calling on link management.
      * @see #manageLinks(GenericRailTransport)
      * syncing the owner entity ID with client.
-     * being sure the transport is listed in the main class (for lighting management).
-     * @see ClientProxy#onTick(TickEvent.ClientTickEvent)
      * and updating the lighting block.
      */
     @Override
@@ -836,7 +831,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
         }
 
-        //todo:why is this only for stock? and do we actually need to do this..? the "checked" variable isn't even used...
+        //todo:this tells the stock that it has a train, but this would be more effectivley done from the train's update since it has to itterate the stock anyway to get weight
         if (!(this instanceof EntityTrainCore) && ticksExisted %60 ==0){
             GenericRailTransport front = null;
             boolean hasReversed = false;
@@ -880,21 +875,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
         }
 
-        /*
-         * be sure the client proxy has a reference to this so the lamps can be updated, and then every other tick, attempt to update the lamp position if it's necessary.
-         */
         if (backBogie!=null && !isDead && worldObj.isRemote) {
-            if (ClientProxy.EnableLights && !ClientProxy.carts.contains(this)) {
-                ClientProxy.carts.add(this);
-            }
-            if (lamp.Y >1 && ticksExisted %2 ==0){
-                vectorCache[0][0] =this.posX + getLampOffset().xCoord;
-                vectorCache[0][1] =this.posY + getLampOffset().yCoord;
-                vectorCache[0][2] =this.posZ + getLampOffset().zCoord;
-                lamp.ShouldUpdate(worldObj, RailUtility.rotatePoint(vectorCache[0], rotationPitch, rotationYaw, 0));
-            }
-
-
             if (ClientProxy.EnableSmokeAndSteam || getParticles().size()>0) {
                 ParticleFX.updateParticleItterator(getParticles(), getBoolean(boolValues.RUNNING));
             }
@@ -1070,9 +1051,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public Item getItem(){return null;}
     /**defines the size of the inventory, not counting any special slots like for fuel.*/
     public int getInventoryRows(){return 0;}
-    /**defines the offset for the lamp in X/Y/Z*/
-    @Deprecated
-    public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
     /**defines the radius in microblocks that the pistons animate*/
     public float getPistonOffset(){return 0;}
     /**defines smoke positions, the outer array defines each new smoke point, the inner arrays define the X/Y/Z*/

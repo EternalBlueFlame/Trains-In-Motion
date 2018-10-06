@@ -241,15 +241,14 @@ public class EntityTrainCore extends GenericRailTransport {
                 }
             }
         }
-        if (vectorCache[7][0]>-0.0005 && vectorCache[7][0]<0.0005){
-            //vectorCache[7][0] = 0;
-        }
 
-        if (vectorCache[7][0] > transportTopSpeed()*0.0138889){
-            vectorCache[7][0] = transportTopSpeed()*0.0138889;
-        } else if (vectorCache[7][0] < (-transportTopSpeed()*0.0138889)*0.5){
-            vectorCache[7][0] = (-transportTopSpeed()*0.0138889)*0.5;
+        //cap movement to the max speed
+        if (vectorCache[7][0] > (transportTopSpeed()*0.0138889)){
+            vectorCache[7][0] = (transportTopSpeed()*0.0138889);
+        } else if (vectorCache[7][0] < (-transportTopSpeed()*0.0138889)){
+            vectorCache[7][0] = (-transportTopSpeed()*0.0138889);
         }
+        //todo: make the max reduced when going reverse
 
 
     }

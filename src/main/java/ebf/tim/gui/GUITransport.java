@@ -64,8 +64,6 @@ public class GUITransport extends GUIContainerNoNEI {
     private static GenericRailTransport transport;
     /**a reference to the player that opened the GUI.*/
     private EntityPlayer player;
-    /**a cached value for the second fuel tank, only used for steam currently*/
-    private int secondTankFluid;
     /**the amount to scale the GUI by, same as vanilla*/
     private static final float guiScaler = 0.00390625F;
     /**the center position for the inventory render*/
@@ -175,9 +173,9 @@ public class GUITransport extends GUIContainerNoNEI {
         }
         this.buttonList.add(new GUIButton(6, guiLeft + 130, guiTop + 166, 18, 18, "locked"));
         this.buttonList.add(new GUIButton(7, guiLeft + 148, guiTop + 166, 18, 18, "coupler"));
-        if (transport.getLampOffset().yCoord>1) {
-            this.buttonList.add(new GUIButton(5, guiLeft + 238, guiTop + 166, 18, 18, "lamp"));
-        }
+
+        this.buttonList.add(new GUIButton(5, guiLeft + 238, guiTop + 166, 18, 18, "lamp"));
+
         this.buttonList.add(new GUIButton(4, guiLeft + 220, guiTop + 166, 18, 18, "brake"));
         //train specific
         if (transport instanceof EntityTrainCore) {

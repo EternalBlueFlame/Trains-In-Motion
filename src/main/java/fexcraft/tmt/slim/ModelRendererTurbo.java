@@ -70,7 +70,7 @@ public class ModelRendererTurbo {
     public float rotationPointX=0;
     public float rotationPointY=0;
     public float rotationPointZ=0;
-    
+
 	private static final float pi = (float)Math.PI;
 	
 	public ModelRendererTurbo(ModelBase modelbase, String s){
@@ -1059,7 +1059,7 @@ public class ModelRendererTurbo {
      * @param textureW
      * @param textureH
      */
-    public void addSphere(float x, float y, float z, float r, int segs, int rings, int textureW, int textureH){
+    public ModelRendererTurbo addSphere(float x, float y, float z, float r, int segs, int rings, int textureW, int textureH){
     	if(segs < 3){
     		segs = 3;
     	}
@@ -1133,6 +1133,7 @@ public class ModelRendererTurbo {
 			currentFace++;
 		}
 		copyTo(tempVerts, poly);
+		return this;
     }
     
     /**
@@ -1144,8 +1145,9 @@ public class ModelRendererTurbo {
      * @param length the length of the cylinder
      * @param segments the amount of segments the cylinder is made of
      */
-    public void addCone(float x, float y, float z, float radius, float length, int segments){
+    public ModelRendererTurbo addCone(float x, float y, float z, float radius, float length, int segments){
     	addCone(x, y, z, radius, length, segments, 1F);
+    	return this;
     }
     
     /**

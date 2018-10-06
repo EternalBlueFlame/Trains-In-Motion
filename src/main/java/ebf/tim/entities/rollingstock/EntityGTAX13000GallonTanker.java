@@ -69,8 +69,6 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
     public double[][] getRiderOffsets(){return null;}
     @Override
     public double[][] getHitboxPositions(){return new double[][]{{-3.35d,0.25d,0d},{-2.75d,0.25d,0d},{-1.35d,0.25d,0d},{0d,0.25d,0d},{1.35d,0.25d,0d},{2.75d,0.25d,0d},{3.35d,0.25d,0d}};}
-    @Override
-    public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
 
     @Override
     public float getPistonOffset() {

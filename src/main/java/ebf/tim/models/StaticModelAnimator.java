@@ -31,6 +31,10 @@ public class StaticModelAnimator {
     public static final String tagDoorSlide = "doorslide";
     /**tag for doors that swing open and closed, the center point for all parts must be at the hinge.*/
     public static final String tagDoorSwing = "doorswing";
+    /**tag for lamps that render a cone*/
+    public static final String tagLampCone = "lamp cone";
+    /**tag for lamps that render in a sphere*/
+    public static final String tagLampsphere = "lamp sphere";
     /**A copy of the original Vec6F for the model part*/
     private final float[] originalRotationValuesXYZ;
     /**a reference to the current model geometry, the one with the modifications that's actually being rendered.*/

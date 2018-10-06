@@ -108,11 +108,6 @@ public class EntityVATLogCar extends RollingstockBase {
      */
     @Override
     public double[][] getHitboxPositions(){return new double[][]{{-2.1d,0.25d,0d},{-1.5d,0.25d,0d},{0,0.25d,0d},{1.5d,0.25d,0d},{2.1d,0.25d,0d}};}
-    /**
-     * <h2>Lamp offset</h2>
-     */
-    @Override
-    public Vec3d getLampOffset(){return new Vec3d(0,0,0);}
 
     @Override
     public float getPistonOffset() {

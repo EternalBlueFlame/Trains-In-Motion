@@ -73,15 +73,8 @@ public abstract class RollingstockBase extends EntityRollingStockCore{
 
     /**
      * defines the size of the inventory, not counting any special slots like for fuel.
-     *
-     * @see TrainsInMotion.inventorySizes
      */
     public abstract int getInventoryRows();
-
-    /**
-     * defines the offset for the lamp in X/Y/Z
-     */
-    public abstract Vec3d getLampOffset();
 
     /**
      * defines the radius in microblocks that the pistons animate

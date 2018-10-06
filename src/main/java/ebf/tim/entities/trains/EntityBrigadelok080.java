@@ -166,16 +166,6 @@ public class EntityBrigadelok080 extends TrainBase {
     @Override
     public double[][] getHitboxPositions(){return new double[][]{{-1.75d,0.25d,0d},{-1.15d,0.25d,0d},{0d,0.25d,0d},{1.15d, 0.25d,0d},{1.75d,0.25d,0d}};}
 
-
-    /**
-     * <h2>Lamp offset</h2>
-     * @return defines the offset for the lamp in blocks.
-     * negative X values are towards the front of the train.
-     * a Y value of less than 2 will register the lamp as null (this is to allow for null lamps, and to prevent from breaking the rails the train is on).
-     *     NOTE: values should never be higher than the hitboxes, or it may not work. (it is managed through a block after all)
-     */
-    @Override
-    public Vec3d getLampOffset(){return new Vec3d(-3.5,2,0);}
     /**
      * <h2>Animation radius</h2>
      * @return defines the radius in microblocks (1/16 of a block) for the piston rotations.
