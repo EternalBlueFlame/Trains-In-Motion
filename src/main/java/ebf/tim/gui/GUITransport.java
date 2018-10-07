@@ -11,39 +11,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderBlocks;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.IItemRenderer;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.FluidRegistry;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import static ebf.tim.TrainsInMotion.transportTypes.PASSENGER;
+import java.util.*;
 
 /**
  * <h1>Transport GUI</h1>
@@ -72,6 +52,8 @@ public class GUITransport extends GUIContainerNoNEI {
     public static final DecimalFormat decimal = new DecimalFormat("#.##");
     /**cache a string for more efficient use rather than concurrent adding*/
     private StringBuilder stringCache = new StringBuilder();
+
+    private List<GUIButton> buttons = new ArrayList<>();
 
     /**
      * <h2>GUI initialization</h2>
@@ -145,14 +127,12 @@ public class GUITransport extends GUIContainerNoNEI {
 
         //draw the text that goes over everything
 
-        drawTextOutlined(fontRendererObj, StatCollector.translateToLocal(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
+        drawTextOutlined(fontRendererObj, RailUtility.translate(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
         drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), guiLeft+120, guiTop+70, 16777215);
 
-        //draw the hover text for the buttons.
-        for (Object o : buttonList){
-            if(((GUIButton)o).getMouseHover()) {
-                drawHoveringText(((GUIButton)o).getDisplayString(transport), mouseX, mouseY, mc.fontRenderer);
-            }
+        //draw the buttons.
+        for (GUIButton b : buttons){
+            b.drawButton(mouseX,mouseY);
         }
     }
 
@@ -168,24 +148,112 @@ public class GUITransport extends GUIContainerNoNEI {
         yCenter = (int)((11-transport.getInventoryRows())*0.5f)*18;
         //generic to all
         if (player.getDisplayName().equals(transport.getOwnerName())) {
-            this.buttonList.add(new GUIButton(13, guiLeft +112, guiTop + 166, 18, 18, "unlink"));
-            this.buttonList.add(new GUIButton(12, guiLeft + 166, guiTop + 166, 18, 18, "dropkey"));
+            this.buttons.add(new GUIButton(guiLeft +112, guiTop + 166, 18, 18, null, null){
+
+                @Override
+                public String getHoverText() {
+                    return "gui.unlink";
+                }
+
+                @Override
+                public void onClick() {
+                    TrainsInMotion.keyChannel.sendToServer(new PacketInteract(13, transport.getEntityId()));
+                }
+            });
         }
-        this.buttonList.add(new GUIButton(6, guiLeft + 130, guiTop + 166, 18, 18, "locked"));
-        this.buttonList.add(new GUIButton(7, guiLeft + 148, guiTop + 166, 18, 18, "coupler"));
+        this.buttons.add(new GUIButton(guiLeft + 130, guiTop + 166, 18, 18, null, null){
 
-        this.buttonList.add(new GUIButton(5, guiLeft + 238, guiTop + 166, 18, 18, "lamp"));
+            @Override
+            public String getHoverText() {
+                return "gui.locked." + transport.getBoolean(GenericRailTransport.boolValues.LOCKED);
+            }
 
-        this.buttonList.add(new GUIButton(4, guiLeft + 220, guiTop + 166, 18, 18, "brake"));
+            @Override
+            public void onClick() {
+                TrainsInMotion.keyChannel.sendToServer(new PacketInteract(6, transport.getEntityId()));
+            }
+        });
+
+        this.buttons.add(new GUIButton(guiLeft + 148, guiTop + 166, 18, 18, null, null){
+
+            @Override
+            public String getHoverText() {
+                return "gui.coupler." + transport.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT);
+            }
+
+            @Override
+            public void onClick() {
+                TrainsInMotion.keyChannel.sendToServer(new PacketInteract(7, transport.getEntityId()));
+            }
+        });
+
+        this.buttons.add(new GUIButton(guiLeft + 238, guiTop + 166, 18, 18, null, null){
+
+            @Override
+            public String getHoverText() {
+                return "gui.lamp." + transport.getBoolean(GenericRailTransport.boolValues.LAMP);
+            }
+
+            @Override
+            public void onClick() {
+                TrainsInMotion.keyChannel.sendToServer(new PacketInteract(5, transport.getEntityId()));
+            }
+        });
+
+        this.buttons.add(new GUIButton(guiLeft + 220, guiTop + 166, 18, 18, null, null){
+
+            @Override
+            public String getHoverText() {
+                return "gui.coupler." + transport.getBoolean(GenericRailTransport.boolValues.BRAKE);
+            }
+
+            @Override
+            public void onClick() {
+                TrainsInMotion.keyChannel.sendToServer(new PacketInteract(4, transport.getEntityId()));
+            }
+        });
         //train specific
         if (transport instanceof EntityTrainCore) {
             if (player.capabilities.isCreativeMode) {
-                this.buttonList.add(new GUIButton(10, guiLeft + 184, guiTop + 166, 18, 18, "creative"));
+                this.buttons.add(new GUIButton(guiLeft + 184, guiTop + 166, 18, 18, null, null){
+
+                    @Override
+                    public String getHoverText() {
+                        return "gui.coupler." + transport.getBoolean(GenericRailTransport.boolValues.CREATIVE);
+                    }
+
+                    @Override
+                    public void onClick() {
+                        TrainsInMotion.keyChannel.sendToServer(new PacketInteract(10, transport.getEntityId()));
+                    }
+                });
             }
             if (transport.getType() != TrainsInMotion.transportTypes.STEAM) {
-                this.buttonList.add(new GUIButton(8, guiLeft + 202, guiTop + 166, 18, 18, "running"));
+                this.buttons.add(new GUIButton(guiLeft + 202, guiTop + 166, 18, 18, null, null){
+
+                    @Override
+                    public String getHoverText() {
+                        return "gui.coupler." + transport.getBoolean(GenericRailTransport.boolValues.RUNNING);
+                    }
+
+                    @Override
+                    public void onClick() {
+                        TrainsInMotion.keyChannel.sendToServer(new PacketInteract(8, transport.getEntityId()));
+                    }
+                });
             }
-            this.buttonList.add(new GUIButton(9, guiLeft + 256, guiTop + 166, 18, 18, "horn"));
+            this.buttons.add(new GUIButton(guiLeft + 256, guiTop + 166, 18, 18, null, null){
+
+                @Override
+                public String getHoverText() {
+                    return "gui.horn";
+                }
+
+                @Override
+                public void onClick() {
+                    TrainsInMotion.keyChannel.sendToServer(new PacketInteract(9, transport.getEntityId()));
+                }
+            });
 
         }
     }
@@ -195,32 +263,19 @@ public class GUITransport extends GUIContainerNoNEI {
      * here we define the overrides for the button functionality.
      */
     @Override
-    public void actionPerformed(GuiButton button) {
-        TrainsInMotion.keyChannel.sendToServer(new PacketInteract(button.id, transport.getEntityId()));
-    }
+    public void actionPerformed(GuiButton button) {}
 
-
-    /**
-     * <h3>gui Tank name</h3>
-     * @return the name of the defined tank dependant in the current transport and the user's language.
-     */
-    @Deprecated //just render the fluid name?????
-    private String tankType(boolean firsttank){
-        switch (transport.getType()){
-            case STEAM: case NUCLEAR_STEAM:{
-                if (firsttank){
-                    return StatCollector.translateToLocal("gui.waterboiler") + ":";
-                } else {
-                    return StatCollector.translateToLocal("menu.item.steam") + ":";
-                }
+    @Override
+    public void mouseClicked(int mouseButton, int mouseX, int mouseY){
+        for(GUIButton b :buttons){
+            if(b.getMouseHover()){
+                b.onClick();
+                return;
             }
-            case DIESEL:{return StatCollector.translateToLocal("gui.diesel") + ":";}
-            case ELECTRIC:{return StatCollector.translateToLocal("gui.rf") + ":";}
-            case HYDROGEN_DIESEL:{return StatCollector.translateToLocal("gui.hydrogencell") + ":";}
-            case NUCLEAR_ELECTRIC:{return StatCollector.translateToLocal("gui.coolant") + ":";}
-            default:{return "Unknown Tank";}
         }
+        super.mouseClicked(mouseButton, mouseX, mouseY);
     }
+
 
     /**
      * <h2> render train inventory</h2>

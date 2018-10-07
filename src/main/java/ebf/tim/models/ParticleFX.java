@@ -66,7 +66,7 @@ public class ParticleFX {
         switch (particleID) {
             case 0:case 1:{//smoke, steam
                 motionX = (rand.nextInt(40) - 20) * 0.001f;
-                motionY = particleID==0?0.15:0.05;
+                motionY = particleID==0?0.15:0.0005;
                 motionZ = (rand.nextInt(40) - 20) * 0.001f;
 
 
@@ -83,15 +83,17 @@ public class ParticleFX {
     }
 
     public static int getParticleIDFronName(String name){
-        if(name.contains("smoke")){
+        if(name.toLowerCase().contains("smoke")){
             return 0;
-        } else if(name.contains("steam")){
+        } else if(name.toLowerCase().contains("steam")){
             return 1;
-        }else if(name.contains("cone")){
-            return 2;
-        }else if(name.contains("sphere")){
-            return 3;
-        } else if (name.contains("wheel")){
+        } else if (name.toLowerCase().contains("lamp")){
+            if(name.toLowerCase().contains("cone")){
+                return 2;
+            }else if(name.toLowerCase().contains("sphere")) {
+                return 3;
+            }
+        }  else if (name.toLowerCase().contains("wheel")){
             return 4;
         }
 
@@ -118,7 +120,7 @@ public class ParticleFX {
         if (s.contains("smoke")) {
             return s.substring(s.indexOf("smoke ")+6).split(" ");
         } else if (s.contains("wheel")||s.contains("lamp")){
-            return new String[]{"0", "CCCC00"};
+            return new String[]{"1", "CCCC00"};
         } else {
             return s.substring(s.indexOf("steam ")+6).split(" ");
         }
@@ -138,18 +140,15 @@ public class ParticleFX {
         }
 
 
-        if (boundingBox==null){
-            if(motionX==1) {
-                shouldRender = host.getBoolean(GenericRailTransport.boolValues.LAMP);
-                if (ticksExisted > 20f) {
-                    //todo change color to simulate flicker?
-                }
+        //update lamps
+        if (particleID==3 || particleID==2){
+            shouldRender=host.getBoolean(GenericRailTransport.boolValues.LAMP);
+            if (ticksExisted > 20f) {
+                //todo change color to simulate flicker?
             }
             return;
-        }
-
-        //if the lifespan is out we reset the information, as if we just spawned a new particle.
-        if (hostIsRunning && this.ticksExisted > this.lifespan) {
+        } else if (hostIsRunning && this.ticksExisted > this.lifespan) {
+            //if the lifespan is out we reset the information, as if we just spawned a new particle.
             colorTint = (rand.nextInt(60) - 30)* 0.005f;
             lifespan = rand.nextInt(80) +140;
             ticksExisted =0f;
@@ -157,7 +156,7 @@ public class ParticleFX {
             this.boundingBox.setBounds(host.posX+pos[0] -0.1, host.posY+pos[1] -0.1, host.posZ+pos[2] -0.1, host.posX+pos[0] +0.1,  host.posY+pos[1] +0.1, host.posZ+pos[2] +0.1);
             motionX = (rand.nextInt(40) - 20) * 0.001f;
             if(particleID==0) {
-                motionY = rand.nextInt(15)*0.01;
+                motionY = rand.nextInt(15)*0.0001;
             } else if (particleID==1){
                 motionY = rand.nextInt(15)*0.003;
             }
@@ -243,32 +242,34 @@ public class ParticleFX {
             return;
         }
 
-        if(entity.boundingBox==null ){
 
+        if (entity.particleID==2) {//cone lamps
+            GL11.glPushMatrix();
+            GL11.glTranslated(x +entity.pos[0], y+entity.pos[1] , z+entity.pos[2]);
+            //use the texture to simulate it's fade with distance, rather than having the entire thing a set color.
+            //Tessellator.bindTexture(new ResourceLocation(TrainsInMotion.MODID, "cyltest.png"));
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            GL11.glColor4f(((entity.color >> 16 & 0xFF) * 0.00392156863f) - entity.colorTint,
+                    ((entity.color >> 8 & 0xFF) * 0.00392156863f) - entity.colorTint,
+                    ((entity.color & 0xFF) * 0.00392156863f) - entity.colorTint,
+                    1f);
+            lampCone.render(0.0625f);
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            GL11.glPopMatrix();
+            //todo loop for a detail intensity going from outside to inside using GLScaleF to shrink it from 1 to about 0.25
+        } else if (entity.particleID==3) {//sphere lamps
             GL11.glPushMatrix();
             GL11.glTranslated(x, y , z);
-            if (entity.motionX==1) {
-                //use the texture to simulate it's fade with distance, rather than having the entire thing a set color.
-                //Tessellator.bindTexture(new ResourceLocation(TrainsInMotion.MODID, "cyltest.png"));
-                GL11.glDisable(GL11.GL_TEXTURE_2D);
-                GL11.glColor4f(((entity.color >> 16 & 0xFF) * 0.00392156863f) - entity.colorTint,
-                        ((entity.color >> 8 & 0xFF) * 0.00392156863f) - entity.colorTint,
-                        ((entity.color & 0xFF) * 0.00392156863f) - entity.colorTint,
-                        1f);
-                lampCone.render(0.0625f);
-                GL11.glEnable(GL11.GL_TEXTURE_2D);
-            } else {
-                GL11.glDisable(GL11.GL_TEXTURE_2D);
-                GL11.glColor4f(((entity.color >> 16 & 0xFF) * 0.00392156863f) - entity.colorTint,
-                        ((entity.color >> 8 & 0xFF) * 0.00392156863f) - entity.colorTint,
-                        ((entity.color & 0xFF) * 0.00392156863f) - entity.colorTint,
-                        0.1f);
-                lampSphere.render(0.0625f);
-                GL11.glEnable(GL11.GL_TEXTURE_2D);
-            }
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            GL11.glColor4f(((entity.color >> 16 & 0xFF) * 0.00392156863f) - entity.colorTint,
+                    ((entity.color >> 8 & 0xFF) * 0.00392156863f) - entity.colorTint,
+                    ((entity.color & 0xFF) * 0.00392156863f) - entity.colorTint,
+                    0.1f);
+            lampSphere.render(0.0625f);
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            GL11.glPopMatrix();
             //todo loop for a detail intensity going from outside to inside using GLScaleF to shrink it from 1 to about 0.25
 
-            GL11.glPopMatrix();
         } else {
 
             GL11.glPushMatrix();

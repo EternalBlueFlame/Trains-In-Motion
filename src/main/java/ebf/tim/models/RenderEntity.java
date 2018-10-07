@@ -112,11 +112,11 @@ public class RenderEntity extends Render {
                             render.showModel = false;
                         }
                         if(ParticleFX.getParticleIDFronName(render.boxName)!=-1){
-                            density = ParticleFX.parseData(render.boxName);
-                            entity.renderData.particles = ParticleFX.newParticleItterator(Integer.parseInt(density[0].trim())*20,
+                            density = ParticleFX.parseData(render.boxName.toLowerCase());
+                            entity.renderData.particles.addAll(ParticleFX.newParticleItterator(Integer.parseInt(density[0].trim())*20,
                                     Integer.parseInt(density[1].trim(), 16),
                                     render.rotationPointX, render.rotationPointY, render.rotationPointZ,
-                                    entity, render.boxName);
+                                    entity, render.boxName));
                         }
                     }
                 }
