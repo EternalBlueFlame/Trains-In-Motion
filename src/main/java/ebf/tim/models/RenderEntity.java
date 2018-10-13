@@ -116,6 +116,7 @@ public class RenderEntity extends Render {
                             entity.renderData.particles.addAll(ParticleFX.newParticleItterator(Integer.parseInt(density[0].trim())*20,
                                     Integer.parseInt(density[1].trim(), 16),
                                     render.rotationPointX, render.rotationPointY, render.rotationPointZ,
+                                    render.rotateAngleX,render.rotateAngleY,render.rotateAngleZ,
                                     entity, render.boxName));
                         }
                     }

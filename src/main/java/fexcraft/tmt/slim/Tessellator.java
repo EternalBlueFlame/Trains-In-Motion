@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -222,16 +223,15 @@ public class Tessellator{
 			int width =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
 			int height =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
 
-			int format = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT);
-			ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * (format == GL_RGB?3:4));
+			ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
 
-			GL11.glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, buffer);
+			GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
 			texture = new int[((width*height)*4)+2];
 			texture[0]=width;
 			texture[1]=height;
-			for (int i=2; i<((width*height)*(format == GL_RGB?3:4))-2; i+=(format == GL_RGB?3:4)){
-				texture[i+3]=format==GL_RGB?0xFF:buffer.get(i+3) & 0xFF;//alpha
+			for (int i=2; i<((width*height)*(4))-2; i+=(4)){
+				texture[i+3]=buffer.get(i+3);//alpha
 				texture[i+2]=buffer.get(i+2);//Red
 				texture[i+1]=buffer.get(i+1);//Green
 				texture[i]=buffer.get(i);//Blue
@@ -242,7 +242,7 @@ public class Tessellator{
 		return texture;
 	}
 
-	private static ByteBuffer renderPixels = ByteBuffer.allocateDirect((4096*4096)*4);
+	public static ByteBuffer renderPixels = ByteBuffer.allocateDirect((4096*4096)*4);
 	private static int i,ii, length;
 	private static int[] RGBint, pixels;
 	private static final byte fullAlpha=(byte)0;
@@ -278,7 +278,7 @@ public class Tessellator{
 			}
 		}
 
-		//glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, pixels[0], pixels[1], GL_RGBA, GL_UNSIGNED_BYTE, renderPixels);
+		glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, pixels[0], pixels[1], GL_RGBA, GL_UNSIGNED_BYTE, renderPixels);
 		renderPixels.clear();//reset the buffer to all 0's.
 	}
 

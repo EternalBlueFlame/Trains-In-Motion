@@ -8,6 +8,7 @@ import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.AxisAlignedBB;
@@ -15,10 +16,17 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static fexcraft.tmt.slim.Tessellator.b;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.GL_SAMPLE_ALPHA_TO_COVERAGE;
+import static org.lwjgl.opengl.GL30.GL_RASTERIZER_DISCARD;
 
 /**
  * <h1>Particle effect</h1>
@@ -57,11 +65,12 @@ public class ParticleFX {
      * Initialize the particle, basically for spawning it
      * @param color the color of the particle.
      */
-    public ParticleFX(GenericRailTransport transport, int color, float offsetX, float offsetY, float offsetZ, int id) {
+    public ParticleFX(GenericRailTransport transport, int color, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, int id) {
         host = transport;
         particleID=id;
         this.offset = new double[]{offsetX, offsetY, offsetZ};
         pos = RailUtility.rotatePoint(new double[]{offset[0]*0.0625,offset[1]*-0.0625,offset[2]*0.0625}, transport.rotationPitch, transport.rotationYaw, 0);
+        pos= new double[]{pos[0],pos[1],pos[2],rotationX,rotationY,rotationZ};
 
         switch (particleID) {
             case 0:case 1:{//smoke, steam
@@ -100,10 +109,10 @@ public class ParticleFX {
         return -1;//invalid part
     }
 
-    public static List<ParticleFX> newParticleItterator(int strength, int color, float offsetX, float offsetY, float offsetZ, GenericRailTransport host, String partname){
+    public static List<ParticleFX> newParticleItterator(int strength, int color, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, GenericRailTransport host, String partname){
         List<ParticleFX> list = new ArrayList<>();
         for (int i=0; i<strength; i++){
-            list.add(new ParticleFX(host, color, offsetX, offsetY, offsetZ, getParticleIDFronName(partname)));
+            list.add(new ParticleFX(host, color, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, getParticleIDFronName(partname)));
         }
         return list;
     }
@@ -152,13 +161,14 @@ public class ParticleFX {
             colorTint = (rand.nextInt(60) - 30)* 0.005f;
             lifespan = rand.nextInt(80) +140;
             ticksExisted =0f;
+            //recalculating it throws away the rotation value, but that's only used for the cone lamp, which doesn't even run this, so we don't need it anyway.
             pos = RailUtility.rotatePoint(new double[]{offset[0]*0.0625,offset[1]*-0.0625,offset[2]*0.0625}, host.rotationPitch, host.rotationYaw, 0);
             this.boundingBox.setBounds(host.posX+pos[0] -0.1, host.posY+pos[1] -0.1, host.posZ+pos[2] -0.1, host.posX+pos[0] +0.1,  host.posY+pos[1] +0.1, host.posZ+pos[2] +0.1);
             motionX = (rand.nextInt(40) - 20) * 0.001f;
             if(particleID==0) {
-                motionY = rand.nextInt(15)*0.0001;
-            } else if (particleID==1){
                 motionY = rand.nextInt(15)*0.003;
+            } else if (particleID==1){
+                motionY = rand.nextInt(15)*0.00005;
             }
             motionZ = (rand.nextInt(40) - 20) * 0.001f;
             shouldRender = true;
@@ -245,30 +255,47 @@ public class ParticleFX {
 
         if (entity.particleID==2) {//cone lamps
             GL11.glPushMatrix();
-            GL11.glTranslated(x +entity.pos[0], y+entity.pos[1] , z+entity.pos[2]);
-            //use the texture to simulate it's fade with distance, rather than having the entire thing a set color.
-            //Tessellator.bindTexture(new ResourceLocation(TrainsInMotion.MODID, "cyltest.png"));
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-            GL11.glColor4f(((entity.color >> 16 & 0xFF) * 0.00392156863f) - entity.colorTint,
-                    ((entity.color >> 8 & 0xFF) * 0.00392156863f) - entity.colorTint,
-                    ((entity.color & 0xFF) * 0.00392156863f) - entity.colorTint,
-                    1f);
-            lampCone.render(0.0625f);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            GL11.glTranslated(x +entity.pos[0], y+entity.pos[1]+0.3, z+entity.pos[2]);
+            GL11.glRotated(90+entity.pos[3],1,0,0);
+            GL11.glRotated(entity.pos[4],0,1,0);
+            GL11.glRotated(entity.pos[5],0,0,1);
+            GL11.glDisable(GL11.GL_LIGHTING);
+            Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
+            glAlphaFunc(GL_LEQUAL, 1f);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+            GL11.glDepthMask(false);
+            drawLightTexture(entity);
+            for (int i=0; i<11; i++) {
+                GL11.glScalef(1-(i*0.03f),1+(i*0.003f),1-(i*0.03f));
+                lampCone.render(0.625f);
+            }
+            GL11.glEnable(GL11.GL_LIGHTING);
+            glAlphaFunc(GL_GREATER, 0.1f);
+            Minecraft.getMinecraft().entityRenderer.enableLightmap(1D);
+            GL11.glDisable(GL11.GL_BLEND);
+            GL11.glDepthMask(true);
             GL11.glPopMatrix();
-            //todo loop for a detail intensity going from outside to inside using GLScaleF to shrink it from 1 to about 0.25
         } else if (entity.particleID==3) {//sphere lamps
             GL11.glPushMatrix();
-            GL11.glTranslated(x, y , z);
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-            GL11.glColor4f(((entity.color >> 16 & 0xFF) * 0.00392156863f) - entity.colorTint,
-                    ((entity.color >> 8 & 0xFF) * 0.00392156863f) - entity.colorTint,
-                    ((entity.color & 0xFF) * 0.00392156863f) - entity.colorTint,
-                    0.1f);
-            lampSphere.render(0.0625f);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            GL11.glTranslated(x +entity.pos[0], y+entity.pos[1]+0.3, z+entity.pos[2]);
+            GL11.glDisable(GL11.GL_LIGHTING);
+            Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
+            glAlphaFunc(GL_LEQUAL, 1f);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+            GL11.glDepthMask(false);
+            drawLightTexture(entity);
+            for (int i=0; i<11; i++) {
+                GL11.glScalef(1 - (i * 0.03f), 1 - (i * 0.03f), 1 - (i * 0.03f));
+                lampSphere.render(0.625f);
+            }
+            GL11.glEnable(GL11.GL_LIGHTING);
+            glAlphaFunc(GL_GREATER, 0.1f);
+            Minecraft.getMinecraft().entityRenderer.enableLightmap(1D);
+            GL11.glDisable(GL11.GL_BLEND);
+            GL11.glDepthMask(true);
             GL11.glPopMatrix();
-            //todo loop for a detail intensity going from outside to inside using GLScaleF to shrink it from 1 to about 0.25
 
         } else {
 
@@ -290,10 +317,24 @@ public class ParticleFX {
 
     }
 
+
+    public static void drawLightTexture(ParticleFX entity){
+        for(int i=0; i<4092; i+=4) {
+            Tessellator.renderPixels.put(i, b(((entity.color >> 16 & 0xFF)) - (int)entity.colorTint));
+            Tessellator.renderPixels.put(i + 1, b(((entity.color >> 8 & 0xFF)) - (int)entity.colorTint));
+            Tessellator.renderPixels.put(i + 2, b(((entity.color & 0xFF)) - (int)entity.colorTint));
+            Tessellator.renderPixels.put(i + 3, b(1));
+        }
+
+        glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, 32, 32, GL_RGBA, GL_UNSIGNED_BYTE, Tessellator.renderPixels);
+        Tessellator.renderPixels.clear();//reset the buffer to all 0's.
+    }
+
+
     public static ModelRendererTurbo particle = new ModelRendererTurbo(null, 0, 0, 32, 32)
             .addBox(0,0,0, 4, 4, 4).setRotationPoint(-2F, 2F, -1F);
     public static ModelRendererTurbo lampCone = new ModelRendererTurbo(null, 0, 0, 32, 32)
-            .addCone(0,0,0,3,7,16);
+            .addCone(0,-8,0,3,8,16);
     public static ModelRendererTurbo lampSphere = new ModelRendererTurbo(null, 0, 0, 32, 32)
             .addSphere(0,0,0, 2, 6, 6,1,1);
 
