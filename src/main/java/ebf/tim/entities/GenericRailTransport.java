@@ -80,7 +80,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public String destination ="";
     /**used to initialize a laege number of variables that are used to calculate everything from movement to linking.
      * this is so we don't have to initialize each of these variables every tick, saves CPU.*/
-    protected double[][] vectorCache = new double[8][3];
+    public double[][] vectorCache = new double[8][3];
     /**the health of the entity, similar to that of EntityLiving*/
     private int health = 20;
     /**the fluidTank tank*/

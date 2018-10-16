@@ -15,6 +15,7 @@ group= "ebf.tim"
 archivesBaseName = "Trains in Motion"
 
 sourceCompatibility = targetCompatibility = "1.7"
+compileJava { sourceCompatibility = targetCompatibility = "1.7" }
 
 minecraft {
     version = "1.7.10-10.13.4.1558-1.7.10"

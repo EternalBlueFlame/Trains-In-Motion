@@ -19,13 +19,15 @@ public class StaticModelAnimator {
     public static final String tagAdvancedPiston = "advancedpiston";
     /**tag for animatedPart, axles, and other geometry that just spins.*/
     public static final String tagSimpleRotate = "simplerotate";
+    /**tag for wheels, adds support for the sparks on top of what tagSimpleRotate does.*/
+    public static final String tagWheel = "wheel";
     /**tag for lens flare effects. use this on geometric faces to hide or change color dependant on the state of the train.
      * this also disables lightmapping in the render for the geometry.
-     * @see ModelRendererTurbo#render(float, boolean)  */
+     * @see ModelRendererTurbo#render(float)  */
     public static final String tagLenseFlare = "lenseflare";
     /**tag for parts that glow, this disables the game's lightmapping on the geometry to make it appear as if it's glowing.
      * this is fully managed by the render
-     * @see ModelRendererTurbo#render(float, boolean)  */
+     * @see ModelRendererTurbo#render(float)  */
     public static final String tagGlow = "glow";
     /**tag for doors that slide open and closed*/
     public static final String tagDoorSlide = "doorslide";
@@ -74,7 +76,7 @@ public class StaticModelAnimator {
         }
         switch (modelRefrence.boxName){
             //animate wheels
-            case tagSimpleRotate:{
+            case tagSimpleRotate: case tagWheel:{
                 modelRefrence.rotateAngleZ = rotationZ*-0.5f;
                 break;
             }
