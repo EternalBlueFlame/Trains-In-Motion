@@ -87,7 +87,7 @@ public class RenderEntity extends Render {
             }
 
             //cache animating parts
-            if (ClientProxy.EnableAnimations) {
+            if (ClientProxy.EnableAnimations && entity.renderData.needsModelUpdate) {
                 boolean isAdded;
                 String[] density;
                 for (ModelBase part : entity.renderData.modelList) {
@@ -113,7 +113,7 @@ public class RenderEntity extends Render {
                         }
                         if(ParticleFX.getParticleIDFronName(render.boxName)!=-1){
                             density = ParticleFX.parseData(render.boxName.toLowerCase());
-                            entity.renderData.particles.addAll(ParticleFX.newParticleItterator(Integer.parseInt(density[0].trim())*20,
+                            entity.renderData.particles.addAll(ParticleFX.newParticleItterator(density[0].trim(),
                                     Integer.parseInt(density[1].trim(), 16),
                                     render.rotationPointX, render.rotationPointY, render.rotationPointZ,
                                     render.rotateAngleX,render.rotateAngleY,render.rotateAngleZ,
@@ -130,6 +130,7 @@ public class RenderEntity extends Render {
                     }
                 }
             }
+            entity.renderData.needsModelUpdate=false;
         }
 
 

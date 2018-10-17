@@ -42,7 +42,7 @@ public class ParticleFX {
     /*the color to render the particle as*/
     private final int color;
     /*the ticks the particle has existed, float is used so render can divide it into decimals*/
-    private Float ticksExisted=null;
+    private Float ticksExisted=null, scale=null;
     /*the offset to tint the particle color*/
     private float colorTint;
     /*the bounding box of the particle to use for rendering and collision, if it's null we render it as a static particle*/
@@ -59,7 +59,7 @@ public class ParticleFX {
     private GenericRailTransport host;
     /*the position offset to move based on the transport's rotation*/
     private double[] offset, pos;
-    private int particleID=0;
+    private int particleID=0, colorTemp;
 
     /**
      * Initialize the particle, basically for spawning it
@@ -71,13 +71,13 @@ public class ParticleFX {
         this.offset = new double[]{offsetX, id==4?transport.posY:offsetY, offsetZ};
         pos = RailUtility.rotatePoint(new double[]{offset[0]*0.0625,offset[1]*-0.0625,offset[2]*0.0625}, transport.rotationPitch, transport.rotationYaw, 0);
         pos= new double[]{pos[0],pos[1],pos[2],rotationX,rotationY,rotationZ};
+        this.color = color;
 
         switch (particleID) {
             case 0:case 1:{//smoke, steam
                 motionX = (rand.nextInt(40) - 20) * 0.001f;
                 motionY = particleID==0?0.15:0.0005;
                 motionZ = (rand.nextInt(40) - 20) * 0.001f;
-
 
                 this.boundingBox = AxisAlignedBB.getBoundingBox(pos[0] + transport.posX - 0.1, pos[1] + transport.posY - 0.1, pos[2] + transport.posZ - 0.1, pos[0] + transport.posX + 0.1, pos[1] + transport.posY + 0.1, pos[2] + transport.posZ + 0.1);
                 break;
@@ -96,7 +96,11 @@ public class ParticleFX {
                 break;
             }
         }
-        this.color = color;
+    }
+
+    public ParticleFX(GenericRailTransport transport, int color, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, int id, float scale){
+        this(transport, color, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id);
+        this.scale=scale;
     }
 
     public static int getParticleIDFronName(String name){
@@ -117,10 +121,15 @@ public class ParticleFX {
         return -1;//invalid part
     }
 
-    public static List<ParticleFX> newParticleItterator(int strength, int color, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, GenericRailTransport host, String partname){
+    public static List<ParticleFX> newParticleItterator(String strength, int color, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, GenericRailTransport host, String partname){
         List<ParticleFX> list = new ArrayList<>();
-        for (int i=0; i<strength; i++){
-            list.add(new ParticleFX(host, color, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, getParticleIDFronName(partname)));
+        int id= getParticleIDFronName(partname);
+        if(id==0 || id==1) {
+            for (int i = 0; i < Integer.parseInt(strength)*20; i++) {
+                list.add(new ParticleFX(host, color, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id));
+            }
+        } else {
+            list.add(new ParticleFX(host, color, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id, Float.parseFloat(strength)));
         }
         return list;
     }
@@ -137,7 +146,8 @@ public class ParticleFX {
         if (s.contains("smoke")) {
             return s.substring(s.indexOf("smoke ")+6).split(" ");
         } else if (s.contains("lamp")){
-            return new String[]{"1", "CCCC00"};
+            String[] lamp = s.substring(s.indexOf("lamp ")+5).split(" ");
+            return new String[]{lamp[1], lamp[2]};
         } else if (s.contains(StaticModelAnimator.tagWheel)){
             return new String[]{"4", "CCCC00"};
         } else {
@@ -167,6 +177,8 @@ public class ParticleFX {
             oldZ=pos[5];
             pos = RailUtility.rotatePoint(new double[]{offset[0]*0.0625,offset[1]*-0.0625,offset[2]*0.0625}, host.rotationPitch, host.rotationYaw, 0);
             pos= new double[]{pos[0],pos[1],pos[2],oldX,oldY,oldZ};
+            //in this case color is used as an ID of sorts.
+            colorTint=Integer.parseInt(host.renderData.particleRecolors[color],16);
             return;
         } else if(particleID==4 && this.ticksExisted > this.lifespan){
             if(host.vectorCache[7][1]>0.005){
@@ -185,6 +197,7 @@ public class ParticleFX {
         }else if (hostIsRunning && this.ticksExisted > this.lifespan) {
             //if the lifespan is out we reset the information, as if we just spawned a new particle.
             colorTint = (rand.nextInt(60) - 30)* 0.005f;
+            colorTemp=Integer.parseInt(host.renderData.particleRecolors[color],16);
             lifespan = rand.nextInt(80) +140;
             ticksExisted =0f;
             //recalculating it throws away the rotation value, but that's only used for the cone lamp, which doesn't even run this, so we don't need it anyway.
@@ -288,12 +301,14 @@ public class ParticleFX {
         }
 
         GL11.glPushMatrix();
+        //DebugUtil.println(entity.host.rotationYaw);
 
         if (entity.particleID==2) {//cone lamps
-            GL11.glTranslated(x +entity.pos[0], y+entity.pos[1]+0.3, z+entity.pos[2]);
-            GL11.glRotated(90+entity.pos[3],1,0,0);
-            GL11.glRotated(entity.pos[4],0,1,0);
-            GL11.glRotated(entity.pos[5],0,0,1);
+            GL11.glTranslated(x+entity.pos[0] , y+entity.pos[1]+0.3, z+entity.pos[2]);
+            GL11.glRotated(90+entity.pos[4]+entity.host.rotationPitch,1,0,0);
+            GL11.glRotated(entity.pos[5],0,1,0);
+            GL11.glRotated(270-entity.pos[3]+entity.host.rotationYaw,0,0,1);
+            GL11.glScalef(3,3,3);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
             glAlphaFunc(GL_LEQUAL, 1f);
@@ -302,7 +317,7 @@ public class ParticleFX {
             GL11.glDepthMask(false);
             drawLightTexture(entity);
             for (int i=0; i<11; i++) {
-                GL11.glScalef(1-(i*0.03f),1+(i*0.003f),1-(i*0.03f));
+                GL11.glScalef(1-(i*0.03f),1-(i*0.003f),1-(i*0.03f));
                 lampCone.render(0.625f);
             }
             GL11.glEnable(GL11.GL_LIGHTING);
@@ -311,7 +326,9 @@ public class ParticleFX {
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glDepthMask(true);
         } else if (entity.particleID==3) {//sphere lamps
+            //DebugUtil.println(entity.pos[0],entity.pos[1],entity.pos[2]);
             GL11.glTranslated(x +entity.pos[0], y+entity.pos[1]+0.3, z+entity.pos[2]);
+            GL11.glScalef(entity.scale,entity.scale,entity.scale);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
             glAlphaFunc(GL_LEQUAL, 1f);
@@ -334,9 +351,9 @@ public class ParticleFX {
 
             GL11.glDisable(GL11.GL_TEXTURE_2D);
             //set the color with the tint.   * 0.00392156863 is the same as /255, but multiplication is more efficient than division.
-            GL11.glColor4f(((entity.color >> 16 & 0xFF)* 0.00392156863f) - entity.colorTint,
-                    ((entity.color >> 8 & 0xFF)* 0.00392156863f) - entity.colorTint,
-                    ((entity.color & 0xFF)* 0.00392156863f) - entity.colorTint,
+            GL11.glColor4f(((entity.colorTemp >> 16 & 0xFF)* 0.00392156863f) - entity.colorTint,
+                    ((entity.colorTemp >> 8 & 0xFF)* 0.00392156863f) - entity.colorTint,
+                    ((entity.colorTemp & 0xFF)* 0.00392156863f) - entity.colorTint,
                     1f-(entity.ticksExisted/entity.lifespan));
             //set the position
             GL11.glTranslated( x + entity.boundingBox.minX - entity.host.posX, y+ entity.boundingBox.minY-entity.host.posY, z+ entity.boundingBox.minZ - entity.host.posZ);
@@ -354,23 +371,24 @@ public class ParticleFX {
 
 
     public static void drawLightTexture(ParticleFX entity){
-        for(int i=0; i<4092; i+=4) {
-            Tessellator.renderPixels.put(i, b(((entity.color >> 16 & 0xFF)) - (int)entity.colorTint));
-            Tessellator.renderPixels.put(i + 1, b(((entity.color >> 8 & 0xFF)) - (int)entity.colorTint));
-            Tessellator.renderPixels.put(i + 2, b(((entity.color & 0xFF)) - (int)entity.colorTint));
-            Tessellator.renderPixels.put(i + 3, b(1));
+        //DebugUtil.println(((int)entity.colorTint) & 0xFF);
+        for(int i=0; i<16368; i+=4) {
+            Tessellator.renderPixels.put(i, b(((int)entity.colorTint) >> 16 & 0xFF));
+            Tessellator.renderPixels.put(i + 1, b((((int)entity.colorTint) >> 8 & 0xFF)));
+            Tessellator.renderPixels.put(i + 2, b((((int)entity.colorTint) & 0xFF)));
+            Tessellator.renderPixels.put(i + 3, b(10));
         }
 
-        glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, 32, 32, GL_RGBA, GL_UNSIGNED_BYTE, Tessellator.renderPixels);
+        glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, 64, 64, GL_RGBA, GL_UNSIGNED_BYTE, Tessellator.renderPixels);
         Tessellator.renderPixels.clear();//reset the buffer to all 0's.
     }
 
 
-    public static ModelRendererTurbo particle = new ModelRendererTurbo(null, 0, 0, 32, 32)
+    public static ModelRendererTurbo particle = new ModelRendererTurbo(null, 0, 0, 16, 16)
             .addBox(0,0,0, 4, 4, 4).setRotationPoint(-2F, 2F, -1F);
-    public static ModelRendererTurbo lampCone = new ModelRendererTurbo(null, 0, 0, 32, 32)
-            .addCone(0,-8,0,3,8,16);
-    public static ModelRendererTurbo lampSphere = new ModelRendererTurbo(null, 0, 0, 32, 32)
+    public static ModelRendererTurbo lampCone = new ModelRendererTurbo(null, 0, 0, 64, 64)
+            .addCone(0,-4,0,1,4,16);
+    public static ModelRendererTurbo lampSphere = new ModelRendererTurbo(null, 0, 0, 64, 64)
             .addSphere(0,0,0, 2, 8, 8,1,1);
 
 }

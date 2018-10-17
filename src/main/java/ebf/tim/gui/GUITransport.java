@@ -204,7 +204,7 @@ public class GUITransport extends GUIContainerNoNEI {
 
             @Override
             public String getHoverText() {
-                return "gui.coupler." + transport.getBoolean(GenericRailTransport.boolValues.BRAKE);
+                return "gui.brake." + transport.getBoolean(GenericRailTransport.boolValues.BRAKE);
             }
 
             @Override
@@ -219,7 +219,7 @@ public class GUITransport extends GUIContainerNoNEI {
 
                     @Override
                     public String getHoverText() {
-                        return "gui.coupler." + transport.getBoolean(GenericRailTransport.boolValues.CREATIVE);
+                        return "gui.creative." + transport.getBoolean(GenericRailTransport.boolValues.CREATIVE);
                     }
 
                     @Override
@@ -233,7 +233,7 @@ public class GUITransport extends GUIContainerNoNEI {
 
                     @Override
                     public String getHoverText() {
-                        return "gui.coupler." + transport.getBoolean(GenericRailTransport.boolValues.RUNNING);
+                        return "gui.running." + transport.getBoolean(GenericRailTransport.boolValues.RUNNING);
                     }
 
                     @Override

@@ -32,6 +32,10 @@ public class TransportRenderData {
     /**the value to rotate the geometry with.*/
     public float wheelPitch=0;
     public float lastWheelPitch =0;
+    //sets the colors for the lamps and smoke in sets of hex, defined by the ID at the end of the lamp initialization.
+    public String[] particleRecolors=new String[]{"CCCC00","CC0000", "CCCCCC", "232323", "EEEEEE"};
+    //use this to force a model/animator refresh, like if you change the lamp colors.
+    public boolean needsModelUpdate = true;
 
     public List<ParticleFX> particles = new ArrayList<>();
 
