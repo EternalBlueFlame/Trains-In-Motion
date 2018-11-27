@@ -1,32 +1,18 @@
 package ebf.tim.models;
 
-import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
-import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.Tessellator;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
+import static fexcraft.tmt.slim.ModelRendererTurbo.MR_TOP;
 import static fexcraft.tmt.slim.Tessellator.b;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.GL_SAMPLE_ALPHA_TO_COVERAGE;
-import static org.lwjgl.opengl.GL30.GL_RASTERIZER_DISCARD;
 
 /**
  * <h1>Particle effect</h1>
@@ -44,7 +30,7 @@ public class ParticleFX {
     /*the ticks the particle has existed, float is used so render can divide it into decimals*/
     private Float ticksExisted=null, scale=null;
     /*the offset to tint the particle color*/
-    private float colorTint;
+    private int colorTint;
     /*the bounding box of the particle to use for rendering and collision, if it's null we render it as a static particle*/
     private final AxisAlignedBB boundingBox;
     /*the motion of the particle*/
@@ -182,7 +168,7 @@ public class ParticleFX {
             return;
         } else if(particleID==4 && this.ticksExisted > this.lifespan){
             if(host.vectorCache[7][1]>0.005){
-                colorTint = (rand.nextInt(60) - 30)* 0.005f;
+                colorTint = (rand.nextInt(75) - 30);
                 lifespan = rand.nextInt(80) +140;
                 ticksExisted =0f;
                 //recalculating it throws away the rotation value, but that's only used for the cone lamp, which doesn't even run this, so we don't need it anyway.
@@ -196,7 +182,7 @@ public class ParticleFX {
 
         }else if (hostIsRunning && this.ticksExisted > this.lifespan) {
             //if the lifespan is out we reset the information, as if we just spawned a new particle.
-            colorTint = (rand.nextInt(60) - 30)* 0.005f;
+            colorTint = (rand.nextInt(75) - 30);
             colorTemp=Integer.parseInt(host.renderData.particleRecolors[color],16);
             lifespan = rand.nextInt(80) +140;
             ticksExisted =0f;
@@ -308,26 +294,28 @@ public class ParticleFX {
             GL11.glRotated(90+entity.pos[4]+entity.host.rotationPitch,1,0,0);
             GL11.glRotated(entity.pos[5],0,1,0);
             GL11.glRotated(270-entity.pos[3]+entity.host.rotationYaw,0,0,1);
-            GL11.glScalef(3,3,3);
+            GL11.glScalef(5.5f,5.5f,5.5f);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
             glAlphaFunc(GL_LEQUAL, 1f);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
             GL11.glDepthMask(false);
-            drawLightTexture(entity);
-            for (int i=0; i<11; i++) {
-                GL11.glScalef(1-(i*0.03f),1-(i*0.003f),1-(i*0.03f));
+            GL11.glDisable(GL_CULL_FACE);
+            drawLightTexture(entity, true);
+            for (int i=0; i<5; i++) {
+                GL11.glScalef(1-(i*0.04f),1-(i*0.01f),1-(i*0.04f));
                 lampCone.render(0.625f);
             }
+            GL11.glEnable(GL_CULL_FACE);
             GL11.glEnable(GL11.GL_LIGHTING);
             glAlphaFunc(GL_GREATER, 0.1f);
             Minecraft.getMinecraft().entityRenderer.enableLightmap(1D);
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glDepthMask(true);
         } else if (entity.particleID==3) {//sphere lamps
-            //DebugUtil.println(entity.pos[0],entity.pos[1],entity.pos[2]);
-            GL11.glTranslated(x +entity.pos[0], y+entity.pos[1]+0.3, z+entity.pos[2]);
+            GL11.glTranslated(x+entity.pos[0] , y+entity.pos[1]+0.3, z+entity.pos[2]);
+            GL11.glRotated(270-entity.pos[3]+entity.host.rotationYaw,0,0,1);
             GL11.glScalef(entity.scale,entity.scale,entity.scale);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
@@ -335,11 +323,13 @@ public class ParticleFX {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
             GL11.glDepthMask(false);
-            drawLightTexture(entity);
-            for (int i=0; i<11; i++) {
-                GL11.glScalef(1 - (i * 0.03f), 1 - (i * 0.03f), 1 - (i * 0.03f));
+            GL11.glDisable(GL_CULL_FACE);
+            drawLightTexture(entity, true);
+            for (int i=0; i<5; i++) {
+                GL11.glScalef(1-(i*0.04f),1-(i*0.01f),1-(i*0.04f));
                 lampSphere.render(0.625f);
             }
+            GL11.glEnable(GL_CULL_FACE);
             GL11.glEnable(GL11.GL_LIGHTING);
             glAlphaFunc(GL_GREATER, 0.1f);
             Minecraft.getMinecraft().entityRenderer.enableLightmap(1D);
@@ -351,9 +341,9 @@ public class ParticleFX {
 
             GL11.glDisable(GL11.GL_TEXTURE_2D);
             //set the color with the tint.   * 0.00392156863 is the same as /255, but multiplication is more efficient than division.
-            GL11.glColor4f(((entity.colorTemp >> 16 & 0xFF)* 0.00392156863f) - entity.colorTint,
-                    ((entity.colorTemp >> 8 & 0xFF)* 0.00392156863f) - entity.colorTint,
-                    ((entity.colorTemp & 0xFF)* 0.00392156863f) - entity.colorTint,
+            GL11.glColor4f(((entity.colorTemp >> 16 & 0xFF)-entity.colorTint)* 0.00392156863f,
+                    ((entity.colorTemp >> 8 & 0xFF)-entity.colorTint)* 0.00392156863f,
+                    ((entity.colorTemp & 0xFF)-entity.colorTint)* 0.00392156863f,
                     1f-(entity.ticksExisted/entity.lifespan));
             //set the position
             GL11.glTranslated( x + entity.boundingBox.minX - entity.host.posX, y+ entity.boundingBox.minY-entity.host.posY, z+ entity.boundingBox.minZ - entity.host.posZ);
@@ -370,24 +360,38 @@ public class ParticleFX {
     }
 
 
-    public static void drawLightTexture(ParticleFX entity){
-        //DebugUtil.println(((int)entity.colorTint) & 0xFF);
-        for(int i=0; i<16368; i+=4) {
-            Tessellator.renderPixels.put(i, b(((int)entity.colorTint) >> 16 & 0xFF));
-            Tessellator.renderPixels.put(i + 1, b((((int)entity.colorTint) >> 8 & 0xFF)));
-            Tessellator.renderPixels.put(i + 2, b((((int)entity.colorTint) & 0xFF)));
-            Tessellator.renderPixels.put(i + 3, b(10));
+    public static void drawLightTexture(ParticleFX entity, boolean isCone){
+        int pos=0;
+        for(int i=0; i<8192; i+=4) {
+            if(!isCone || getY(pos)>7) {
+                Tessellator.renderPixels.put(i, b(entity.colorTint >> 16 & 0xFF));
+                Tessellator.renderPixels.put(i + 1, b(entity.colorTint >> 8 & 0xFF));
+                Tessellator.renderPixels.put(i + 2, b(entity.colorTint & 0xFF));
+                Tessellator.renderPixels.put(i + 3, b(getY(pos)-7));
+            } else {
+                Tessellator.renderPixels.put(i+3,b(0));
+            }
+
+            pos++;
         }
 
-        glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, 64, 64, GL_RGBA, GL_UNSIGNED_BYTE, Tessellator.renderPixels);
+        glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, 32, 64, GL_RGBA, GL_UNSIGNED_BYTE, Tessellator.renderPixels);
         Tessellator.renderPixels.clear();//reset the buffer to all 0's.
+    }
+
+    public static int getY(int pos){
+        int y=0;
+        while ((y+1)*32<pos) {
+            y++;
+        }
+        return y;
     }
 
 
     public static ModelRendererTurbo particle = new ModelRendererTurbo(null, 0, 0, 16, 16)
             .addBox(0,0,0, 4, 4, 4).setRotationPoint(-2F, 2F, -1F);
-    public static ModelRendererTurbo lampCone = new ModelRendererTurbo(null, 0, 0, 64, 64)
-            .addCone(0,-4,0,1,4,16);
+    public static ModelRendererTurbo lampCone = new ModelRendererTurbo(null, 0, 0, 32, 64)
+            .addCylinder(0, -4, 0, 1, 4, 16, 1F, 0.01F, MR_TOP, 1,1, 6);
     public static ModelRendererTurbo lampSphere = new ModelRendererTurbo(null, 0, 0, 64, 64)
             .addSphere(0,0,0, 2, 8, 8,1,1);
 

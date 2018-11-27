@@ -7,7 +7,7 @@ import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.items.ItemRail;
 import ebf.tim.models.rails.*;
 import ebf.tim.utility.ClientProxy;
-import ebf.tim.utility.CommonProxy;
+import ebf.tim.utility.DebugUtil;
 import net.minecraft.block.Block;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.block.BlockRail;
@@ -15,13 +15,11 @@ import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import fexcraft.tmt.slim.Vec3f;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -169,6 +167,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     @Override
     public void onNeighborBlockChange(World worldObj, int x, int y, int z, Block b) {
         super.onNeighborBlockChange(worldObj, x, y, z, b);
+        this.tile.updateShape();
     }
 
     //stuff from block container to make tile entity more reliable.
@@ -215,267 +214,73 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
 
-    protected static List<ModelRailSegment> quadGenModel(Vec3f P1, Vec3f P2, Vec3f P3, Vec3f P4, float[] railOffsets, float blockLength, RailTileEntity tile){
-        float segment = TrainsInMotion.proxy.isClient()?ClientProxy.railLoD:8;
-        segment*=blockLength;
-        if (segment<3){
-            segment=3;
-        }
-        double originalT =(Math.abs(P4.xCoord) + Math.abs(P4.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord))/ (segment*(Math.abs(P4.xCoord) + Math.abs(P4.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord)));
-        double t=-originalT;
+    protected static void quadGenModel(Vec3f P1, Vec3f P2, Vec3f P3, Vec3f P4, float[] railOffsets, float segmentation, RailTileEntity tile){
+
+
+        segmentation=Math.max(segmentation, 1);
+
+        float originalT =Math.abs(P1.xCoord)+Math.abs(P1.zCoord);
+        originalT+=Math.abs(P2.xCoord)+Math.abs(P2.zCoord);
+        originalT+=Math.abs(P3.xCoord)+Math.abs(P3.zCoord);
+        originalT= originalT/(originalT*segmentation);
+
+        float t=-originalT;
         int i;
-        //calculate the bezier curve
+        //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
         List<float[]> points = new ArrayList<>();
-        for (i=0; i<segment+3;i++){
+        for (i=0; i<segmentation+3;i++){
             //define position
             points.add(new float[]{
-                    (float) ((Math.pow(1 - t, 3) * P1.xCoord) + (3*Math.pow(1-t,2)*t*P2.xCoord) + (3*(1-t)*Math.pow(t,2)*P3.xCoord) + (Math.pow(t,3)*P4.xCoord)),//X
-                    (float) ((Math.pow(1 - t, 3) * P1.yCoord) + (3*Math.pow(1-t,2)*t*P2.yCoord) + (3*(1-t)*Math.pow(t,2)*P3.yCoord) + (Math.pow(t,3)*P4.yCoord)),//Y
-                    (float) ((Math.pow(1 - t, 3) * P1.zCoord) + (3*Math.pow(1-t,2)*t*P2.zCoord) + (3*(1-t)*Math.pow(t,2)*P3.zCoord) + (Math.pow(t,3)*P4.zCoord))//Z
-            });
-            t += originalT;
-        }
-        points.set(points.size()-2, new float[]{P4.xCoord,P4.yCoord,P4.zCoord});
-        points.set(1, new float[]{P1.xCoord,P1.yCoord,P1.zCoord});
-
-        originalT =(Math.abs(P4.xCoord) + Math.abs(P4.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord))/ ((blockLength*4f)*(Math.abs(P4.xCoord) + Math.abs(P4.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord)));
-        t=-originalT;
-        List<float[]> tiePoints = new ArrayList<>();
-        for (i=0; i<(blockLength*4f)+3;i++){
-            //define position
-            tiePoints.add(new float[]{
-                    (float) ((Math.pow(1 - t, 3) * P1.xCoord) + (3*Math.pow(1-t,2)*t*P2.xCoord) + (3*(1-t)*Math.pow(t,2)*P3.xCoord) + (Math.pow(t,3)*P4.xCoord)),//X
-                    (float) ((Math.pow(1 - t, 3) * P1.yCoord) + (3*Math.pow(1-t,2)*t*P2.yCoord) + (3*(1-t)*Math.pow(t,2)*P3.yCoord) + (Math.pow(t,3)*P4.yCoord)),//Y
-                    (float) ((Math.pow(1 - t, 3) * P1.zCoord) + (3*Math.pow(1-t,2)*t*P2.zCoord) + (3*(1-t)*Math.pow(t,2)*P3.zCoord) + (Math.pow(t,3)*P4.zCoord))//Z
+                    (RailUtility.power(1 - t, 3) * P1.xCoord) + (3*((1-t)*(1-t))*t*P2.xCoord) + (3*(1-t)*((1-t)*(1-t))*P3.xCoord) + (RailUtility.power(t,3)*P4.xCoord),//X
+                    (RailUtility.power(1 - t, 3) * P1.yCoord) + (3*((1-t)*(1-t))*t*P2.yCoord) + (3*(1-t)*((1-t)*(1-t))*P3.yCoord) + (RailUtility.power(t,3)*P4.yCoord),//Y
+                    (RailUtility.power(1 - t, 3) * P1.zCoord) + (3*((1-t)*(1-t))*t*P2.zCoord) + (3*(1-t)*((1-t)*(1-t))*P3.zCoord) + (RailUtility.power(t,3)*P4.zCoord)//Z
             });
             t += originalT;
         }
 
-        return genSegments(points, tiePoints, railOffsets, tile);
+        for (i=1; i < points.size() - 1; i++) {
+            tile.points.add(
+                    new float[]{points.get(i)[0],points.get(i)[1],points.get(i)[2],0, RailUtility.atan2degreesf(
+                            points.get(i-1)[2] - (points.get(i+1)[2]),
+                            points.get(i-1)[0] - (points.get(i+1)[0])),0}
+            );
+        }
+
+
+        tile.railGauges =railOffsets;
+        tile.segmentLength=segmentation;
     }
 
-    protected static List<ModelRailSegment> triGenModel(Vec3f P1, Vec3f P2, Vec3f P3, float[] railOffsets, float blockLength, RailTileEntity tile){
-        float segment = TrainsInMotion.proxy.isClient()?ClientProxy.railLoD:8;
-        segment*=blockLength;
-        if (segment<3){
-            segment=3;
-        }
-        double originalT =(Math.abs(P3.xCoord) + Math.abs(P3.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord))/ (segment*(Math.abs(P3.xCoord) + Math.abs(P3.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord)));
-        double t=-originalT;
+    protected static void triGenModel(Vec3f P1, Vec3f P2, Vec3f P3, float[] railOffsets, float segmentation, RailTileEntity tile){
+        segmentation=Math.max(segmentation, 1);
+
+        float originalT =Math.abs(P1.xCoord)+Math.abs(P1.zCoord);
+        originalT+=Math.abs(P2.xCoord)+Math.abs(P2.zCoord);
+        originalT+=Math.abs(P3.xCoord)+Math.abs(P3.zCoord);
+        originalT= originalT/(originalT*segmentation);
+
+        float t=-originalT;
         int i;
-        //calculate the bezier curve
+        //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
         List<float[]> points = new ArrayList<>();
-        for (i=0; i<segment+3;i++){
+        for (i=0; i<segmentation+3;i++){
             //define position
             points.add(new float[]{
-                    (float) ((Math.pow(1 - t, 2) * P1.xCoord) + (2 * (1 - t) * t * P2.xCoord) + ((Math.pow(t, 2) * P3.xCoord))),//X
-                    (float) ((Math.pow(1 - t, 2) * P1.yCoord) + (2 * (1 - t) * t * P2.yCoord) + ((Math.pow(t, 2) * P3.yCoord))),//Y
-                    (float) ((Math.pow(1 - t, 2) * P1.zCoord) + (2 * (1 - t) * t * P2.zCoord) + ((Math.pow(t, 2) * P3.zCoord))),//X
-            });
-            t += originalT;
-        }
-        points.set(points.size()-2, new float[]{P3.xCoord,P3.yCoord,P3.zCoord});
-        points.set(1, new float[]{P1.xCoord,P1.yCoord,P1.zCoord});
-
-        List<float[]> tiePoints = new ArrayList<>();
-        originalT =(Math.abs(P3.xCoord) + Math.abs(P3.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord))/ ((blockLength*4f)*(Math.abs(P3.xCoord) + Math.abs(P3.zCoord) + Math.abs(P1.xCoord) + Math.abs(P1.zCoord)));
-        t=-originalT;
-        for (i=0; i<(blockLength*4f)+3;i++){
-            //define position
-            tiePoints.add(new float[]{
-                    (float) ((Math.pow(1 - t, 2) * P1.xCoord) + (2 * (1 - t) * t * P2.xCoord) + ((Math.pow(t, 2) * P3.xCoord))),//X
-                    (float) ((Math.pow(1 - t, 2) * P1.yCoord) + (2 * (1 - t) * t * P2.yCoord) + ((Math.pow(t, 2) * P3.yCoord))),//Y
-                    (float) ((Math.pow(1 - t, 2) * P1.zCoord) + (2 * (1 - t) * t * P2.zCoord) + ((Math.pow(t, 2) * P3.zCoord))),//X
+                    (((1-t)*(1-t)) * P1.xCoord) + (2 * (1-t) * t * P2.xCoord) + ((t*t) * P3.xCoord),//X
+                    (((1-t)*(1-t)) * P1.yCoord) + (2 * (1-t) * t * P2.yCoord) + ((t*t) * P3.yCoord),//Y
+                    (((1-t)*(1-t)) * P1.zCoord) + (2 * (1-t) * t * P2.zCoord) + ((t*t) * P3.zCoord),//X
             });
             t += originalT;
         }
 
-        return genSegments(points, tiePoints, railOffsets, tile);
-    }
-
-    public static List<ModelRailSegment> genSegments(List<float[]> points,List<float[]> tiePoints, float[] railOffsets, RailTileEntity tile){
-
-        double[] offsetInner, offsetOuter;
-        double dX, dZ;
-        int i, length;
-        Float inner, left = null, right = null;
-        float[] startEndnd=new float[]{0,0};
-
-
-        //now make the points
-        List<ModelRailSegment> segments = new ArrayList<>();
-        for (i = 1; i < points.size() - 1; i++) {
-
-            //define the actual path
-            ModelRailSegment seg = new ModelRailSegment();
-            seg.position = new float[]{
-                    points.get(i)[0] * 16, points.get(i)[1] * 16, points.get(i)[2] * 16
-            };
-
-            //define the offset for model modifications.
-            dX = points.get(i-1)[0] - (points.get(i + 1)[0]);
-            dZ = points.get(i-1)[2] - (points.get(i + 1)[2]);
-            offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625}, 0,RailUtility.atan2degreesf(dZ,dX),0);
-            seg.zOffset = new float[]{(float)offsetOuter[0],(float)offsetOuter[1],(float)offsetOuter[2]};
-
-            left = null;
-            right = null;
-
-            //define the front positions for each model
-            for (float f : railOffsets){
-                if (f==0f || !TrainsInMotion.proxy.isClient()){
-                    continue;
-                }
-                //set the offsets for ballast and ties
-                if (left ==null){
-                    left = f;
-                } else if (f<left){
-                    left=f;
-                }
-                if (right ==null){
-                    right = f;
-                } else if (f>right){
-                    right=f;
-                }
-                offsetInner = RailUtility.rotatePoint(new double[]{0,0,-0.0625+f}, 0,RailUtility.atan2degreesf(dZ,dX),0);
-                offsetOuter = RailUtility.rotatePoint(new double[]{0,0,0.0625+f}, 0,RailUtility.atan2degreesf(dZ,dX),0);
-
-                seg.models.add(seg.genNewSubModel(
-                        new float[]{
-                                (float)(offsetInner[0]+points.get(i)[0]), (float)(offsetInner[1]+points.get(i)[1]), (float)(offsetInner[2]+points.get(i)[2])
-                        },
-                        new float[]{
-                                (float)(offsetOuter[0]+points.get(i)[0]), (float)(offsetOuter[1]+points.get(i)[1]), (float)(offsetOuter[2]+points.get(i)[2])
-                        },tile, (byte)0
-                ));
-            }
-
-
-            if (left!=null) {
-                //this is used for texture tiling along the path
-                if (startEndnd[1] > 0.029f) {
-                    startEndnd[1] = 0;
-                }
-                startEndnd[0] = startEndnd[1];
-                startEndnd[1] += (Math.abs(dX) + Math.abs(dZ)) * 0.0155f;
-                if (startEndnd[1] > 0.03f) {
-                    startEndnd[1] = 0.03f;
-                }
-
-                //this segments it horizontally for tiling.
-                length = (int) (((Math.abs(left) + Math.abs(right)) * 1.6) + 0.5f);//cast as an int, lazy rounding down to whole number.
-                inner = ((Math.abs(left) + Math.abs(right)) * 1.6f);
-                if (length == 0) {
-                    length = 1;
-                    inner = 1F;
-                }
-            /*
-            * -----------------------------------------------------
-            * Ballast
-            * -----------------------------------------------------
-             */
-                if (tile.ballast !=null) { //checking if left is null is technically faster than seeing if the array of rails has more than 0 entries
-
-
-                    //this actually gens the parts
-                    for (int ii = 0; ii < length; ii++) {
-                        offsetInner = RailUtility.rotatePoint(new double[]{0, 0, (-inner * 0.5f) + ((inner / length) * (ii))}, 0, RailUtility.atan2degreesf(dZ, dX), 0);
-                        offsetOuter = RailUtility.rotatePoint(new double[]{0, 0, (-inner * 0.5f) + ((inner / length) * (ii + 1))}, 0, RailUtility.atan2degreesf(dZ, dX), 0);
-
-                        ModelRailSegment.subModel model = seg.genNewSubModel(
-                                new float[]{
-                                        (float) (offsetInner[0] + points.get(i)[0]), (float) (offsetInner[1] + points.get(i)[1])-0.025f, (float) (offsetInner[2] + points.get(i)[2])
-                                },
-                                new float[]{
-                                        (float) (offsetOuter[0] + points.get(i)[0]), (float) (offsetOuter[1] + points.get(i)[1])-0.025f, (float) (offsetOuter[2] + points.get(i)[2])
-                                }, tile, (byte) 1
-                        );
-                        model.offset[0] = startEndnd[0];
-                        model.offset[1] = startEndnd[1];
-                        seg.models.add(model);
-                    }
-                }
-            }
-            segments.add(seg);
+        for (i=1; i < points.size() - 1; i++) {
+            tile.points.add(
+                    new float[]{points.get(i)[0],points.get(i)[1],points.get(i)[2],0, RailUtility.atan2degreesf(
+                            points.get(i-1)[2] - (points.get(i+1)[2]),
+                            points.get(i-1)[0] - (points.get(i+1)[0])),0}
+            );
         }
-
-        if (tile.getWorldObj().isRemote && left!=null && segments.size() > 0 && tile.ties != null) {
-        /*
-        * -----------------------------------------------------
-        * Ties
-        * -----------------------------------------------------
-         */
-            for (i = 1; i < tiePoints.size() - 2; i++) {
-                dX = tiePoints.get(i - 1)[0] - (tiePoints.get(i + 1)[0]);
-                dZ = tiePoints.get(i - 1)[2] - (tiePoints.get(i + 1)[2]);
-
-                //this segments it horizontally for tiling.
-                length = (int) (((Math.abs(left) + Math.abs(right)) * 1.6) + 0.5f);//cast as an int, lazy rounding down to whole number.
-                inner = ((Math.abs(left) + Math.abs(right)) * 1.6f);
-                if (length == 0) {
-                    length = 1;
-                    inner = 1F;
-                }
-                float zBufferFix;
-                Random r = new Random();
-                //this actually gens the parts
-                for (int ii = 0; ii < length; ii++) {
-                    offsetInner = RailUtility.rotatePoint(new double[]{-0.06, 0, (-inner * 0.49f) + ((inner / length) * (ii))}, 0, RailUtility.atan2degreesf(dZ, dX), 0);
-                    offsetOuter = RailUtility.rotatePoint(new double[]{-0.06, 0, (-inner * 0.51f) + ((inner / length) * (ii + 1))}, 0, RailUtility.atan2degreesf(dZ, dX), 0);
-                    zBufferFix = (float) r.nextInt(10000) * 0.0000001f;
-                    ModelRailSegment.subModel model = segments.get(0).genNewSubModel(
-                            new float[]{
-                                    (float) (offsetInner[0] + tiePoints.get(i)[0]), (float) (offsetInner[1] + tiePoints.get(i)[1]) + zBufferFix, (float) (offsetInner[2] + tiePoints.get(i)[2])
-                            },
-                            new float[]{
-                                    (float) (offsetOuter[0] + tiePoints.get(i)[0]), (float) (offsetOuter[1] + tiePoints.get(i)[1]) + zBufferFix, (float) (offsetOuter[2] + tiePoints.get(i)[2])
-                            }, tile, (byte) 2
-                    );
-
-                    offsetInner = RailUtility.rotatePoint(new double[]{-0.18, 0, (-inner * 0.49f) + ((inner / length) * (ii))}, 0, RailUtility.atan2degreesf(dZ, dX), 0);
-                    offsetOuter = RailUtility.rotatePoint(new double[]{-0.18, 0, (-inner * 0.51f) + ((inner / length) * (ii + 1))}, 0, RailUtility.atan2degreesf(dZ, dX), 0);
-
-                    model.lastPositionInner = new float[]{
-                            (float) (offsetInner[0] + tiePoints.get(i)[0]), (float) (offsetInner[1] + tiePoints.get(i)[1]) + zBufferFix, (float) (offsetInner[2] + tiePoints.get(i)[2])
-                    };
-                    model.lastPositionOuter = new float[]{
-                            (float) (offsetOuter[0] + tiePoints.get(i)[0]), (float) (offsetOuter[1] + tiePoints.get(i)[1]) + zBufferFix, (float) (offsetOuter[2] + tiePoints.get(i)[2])
-                    };
-
-
-                    model.offset[0] = startEndnd[0];
-                    model.offset[1] = startEndnd[1];
-                    if (ii == 0) {
-                        model.offset[2] = ii == length - 1 ? 3 : 1;
-                    } else {
-                        model.offset[2] = ii == length - 1 ? 2 : 0;
-                    }
-                    segments.get(0).models.add(model);
-                }
-            }
-        }
-
-        //connect the back positions of each model to the previous model's front positions
-        if (segments.size() > 0 && TrainsInMotion.proxy.isClient()) {
-            int ii = 0;
-            for (i = 0; i < segments.size() - 1; i++) {
-                for (ii = 0; ii < segments.get(i).models.size(); ii++) {
-                    if (segments.get(i).models.get(ii).type == 2) {
-                        continue;//skip ties
-                    }
-                    segments.get(i).models.get(ii).lastPositionInner = segments.get(i + 1).models.get(ii).positionInner;
-                    segments.get(i).models.get(ii).lastPositionOuter = segments.get(i + 1).models.get(ii).positionOuter;
-                }
-            }
-
-            for (ii = 0; ii < segments.get(i).models.size(); ii++) {
-                if (segments.get(i).models.get(ii).type == 2) {
-                    continue;//skip ties
-                }
-                segments.get(segments.size() - 1).models.get(ii).lastPositionInner = segments.get(segments.size() - 1).models.get(ii).positionInner = null;
-                segments.get(segments.size() - 1).models.get(ii).lastPositionOuter = segments.get(segments.size() - 1).models.get(ii).lastPositionOuter = null;
-            }
-        }
-        return segments;
+        tile.railGauges =railOffsets;
+        tile.segmentLength=segmentation;
     }
 }

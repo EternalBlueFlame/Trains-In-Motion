@@ -1293,7 +1293,7 @@ public class ModelRendererTurbo {
      * @param textureCircleDiameterH the diameter height of the circle on the texture
      * @param textureH the height of the texture of the body
      */
-	public void addCylinder(float x, float y, float z, float radius, float length, int segments, float baseScale, float topScale, int baseDirection, int textureCircleDiameterW, int textureCircleDiameterH, int textureH){
+	public ModelRendererTurbo addCylinder(float x, float y, float z, float radius, float length, int segments, float baseScale, float topScale, int baseDirection, int textureCircleDiameterW, int textureCircleDiameterH, int textureH){
 		boolean dirTop = (baseDirection == MR_TOP || baseDirection == MR_BOTTOM);
 		boolean dirSide = (baseDirection == MR_RIGHT || baseDirection == MR_LEFT);
 		boolean dirFront = (baseDirection == MR_FRONT || baseDirection == MR_BACK);
@@ -1381,6 +1381,7 @@ public class ModelRendererTurbo {
 			}
 		}
 		copyTo(tempVerts, poly);
+		return this;
 	}
     
     /**

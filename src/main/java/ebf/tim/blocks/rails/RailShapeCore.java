@@ -1,7 +1,6 @@
 package ebf.tim.blocks.rails;
 
 import ebf.tim.blocks.RailTileEntity;
-import ebf.tim.models.rails.ModelRailSegment;
 import fexcraft.tmt.slim.Vec3f;
 import net.minecraft.util.MathHelper;
 
@@ -12,12 +11,16 @@ import static ebf.tim.utility.RailUtility.radianF;
 public class RailShapeCore {
 
 
-    public static List<?extends ModelRailSegment> quadProcessPoints(Vec3f[] coords, float[] gauge, RailTileEntity tile, float length){
-        return BlockRailCore.quadGenModel(coords[0],coords[1], coords[2], coords[3], gauge, length, tile);
+    public static void quadProcessPoints(List<Vec3f[]> coordList, float[] gauge, RailTileEntity tile, float length){
+        for(Vec3f[] coords : coordList) {
+            BlockRailCore.quadGenModel(coords[0], coords[1], coords[2], coords[3], gauge, length, tile);
+        }
     }
 
-    public static List<?extends ModelRailSegment> triProcessPoints(Vec3f[] coords, float[] gauge, RailTileEntity tile, float length){
-        return BlockRailCore.triGenModel(coords[0],coords[1], coords[2], gauge, length, tile);
+    public static void triProcessPoints(List<Vec3f[]> coordList, float[] gauge, RailTileEntity tile, float length){
+        for(Vec3f[] coords : coordList) {
+            BlockRailCore.triGenModel(coords[0], coords[1], coords[2], gauge, length, tile);
+        }
     }
 
     /**

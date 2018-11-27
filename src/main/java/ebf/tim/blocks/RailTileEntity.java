@@ -3,10 +3,9 @@ package ebf.tim.blocks;
 import cpw.mods.fml.common.registry.GameData;
 import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.blocks.rails.RailVanillaShapes;
-import ebf.tim.models.rails.ModelRailSegment;
-import fexcraft.tmt.slim.Vec3f;
+import ebf.tim.models.rails.Model1x1Rail;
+import ebf.tim.utility.DebugUtil;
 import net.minecraft.block.BlockRailBase;
-import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.block.Block;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.init.Blocks;
@@ -27,8 +26,6 @@ import java.util.List;
 public class RailTileEntity extends TileEntity {
 
     private AxisAlignedBB boundingBox = null;
-    public List<List<?extends ModelRailSegment>> renderPath = new ArrayList<>();
-    public List<Vec3f[]> pathCore = null;
     //management variables
     public Block ballast = null;
     public Block ties = null;
@@ -44,24 +41,22 @@ public class RailTileEntity extends TileEntity {
         return 0.4f;
     }
 
+    //used for the actual path, and rendered
+    public List<float[]> points = new ArrayList<>();
+    public float segmentLength=0;
+    //used to define the number of rails and their offset from the center.
+    public float[] railGauges;
+    //TODO: only rendered, to show other paths, maybe rework so they are all in the same list and just have a bool for which is active?
+    //public List<RailPointData> cosmeticPoints = new ArrayList<>();
+
 
     public void func_145828_a(@Nullable CrashReportCategory report)  {
         if (report == null) {
-            if (!worldObj.isRemote || renderPath == null) {
+            if (!worldObj.isRemote) {
                 return;
             }
-            int i=0;
-            int last=0;
-            for (List<? extends ModelRailSegment> path : renderPath) {
-                last = renderPath.size() - 1;
-                for (ModelRailSegment point : path) {
-
-                    for (ModelRailSegment.subModel model : point.models) {
-                        model.render(Tessellator.getInstance(), i == 0, i == last, ballast, ties, Blocks.iron_block);
-                    }
-                    i++;
-                }
-            }
+            //DebugUtil.println(segmentLength);
+            Model1x1Rail.Model3DRail(points, gauge750mm, segmentLength);
         } else {super.func_145828_a(report);}
     }
 
@@ -73,7 +68,7 @@ public class RailTileEntity extends TileEntity {
     @Override
     public boolean canUpdate(){return worldObj!=null && !worldObj.isRemote;}
 
-    public static final float[] gauge750mm={0f, 0.3125f, -0.3125f};
+    public static final float[] gauge750mm={0.3125f, -0.3125f};
 
     int[] meta = new int[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};//3x3x3. value -1 is for blocks that aren't a rail
     int tickOffset=0;
@@ -107,60 +102,66 @@ public class RailTileEntity extends TileEntity {
 
     public void updateShape() {
 
-        List<Vec3f[]> oldPath = pathCore;
+        List<float[]> oldPoints = points;//hold on to check if we need update.
 
+        ballast=Blocks.glowstone;
+        ties=Blocks.log;
+
+        points= new ArrayList<>();
+        //todo: process these directly into quad/triProcessPoints on server, then sync the offsets over the NBT network packet.
             switch (worldObj.getBlockMetadata(xCoord, yCoord, zCoord)){
                 //Z straight
                 case 0: {
-                    pathCore = RailVanillaShapes.vanillaZStraight(worldObj, xCoord, yCoord, zCoord);
+                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaZStraight(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 //X straight
                 case 1: {
-                    pathCore = RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord);
+                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
 
                 //curves
                 case 9: {
-                    pathCore = RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord);
+                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 case 8: {
-                    pathCore = RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord);
+                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 case 7: {
-                    pathCore = RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord);
+                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 case 6: {
-                    pathCore = RailVanillaShapes.vanillaCurve6(worldObj, xCoord, yCoord, zCoord);
+                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaCurve6(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 //Z slopes
                 case 5 :{
-                    pathCore = RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord);
+                    RailShapeCore.quadProcessPoints(RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 case 4 :{
-                    pathCore = RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord);
+                    RailShapeCore.quadProcessPoints(RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 //X slopes
                 case 2 :{
-                    pathCore = RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord);
+                    RailShapeCore.quadProcessPoints(RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 case 3 :{
-                    pathCore = RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord);
+                    RailShapeCore.quadProcessPoints(RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
             }
 
-            if(oldPath != pathCore) {
+            if(oldPoints != points) {
                 this.markDirty();
             }
+            oldPoints=null;//clean it out of ram, we dont need it now.
 
     }
 
@@ -203,19 +204,7 @@ public class RailTileEntity extends TileEntity {
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
         super.onDataPacket(net, pkt);
         if(pkt ==null){return;}
-
         readFromNBT(pkt.func_148857_g());
-        if (pathCore == null){
-            return;
-        }
-        renderPath = new ArrayList<>();
-        for (Vec3f[] p : pathCore) {
-            if (p.length == 3) {
-                renderPath.add(RailShapeCore.triProcessPoints(p, gauge750mm, this, 1));
-            } else if (p.length == 4) {
-                renderPath.add(RailShapeCore.quadProcessPoints(p, gauge750mm, this, 1));
-            }
-        }
     }
 
 
@@ -226,12 +215,15 @@ public class RailTileEntity extends TileEntity {
         tag.setString("ties", ties!=null?ties.delegate.name():"null");
         tag.setString("rail", rail !=null? rail.delegate.name():"null");
         tag.setString("wires", wires!=null?wires.delegate.name():"null");
+        tag.setFloat("segmentLength", segmentLength);
         try {
             ByteArrayOutputStream bo = new ByteArrayOutputStream();
             ObjectOutputStream so = new ObjectOutputStream(bo);
-            so.writeObject(pathCore);
+            so.writeObject(points);
             tag.setByteArray("path", bo.toByteArray());
             so.flush();
+            bo.close();
+
         } catch (Exception e){
             System.out.println("HOW DID YOU GET AN IO EXCEPTION WITHOUT WRITING TO FILE?");
             e.printStackTrace();
@@ -271,10 +263,13 @@ public class RailTileEntity extends TileEntity {
             }
         }
 
+        if (tag.hasKey("segmentLength")) {
+            segmentLength = tag.getFloat("segmentLength");
+        }
+
         byte[] b = tag.getByteArray("path");
-        pathCore = new ArrayList<>();
         try {
-          pathCore = (List<Vec3f[]>) new ObjectInputStream(new ByteArrayInputStream(b)).readObject();
+          points = (List<float[]>) new ObjectInputStream(new ByteArrayInputStream(b)).readObject();
         } catch (Exception e){
           e.printStackTrace();
         }

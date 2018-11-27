@@ -51,10 +51,10 @@ public class Tessellator{
 	private int verts, dm;
 	private boolean translated=false, texture4d=false, isQuad =true;
 	private float x, y, z;
-	//supports up to 64 vertex points for support of larger
-	private static FloatBuffer bufferVertex = GLAllocation.createDirectByteBuffer(128*3).asFloatBuffer();//one for each vertex
-	private static IntBuffer bufferIndex = GLAllocation.createDirectByteBuffer(128).asIntBuffer();//one per set of vertex points
-	private static FloatBuffer bufferTexture = GLAllocation.createDirectByteBuffer(128*4).asFloatBuffer();//one for each texture vertex, yes there's 4 for some compatibility reason.
+	//supports up to 1024 vertex points for support of larger
+	private static FloatBuffer bufferVertex = GLAllocation.createDirectByteBuffer(4096*6).asFloatBuffer();//one for each vertex
+	private static IntBuffer bufferIndex = GLAllocation.createDirectByteBuffer(4096*2).asIntBuffer();//one per set of vertex points
+	private static FloatBuffer bufferTexture = GLAllocation.createDirectByteBuffer(4096*8).asFloatBuffer();//one for each texture vertex, yes there's 4 for some compatibility reason.
 
 	//rendering quads is far more common than other shapes, so they get their own specific system that's slightly more efficient by using a preset variable for the index.
 	private static final IntBuffer quadIndex = (IntBuffer) GLAllocation.createDirectIntBuffer(4).put(new int[]{0,1,2,3}).flip();
