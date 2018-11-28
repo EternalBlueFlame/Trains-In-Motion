@@ -68,19 +68,21 @@ public class EntityTrainCore extends GenericRailTransport {
     public void readSpawnData(ByteBuf additionalData) {
         super.readSpawnData(additionalData);
         accelerator = additionalData.readInt();
+        fuelHandler.heatC = additionalData.readFloat();
     }
     /**sends the data to server from client*/
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         super.writeSpawnData(buffer);
         buffer.writeInt(accelerator);
+        buffer.writeFloat(fuelHandler.heatC);
     }
     /**loads the entity's save file*/
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
         accelerator = tag.getInteger(NBTKeys.accelerator);
-        dataWatcher.updateObject(16, tag.getFloat(NBTKeys.transportFuel));
+        this.fuelHandler.heatC = tag.getFloat(NBTKeys.transportFuel);
         vectorCache[7][0] = tag.getDouble(NBTKeys.trainSpeed);
 
 
@@ -90,16 +92,16 @@ public class EntityTrainCore extends GenericRailTransport {
     protected void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
         tag.setInteger(NBTKeys.accelerator, accelerator);
-        tag.setFloat(NBTKeys.transportFuel, dataWatcher.getWatchableObjectFloat(16));
+        tag.setFloat(NBTKeys.transportFuel, fuelHandler.heatC);
         tag.setDouble(NBTKeys.trainSpeed, vectorCache[7][0]);
 
     }
 
     @Override
-    public void entityInit(){
+    public void entityInit() {
         super.entityInit();
-        this.dataWatcher.addObject(18, 0);//accelerator
-        this.dataWatcher.addObject(16, 0.0f);//boiler heat
+        this.dataWatcher.addObject(18, accelerator);//accelerator
+        this.dataWatcher.addObject(16, 0f);//accelerator
         this.updateWatchers = true;
     }
 
@@ -314,13 +316,13 @@ public class EntityTrainCore extends GenericRailTransport {
                 }case 2:{ //decrease speed
                     if (accelerator >-6 && getBoolean(boolValues.RUNNING)) {
                         accelerator--;
-                        this.dataWatcher.updateObject(18, accelerator);
+                        updateWatchers = true;
                     }
                     return true;
                 }case 3:{ //increase speed
                     if (accelerator <6 && getBoolean(boolValues.RUNNING)) {
                         accelerator++;
-                        this.dataWatcher.updateObject(18, accelerator);
+                        updateWatchers = true;
                     }
                     return true;
                 }
