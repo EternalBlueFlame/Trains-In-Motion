@@ -12,9 +12,14 @@ import ebf.tim.entities.rollingstock.EntityVATLogCar;
 import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.bogies.CMDBogie;
+import ebf.tim.utility.DebugUtil;
+import net.minecraft.crash.CrashReport;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <h1>Train registry</h1>
@@ -39,13 +44,18 @@ public class TransportRegistry {
     public static void registerTransports(int entityIDOffset){
         int index =0;
         GenericRailTransport registry = listTrains(0);
+        List<String> usedNames = new ArrayList<>();
         while (registry!=null) {
+            if(usedNames.contains(registry.getItem().getUnlocalizedName())){
+                DebugUtil.println(registry.getClass().getName(),"is trying to register under the name", usedNames.contains(registry.getItem().getUnlocalizedName()), "which is already used");
+            }
             cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(
                     registry.getClass(),
                     registry.getItem().getUnlocalizedName().replace("item","entity"),
                     index+entityIDOffset, TrainsInMotion.instance, 60, 1, true);
             GameRegistry.registerItem(registry.getItem(), registry.getItem().getUnlocalizedName().substring(5));
             registry.registerSkins();
+            usedNames.add(registry.getItem().getUnlocalizedName());
             index++;
             registry = listTrains(index);
         }

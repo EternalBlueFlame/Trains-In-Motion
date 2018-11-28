@@ -153,13 +153,12 @@ public class RenderEntity extends Render {
          * Be sure animations are enabled in user settings, then check of there is something to animate.
          * if there is, then calculate the vectors and apply the animations
          */
-        if (!Minecraft.getMinecraft().isGamePaused() &&ClientProxy.EnableAnimations &&
-                (entity.frontVelocityX > 0.0003 || entity.frontVelocityX < -0.0003 || entity.frontVelocityZ > 0.0003 || entity.frontVelocityZ < -0.0003)) {
+        if (!Minecraft.getMinecraft().isGamePaused() &&ClientProxy.EnableAnimations) {
             if (entity.renderData.wheelPitch >= 6.2831855f || entity.renderData.wheelPitch <=-6.2831855f) {
                 entity.renderData.wheelPitch -= Math.copySign(6.2831855f, entity.renderData.wheelPitch);
             }
             //define the rotation angle, if it's going fast enough.
-            entity.renderData.wheelPitch += (((entity.frontVelocityX * entity.frontVelocityX) + (entity.frontVelocityZ * entity.frontVelocityZ))*0.1f);
+            entity.renderData.wheelPitch += (((entity.frontVelocityX * entity.frontVelocityX) + (entity.frontVelocityZ * entity.frontVelocityZ))*0.3f);
 
             if (entity.renderData.wheelPitch != entity.renderData.lastWheelPitch) {
                 entity.renderData.lastWheelPitch =entity.renderData.wheelPitch;

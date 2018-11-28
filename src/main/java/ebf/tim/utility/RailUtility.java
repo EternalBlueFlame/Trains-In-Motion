@@ -153,18 +153,19 @@ public class RailUtility {
         return xyz;
     }
 
-    public static float[] rotatePointF(float[] f, float pitch, float yaw, float roll) {
-        float cos;
-        float sin;
-        float[] xyz = new float[]{f[0],f[1],f[2]};
+    private static float cos;
+    private static float sin;
+    private static float[] xyz = new float[]{0,0,0};
+    public static float[] rotatePointF(float x, float y, float z, float pitch, float yaw, float roll) {
+        xyz[0]=x; xyz[1]=y; xyz[2]=z;
         //rotate pitch
         if (pitch != 0.0F) {
             pitch *= radianF;
             cos = MathHelper.cos(pitch);
             sin = MathHelper.sin(pitch);
 
-            xyz[0] = (f[1] * sin) + (f[0] * cos);
-            xyz[1] = (f[1] * cos) - (f[0] * sin);
+            xyz[0] = (y * sin) + (x * cos);
+            xyz[1] = (y * cos) - (x * sin);
         }
         //rotate yaw
         if (yaw != 0.0F) {
@@ -172,8 +173,8 @@ public class RailUtility {
             cos = MathHelper.cos(yaw);
             sin = MathHelper.sin(yaw);
 
-            xyz[0] = (f[0] * cos) - (f[2] * sin);
-            xyz[2] = (f[0] * sin) + (f[2] * cos);
+            xyz[0] = (x * cos) - (z * sin);
+            xyz[2] = (x * sin) + (z* cos);
         }
         //rotate roll
         if (roll != 0.0F) {
@@ -181,8 +182,8 @@ public class RailUtility {
             cos = MathHelper.cos(roll);
             sin = MathHelper.sin(roll);
 
-            xyz[1] = (f[2] * cos) - (f[1] * sin);
-            xyz[2] = (f[2] * sin) + (f[1] * cos);
+            xyz[1] = (z * cos) - (y * sin);
+            xyz[2] = (z * sin) + (y * cos);
         }
 
         return xyz;

@@ -58,6 +58,8 @@ public class Tessellator{
 
 	//rendering quads is far more common than other shapes, so they get their own specific system that's slightly more efficient by using a preset variable for the index.
 	private static final IntBuffer quadIndex = (IntBuffer) GLAllocation.createDirectIntBuffer(4).put(new int[]{0,1,2,3}).flip();
+	//2 bytes for idk GL does something with them, then 4 bytes per pixel at 4kx4k resolution. any bigger breaks intel GPU's anyway.
+	private static ByteBuffer bufferTexturePixels = GLAllocation.createDirectByteBuffer(67108866);
 
 
 	public static Tessellator getInstance(){
@@ -223,18 +225,17 @@ public class Tessellator{
 			int width =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
 			int height =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
 
-			ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
 
-			GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+			GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, bufferTexturePixels);
 
 			texture = new int[((width*height)*4)+2];
 			texture[0]=width;
 			texture[1]=height;
 			for (int i=2; i<((width*height)*(4))-2; i+=(4)){
-				texture[i+3]=buffer.get(i+3);//alpha
-				texture[i+2]=buffer.get(i+2);//Red
-				texture[i+1]=buffer.get(i+1);//Green
-				texture[i]=buffer.get(i);//Blue
+				texture[i+3]=bufferTexturePixels.get(i+3);//alpha
+				texture[i+2]=bufferTexturePixels.get(i+2);//Red
+				texture[i+1]=bufferTexturePixels.get(i+1);//Green
+				texture[i]=bufferTexturePixels.get(i);//Blue
 			}
 			tmtTextureMap.put(resource, texture);
 		}

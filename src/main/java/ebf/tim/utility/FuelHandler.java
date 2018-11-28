@@ -28,8 +28,6 @@ public class FuelHandler{
 	public int burnHeat =0;
 	private float burnTime =0;
 	private float burnTimeMax =0;
-	/**the steam tank, used for steam and nuclear steam trains*/
-	public float heatC =21;
 
 	public float maxHeat(GenericRailTransport transport){
 		switch (transport.getType()){
@@ -42,7 +40,9 @@ public class FuelHandler{
 	 * <h2>check if an item is a usable water source item</h2>
 	 * @return if the train can add the water to the boiler or not.
 	 * TiM only water items and support for 3rd party/vanilla fuels are managed here
+	 *
 	 */
+	@Deprecated
 	public static FluidStack isUseableFluid(ItemStack itemStack, GenericRailTransport transport){
 		switch (transport.getType()){
 			case ELECTRIC:{
@@ -55,29 +55,25 @@ public class FuelHandler{
 				}
 				return null;
 			}
-			case NUCLEAR_STEAM:{/*compensate for coolant*/}
-			case STEAM:{
-				//return the fluidstack only if it's water.
-				return FluidContainerRegistry.getFluidForFilledItem(itemStack)!= null && FluidContainerRegistry.getFluidForFilledItem(itemStack).getFluidID() == FluidRegistry.WATER.getID()?FluidContainerRegistry.getFluidForFilledItem(itemStack):null;
-			}
 			default:{
 				return FluidContainerRegistry.getFluidForFilledItem(itemStack);
 			}
 		}
 	}
 
+	public FluidStack getFluidForSlot(GenericRailTransport train, int slot){
+		return FluidContainerRegistry.getFluidForFilledItem(train.getSlotIndexByID(slot).getStack());
+	}
 
 	/**
 	 * <h2>steam management</h2>
 	 *
-	 * Credit to zodiacmal for the heatC calculation.
+	 * Credit to zodiacmal for the heat calculation.
 	 * @param train
 	 */
 	public void manageSteam(EntityTrainCore train){
 		//manage solid burnHeat
 		ItemStackSlot slotId=train.getSlotIndexByID(400);
-		//DebugUtil.println(slotId, (slotId==null?"null":slotId.getDisplayName()),
-		//		train.getSlotIndexByID(401), (train.getStackInSlot(train.getSlotIndexByID(401))==null?"null":train.getStackInSlot(train.getSlotIndexByID(401)).getDisplayName()));
 		if (burnTime <1){
 			burnTime=0;
 			if (slotId != null && TileEntityFurnace.getItemBurnTime(slotId.getStack())>0) {
@@ -95,14 +91,13 @@ public class FuelHandler{
 			burnTime--;
 		}
 
-		slotId=train.getSlotIndexByID(401);
 		//if there's a fluid item in the slot and the train can consume the entire thing
-		if (slotId != null && FluidContainerRegistry.getFluidForFilledItem(slotId.getStack()) !=null &&
-				train.fill(null, isUseableFluid(slotId.getStack(), train), false) == 0) {
+		if (getFluidForSlot(train, 401) !=null &&
+				train.fill(null, getFluidForSlot(train, 401), false) == 0) {
 
-			train.fill(null, isUseableFluid(slotId.getStack(), train), true);
+			train.fill(null, getFluidForSlot(train, 401), true);
 			if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
-				slotId.decrStackSize(1);
+				train.getSlotIndexByID(401).decrStackSize(1);
 				train.addItem(new ItemStack(Items.bucket));
 			}
 		}
@@ -110,19 +105,22 @@ public class FuelHandler{
 		//be sure there is burnHeat before trying to consume it
 		if (burnHeat > 1) {
 			//calculate the heat increase
-			heatC += (float) ((1- Math.sqrt(heatC/maxHeat(train))) * Math.sqrt((heatC+burnHeat)/burnHeat))*train.getEfficiency();
+			train.getDataWatcher().updateObject(16,
+					(train.getDataWatcher().getWatchableObjectFloat(16)+
+							(float) ((1f- Math.sqrt(train.getDataWatcher().getWatchableObjectFloat(16)/maxHeat(train))) * Math.sqrt((train.getDataWatcher().getWatchableObjectFloat(16)+burnHeat)/burnHeat))*train.getEfficiency()));
 		} else {
 			//cool down, or heat up the boiler to match the temperature of the biome and height
-			heatC += 1- Math.sqrt(heatC/ (
-					(((train.worldObj.getBiomeGenForCoords(train.chunkCoordX, train.chunkCoordZ).temperature -0.15)//biome temperature with freezing point (0.15) set to 0
+			train.getDataWatcher().updateObject(16,
+					train.getDataWatcher().getWatchableObjectFloat(16)+ 1f- (float)Math.sqrt(train.getDataWatcher().getWatchableObjectFloat(16)/ (
+					(((train.worldObj.getBiomeGenForCoords(train.chunkCoordX, train.chunkCoordZ).temperature -0.15f)//biome temperature with freezing point (0.15) set to 0
 							- (0.0014166695 * (train.posY - 64))) //temperature changes by 0.00166667 for every meter above or below sea level (64), the value is -15% to match up with the change to biome temp
 							*36.8)//converts the temp to celsius with compensation for the temp offset
-			));
+			)));
 		}
 		//if the boiler temp is above the boiling point, start generating steam.
-		if (heatC >100){
+		if (train.getDataWatcher().getWatchableObjectFloat(16) >100){
 			int steam = (int)Math.floor(
-					((heatC-100)*0.015f) * //calculate heat from burnHeat
+					((train.getDataWatcher().getWatchableObjectFloat(16)-100)*0.005f) * //calculate heat from burnHeat
 							(train.getTankInfo(null)[0].fluid.amount*0.005f) //calculate surface area of water
 			);
 			//drain fluid
@@ -135,7 +133,7 @@ public class FuelHandler{
 			} else if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)){
 				train.worldObj.createExplosion(train, train.posX, train.posY, train.posZ, 5f, false);
 				train.dropItem(train.getItem(), 1);
-				train.attackEntityFrom(new EntityDamageSource("overheat", train),100);
+				train.setDead();
 			}
 			train.setBoolean(GenericRailTransport.boolValues.RUNNING, true);
 		} else {
@@ -150,7 +148,7 @@ public class FuelHandler{
 
 		//update the datawatchers so client can display the info on the GUI.
 		train.getDataWatcher().updateObject(13, burnTime>0?(int)((burnTime/ burnTimeMax)*18):0);
-		train.getDataWatcher().updateObject(15, MathHelper.floor_float(heatC * 100f));
+		train.getDataWatcher().updateObject(15, MathHelper.floor_float(train.getDataWatcher().getWatchableObjectFloat(16) * 100f));
 	}
 
 

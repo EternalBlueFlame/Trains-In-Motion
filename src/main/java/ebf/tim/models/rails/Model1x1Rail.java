@@ -9,14 +9,15 @@ import java.util.List;
 
 public class Model1x1Rail {
 
+    private static float[] vert;
 
     public static void addVertexWithOffset(float[] p, float width, float height, float depth){
-        float[] vert= RailUtility.rotatePointF(new float[]{depth,height,width},0,p[4],0);
+        vert= RailUtility.rotatePointF(depth,height,width,0,p[4],0);
         Tessellator.getInstance().addVertex(vert[0]+p[0],vert[1]+p[1], vert[2]+p[2]);
     }
 
     public static void addVertexWithOffsetAndUV(float[] p, float width, float height, float depth, float U, float V){
-        float[] vert= RailUtility.rotatePointF(new float[]{depth,height,width},p[3],p[4],0);
+        vert= RailUtility.rotatePointF(depth,height,width,p[3],p[4],0);
         Tessellator.getInstance().addVertexWithUV(vert[0]+p[0],vert[1]+p[1], vert[2]+p[2],U,V);
     }
 
@@ -46,8 +47,6 @@ public class Model1x1Rail {
 
             //renders the rails, also defines min and max width
             ModelRail.model3DRail(points,railOffsets);
-
-            //todo: render the ties here, need a different texture binding method so we can tile it via GL stuff.
             //shouldnt even need to define models like the rails, only need 2, flat and 3d, get a boolean operator config.ispotato?.
 
             ModelTies.model3DTies(points,maxWidth,minWidth, Blocks.log);

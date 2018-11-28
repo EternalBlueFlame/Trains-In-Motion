@@ -18,11 +18,10 @@ public class ModelRail {
         GL11.glPushMatrix();
         GL11.glDisable(GL_TEXTURE_2D);
         GL11.glTranslated(0, 0.225, 0);
-        int color = 0xCBCDCD;
         GL11.glColor4f(
-                ((color >> 16 & 0xFF))* 0.00392156863f,
-                ((color >> 8 & 0xFF))* 0.00392156863f,
-                ((color & 0xFF))* 0.00392156863f, 1);
+                ((0xCBCDCD >> 16 & 0xFF))* 0.00392156863f,
+                ((0xCBCDCD >> 8 & 0xFF))* 0.00392156863f,
+                ((0xCBCDCD & 0xFF))* 0.00392156863f, 1);
 
         for(float rail : railOffsets) {
             Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);

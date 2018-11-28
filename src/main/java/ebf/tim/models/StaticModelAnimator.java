@@ -60,7 +60,7 @@ public class StaticModelAnimator {
      */
     public static boolean canAdd(ModelRendererTurbo modelRefrence){
         switch (modelRefrence.boxName){
-            case tagAdvancedPiston:case tagSimplePiston:case tagSimpleRotate:{return true;}
+            case tagAdvancedPiston:case tagSimplePiston:case tagSimpleRotate: case tagWheel:{return true;}
             default:{return false;}
         }
     }

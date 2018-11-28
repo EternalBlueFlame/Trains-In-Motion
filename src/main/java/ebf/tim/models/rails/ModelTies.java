@@ -20,9 +20,8 @@ public class ModelTies {
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.125, 0);
 
-        //Tessellator.bindTexture(TextureMap.locationBlocksTexture);
+        Tessellator.bindTexture(TextureMap.locationBlocksTexture);
         //top side
-        //GL11.glDisable(GL11.GL_TEXTURE_2D);
         IIcon iicon=  RenderBlocks.getInstance().getBlockIconFromSide(block, ForgeDirection.WEST.ordinal());
         boolean first = true;
         for (float[] p :points) {
