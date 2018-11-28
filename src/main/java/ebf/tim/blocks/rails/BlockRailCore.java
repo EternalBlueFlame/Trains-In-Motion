@@ -167,7 +167,9 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     @Override
     public void onNeighborBlockChange(World worldObj, int x, int y, int z, Block b) {
         super.onNeighborBlockChange(worldObj, x, y, z, b);
-        this.tile.updateShape();
+        if(this.tile!=null){
+            this.tile.updateShape();
+        }
     }
 
     //stuff from block container to make tile entity more reliable.
