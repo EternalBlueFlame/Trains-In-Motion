@@ -2,9 +2,11 @@ package ebf.tim.models.rails;
 
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.Tessellator;
+import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import org.lwjgl.opengl.GL11;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class Model1x1Rail {
@@ -23,7 +25,7 @@ public class Model1x1Rail {
 
 
     //todo use the return value to manage displaylists
-    public static boolean Model3DRail(List<float[]> points, float[] railOffsets, float segmentLength){
+    public static boolean Model3DRail(List<float[]> points, float[] railOffsets, float segmentLength, @Nullable Block ties, @Nullable Block ballast, @Nullable Block railBlock){
         if(railOffsets==null || points ==null){
             return false;
         }
@@ -46,11 +48,15 @@ public class Model1x1Rail {
             GL11.glDisable(GL11.GL_LIGHTING);
 
             //renders the rails, also defines min and max width
-            ModelRail.model3DRail(points,railOffsets);
+            ModelRail.model3DRail(points,railOffsets, railBlock);
             //shouldnt even need to define models like the rails, only need 2, flat and 3d, get a boolean operator config.ispotato?.
 
-            ModelTies.model3DTies(points,maxWidth,minWidth, Blocks.log);
-            ModelBallast.model3DBallast(points,maxWidth,minWidth, Blocks.gravel, segmentLength);
+            if(ties!=null) {
+                ModelTies.model3DTies(points, maxWidth, minWidth, Blocks.log);
+            }
+            if(ballast!=null) {
+                ModelBallast.model3DBallast(points, maxWidth, minWidth, Blocks.gravel, segmentLength);
+            }
 
 
             GL11.glEnable(GL11.GL_LIGHTING);

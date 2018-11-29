@@ -36,6 +36,7 @@ import net.minecraftforge.fluids.BlockFluidBase;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -140,8 +141,6 @@ public class CommonProxy implements IGuiHandler {
 
     public static BlockRailCore railBlock = new BlockRailCore();
 
-
-    public static Item railItem = new ItemRail();
     /**
      * <h2>Server Register</h2>
      * Used for registering server only functions.
@@ -164,13 +163,40 @@ public class CommonProxy implements IGuiHandler {
 
         RegisterItem(new ItemKey(), "transportkey","transportkey", TrainsInMotion.creativeTab, null);
         RegisterItem(new ItemTicket(), "transportticket","transportticket", TrainsInMotion.creativeTab, null);
-
+        RegisterItem(new ItemRail(), "item.timrail", "item.timrail", TrainsInMotion.creativeTab, null);
         //register the train crafting table
         addRecipe(new ItemStack(RegisterBlock(trainTable, "block.traintable", "block.traintable", TrainsInMotion.creativeTab),1),
                 "WWW", "WIW", "WWW", 'W', Blocks.planks, 'I', Items.iron_ingot);
+        //OreDictionary.getOres("ingot")
+        for (ItemStack i : new ItemStack[]{new ItemStack(Items.iron_ingot),new ItemStack(Items.gold_ingot)}) {
+            DebugUtil.println("found ingot");
+            addRecipe(new ItemStack(
+                            new ItemRail()
+                                    .setBallast(Item.getItemFromBlock(Blocks.gravel))
+                                    .setTies(Item.getItemFromBlock(Blocks.planks))
+                                    .setIngot(i.getItem()), 1),
+                    "IBI", "IWI", "IWI", 'W', Blocks.planks, 'I', i, 'B', Blocks.gravel);
+            addRecipe(new ItemStack(
+                            new ItemRail()
+                                    .setTies(Item.getItemFromBlock(Blocks.planks))
+                                    .setIngot(i.getItem()), 1),
+                    "I I", "IWI", "IWI", 'W', Blocks.planks, 'I', i);
+            addRecipe(new ItemStack(
+                            new ItemRail()
+                                    .setBallast(Item.getItemFromBlock(Blocks.gravel))
+                                    .setIngot(i.getItem()), 1),
+                    "IBI", "I I", "I I", 'I', i, 'B', Blocks.gravel);
+            addRecipe(new ItemStack(
+                            new ItemRail()
+                                    .setIngot(i.getItem()), 1),
+                    "I I", "I I", "I I", 'I', i);
 
-        addRecipe(new ItemStack(RegisterItem(railItem, "item.timrail", "item.timrail", TrainsInMotion.creativeTab, null), 1),
-                "I I", "IWI", "IWI", 'W', Blocks.planks, 'I', Items.iron_ingot);
+            addRecipe(new ItemStack(
+                            new ItemRail()
+                                    .setBallast(Item.getItemFromBlock(Blocks.stone))
+                                    .setIngot(i.getItem()), 1),
+                    "IBI", "I I", "I I", 'I', i, 'B', Blocks.stone);
+        }
     }
 
     public static Fluid RegisterFluid(Fluid fluid, String unlocalizedName, boolean isGaseous, int density){
@@ -206,7 +232,6 @@ public class CommonProxy implements IGuiHandler {
         FluidContainerRegistry.registerFluidContainer(fluid, new ItemStack(bucket), new ItemStack(Items.bucket));
         return bucket;
     }
-
 
 
     public static Item RegisterItem(Item itm, String name, String unlocalizedName, @Nullable CreativeTabs tab, @Nullable Item container){

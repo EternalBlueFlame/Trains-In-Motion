@@ -1,10 +1,12 @@
 package ebf.tim.items;
 
+import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.utility.CommonProxy;
+import ebf.tim.utility.DebugUtil;
 import jdk.nashorn.internal.ir.Block;
 import mods.railcraft.api.core.items.ITrackItem;
 import net.minecraft.block.BlockFlower;
@@ -90,7 +92,24 @@ public class ItemRail extends Item implements ITrackItem {
                     --stack.stackSize;
                 }
             }
-
+            if(world.getTileEntity(x,y,z) instanceof RailTileEntity){
+                if(!this.data.railIngot.equals("")) {
+                    ((RailTileEntity) world.getTileEntity(x,y,z)).rail = GameRegistry.findBlock(
+                            this.data.railIngot.substring(0,this.data.railIngot.indexOf(":")), this.data.railIngot.substring(this.data.railIngot.indexOf(":")+1));
+                } else {
+                    ((RailTileEntity) world.getTileEntity(x,y,z)).rail = Blocks.iron_block;
+                }
+                if(!this.data.ties.equals("")) {
+                    ((RailTileEntity) world.getTileEntity(x,y,z)).ties = GameRegistry.findBlock(
+                            this.data.ties.substring(0,this.data.ties.indexOf(":")), this.data.ties.substring(this.data.ties.indexOf(":")+1));
+                }
+                if(!this.data.ballast.equals("")) {
+                    ((RailTileEntity) world.getTileEntity(x,y,z)).ballast = GameRegistry.findBlock(
+                            this.data.ballast.substring(0,this.data.ballast.indexOf(":")), this.data.ballast.substring(this.data.ballast.indexOf(":")+1));
+                }
+            } else {
+                System.out.println("Trains In Motion ERROR, TILE ENTITY NOT SPAWNED FAST ENOUGH, that can happen?");
+            }
             return true;
         }
     }
@@ -140,10 +159,15 @@ public class ItemRail extends Item implements ITrackItem {
 
 
     private class railSaveData extends WorldSavedData{
+        @Deprecated
         public String railIngot ="";
+        @Deprecated
         public String ballast ="";
+        @Deprecated
         public String ties ="";
+        @Deprecated
         public String wires ="";
+        //todo: use the actual items instead and have them written to NBT through their own write to NBT functions
 
         public railSaveData(String name){
             super(name);

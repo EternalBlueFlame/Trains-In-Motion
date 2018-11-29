@@ -56,7 +56,7 @@ public class RailTileEntity extends TileEntity {
                 return;
             }
             //DebugUtil.println(segmentLength);
-            Model1x1Rail.Model3DRail(points, gauge750mm, segmentLength);
+            Model1x1Rail.Model3DRail(points, gauge750mm, segmentLength, ties, ballast, rail);
         } else {super.func_145828_a(report);}
     }
 

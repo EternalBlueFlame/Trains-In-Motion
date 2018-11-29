@@ -408,6 +408,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      */
     @Override
     public boolean attackEntityFrom(DamageSource damageSource, float p_70097_2_){
+
+
         if (damageSource.getEntity() instanceof GenericRailTransport){
             return false;
         }
@@ -1083,17 +1085,22 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * for nuclear this is the number of fusion cores, rounded down. (usually 1)*/
     public float getMaxFuel(){return 1;}
     /**defines the functionality to run when rendering a gui on client*/
+    @SideOnly(Side.CLIENT)
     public void guiClient(){}
     /**defines the functionality to run when setting up the GUI on server*/
+    @SideOnly(Side.SERVER)
     public void guiServer(){}
 
-
+    /**returns an offset for each model in the train, not counting bogies*/
+    @SideOnly(Side.CLIENT)
+    public double[][] getOffsets(){return null;}
+    @SideOnly(Side.CLIENT)
     public Bogie[] getBogieModels(){return null;}
-
+    @SideOnly(Side.CLIENT)
     public ResourceLocation getDefaultTexture(){
         return new ResourceLocation("");
     }
-
+    @SideOnly(Side.CLIENT)
     public ResourceLocation getTexture(){
         return null;
     }
@@ -1101,7 +1108,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public ItemStack[] getRecipie(){return null;}
 
     public void registerSkins(){};
-
+    @SideOnly(Side.CLIENT)
     public List<? extends ModelBase> getModel(){return new ArrayList<ModelBase>();}
 
 

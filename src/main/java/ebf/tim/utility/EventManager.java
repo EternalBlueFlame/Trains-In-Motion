@@ -18,6 +18,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ReportedException;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import org.lwjgl.input.Keyboard;
 
 import java.io.BufferedReader;
@@ -210,6 +211,16 @@ public class EventManager {
             event.player.dismountEntity(event.player.ridingEntity);
         }
     }
+
+
+    @SubscribeEvent
+    @SuppressWarnings("unused")
+    public void EntityStruckByLightningEvent(EntityStruckByLightningEvent event) {
+        if (event.entity instanceof GenericRailTransport){
+            event.setCanceled(true);
+        }
+    }
+
 
 
 }

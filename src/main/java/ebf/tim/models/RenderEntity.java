@@ -30,6 +30,7 @@ import java.util.Random;
 public class RenderEntity extends Render {
 
     private static final float RailOffset = 0.34f;
+    private static int i=0;
 
     //public RenderEntity() {}
 
@@ -94,6 +95,9 @@ public class RenderEntity extends Render {
                     for (ModelRendererTurbo render : part.boxList) {
                         if (render.boxName ==null){continue;}
                         //attempt to cache the parts for the main transport model
+                        if(render.boxName.contains("HIDE")){
+                            render.showModel = false;
+                        }
                         if (StaticModelAnimator.canAdd(render) || entity.isAnimationTag(render.boxName)) {
                             entity.renderData.animatedPart.add(new StaticModelAnimator(render));
                         } else if (GroupedModelRender.canAdd(render)) {
@@ -180,9 +184,12 @@ public class RenderEntity extends Render {
          * @see net.minecraft.client.renderer.entity.RenderEnderman#renderEquippedItems(EntityEnderman, float)
          */
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
-        for(ModelBase model : entity.renderData.modelList) {
+        for(i=0; i< entity.renderData.modelList.size();i++) {
             Tessellator.maskColors(entity.getTexture(), null);
-            model.render(null, 0, 0, 0, 0, 0, 0.0625f);
+            if(entity.getOffsets()!=null && entity.getOffsets().length>i) {
+                GL11.glTranslated(entity.getOffsets()[i][0],entity.getOffsets()[i][1],entity.getOffsets()[i][2]);
+            }
+            entity.renderData.modelList.get(i).render(null, 0, 0, 0, 0, 0, 0.0625f);
         }
 
 

@@ -13,11 +13,12 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class ModelRail {
 
-    public static void model3DRail(List<float[]> points, float[] railOffsets){
+    public static void model3DRail(List<float[]> points, float[] railOffsets, Block railBlock){
 
         GL11.glPushMatrix();
         GL11.glDisable(GL_TEXTURE_2D);
         GL11.glTranslated(0, 0.225, 0);
+        //todo get average color from rail block
         GL11.glColor4f(
                 ((0xCBCDCD >> 16 & 0xFF))* 0.00392156863f,
                 ((0xCBCDCD >> 8 & 0xFF))* 0.00392156863f,
