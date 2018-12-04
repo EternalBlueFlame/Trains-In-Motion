@@ -23,7 +23,7 @@ import java.util.UUID;
  * this is the management core for all trains.
  * @author Eternal Blue Flame
  */
-public class EntityTrainCore extends GenericRailTransport {
+public abstract class EntityTrainCore extends GenericRailTransport {
 
     /**manages the items for burnHeat, and the burnHeat itself.*/
     public FuelHandler fuelHandler = new FuelHandler();
@@ -81,7 +81,7 @@ public class EntityTrainCore extends GenericRailTransport {
         super.readEntityFromNBT(tag);
         accelerator = tag.getInteger(NBTKeys.accelerator);
         dataWatcher.updateObject(16, tag.getFloat(NBTKeys.transportFuel));
-        vectorCache[7][0] = tag.getDouble(NBTKeys.trainSpeed);
+        vectorCache[7][0] = tag.getFloat(NBTKeys.trainSpeed);
 
 
     }
@@ -91,7 +91,7 @@ public class EntityTrainCore extends GenericRailTransport {
         super.writeEntityToNBT(tag);
         tag.setInteger(NBTKeys.accelerator, accelerator);
         tag.setFloat(NBTKeys.transportFuel, dataWatcher.getWatchableObjectFloat(16));
-        tag.setDouble(NBTKeys.trainSpeed, vectorCache[7][0]);
+        tag.setFloat(NBTKeys.trainSpeed, vectorCache[7][0]);
 
     }
 
@@ -217,7 +217,7 @@ public class EntityTrainCore extends GenericRailTransport {
                 vectorCache[7][0] += ((powerNewtons/weight)/745.7);//applied power
 
 
-                vectorCache[7][1]=Math.abs((maxPowerNewtons/pullingWeight)/745.7)-Math.abs(vectorCache[7][0]);//max power produced without drag, minus the current power
+                vectorCache[7][1]=Math.abs((maxPowerNewtons/pullingWeight)/745.7f)-Math.abs(vectorCache[7][0]);//max power produced without drag, minus the current power
                 if(vectorCache[7][1]>0.005){
                     //todo: add sparks to animator.
                     vectorCache[7][0] -= ((powerNewtons/weight)/745.7)*0.5f;
@@ -242,10 +242,10 @@ public class EntityTrainCore extends GenericRailTransport {
         }
 
         //cap movement to the max speed
-        if (vectorCache[7][0] > (transportTopSpeed()*0.0138889)){
-            vectorCache[7][0] = (transportTopSpeed()*0.0138889);
-        } else if (vectorCache[7][0] < (-transportTopSpeed()*0.0138889)){
-            vectorCache[7][0] = (-transportTopSpeed()*0.0138889);
+        if (vectorCache[7][0] > (transportTopSpeed()*0.0138889f)){
+            vectorCache[7][0] = (transportTopSpeed()*0.0138889f);
+        } else if (vectorCache[7][0] < (-transportTopSpeed()*0.0138889f)){
+            vectorCache[7][0] = (-transportTopSpeed()*0.0138889f);
         }
         //todo: make the max reduced when going reverse
 
@@ -275,7 +275,7 @@ public class EntityTrainCore extends GenericRailTransport {
                     calculateAcceleration();
                 }
             }
-            vectorCache[6] = RailUtility.rotatePoint(vectorCache[7], rotationPitch, rotationYaw, 0);
+            vectorCache[6] = RailUtility.rotatePointF(vectorCache[7][0],vectorCache[7][1],vectorCache[7][2], rotationPitch, rotationYaw, 0);
             frontBogie.setVelocity(vectorCache[6][0], vectorCache[6][1], vectorCache[6][2]);
             backBogie.setVelocity(vectorCache[6][0], vectorCache[6][1], vectorCache[6][2]);
 

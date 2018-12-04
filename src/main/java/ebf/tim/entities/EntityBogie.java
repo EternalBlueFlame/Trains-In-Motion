@@ -411,7 +411,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         if (stack == null || worldObj.getEntityByID(parentId) == null) {
             return false;
         } else {
-            Item cartItem = ((EntityTrainCore)worldObj.getEntityByID(parentId)).getItem();
+            Item cartItem = ((GenericRailTransport)worldObj.getEntityByID(parentId)).getItem();
             return cartItem != null && stack.getItem() == cartItem;
         }
     }

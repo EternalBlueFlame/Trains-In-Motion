@@ -34,13 +34,13 @@ public class ItemTransport extends Item {
      * @param cart the class for the entity*/
     public ItemTransport(GenericRailTransport cart) {
         super();
+        setUnlocalizedName(cart.transportName().replace(" ",""));
         subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.era") +  ": " + RailUtility.translate(cart.transportEra()));
         subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.year") +": " + cart.transportYear());
         subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.country") + ": " + RailUtility.translate(cart.transportcountry()));
         subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.weight") +": " + cart.weightKg() + "kg");
         if (cart.transportTopSpeed()!=0){
             subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.speed") +": " + cart.transportTopSpeed() +"km");
-            subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.pullingpower") +": "+ cart.transportPullingPower() +" " + RailUtility.translate("menu.item.tons"));
 
             if (cart.transportMetricHorsePower() !=0){
                 subtext.add(EnumChatFormatting.GREEN +RailUtility.translate("menu.item.mhp") +": " + cart.weightKg());

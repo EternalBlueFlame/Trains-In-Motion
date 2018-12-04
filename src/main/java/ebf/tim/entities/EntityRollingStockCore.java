@@ -11,7 +11,7 @@ import java.util.UUID;
  * any rollingstock functionality that happens specifically from the core entity happens here.
  * @author Eternal Blue Flame
  */
-public class EntityRollingStockCore extends GenericRailTransport {
+public abstract class EntityRollingStockCore extends GenericRailTransport {
 
 
 

@@ -39,23 +39,23 @@ public class TransportRegistry {
 
 
     /**returns a CMD Bogie with the default texture, just to simplify some code*/
-    public static Bogie GenericCMDBogie(){return new Bogie(URIRegistry.HD_MODEL_ROLLINGSTOCK_TEXTURE.getResource("cmd_bogie.png"), new CMDBogie());}
+    //public static Bogie GenericCMDBogie(){return new Bogie(URIRegistry.HD_MODEL_ROLLINGSTOCK_TEXTURE.getResource("cmd_bogie.png"), new CMDBogie());}
 
     public static void registerTransports(int entityIDOffset){
         int index =0;
         GenericRailTransport registry = listTrains(0);
         List<String> usedNames = new ArrayList<>();
         while (registry!=null) {
-            if(usedNames.contains(registry.getItem().getUnlocalizedName())){
-                DebugUtil.println(registry.getClass().getName(),"is trying to register under the name", usedNames.contains(registry.getItem().getUnlocalizedName()), "which is already used");
+            if(usedNames.contains(registry.transportName())){
+                DebugUtil.println(registry.getClass().getName(),"is trying to register under the name", usedNames.contains(registry.transportName()), "which is already used");
             }
             cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(
                     registry.getClass(),
-                    registry.getItem().getUnlocalizedName().replace("item","entity"),
+                    registry.transportName().replace(" ","") + ".entity",
                     index+entityIDOffset, TrainsInMotion.instance, 60, 1, true);
-            GameRegistry.registerItem(registry.getItem(), registry.getItem().getUnlocalizedName().substring(5));
+            GameRegistry.registerItem(registry.getItem(), registry.transportName());
             registry.registerSkins();
-            usedNames.add(registry.getItem().getUnlocalizedName());
+            usedNames.add(registry.transportName());
             index++;
             registry = listTrains(index);
         }

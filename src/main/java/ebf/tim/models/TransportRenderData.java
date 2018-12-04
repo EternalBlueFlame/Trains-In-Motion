@@ -14,7 +14,7 @@ public class TransportRenderData {
 
 
     /**the base model of the entity, this holds every piece of sub-geometry and their texture mappings*/
-    public List<? extends ModelBase> modelList = null;
+    public ModelBase[] modelList = null;
     /**the models, textures, and other data for each bogie to render*/
     public Bogie[] bogieRenders = null;
     /**a cached list of all the animatedPart, and other geometry that just spins.
@@ -26,7 +26,7 @@ public class TransportRenderData {
      * @see GroupedModelRender*/
     public List<GroupedModelRender> blockCargoRenders = new ArrayList<GroupedModelRender>();
     /**a cached list of all the vectors used, so we don't have to re-initialize them every frame.*/
-    public double[][] animationCache = new double[4][3];
+    public float[][] animationCache = new float[4][3];
     /**a cached list of all the cubes intended to display liveries.*/
     public List<ModelRendererTurbo> liveriesSquare = new ArrayList<ModelRendererTurbo>();
     /**the value to rotate the geometry with.*/

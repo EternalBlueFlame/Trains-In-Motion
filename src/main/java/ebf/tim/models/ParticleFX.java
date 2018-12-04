@@ -34,17 +34,17 @@ public class ParticleFX {
     /*the bounding box of the particle to use for rendering and collision, if it's null we render it as a static particle*/
     private final AxisAlignedBB boundingBox;
     /*the motion of the particle*/
-    private double motionX=0, motionY=0, motionZ=0;
+    private float motionX=0, motionY=0, motionZ=0;
     /*a random to use for variable generating*/
     private static final Random rand = new Random();
     /*the list of objects in the hitbox*/
     private List list = new ArrayList<>();
     /*the cached motion of the particle*/
-    private double oldX, oldY, oldZ;
+    private float oldX, oldY, oldZ;
     /*the host entity*/
     private GenericRailTransport host;
     /*the position offset to move based on the transport's rotation*/
-    private double[] offset, pos;
+    private float[] offset, pos;
     private int particleID=0, colorTemp;
 
     /**
@@ -54,22 +54,22 @@ public class ParticleFX {
     public ParticleFX(GenericRailTransport transport, int color, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, int id) {
         host = transport;
         particleID=id;
-        this.offset = new double[]{offsetX, id==4?transport.posY:offsetY, offsetZ};
-        pos = RailUtility.rotatePoint(new double[]{offset[0]*0.0625,offset[1]*-0.0625,offset[2]*0.0625}, transport.rotationPitch, transport.rotationYaw, 0);
-        pos= new double[]{pos[0],pos[1],pos[2],rotationX,rotationY,rotationZ};
+        this.offset = new float[]{offsetX, id==4?(float)transport.posY:offsetY, offsetZ};
+        pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, transport.rotationPitch, transport.rotationYaw, 0);
+        pos= new float[]{pos[0],pos[1],pos[2],rotationX,rotationY,rotationZ};
         this.color = color;
 
         switch (particleID) {
             case 0:case 1:{//smoke, steam
                 motionX = (rand.nextInt(40) - 20) * 0.001f;
-                motionY = particleID==0?0.15:0.0005;
+                motionY = particleID==0f?0.15f:0.0005f;
                 motionZ = (rand.nextInt(40) - 20) * 0.001f;
 
                 this.boundingBox = AxisAlignedBB.getBoundingBox(pos[0] + transport.posX - 0.1, pos[1] + transport.posY - 0.1, pos[2] + transport.posZ - 0.1, pos[0] + transport.posX + 0.1, pos[1] + transport.posY + 0.1, pos[2] + transport.posZ + 0.1);
                 break;
             }case 4:{//sparks
                 motionX = (rand.nextInt(40) - 20) * 0.0005f;
-                motionY = 0.001;
+                motionY = 0.001f;
                 motionZ = (rand.nextInt(40) - 20) * 0.0005f;
 
 
@@ -161,8 +161,8 @@ public class ParticleFX {
             oldX=pos[3];
             oldY=pos[4];
             oldZ=pos[5];
-            pos = RailUtility.rotatePoint(new double[]{offset[0]*0.0625,offset[1]*-0.0625,offset[2]*0.0625}, host.rotationPitch, host.rotationYaw, 0);
-            pos= new double[]{pos[0],pos[1],pos[2],oldX,oldY,oldZ};
+            pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, host.rotationPitch, host.rotationYaw, 0);
+            pos= new float[]{pos[0],pos[1],pos[2],oldX,oldY,oldZ};
             //in this case color is used as an ID of sorts.
             colorTint=Integer.parseInt(host.renderData.particleRecolors[color],16);
             return;
@@ -172,10 +172,10 @@ public class ParticleFX {
                 lifespan = rand.nextInt(80) +140;
                 ticksExisted =0f;
                 //recalculating it throws away the rotation value, but that's only used for the cone lamp, which doesn't even run this, so we don't need it anyway.
-                pos = RailUtility.rotatePoint(new double[]{offset[0]*0.0625,offset[1]*-0.0625,offset[2]*0.0625}, host.rotationPitch, host.rotationYaw, 0);
+                pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, host.rotationPitch, host.rotationYaw, 0);
                 this.boundingBox.setBounds(host.posX+pos[0] -0.05, host.posY+pos[1] -0.05, host.posZ+pos[2] -0.05, host.posX+pos[0] +0.05,  host.posY+pos[1] +0.05, host.posZ+pos[2] +0.05);
                 motionX = (rand.nextInt(40) - 20) * 0.001f;
-                motionY = rand.nextInt(15)*-0.003;
+                motionY = rand.nextInt(15)*-0.003f;
                 motionZ = (rand.nextInt(40) - 20) * 0.001f;
                 shouldRender = true;
             }
@@ -187,13 +187,13 @@ public class ParticleFX {
             lifespan = rand.nextInt(80) +140;
             ticksExisted =0f;
             //recalculating it throws away the rotation value, but that's only used for the cone lamp, which doesn't even run this, so we don't need it anyway.
-            pos = RailUtility.rotatePoint(new double[]{offset[0]*0.0625,offset[1]*-0.0625,offset[2]*0.0625}, host.rotationPitch, host.rotationYaw, 0);
+            pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, host.rotationPitch, host.rotationYaw, 0);
             this.boundingBox.setBounds(host.posX+pos[0] -0.1, host.posY+pos[1] -0.1, host.posZ+pos[2] -0.1, host.posX+pos[0] +0.1,  host.posY+pos[1] +0.1, host.posZ+pos[2] +0.1);
             motionX = (rand.nextInt(40) - 20) * 0.001f;
             if(particleID==0) {
-                motionY = rand.nextInt(15)*0.003;
+                motionY = rand.nextInt(15)*0.003f;
             } else if (particleID==1){
-                motionY = rand.nextInt(15)*0.00005;
+                motionY = rand.nextInt(15)*0.00005f;
             }
             motionZ = (rand.nextInt(40) - 20) * 0.001f;
             shouldRender = true;
@@ -226,13 +226,13 @@ public class ParticleFX {
         for (Object obj : list) {
             box = ((AxisAlignedBB) obj);
             if (motionY <0.001 || motionY >-0.001) {
-                motionY = box.calculateYOffset(this.boundingBox, motionY);
+                motionY = (float) box.calculateYOffset(this.boundingBox, motionY);
             }
             if (motionX <0.0001 || motionX >-0.0001) {
-                motionX = box.calculateXOffset(this.boundingBox, motionX);
+                motionX = (float) box.calculateXOffset(this.boundingBox, motionX);
             }
             if (motionZ <0.0001 || motionZ >-0.0001) {
-                motionZ = box.calculateZOffset(this.boundingBox, motionZ);
+                motionZ = (float) box.calculateZOffset(this.boundingBox, motionZ);
             }
         }
 
@@ -243,7 +243,7 @@ public class ParticleFX {
             if (oldY != motionY) {
                 motionZ *=1.5d; motionZ +=rand.nextBoolean()?oldY:rand.nextBoolean()?0:-oldY;
                 motionX *=1.5d; motionX +=rand.nextBoolean()?oldY:rand.nextBoolean()?0:-oldY;
-                motionY = oldY * -0.4d;
+                motionY = oldY * -0.4f;
             }
             if (motionY<0.005){
                 motionY += 0.00075;
@@ -256,18 +256,18 @@ public class ParticleFX {
         if (motionX <0.0001 || motionX >-0.0001) {
             this.boundingBox.offset(motionX, 0.0D, 0.0D);
             if (oldX != motionX) {
-                motionX = this.motionX*0.75d;
+                motionX = this.motionX*0.75f;
             }
-            motionX *=0.975;
+            motionX *=0.975f;
         }
 
         //check for collisions on the Z axis.
         if (motionZ <0.0001 || motionZ >-0.0001) {
             this.boundingBox.offset(0.0D, 0.0D, motionZ);
             if (oldZ != motionZ) {
-                motionZ = this.motionZ*0.75d;
+                motionZ = this.motionZ*0.75f;
             }
-            motionZ *=0.975;
+            motionZ *=0.975f;
         }
 
         ticksExisted++;
@@ -363,7 +363,7 @@ public class ParticleFX {
     public static void drawLightTexture(ParticleFX entity, boolean isCone){
         int pos=0;
         for(int i=0; i<8192; i+=4) {
-            if(!isCone || getY(pos)>7) {
+            if(entity.colorTint!= 0x000000 && (!isCone || getY(pos)>7)) {
                 Tessellator.renderPixels.put(i, b(entity.colorTint >> 16 & 0xFF));
                 Tessellator.renderPixels.put(i + 1, b(entity.colorTint >> 8 & 0xFF));
                 Tessellator.renderPixels.put(i + 2, b(entity.colorTint & 0xFF));

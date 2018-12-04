@@ -70,7 +70,7 @@ public class StaticModelAnimator {
      * to add more animations override this and add your own checks before calling the super.
      * @param rotationZ the rotation degree for the animation.
      */
-    public void Animate(float rotationZ, double[] pistonOffset){
+    public void Animate(float rotationZ, float[] pistonOffset){
         if(modelRefrence ==null || modelRefrence.boxName ==null){
             return;
         }
@@ -82,7 +82,7 @@ public class StaticModelAnimator {
             }
             //animate simple pistons, just rotates around center
             case tagSimplePiston:{
-                double[] positionOffset = RailUtility.rotatePoint(pistonOffset,
+                float[] positionOffset = RailUtility.rotatePointF(pistonOffset[0],pistonOffset[1],pistonOffset[2],
                         rotationZ *degreesF,
                         rotationZ *degreesF, 0);
 
@@ -92,7 +92,7 @@ public class StaticModelAnimator {
             }
             //animate advanced pistons, uses position and rotation
             case tagAdvancedPiston:{
-                double[] positionOffset = RailUtility.rotatePoint(pistonOffset,
+                float[] positionOffset = RailUtility.rotatePointF(pistonOffset[0],pistonOffset[1],pistonOffset[2],
                         rotationZ *degreesF,
                         rotationZ *degreesF, 0);
 

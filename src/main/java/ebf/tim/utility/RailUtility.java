@@ -3,8 +3,10 @@ package ebf.tim.utility;
 
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.GenericRailTransport;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
@@ -34,7 +36,6 @@ public class RailUtility {
     /**
      * <h2>Vanilla Track  detection Overrrides</h2>
      * a modified version of vanilla track detection so that way it's more efficient and can support rails from other mods.
-     * @see EntityBogie#moveBogie(double, double, int, int, int, BlockRailBase)
      */
     public static boolean isRailBlockAt(World world, int x, int y, int z) {
         return (world.getTileEntity(x, y, z) instanceof ITrackBase || world.getBlock(x, y, z) instanceof BlockRailBase);
@@ -153,11 +154,12 @@ public class RailUtility {
         return xyz;
     }
 
-    private static float cos;
-    private static float sin;
-    private static float[] xyz = new float[]{0,0,0};
+    //private static float cos;
+    //private static float sin;
+    //private static float[] xyz = new float[]{0,0,0};
     public static float[] rotatePointF(float x, float y, float z, float pitch, float yaw, float roll) {
-        xyz[0]=x; xyz[1]=y; xyz[2]=z;
+        float[] xyz = new float[]{x,y,z};
+        float sin, cos;
         //rotate pitch
         if (pitch != 0.0F) {
             pitch *= radianF;
@@ -174,7 +176,7 @@ public class RailUtility {
             sin = MathHelper.sin(yaw);
 
             xyz[0] = (x * cos) - (z * sin);
-            xyz[2] = (x * sin) + (z* cos);
+            xyz[2] = (x * sin) + (z * cos);
         }
         //rotate roll
         if (roll != 0.0F) {
@@ -257,8 +259,8 @@ public class RailUtility {
                 //check player direction
                 if (playerMeta == 3) {
                     //check if the transport can be placed in the area
-                    if (!RailUtility.isRailBlockAt(worldObj, posX + MathHelper.floor_double(entity.bogieLengthFromCenter()+ 1.0D ), posY, posZ)
-                            && !RailUtility.isRailBlockAt(worldObj, posX + MathHelper.floor_double((-entity.bogieLengthFromCenter())- 1.0D ), posY, posZ)) {
+                    if (!RailUtility.isRailBlockAt(worldObj, posX + MathHelper.floor_float(entity.bogieLengthFromCenter()[0]+ 1.0F ), posY, posZ)
+                            && !RailUtility.isRailBlockAt(worldObj, posX + MathHelper.floor_float(entity.bogieLengthFromCenter()[1] - 1.0F ), posY, posZ)) {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
@@ -271,8 +273,8 @@ public class RailUtility {
                 //same as above, but reverse direction.
                 else if (playerMeta == 1) {
 
-                    if (!RailUtility.isRailBlockAt(worldObj, posX - MathHelper.floor_double(entity.bogieLengthFromCenter()+ 1.0D ), posY, posZ)
-                            && !RailUtility.isRailBlockAt(worldObj, posX - MathHelper.floor_double((-entity.bogieLengthFromCenter())- 1.0D ), posY, posZ)) {
+                    if (!RailUtility.isRailBlockAt(worldObj, posX - MathHelper.floor_double(entity.bogieLengthFromCenter()[0]+ 1.0f ), posY, posZ)
+                            && !RailUtility.isRailBlockAt(worldObj, posX - MathHelper.floor_double(entity.bogieLengthFromCenter()[1]- 1.0f ), posY, posZ)) {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
@@ -287,8 +289,8 @@ public class RailUtility {
 
                 if (playerMeta == 0) {
 
-                    if (!RailUtility.isRailBlockAt(worldObj, posX, posY, posZ + MathHelper.floor_double(entity.bogieLengthFromCenter()+ 1.0D ))
-                            && !RailUtility.isRailBlockAt(worldObj, posX, posY, posZ + MathHelper.floor_double((-entity.bogieLengthFromCenter())- 1.0D ))) {
+                    if (!RailUtility.isRailBlockAt(worldObj, posX, posY, posZ + MathHelper.floor_float(entity.bogieLengthFromCenter()[0]+ 1.0f ))
+                            && !RailUtility.isRailBlockAt(worldObj, posX, posY, posZ + MathHelper.floor_float(entity.bogieLengthFromCenter()[1]- 1.0f ))) {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
@@ -299,8 +301,8 @@ public class RailUtility {
                 }
                 else if (playerMeta == 2) {
 
-                    if (!RailUtility.isRailBlockAt(worldObj, posX, posY, posZ - MathHelper.floor_double(entity.bogieLengthFromCenter()+ 1.0D ))
-                            && !RailUtility.isRailBlockAt(worldObj, posX, posY, posZ - MathHelper.floor_double((-entity.bogieLengthFromCenter())- 1.0D ))) {
+                    if (!RailUtility.isRailBlockAt(worldObj, posX, posY, posZ - MathHelper.floor_double(entity.bogieLengthFromCenter()[0]+ 1.0f ))
+                            && !RailUtility.isRailBlockAt(worldObj, posX, posY, posZ - MathHelper.floor_double(entity.bogieLengthFromCenter()[1]- 1.0f ))) {
                         playerEntity.addChatMessage(new ChatComponentText("Place on a straight piece of track that is of sufficient length"));
                         return false;
                     }
@@ -360,5 +362,14 @@ public class RailUtility {
         }
         return OREDICT_COAL.contains(i.getUnlocalizedName());
     }
-    
+
+
+    /*<h1>shorthands for lazy bums</h1>*/
+
+    public static ItemStack DefineStack (Item itm, int size){
+        return new ItemStack(itm, size);
+    }
+    public static ItemStack DefineStack (Block itm, int size){
+        return new ItemStack(Item.getItemFromBlock(itm), size);
+    }
 }

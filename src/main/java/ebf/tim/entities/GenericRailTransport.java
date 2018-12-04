@@ -7,6 +7,8 @@ import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
+import ebf.tim.api.SkinRegistry;
+import ebf.tim.api.skin;
 import ebf.tim.items.ItemKey;
 import ebf.tim.items.ItemTicket;
 import ebf.tim.models.Bogie;
@@ -42,14 +44,14 @@ import fexcraft.tmt.slim.ModelBase;
 import javax.annotation.Nullable;
 import java.util.*;
 
-import static ebf.tim.utility.RailUtility.rotatePoint;
+import static ebf.tim.utility.RailUtility.rotatePointF;
 
 /**
  * <h1>Generic Rail Transport</h1>
  * this is the base for all trains and rollingstock.
  * @author Eternal Blue Flame
  */
-public class GenericRailTransport extends EntityMinecart implements IEntityAdditionalSpawnData, IInventory, IFluidHandler, IFluidCart {
+public abstract class GenericRailTransport extends EntityMinecart implements IEntityAdditionalSpawnData, IInventory, IFluidHandler, IFluidCart, GenericTransportData {
 
     /*
      * <h2>variables</h2>
@@ -80,7 +82,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public String destination ="";
     /**used to initialize a laege number of variables that are used to calculate everything from movement to linking.
      * this is so we don't have to initialize each of these variables every tick, saves CPU.*/
-    public double[][] vectorCache = new double[8][3];
+    //todo: values 1 and 6 are unused.
+    public float[][] vectorCache = new float[8][3];
     /**the health of the entity, similar to that of EntityLiving*/
     private int health = 20;
     /**the fluidTank tank*/
@@ -198,7 +201,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this.dataWatcher.addObject(23, "");//owner
         this.dataWatcher.addObject(21, 0);//front linked transport
         this.dataWatcher.addObject(22, 0);//back linked transport
-        this.dataWatcher.addObject(24, getDefaultTexture().getResourceDomain()+":"+getDefaultTexture().getResourcePath());//currently used
+        ResourceLocation s = SkinRegistry.getDefaultTexture(this.getClass());
+        this.dataWatcher.addObject(24, s==null?"":s.getResourceDomain()+":"+s.getResourcePath());//currently used
     }
 
     /**
@@ -716,13 +720,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         //always be sure the bogies exist on client and server.
         if (!worldObj.isRemote && (frontBogie == null || backBogie == null)) {
             //spawn frontLinkedTransport bogie
-            vectorCache[1][0] = bogieLengthFromCenter();
-            vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
+            vectorCache[0] = RailUtility.rotatePointF(bogieLengthFromCenter()[0], 0, 0,rotationPitch, rotationYaw,0);
             frontBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId(), true);
             frontBogie.setVelocity(frontVelocityX,0,frontVelocityZ);
             //spawn backLinkedTransport bogie
-            vectorCache[1][0] = -bogieLengthFromCenter();
-            vectorCache[0] = RailUtility.rotatePoint(vectorCache[1],rotationPitch, rotationYaw,0);
+            vectorCache[0] = RailUtility.rotatePointF(bogieLengthFromCenter()[1], 0, 0, rotationPitch, rotationYaw,0);
             backBogie = new EntityBogie(worldObj, posX + vectorCache[0][0], posY + vectorCache[0][1], posZ + vectorCache[0][2], getEntityId(), false);
             backBogie.setVelocity(backVelocityX, 0, backVelocityZ);
             worldObj.spawnEntityInWorld(frontBogie);
@@ -761,11 +763,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
             if (ticksExisted %2 ==0) {
                 //align bogies
-                vectorCache[1][0]= bogieLengthFromCenter();
-                vectorCache[0] = rotatePoint(vectorCache[1], rotationPitch, rotationYaw, 0.0f);
+                vectorCache[0] = rotatePointF(bogieLengthFromCenter()[0], 0, 0, rotationPitch, rotationYaw, 0.0f);
                 frontBogie.setPosition(vectorCache[0][0] + posX, frontBogie.posY, vectorCache[0][2] + posZ);
-                vectorCache[1][0]= -bogieLengthFromCenter();
-                vectorCache[0] = rotatePoint(vectorCache[1], rotationPitch, rotationYaw, 0.0f);
+                vectorCache[0] = rotatePointF(bogieLengthFromCenter()[1], 0, 0, rotationPitch, rotationYaw, 0.0f);
                 backBogie.setPosition(vectorCache[0][0] + posX, backBogie.posY, vectorCache[0][2] + posZ);
             }
         }
@@ -773,7 +773,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         //rider updating isn't called if there's no driver/conductor, so just in case of that, we reposition the seats here too.
         if (riddenByEntity == null && getRiderOffsets() != null) {
             for (int i = 0; i < seats.size(); i++) {
-                vectorCache[0] = rotatePoint(getRiderOffsets()[i], rotationPitch, rotationYaw, 0);
+                vectorCache[0] = rotatePointF(getRiderOffsets()[i][0], getRiderOffsets()[i][1], getRiderOffsets()[i][2], rotationPitch, rotationYaw, 0f);
                 vectorCache[0][0] += posX;
                 vectorCache[0][1] += posY;
                 vectorCache[0][2] += posZ;
@@ -894,12 +894,12 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public void updateRiderPosition() {
         if (getRiderOffsets() != null) {
             if (riddenByEntity != null) {
-                vectorCache[2] = rotatePoint(getRiderOffsets()[0], rotationPitch, rotationYaw, 0);
+                vectorCache[2] = rotatePointF(getRiderOffsets()[0][0],getRiderOffsets()[0][1],getRiderOffsets()[0][2], rotationPitch, rotationYaw, 0);
                 riddenByEntity.setPosition(vectorCache[2][0] + this.posX, vectorCache[2][1] + this.posY, vectorCache[2][2] + this.posZ);
             }
 
             for (int i = 0; i < seats.size(); i++) {
-                vectorCache[2] = rotatePoint(getRiderOffsets()[i], rotationPitch, rotationYaw, 0);
+                vectorCache[2] = rotatePointF(getRiderOffsets()[i][0],getRiderOffsets()[i][1],getRiderOffsets()[i][2], rotationPitch, rotationYaw, 0);
                 vectorCache[2][0] += posX;
                 vectorCache[2][1] += posY;
                 vectorCache[2][2] += posZ;
@@ -916,33 +916,33 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * If coupling is on then it will check sides without linked transports for anything to link to.
      */
     public void manageLinks(GenericRailTransport linkedTransport) {
-        vectorCache[4][0]=linkedTransport.posX - this.posX;
-        vectorCache[4][2]=linkedTransport.posZ - this.posZ;
-        if (Math.abs(vectorCache[4][0]) + Math.abs(vectorCache[4][2]) >0.05) {
+        vectorCache[4][0]=(float)(linkedTransport.posX - this.posX);
+        vectorCache[4][2]=(float)(linkedTransport.posZ - this.posZ);
+        if (Math.abs(vectorCache[4][0]) + Math.abs(vectorCache[4][2]) >0.05f) {
 
-            double distance = MathHelper.sqrt_double((vectorCache[4][0] * vectorCache[4][0]) + (vectorCache[4][2] * vectorCache[4][2]));
+            float distance = MathHelper.sqrt_double((vectorCache[4][0] * vectorCache[4][0]) + (vectorCache[4][2] * vectorCache[4][2]));
 
             vectorCache[5][0] = vectorCache[4][0] / distance;
             vectorCache[5][2] = vectorCache[4][2] / distance;
 
             if (linkedTransport.frontLinkedID != null && linkedTransport.frontLinkedID == this.getEntityId()) {
-                distance -= Math.abs(linkedTransport.getHitboxSize()[0]*-0.5);
+                distance -= Math.abs(linkedTransport.getHitboxSize()[0]*-0.5f);
             } else {
-                distance -= Math.abs(linkedTransport.getHitboxSize()[0]*0.5);
+                distance -= Math.abs(linkedTransport.getHitboxSize()[0]*0.5f);
             }
             if (this.frontLinkedID != null && this.frontLinkedID == linkedTransport.getEntityId()) {
-                distance -= Math.abs(this.getHitboxSize()[0]*-0.5);
+                distance -= Math.abs(this.getHitboxSize()[0]*-0.5f);
             } else {
-                distance -= Math.abs(this.getHitboxSize()[0]*0.5);
+                distance -= Math.abs(this.getHitboxSize()[0]*0.5f);
             }
 
-            vectorCache[3][0] = 0.3 * distance * vectorCache[4][0];
-            vectorCache[3][2] = 0.3 * distance * vectorCache[4][2];
+            vectorCache[3][0] = 0.3f * distance * vectorCache[4][0];
+            vectorCache[3][2] = 0.3f * distance * vectorCache[4][2];
 
             distance = (-vectorCache[3][0] - vectorCache[3][0]) * vectorCache[5][0] + (-vectorCache[3][2] - vectorCache[3][2]) * vectorCache[5][2];
 
-            vectorCache[3][0] -= 0.4 * distance * vectorCache[5][0] * -1;
-            vectorCache[3][2] -= 0.4 * distance * vectorCache[5][2] * -1;
+            vectorCache[3][0] -= 0.4f * distance * vectorCache[5][0] * -1f;
+            vectorCache[3][2] -= 0.4f * distance * vectorCache[5][2] * -1f;
 
 
             this.frontBogie.addVelocity(vectorCache[3][0], 0, vectorCache[3][2]);
@@ -1030,111 +1030,12 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         return null;
     }
 
-    /*
-     * <h2>Inherited variables</h2>
-     * these functions are overridden by classes that extend this so that way the values can be changed indirectly.
-     */
-    /**returns the lengths from center that represent the offset each bogie should render at*/
-    public List<Double> getRenderBogieOffsets(){return new ArrayList<>();}
-    /**returns the type of transport, for a list of options:
-     * @see TrainsInMotion.transportTypes */
-    @Deprecated
-    public TrainsInMotion.transportTypes getType(){return null;}
-    /**returns the rider offsets, each of the outer arrays represents a new rider seat,
-     * the first value of the double[] inside that represents length from center in blocks.
-     * the second represents height offset in blocks
-     * the third value is for the horizontal offset*/
-    public double[][] getRiderOffsets(){return new double[][]{{0,0,0,0,0,0}};}
-    /**returns the positions for the hitbox, they are defined by length from center.
-     * must have at least 4 hitboxes, the first and last values are used for coupling positions*/
-    public double[] getHitboxSize(){return new double[]{3.2, 2,1};}
-    /**returns the item of the transport, this should be a static value in the transport's class.*/
-    @Deprecated
-    public Item getItem(){return null;}
-    /**defines the size of the inventory, not counting any special slots like for fuel.*/
-    public int getInventoryRows(){return 0;}
-    /**defines the radius in microblocks that the pistons animate*/
-    public float getPistonOffset(){return 0;}
-    /**defines smoke positions, the outer array defines each new smoke point, the inner arrays define the X/Y/Z*/
-    @Deprecated
-    public float[][] getSmokeOffset(){return new float[0][0];}
-    /**defines the length from center of the transport's bogies, thus is used for the motion calculation*/
-    public int bogieLengthFromCenter(){return 1;}
-    /**defines the render scale, minecraft's default is 0.0625*/
-    public float getRenderScale(){return 0.0625f;}
-    /**defines if the transport is explosion resistant*/
-    public boolean isReinforced(){return false;}
-    /**defines the capacity of the fluidTank tank.
-     * Usually value is 10,000 *the cubic meter capacity, so 242 gallons, is 0.9161 cubic meters, which is 9161 tank capacity
-     *NOTE if this is used for a train, minimum value should be 1100, which is just a little over a single bucket to allow prevention of overheating.*/
-    public int[] getTankCapacity(){return new int[]{0};}
-    public String[] getTankFilters(int tankID){return new String[]{""};}
-    /**defines the capacity of the RF storage, intended for electric rollingstock that store power for the train.*/
-    public int getRFCapacity(){return 0;}
     /**defines the ID of the owner*/
     public String getOwnerName(){return ownerName.equals("")?this.dataWatcher.getWatchableObjectString(23):ownerName;}
-    /**this function allows individual trains and rollingstock to implement custom fuel consumption and management
-     * @see FuelHandler#manageSteam(EntityTrainCore) */
-    public void manageFuel(){}
-    /**defines the weight of the transport.*/
-    public float weightKg(){return 907.1847f;}
-    /** returns the max fuel.
-     * for steam trains this is cubic meters of the firebox size. (1.5 on average)
-     * for diesel this is cubic meters. (11.3 on average)
-     * for electric this is Kw. (400 on average)
-     * for nuclear this is the number of fusion cores, rounded down. (usually 1)*/
-    public float getMaxFuel(){return 1;}
-    /**defines the functionality to run when rendering a gui on client*/
-    @SideOnly(Side.CLIENT)
-    public void guiClient(){}
-    /**defines the functionality to run when setting up the GUI on server*/
-    @SideOnly(Side.SERVER)
-    public void guiServer(){}
 
-    /**returns an offset for each model in the train, not counting bogies*/
-    @SideOnly(Side.CLIENT)
-    public double[][] getOffsets(){return null;}
-    @SideOnly(Side.CLIENT)
-    public Bogie[] getBogieModels(){return null;}
-    @SideOnly(Side.CLIENT)
-    public ResourceLocation getDefaultTexture(){
-        return new ResourceLocation("");
+    public skin getTexture(){
+        return SkinRegistry.getSkin(this.getClass(), this.dataWatcher.getWatchableObjectString(24));
     }
-    @SideOnly(Side.CLIENT)
-    public ResourceLocation getTexture(){
-        return null;
-    }
-
-    public ItemStack[] getRecipie(){return null;}
-
-    public void registerSkins(){};
-    @SideOnly(Side.CLIENT)
-    public List<? extends ModelBase> getModel(){return new ArrayList<ModelBase>();}
-
-
-    public String transportName(){return "Fugidsnot";}
-
-    public String transportcountry(){return "Void";}
-
-    public int transportYear(){return -1;}
-
-    public String transportEra(){return "Magic";}
-
-    public float transportTopSpeed(){return 0;}
-
-    public boolean isFictional(){return false;}
-
-    public float transportTractiveEffort(){return 0;}
-
-    public float transportMetricHorsePower(){return 0;}
-
-    public float transportPullingPower(){return 0;}
-
-    public String[] additionalItemText(){return null;}
-
-    @SideOnly(Side.CLIENT)
-    public boolean isAnimationTag(String name){return false;}
-
 
     public List<ParticleFX> getParticles(){
         return renderData.particles;
@@ -1207,11 +1108,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * These are grouped together because they are pretty self-explanatory.
      */
     @Override
-    public String getInventoryName() {return getItem().getUnlocalizedName() + ".storage";}
+    public String getInventoryName() {return transportName() + ".storage";}
     @Override
     public boolean hasCustomInventoryName() {return inventory != null;}
     @Override
-    public int getInventoryStackLimit() {return getType().isTanker()?1:inventory!=null?64:0;}
+    public int getInventoryStackLimit() {return inventory!=null?64:0;}
 
     /**
      * <h2>is Locked</h2>

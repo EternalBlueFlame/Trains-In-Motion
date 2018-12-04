@@ -16,6 +16,7 @@ import ebf.tim.registry.TransportRegistry;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.FuelHandler;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
@@ -32,6 +33,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import static ebf.tim.utility.RailUtility.DefineStack;
 
 /**
  * <h1>Brigadelok 0-8-0 entity</h1>
@@ -80,7 +83,7 @@ public class EntityBrigadelok080 extends TrainBase {
     @Override
     public String transportcountry(){return "Germany";}
     @Override
-    public int transportYear(){return 1918;}
+    public String transportYear(){return "1918";}
     @Override
     public String transportEra(){return "Steam";}
     @Override
@@ -88,15 +91,10 @@ public class EntityBrigadelok080 extends TrainBase {
     @Override
     public float transportTractiveEffort(){return 0;}
 
-
-    @Override
-    public ResourceLocation getDefaultTexture(){
-        return new ResourceLocation(TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png");
-    }
     @Override
     public void registerSkins(){
         SkinRegistry.addSkin(this.getClass(),TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png", null,
-        "default", "The standard design used by Germany in WWI");
+        "default", "Used by Germany in WWI as a transport for solders and equipment");
     }
 
     /*
@@ -147,7 +145,13 @@ public class EntityBrigadelok080 extends TrainBase {
      *     Only the first 3 values of each set of floats are actually used.
      */
     @Override
-    public double[][] getRiderOffsets(){return new double[][]{{1.3f,1.2f, 0f}};}
+    public float[][] getRiderOffsets(){return new float[][]{{1.3f,1.2f, 0f}};}
+
+    @Override
+    public float[] getHitboxSize() {
+        return new float[]{3,2,1.5f};
+    }
+
     /**
      * <h2>Acceleration</h2>
      * <h4>TRAINS ONLY.</h4>
@@ -157,7 +161,21 @@ public class EntityBrigadelok080 extends TrainBase {
     public float transportMetricHorsePower(){return 75f;}
 
     @Override
+    public String[] additionalItemText() {
+        return null;
+    }
+
+    @Override
     public float weightKg(){return 10886.2169f;}
+
+    @Override
+    public ItemStack[] getRecipie() {
+        return new ItemStack[]{
+                DefineStack(Items.iron_ingot, 1), null, null,
+                null, null, null,
+                null, null, null
+        };
+    }
 
     /**
      * <h2>Hitbox offsets</h2>
@@ -185,13 +203,28 @@ public class EntityBrigadelok080 extends TrainBase {
     public float[][] getSmokeOffset(){return new float[][]{{-1,0,0.5f,0xB2B2B2,30},{-1,0,-0.5f,0xB2B2B2,30},{-1.4f,2f,0,0x3C3C3C,500}};}
 
     @Override
-    public int bogieLengthFromCenter() {
-        return 1;
+    public float[][] bogieModelOffsets() {
+        return null;
+    }
+
+    @Override
+    public ModelBase[] bogieModels() {
+        return null;
+    }
+
+    @Override
+    public float[] bogieLengthFromCenter() {
+        return new float[]{1, -1};
     }
 
     @Override
     public float getRenderScale() {
         return  0.0625f;
+    }
+
+    @Override
+    public float[][] modelOffsets() {
+        return null;
     }
 
     /**
@@ -268,16 +301,12 @@ public class EntityBrigadelok080 extends TrainBase {
         return thisItem;
     }
 
-    @Override
-    public ResourceLocation getTexture(){
-        return SkinRegistry.getTexture(this.getClass(), this.dataWatcher.getWatchableObjectString(24));
-    }
 
     @Override
     public Bogie[] getBogieModels(){return null;}
 
     @Override
-    public List<? extends ModelBase> getModel(){return Collections.singletonList(new Brigadelok_080());}
+    public ModelBase[] getModel(){return new ModelBase[]{new Brigadelok_080()};}
 
     /**
      * <h2>sets the resource location for sounds, like horn and the sound made for the engine running</h2>

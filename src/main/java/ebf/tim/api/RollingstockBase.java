@@ -32,18 +32,10 @@ public abstract class RollingstockBase extends EntityRollingStockCore{
         super(worldObj);
     }
 
-    public abstract ResourceLocation getTexture();
 
     /*if this needs to be changed, then after you change it, have the renderdata.modelList variable set to null so it has to regen the data with the new models*/
-    public abstract List<? extends ModelBase> getModel();
+    public abstract ModelBase[] getModel();
 
-    public abstract Bogie[] getBogieModels();
-
-
-    /**
-     * returns the lengths from center that represent the offset each bogie should render at
-     */
-    public abstract List<Double> getRenderBogieOffsets();
 
     /**
      * returns the type of transport, for a list of options:
@@ -58,13 +50,7 @@ public abstract class RollingstockBase extends EntityRollingStockCore{
      * the second represents height offset in blocks
      * the third value is for the horizontal offset
      */
-    public abstract double[][] getRiderOffsets();
-
-    /**
-     * returns the positions for the hitbox, they are defined by length from center.
-     * must have at least 4 hitboxes, the first and last values are used for coupling positions
-     */
-    public abstract double[][] getHitboxPositions();
+    public abstract float[][] getRiderOffsets();
 
     /**
      * returns the item of the transport, this should be a static value in the transport's class.
@@ -82,14 +68,9 @@ public abstract class RollingstockBase extends EntityRollingStockCore{
     public abstract float getPistonOffset();
 
     /**
-     * defines smoke positions, the outer array defines each new smoke point, the inner arrays define the X/Y/Z
-     */
-    public abstract float[][] getSmokeOffset();
-
-    /**
      * defines the length from center of the transport, thus is used for the motion calculation
      */
-    public abstract int bogieLengthFromCenter();
+    public abstract float[] bogieLengthFromCenter();
 
     /**
      * defines the render scale, minecraft's default is 0.0625

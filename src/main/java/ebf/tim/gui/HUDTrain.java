@@ -45,7 +45,7 @@ public class HUDTrain extends GuiScreen {
             if (game.thePlayer.ridingEntity instanceof EntityTrainCore) {
                 EntityTrainCore trainEntity = (EntityTrainCore) game.thePlayer.ridingEntity;
 
-                fontRendererObj.drawString("Entity Internal ID: "+StatCollector.translateToLocal(trainEntity.getItem().getUnlocalizedName()), 8, 8, 4210752);
+                fontRendererObj.drawString("Entity Internal ID: "+StatCollector.translateToLocal(trainEntity.transportName()), 8, 8, 4210752);
                 fontRendererObj.drawString("DEBUG INFO:", 8, 18, 4210752);
                 fontRendererObj.drawString("Accelerator State: " + -trainEntity.getDataWatcher().getWatchableObjectInt(18), 8, 28, 4210752);
                 String speed = ""+Math.abs((Math.abs(trainEntity.motionX)>Math.abs(trainEntity.motionZ)?trainEntity.motionX:trainEntity.motionZ)  *72);

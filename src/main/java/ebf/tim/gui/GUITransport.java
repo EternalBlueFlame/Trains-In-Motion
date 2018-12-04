@@ -127,7 +127,7 @@ public class GUITransport extends GUIContainerNoNEI {
 
         //draw the text that goes over everything
 
-        drawTextOutlined(fontRendererObj, RailUtility.translate(transport.getItem().getUnlocalizedName() + ".name"), -94, -30+yCenter, 16777215);
+        drawTextOutlined(fontRendererObj, RailUtility.translate(transport.transportName()+ ".name"), -94, -30+yCenter, 16777215);
         drawTextOutlined(fontRendererObj, I18n.format("container.inventory", new Object()), guiLeft+120, guiTop+70, 16777215);
 
         //draw the buttons.

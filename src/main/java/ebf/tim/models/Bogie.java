@@ -13,21 +13,37 @@ import fexcraft.tmt.slim.ModelBase;
 public class Bogie {
 
     /**the vector 3 of the previously known position.*/
-    private double[] prevPos = null;
+    private float[] prevPos = null;
     /**the current yaw rotation.*/
     public float rotationYaw;
-    /**the texture defined in the registration of this.*/
-    public final ResourceLocation bogieTexture;
     /**the model defined in the registration of this.*/
     public final ModelBase bogieModel;
-    private double[] offset = new double[]{0,0,0};
+    private float[] offset = new float[]{0,0,0};
     public double sqrtPos = 0;
     public double oldSqrtPos = 0;
 
 
-    public Bogie(ResourceLocation texture, ModelBase model){
-        this.bogieTexture = texture;
+    public Bogie(ModelBase model){
         this.bogieModel = model;
+    }
+
+    public static Bogie[] genBogies(ModelBase[] models, float[][] offsets){
+        if(models==null){
+            return null;
+        }
+        int modelNumber =models.length;
+        if(offsets!=null && offsets.length>modelNumber){
+            modelNumber=offsets.length;
+        }
+        Bogie[] value = new Bogie[modelNumber];
+        for (int i=0;i<modelNumber;i++){
+            if(models.length>i) {
+                value[i] = new Bogie(models[i]);
+            } else {
+                value[i] = new Bogie(models[0]);
+            }
+        }
+        return value;
     }
 
     /**
@@ -35,18 +51,18 @@ public class Bogie {
      * updates the positions of the model, and then uses that data to set the rotations.
      * @param entity the GenericRailTransport to get the pitch from.
      */
-    public void setPositionAndRotation(GenericRailTransport entity, double distance){
+    public void setPositionAndRotation(GenericRailTransport entity, float distance){
         //update positions
         offset[0] = distance;
         if(prevPos == null){
-            prevPos = RailUtility.rotatePoint(offset, 0, entity.rotationYaw,0);
+            prevPos = RailUtility.rotatePointF(offset[0], offset[1], offset[2], 0, entity.rotationYaw,0);
             prevPos[0] += entity.posX;
             prevPos[2] += entity.posZ;
             rotationYaw = entity.rotationYaw;
             oldSqrtPos = Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ);
         } else if (shouldUpdate()) {
             oldSqrtPos = Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ);
-            double[] position = RailUtility.rotatePoint(offset, 0, entity.rotationYaw,0);
+            float[] position = RailUtility.rotatePointF(offset[0], offset[1], offset[2], 0, entity.rotationYaw,0);
             position[0] += entity.posX;
             position[2] += entity.posZ;
             //don't update if we aren't moving fast enough.

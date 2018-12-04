@@ -28,8 +28,6 @@ public abstract class TrainBase extends EntityTrainCore{
         super(worldObj);
     }
 
-    public abstract List<? extends ModelBase> getModel();
-
     public abstract Bogie[] getBogieModels();
 
 
@@ -44,14 +42,6 @@ public abstract class TrainBase extends EntityTrainCore{
      * @see TrainsInMotion.transportTypes
      */
     public abstract TrainsInMotion.transportTypes getType();
-
-    /**
-     * returns the rider offsets, each of the outer arrays represents a new rider seat,
-     * the first value of the double[] inside that represents length from center in blocks.
-     * the second represents height offset in blocks
-     * the third value is for the horizontal offset
-     */
-    public abstract double[][] getRiderOffsets();
 
     /**
      * returns the positions for the hitbox, they are defined by length from center.
@@ -83,7 +73,7 @@ public abstract class TrainBase extends EntityTrainCore{
     /**
      * defines the length from center of the transport, thus is used for the motion calculation
      */
-    public abstract int bogieLengthFromCenter();
+    public abstract float[] bogieLengthFromCenter();
 
     /**
      * defines the render scale, minecraft's default is 0.0625
