@@ -1,8 +1,6 @@
 package ebf.tim.entities;
 
 import com.mojang.authlib.GameProfile;
-import cpw.mods.fml.common.gameevent.InputEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -11,23 +9,19 @@ import ebf.tim.api.SkinRegistry;
 import ebf.tim.api.skin;
 import ebf.tim.items.ItemKey;
 import ebf.tim.items.ItemTicket;
-import ebf.tim.models.Bogie;
 import ebf.tim.models.ParticleFX;
 import ebf.tim.models.TransportRenderData;
 import ebf.tim.networking.PacketInteract;
-import fexcraft.tmt.slim.Vec3d;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.*;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
@@ -39,10 +33,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.*;
-import fexcraft.tmt.slim.ModelBase;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import static ebf.tim.utility.RailUtility.rotatePointF;
 
@@ -156,7 +151,6 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
             updateWatchers = true;
         }
     }
-
 
     public GenericRailTransport(World world){
         super(world);
@@ -1113,6 +1107,10 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
     public boolean hasCustomInventoryName() {return inventory != null;}
     @Override
     public int getInventoryStackLimit() {return inventory!=null?64:0;}
+    @Override
+    public ItemStack getCartItem(){
+        return new ItemStack(getItem(),1);
+    }
 
     /**
      * <h2>is Locked</h2>

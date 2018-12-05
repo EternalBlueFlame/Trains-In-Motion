@@ -2,7 +2,6 @@ package ebf.tim.entities;
 
 import ebf.tim.TrainsInMotion;
 import ebf.tim.registry.NBTKeys;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.FuelHandler;
 import ebf.tim.utility.RailUtility;
 import io.netty.buffer.ByteBuf;

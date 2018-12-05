@@ -1,10 +1,11 @@
 package ebf.tim.models;
 
-import ebf.tim.api.SkinRegistry;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.ClientProxy;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
+import fexcraft.tmt.slim.ModelBase;
+import fexcraft.tmt.slim.ModelRendererTurbo;
+import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.entity.Render;
@@ -13,13 +14,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
-import fexcraft.tmt.slim.ModelBase;
-import fexcraft.tmt.slim.ModelRendererTurbo;
-import fexcraft.tmt.slim.Tessellator;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 /**
  * <h2>Entity Rendering</h2>
@@ -80,12 +74,7 @@ public class RenderEntity extends Render {
         if (entity.renderData.modelList == null) {
             entity.renderData = new TransportRenderData();
             entity.renderData.modelList = entity.getModel();
-            entity.renderData.bogieRenders = Bogie.genBogies(entity.bogieModels(), entity.bogieModelOffsets());
-            if (entity.renderData.bogieRenders != null) {
-                for (Bogie b : entity.renderData.bogieRenders) {
-                    b.rotationYaw = entity.rotationYaw;
-                }
-            }
+            entity.renderData.bogieRenders = Bogie.genBogies(entity.bogieModels(), entity.bogieModelOffsets(), entity.rotationYaw);
 
             //cache animating parts
             if (ClientProxy.EnableAnimations && entity.renderData.needsModelUpdate) {
@@ -143,8 +132,8 @@ public class RenderEntity extends Render {
 
         GL11.glEnable(GL11.GL_VERTEX_ARRAY);
         GL11.glEnable(GL11.GL_TEXTURE_COORD_ARRAY);
-        GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_BLEND);
 
         GL11.glPushMatrix();
         //set the render position
@@ -214,9 +203,11 @@ public class RenderEntity extends Render {
                     Tessellator.bindTexture(entity.getTexture().getBogieSkin(i));
                 }
                 //set the offset
-                entity.renderData.animationCache[2][0]=entity.bogieModelOffsets()[i][0] + Math.copySign((entity.getRenderScale()-0.0625f)*26f, entity.bogieModelOffsets()[i][0]);
-                entity.renderData.animationCache[2][1] = RailOffset;
-                entity.renderData.animationCache[3] = RailUtility.rotatePointF(entity.renderData.animationCache[2][0],entity.renderData.animationCache[2][1],entity.renderData.animationCache[2][2], entity.rotationPitch, entity.rotationYaw,0);
+                entity.renderData.animationCache[3] = RailUtility.rotatePointF(
+                        entity.bogieModelOffsets()[i][0] + Math.copySign((entity.getRenderScale()-0.0625f)*26f, entity.bogieModelOffsets()[i][0])
+                        , RailOffset+entity.bogieModelOffsets()[i][1]
+                        ,entity.bogieModelOffsets()[i][2],
+                        entity.rotationPitch, entity.rotationYaw,0);
                 GL11.glTranslated(entity.renderData.animationCache[3][0]+x,entity.renderData.animationCache[3][1]+y, entity.renderData.animationCache[3][2]+z);
                 entity.renderData.bogieRenders[i].setPositionAndRotation(entity, entity.bogieModelOffsets()[i][0]);
                 //set the rotation

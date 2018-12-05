@@ -4,9 +4,6 @@ package ebf.tim.utility;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.common.registry.GameRegistry;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.EntityBogie;
@@ -18,8 +15,6 @@ import ebf.tim.gui.GUITransport;
 import ebf.tim.gui.HUDTrain;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
-import ebf.tim.registry.TransportRegistry;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
@@ -29,15 +24,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <h1>client proxy</h1>
@@ -175,15 +166,6 @@ public class ClientProxy extends CommonProxy {
 
         //register the fluid icons
         fluidOil.setIcons(BlockLiquid.getLiquidIcon("water_still"), BlockLiquid.getLiquidIcon("water_flow"));
-
-        //trains and rollingstock
-        int index=0;
-        GenericRailTransport transport = TransportRegistry.listTrains(0);
-        while (transport!=null) {
-            RenderingRegistry.registerEntityRenderingHandler(transport.getClass(), transportRenderer);
-            index++;
-            transport = TransportRegistry.listTrains(index);
-        }
         //hitboxes
         RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.MultipartHitbox.class, nullRender);
         //bogies
@@ -223,6 +205,14 @@ public class ClientProxy extends CommonProxy {
         MinecraftForge.EVENT_BUS.register(hud);
 
     }
+
+    @Override
+    public Object getTESR(){return specialRenderer;}
+    @Override
+    public Object getEntityRender(){return transportRenderer;}
+    @Override
+    public Object getNullRender(){return nullRender;}
+
 
     public static final TileEntitySpecialRenderer specialRenderer = new TileEntitySpecialRenderer() {
         @Override

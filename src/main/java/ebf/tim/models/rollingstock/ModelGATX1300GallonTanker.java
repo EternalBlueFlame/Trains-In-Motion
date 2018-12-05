@@ -9,9 +9,9 @@
 
 package ebf.tim.models.rollingstock;
 
-import net.minecraft.entity.Entity;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
+import net.minecraft.entity.Entity;
 
 public class ModelGATX1300GallonTanker extends ModelBase
 {

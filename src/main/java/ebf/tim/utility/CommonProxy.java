@@ -5,12 +5,11 @@ import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.BlockDynamic;
-import ebf.tim.blocks.RailTileEntity;
-import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.blocks.BlockTrainFluid;
+import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.blocks.TileEntityStorage;
+import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.gui.GUIAdminBook;
 import ebf.tim.items.ItemAdminBook;
 import ebf.tim.items.ItemKey;
 import ebf.tim.items.ItemRail;
@@ -19,7 +18,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialLiquid;
-import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -32,16 +30,15 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fluids.BlockFluidBase;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.UUID;
 
 import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
+import static ebf.tim.registry.TiMGenericRegistry.RegisterItem;
 
 
 /**
@@ -96,11 +93,11 @@ public class CommonProxy implements IGuiHandler {
         for (int w=0; w < MinecraftServer.getServer().worldServers.length; w++) {
             if (MinecraftServer.getServer().worldServers[w] != null) {
                 //if the server isn't null, loop for the entities loaded in that server
-                for (int i=0; i< MinecraftServer.getServer().worldServers[w].getLoadedEntityList().size();i++) {
+                for (int i=0; i< MinecraftServer.getServer().worldServers[w].loadedEntityList.size();i++) {
                     //if it's an entity, not null, and has a matching UUID, then return it.
-                    if (MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i) instanceof Entity &&
-                            ((Entity) MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i)).getUniqueID().equals(uuid)) {
-                        return (Entity) MinecraftServer.getServer().worldServers[w].getLoadedEntityList().get(i);
+                    if (MinecraftServer.getServer().worldServers[w].loadedEntityList.get(i) instanceof Entity &&
+                            ((Entity) MinecraftServer.getServer().worldServers[w].loadedEntityList.get(i)).getUniqueID().equals(uuid)) {
+                        return (Entity) MinecraftServer.getServer().worldServers[w].loadedEntityList.get(i);
                     }
                 }
             }
@@ -117,6 +114,10 @@ public class CommonProxy implements IGuiHandler {
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {return null;}
 
+
+    public Object getTESR(){return null;}
+    public Object getEntityRender(){return null;}
+    public Object getNullRender(){return null;}
 
     /*
      * <h1> registration </h1>
@@ -234,22 +235,7 @@ public class CommonProxy implements IGuiHandler {
     }
 
 
-    public static Item RegisterItem(Item itm, String name, String unlocalizedName, @Nullable CreativeTabs tab, @Nullable Item container){
-        if (tab!=null) {
-            itm.setCreativeTab(tab);
-        }
-        if (container!=null){
-            itm.setContainerItem(container);
-        }
-        if (!unlocalizedName.equals("")){
-            itm.setUnlocalizedName(unlocalizedName);
-        }
-        GameRegistry.registerItem(itm, name);
-        if (TrainsInMotion.proxy.isClient() && itm.getUnlocalizedName().equals(StatCollector.translateToLocal(itm.getUnlocalizedName()))){
-            DebugUtil.println("Item missing lang entry: " + itm.getUnlocalizedName());
-        }
-        return itm;
-    }
+
 
 
     public static Block RegisterBlock(Block block, String name, String unlocalizedName, @Nullable CreativeTabs tab){

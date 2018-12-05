@@ -1,11 +1,9 @@
 package ebf.tim.models.rails;
 
 import fexcraft.tmt.slim.Tessellator;
-import fexcraft.tmt.slim.Vec3f;
 import net.minecraft.block.Block;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static ebf.tim.models.rails.Model1x1Rail.addVertexWithOffset;

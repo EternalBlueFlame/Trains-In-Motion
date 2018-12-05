@@ -8,7 +8,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.AxisAlignedBB;
 import org.lwjgl.opengl.GL11;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import static fexcraft.tmt.slim.ModelRendererTurbo.MR_TOP;
 import static fexcraft.tmt.slim.Tessellator.b;

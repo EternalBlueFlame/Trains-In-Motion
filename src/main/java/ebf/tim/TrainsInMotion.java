@@ -4,6 +4,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -16,7 +17,7 @@ import ebf.tim.items.ItemAdminBook;
 import ebf.tim.items.TiMTab;
 import ebf.tim.networking.PacketInteract;
 import ebf.tim.networking.PacketRemove;
-import ebf.tim.registry.TransportRegistry;
+import ebf.tim.registry.TiMGenericRegistry;
 import ebf.tim.utility.ChunkHandler;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.CommonProxy;
@@ -129,13 +130,14 @@ public class TrainsInMotion {
      */
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-
-
-
         //loop for registering the entities. the values needed are the class, entity name, entity ID, mod instance, update range, update rate, and if it does velocity things,
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", 15, TrainsInMotion.instance, 60, 1, true);
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntitySeat.class, "Seat", 16, TrainsInMotion.instance, 60, 2, true);
-        TransportRegistry.registerTransports(17);
+
+        TiMGenericRegistry.registerTransports(event.getSide().isClient(), TiMGenericRegistry.listSteamTrains(), null);
+        TiMGenericRegistry.registerTransports(event.getSide().isClient(), TiMGenericRegistry.listFreight(), null);
+        TiMGenericRegistry.registerTransports(event.getSide().isClient(), TiMGenericRegistry.listPassenger(), null);
+        TiMGenericRegistry.registerTransports(event.getSide().isClient(), TiMGenericRegistry.listTanker(), null);
 
 
         //register the networking instances and channels
@@ -157,4 +159,8 @@ public class TrainsInMotion {
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
     }
 
+    @Mod.EventHandler
+    public void postinit(FMLPostInitializationEvent event) {
+        TiMGenericRegistry.endRegistration();
+    }
 }

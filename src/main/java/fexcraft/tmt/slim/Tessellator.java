@@ -181,17 +181,17 @@ public class Tessellator{
 	}
 
 	private static Map<ResourceLocation, Integer> tmtMap = new HashMap<>();
-
+	private static ITextureObject object;
 	/**
 	 * custom texture binding method, generally same as vanilla, but possible to improve performance later.
 	 * @param textureURI
 	 */
-	public static void bindTexture(ResourceLocation textureURI) {
+	public static boolean bindTexture(ResourceLocation textureURI) {
 		if (textureURI == null){
 			textureURI= new ResourceLocation(TrainsInMotion.MODID,"nullTrain");
 		}
 		if(ClientProxy.ForceTextureBinding) {
-			ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
+			object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
 			if (object == null) {
 				object = new SimpleTexture(textureURI);
 				Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
@@ -200,7 +200,7 @@ public class Tessellator{
 		} else {
 			Integer id = tmtMap.get(textureURI);
 			if (id ==null){
-				ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
+				object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
 				if (object == null) {
 					object = new SimpleTexture(textureURI);
 					Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
@@ -212,6 +212,7 @@ public class Tessellator{
 				GL11.glBindTexture(GL_TEXTURE_2D, id);
 			}
 		}
+		return true;
 	}
 
 
@@ -224,7 +225,6 @@ public class Tessellator{
 		if(texture==null){
 			int width =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
 			int height =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
-
 
 			GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, bufferTexturePixels);
 
@@ -249,13 +249,16 @@ public class Tessellator{
 	private static final byte fullAlpha=(byte)0;
 	public static void maskColors(ResourceLocation textureURI, List<int[]> colors){
 		pixels = loadTexture(textureURI);
+		if(pixels.length==2){
+			return;
+		}
 		length = ((pixels[0]*pixels[1])*4)-4;
 
 		for(i=0; i<length; i+=4) {
+			renderPixels.put(i+3, b(pixels[i+3]));//alpha is always from host texture.
 			if (pixels[i+3] == fullAlpha){
 				continue;//skip pixels with no color
 			}
-			renderPixels.put(i+3, b(pixels[i+3]));//alpha is always from host texture.
 			//for each set of recoloring
 			if (colors!=null) {
 				for (ii = 0; ii < colors.size(); ii++) {

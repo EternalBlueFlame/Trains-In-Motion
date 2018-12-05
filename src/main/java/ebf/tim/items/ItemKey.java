@@ -2,16 +2,11 @@ package ebf.tim.items;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ebf.tim.TrainsInMotion;
-import ebf.tim.api.SkinRegistry;
-import ebf.tim.models.rollingstock.VATLogCar;
 import ebf.tim.utility.DebugUtil;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldSavedData;
 
 import java.util.ArrayList;
 import java.util.List;

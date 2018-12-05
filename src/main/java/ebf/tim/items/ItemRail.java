@@ -4,27 +4,20 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.blocks.RailTileEntity;
-import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.utility.CommonProxy;
-import ebf.tim.utility.DebugUtil;
-import jdk.nashorn.internal.ir.Block;
 import mods.railcraft.api.core.items.ITrackItem;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockMushroom;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * <h1>Key Item</h1>

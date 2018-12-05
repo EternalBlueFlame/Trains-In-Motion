@@ -1,8 +1,6 @@
 package ebf.tim.utility;
 
 import ebf.tim.blocks.TileEntityStorage;
-import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.registry.TransportRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -138,33 +136,14 @@ public class TileEntitySlotManager extends Container{
     private ItemStack findMatchingRecipe() {
         //if this is for a crafting table
         if (craftingTable != null) {
-            int index=0;
-            ItemStack[] recipe = TransportRegistry.listRecipies(0);
-            //for every train and rollingstock in the registry, check the recipe
-            while (recipe!=null) {
-                int i = 0;
-                //check each item value, if one is false, set i to 20, which makes it return null
-                for (; i < 8; i++) {
-                    if (craftingTable.getStackInSlot(i) == null) {
-                        if (recipe[i] != null) {
-                            i = 20;
-                        }
-                    } else {
-                        if (recipe[i].getItem() != craftingTable.getStackInSlot(i).getItem()) {
-                            i = 20;
-                        }
-                    }
-                }
-                //if i is 8 (remember this is a 0 system so 8 is actually 9 slots) that means the recipe was correct, so return the proper itemstack.
-                if (i == 8) {
-                    GenericRailTransport transport = TransportRegistry.listTrains(index);
-                    return  transport!=null?new ItemStack(transport.getItem(), 1):null;
-                }
-                index++;
-                recipe = TransportRegistry.listRecipies(index);
-            }
+            return RecipeManager.getResult(new ItemStack[]{
+                    craftingTable.getStackInSlot(0), craftingTable.getStackInSlot(1), craftingTable.getStackInSlot(2),
+                    craftingTable.getStackInSlot(3), craftingTable.getStackInSlot(4), craftingTable.getStackInSlot(5),
+                    craftingTable.getStackInSlot(6), craftingTable.getStackInSlot(7), craftingTable.getStackInSlot(8)
+            });
+        } else {
+            return null;
         }
-        return null;
     }
 
 

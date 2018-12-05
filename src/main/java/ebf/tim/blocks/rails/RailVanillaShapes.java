@@ -1,7 +1,7 @@
 package ebf.tim.blocks.rails;
 
-import net.minecraft.world.World;
 import fexcraft.tmt.slim.Vec3f;
+import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -9,28 +9,21 @@ import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.items.ItemTransport;
 import ebf.tim.models.Bogie;
-import fexcraft.tmt.slim.ModelBase;
-import fexcraft.tmt.slim.Vec3d;
 import ebf.tim.models.trains.Brigadelok_080;
-import ebf.tim.registry.TransportRegistry;
+import ebf.tim.registry.TiMGenericRegistry;
 import ebf.tim.registry.URIRegistry;
-import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.FuelHandler;
+import fexcraft.tmt.slim.ModelBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,7 +41,7 @@ public class EntityBrigadelok080 extends TrainBase {
      * To make your own custom train or rollingstock, create a new class that is a copy of the train or rollingstock that is closest to what you are adding,
      *     in that copy, you will need to go through the variables and overrides and change them to match the class/transport.
      * lastly you have to register the class in
-     * @see TransportRegistry#listTrains(int)
+     * @see TiMGenericRegistry#listTrains(int)
      *
      * The fluid tank has 2 values, one for water/RF/fuel/uranium and another for steam, the second one is ONLY used with steam and nuclear steam trains.
      *     The first part is how much fluid it can store, a bucket is worth 1000.

@@ -12,9 +12,9 @@
 package ebf.tim.models.rollingstock;
 
 import ebf.tim.models.StaticModelAnimator;
-import net.minecraft.entity.Entity;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
+import net.minecraft.entity.Entity;
 
 public class PullmansPalace extends ModelBase
 {

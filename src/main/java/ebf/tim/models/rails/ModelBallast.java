@@ -1,6 +1,5 @@
 package ebf.tim.models.rails;
 
-import ebf.tim.utility.DebugUtil;
 import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;

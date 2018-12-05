@@ -2,7 +2,6 @@ package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.RailUtility;
-import net.minecraft.util.ResourceLocation;
 import fexcraft.tmt.slim.ModelBase;
 
 /**
@@ -27,7 +26,7 @@ public class Bogie {
         this.bogieModel = model;
     }
 
-    public static Bogie[] genBogies(ModelBase[] models, float[][] offsets){
+    public static Bogie[] genBogies(ModelBase[] models, float[][] offsets, float yaw){
         if(models==null){
             return null;
         }
@@ -42,6 +41,7 @@ public class Bogie {
             } else {
                 value[i] = new Bogie(models[0]);
             }
+            value[i].rotationYaw=yaw;
         }
         return value;
     }

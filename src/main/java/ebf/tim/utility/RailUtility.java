@@ -1,8 +1,8 @@
 package ebf.tim.utility;
 
 
-import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.GenericRailTransport;
+import fexcraft.tmt.slim.Vec3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,10 +13,9 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
-import fexcraft.tmt.slim.Vec3d;
 import zoranodensha.api.structures.tracks.ITrackBase;
 
-import java.util.*;
+import java.util.LinkedList;
 
 /**
  * <h1>utilities</h1>

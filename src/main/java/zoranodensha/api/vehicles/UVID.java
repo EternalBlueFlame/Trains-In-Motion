@@ -117,7 +117,7 @@ import zoranodensha.api.vehicles.vehicleParts.IVehiclePartEngine.IVehiclePartEng
  * Date: 2017/09/30, Engine: Hybrid, Speed: 420km/h, Username: Ed, Random number: 34915<br>
  * {@code 017-09-30 H-420 EDD-34915}<p>
  * 
- * Date: 1997/01/03, Engine: Steam, Speed: 80km/h, Username: Ánha, Random number: 48190<br>
+ * Date: 1997/01/03, Engine: Steam, Speed: 80km/h, Username: Anha, Random number: 48190<br>
  * {@code 997-01-03 S-080 ANH-48190}
  */
 public final class UVID {

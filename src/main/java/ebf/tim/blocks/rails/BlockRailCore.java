@@ -2,14 +2,11 @@ package ebf.tim.blocks.rails;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.items.ItemRail;
-import ebf.tim.models.rails.*;
-import ebf.tim.utility.ClientProxy;
-import ebf.tim.utility.DebugUtil;
-import net.minecraft.block.Block;
 import ebf.tim.utility.RailUtility;
+import fexcraft.tmt.slim.Vec3f;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockRail;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.ITileEntityProvider;
@@ -19,7 +16,6 @@ import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import fexcraft.tmt.slim.Vec3f;
 
 import java.util.ArrayList;
 import java.util.List;

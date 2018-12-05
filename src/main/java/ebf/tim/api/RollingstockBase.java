@@ -4,14 +4,10 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityRollingStockCore;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.models.Bogie;
 import fexcraft.tmt.slim.ModelBase;
-import fexcraft.tmt.slim.Vec3d;
 import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
