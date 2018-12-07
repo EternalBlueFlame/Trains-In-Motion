@@ -23,9 +23,12 @@ import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.EventManager;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+
+import static sun.security.x509.ReasonFlags.UNUSED;
 
 
 /**
@@ -50,7 +53,7 @@ public class TrainsInMotion {
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
     /**the creative tab for the mod*/
-    public static CreativeTabs creativeTab = new TiMTab("Trains in Motion");
+    public static CreativeTabs creativeTab = new TiMTab("Trains in Motion", MODID, "TiM");
     /**
      *Setup the proxy, this is used for managing some of the client and server specific features.
      *@see CommonProxy
@@ -94,11 +97,6 @@ public class TrainsInMotion {
              return this == TANKER || this == LAVATANKER || this == OILCAR || this == FUELTANKER;
          }
     }
-    /**defines the type of block, so that way our generic block classes can change the functionality without needing a bunch of different classes.*/
-    @Deprecated //obsolete in favor of interfaces or type classes
-    public enum blockTypes {
-        CRAFTING, CONTAINER, COSMETIC, SWITCH
-    }
 
     /**
      * <h2>load config</h2>
@@ -129,6 +127,7 @@ public class TrainsInMotion {
      * This could be done in pre-init but that would brake compatibility with Dragon API and a number of 3rd party mods.
      */
     @Mod.EventHandler
+    @SuppressWarnings(UNUSED)
     public void init(FMLInitializationEvent event) {
         //loop for registering the entities. the values needed are the class, entity name, entity ID, mod instance, update range, update rate, and if it does velocity things,
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", 15, TrainsInMotion.instance, 60, 1, true);
@@ -160,6 +159,7 @@ public class TrainsInMotion {
     }
 
     @Mod.EventHandler
+    @SuppressWarnings(UNUSED)
     public void postinit(FMLPostInitializationEvent event) {
         TiMGenericRegistry.endRegistration();
     }

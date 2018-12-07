@@ -27,7 +27,7 @@ public class EntityPullmansPalace extends RollingstockBase {
     private static final String[] itemDescription = new String[]{
             "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2 " + StatCollector.translateToLocal("menu.item.tons"),
             "\u00A77" + StatCollector.translateToLocal("menu.item.seats") +": 4 " + StatCollector.translateToLocal("menu.item.players")};
-    public static final Item thisItem = new ItemTransport(new EntityPullmansPalace(null)).setUnlocalizedName("pullmanspalace");
+    public static final Item thisItem = new ItemTransport(new EntityPullmansPalace(null), TrainsInMotion.MODID, TrainsInMotion.creativeTab);
 
     public EntityPullmansPalace(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);

@@ -3,6 +3,7 @@ package ebf.tim.registry;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import ebf.tim.TrainsInMotion;
+import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.entities.rollingstock.EntityGTAX13000GallonTanker;
 import ebf.tim.entities.rollingstock.EntityPullmansPalace;
@@ -13,10 +14,19 @@ import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RecipeManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.material.MapColor;
+import net.minecraft.block.material.MaterialLiquid;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBucket;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidContainerRegistry;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -38,14 +48,17 @@ public class TiMGenericRegistry {
         this.recipe = recipe;
     }
 
-    public static void registerBlock(boolean isClient, Block block, CreativeTabs tab, String name, @Nullable Object TESR){
+    public static Block registerBlock(boolean isClient, Block block, CreativeTabs tab, String unlocalizedName, @Nullable String oreDictionaryName, @Nullable Object TESR){
         if (tab!=null){
             block.setCreativeTab(tab);
         }
-        if (!name.equals("")){
-            block.setBlockName(name);
-            GameRegistry.registerBlock(block, name);
-            usedNames.add(name);
+        if (!unlocalizedName.equals("")){
+            block.setBlockName(unlocalizedName);
+            GameRegistry.registerBlock(block, unlocalizedName);
+            usedNames.add(unlocalizedName);
+        }
+        if(oreDictionaryName!=null){
+            OreDictionary.registerOre(oreDictionaryName, block);
         }
         if (TrainsInMotion.proxy.isClient() && block.getUnlocalizedName().equals(StatCollector.translateToLocal(block.getUnlocalizedName()))){
             DebugUtil.println("Block missing lang entry: " + block.getUnlocalizedName());
@@ -53,36 +66,61 @@ public class TiMGenericRegistry {
         if(block instanceof ITileEntityProvider){
             GameRegistry.registerTileEntity(
                     ((ITileEntityProvider)block).createNewTileEntity(null,0).getClass(),
-                    name+"tile");
-            usedNames.add(name+"tile");
+                    unlocalizedName+"tile");
+            usedNames.add(unlocalizedName+"tile");
 
-            if(isClient){
-                if(TESR!=null) {
-                    cpw.mods.fml.client.registry.ClientRegistry.bindTileEntitySpecialRenderer(((ITileEntityProvider) block).createNewTileEntity(null, 0).getClass(), (TileEntitySpecialRenderer) TESR);
-                } else {
-                    cpw.mods.fml.client.registry.ClientRegistry.bindTileEntitySpecialRenderer(((ITileEntityProvider) block).createNewTileEntity(null, 0).getClass(), (TileEntitySpecialRenderer)TrainsInMotion.proxy.getTESR());
-                }
+            if(isClient && TESR!=null){
+                cpw.mods.fml.client.registry.ClientRegistry.bindTileEntitySpecialRenderer(((ITileEntityProvider) block).createNewTileEntity(null, 0).getClass(), (TileEntitySpecialRenderer) TESR);
             }
         }
+        return block;
     }
 
-    public static Item RegisterItem(Item itm, String name, String unlocalizedName, @Nullable CreativeTabs tab, @Nullable Item container){
+    public static Item RegisterItem(Item itm, String MODID, String unlocalizedName, @Nullable String oreDictionaryName, @Nullable CreativeTabs tab, @Nullable Item container){
         if (tab!=null) {
             itm.setCreativeTab(tab);
         }
         if (container!=null){
             itm.setContainerItem(container);
         }
-        if (!unlocalizedName.equals("")){
-            itm.setUnlocalizedName(unlocalizedName);
+        itm.setTextureName(MODID+":"+unlocalizedName);
+        GameRegistry.registerItem(itm, unlocalizedName);
+        if(oreDictionaryName!=null){
+            OreDictionary.registerOre(oreDictionaryName, itm);
         }
-        GameRegistry.registerItem(itm, name);
-        if (TrainsInMotion.proxy.isClient() && itm.getUnlocalizedName().equals(StatCollector.translateToLocal(itm.getUnlocalizedName()))){
+        if (TrainsInMotion.proxy!=null &&TrainsInMotion.proxy.isClient() && itm.getUnlocalizedName().equals(StatCollector.translateToLocal(itm.getUnlocalizedName()))){
             DebugUtil.println("Item missing lang entry: " + itm.getUnlocalizedName());
         }
         return itm;
     }
 
+
+    public static void RegisterFluid(Fluid fluid, String unlocalizedName, boolean isGaseous, int density, MapColor color, CreativeTabs tab){
+        fluid.setUnlocalizedName(unlocalizedName).setGaseous(isGaseous).setDensity(density);
+        FluidRegistry.registerFluid(fluid);
+
+        Block block = new BlockTrainFluid(fluid, new MaterialLiquid(color)).setBlockName("block."+unlocalizedName);
+        GameRegistry.registerBlock(block, "block."+unlocalizedName);
+        fluid.setBlock(block);
+
+        Item bucket = new ItemBucket(block).setCreativeTab(tab).setUnlocalizedName("item." + unlocalizedName + ".bucket").setContainerItem(Items.bucket);
+        GameRegistry.registerItem(bucket, "fluid." + unlocalizedName + ".bucket");
+        FluidContainerRegistry.registerFluidContainer(fluid, new ItemStack(bucket), new ItemStack(Items.bucket));
+
+
+        if (TrainsInMotion.proxy.isClient()){
+            if(fluid.getUnlocalizedName().equals(StatCollector.translateToLocal(fluid.getUnlocalizedName()))) {
+                DebugUtil.println("Fluid missing lang entry: " + fluid.getUnlocalizedName());
+            }
+            if (bucket.getUnlocalizedName().equals(StatCollector.translateToLocal(block.getUnlocalizedName()))) {
+                DebugUtil.println("Item missing lang entry: " + bucket.getUnlocalizedName());
+            }
+            if(block.getUnlocalizedName().equals(StatCollector.translateToLocal(block.getUnlocalizedName()))){
+                DebugUtil.println("Block missing lang entry: " + block.getUnlocalizedName());
+            }
+
+        }
+    }
 
     private static List<String>usedNames = new ArrayList<>();
     private static int registryPosition =17;

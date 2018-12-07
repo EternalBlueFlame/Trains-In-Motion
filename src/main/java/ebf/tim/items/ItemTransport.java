@@ -8,10 +8,12 @@ import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -29,10 +31,9 @@ public class ItemTransport extends Item {
     private final List<String> subtext = new ArrayList<>();
     /**the class for the entity*/
     private final Class<? extends GenericRailTransport> transport;
-
     /**the main constructor.
      * @param cart the class for the entity*/
-    public ItemTransport(GenericRailTransport cart) {
+    public ItemTransport(GenericRailTransport cart, String MODID, CreativeTabs tabs) {
         super();
         setUnlocalizedName(cart.transportName().replace(" ",""));
         subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.era") +  ": " + RailUtility.translate(cart.transportEra()));
@@ -58,9 +59,9 @@ public class ItemTransport extends Item {
                 subtext.add(EnumChatFormatting.LIGHT_PURPLE  +s);
             }
         }
-        //if we did this anywhere else it would error. why it is fine here I will never know. But I'm gonna abuse that.
-        transport = cart.getClass();
-        setCreativeTab(TrainsInMotion.creativeTab);
+        transport=cart.getClass();
+        setTextureName(MODID+":transports/"+getUnlocalizedName());
+        setCreativeTab(tabs);
     }
 
     /**
@@ -103,16 +104,6 @@ public class ItemTransport extends Item {
         	DebugUtil.log("Failed to cast : " + transport.toString() + "to a new generic transport entity");
         }
         return true;
-    }
-
-    /**
-     * <h2>Item icon</h2>
-     * Sets the icon for the item, this re-uses the unlocalized name defined by the class that instanced this.
-     */
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister iconRegister) {
-        this.itemIcon = iconRegister.registerIcon(URIRegistry.ITEM_TRANSPORT_ICON.getResource(this.getUnlocalizedName()).toString());
     }
 
 }

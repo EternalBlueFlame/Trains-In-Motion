@@ -1,7 +1,6 @@
 package ebf.tim.blocks;
 
 import ebf.tim.TrainsInMotion;
-import ebf.tim.TrainsInMotion.blockTypes;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
@@ -17,14 +16,19 @@ import net.minecraft.world.World;
  */
 public class BlockDynamic extends BlockContainer {
 
-    /**defines the type of tile entity that the block will spawn and manage*/
-    private blockTypes type = blockTypes.CONTAINER;
+    /**defines the type of GUI and potentially tile entity that the block uses
+     * 0: standard crafting table
+     * 1: rail crafting table , NOT IMPLEMENTED
+     * 2: storage blocks like chests, NOT IMPLEMENTED
+     * 3: signals and levers, NOT IMPLEMENTED
+     * 4: signs, NOT IMPLEMENTED*/
+    private int type = 0;
 
     /**
      * <h2>block initializer</h2>
      *  Defines the material like what is necessary to make it and the creative tab for it, and the block name.
      */
-    public BlockDynamic(String name, Material material, blockTypes blockType){
+    public BlockDynamic(String name, Material material, int blockType){
         super(material);
         setCreativeTab(TrainsInMotion.creativeTab);
         setBlockName(name);
@@ -38,23 +42,18 @@ public class BlockDynamic extends BlockContainer {
      */
     @Override
     public boolean onBlockActivated(World worldOBJ, int x, int y, int z, EntityPlayer player, int p_149727_6_, float p_149727_7_, float p_149727_8_, float p_149727_9_) {
-
+        if (player.isSneaking()) {
+            return false;
+        } else if (worldOBJ.isRemote) {
+            return true;
+        }
         switch (type) {
-            case CONTAINER: case CRAFTING: {
-                if (player.isSneaking()) {
-                    return false;
-                } else {
-                    if (worldOBJ.isRemote) {
-                        return true;
-                    } else {
-                        TileEntity entity = worldOBJ.getTileEntity(x, y, z);
-                        if (entity != null) {
-                            player.openGui(TrainsInMotion.instance, 0, worldOBJ, x, y, z);
-                        }
-
-                        return true;
-                    }
+            case 0: {
+                TileEntity entity = worldOBJ.getTileEntity(x, y, z);
+                if (entity != null) {
+                    player.openGui(TrainsInMotion.instance, 0, worldOBJ, x, y, z);
                 }
+                return true;
             }
             //cosmetic and otherwise
             default:{

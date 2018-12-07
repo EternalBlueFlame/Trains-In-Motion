@@ -14,6 +14,7 @@ import ebf.tim.items.ItemAdminBook;
 import ebf.tim.items.ItemKey;
 import ebf.tim.items.ItemRail;
 import ebf.tim.items.ItemTicket;
+import ebf.tim.registry.TiMGenericRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -33,12 +34,15 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 
 import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
+import static ebf.tim.registry.TiMGenericRegistry.RegisterFluid;
 import static ebf.tim.registry.TiMGenericRegistry.RegisterItem;
+import static ebf.tim.registry.TiMGenericRegistry.registerBlock;
 
 
 /**
@@ -123,22 +127,13 @@ public class CommonProxy implements IGuiHandler {
      * <h1> registration </h1>
      */
 
-    //initialize the oil
-    /**the oil fluid block*/
-    public static BlockTrainFluid blockFluidOil;
-    /**the diesel fluid block*/
-    public static BlockTrainFluid blockFluidDiesel;
     /**the oil fluid*/
     public static Fluid fluidOil = new Fluid("Oil");
     /**the diesel fluid*/
     public static Fluid fluidDiesel = new Fluid("Diesel");
-    /**the oil bucket*/
-    public static ItemBucket bucketOil;
-    /**the diesel bucket*/
-    public static ItemBucket bucketDiesel;
 
     /**the crafting table for trains*/
-    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", Material.wood, TrainsInMotion.blockTypes.CRAFTING);
+    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", Material.wood, 0);
 
     public static BlockRailCore railBlock = new BlockRailCore();
 
@@ -149,26 +144,23 @@ public class CommonProxy implements IGuiHandler {
      */
     public void register() {
 
-        fluidOil = RegisterFluid(fluidOil, "oil", false, 700);
-        blockFluidOil = RegisterFluidBlock(fluidOil, "oil", MapColor.blackColor);
-        bucketOil = RegisterFluidBucket(fluidOil, blockFluidOil, "oil", TrainsInMotion.creativeTab);
-        fluidDiesel = RegisterFluid(fluidDiesel, "diesel", false, 500);
-        blockFluidDiesel = RegisterFluidBlock(fluidDiesel, "diesel", MapColor.sandColor);
-        bucketDiesel = RegisterFluidBucket(fluidDiesel, blockFluidDiesel, "diesel", TrainsInMotion.creativeTab);
+        RegisterFluid(fluidOil, "oil", false, 700,MapColor.blackColor, TrainsInMotion.creativeTab);
+        RegisterFluid(fluidDiesel, "diesel", false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
 
-        RegisterItem(new ItemAdminBook(), "adminbook", "adminbook", TrainsInMotion.creativeTab, null);
-        RegisterBlock(railBlock, "block.timrail", "block.timrail", null);
 
-        GameRegistry.registerTileEntity(TileEntityStorage.class, "StorageEntity");
-        GameRegistry.registerTileEntity(RailTileEntity.class, "TiMRailEntity");
+        RegisterItem(new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", null, TrainsInMotion.creativeTab, null);
 
-        RegisterItem(new ItemKey(), "transportkey","transportkey", TrainsInMotion.creativeTab, null);
-        RegisterItem(new ItemTicket(), "transportticket","transportticket", TrainsInMotion.creativeTab, null);
-        RegisterItem(new ItemRail(), "item.timrail", "item.timrail", TrainsInMotion.creativeTab, null);
+        RegisterItem(new ItemKey(),TrainsInMotion.MODID,  "transportkey",null, TrainsInMotion.creativeTab, null);
+        RegisterItem(new ItemTicket(),TrainsInMotion.MODID,  "transportticket",null, TrainsInMotion.creativeTab, null);
+        RegisterItem(new ItemRail(),TrainsInMotion.MODID,  "item.timrail", null, TrainsInMotion.creativeTab, null);
+
+        registerBlock(isClient(), railBlock, null, "block.timrail", null, getTESR());
+
         //register the train crafting table
-        addRecipe(new ItemStack(RegisterBlock(trainTable, "block.traintable", "block.traintable", TrainsInMotion.creativeTab),1),
+        addRecipe(new ItemStack(registerBlock(isClient(), trainTable, TrainsInMotion.creativeTab,"block.traintable", null, null),1),
                 "WWW", "WIW", "WWW", 'W', Blocks.planks, 'I', Items.iron_ingot);
-        //OreDictionary.getOres("ingot")
+
+        //@Deprecated
         for (ItemStack i : new ItemStack[]{new ItemStack(Items.iron_ingot),new ItemStack(Items.gold_ingot)}) {
             DebugUtil.println("found ingot");
             addRecipe(new ItemStack(
@@ -200,55 +192,4 @@ public class CommonProxy implements IGuiHandler {
         }
     }
 
-    public static Fluid RegisterFluid(Fluid fluid, String unlocalizedName, boolean isGaseous, int density){
-        fluid.setUnlocalizedName(unlocalizedName).setGaseous(isGaseous).setDensity(density);
-        FluidRegistry.registerFluid(fluid);
-        if (TrainsInMotion.proxy.isClient() && fluid.getUnlocalizedName().equals(StatCollector.translateToLocal(fluid.getUnlocalizedName()))){
-            DebugUtil.println("Fluid missing lang entry: " + fluid.getUnlocalizedName());
-        }
-
-        return fluid;
-    }
-
-    public static BlockTrainFluid RegisterFluidBlock(Fluid fluid, String unlocalizedName, MapColor color){
-        BlockTrainFluid block = new BlockTrainFluid(fluid, new MaterialLiquid(color));
-        block.setBlockName("block."+unlocalizedName);
-        GameRegistry.registerBlock(block, "block."+unlocalizedName);
-        if (TrainsInMotion.proxy.isClient() && block.getUnlocalizedName().equals(StatCollector.translateToLocal(block.getUnlocalizedName()))){
-            DebugUtil.println("Block missing lang entry: " + block.getUnlocalizedName());
-        }
-
-        fluid.setBlock(block);
-        return block;
-    }
-
-    public static ItemBucket RegisterFluidBucket(Fluid fluid, Block block, String unlocalizedName, CreativeTabs tab){
-        ItemBucket bucket = new ItemBucket(block);
-        bucket.setCreativeTab(tab).setUnlocalizedName("item." + unlocalizedName + ".bucket").setContainerItem(Items.bucket);
-        GameRegistry.registerItem(bucket, "fluid." + unlocalizedName + ".bucket");
-        if (TrainsInMotion.proxy.isClient() && bucket.getUnlocalizedName().equals(StatCollector.translateToLocal(block.getUnlocalizedName()))){
-            DebugUtil.println("Item missing lang entry: " + bucket.getUnlocalizedName());
-        }
-
-        FluidContainerRegistry.registerFluidContainer(fluid, new ItemStack(bucket), new ItemStack(Items.bucket));
-        return bucket;
-    }
-
-
-
-
-
-    public static Block RegisterBlock(Block block, String name, String unlocalizedName, @Nullable CreativeTabs tab){
-        if (tab!=null){
-            block.setCreativeTab(tab);
-        }
-        if (!unlocalizedName.equals("")){
-            block.setBlockName(unlocalizedName);
-        }
-        GameRegistry.registerBlock(block, name);
-        if (TrainsInMotion.proxy.isClient() && block.getUnlocalizedName().equals(StatCollector.translateToLocal(block.getUnlocalizedName()))){
-            DebugUtil.println("Block missing lang entry: " + block.getUnlocalizedName());
-        }
-        return block;
-    }
 }

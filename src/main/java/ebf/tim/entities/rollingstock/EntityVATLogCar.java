@@ -30,7 +30,7 @@ public class EntityVATLogCar extends RollingstockBase {
     public static final String[] itemDescription = new String[]{
             "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2" + StatCollector.translateToLocal("menu.item.tons"),
             "\u00A77" + StatCollector.translateToLocal("menu.item.sizeof") +": 27" + StatCollector.translateToLocal("menu.item.slots")};
-    public static final Item thisItem = new ItemTransport(new EntityVATLogCar(null)).setUnlocalizedName("vatlogcar");
+    public static final Item thisItem = new ItemTransport(new EntityVATLogCar(null), TrainsInMotion.MODID, TrainsInMotion.creativeTab);
 
     public EntityVATLogCar(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);

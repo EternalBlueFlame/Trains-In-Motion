@@ -1,7 +1,9 @@
 package ebf.tim.items;
 
+import ebf.tim.registry.TiMGenericRegistry;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
+import net.minecraft.util.StatCollector;
 
 /**
  * <h1>Creative tab</h1>
@@ -10,18 +12,20 @@ import net.minecraft.item.Item;
  */
 public class TiMTab extends CreativeTabs {
 
+    Item tabItem;
+
     /**instances the tab by handling it through the super.*/
-    public TiMTab(String name) {
+    public TiMTab(String name, String MODID, String textureName) {
         super(CreativeTabs.getNextID(), name);
+        tabItem= TiMGenericRegistry.RegisterItem(new Item(),MODID,textureName,null,null,null);
     }
     /**returns the label of the tab, this is defined in the language files,*/
     @Override
     public String getTranslatedTabLabel() {
-        return getTabLabel();
+        return StatCollector.translateToLocal(tabItem.getUnlocalizedName());
     }
     /**the icon for the tab.
      * TODO we don't actually have an icon for the mod yet.*/
     @Override
-    public Item getTabIconItem(){return new Item();}
-
+    public Item getTabIconItem(){return tabItem;}
 }

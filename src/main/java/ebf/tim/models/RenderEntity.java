@@ -184,7 +184,7 @@ public class RenderEntity extends Render {
 
 
         //loop for the groups of cargo
-        for (int i = 0; i< entity.renderData.blockCargoRenders.size() && i < entity.calculatePercentageOfSlotsUsed(entity.renderData.blockCargoRenders.size()); i++) {
+        for (i = 0; i< entity.renderData.blockCargoRenders.size() && i < entity.calculatePercentageOfSlotsUsed(entity.renderData.blockCargoRenders.size()); i++) {
             entity.renderData.blockCargoRenders.get(i).doRender(field_147909_c, entity.getFirstBlock(i), this, entity.getRenderScale(), entity);
         }
 
@@ -196,7 +196,7 @@ public class RenderEntity extends Render {
          * this loops for every bogie defined in the registry for the transport, that way we can have different bogies.
          */
         if (entity.renderData.bogieRenders != null && entity.renderData.bogieRenders.length >0){
-            for (int i = 0; i<entity.bogieModelOffsets().length; i++){
+            for (i = 0; i<entity.bogieModelOffsets().length; i++){
                 GL11.glPushMatrix();
                 //bind the texture
                 if(entity.getTexture().getBogieSkin(i)!=null) {

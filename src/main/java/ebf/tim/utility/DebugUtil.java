@@ -44,7 +44,7 @@ public class DebugUtil {
 
 
 	public static void printStackTrace(){
-		DebugUtil.println(Thread.currentThread().getStackTrace());
+		DebugUtil.println(Thread.currentThread().getStackTrace(),"");
 	}
 
 	/**

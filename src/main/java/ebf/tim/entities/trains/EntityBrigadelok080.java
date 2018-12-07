@@ -57,7 +57,7 @@ public class EntityBrigadelok080 extends TrainBase {
      */
 
 
-    public static final Item thisItem = new ItemTransport(new EntityBrigadelok080(null) ).setUnlocalizedName("brigadelok080");
+    public static final Item thisItem = new ItemTransport(new EntityBrigadelok080(null), TrainsInMotion.MODID,TrainsInMotion.creativeTab);
 
     /**
      * these basic constructors only need to have their names changed to that of this class, that is assuming your editor doesn't automatically do that.
@@ -164,7 +164,7 @@ public class EntityBrigadelok080 extends TrainBase {
     @Override
     public ItemStack[] getRecipie() {
         return new ItemStack[]{
-                DefineStack(Items.iron_ingot, 1), null, null,
+                null, null, null,
                 null, null, null,
                 null, null, null
         };
