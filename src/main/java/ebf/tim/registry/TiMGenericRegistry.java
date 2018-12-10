@@ -83,7 +83,7 @@ public class TiMGenericRegistry {
         if (container!=null){
             itm.setContainerItem(container);
         }
-        itm.setTextureName(MODID+":"+unlocalizedName);
+        itm.setUnlocalizedName(unlocalizedName).setTextureName(MODID+":"+unlocalizedName);
         GameRegistry.registerItem(itm, unlocalizedName);
         if(oreDictionaryName!=null){
             OreDictionary.registerOre(oreDictionaryName, itm);

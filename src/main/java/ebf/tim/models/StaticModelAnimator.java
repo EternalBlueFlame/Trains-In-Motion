@@ -21,26 +21,22 @@ public class StaticModelAnimator {
     public static final String tagSimpleRotate = "simplerotate";
     /**tag for wheels, adds support for the sparks on top of what tagSimpleRotate does.*/
     public static final String tagWheel = "wheel";
-    /**tag for lens flare effects. use this on geometric faces to hide or change color dependant on the state of the train.
-     * this also disables lightmapping in the render for the geometry.
-     * @see ModelRendererTurbo#render(float)  */
-    public static final String tagLenseFlare = "lenseflare";
-    /**tag for parts that glow, this disables the game's lightmapping on the geometry to make it appear as if it's glowing.
-     * this is fully managed by the render
-     * @see ModelRendererTurbo#render(float)  */
-    public static final String tagGlow = "glow";
-    /**tag for doors that slide open and closed*/
-    public static final String tagDoorSlide = "doorslide";
-    /**tag for doors that swing open and closed, the center point for all parts must be at the hinge.*/
-    public static final String tagDoorSwing = "doorswing";
-    /**tag for lamps that render a cone*/
-    public static final String tagLampCone = "lamp cone";
-    /**tag for lamps that render in a sphere*/
-    public static final String tagLampsphere = "lamp sphere";
     /**A copy of the original Vec6F for the model part*/
     private final float[] originalRotationValuesXYZ;
     /**a reference to the current model geometry, the one with the modifications that's actually being rendered.*/
     private ModelRendererTurbo modelRefrence;
+
+    public static String tagLamp(String type, float scale, int id){
+        return "lamp "+ type+" "+scale+" "+id;
+    }
+
+    public static String tagDoor(String type, int side, boolean mirror){
+        return "";
+    }
+
+    public static String tagSmoke(int density, int idfk){
+        return "smoke "+ density +" " + idfk;
+    }
 
     /**
      * used to create an instance of this class.

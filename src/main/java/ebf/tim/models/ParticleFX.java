@@ -30,7 +30,7 @@ public class ParticleFX {
     /*the color to render the particle as*/
     private final int color;
     /*the ticks the particle has existed, float is used so render can divide it into decimals*/
-    private Float ticksExisted=null, scale=null;
+    public Float ticksExisted=null, scale=null;
     /*the offset to tint the particle color*/
     private int colorTint;
     /*the bounding box of the particle to use for rendering and collision, if it's null we render it as a static particle*/
@@ -53,9 +53,10 @@ public class ParticleFX {
      * Initialize the particle, basically for spawning it
      * @param color the color of the particle.
      */
-    public ParticleFX(GenericRailTransport transport, int color, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, int id) {
+    public ParticleFX(GenericRailTransport transport, int color, float scale, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, int id) {
         host = transport;
         particleID=id;
+        this.scale=scale;
         this.offset = new float[]{offsetX, id==4?(float)transport.posY:offsetY, offsetZ};
         pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, transport.rotationPitch, transport.rotationYaw, 0);
         pos= new float[]{pos[0],pos[1],pos[2],rotationX,rotationY,rotationZ};
@@ -87,8 +88,7 @@ public class ParticleFX {
     }
 
     public ParticleFX(GenericRailTransport transport, int color, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, int id, float scale){
-        this(transport, color, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id);
-        this.scale=scale;
+        this(transport, color, scale, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id);
     }
 
     public static int getParticleIDFronName(String name){
@@ -109,15 +109,15 @@ public class ParticleFX {
         return -1;//invalid part
     }
 
-    public static List<ParticleFX> newParticleItterator(String strength, int color, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, GenericRailTransport host, String partname){
+    public static List<ParticleFX> newParticleItterator(Float strength, float scale, int color, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, GenericRailTransport host, String partname){
         List<ParticleFX> list = new ArrayList<>();
         int id= getParticleIDFronName(partname);
         if(id==0 || id==1) {
-            for (int i = 0; i < Integer.parseInt(strength)*20; i++) {
-                list.add(new ParticleFX(host, color, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id));
+            for (int i = 0; i < strength*20; i++) {
+                list.add(new ParticleFX(host, color, scale, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id));
             }
         } else {
-            list.add(new ParticleFX(host, color, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id, Float.parseFloat(strength)));
+            list.add(new ParticleFX(host, color, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id, strength));
         }
         return list;
     }
@@ -130,16 +130,18 @@ public class ParticleFX {
         }
     }
 
-    public static String[] parseData(String s){
+    public static float[] parseData(String s){
         if (s.contains("smoke")) {
-            return s.substring(s.indexOf("smoke ")+6).split(" ");
+            String[] smoke = s.substring(s.indexOf("smoke ")+6).split(" ");
+            return new float[]{Float.parseFloat(smoke[0]), 1f, Float.parseFloat(smoke[1])};
         } else if (s.contains("lamp")){
             String[] lamp = s.substring(s.indexOf("lamp ")+5).split(" ");
-            return new String[]{lamp[1], lamp[2]};
+            return new float[]{1f, Float.parseFloat(lamp[1]), Float.parseFloat(lamp[2])};
         } else if (s.contains(StaticModelAnimator.tagWheel)){
-            return new String[]{"4", "CCCC00"};
+            return new float[]{4f, 1f, 0xCCCC00};
         } else {
-            return s.substring(s.indexOf("steam ")+6).split(" ");
+            String[] smoke = s.substring(s.indexOf("steam ")+6).split(" ");
+            return new float[]{Float.parseFloat(smoke[0]), 1f, Float.parseFloat(smoke[1])};
         }
     }
 
@@ -296,7 +298,7 @@ public class ParticleFX {
             GL11.glRotated(90+entity.pos[4]+entity.host.rotationPitch,1,0,0);
             GL11.glRotated(entity.pos[5],0,1,0);
             GL11.glRotated(270-entity.pos[3]+entity.host.rotationYaw,0,0,1);
-            GL11.glScalef(5.5f,5.5f,5.5f);
+            GL11.glScalef(5.5f+entity.scale,5.5f+entity.scale,5.5f+entity.scale);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
             glAlphaFunc(GL_LEQUAL, 1f);

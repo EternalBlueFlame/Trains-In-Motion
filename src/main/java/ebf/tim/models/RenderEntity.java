@@ -2,6 +2,7 @@ package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
@@ -79,7 +80,7 @@ public class RenderEntity extends Render {
             //cache animating parts
             if (ClientProxy.EnableAnimations && entity.renderData.needsModelUpdate) {
                 boolean isAdded;
-                String[] density;
+                float[] density;
                 for (ModelBase part : entity.renderData.modelList) {
                     for (ModelRendererTurbo render : part.boxList) {
                         if (render.boxName ==null){continue;}
@@ -107,8 +108,9 @@ public class RenderEntity extends Render {
                         }
                         if(ParticleFX.getParticleIDFronName(render.boxName)!=-1){
                             density = ParticleFX.parseData(render.boxName.toLowerCase());
-                            entity.renderData.particles.addAll(ParticleFX.newParticleItterator(density[0].trim(),
-                                    Integer.parseInt(density[1].trim(), 16),
+                            DebugUtil.println(density);
+                            entity.renderData.particles.addAll(ParticleFX.newParticleItterator(density[0],
+                                    density[1], (int)density[2],
                                     render.rotationPointX, render.rotationPointY, render.rotationPointZ,
                                     render.rotateAngleX,render.rotateAngleY,render.rotateAngleZ,
                                     entity, render.boxName));
@@ -227,9 +229,7 @@ public class RenderEntity extends Render {
 
         //render the particles, if there are any.
         for(ParticleFX particle : entity.renderData.particles){
-            GL11.glPushMatrix();
             ParticleFX.doRender(particle, x,y,z);
-            GL11.glPopMatrix();
         }
 
         GL11.glDisable(GL11.GL_BLEND);

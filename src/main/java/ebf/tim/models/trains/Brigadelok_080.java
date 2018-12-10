@@ -14,6 +14,8 @@ import ebf.tim.models.StaticModelAnimator;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 
+import static ebf.tim.models.StaticModelAnimator.tagLamp;
+
 public class Brigadelok_080 extends ModelBase //Same as Filename
 {
 	int textureX = 256;
@@ -139,7 +141,7 @@ public class Brigadelok_080 extends ModelBase //Same as Filename
 		bodyModel[108] = new ModelRendererTurbo(this, 65, 121, textureX, textureY); // Box 109
 		bodyModel[109] = new ModelRendererTurbo(this, 209, 57, textureX, textureY); // Box 110
 		bodyModel[110] = new ModelRendererTurbo(this, 59, 38, textureX, textureY); // Box 111
-		bodyModel[111] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "lamp cone 1.5 0"); // lamp
+		bodyModel[111] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, tagLamp("cone",1.5f, 0)); // lamp
 		bodyModel[112] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "smoke 3 3"); // smoke
 		bodyModel[113] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "steam 1 4"); // steam
 		bodyModel[114] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "steam 1 4"); // steam
