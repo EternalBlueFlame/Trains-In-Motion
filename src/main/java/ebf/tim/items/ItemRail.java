@@ -163,6 +163,9 @@ public class ItemRail extends Item implements ITrackItem {
     }
 
     public static ItemStack setStackData(ItemStack stack, ItemStack ingot, Block ballast, Block ties, Block wires){
+        if (!stack.hasTagCompound()){
+            stack.setTagCompound(new NBTTagCompound());
+        }
         ingot.writeToNBT(stack.getTagCompound().getCompoundTag("ingot"));
         if(ballast!=null) {
            new ItemStack(ballast).writeToNBT(stack.getTagCompound().getCompoundTag("ballast"));
