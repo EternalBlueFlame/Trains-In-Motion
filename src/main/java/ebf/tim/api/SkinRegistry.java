@@ -3,6 +3,7 @@ package ebf.tim.api;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,8 +16,12 @@ public class SkinRegistry {
         addSkinRecolor(c,modid,textureURI,null, null,name,description);
     }
 
-    public static void addSkin(Class c, String modid, String textureURI, String[] bogieTextureURIs, String name, String description){
-        addSkinRecolor(c,modid,textureURI,null,null,name,description);
+    public static void addSkin(Class c, String modid, String textureURI, String bogieTextureURI, String name, String description){
+        addSkinRecolor(c,modid,textureURI,new String[]{bogieTextureURI},null,name,description);
+    }
+
+    public static void addSkin(Class c, String modid, String textureURI, @Nullable String[] bogieTextureURIs, String name, String description){
+        addSkinRecolor(c,modid,textureURI,bogieTextureURIs,null,name,description);
     }
 
     public static void addSkinRecolor(Class c,String modid, String textureURI, String[] bogieTextureURI, @Nullable int[][] recolor, String skinName, String skinDescription){

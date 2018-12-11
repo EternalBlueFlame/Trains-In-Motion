@@ -108,7 +108,6 @@ public class RenderEntity extends Render {
                         }
                         if(ParticleFX.getParticleIDFronName(render.boxName)!=-1){
                             density = ParticleFX.parseData(render.boxName.toLowerCase());
-                            DebugUtil.println(density);
                             entity.renderData.particles.addAll(ParticleFX.newParticleItterator(density[0],
                                     density[1], (int)density[2],
                                     render.rotationPointX, render.rotationPointY, render.rotationPointZ,
@@ -206,8 +205,8 @@ public class RenderEntity extends Render {
                 }
                 //set the offset
                 entity.renderData.animationCache[3] = RailUtility.rotatePointF(
-                        entity.bogieModelOffsets()[i][0] + Math.copySign((entity.getRenderScale()-0.0625f)*26f, entity.bogieModelOffsets()[i][0])
-                        , RailOffset+entity.bogieModelOffsets()[i][1]
+                        entity.bogieModelOffsets()[i][0],
+                        RailOffset+entity.bogieModelOffsets()[i][1]
                         ,entity.bogieModelOffsets()[i][2],
                         entity.rotationPitch, entity.rotationYaw,0);
                 GL11.glTranslated(entity.renderData.animationCache[3][0]+x,entity.renderData.animationCache[3][1]+y, entity.renderData.animationCache[3][2]+z);

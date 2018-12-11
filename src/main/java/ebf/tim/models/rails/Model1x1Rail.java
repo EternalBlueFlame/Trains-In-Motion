@@ -3,6 +3,7 @@ package ebf.tim.models.rails;
 import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 
@@ -59,7 +60,7 @@ public class Model1x1Rail {
 
 
     //todo use the return value to manage displaylists
-    public static boolean Model3DRail(List<float[]> points, float[] railOffsets, float segmentLength, @Nullable Block ties, @Nullable Block ballast, @Nullable Block railBlock){
+    public static boolean Model3DRail(List<float[]> points, float[] railOffsets, float segmentLength, @Nullable Block ties, @Nullable Block ballast, ItemStack railBlock){
         if(railOffsets==null || points ==null){
             return false;
         }

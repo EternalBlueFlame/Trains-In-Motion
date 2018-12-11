@@ -49,14 +49,23 @@ menu.item.seats=Seats
 menu.item.weight=Players
 menu.item.iszeof=Inventory size of
 menu.item.slots=Slots
+US=USA
 
 item.oilbucket=Oil bucket
 
 
 <!-- ## Blocks ## -->
 fluid.oil=Oil
-block.traintable=Train crafting table
-
+block.traintable.name=Train crafting table
+tile.block.traintable=Train crafting table
+item.item.timrail.name=Rail
+item.transportticket.name=Train Ticket
+item.transportkey.name=Train Key
+item.adminbook.name=Trains in Motion Admin Book
+tile.block.diesel.name=Diesel Fluid
+fluid.diesel.name=Diesel Fluid
+tile.block.oil.name=Oil Fluid
+fluid.oil.name=Oil Fluid
 
 <!-- ## Trains ## -->
 <!-- ## These are actually defined from the item name, so one name covers all areas ## -->

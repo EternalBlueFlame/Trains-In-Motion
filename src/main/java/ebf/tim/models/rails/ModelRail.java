@@ -2,6 +2,7 @@ package ebf.tim.models.rails;
 
 import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.block.Block;
+import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -11,7 +12,7 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class ModelRail {
 
-    public static void model3DRail(List<float[]> points, float[] railOffsets, Block railBlock){
+    public static void model3DRail(List<float[]> points, float[] railOffsets, ItemStack railBlock){
 
         GL11.glPushMatrix();
         GL11.glDisable(GL_TEXTURE_2D);

@@ -3,11 +3,14 @@ package ebf.tim.blocks;
 import cpw.mods.fml.common.registry.GameData;
 import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.blocks.rails.RailVanillaShapes;
+import ebf.tim.items.ItemRail;
 import ebf.tim.models.rails.Model1x1Rail;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -29,10 +32,10 @@ public class RailTileEntity extends TileEntity {
 
     private AxisAlignedBB boundingBox = null;
     //management variables
-    public Block ballast = null;
-    public Block ties = null;
-    public Block wires = null;
-    public Block rail;
+    public ItemStack rail;
+    public Block ballast;
+    public Block ties;
+    public Block wires;
     public int snow=0;
     public int timer=0;
     public int overgrowth=0;
@@ -106,8 +109,6 @@ public class RailTileEntity extends TileEntity {
 
         List<float[]> oldPoints = points;//hold on to check if we need update.
 
-        ballast=Blocks.glowstone;
-        ties=Blocks.log;
 
         points= new ArrayList<>();
         //todo: process these directly into quad/triProcessPoints on server, then sync the offsets over the NBT network packet.
@@ -213,10 +214,19 @@ public class RailTileEntity extends TileEntity {
     @Override
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
-        tag.setString("ballast", ballast!=null?ballast.delegate.name():"null");
-        tag.setString("ties", ties!=null?ties.delegate.name():"null");
-        tag.setString("rail", rail !=null? rail.delegate.name():"null");
-        tag.setString("wires", wires!=null?wires.delegate.name():"null");
+        NBTTagCompound compound = new NBTTagCompound();
+        rail.writeToNBT(compound);
+        tag.setTag("rail", compound);
+        compound = new NBTTagCompound();
+        new ItemStack(Item.getItemFromBlock(ballast)).writeToNBT(compound);
+        tag.setTag("ballast", compound);
+        compound = new NBTTagCompound();
+        new ItemStack(Item.getItemFromBlock(ties)).writeToNBT(compound);
+        tag.setTag("ties", compound);
+        compound = new NBTTagCompound();
+        new ItemStack(Item.getItemFromBlock(wires)).writeToNBT(compound);
+        tag.setTag("wires", compound);
+
         tag.setFloat("segmentLength", segmentLength);
         try {
             ByteArrayOutputStream bo = new ByteArrayOutputStream();
@@ -236,34 +246,10 @@ public class RailTileEntity extends TileEntity {
     @Override
     public void readFromNBT(NBTTagCompound tag){
         super.readFromNBT(tag);
-        String s = "null";
-        if (tag.hasKey("ballast")) {
-            s = tag.getString("ballast");
-            if (!s.equals("null")) {
-                ballast = GameData.getBlockRegistry().getObject(s);
-            }
-        }
-
-        if (tag.hasKey("ties")) {
-            s = tag.getString("ties");
-            if (!s.equals("null")) {
-                ties = GameData.getBlockRegistry().getObject(s);
-            }
-        }
-
-        if (tag.hasKey("wires")) {
-            s = tag.getString("wires");
-            if (!s.equals("null")) {
-                wires = GameData.getBlockRegistry().getObject(s);
-            }
-        }
-
-        if (tag.hasKey("rail")) {
-            s = tag.getString("rail");
-            if (!s.equals("null")) {
-                rail = GameData.getBlockRegistry().getObject(s);
-            }
-        }
+        rail= ItemStack.loadItemStackFromNBT(tag.getCompoundTag("rail"));
+        ballast = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ballast")).getItem());
+        ties = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ties")).getItem());
+        wires = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("wires")).getItem());
 
         if (tag.hasKey("segmentLength")) {
             segmentLength = tag.getFloat("segmentLength");

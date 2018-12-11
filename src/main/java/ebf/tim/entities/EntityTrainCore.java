@@ -264,14 +264,13 @@ public abstract class EntityTrainCore extends GenericRailTransport {
         if(frontBogie != null && backBogie != null && !worldObj.isRemote) {
             //twice a second, re-calculate the speed.
             if(ticksExisted %10==0){
-                //stop calculation if it can't move
-                if ((getTankInfo(null)[1]!=null && getTankInfo(null)[1].fluid.amount< getTankCapacity()[1]*0.25)//check for steam fuel
-                        || (getType() == TrainsInMotion.transportTypes.ELECTRIC && getTankInfo(null)[1].fluid.amount<1)//check for electric fuel
-                ) {
-                    vectorCache[7][0] = 0;
-                    setBoolean(boolValues.RUNNING, false);
-                } else {
+                //stop calculation if it can't move, running should be managed from the fuel handler, to be more dynamic
+                if (getBoolean(boolValues.RUNNING)) {
                     calculateAcceleration();
+                } else {
+                    vectorCache[7][0] = 0;
+                    accelerator=0;
+                    this.dataWatcher.updateObject(18, accelerator);
                 }
             }
             vectorCache[6] = RailUtility.rotatePointF(vectorCache[7][0],vectorCache[7][1],vectorCache[7][2], rotationPitch, rotationYaw, 0);
@@ -282,10 +281,6 @@ public abstract class EntityTrainCore extends GenericRailTransport {
             frontVelocityZ = frontBogie.motionZ;
             backVelocityX = backBogie.motionX;
             backVelocityZ = backBogie.motionZ;
-        }
-
-        if (updateWatchers){
-            this.dataWatcher.updateObject(18, accelerator);
         }
         super.onUpdate();
     }

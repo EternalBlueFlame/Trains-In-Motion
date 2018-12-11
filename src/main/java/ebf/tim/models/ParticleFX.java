@@ -298,7 +298,7 @@ public class ParticleFX {
             GL11.glRotated(90+entity.pos[4]+entity.host.rotationPitch,1,0,0);
             GL11.glRotated(entity.pos[5],0,1,0);
             GL11.glRotated(270-entity.pos[3]+entity.host.rotationYaw,0,0,1);
-            GL11.glScalef(5.5f+entity.scale,5.5f+entity.scale,5.5f+entity.scale);
+            GL11.glScalef(5.5f*entity.scale,5.5f*entity.scale,5.5f*entity.scale);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
             glAlphaFunc(GL_LEQUAL, 1f);

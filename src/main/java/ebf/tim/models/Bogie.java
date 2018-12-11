@@ -19,7 +19,7 @@ public class Bogie {
     public float rotationYaw;
     /**the model defined in the registration of this.*/
     public final ModelBase bogieModel;
-    private float[] offset = new float[]{0,0,0};
+    private float[] offset = new float[]{0,0,0}, position = new float[]{0,0,0};
     public double sqrtPos = 0;
     public double oldSqrtPos = 0;
 
@@ -67,7 +67,7 @@ public class Bogie {
             oldSqrtPos = Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ);
         } else if (shouldUpdate()) {
             oldSqrtPos = Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ);
-            float[] position = RailUtility.rotatePointF(offset[0], offset[1], offset[2], 0, entity.rotationYaw,0);
+            position = RailUtility.rotatePointF(offset[0], offset[1], offset[2], 0, entity.rotationYaw,0);
             position[0] += entity.posX;
             position[2] += entity.posZ;
             //don't update if we aren't moving fast enough.

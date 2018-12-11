@@ -160,35 +160,22 @@ public class CommonProxy implements IGuiHandler {
         addRecipe(new ItemStack(registerBlock(isClient(), trainTable, TrainsInMotion.creativeTab,"block.traintable", null, null),1),
                 "WWW", "WIW", "WWW", 'W', Blocks.planks, 'I', Items.iron_ingot);
 
-        //@Deprecated
-        for (ItemStack i : new ItemStack[]{new ItemStack(Items.iron_ingot),new ItemStack(Items.gold_ingot)}) {
-            DebugUtil.println("found ingot");
-            addRecipe(new ItemStack(
-                            new ItemRail()
-                                    .setBallast(Item.getItemFromBlock(Blocks.gravel))
-                                    .setTies(Item.getItemFromBlock(Blocks.planks))
-                                    .setIngot(i.getItem()), 1),
-                    "IBI", "IWI", "IWI", 'W', Blocks.planks, 'I', i, 'B', Blocks.gravel);
-            addRecipe(new ItemStack(
-                            new ItemRail()
-                                    .setTies(Item.getItemFromBlock(Blocks.planks))
-                                    .setIngot(i.getItem()), 1),
-                    "I I", "IWI", "IWI", 'W', Blocks.planks, 'I', i);
-            addRecipe(new ItemStack(
-                            new ItemRail()
-                                    .setBallast(Item.getItemFromBlock(Blocks.gravel))
-                                    .setIngot(i.getItem()), 1),
-                    "IBI", "I I", "I I", 'I', i, 'B', Blocks.gravel);
-            addRecipe(new ItemStack(
-                            new ItemRail()
-                                    .setIngot(i.getItem()), 1),
-                    "I I", "I I", "I I", 'I', i);
 
-            addRecipe(new ItemStack(
-                            new ItemRail()
-                                    .setBallast(Item.getItemFromBlock(Blocks.stone))
-                                    .setIngot(i.getItem()), 1),
-                    "IBI", "I I", "I I", 'I', i, 'B', Blocks.stone);
+        for (ItemStack i : new ItemStack[]{new ItemStack(Items.iron_ingot),new ItemStack(Items.gold_ingot)}) {
+            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,Blocks.gravel, Blocks.planks, null),
+                    "IWI", "IWI", "IBI", 'W', Blocks.planks, 'I', i, 'B', Blocks.gravel);
+
+            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,null, Blocks.planks, null),
+                    "IWI", "IWI", "I I", 'W', Blocks.planks, 'I', i);
+
+            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,Blocks.gravel, null, null),
+                    "I I", "I I", "IBI", 'I', i, 'B', Blocks.gravel);
+
+            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,Blocks.stone, null, null),
+                    "I I", "I I", "IBI", 'I', i, 'B', Blocks.stone);
+
+            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,null, null, null),
+                    "I I", "I I", "I I", 'I', i);
         }
     }
 

@@ -38,7 +38,7 @@ import static ebf.tim.utility.RailUtility.DefineStack;
 public class EntityBrigadelok080 extends TrainBase {
     /**
      * <h2>Basic Train Constructor</h2>
-     * To make your own custom train or rollingstock, create a new class that is a copy of the train or rollingstock that is closest to what you are adding,
+     * To make your own custom train or rollingstock, create a new class that is a copy of the train or rollingstockShapeBox that is closest to what you are adding,
      *     in that copy, you will need to go through the variables and overrides and change them to match the class/transport.
      * lastly you have to register the class in
      * @see TiMGenericRegistry#listTrains(int)
@@ -86,7 +86,7 @@ public class EntityBrigadelok080 extends TrainBase {
 
     @Override
     public void registerSkins(){
-        SkinRegistry.addSkin(this.getClass(),TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png", null,
+        SkinRegistry.addSkin(this.getClass(),TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png",
         "default", "Used by Germany in WWI as a transport for solders and equipment");
     }
 
