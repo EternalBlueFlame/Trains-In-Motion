@@ -144,8 +144,8 @@ public class CommonProxy implements IGuiHandler {
      */
     public void register() {
 
-        RegisterFluid(fluidOil, "oil", false, 700,MapColor.blackColor, TrainsInMotion.creativeTab);
-        RegisterFluid(fluidDiesel, "diesel", false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
+        RegisterFluid(fluidOil, TrainsInMotion.MODID, "oil", false, 700,MapColor.blackColor, TrainsInMotion.creativeTab);
+        RegisterFluid(fluidDiesel, TrainsInMotion.MODID, "diesel", false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
 
 
         RegisterItem(new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", null, TrainsInMotion.creativeTab, null);

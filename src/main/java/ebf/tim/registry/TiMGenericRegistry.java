@@ -95,15 +95,15 @@ public class TiMGenericRegistry {
     }
 
 
-    public static void RegisterFluid(Fluid fluid, String unlocalizedName, boolean isGaseous, int density, MapColor color, CreativeTabs tab){
+    public static void RegisterFluid(Fluid fluid, String MODID, String unlocalizedName, boolean isGaseous, int density, MapColor color, CreativeTabs tab){
         fluid.setUnlocalizedName(unlocalizedName).setGaseous(isGaseous).setDensity(density);
         FluidRegistry.registerFluid(fluid);
 
-        Block block = new BlockTrainFluid(fluid, new MaterialLiquid(color)).setBlockName("block."+unlocalizedName);
+        Block block = new BlockTrainFluid(fluid, new MaterialLiquid(color)).setBlockName("block."+unlocalizedName).setBlockTextureName(MODID+":block_"+unlocalizedName);
         GameRegistry.registerBlock(block, "block."+unlocalizedName);
         fluid.setBlock(block);
 
-        Item bucket = new ItemBucket(block).setCreativeTab(tab).setUnlocalizedName("item." + unlocalizedName + ".bucket").setContainerItem(Items.bucket);
+        Item bucket = new ItemBucket(block).setCreativeTab(tab).setUnlocalizedName("item." + unlocalizedName + ".bucket").setContainerItem(Items.bucket).setTextureName(MODID+":bucket_"+unlocalizedName);
         GameRegistry.registerItem(bucket, "fluid." + unlocalizedName + ".bucket");
         FluidContainerRegistry.registerFluidContainer(fluid, new ItemStack(bucket), new ItemStack(Items.bucket));
 

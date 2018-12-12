@@ -215,17 +215,25 @@ public class RailTileEntity extends TileEntity {
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
         NBTTagCompound compound = new NBTTagCompound();
-        rail.writeToNBT(compound);
-        tag.setTag("rail", compound);
-        compound = new NBTTagCompound();
-        new ItemStack(Item.getItemFromBlock(ballast)).writeToNBT(compound);
-        tag.setTag("ballast", compound);
-        compound = new NBTTagCompound();
-        new ItemStack(Item.getItemFromBlock(ties)).writeToNBT(compound);
-        tag.setTag("ties", compound);
-        compound = new NBTTagCompound();
-        new ItemStack(Item.getItemFromBlock(wires)).writeToNBT(compound);
-        tag.setTag("wires", compound);
+        if(rail!=null) {
+            rail.writeToNBT(compound);
+            tag.setTag("rail", compound);
+        }
+        if(ballast!=null) {
+            compound = new NBTTagCompound();
+            new ItemStack(Item.getItemFromBlock(ballast)).writeToNBT(compound);
+            tag.setTag("ballast", compound);
+        }
+        if(ties!=null) {
+            compound = new NBTTagCompound();
+            new ItemStack(Item.getItemFromBlock(ties)).writeToNBT(compound);
+            tag.setTag("ties", compound);
+        }
+        if(wires!=null) {
+            compound = new NBTTagCompound();
+            new ItemStack(Item.getItemFromBlock(wires)).writeToNBT(compound);
+            tag.setTag("wires", compound);
+        }
 
         tag.setFloat("segmentLength", segmentLength);
         try {
@@ -246,10 +254,18 @@ public class RailTileEntity extends TileEntity {
     @Override
     public void readFromNBT(NBTTagCompound tag){
         super.readFromNBT(tag);
-        rail= ItemStack.loadItemStackFromNBT(tag.getCompoundTag("rail"));
-        ballast = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ballast")).getItem());
-        ties = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ties")).getItem());
-        wires = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("wires")).getItem());
+        if(tag.hasKey("rail")) {
+            rail = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("rail"));
+        }
+        if(tag.hasKey("ballast")) {
+            ballast = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ballast")).getItem());
+        }
+        if(tag.hasKey("ties")) {
+            ties = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ties")).getItem());
+        }
+        if(tag.hasKey("wires")) {
+            wires = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("wires")).getItem());
+        }
 
         if (tag.hasKey("segmentLength")) {
             segmentLength = tag.getFloat("segmentLength");

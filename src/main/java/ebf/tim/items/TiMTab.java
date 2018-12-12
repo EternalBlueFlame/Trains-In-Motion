@@ -11,8 +11,7 @@ import net.minecraft.util.StatCollector;
  * @author Eternal Blue Flame
  */
 public class TiMTab extends CreativeTabs {
-
-    Item tabItem;
+    private Item tabItem;
 
     /**instances the tab by handling it through the super.*/
     public TiMTab(String name, String MODID, String textureName) {

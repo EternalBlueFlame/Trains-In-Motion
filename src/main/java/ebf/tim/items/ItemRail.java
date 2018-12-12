@@ -10,6 +10,7 @@ import mods.railcraft.api.core.items.ITrackItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockMushroom;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -84,7 +85,7 @@ public class ItemRail extends Item implements ITrackItem {
                 if(stack.getTagCompound().getTag("wires")!=null) {
                     ((RailTileEntity) world.getTileEntity(x,y,z)).ballast = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("wires")).getItem());
                 }
-            } else {
+            } else if(stack.hasTagCompound()) {
                 System.out.println("Trains In Motion ERROR, TILE ENTITY NOT SPAWNED FAST ENOUGH, that can happen?");
             }
             return true;
@@ -126,10 +127,10 @@ public class ItemRail extends Item implements ITrackItem {
 
         if( stack.hasTagCompound()){
             if(stack.getTagCompound().getTag("count")!=null) {
-                stringList.add(stack.getTagCompound().getInteger("count")+
-                        RailUtility.translate(" Items"));
+                stringList.add(stack.getTagCompound().getInteger("count")+" "+
+                        RailUtility.translate("items"));
             } else {
-                stringList.add(RailUtility.translate("1 Item"));
+                stringList.add("1 "+RailUtility.translate("item"));
             }
 
             if(stack.getTagCompound().getTag("rail")!=null) {
@@ -163,54 +164,38 @@ public class ItemRail extends Item implements ITrackItem {
     }
 
     public static ItemStack setStackData(ItemStack stack, ItemStack ingot, Block ballast, Block ties, Block wires){
-        if (!stack.hasTagCompound()){
-            stack.setTagCompound(new NBTTagCompound());
-        }
+        //init stack NBT
+        stack.setTagCompound(new NBTTagCompound());
+        //add a tag for the stack then put the stack in it.
+        stack.getTagCompound().setTag("ingot",new NBTTagCompound());
         ingot.writeToNBT(stack.getTagCompound().getCompoundTag("ingot"));
+        //rinse and repeat
         if(ballast!=null) {
-           new ItemStack(ballast).writeToNBT(stack.getTagCompound().getCompoundTag("ballast"));
+            stack.getTagCompound().setTag("ballast",new NBTTagCompound());
+            new ItemStack(ballast).writeToNBT(stack.getTagCompound().getCompoundTag("ballast"));
         }
         if(ties!=null) {
+            stack.getTagCompound().setTag("ties",new NBTTagCompound());
             new ItemStack(ties).writeToNBT(stack.getTagCompound().getCompoundTag("ties"));
         }
         if(wires!=null) {
+            stack.getTagCompound().setTag("wires",new NBTTagCompound());
             new ItemStack(wires).writeToNBT(stack.getTagCompound().getCompoundTag("wires"));
         }
         return stack;
     }
 
-
-    private class railSaveData extends WorldSavedData{
-        public ItemStack railIngot;
-        public ItemStack ballast;
-        public ItemStack ties;
-        public ItemStack wires;
-        //todo: use the actual items instead and have them written to NBT through their own write to NBT functions
-
-        public railSaveData(String name){
-            super(name);
-        }
-
-        /**
-         * <h2> Data Syncing and Saving </h2>
-         * NBT is save data, which only happens on server.
-         */
-        /**loads the entity's save file*/
-        @Override
-        public void readFromNBT(NBTTagCompound tag) {
-            railIngot=ItemStack.loadItemStackFromNBT(tag.getCompoundTag("rail"));
-            ballast=ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ballast"));
-            ties=ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ties"));
-            wires=ItemStack.loadItemStackFromNBT(tag.getCompoundTag("wire"));
-        }
-
-        /**saves the entity to server world*/
-        @Override
-        public void writeToNBT(NBTTagCompound tag) {
-            railIngot.writeToNBT(tag.getCompoundTag("rail"));
-            ballast.writeToNBT(tag.getCompoundTag("ballast"));
-            ties.writeToNBT(tag.getCompoundTag("ties"));
-            wires.writeToNBT(tag.getCompoundTag("wire"));
+    //adds custom versions of this to the creative menu, with the necessary NBT and metadata
+    @SideOnly(Side.CLIENT)
+    public void getSubItems(Item p_150895_1_, CreativeTabs p_150895_2_, List tabItems) {
+        if(p_150895_1_ instanceof ItemRail) {
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.log, Blocks.gravel, null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.planks, Blocks.gravel, null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, Blocks.gravel, null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, Blocks.stone, null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, null, null));
+        } else {
+            tabItems.add(new ItemStack(p_150895_1_));
         }
     }
 }

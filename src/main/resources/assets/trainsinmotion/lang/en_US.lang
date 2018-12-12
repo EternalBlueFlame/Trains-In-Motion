@@ -49,6 +49,11 @@ menu.item.seats=Seats
 menu.item.weight=Players
 menu.item.iszeof=Inventory size of
 menu.item.slots=Slots
+menu.noties=No Ties
+menu.nowires=No Overhead Wires
+menu.noballast=No Ballast
+menu.item=Item
+menu.items=Items
 US=USA
 
 item.oilbucket=Oil bucket
