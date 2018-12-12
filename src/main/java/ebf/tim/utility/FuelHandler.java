@@ -2,14 +2,19 @@ package ebf.tim.utility;
 
 
 import cofh.api.energy.IEnergyContainerItem;
+import cofh.api.energy.IEnergyHandler;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
+import mods.railcraft.api.electricity.IElectricGrid;
+import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -154,10 +159,51 @@ public class FuelHandler{
 
 	public void manageElectric(EntityTrainCore train){
 		//add redstone to the fuel tank
-		if (train.fill(null, isUseableFluid(train.getStackInSlot(1), train), false)>0) {
-			train.fill(null, isUseableFluid(train.getStackInSlot(1), train), true);
-			if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
-				train.decrStackSize(0, 1);
+		if(train.getStackInSlot(400) !=null) {
+			if (train.getStackInSlot(400).getItem() == Items.redstone) {
+				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) >= 100) {
+					train.fill(null, new FluidStack(FluidRegistry.WATER, 100), true);
+					train.decrStackSize(400, 1);
+				}
+			} else if (train.getStackInSlot(400).getItem() == Item.getItemFromBlock(Blocks.redstone_block)) {
+				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 1000), false) >= 1000) {
+					train.fill(null, new FluidStack(FluidRegistry.WATER, 1000), true);
+					train.decrStackSize(400, 1);
+				}
+			} else if (train.getStackInSlot(400).getItem() instanceof IEnergyContainerItem) {
+				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) >= 100) {
+					train.fill(null, new FluidStack(FluidRegistry.WATER,
+							((IEnergyContainerItem) train.getStackInSlot(400).getItem())
+									.extractEnergy(train.getStackInSlot(400), 100, false)), true);
+				}
+			}
+			if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) >= 100) {
+				int draw = 0;
+				TileEntity te;
+				Block b;
+				for (int i=-1; i<5;i++) {
+					te=train.worldObj.getTileEntity(MathHelper.floor_double(train.posX), MathHelper.floor_double(train.posY + i), MathHelper.floor_double(train.posZ));
+					if (te instanceof IEnergyHandler) {
+						for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
+							draw = ((IEnergyHandler) te).receiveEnergy(direction, 100, true);
+
+							if (draw != 0) {
+								((IEnergyHandler) te).receiveEnergy(direction, 100, false);
+								train.fill(null, new FluidStack(FluidRegistry.WATER, 100), true);
+								break;
+							}
+						}
+					} else{
+						b= train.worldObj.getBlock(MathHelper.floor_double(train.posX), MathHelper.floor_double(train.posY + i), MathHelper.floor_double(train.posZ));
+						if (b instanceof IElectricGrid && ((IElectricGrid) b).getChargeHandler().getCharge()>=100){
+							((IElectricGrid) b).getChargeHandler().removeCharge(100);
+							train.fill(null, new FluidStack(FluidRegistry.WATER, 100), true);
+						}
+					}
+					if (draw != 0) {
+						break;
+					}
+				}
 			}
 		}
 
