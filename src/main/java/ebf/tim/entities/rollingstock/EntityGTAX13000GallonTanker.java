@@ -148,7 +148,7 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
     }
 
     @Override
-    public String transportEra() {
+    public String transportFuelType() {
         return "Diesel";
     }
 

@@ -2,18 +2,14 @@ package ebf.tim.items;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -36,7 +32,7 @@ public class ItemTransport extends Item {
     public ItemTransport(GenericRailTransport cart, String MODID, CreativeTabs tabs) {
         super();
         setUnlocalizedName(cart.transportName().replace(" ",""));
-        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.era") +  ": " + RailUtility.translate(cart.transportEra()));
+        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.era") +  ": " + RailUtility.translate(cart.transportFuelType()));
         subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.year") +": " + cart.transportYear());
         subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.country") + ": " + RailUtility.translate(cart.transportcountry()));
         subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.weight") +": " + cart.weightKg() + "kg");

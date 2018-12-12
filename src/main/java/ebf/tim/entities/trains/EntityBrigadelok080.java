@@ -78,7 +78,7 @@ public class EntityBrigadelok080 extends TrainBase {
     @Override
     public String transportYear(){return "1918";}
     @Override
-    public String transportEra(){return "Steam";}
+    public String transportFuelType(){return "Steam";}
     @Override
     public boolean isFictional(){return false;}
     @Override

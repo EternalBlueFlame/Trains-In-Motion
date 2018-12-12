@@ -131,7 +131,7 @@ public class EntityUP3Bay100TonHopper extends RollingstockBase {
     }
 
     @Override
-    public String transportEra() {
+    public String transportFuelType() {
         return "Steam-Diesel";
     }
 

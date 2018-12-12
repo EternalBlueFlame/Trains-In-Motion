@@ -22,6 +22,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -48,7 +49,7 @@ import static ebf.tim.utility.RailUtility.rotatePointF;
  * this is the base for all trains and rollingstock.
  * @author Eternal Blue Flame
  */
-public abstract class GenericRailTransport extends EntityMinecart implements IEntityAdditionalSpawnData, IInventory, IFluidHandler, IFluidCart{
+public class GenericRailTransport extends EntityMinecart implements IEntityAdditionalSpawnData, IInventory, IFluidHandler, IFluidCart{
 
     /*
      * <h2>variables</h2>
@@ -949,21 +950,6 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
 
 
     /**
-     * <h2>RF storage transfer</h2>
-     * this is used to figure out how much RF this transport can take from another transport.
-     * this is intended for rollingstock that can store power for an electric train.
-     * @return the amount of RF this can accept
-     */
-    public int RequestPower(){
-        if(getRFCapacity() - battery >20){
-            return 20;
-        } else if (getRFCapacity() - battery >0){
-            return getRFCapacity() - battery;
-        }
-        return 0;
-    }
-
-    /**
      * <h2>Permissions handler</h2>
      * Used to check if the player has permission to do whatever it is the player is trying to do. Yes I could be more vague with that.
      *
@@ -1441,14 +1427,14 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
      * return new float[][]{{x1,y1,z1},{x2,y2,z2}, etc...};
      * may return null.*/
     @SideOnly(Side.CLIENT)
-    public abstract float[][] bogieModelOffsets();
+    public float[][] bogieModelOffsets(){return null;}
 
     /**returns a list of models to be used for the bogies
      * example:
      * return new ModelBase[]{new MyModel1(), new myModel2(), etc...};
      * may return null. */
     @SideOnly(Side.CLIENT)
-    public abstract ModelBase[] bogieModels();
+    public ModelBase[] bogieModels(){return null;}
 
     /**defines the points that the entity uses for path-finding and rotation, with 0 being the entity center.
      * Usually the point where the front and back bogies would connect to the transport.
@@ -1456,20 +1442,20 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
      * example:
      * return new float{2f, -1f};
      * may not return null*/
-    public abstract float[] bogieLengthFromCenter();
+    public float[] bogieLengthFromCenter(){return new float[]{1,-1};}
 
     /**defines the radius from center in microblocks that the pistons animate, if there are any.*/
-    public abstract float getPistonOffset();
+    public float getPistonOffset(){return 0;}
 
     /**defines the scale to render the model at. Default is 0.0625*/
-    public abstract float getRenderScale();
+    public float getRenderScale(){return 0.0625f;}
 
     /**returns the x/y/z offset each model should render at, with 0 being the entity center, in order with getModels
      * example:
      * return new float[][]{{x1,y1,z1},{x2,y2,z2}, etc...};
      * may return null.*/
     @SideOnly(Side.CLIENT)
-    public abstract float[][] modelOffsets();
+    public float[][] modelOffsets(){return null;}
 
     /**event is to add skins for the model to the skins registry on mod initialization.
      * this function can be used to register multiple skins, one after another.
@@ -1481,14 +1467,14 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
      * the first skin added to the registry for a transport class will be the default
      * additionally the addSkin function may be called from any other class at any time.
      * the registerSkins method is only for organization and convenience.*/
-    public abstract void registerSkins();
+    public void registerSkins(){}
 
     /**returns a list of models to be used for the transport
      * example:
      * return new MyModel();
      * may return null. */
     @SideOnly(Side.CLIENT)
-    public abstract ModelBase[] getModel();
+    public ModelBase[] getModel(){return null;}
 
 
     /*
@@ -1500,16 +1486,16 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
      * example:
      * return new float[][]{{x1,y1,z1},{x2,y2,z2}, etc...};
      * may return null*/
-    public abstract float[][] getRiderOffsets();
+    public float[][] getRiderOffsets(){return null;}
 
     /**returns the size of the hitbox in blocks.
      * example:
      * return new float[]{x,y,z};
      * may not return null*/
-    public abstract float[] getHitboxSize();
+    public float[] getHitboxSize(){return new float[]{3,1.5f,.21f};}
 
     /**defines if the transport is immune to explosions*/
-    public abstract boolean isReinforced();
+    public boolean isReinforced(){return false;}
 
 
     /*
@@ -1519,7 +1505,7 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
     /**defines the size of the inventory row by row, not counting any special slots like for fuel.
      * end result number of slots is this times 9. plus any crafting/fuel slots
      * may not return null*/
-    public abstract int getInventoryRows();
+    public int getInventoryRows(){return 0;}
 
     /**defines the capacity of the fluidTank tank.
      * each value defibes another tank.
@@ -1528,16 +1514,14 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
      *example:
      * return new int[]{11000, 1000};
      * may return null*/
-    public abstract int[] getTankCapacity();
+    public int[] getTankCapacity(){return null;}
 
     /** defines the whitelist of fluid names for the tank defined by tankID
      * example:
      * if(tankID==0){return new String[]{"water", "diesel"}} else { return null}*/
     @Deprecated //replace with an array of string arrays, more similar to other methods
-    public abstract String[] getTankFilters(int tankID);
+    public String[] getTankFilters(int tankID){return null;}
 
-    /**defines the capacity of the RF storage, intended for electric rollingstock that store power for the train.*/
-    public abstract int getRFCapacity();
 
     /**this function allows individual trains and rollingstock to implement custom fuel consumption and management
      * you can call one of the existing methods in the FuelHandler class:
@@ -1545,13 +1529,13 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
      * you may also leave it empty if you don't plan to use it.
      * for more detail on implementing custom versions, take a look at the existing ones, for example:
      * @see FuelHandler#manageSteam(EntityTrainCore) for an example*/
-    public abstract void manageFuel();
+    public void manageFuel(){}
 
     /** returns the max fuel.
      * for steam trains this is cubic meters of the firebox size. (1.5 on average)
      * for diesel this is cubic meters of the fuel tank. (11.3 on average)
      * for electric this is Kw. (400 on average)*/
-    public abstract float getMaxFuel();
+    public float getMaxFuel(){return 0;}
 
 
 
@@ -1559,38 +1543,40 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
 
 
     /**defines the weight of the transport.*/
-    public abstract float weightKg();
+    public float weightKg(){return 907.18474f;}
 
     /**defines the recipe in order from topleft to bottom right.
      * example:
      * return new ItemStack[]{new ItemStack(Blocks.dirt, 2), new ItemStack(Blocks.glass,1), etc};
      * array must contain 9 values. may not return null.*/
-    public abstract ItemStack[] getRecipie();
+    public ItemStack[] getRecipie(){return new ItemStack[]{
+      new ItemStack(Blocks.dirt),null,null,null,null,null,null,null,null
+    };}
 
 
     /**defines the name used for registration and the default name used in the gui.*/
-    public abstract String transportName();
+    public String transportName(){return "Fugidsnot";}
     /**defines the country of origin for the transport*/
-    public abstract String transportcountry();
+    public String transportcountry(){return "Nowhere";}
     /**the year or year range to display for the transport.*/
-    public abstract String transportYear();
+    public String transportYear(){return "19 somethin'";}
 
     /**the fuel type to display for the transport.*/
-    public abstract String transportEra();
+    public String transportFuelType(){return "Magic";}
 
     /**the top speed in km/h for the transport.
      * not used tor rollingstock.*/
-    public abstract float transportTopSpeed();
+    public float transportTopSpeed(){return 0;}
     /**displays in item lore if the transport is fictional or not*/
-    public abstract boolean isFictional();
+    public boolean isFictional(){return true;}
     /**the tractive effort for the transport, this is a fallback if metric horsepower (mhp) is not available*/
-    public abstract float transportTractiveEffort();
+    public float transportTractiveEffort(){return 0;}
     /**this is the default value to define the acceleration speed and pulling power of a transport.*/
-    public abstract float transportMetricHorsePower();
+    public float transportMetricHorsePower(){return 0;}
 
     /**additional lore for the item, each entry in the array is a new line.
      * may return null.*/
-    public abstract String[] additionalItemText();
+    public String[] additionalItemText(){return null;}
 
 
 
@@ -1604,7 +1590,7 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
      * @see TrainsInMotion.transportTypes
      * may not return null.*/
     @Deprecated
-    public abstract TrainsInMotion.transportTypes getType();
+    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.SLUG;}
 
     /**returns the item of this transport, this should be a static value in the transport's class.
      * example:
@@ -1612,6 +1598,6 @@ public abstract class GenericRailTransport extends EntityMinecart implements IEn
      * Item getItem(){return thisItem;}
      * may not return null*/
     @Deprecated
-    public abstract Item getItem();
+    public Item getItem(){return null;}
 
 }

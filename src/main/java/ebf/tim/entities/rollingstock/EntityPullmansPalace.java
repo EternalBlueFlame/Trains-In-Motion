@@ -127,7 +127,7 @@ public class EntityPullmansPalace extends RollingstockBase {
     }
 
     @Override
-    public String transportEra() {
+    public String transportFuelType() {
         return "Steam";
     }
 

@@ -23,14 +23,14 @@ public interface GenericTransportData {
      * return new float[][]{{x1,y1,z1},{x2,y2,z2}, etc...};
      * may return null.*/
     @SideOnly(Side.CLIENT)
-    float[][] bogieModelOffsets();
+    public abstract float[][] bogieModelOffsets();
 
     /**returns a list of models to be used for the bogies
      * example:
      * return new ModelBase[]{new MyModel1(), new myModel2(), etc...};
      * may return null. */
     @SideOnly(Side.CLIENT)
-    ModelBase[] bogieModels();
+    public abstract ModelBase[] bogieModels();
 
     /**defines the points that the entity uses for path-finding and rotation, with 0 being the entity center.
      * Usually the point where the front and back bogies would connect to the transport.
@@ -38,20 +38,20 @@ public interface GenericTransportData {
      * example:
      * return new float{2f, -1f};
      * may not return null*/
-    float[] bogieLengthFromCenter();
+    public abstract float[] bogieLengthFromCenter();
 
     /**defines the radius from center in microblocks that the pistons animate, if there are any.*/
-    float getPistonOffset();
+    public abstract float getPistonOffset();
 
     /**defines the scale to render the model at. Default is 0.0625*/
-    float getRenderScale();
+    public abstract float getRenderScale();
 
     /**returns the x/y/z offset each model should render at, with 0 being the entity center, in order with getModels
      * example:
      * return new float[][]{{x1,y1,z1},{x2,y2,z2}, etc...};
      * may return null.*/
     @SideOnly(Side.CLIENT)
-    float[][] modelOffsets();
+    public abstract float[][] modelOffsets();
 
     /**event is to add skins for the model to the skins registry on mod initialization.
      * this function can be used to register multiple skins, one after another.
@@ -63,14 +63,14 @@ public interface GenericTransportData {
      * the first skin added to the registry for a transport class will be the default
      * additionally the addSkin function may be called from any other class at any time.
      * the registerSkins method is only for organization and convenience.*/
-    void registerSkins();
+    public abstract void registerSkins();
 
     /**returns a list of models to be used for the transport
      * example:
      * return new MyModel();
      * may return null. */
     @SideOnly(Side.CLIENT)
-    ModelBase[] getModel();
+    public abstract ModelBase[] getModel();
 
 
     /*
@@ -82,16 +82,16 @@ public interface GenericTransportData {
      * example:
      * return new float[][]{{x1,y1,z1},{x2,y2,z2}, etc...};
      * may return null*/
-    float[][] getRiderOffsets();
+    public abstract float[][] getRiderOffsets();
 
     /**returns the size of the hitbox in blocks.
      * example:
      * return new float[]{x,y,z};
      * may not return null*/
-    float[] getHitboxSize();
+    public abstract float[] getHitboxSize();
 
     /**defines if the transport is immune to explosions*/
-    boolean isReinforced();
+    public abstract boolean isReinforced();
 
 
     /*
@@ -101,7 +101,7 @@ public interface GenericTransportData {
     /**defines the size of the inventory row by row, not counting any special slots like for fuel.
      * end result number of slots is this times 9. plus any crafting/fuel slots
      * may not return null*/
-    int getInventoryRows();
+    public abstract int getInventoryRows();
 
     /**defines the capacity of the fluidTank tank.
      * each value defibes another tank.
@@ -110,16 +110,16 @@ public interface GenericTransportData {
      *example:
      * return new int[]{11000, 1000};
      * may return null*/
-    int[] getTankCapacity();
+    public abstract int[] getTankCapacity();
 
     /** defines the whitelist of fluid names for the tank defined by tankID
      * example:
      * if(tankID==0){return new String[]{"water", "diesel"}} else { return null}*/
     @Deprecated //replace with an array of string arrays, more similar to other methods
-    String[] getTankFilters(int tankID);
+    public abstract String[] getTankFilters(int tankID);
 
     /**defines the capacity of the RF storage, intended for electric rollingstock that store power for the train.*/
-    int getRFCapacity();
+    public abstract int getRFCapacity();
 
     /**this function allows individual trains and rollingstock to implement custom fuel consumption and management
      * you can call one of the existing methods in the FuelHandler class:
@@ -127,13 +127,13 @@ public interface GenericTransportData {
      * you may also leave it empty if you don't plan to use it.
      * for more detail on implementing custom versions, take a look at the existing ones, for example:
      * @see FuelHandler#manageSteam(EntityTrainCore) for an example*/
-    void manageFuel();
+    public abstract void manageFuel();
 
     /** returns the max fuel.
      * for steam trains this is cubic meters of the firebox size. (1.5 on average)
      * for diesel this is cubic meters of the fuel tank. (11.3 on average)
      * for electric this is Kw. (400 on average)*/
-    float getMaxFuel();
+    public abstract float getMaxFuel();
 
 
 
@@ -141,7 +141,7 @@ public interface GenericTransportData {
 
 
     /**defines the weight of the transport.*/
-     float weightKg();
+     public abstract float weightKg();
 
     /**defines the recipe in order from topleft to bottom right.
      * example:
@@ -151,28 +151,28 @@ public interface GenericTransportData {
 
 
     /**defines the name used for registration and the default name used in the gui.*/
-     String transportName();
+     public abstract String transportName();
      /**defines the country of origin for the transport*/
-     String transportcountry();
+     public abstract String transportcountry();
      /**the year or year range to display for the transport.*/
-     String transportYear();
+     public abstract String transportYear();
 
     /**the fuel type to display for the transport.*/
-     String transportEra();
+     public abstract String transportEra();
 
     /**the top speed in km/h for the transport.
      * not used tor rollingstock.*/
-     float transportTopSpeed();
+     public abstract float transportTopSpeed();
      /**displays in item lore if the transport is fictional or not*/
-     boolean isFictional();
+     public abstract boolean isFictional();
      /**the tractive effort for the transport, this is a fallback if metric horsepower (mhp) is not available*/
-     float transportTractiveEffort();
+     public abstract float transportTractiveEffort();
      /**this is the default value to define the acceleration speed and pulling power of a transport.*/
-     float transportMetricHorsePower();
+     public abstract float transportMetricHorsePower();
 
     /**additional lore for the item, each entry in the array is a new line.
      * may return null.*/
-     String[] additionalItemText();
+     public abstract String[] additionalItemText();
 
 
 
@@ -186,7 +186,7 @@ public interface GenericTransportData {
      * @see TrainsInMotion.transportTypes
      * may not return null.*/
     @Deprecated
-    TrainsInMotion.transportTypes getType();
+    public abstract TrainsInMotion.transportTypes getType();
 
     /**returns the item of this transport, this should be a static value in the transport's class.
      * example:
@@ -194,6 +194,6 @@ public interface GenericTransportData {
      * Item getItem(){return thisItem;}
      * may not return null*/
     @Deprecated
-    Item getItem();
+    public abstract Item getItem();
 
 }

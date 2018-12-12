@@ -167,8 +167,10 @@ public class ItemRail extends Item implements ITrackItem {
         //init stack NBT
         stack.setTagCompound(new NBTTagCompound());
         //add a tag for the stack then put the stack in it.
-        stack.getTagCompound().setTag("ingot",new NBTTagCompound());
-        ingot.writeToNBT(stack.getTagCompound().getCompoundTag("ingot"));
+        if(ingot!=null) {
+            stack.getTagCompound().setTag("ingot", new NBTTagCompound());
+            ingot.writeToNBT(stack.getTagCompound().getCompoundTag("ingot"));
+        }
         //rinse and repeat
         if(ballast!=null) {
             stack.getTagCompound().setTag("ballast",new NBTTagCompound());
