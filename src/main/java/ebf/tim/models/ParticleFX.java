@@ -58,7 +58,7 @@ public class ParticleFX {
         host = transport;
         particleID=id;
         this.scale=scale;
-        this.offset = new float[]{offsetX, id==4?(float)transport.posY:offsetY, offsetZ};
+        this.offset = new float[]{offsetX, id==4?(float)transport.posY:offsetY, offsetZ, rotationX*RailUtility.degreesF, rotationY*RailUtility.degreesF, rotationZ*RailUtility.degreesF};
         pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, transport.rotationPitch, transport.rotationYaw, 0);
         pos= new float[]{pos[0],pos[1],pos[2],rotationX,rotationY,rotationZ};
         this.color = color;
@@ -115,7 +115,7 @@ public class ParticleFX {
         int id= getParticleIDFronName(partname);
         if(id==0 || id==1) {
             for (int i = 0; i < strength*20; i++) {
-                list.add(new ParticleFX(host, color, scale, offsetX, offsetY, offsetZ, rotationX*RailUtility.degreesF, rotationY*RailUtility.degreesF, rotationZ*RailUtility.degreesF, id));
+                list.add(new ParticleFX(host, color, scale, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id));
             }
         } else {
             list.add(new ParticleFX(host, color, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id, strength));
@@ -163,11 +163,8 @@ public class ParticleFX {
         //update lamps
         if (particleID==3 || particleID==2){
             shouldRender=host.getBoolean(GenericRailTransport.boolValues.LAMP);
-            oldX=pos[3];
-            oldY=pos[4];
-            oldZ=pos[5];
             pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, host.rotationPitch, host.rotationYaw, 0);
-            pos= new float[]{pos[0],pos[1],pos[2],oldX,oldY,oldZ};
+            pos= new float[]{pos[0],pos[1],pos[2],offset[3],offset[4],offset[5]};
             //in this case color is used as an ID of sorts.
             colorTint=Integer.parseInt(host.renderData.particleRecolors[color],16);
             return;
@@ -298,7 +295,7 @@ public class ParticleFX {
             GL11.glTranslated(x+entity.pos[0] , y+entity.pos[1]+0.3, z+entity.pos[2]);
             GL11.glRotated(90+entity.pos[4]+entity.host.rotationPitch,1,0,0);
             GL11.glRotated(entity.pos[5],0,1,0);
-            GL11.glRotated(270-entity.pos[3]+entity.host.rotationYaw,0,0,1);
+            GL11.glRotated(270-(entity.pos[3]+entity.host.rotationYaw),0,0,1);
             GL11.glScalef(5.5f*entity.scale,5.5f*entity.scale,5.5f*entity.scale);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);

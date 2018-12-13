@@ -52,8 +52,6 @@ public class TrainsInMotion {
     /**an instance of the mod*/
     @Mod.Instance(MODID)
     public static TrainsInMotion instance;
-    /**the creative tab for the mod*/
-    public static CreativeTabs creativeTab = new TiMTab("Trains in Motion", MODID, "TiM");
     /**
      *Setup the proxy, this is used for managing some of the client and server specific features.
      *@see CommonProxy
@@ -61,6 +59,9 @@ public class TrainsInMotion {
      */
     @SidedProxy(clientSide = "ebf.tim.utility.ClientProxy", serverSide = "ebf.tim.utility.CommonProxy")
     public static CommonProxy proxy;
+
+    /**the creative tab for the mod*/
+    public static CreativeTabs creativeTab;
 
     /**instance the network wrapper for the channels.
      * Every wrapper runs on it's own thread, so heavy traffic should go on it's own wrapper, using channels to separate packet types.*/
@@ -114,6 +115,7 @@ public class TrainsInMotion {
         config.save();
         ForgeChunkManager.setForcedChunkLoadingCallback(TrainsInMotion.instance, chunkHandler);
         MinecraftForge.EVENT_BUS.register(chunkHandler);
+        creativeTab=new TiMTab(event.getSide().isClient(),"Trains in Motion", MODID, "TiM");
 
     }
 
