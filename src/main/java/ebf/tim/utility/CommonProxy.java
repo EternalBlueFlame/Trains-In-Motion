@@ -144,15 +144,15 @@ public class CommonProxy implements IGuiHandler {
      */
     public void register() {
 
-        RegisterFluid(fluidOil, TrainsInMotion.MODID, "oil", false, 700,MapColor.blackColor, TrainsInMotion.creativeTab);
-        RegisterFluid(fluidDiesel, TrainsInMotion.MODID, "diesel", false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
+        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidOil, TrainsInMotion.MODID, "oil", false, 700,MapColor.blackColor, TrainsInMotion.creativeTab);
+        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidDiesel, TrainsInMotion.MODID, "diesel", false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
 
 
-        RegisterItem(new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", null, TrainsInMotion.creativeTab, null);
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", null, TrainsInMotion.creativeTab, null);
 
-        RegisterItem(new ItemKey(),TrainsInMotion.MODID,  "transportkey",null, TrainsInMotion.creativeTab, null);
-        RegisterItem(new ItemTicket(),TrainsInMotion.MODID,  "transportticket",null, TrainsInMotion.creativeTab, null);
-        RegisterItem(new ItemRail(),TrainsInMotion.MODID,  "item.timrail", null, TrainsInMotion.creativeTab, null);
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemKey(),TrainsInMotion.MODID,  "transportkey",null, TrainsInMotion.creativeTab, null);
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemTicket(),TrainsInMotion.MODID,  "transportticket",null, TrainsInMotion.creativeTab, null);
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemRail(),TrainsInMotion.MODID,  "item.timrail", null, TrainsInMotion.creativeTab, null);
 
         registerBlock(isClient(), railBlock, null, "block.timrail", null, getTESR());
 

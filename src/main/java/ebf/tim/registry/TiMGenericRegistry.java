@@ -10,6 +10,7 @@ import ebf.tim.entities.rollingstock.EntityPullmansPalace;
 import ebf.tim.entities.rollingstock.EntityUP3Bay100TonHopper;
 import ebf.tim.entities.rollingstock.EntityVATLogCar;
 import ebf.tim.entities.trains.EntityBrigadelok080;
+import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RecipeManager;
 import net.minecraft.block.Block;
@@ -76,14 +77,17 @@ public class TiMGenericRegistry {
         return block;
     }
 
-    public static Item RegisterItem(Item itm, String MODID, String unlocalizedName, @Nullable String oreDictionaryName, @Nullable CreativeTabs tab, @Nullable Item container){
+    public static Item RegisterItem(boolean isClient, Item itm, String MODID, String unlocalizedName, @Nullable String oreDictionaryName, @Nullable CreativeTabs tab, @Nullable Item container){
         if (tab!=null) {
             itm.setCreativeTab(tab);
         }
         if (container!=null){
             itm.setContainerItem(container);
         }
-        itm.setUnlocalizedName(unlocalizedName).setTextureName(MODID+":"+unlocalizedName);
+        itm.setUnlocalizedName(unlocalizedName);
+        if(isClient){
+            itm.setTextureName(MODID+":"+unlocalizedName);
+        }
         GameRegistry.registerItem(itm, unlocalizedName);
         if(oreDictionaryName!=null){
             OreDictionary.registerOre(oreDictionaryName, itm);
@@ -95,7 +99,7 @@ public class TiMGenericRegistry {
     }
 
 
-    public static void RegisterFluid(Fluid fluid, String MODID, String unlocalizedName, boolean isGaseous, int density, MapColor color, CreativeTabs tab){
+    public static void RegisterFluid(boolean isClient, Fluid fluid, String MODID, String unlocalizedName, boolean isGaseous, int density, MapColor color, CreativeTabs tab){
         fluid.setUnlocalizedName(unlocalizedName).setGaseous(isGaseous).setDensity(density);
         FluidRegistry.registerFluid(fluid);
 
@@ -103,7 +107,10 @@ public class TiMGenericRegistry {
         GameRegistry.registerBlock(block, "block."+unlocalizedName);
         fluid.setBlock(block);
 
-        Item bucket = new ItemBucket(block).setCreativeTab(tab).setUnlocalizedName("item." + unlocalizedName + ".bucket").setContainerItem(Items.bucket).setTextureName(MODID+":bucket_"+unlocalizedName);
+        Item bucket = new ItemBucket(block).setCreativeTab(tab).setUnlocalizedName("item." + unlocalizedName + ".bucket").setContainerItem(Items.bucket);
+                if(isClient){
+                    bucket.setTextureName(MODID+":bucket_"+unlocalizedName);
+                }
         GameRegistry.registerItem(bucket, "fluid." + unlocalizedName + ".bucket");
         FluidContainerRegistry.registerFluidContainer(fluid, new ItemStack(bucket), new ItemStack(Items.bucket));
 
@@ -144,6 +151,7 @@ public class TiMGenericRegistry {
                 RecipeManager.registerRecipe(registry.getCartItem(), registry.getRecipie());
             }
             if(isClient){
+                ItemCraftGuide.itemEntries.add(registry.getClass());
                 if(entityRender==null){
                     cpw.mods.fml.client.registry.RenderingRegistry.registerEntityRenderingHandler(registry.getClass(), (net.minecraft.client.renderer.entity.Render)TrainsInMotion.proxy.getEntityRender());
                 } else {

@@ -1,6 +1,7 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.Tessellator;
@@ -114,7 +115,7 @@ public class ParticleFX {
         int id= getParticleIDFronName(partname);
         if(id==0 || id==1) {
             for (int i = 0; i < strength*20; i++) {
-                list.add(new ParticleFX(host, color, scale, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id));
+                list.add(new ParticleFX(host, color, scale, offsetX, offsetY, offsetZ, rotationX*RailUtility.degreesF, rotationY*RailUtility.degreesF, rotationZ*RailUtility.degreesF, id));
             }
         } else {
             list.add(new ParticleFX(host, color, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id, strength));

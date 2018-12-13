@@ -1,5 +1,6 @@
 package ebf.tim.items;
 
+import ebf.tim.TrainsInMotion;
 import ebf.tim.registry.TiMGenericRegistry;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -16,7 +17,7 @@ public class TiMTab extends CreativeTabs {
     /**instances the tab by handling it through the super.*/
     public TiMTab(String name, String MODID, String textureName) {
         super(CreativeTabs.getNextID(), name);
-        tabItem= TiMGenericRegistry.RegisterItem(new Item(),MODID,textureName,null,null,null);
+        tabItem= TiMGenericRegistry.RegisterItem(TrainsInMotion.proxy.isClient(),new Item(),MODID,textureName,null,null,null);
     }
     /**returns the label of the tab, this is defined in the language files,*/
     @Override

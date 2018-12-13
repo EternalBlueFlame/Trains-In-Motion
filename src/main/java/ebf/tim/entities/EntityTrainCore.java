@@ -21,7 +21,7 @@ import java.util.UUID;
  * this is the management core for all trains.
  * @author Eternal Blue Flame
  */
-public abstract class EntityTrainCore extends GenericRailTransport {
+public class EntityTrainCore extends GenericRailTransport {
 
     /**manages the items for burnHeat, and the burnHeat itself.*/
     public FuelHandler fuelHandler = new FuelHandler();
