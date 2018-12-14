@@ -60,7 +60,7 @@ public class ParticleFX {
         this.scale=scale;
         this.offset = new float[]{offsetX, id==4?(float)transport.posY:offsetY, offsetZ, rotationX*RailUtility.degreesF, rotationY*RailUtility.degreesF, rotationZ*RailUtility.degreesF};
         pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, transport.rotationPitch, transport.rotationYaw, 0);
-        pos= new float[]{pos[0],pos[1],pos[2],rotationX,rotationY,rotationZ};
+        pos= new float[]{pos[0],pos[1],pos[2]};
         this.color = color;
 
         switch (particleID) {
@@ -164,7 +164,7 @@ public class ParticleFX {
         if (particleID==3 || particleID==2){
             shouldRender=host.getBoolean(GenericRailTransport.boolValues.LAMP);
             pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, host.rotationPitch, host.rotationYaw, 0);
-            pos= new float[]{pos[0],pos[1],pos[2],offset[3],offset[4],offset[5]};
+            pos= new float[]{pos[0],pos[1],pos[2]};
             //in this case color is used as an ID of sorts.
             colorTint=Integer.parseInt(host.renderData.particleRecolors[color],16);
             return;
@@ -293,9 +293,9 @@ public class ParticleFX {
 
         if (entity.particleID==2) {//cone lamps
             GL11.glTranslated(x+entity.pos[0] , y+entity.pos[1]+0.3, z+entity.pos[2]);
-            GL11.glRotated(90+entity.pos[4]+entity.host.rotationPitch,1,0,0);
-            GL11.glRotated(entity.pos[5],0,1,0);
-            GL11.glRotated(270-(entity.pos[3]+entity.host.rotationYaw),0,0,1);
+            GL11.glRotated(270+entity.offset[4]+entity.host.rotationPitch,1,0,0);
+            GL11.glRotated(entity.offset[5],0,1,0);
+            GL11.glRotated(270-(entity.offset[3]+entity.host.rotationYaw),0,0,1);
             GL11.glScalef(5.5f*entity.scale,5.5f*entity.scale,5.5f*entity.scale);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
@@ -393,7 +393,7 @@ public class ParticleFX {
     public static ModelRendererTurbo particle = new ModelRendererTurbo(null, 0, 0, 16, 16)
             .addBox(0,0,0, 4, 4, 4).setRotationPoint(-2F, 2F, -1F);
     public static ModelRendererTurbo lampCone = new ModelRendererTurbo(null, 0, 0, 32, 64)
-            .addCylinder(0, -4, 0, 1, 4, 16, 1F, 0.01F, MR_TOP, 1,1, 6);
+            .addCylinder(-0.00625f, -4.025f, -0.0125f, 1, 4, 16, 1F, 0.01F, MR_TOP, 1,1, 6);
     public static ModelRendererTurbo lampSphere = new ModelRendererTurbo(null, 0, 0, 64, 64)
             .addSphere(0,0,0, 2, 8, 8,1,1);
 
