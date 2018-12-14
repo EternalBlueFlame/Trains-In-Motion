@@ -20,8 +20,9 @@ public class BlockDynamic extends BlockContainer {
      * 0: standard crafting table
      * 1: rail crafting table , NOT IMPLEMENTED
      * 2: storage blocks like chests, NOT IMPLEMENTED
-     * 3: signals and levers, NOT IMPLEMENTED
-     * 4: signs, NOT IMPLEMENTED*/
+     * 3: signals, NOT IMPLEMENTED
+     * 4: levers, NOT IMPLEMENTED
+     * 5: signs, NOT IMPLEMENTED*/
     private int type = 0;
 
     /**
@@ -69,7 +70,7 @@ public class BlockDynamic extends BlockContainer {
      * spawns the tile entity related to this block, if there isn't one already. Called on placing the block.
      */
     public TileEntity createNewTileEntity(World worldObj, int meta){
-        return new TileEntityStorage();
+        return new TileEntityStorage(type);
     }
 
 }

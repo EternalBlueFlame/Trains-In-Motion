@@ -133,7 +133,9 @@ public class CommonProxy implements IGuiHandler {
     public static Fluid fluidDiesel = new Fluid("Diesel");
 
     /**the crafting table for trains*/
-    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", Blocks.log.getMaterial(), 0);
+    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", new Material(MapColor.woodColor), 0);
+
+    public static BlockDynamic railTable = new BlockDynamic("blockrailtable", new Material(MapColor.ironColor), 1);
 
     public static BlockRailCore railBlock = new BlockRailCore();
 
@@ -160,6 +162,8 @@ public class CommonProxy implements IGuiHandler {
         addRecipe(new ItemStack(registerBlock(isClient(), trainTable, TrainsInMotion.creativeTab,"block.traintable", null, null),1),
                 "WWW", "WIW", "WWW", 'W', Blocks.planks, 'I', Items.iron_ingot);
 
+        addRecipe(new ItemStack(registerBlock(isClient(), railTable, TrainsInMotion.creativeTab,"block.railtable", null, null),1),
+                "III", "I I", "I I", 'I', Items.iron_ingot);
 
         for (ItemStack i : new ItemStack[]{new ItemStack(Items.iron_ingot),new ItemStack(Items.gold_ingot)}) {
             addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,Blocks.gravel, Blocks.planks, null),

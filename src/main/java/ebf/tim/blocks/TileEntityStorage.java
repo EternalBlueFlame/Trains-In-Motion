@@ -22,13 +22,15 @@ import java.util.List;
 public class TileEntityStorage extends TileEntity implements IInventory {
 
 
-    public TileEntityStorage(){
+    public TileEntityStorage(int type){
         for (int i=0; i< getSizeInventory(); i++){
             items.add(null);
         }
+        storageType=type;
     }
     /**the list of item stacks in the inventory*/
     private List<ItemStack> items = new ArrayList<ItemStack>();
+    public int storageType=0;
 
     /**
      * <h2>Syncing</h2>
@@ -36,6 +38,7 @@ public class TileEntityStorage extends TileEntity implements IInventory {
     /**loads the tile entity's save file*/
     public void readFromNBT(NBTTagCompound p_145839_1_) {
         super.readFromNBT(p_145839_1_);
+        storageType=p_145839_1_.getInteger("storageType");
         for (int i = 0; i < getSizeInventory(); i++) {
             ItemStack item = ItemStack.loadItemStackFromNBT(p_145839_1_);
             if (item.stackSize != 0) {
@@ -46,6 +49,7 @@ public class TileEntityStorage extends TileEntity implements IInventory {
     /**saves the tile entity to server world*/
     public void writeToNBT(NBTTagCompound p_145841_1_) {
         super.writeToNBT(p_145841_1_);
+        p_145841_1_.setInteger("stroageType", storageType);
         for (ItemStack stack : items) {
             if (stack != null) {
                 stack.writeToNBT(p_145841_1_);
@@ -59,7 +63,12 @@ public class TileEntityStorage extends TileEntity implements IInventory {
      */
     /**gets the number of slots the inventory.*/
     @Override
-    public int getSizeInventory() {return 9;}
+    public int getSizeInventory() {
+        switch (storageType){
+            case 1:{return 3;}
+            default:{return 9;}
+        }
+    }
 
 
     @Override
