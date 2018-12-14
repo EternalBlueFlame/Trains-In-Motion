@@ -27,6 +27,7 @@ public class BlockDynamic extends BlockContainer {
     /**
      * <h2>block initializer</h2>
      *  Defines the material like what is necessary to make it and the creative tab for it, and the block name.
+     *  NOTE; forge materials are fake, don't use them directly, steal them from existing blocks.
      */
     public BlockDynamic(String name, Material material, int blockType){
         super(material);

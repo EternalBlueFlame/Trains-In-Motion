@@ -13,6 +13,7 @@ import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -125,7 +126,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public Material getMaterial(){
-        return Material.circuits;//tells the world not to let entities spawn on it, or things be placed on top of it.
+        return Blocks.rail.getMaterial();//tells the world not to let entities spawn on it, or things be placed on top of it.
     }
 
     @Override

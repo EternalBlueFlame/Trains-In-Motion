@@ -322,6 +322,9 @@ public class EntityTrainCore extends GenericRailTransport {
         return false;
     }
 
+    @Override
+    public int getMinecartType(){return 10004;}
+
     /*
      * <h2>Inherited variables</h2>
      * these functions are overridden by classes that extend this so that way the values can be changed indirectly.

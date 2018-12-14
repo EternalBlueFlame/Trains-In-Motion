@@ -6,10 +6,8 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.Bogie;
-import ebf.tim.utility.FuelHandler;
 import fexcraft.tmt.slim.ModelBase;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 import java.util.List;

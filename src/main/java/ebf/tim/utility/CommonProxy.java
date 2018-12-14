@@ -133,7 +133,7 @@ public class CommonProxy implements IGuiHandler {
     public static Fluid fluidDiesel = new Fluid("Diesel");
 
     /**the crafting table for trains*/
-    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", Material.wood, 0);
+    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", Blocks.log.getMaterial(), 0);
 
     public static BlockRailCore railBlock = new BlockRailCore();
 
