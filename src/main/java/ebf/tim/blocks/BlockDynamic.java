@@ -50,7 +50,7 @@ public class BlockDynamic extends BlockContainer {
             return true;
         }
         switch (type) {
-            case 0: {
+            case 0: case 1: {
                 TileEntity entity = worldOBJ.getTileEntity(x, y, z);
                 if (entity != null) {
                     player.openGui(TrainsInMotion.instance, 0, worldOBJ, x, y, z);

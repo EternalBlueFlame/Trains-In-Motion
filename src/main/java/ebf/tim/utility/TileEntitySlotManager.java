@@ -1,13 +1,21 @@
 package ebf.tim.utility;
 
 import ebf.tim.blocks.TileEntityStorage;
+import ebf.tim.items.ItemRail;
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.oredict.OreDictionary;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * <h1>Tile Entity Container</h1>
@@ -17,7 +25,7 @@ import net.minecraft.item.ItemStack;
  */
 public class TileEntitySlotManager extends Container{
     /**the tile entity*/
-    private TileEntityStorage craftingTable;
+    public TileEntityStorage craftingTable;
 
     /**
      * <h2>Server-side inventory GUI for tile entities</h2>
@@ -45,13 +53,24 @@ public class TileEntitySlotManager extends Container{
         }
 
 
+        if (craftingTable.storageType == 1) {
 
-        //tile entity's output slot
-        this.addSlotToContainer(new SlotCrafting(iinventory.player, craftingTable, craftingTable, 10, 124, 35));
-        //tile entity's crafting grid
-        for (int l = 0; l < 3; ++l) {
-            for (int i1 = 0; i1 < 3; ++i1) {
-                this.addSlotToContainer(new craftingSlot(craftingTable, i1 + l * 3, 30 + i1 * 18, 17 + l * 18));
+            //tile entity's output slot
+            this.addSlotToContainer(new SlotCrafting(iinventory.player, craftingTable, craftingTable, 10, 124, 44));
+            this.addSlotToContainer(new SlotCrafting(iinventory.player, craftingTable, craftingTable, 4, 124, 0));
+            //tile entity's crafting grid
+            for (int l = 0; l < 3; ++l) {
+                this.addSlotToContainer(new craftingSlot(craftingTable, l, 30, 2 + (l * 20)));
+            }
+
+        } else {
+            //tile entity's output slot
+            this.addSlotToContainer(new SlotCrafting(iinventory.player, craftingTable, craftingTable, 10, 124, 35));
+            //tile entity's crafting grid
+            for (int l = 0; l < 3; ++l) {
+                for (int i1 = 0; i1 < 3; ++i1) {
+                    this.addSlotToContainer(new craftingSlot(craftingTable, i1 + l * 3, 30 + i1 * 18, 17 + l * 18));
+                }
             }
         }
         onCraftMatrixChanged(craftingTable);
@@ -136,14 +155,36 @@ public class TileEntitySlotManager extends Container{
     private ItemStack findMatchingRecipe() {
         //if this is for a crafting table
         if (craftingTable != null) {
-            return RecipeManager.getResult(new ItemStack[]{
-                    craftingTable.getStackInSlot(0), craftingTable.getStackInSlot(1), craftingTable.getStackInSlot(2),
-                    craftingTable.getStackInSlot(3), craftingTable.getStackInSlot(4), craftingTable.getStackInSlot(5),
-                    craftingTable.getStackInSlot(6), craftingTable.getStackInSlot(7), craftingTable.getStackInSlot(8)
-            });
-        } else {
-            return null;
+            if(craftingTable.storageType==0) {
+                return RecipeManager.getResult(new ItemStack[]{
+                        craftingTable.getStackInSlot(0), craftingTable.getStackInSlot(1), craftingTable.getStackInSlot(2),
+                        craftingTable.getStackInSlot(3), craftingTable.getStackInSlot(4), craftingTable.getStackInSlot(5),
+                        craftingTable.getStackInSlot(6), craftingTable.getStackInSlot(7), craftingTable.getStackInSlot(8)
+                });
+            } else if(craftingTable.storageType==1){
+                if(craftingTable.getStackInSlot(4).getItem() instanceof ItemRail &&
+                        craftingTable.getStackInSlot(0)==(ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ingot"))) &&
+                        craftingTable.getStackInSlot(1)==(ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ties"))) &&
+                        craftingTable.getStackInSlot(2)==(ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ballast")))
+                ){
+                    ItemStack rail = ItemRail.setStackData(new ItemStack(new ItemRail()),
+                            craftingTable.getStackInSlot(0),
+                            Block.getBlockFromItem(craftingTable.getStackInSlot(1).getItem()),
+                            Block.getBlockFromItem(craftingTable.getStackInSlot(2).getItem()),
+                            null
+                    );
+                    rail.getTagCompound().setInteger("count", craftingTable.getStackInSlot(4).getTagCompound().getInteger("count")+1);
+                    return rail;
+                }
+                return ItemRail.setStackData(new ItemStack(new ItemRail()),
+                        craftingTable.getStackInSlot(0),
+                        Block.getBlockFromItem(craftingTable.getStackInSlot(1).getItem()),
+                        Block.getBlockFromItem(craftingTable.getStackInSlot(2).getItem()),
+                        null);
+            }
         }
+        return null;
+
     }
 
 
