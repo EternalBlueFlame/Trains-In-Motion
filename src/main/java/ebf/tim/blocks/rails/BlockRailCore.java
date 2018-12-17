@@ -14,6 +14,7 @@ import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialLogic;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -128,7 +129,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public Material getMaterial(){
-        return TrainsInMotion.proxy.isClient()?new Material(MapColor.redColor):null;
+        return new MaterialLogic(MapColor.mapColorArray[28]);
     }
 
     @Override

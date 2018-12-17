@@ -130,9 +130,9 @@ public class CommonProxy implements IGuiHandler {
     public static Fluid fluidDiesel = new Fluid("Diesel");
 
     /**the crafting table for trains*/
-    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", TrainsInMotion.proxy.isClient()?new Material(MapColor.woodColor):null, 0);
+    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", new Material(MapColor.mapColorArray[13]), 0);
 
-    public static BlockDynamic railTable = new BlockDynamic("blockrailtable", TrainsInMotion.proxy.isClient()?new Material(MapColor.ironColor):null, 1);
+    public static BlockDynamic railTable = new BlockDynamic("blockrailtable", new Material(MapColor.mapColorArray[6]), 1);
 
     public static BlockRailCore railBlock = new BlockRailCore();
 
