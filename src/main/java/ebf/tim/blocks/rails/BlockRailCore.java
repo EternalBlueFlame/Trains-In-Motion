@@ -2,6 +2,7 @@ package ebf.tim.blocks.rails;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.items.ItemRail;
 import ebf.tim.utility.DebugUtil;
@@ -127,7 +128,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public Material getMaterial(){
-        return new Material(MapColor.redColor);
+        return TrainsInMotion.proxy.isClient()?new Material(MapColor.redColor):null;
     }
 
     @Override
@@ -167,8 +168,8 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     @Override
     public void updateTick(World worldObj, int xCoord, int yCoord, int zCoord, Random p_149674_5_) {
         //super.updateTick(worldObj, xCoord,yCoord,zCoord,p_149674_5_);
-        if(!worldObj.isRemote && getTile(worldObj,xCoord,yCoord,zCoord) ==null){
-            tile = (RailTileEntity) worldObj.getChunkProvider().loadChunk(xCoord >> 4,zCoord >>4).func_150806_e(xCoord,yCoord,zCoord);
+        if(!worldObj.isRemote && tile ==null && worldObj.getTileEntity(xCoord,yCoord,zCoord) instanceof RailTileEntity){
+            tile = (RailTileEntity) worldObj.getTileEntity(xCoord,yCoord,zCoord);
         }
     }
 

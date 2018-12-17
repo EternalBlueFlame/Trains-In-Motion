@@ -164,7 +164,7 @@ public class RailTileEntity extends TileEntity {
             if(oldPoints != points) {
                 this.markDirty();
             }
-            oldPoints=null;//clean it out of ram, we dont need it now.
+            oldPoints=null;//clean it out of ram, we dont need it now, save GC the effort.
 
     }
 

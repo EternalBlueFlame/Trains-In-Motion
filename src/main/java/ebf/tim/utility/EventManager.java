@@ -179,13 +179,12 @@ public class EventManager {
 
 
             //add alpha notice
-            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("You are currently playing an alpha release of Trains In Motion."));
+            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("You are currently playing a pre-alpha release of Trains In Motion."));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("For official releases, check out https://github.com/EternalBlueFlame/Trains-In-Motion/"));
-            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Keep in mind that everything in this mod is subject to change, especially the rails, and report any bugs you find."));
+            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Keep in mind that everything in this mod currently is subject to change."));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Good luck and thanks for the assistance. - Eternal Blue Flame."));
 
             //use an HTTP request and parse to check for new versions of the mod from github.
-            System.out.println();
             try {
                 //make an HTTP connection to the version text file, and set the type as get.
                 HttpURLConnection conn = (HttpURLConnection) new URL("https://raw.githubusercontent.com/USER/PROJECT/BRANCH/version.txt").openConnection();

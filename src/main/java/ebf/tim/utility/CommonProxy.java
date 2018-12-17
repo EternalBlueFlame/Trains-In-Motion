@@ -10,10 +10,7 @@ import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.items.ItemAdminBook;
-import ebf.tim.items.ItemKey;
-import ebf.tim.items.ItemRail;
-import ebf.tim.items.ItemTicket;
+import ebf.tim.items.*;
 import ebf.tim.registry.TiMGenericRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
@@ -133,9 +130,9 @@ public class CommonProxy implements IGuiHandler {
     public static Fluid fluidDiesel = new Fluid("Diesel");
 
     /**the crafting table for trains*/
-    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", new Material(MapColor.woodColor), 0);
+    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", TrainsInMotion.proxy.isClient()?new Material(MapColor.woodColor):null, 0);
 
-    public static BlockDynamic railTable = new BlockDynamic("blockrailtable", new Material(MapColor.ironColor), 1);
+    public static BlockDynamic railTable = new BlockDynamic("blockrailtable", TrainsInMotion.proxy.isClient()?new Material(MapColor.ironColor):null, 1);
 
     public static BlockRailCore railBlock = new BlockRailCore();
 
@@ -151,6 +148,7 @@ public class CommonProxy implements IGuiHandler {
 
 
         RegisterItem(TrainsInMotion.proxy.isClient(),new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", null, TrainsInMotion.creativeTab, null);
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemCraftGuide(),TrainsInMotion.MODID, "craftbook", null, TrainsInMotion.creativeTab, null);
 
         RegisterItem(TrainsInMotion.proxy.isClient(),new ItemKey(),TrainsInMotion.MODID,  "transportkey",null, TrainsInMotion.creativeTab, null);
         RegisterItem(TrainsInMotion.proxy.isClient(),new ItemTicket(),TrainsInMotion.MODID,  "transportticket",null, TrainsInMotion.creativeTab, null);

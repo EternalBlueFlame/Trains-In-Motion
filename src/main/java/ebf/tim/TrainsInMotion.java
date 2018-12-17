@@ -14,6 +14,7 @@ import ebf.tim.blocks.OreGen;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.items.ItemAdminBook;
+import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.items.TiMTab;
 import ebf.tim.networking.PacketInteract;
 import ebf.tim.networking.PacketRemove;
@@ -27,6 +28,9 @@ import net.minecraft.item.Item;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static sun.security.x509.ReasonFlags.UNUSED;
 
@@ -117,6 +121,10 @@ public class TrainsInMotion {
         MinecraftForge.EVENT_BUS.register(chunkHandler);
         creativeTab=new TiMTab(event.getSide().isClient(),"Trains in Motion", MODID, "TiM");
 
+        ItemCraftGuide.modInfoPages.put(MODID, "Trains in Motion\n Creator/Dev: Eternal Blue Flame\n Artist: Lunar Tales\n"+
+                "Honorable mentions for helping development:\nFerdinand, Zora no Densha, cam27cam, MothershipQ\n" +
+                "A special thanks to those that helped support the mod from donations\nNightScale5755" +
+        "and a huge thanks to the entire Traincraft community for all the patience");
     }
 
     /**

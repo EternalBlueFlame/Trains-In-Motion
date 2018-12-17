@@ -191,10 +191,10 @@ public class ItemRail extends Item implements ITrackItem {
     @SideOnly(Side.CLIENT)
     public void getSubItems(Item p_150895_1_, CreativeTabs p_150895_2_, List tabItems) {
         if(p_150895_1_ instanceof ItemRail) {
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.log, Blocks.gravel, null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.planks, Blocks.gravel, null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, Blocks.gravel, null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, Blocks.stone, null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.gravel, Blocks.log, null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.gravel, Blocks.planks, null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.gravel, null, null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.stone, null, null));
             tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, null, null));
         } else {
             tabItems.add(new ItemStack(p_150895_1_));

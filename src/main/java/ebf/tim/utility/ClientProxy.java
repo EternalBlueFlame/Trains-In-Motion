@@ -9,10 +9,8 @@ import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.gui.GUIAdminBook;
-import ebf.tim.gui.GUITrainTable;
-import ebf.tim.gui.GUITransport;
-import ebf.tim.gui.HUDTrain;
+import ebf.tim.gui.*;
+import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
 import net.minecraft.block.BlockLiquid;
@@ -95,6 +93,9 @@ public class ClientProxy extends CommonProxy {
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         if (player != null) {
+            if(x==0&&y==0&&z==0&&ID==-1 && player.getHeldItem().getItem() instanceof ItemCraftGuide){
+                return new GUIGuideBook((ItemCraftGuide) player.getHeldItem().getItem());
+            }
             //Trains
             if (player.worldObj.getEntityByID(ID) instanceof GenericRailTransport && !((GenericRailTransport) player.worldObj.getEntityByID(ID)).hasCustomGUI()) {
                 return new GUITransport(player.inventory, (GenericRailTransport) player.worldObj.getEntityByID(ID));
