@@ -4,6 +4,7 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.items.ItemAdminBook;
 import ebf.tim.items.ItemCraftGuide;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.ServerLogger;
 import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.client.Minecraft;
@@ -28,12 +29,12 @@ import java.util.List;
 public class GUIGuideBook extends GuiScreen {
     /**the amount to scale the GUI by, same as vanilla*/
     private static final float guiScaler = 0.00390625F;
-    private String[] list;
-    static boolean isTrainPage = false;
     private int guiLeft;
     private int guiTop;
-    private int page=0;
+    private int page=1;
+    List<String> lines = new ArrayList<>();
     ItemCraftGuide itemCraftGuide;
+    private List<GUIButton> buttons = new ArrayList<>();
 
     public GUIGuideBook(ItemCraftGuide item){
         itemCraftGuide=item;
@@ -62,80 +63,134 @@ public class GUIGuideBook extends GuiScreen {
 
         itemCraftGuide.init();
 
+        this.buttons.add(new GUIButton(guiLeft +130, guiTop + 140, 18, 18, ">", null, null){
+
+            @Override
+            public String getHoverText() {
+                if(lines==null || lines.size()<((page+1)*22)){
+                    return "";
+                }
+                return "gui.goToPage" + " " + (page+1);
+            }
+
+            @Override
+            public void onClick() {
+                page++;
+            }
+        });
+
+        this.buttons.add(new GUIButton(guiLeft - 50, guiTop + 140, 18, 18, ",", null, null){
+
+            @Override
+            public String getHoverText() {
+                return page==0?"":"gui.goToPage" + " "+ (page-1);
+            }
+
+            @Override
+            public void onClick() {
+                page--;
+            }
+        });
+
+    }
+
+    @Override
+    public void mouseClicked(int mouseButton, int mouseX, int mouseY){
+        for(GUIButton b :buttons){
+            if(b.getMouseHover()){
+                DebugUtil.println("clicking", page);
+                b.onClick();
+                DebugUtil.println( page);
+                return;
+            }
+        }
+        super.mouseClicked(mouseButton, mouseX, mouseY);
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float par3){
         super.drawScreen(mouseX, mouseY, par3);
 
-        List<String> indexes = new ArrayList<>();
+        lines = new ArrayList<>();
         //add the index pages for the mods
-        indexes.addAll(itemCraftGuide.indexPages);
+        lines.addAll(itemCraftGuide.indexPages);
         //be sure we end two full pages before continuing to the next part.
-        while(indexes.size() %16!=0){
-            indexes.add("");
+        while(lines.size() %22!=0){
+            lines.add("");
         }
         //add the data from each corrisponding mod
         for(String modid : itemCraftGuide.processedTransports.keySet()){
             //add the mod info pages, if any
             if(itemCraftGuide.modInfoPages.get(modid)!=null){
                 for (String info: itemCraftGuide.modInfoPages.get(modid).split("\n")){
-                    indexes.add(info);
+                    lines.add(info);
                 }
             }
             //be sure we end two full pages before continuing to the next part.
-            while(indexes.size() %16!=0){
-                indexes.add("");
+            while(lines.size() %22!=0){
+                lines.add("");
             }
 
             for(GenericRailTransport transport : itemCraftGuide.processedTransports.get(modid)){
-                if((page+1)*16<indexes.size()){
+                if((page+1)*22<lines.size()){
                     break;
                 }
-                indexes.add(transport.transportName());
-                indexes.add(transport.transportYear());
-                indexes.add(transport.transportcountry());
-                indexes.add(transport.transportFuelType());
-                indexes.add(transport.transportTopSpeed() +"km/h   : "+ transport.transportMetricHorsePower()+"MHP");
+                lines.add(transport.transportName());
+                lines.add(transport.transportYear());
+                lines.add(transport.transportcountry());
+                lines.add(transport.transportFuelType());
+                lines.add(transport.transportTopSpeed() +"km/h   : "+ transport.transportMetricHorsePower()+"MHP");
 
-                indexes.add(transport.getRecipie()[0].getDisplayName() +" : "+ transport.getRecipie()[1].getDisplayName() +" : "+ transport.getRecipie()[2].getDisplayName());
-                indexes.add(transport.getRecipie()[3].getDisplayName() +" : "+ transport.getRecipie()[4].getDisplayName() +" : "+ transport.getRecipie()[5].getDisplayName());
-                indexes.add(transport.getRecipie()[6].getDisplayName() +" : "+ transport.getRecipie()[7].getDisplayName() +" : "+ transport.getRecipie()[8].getDisplayName());
+                lines.add(getItem(transport,0) +" : "+ getItem(transport,1) +" : "+ getItem(transport,2));
+                lines.add(getItem(transport,3) +" : "+ getItem(transport,4) +" : "+ getItem(transport,5));
+                lines.add(getItem(transport,6) +" : "+ getItem(transport,7) +" : "+ getItem(transport,8));
+                while(lines.size() %11!=0){
+                    lines.add("");
+                }
+            }
+
+            while(lines.size() %22!=0){
+                lines.add("");
             }
         }
 
-
-        for(int i=0; i<9;i++){
-            drawTextOutlined(fontRendererObj, indexes.get((page*16)+i),guiLeft-50,guiTop-20+(20*i), 0x000000);
+        for (int i=0; i<11;i++) {
+            drawTextOutlined(fontRendererObj, lines.get((page * 22)+i), guiLeft - 80, guiTop +(i*15), 0x000000);
+        }
+        for (int i=0; i<11;i++) {
+            drawTextOutlined(fontRendererObj, lines.get((page * 22)+i+11), guiLeft + 90, guiTop + (i*15), 0x000000);
         }
 
-        for(int i=0; i<9;i++){
-            drawTextOutlined(fontRendererObj, indexes.get((page*16)+i+8),guiLeft+50,guiTop-20+(20*i), 0x000000);
+
+        for (GUIButton b : buttons){
+            b.drawButton(mouseX,mouseY);
         }
-
-
     }
 
     public static void drawTextOutlined(FontRenderer font, String string, int x, int y, int color){
         //bottom left
-        font.drawString(string, x-1, y+1, 0);
+        font.drawString(string, x-1, y+1, 0x999999);
         //bottom
-        font.drawString(string, x, y+1, 0);
+        font.drawString(string, x, y+1, 0x999999);
         //bottom right
-        font.drawString(string, x+1, y+1, 0);
+        font.drawString(string, x+1, y+1, 0x999999);
         //left
-        font.drawString(string, x-1, y, 0);
+        font.drawString(string, x-1, y, 0x999999);
         //right
-        font.drawString(string, x+1, y, 0);
+        font.drawString(string, x+1, y, 0x999999);
         //top left
-        font.drawString(string, x-1, y-1, 0);
+        font.drawString(string, x-1, y-1, 0x999999);
         //top
-        font.drawString(string, x, y-1, 0);
+        font.drawString(string, x, y-1, 0x999999);
         //top right
-        font.drawString(string, x+1, y-1, 0);
+        font.drawString(string, x+1, y-1, 0x999999);
 
 
         font.drawString(string,x,y,color);
+    }
+
+    public String getItem(GenericRailTransport transport, int slot){
+        return transport.getRecipie()[slot]!=null?transport.getRecipie()[slot].getDisplayName():"Empty";
     }
 
     /**

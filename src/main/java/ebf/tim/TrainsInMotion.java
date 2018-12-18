@@ -121,10 +121,10 @@ public class TrainsInMotion {
         MinecraftForge.EVENT_BUS.register(chunkHandler);
         creativeTab=new TiMTab(event.getSide().isClient(),"Trains in Motion", MODID, "TiM");
 
-        ItemCraftGuide.modInfoPages.put(MODID, "Trains in Motion\n Creator/Dev: Eternal Blue Flame\n Artist: Lunar Tales\n"+
-                "Honorable mentions for helping development:\nFerdinand, Zora no Densha, cam27cam, MothershipQ\n" +
-                "A special thanks to those that helped support the mod from donations\nNightScale5755" +
-        "and a huge thanks to the entire Traincraft community for all the patience");
+        ItemCraftGuide.modInfoPages.put(MODID, "Trains in Motion\nCreator/Dev: Eternal Blue Flame\nArtist: Lunar Tales\n"+
+                "\nHonorable mentions\nfor helping development:\nFerdinand, Zora no Densha\ncam27cam, MothershipQ\n" +
+                " \n \n \nA special thanks to everyone\nthat helped support the mod\nthrough donations:\nNightScale5755" +
+        "\n \nAnd a big thanks to\nthe entire Traincraft community\nfor all the patience");
     }
 
     /**

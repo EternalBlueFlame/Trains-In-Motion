@@ -60,7 +60,7 @@ public class Model1x1Rail {
 
 
     //todo use the return value to manage displaylists
-    public static boolean Model3DRail(List<float[]> points, float[] railOffsets, float segmentLength, @Nullable Block ties, @Nullable Block ballast, ItemStack railBlock){
+    public static boolean Model3DRail(List<float[]> points, float[] railOffsets, float segmentLength, @Nullable Block ballast, @Nullable Block ties, ItemStack railBlock){
         if(railOffsets==null || points ==null){
             return false;
         }
@@ -87,10 +87,10 @@ public class Model1x1Rail {
             //shouldnt even need to define models like the rails, only need 2, flat and 3d, get a boolean operator config.ispotato?.
 
             if(ties!=null) {
-                ModelTies.model3DTies(points, maxWidth, minWidth, Blocks.log);
+                ModelTies.model3DTies(points, maxWidth, minWidth, ties);
             }
             if(ballast!=null) {
-                ModelBallast.model3DBallast(points, maxWidth, minWidth, Blocks.gravel, segmentLength);
+                ModelBallast.model3DBallast(points, maxWidth, minWidth, ballast, segmentLength);
             }
 
 
