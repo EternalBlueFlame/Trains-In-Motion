@@ -15,7 +15,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import zoranodensha.api.structures.tracks.ITrackBase;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * <h1>utilities</h1>
@@ -30,6 +32,7 @@ public class RailUtility {
     /**converts a radians double to degrees*/
     public static final double degreesD = 180.0d / Math.PI;
     public static final float degreesF = (float) (180.0d / Math.PI);
+    private static List<String> loggedLangChecks = new ArrayList<>();
 
 
     /**
@@ -43,8 +46,9 @@ public class RailUtility {
 
 
     public static String translate(String text){
-        if (StatCollector.translateToLocal(text).equals(text)){
-            DebugUtil.println("Missing lang entry for: " +text);
+        if (StatCollector.translateToLocal(text).equals(text) && !loggedLangChecks.contains(text)){
+            DebugUtil.println("Missing lang entry for: ",text);
+            loggedLangChecks.add(text);
             return text;
         } else {
             return StatCollector.translateToLocal(text);
