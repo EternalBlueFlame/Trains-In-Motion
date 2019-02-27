@@ -2,6 +2,7 @@ package ebf.tim.utility;
 
 
 import ebf.tim.entities.GenericRailTransport;
+import fexcraft.fcl.common.math.Vec3f;
 import fexcraft.tmt.slim.Vec3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
@@ -18,6 +19,7 @@ import zoranodensha.api.structures.tracks.ITrackBase;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <h1>utilities</h1>
@@ -53,6 +55,15 @@ public class RailUtility {
         } else {
             return StatCollector.translateToLocal(text);
         }
+    }
+
+    public static String[]multiTranslate(String[] s){
+        if(s==null){return null;}
+        String[] ret = new String[s.length];
+        for (int i=0; i<s.length;i++){
+            ret[i]=translate(s[i]);
+        }
+        return ret;
     }
 
 
@@ -106,12 +117,7 @@ public class RailUtility {
 
 
     public static float power(float base, float power){
-        float result = 1.0f;
-        for(float x = 0; x < power; x++) {
-            result *= base;
-        }
-
-        return result;
+        return (float)Math.pow(base,power);
     }
 
 
@@ -194,15 +200,15 @@ public class RailUtility {
         return xyz;
     }
 
-    public static Vec3d rotatePoint(Vec3d f, float pitch, float yaw, float roll) {
-        double cos;
-        double sin;
-        Vec3d xyz = f;
+    public static Vec3f rotatePoint(Vec3f f, float pitch, float yaw, float roll) {
+        float cos;
+        float sin;
+        Vec3f xyz = new Vec3f(f.xCoord, f.yCoord, f.zCoord);
         //rotate pitch
         if (pitch != 0.0F) {
             pitch *= radianF;
-            cos = Math.cos(pitch);
-            sin = Math.sin(pitch);
+            cos = MathHelper.cos(pitch);
+            sin = MathHelper.sin(pitch);
 
             xyz.xCoord = (f.yCoord * sin) + (f.xCoord * cos);
             xyz.yCoord = (f.yCoord * cos) - (f.xCoord * sin);

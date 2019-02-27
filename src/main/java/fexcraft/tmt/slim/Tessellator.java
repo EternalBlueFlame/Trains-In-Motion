@@ -4,11 +4,14 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.utility.ClientProxy;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.ByteBuffer;
@@ -29,9 +32,9 @@ public class Tessellator{
 
 	public static Tessellator INSTANCE = new Tessellator();
 
-	private int verts, dm;
-	private boolean translated=false, texture4d=false, isQuad =true;
-	private float x, y, z;
+	private static int verts, dm,skyLight;
+	private static boolean translated=false, texture4d=false, isQuad =true;
+	private static float x, y, z;
 	//supports up to 1024 vertex points for support of larger
 	private static FloatBuffer bufferVertex = GLAllocation.createDirectByteBuffer(4096*6).asFloatBuffer();//one for each vertex
 	private static IntBuffer bufferIndex = GLAllocation.createDirectByteBuffer(4096*2).asIntBuffer();//one per set of vertex points
@@ -42,6 +45,7 @@ public class Tessellator{
 	//2 bytes for idk GL does something with them, then 4 bytes per pixel at 4kx4k resolution. any bigger breaks intel GPU's anyway.
 	private static ByteBuffer bufferTexturePixels = GLAllocation.createDirectByteBuffer(67108866);
 
+	public static int[] ingotColors = new int[]{};
 
 	public static Tessellator getInstance(){
 		return INSTANCE;
@@ -119,6 +123,11 @@ public class Tessellator{
 			bufferIndex.put(verts);
 			verts++;
 		}
+	}
+
+	public static void adjustLightFixture(World world, int i, int j, int k) {
+		skyLight = world.getLightBrightnessForSkyBlocks(i, j, k, 0);
+		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit,  skyLight % 65536,  skyLight / 65536f);
 	}
 	
 	public void addVertexWithUV(float i, float j, float k, float u, float v){

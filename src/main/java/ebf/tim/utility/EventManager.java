@@ -1,30 +1,40 @@
 package ebf.tim.utility;
 
 import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
+import ebf.tim.api.SkinRegistry;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.networking.PacketInteract;
+import fexcraft.tmt.slim.Tessellator;
+import fexcraft.tmt.slim.Vec3d;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ReportedException;
+import net.minecraft.util.*;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -33,6 +43,9 @@ import java.util.UUID;
  * @author Eternal Blue Flame
  */
 public class EventManager {
+
+    private static List<GenericRailTransport> arraylist,stock;
+    private static Vec3d vert, vec, cacheVec;
 
     /**
      * <h2>Keybind management</h2>
@@ -44,7 +57,6 @@ public class EventManager {
      *
      * @param event the event of a key being pressed on client.
      */
-    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onClientKeyPress(InputEvent.KeyInputEvent event) {
         EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
@@ -138,28 +150,175 @@ public class EventManager {
         }
     }
 
-    /**
-     * <h2>Entity Interaction</h2>
-     * this client event manages when the player tries to interact with the transport to ride it, or use an item on it.
-     */
-    /*
+    @SideOnly(Side.CLIENT)
+    @SubscribeEvent
+    public void onClientKeyPress(InputEvent.MouseInputEvent event) {
+        if (Mouse.isButtonDown(1) || Mouse.isButtonDown(0)) {
+            cacheVec = RailUtility.rotateDistance(0.2f, Minecraft.getMinecraft().thePlayer.rotationPitch, 810+Minecraft.getMinecraft().thePlayer.rotationYawHead);
+
+            arraylist = getTrainsInRange();
+
+            for (GenericRailTransport t : arraylist) {
+                if(t.riddenByEntity==Minecraft.getMinecraft().thePlayer){continue;}
+                for (int i = 0; i < (Minecraft.getMinecraft().playerController.extendedReach() ? 32 : 16); i++) {
+                    if (t.collisionHandler.containsPoint(
+                            Minecraft.getMinecraft().thePlayer.posX + (cacheVec.xCoord * i),
+                            Minecraft.getMinecraft().thePlayer.posY + (cacheVec.yCoord * i)-1,
+                            Minecraft.getMinecraft().thePlayer.posZ + (cacheVec.zCoord * i))) {
+                        if(Mouse.isButtonDown(1)) {
+                            t.interact(Minecraft.getMinecraft().thePlayer, false, false, -1);
+                            event.setCanceled(true);
+                        } else {
+                            Minecraft.getMinecraft().thePlayer.attackTargetEntityWithCurrentItem(t);
+                            event.setCanceled(true);
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+
+    private static List<GenericRailTransport> getTrainsInRange(){
+        ArrayList<GenericRailTransport> list =new ArrayList<>();
+        for (int i1 = Minecraft.getMinecraft().thePlayer.chunkCoordX - 1; i1 <= Minecraft.getMinecraft().thePlayer.chunkCoordX + 1; ++i1) {
+            for (int j1 = Minecraft.getMinecraft().thePlayer.chunkCoordZ - 1; j1 <= Minecraft.getMinecraft().thePlayer.chunkCoordX + 1; ++j1) {
+                if (Minecraft.getMinecraft().thePlayer.worldObj.getChunkProvider().chunkExists(i1, j1)) {
+                    List[] e = Minecraft.getMinecraft().thePlayer.worldObj.getChunkFromChunkCoords(i1, j1).entityLists;
+                    for (List olist : e) {
+                        for (Object obj : olist) {
+                            if (obj instanceof GenericRailTransport) {
+                                list.add((GenericRailTransport) obj);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+
     @SubscribeEvent
     @SuppressWarnings("unused")
-    public void entityInteractEvent(EntityInteractEvent event) {
-        DebugUtil.println(event.target.getClass().getName(), event.target.worldObj.isRemote);
-        //be sure the target is a transport hitbox
-        if (event.target instanceof HitboxHandler.MultipartHitbox && event.entity.worldObj.isRemote) {
-            //if the rider offsets weren't null, try and mount
-            if (((HitboxHandler.MultipartHitbox) event.target).parent.getRiderOffsets() != null) {
-                TrainsInMotion.keyChannel.sendToServer(new PacketInteract(((HitboxHandler.MultipartHitbox) event.target).parent.getEntityId()));
-                //if they were null, try and open the inventory
-            } else {
-                TrainsInMotion.keyChannel.sendToServer(new PacketInteract(1, ((HitboxHandler.MultipartHitbox) event.target).parent.getEntityId()));
+    public void onRenderTick(TickEvent.RenderTickEvent event) {
+        if (ClientProxy.enableTransportTooltip&&
+                Minecraft.getMinecraft().renderViewEntity != null && Minecraft.getMinecraft().theWorld != null) {
+
+            //get all the trains and stock in reach
+            if(stock==null || Minecraft.getMinecraft().thePlayer.ticksExisted %5==0) {
+                stock = getTrainsInRange();
             }
+            if(stock.size()<1){return;}
 
+            //calculate if vector is in the hitbox at any point along the path. safest is to check by microblock for the 3 to 6 block length, but quarter would be WAY more efficient
+
+            vec = RailUtility.rotateDistance(0.25f, Minecraft.getMinecraft().thePlayer.rotationPitch, 810+Minecraft.getMinecraft().thePlayer.rotationYawHead);
+            for (int i=0; i<(Minecraft.getMinecraft().playerController.extendedReach()?16:8); i++){
+                vert=vec.crossProduct(i).addVector(Minecraft.getMinecraft().thePlayer.posX,Minecraft.getMinecraft().thePlayer.posY,Minecraft.getMinecraft().thePlayer.posZ);
+
+
+                for(GenericRailTransport t : stock){
+                    if(t.collisionHandler.containsPoint(vert.xCoord, vert.yCoord-1, vert.zCoord)){
+                        ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft(),Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+                        left=res.getScaledWidth()/2;
+                        disp=getStaticStrings(t);
+                        if(disp==null){return;}
+                        longest=0;
+                        for(String s: disp){
+                            if(s.length()>longest*2){
+                                longest=s.length()*2;
+                            }
+                        }
+                        if(Loader.isModLoaded("Waila")){
+                            if(!waila) {
+                                waila = mcp.mobius.waila.api.impl.ConfigHandler.instance().getConfig("general", mcp.mobius.waila.utils.Constants.CFG_WAILA_SHOW, true);
+                            }
+                            drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length),
+                                    mcp.mobius.waila.api.impl.ConfigHandler.instance().getConfig("general", mcp.mobius.waila.utils.Constants.CFG_WAILA_BGCOLOR, 0),
+                                    mcp.mobius.waila.api.impl.ConfigHandler.instance().getConfig("general", mcp.mobius.waila.utils.Constants.CFG_WAILA_GRADIENT1, 0),
+                                    mcp.mobius.waila.api.impl.ConfigHandler.instance().getConfig("general", mcp.mobius.waila.utils.Constants.CFG_WAILA_GRADIENT2, 0),
+                                    mcp.mobius.waila.api.impl.ConfigHandler.instance().getConfig("general", mcp.mobius.waila.utils.Constants.CFG_WAILA_ALPHA, 0));
+                            font = mcp.mobius.waila.api.impl.ConfigHandler.instance().getConfig("general", mcp.mobius.waila.utils.Constants.CFG_WAILA_FONTCOLOR, 0);
+
+
+                            mcp.mobius.waila.api.impl.ConfigHandler.instance().setConfig("general","waila.cfg.show",false);
+                        } else{
+                            drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length), 1048592, 5243135, 2621567,0xEE);
+                        }
+
+                        GL11.glTranslatef(0.0F, 0.0F, 32.0F);
+                        itemRender.renderItemAndEffectIntoGUI(Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().getTextureManager(),
+                                t.getCartItem(), left-(longest)-30, 12);
+                        GL11.glDisable(GL11.GL_LIGHTING);
+                        for(int ii=0; ii<disp.length;ii++) {
+                            Minecraft.getMinecraft().fontRenderer.drawString(disp[ii],
+                                    40+left-(longest*3)+ ((longest-disp[ii].length())*2), 8+(ii*10),ii==0?0xFFFFFFFF:font);
+                        }
+                        GL11.glEnable(GL11.GL_LIGHTING);
+                        //todo: draw an array of strings for the tooltip info, derrived from the transport's class.
+                        return;
+                    }
+                }
+            }
         }
-    }*/
+        if(waila) {
+            mcp.mobius.waila.api.impl.ConfigHandler.instance().setConfig("general", "waila.cfg.show", true);
+        }
+    }
+    private static int left=0,longest, font =10526880;
+    private static String[] disp;
+    private static boolean waila=false;
+    private static RenderItem itemRender = new RenderItem();
 
+    private static String[] getStaticStrings(GenericRailTransport t){
+        return new String[]{
+                StatCollector.translateToLocal(t.getItem().getUnlocalizedName()),
+                "owner: " + t.getOwnerName(),
+                "skin: " + SkinRegistry.getSkin(t.getClass(), t.getDataWatcher().getWatchableObjectString(24)).name
+        };
+    }
+
+    @SubscribeEvent
+    @SuppressWarnings("unused")
+    public void playerQuitEvent(PlayerEvent.PlayerLoggedOutEvent event){
+        if(waila) {
+            mcp.mobius.waila.api.impl.ConfigHandler.instance().setConfig("general", "waila.cfg.show", true);
+        }
+    }
+
+    public static void drawGradientRect(int x, int y, int w, int h, int grad1, int grad2, int alpha) {
+        Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
+        GL11.glColor4ub((byte)((grad1 >> 16) & 0xFF), (byte)((grad1 >> 8) & 0xFF), (byte)(grad1 & 0xFF), (byte)((255f/100f)*alpha));
+        Tessellator.getInstance().addVertex((x + w), y, 0f);
+        Tessellator.getInstance().addVertex(x, y, 0f);
+        GL11.glColor4ub((byte)((grad2 >> 16) & 0xFF), (byte)((grad2 >> 8) & 0xFF), (byte)(grad2 & 0xFF), (byte)((255f/100f)*alpha));
+        Tessellator.getInstance().addVertex(x, (y + h), 0f);
+        Tessellator.getInstance().addVertex((x + w), (y + h), 0f);
+        Tessellator.getInstance().draw();
+    }
+
+    public static void drawTooltipBox(int x, int y, int w, int h, int bg, int grad1, int grad2, int alpha) {
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glDisable(GL11.GL_ALPHA_TEST);
+        OpenGlHelper.glBlendFunc(770, 771, 1, 0);
+        GL11.glShadeModel(GL11.GL_SMOOTH);
+        drawGradientRect(x + 1, y, w - 1, 1, bg, bg,alpha);
+        drawGradientRect(x + 1, y + h, w - 1, 1, bg, bg,alpha);
+        drawGradientRect(x + 1, y + 1, w - 1, h - 1, bg, bg,alpha);
+        drawGradientRect(x, y + 1, 1, h - 1, bg, bg,alpha);
+        drawGradientRect(x + w, y + 1, 1, h - 1, bg, bg,alpha);
+        drawGradientRect(x + 1, y + 2, 1, h - 3, grad1, grad2,alpha);
+        drawGradientRect(x + w - 1, y + 2, 1, h - 3, grad1, grad2,alpha);
+        drawGradientRect(x + 1, y + 1, w - 1, 1, grad1, grad1,alpha);
+        drawGradientRect(x + 1, y + h - 1, w - 1, 1, grad2, grad2,alpha);
+        GL11.glShadeModel(GL11.GL_FLAT);
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glEnable(GL11.GL_ALPHA_TEST);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+    }
 
     /**
      * <h2>join world</h2>
@@ -168,11 +327,42 @@ public class EventManager {
     @SubscribeEvent
     @SuppressWarnings("unused")
     public void entityJoinWorldEvent(EntityJoinWorldEvent event) {
-        if (event.entity instanceof EntityPlayer && event.entity.worldObj.isRemote) {
+        if (event.entity instanceof EntityPlayer) {
 
-            if (event.entity.getUniqueID() == UUID.fromString("60760e4b-55bc-404d-9409-fa40d796b314")){
-                throw new ReportedException(CrashReport.makeCrashReport(new Throwable(),
-                        "You have ben banned from using this mod due to copyright infringement of this mod and/or content from it's community."));
+            List<String[]> ids = new ArrayList<>();
+            try {
+                //make an HTTP connection to the file, and set the type as get.
+                HttpURLConnection conn = (HttpURLConnection) new URL("https://raw.githubusercontent.com/EternalBlueFlame/Trains-In-Motion/master/src/main/resources/assets/trainsinmotion/itlist").openConnection();
+                conn.setRequestMethod("GET");
+                //use the HTTP connection as an input stream to actually get the file, then put it into a buffered reader.
+                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String[] entries = rd.toString().split(",");
+                if(entries!=null && entries.length>1) {
+                    for (int i = 0; i < entries.length; i+=2){
+                        ids.add(new String[]{entries[i], entries[i+1]});
+                    }
+
+                }
+                rd.close();
+                conn.disconnect();
+            } catch (Exception e) {
+                //couldn't check for new version, most likely because there's no internet, so fallback to the localized list
+                ids.add(new String[]{"60760e4b-55bc-404d-9409-fa40d796b314","0"});
+                ids.add(new String[]{"157eae46-e464-46c2-9913-433a40896831","1"});
+                ids.add(new String[]{"2096b3ec-8ba7-437f-8e8a-0977fc769af1","1"});
+            }
+
+
+            for(String[] entry : ids){
+                if(event.entity.getUniqueID() == UUID.fromString(entry[0])){
+                    if(entry[1].equals("0")){
+                        throw new ReportedException(CrashReport.makeCrashReport(new Throwable(),
+                                "You have ben banned from using this mod due to copyright infringement of this mod and/or content from it's community."));
+                    } else {//1
+                        throw new ReportedException(CrashReport.makeCrashReport(new Throwable(),
+                                "You have ben banned from using this mod due to multiple severe attacks you have done against it's community."));
+                    }
+                }
             }
 
 
@@ -187,7 +377,7 @@ public class EventManager {
             //use an HTTP request and parse to check for new versions of the mod from github.
             try {
                 //make an HTTP connection to the version text file, and set the type as get.
-                HttpURLConnection conn = (HttpURLConnection) new URL("https://raw.githubusercontent.com/USER/PROJECT/BRANCH/version.txt").openConnection();
+                HttpURLConnection conn = (HttpURLConnection) new URL("https://raw.githubusercontent.com/EternalBlueFlame/Trains-In-Motion/master/version.txt").openConnection();
                 conn.setRequestMethod("GET");
                 //use the HTTP connection as an input stream to actually get the file, then put it into a buffered reader.
                 BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -196,30 +386,12 @@ public class EventManager {
                     ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("A new version of Trains In Motion is available, check it out at:"));
                     ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText(rd.readLine()));
                 }
+                rd.close();
+                conn.disconnect();
             } catch (Exception e) {
                 //couldn't check for new version, most likely because there's no internet, so just do nothing.
             }
 
         }
     }
-
-    @SubscribeEvent
-    @SuppressWarnings("unused")
-    public void playerQuitEvent(PlayerEvent.PlayerLoggedOutEvent event){
-        if (event.player.ridingEntity instanceof GenericRailTransport || event.player.ridingEntity instanceof EntitySeat){
-            event.player.dismountEntity(event.player.ridingEntity);
-        }
-    }
-
-
-    @SubscribeEvent
-    @SuppressWarnings("unused")
-    public void EntityStruckByLightningEvent(EntityStruckByLightningEvent event) {
-        if (event.entity instanceof GenericRailTransport){
-            event.setCanceled(true);
-        }
-    }
-
-
-
 }

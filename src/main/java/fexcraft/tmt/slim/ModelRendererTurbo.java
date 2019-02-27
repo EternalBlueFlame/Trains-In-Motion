@@ -1,5 +1,6 @@
 package fexcraft.tmt.slim;
 
+import fexcraft.fvtm.model.TurboList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -93,7 +94,26 @@ public class ModelRendererTurbo {
             modelbase.boxList.add(this);
         }
 	}
-	
+
+    public ModelRendererTurbo(TurboList modelbase, String s){
+        flip = false;
+        compiled = false;
+        displayList = 0;
+        mirror = false;
+        showModel = true;
+        field_1402_i = false;
+        vertices = new PositionTransformVertex[0];
+        faces = new TexturedPolygon[0];
+        forcedRecompile = false;
+        textureGroup = new HashMap<String, TextureGroup>();
+        textureGroup.put("0", new TextureGroup());
+        currentTextureGroup = textureGroup.get("0");
+        boxName = s;
+        defaultTexture = "";
+        useLegacyCompiler = true;
+    }
+
+
 	public ModelRendererTurbo(ModelBase modelbase){
 		this(modelbase, null);
 	}

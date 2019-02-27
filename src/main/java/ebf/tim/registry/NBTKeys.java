@@ -45,6 +45,8 @@ public class NBTKeys {
     public static final String backLinkLeast = "extended.backLinkedTransport.least";
     /**the most significant bits for the owner in GenericRailTransport*/
     public static final String ownerMost = "extended.owner.most";
+    /**the name for the owner in GenericRailTransport*/
+    public static final String ownerName = "extended.owner.name";
     /**the least significant bits for the owner in GenericRailTransport*/
     public static final String ownerLeast = "extended.owner.least";
     /**the length of the filter items in GenericRailTransport*/

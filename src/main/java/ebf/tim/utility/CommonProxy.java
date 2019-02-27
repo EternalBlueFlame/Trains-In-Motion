@@ -49,6 +49,9 @@ import static ebf.tim.registry.TiMGenericRegistry.registerBlock;
  */
 public class CommonProxy implements IGuiHandler {
 
+
+    public static EventManagerServer eventManagerServer = new EventManagerServer();
+
     /**
      * <h2> Server GUI Redirect </h2>
      * Mostly a redirect between the event handler and the actual Container Handler

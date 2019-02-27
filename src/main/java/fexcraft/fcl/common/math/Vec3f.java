@@ -100,6 +100,10 @@ public class Vec3f {
     public Vec3f scale(float scale){
         return new Vec3f(this.xCoord * scale, this.yCoord * scale, this.zCoord * scale);
     }
+
+    public Vec3f scale(float scaleX, float scaleY, float scaleZ){
+        return new Vec3f(this.xCoord * scaleX, this.yCoord * scaleY, this.zCoord * scaleZ);
+    }
     
     public float lengthVector(){
         return (float)Math.sqrt(this.xCoord * this.xCoord + this.yCoord * this.yCoord + this.zCoord * this.zCoord);
@@ -230,6 +234,10 @@ public class Vec3f {
 	public float dot(Vec3f other){
 		return this.xCoord * other.xCoord + this.yCoord * other.yCoord + this.zCoord * other.zCoord;
 	}
+
+    public float dot2D(Vec3f other){
+        return this.xCoord * other.xCoord + this.zCoord * other.zCoord;
+    }
 
 	public Vec3f normalize(Vec3f dest){
 		float len = (float)length(); return dest == null ? new Vec3f(xCoord / len, yCoord / len, zCoord / len) : dest.set(xCoord / len, yCoord / len, zCoord / len);

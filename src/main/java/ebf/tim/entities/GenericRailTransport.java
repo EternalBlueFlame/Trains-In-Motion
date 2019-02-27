@@ -20,6 +20,8 @@ import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -64,8 +66,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public EntityBogie backBogie = null;
     /**the list of seat entities*/
     public List<EntitySeat> seats = new ArrayList<>();
-    /**the list of hitboxes and the class that manages them*/
-    public HitboxHandler hitboxHandler = new HitboxHandler();
     /**the server-sided persistent UUID of the transport linked to the front of this,*/
     public UUID frontLinkedTransport = null;
     /**the id of the rollingstock linked to the front*/
@@ -78,22 +78,19 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public String ownerName ="";
     /**the destination for routing*/
     public String destination ="";
-    /**used to initialize a laege number of variables that are used to calculate everything from movement to linking.
+    /**used to initialize a large number of variables that are used to calculate everything from movement to linking.
      * this is so we don't have to initialize each of these variables every tick, saves CPU.*/
-    //todo: values 1 and 6 are unused.
-    public float[][] vectorCache = new float[8][3];
+    public float[][] vectorCache = new float[6][3];
     /**the health of the entity, similar to that of EntityLiving*/
     private int health = 20;
     /**the fluidTank tank*/
     private FluidTankInfo[] fluidTank = null;
-    /**local cache for fluid tanks, tocheck if parsing is necessary or not*/
+    /**local cache for fluid tanks, to check if parsing is necessary or not*/
     private String fluidCache="";
     /**the list of items used for the inventory and crafting slots.*/
     public List<ItemStackSlot> inventory = null;
     /**whether or not this needs to update the datawatchers*/
     public boolean updateWatchers = false;
-    /**the RF battery for rollingstock.*/
-    public int battery=0;
     /**the ticket that gives the entity permission to load chunks.*/
     private ForgeChunkManager.Ticket chunkTicket;
     /**a cached list of the loaded chunks*/
@@ -108,15 +105,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public double backVelocityZ=0;
     /**Used to be sure we only say once that the transport has been derailed*/
     private boolean displayDerail = false;
-    /*this is cached so we can keep the hitbox handler running even when derailed.*/
-    private boolean collision;
+    public HitboxDynamic collisionHandler=null;
     /**/
     float prevRotationRoll;
     /**/
     float rotationRoll;
     public int forceBackupTimer =0;
-
-    public boolean hasTrain=false;
+    public float pullingWeight=0;
 
     //@SideOnly(Side.CLIENT)
     public TransportRenderData renderData = new TransportRenderData();
@@ -157,12 +152,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
     public GenericRailTransport(World world){
         super(world);
-        setSize(1,2);
+        setSize(0.25f,0.25f);
         ignoreFrustumCheck = true;
         inventory = new ArrayList<>();
         initInventorySlots();
         if(world!=null) {
-            boundingBox.setBounds(0.0D, 0.0D, 0.0D, 1.0D, 2.0D, 1.0D);
+            this.height = 0.25f;
+            collisionHandler = new HitboxDynamic(getHitboxSize()[0],getHitboxSize()[1],getHitboxSize()[2]);
+            collisionHandler.position(posX, posY, posZ, rotationPitch, rotationYaw);
         }
     }
     public GenericRailTransport(UUID owner, World world, double xPos, double yPos, double zPos){
@@ -172,12 +169,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         posX = xPos;
         posZ = zPos;
         this.owner = owner;
-        setSize(1,2);
+        setSize(0.25f,0.25f);
         ignoreFrustumCheck = true;
         inventory = new ArrayList<>();
         initInventorySlots();
         if(world!=null) {
-            boundingBox.setBounds(0.0D, 0.0D, 0.0D, 1.0D, 2.0D, 1.0D);
+            this.height = 0.25f;
+            collisionHandler = new HitboxDynamic(getHitboxSize()[0],getHitboxSize()[1],getHitboxSize()[2]);
+            collisionHandler.position(posX, posY, posZ, rotationPitch, rotationYaw);
         }
     }
 
@@ -192,7 +191,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this.dataWatcher.addObject(13, 0);//train fuel consumption current
         this.dataWatcher.addObject(20, "");//fluid tank data
         this.dataWatcher.addObject(15, 0);//train heat
-        this.dataWatcher.addObject(17, 0);//booleans
+        this.dataWatcher.addObject(17, bools!=null?bools.toInt():BitList.newInt());//booleans
         //18 is used by EntityTrainCore
         //19 is used by the core minecart
         this.dataWatcher.addObject(23, "");//owner
@@ -243,10 +242,12 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public int getMinecartType(){return 10002;}
     /**returns the hitbox of this entity, we dont need that so return null*/
     @Override
-    public AxisAlignedBB getBoundingBox(){return boundingBox;}
+    public AxisAlignedBB getBoundingBox(){
+        return null;}
     /**returns the hitbox of this entity, we dont need that so return null*/
     @Override
-    public AxisAlignedBB getCollisionBox(Entity collidedWith){return collidedWith.boundingBox;}
+    public AxisAlignedBB getCollisionBox(Entity collidedWith){
+        return null;}
     /**returns if this can be collided with, we don't use this so return false*/
     @Override
     public boolean canBeCollidedWith() {return true;}
@@ -271,7 +272,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
     @Override
     public void moveEntity(double p_70091_1_, double p_70091_3_, double p_70091_5_){
-        System.out.println("this is actually used???");
+        DebugUtil.println("this is actually used???");
         super.moveEntity(p_70091_1_,p_70091_3_, p_70091_5_);
     }
 
@@ -337,6 +338,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 }
                 case 1:{ //open GUI
                     player.openGui(TrainsInMotion.instance, getEntityId(), worldObj, 0, 0, 0);
+                    return true;
                 }case 15: {//toggle brake
                     setBoolean(boolValues.BRAKE, !getBoolean(boolValues.BRAKE));
                     return true;
@@ -395,11 +397,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
         return super.interactFirst(player);
 
-    }
-
-    @Override
-    public int getEntityId(){
-        return super.getEntityId();
     }
 
     /**
@@ -463,12 +460,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             seat.setDead();
             TrainsInMotion.keyChannel.sendToServer(new PacketRemove(seat.getEntityId(),false));
             seat.worldObj.removeEntity(seat);
-        }
-        //remove hitboxes
-        for (Entity hitbox : hitboxHandler.hitboxList){
-            hitbox.setDead();
-            TrainsInMotion.keyChannel.sendToServer(new PacketRemove(hitbox.getEntityId(),false));
-            hitbox.worldObj.removeEntity(hitbox);
         }
         //be sure the front and back links are removed in the case of this entity being removed from the world.
         if (frontLinkedID != null){
@@ -552,6 +543,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         }
         //load owner
         owner = new UUID(tag.getLong(NBTKeys.ownerMost),tag.getLong(NBTKeys.ownerLeast));
+        ownerName = tag.getString(NBTKeys.ownerName);
 
         dataWatcher.updateObject(24, tag.getString(NBTKeys.skinURI));
 
@@ -564,11 +556,15 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         rotationRoll = tag.getFloat(NBTKeys.rotationRoll);
         prevRotationRoll = tag.getFloat(NBTKeys.prevRotationRoll);
 
-        fluidTank= new FluidTankInfo[getTankCapacity().length];
-        for(int i=0; i<getTankCapacity().length; i++){
-            if(tag.hasKey("tanks." +i)){
-                fluidTank[i]= new FluidTankInfo(FluidStack.loadFluidStackFromNBT(tag.getCompoundTag("tanks." +i)), getTankCapacity()[i]);
+        if(getTankCapacity()!=null) {
+            fluidTank = new FluidTankInfo[getTankCapacity().length];
+            for (int i = 0; i < getTankCapacity().length; i++) {
+                if (tag.hasKey("tanks." + i)) {
+                    fluidTank[i] = new FluidTankInfo(FluidStack.loadFluidStackFromNBT(tag.getCompoundTag("tanks." + i)), getTankCapacity()[i]);
+                }
             }
+        } else {
+            fluidTank= null;
         }
 
         inventory = new ArrayList<>();
@@ -585,6 +581,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
         }
 
+        DebugUtil.println("fully loaded?");
 
         updateWatchers = true;
     }
@@ -605,6 +602,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         //owner
         tag.setLong(NBTKeys.ownerMost, owner.getMostSignificantBits());
         tag.setLong(NBTKeys.ownerLeast, owner.getLeastSignificantBits());
+        tag.setString(NBTKeys.ownerName, ownerName);
+
 
         tag.setString(NBTKeys.skinURI, dataWatcher.getWatchableObjectString(24));
 
@@ -639,24 +638,22 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
     }
 
-    /**plays a sound during entity movement*/
     @Override
-    protected void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_) {
+    public boolean writeMountToNBT(NBTTagCompound tag){
+        return false;
     }
 
+    /**todo: plays a sound during entity movement*/
+    @Override
+    protected void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_) {}
+
+    public boolean hasDrag(){return true;}
 
     public void updatePosition(){
-
-        this.boundingBox.setBounds(posX-0.5,posY,posZ-0.5, posX+0.5,posY+2, posZ+0.5);
-
-        if (collision) {
-            frontBogie.setVelocity(-frontBogie.motionX,-frontBogie.motionY,-frontBogie.motionZ);
-            backBogie.setVelocity(-backBogie.motionX,-backBogie.motionY,-backBogie.motionZ);
-        }
-        setBoolean(boolValues.DERAILED, frontBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.RUNNING), getType().isTrain() || hasTrain, getBoolean(boolValues.BRAKE),
-                weightKg() * (frontBogie.isOnSlope?1.5f:1) * (backBogie.isOnSlope?2:1), frontLinkedID!=null || backLinkedID!=null));
-        setBoolean(boolValues.DERAILED, backBogie.minecartMove(rotationPitch, rotationYaw, getBoolean(boolValues.RUNNING), getType().isTrain() || hasTrain, getBoolean(boolValues.BRAKE),
-                weightKg() * (frontBogie.isOnSlope?1.5f:1) * (backBogie.isOnSlope?2:1), frontLinkedID!=null || backLinkedID!=null));
+        frontBogie.minecartMove(rotationPitch, rotationYaw, hasDrag(), getBoolean(boolValues.BRAKE),
+                weightKg() * (frontBogie.isOnSlope?1.5f:1) * (backBogie.isOnSlope?2:1));
+        backBogie.minecartMove(rotationPitch, rotationYaw, hasDrag(), getBoolean(boolValues.BRAKE),
+                weightKg() * (frontBogie.isOnSlope?1.5f:1) * (backBogie.isOnSlope?2:1));
         motionX = frontVelocityX = frontBogie.motionX;
         motionZ = frontVelocityZ = frontBogie.motionZ;
         backVelocityX = backBogie.motionX;
@@ -668,6 +665,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 ((frontBogie.posX + backBogie.posX) * 0.5D),
                 ((frontBogie.posY + backBogie.posY) * 0.5D),
                 ((frontBogie.posZ + backBogie.posZ) * 0.5D));
+        collisionHandler.position(posX, posY, posZ, rotationPitch, rotationYaw);
 
         setRotation((RailUtility.atan2degreesf(
                 frontBogie.posZ - backBogie.posZ,
@@ -700,6 +698,15 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             } else if (forceBackupTimer == 0) {
                 ServerLogger.writeWagonToFolder(this);
                 forceBackupTimer--;
+            }
+        }
+
+        //regen health after a while
+        if(health<20 && ticksExisted%40==0){
+            if(health>15){
+                health=20;
+            } else {
+                health+=5;
             }
         }
 
@@ -783,10 +790,16 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
             manageFuel();
 
-            @Nullable
-            Entity player = CommonProxy.getEntityFromUuid(owner);
-            if (player instanceof EntityPlayer) {
-                ownerName = ((EntityPlayer) player).getDisplayName();
+
+            if (ownerName.equals("")) {
+                @Nullable
+                Entity player = CommonProxy.getEntityFromUuid(owner);
+                if (player instanceof EntityPlayer) {
+                    if (!ownerName.equals(((EntityPlayer) player).getDisplayName())) {
+                        ownerName = ((EntityPlayer) player).getDisplayName();
+                        updateWatchers = true;
+                    }
+                }
             }
             //sync the linked transports with client, and on server, easier to use an ID than a UUID.
             Entity linkedTransport = CommonProxy.getEntityFromUuid(frontLinkedTransport);
@@ -806,23 +819,25 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
 
             if(updateWatchers){
-                StringBuilder tanks = new StringBuilder();
-                for(int i=0; i<getTankCapacity().length;i++) {
-                    //todo: these should NEVER be null
-                    if(getTankInfo(null)[i] !=null && getTankInfo(null)[i].fluid !=null) {
-                        tanks.append(getTankInfo(null)[i].fluid.amount);
-                        tanks.append(",");
-                        tanks.append(getTankInfo(null)[i].fluid.getFluid().getName());
-                        tanks.append(";");
-                    } else {
-                        tanks.append(0);
-                        tanks.append(",");
-                        tanks.append(FluidRegistry.WATER.getName());
-                        tanks.append(";");
+                if(getTankCapacity()!=null) {
+                    StringBuilder tanks = new StringBuilder();
+                    for (int i = 0; i < getTankCapacity().length; i++) {
+                        //todo: these should NEVER be null
+                        if (getTankInfo(null)[i] != null && getTankInfo(null)[i].fluid != null) {
+                            tanks.append(getTankInfo(null)[i].fluid.amount);
+                            tanks.append(",");
+                            tanks.append(getTankInfo(null)[i].fluid.getFluid().getName());
+                            tanks.append(";");
+                        } else {
+                            tanks.append(0);
+                            tanks.append(",");
+                            tanks.append(FluidRegistry.WATER.getName());
+                            tanks.append(";");
+                        }
                     }
-                }
 
-                this.dataWatcher.updateObject(20, tanks.toString());
+                    this.dataWatcher.updateObject(20, tanks.toString());
+                }
                 this.dataWatcher.updateObject(23, ownerName);
                 this.dataWatcher.updateObject(17, bools.toInt());
                 this.dataWatcher.updateObject(21, frontLinkedID!=null?frontLinkedID:-1);
@@ -830,56 +845,143 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
         }
 
-        //todo:this tells the stock that it has a train, but this would be more effectivley done from the train's update since it has to itterate the stock anyway to get weight
-        if (!(this instanceof EntityTrainCore) && ticksExisted %60 ==0){
-            GenericRailTransport front = null;
-            boolean hasReversed = false;
-            List<GenericRailTransport> checked = new ArrayList<>();
-            if (frontLinkedID!=null){
-                front = (GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
-            } else if (backLinkedID != null){
-                front = (GenericRailTransport) worldObj.getEntityByID(backLinkedID);
-                hasReversed = true;
-            }
-            hasTrain = false;
+        //handle collisions
+        if (worldObj.isRemote){
+            for (Entity e : collisionHandler.getCollidingPlayers(this)) {
+                double d0 = e.posX - this.posX;
+                double d1 = e.posZ - this.posZ;
+                double d2 = MathHelper.abs_max(d0, d1) * 1.25d;
 
-            while(front != null){
-                @Nullable
-                Entity test = front.frontLinkedID!=null?worldObj.getEntityByID(front.frontLinkedID):null;
-                //if it's null and we haven't reversed yet, start the loop over from the back. if we have reversed though, end the loop.
-                if(test == null){
-                    if (!hasReversed){
-                        front = backLinkedID!=null?(GenericRailTransport)worldObj.getEntityByID(backLinkedID):null;
-                        hasReversed = true;
-                    } else {
-                        front = null;
+                //push entity away
+                if (d2 >= 0.009999999776482582D) {
+                    d2 = MathHelper.sqrt_double(d2);
+                    d0 /= d2;
+                    d1 /= d2;
+
+                    d0 *= Math.min(1.0D / d2, 1D);
+                    d1 *= Math.min(1.0D / d2, 1D);
+                    d0 *= 0.05000000074505806D;
+                    d1 *= 0.05000000074505806D;
+                    d0 *= (1.0D - this.entityCollisionReduction);
+                    d1 *= (1.0D - this.entityCollisionReduction);
+                    e.addVelocity(d0*2.5, 0.0D, d1*2.5);
+                    e.setSprinting(false);
+                }
+            }
+        } else {
+            for (Entity e : collisionHandler.getCollidingEntities(this)) {
+                if (e.ridingEntity != null) {
+                    continue;
+                }
+                if (e instanceof EntityItem) {
+                    if (getType().isHopper() && e.posY > this.posY + 0.5f &&
+                            isItemValidForSlot(0, ((EntityItem) e).getEntityItem())) {
+                        addItem(((EntityItem) e).getEntityItem());
+                        worldObj.removeEntity(e);
                     }
-                    //if the list of checked transports doesn't contain the new one then check if it's an instance of a train, if it is, end the loop and set the values, otherwise continue to the next entry
-                } else if (!checked.contains(test)) {
-                    if (front instanceof EntityTrainCore){
-                        hasTrain = true;
-                        front=null; hasReversed = true;
-                    } else {
-                        front = (GenericRailTransport) test;
+
+                } else if (e instanceof GenericRailTransport) {
+                    double d0 = e.posX - this.posX;
+                    double d1 = e.posZ - this.posZ;
+                    double d2 = MathHelper.abs_max(d0, d1) * 1.25d;
+
+                    //push entity away
+                    if (d2 >= 0.009999999776482582D) {
+                        d2 = MathHelper.sqrt_double(d2);
+                        d0 /= d2;
+                        d1 /= d2;
+
+                        d0 *= Math.min(1.0D / d2, 1D);
+                        d1 *= Math.min(1.0D / d2, 1D);
+                        d0 *= 0.05000000074505806D;
+                        d1 *= 0.05000000074505806D;
+                        d0 *= (1.0D - this.entityCollisionReduction);
+                        d1 *= (1.0D - this.entityCollisionReduction);
+                        //this.motionX=0;
+                        //this.motionZ=0;
+                        this.backBogie.addVelocity(-d0 * 0.5f, 0, -d1 * 0.5f);
+                        this.frontBogie.addVelocity(-d0 * 0.5f, 0, -d1 * 0.5f);
                     }
-                    //if the list does contain the checked one, and we haven't reversed yet,  start the loop over from the back. if we have reversed though, end the loop.
-                } else {
-                    if (!hasReversed){
-                        front = backLinkedID!=null?(GenericRailTransport)worldObj.getEntityByID(backLinkedID):null;
-                        hasReversed = true;
-                    } else {
-                        front = null;
+                } else if (e instanceof EntityLiving || e instanceof EntityPlayer) {
+                    double d0 = e.posX - this.posX;
+                    double d1 = e.posZ - this.posZ;
+                    double d2 = MathHelper.abs_max(d0, d1) * 1.25d;
+
+                    //push entity away
+                    if (d2 >= 0.009999999776482582D) {
+                        d2 = MathHelper.sqrt_double(d2);
+                        d0 /= d2;
+                        d1 /= d2;
+
+                        d0 *= Math.min(1.0D / d2, 1D);
+                        d1 *= Math.min(1.0D / d2, 1D);
+                        d0 *= 0.05000000074505806D;
+                        d1 *= 0.05000000074505806D;
+                        if (e instanceof EntityPlayer && !getBoolean(boolValues.BRAKE)) {
+                            this.frontBogie.addVelocity(-d0 * 1.15f, 0, -d1 * 1.15f);
+                            this.backBogie.addVelocity(-d0 * 1.15f, 0, -d1 * 1.15f);
+                        }
+                    }
+                    //hurt entity if going fast
+                    if (Math.abs(motionX) + Math.abs(motionZ) > 0.25f) {
+                        e.attackEntityFrom(new EntityDamageSource(
+                                        this instanceof EntityTrainCore ? "Locomotive" : "rollingstock", this),
+                                (float) (motionX + motionZ) * 0.1f);
                     }
                 }
             }
         }
-
+        //handle particles
         if (backBogie!=null && !isDead && worldObj.isRemote) {
-            if (ClientProxy.EnableSmokeAndSteam || getParticles().size()>0) {
+            if (ClientProxy.EnableParticles || getParticles().size()>0) {
                 ParticleFX.updateParticleItterator(getParticles(), getBoolean(boolValues.RUNNING));
             }
         }
     }
+
+
+    /**
+     * iterates all the links to check if the stock has a train
+     * todo: use this, ever
+     */
+    public void updateConsist(){
+        List<GenericRailTransport> transports = new ArrayList<>();
+        transports.add(this);
+        GenericRailTransport n =this, old;
+
+        //check the front, then loop for every transport linked to it in opposite direction of this.
+        GenericRailTransport front = frontLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
+        while(front!=null){
+            transports.add(front);
+            old=front;
+            front=front.getOtherLink(n.getEntityId());
+            n=old;
+        }
+        //do it again, but for the back one
+        n=this;
+        front= backLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(backLinkedID);
+        while(front!=null){
+            transports.add(front);
+            old=front;
+            front=front.getOtherLink(n.getEntityId());
+            n=old;
+        }
+
+        //now tell everything in the list, including this, that there's a new list, and provide said list.
+        for(GenericRailTransport t : transports){
+            t.setValuesOnLinkUpdate(transports);
+        }
+    }
+
+
+    //todo: update needed info like weight and combined tractive effort based on values in this array
+    public void setValuesOnLinkUpdate(List<GenericRailTransport> consist){
+
+    }
+
+    //used for trains and B-units
+    public float getPower(){return 0;}
+    public float getMaxPower(){return 0;}
 
 
     /**
@@ -933,17 +1035,17 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 distance -= Math.abs(this.getHitboxSize()[0]*0.5f);
             }
 
-            vectorCache[3][0] = 0.3f * distance * vectorCache[4][0];
-            vectorCache[3][2] = 0.3f * distance * vectorCache[4][2];
+            vectorCache[4][0] = 0.3f * distance * vectorCache[4][0];
+            vectorCache[4][2] = 0.3f * distance * vectorCache[4][2];
 
-            distance = (-vectorCache[3][0] - vectorCache[3][0]) * vectorCache[5][0] + (-vectorCache[3][2] - vectorCache[3][2]) * vectorCache[5][2];
+            distance = (-vectorCache[4][0] - vectorCache[4][0]) * vectorCache[5][0] + (-vectorCache[4][2] - vectorCache[4][2]) * vectorCache[5][2];
 
-            vectorCache[3][0] -= 0.4f * distance * vectorCache[5][0] * -1f;
-            vectorCache[3][2] -= 0.4f * distance * vectorCache[5][2] * -1f;
+            vectorCache[4][0] -= 0.4f * distance * vectorCache[5][0] * -1f;
+            vectorCache[4][2] -= 0.4f * distance * vectorCache[5][2] * -1f;
 
 
-            this.frontBogie.addVelocity(vectorCache[3][0], 0, vectorCache[3][2]);
-            this.backBogie.addVelocity(vectorCache[3][0], 0, vectorCache[3][2]);
+            this.frontBogie.addVelocity(vectorCache[4][0], 0, vectorCache[4][2]);
+            this.backBogie.addVelocity(vectorCache[4][0], 0, vectorCache[4][2]);
         }
 
     }
@@ -1023,6 +1125,12 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         return renderData.particles;
     }
 
+
+    public @Nullable GenericRailTransport getOtherLink(@Nullable Integer notThisOne){
+        return frontLinkedID.equals(notThisOne)?
+                backLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(backLinkedID):
+                frontLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
+    }
     /*
      * <h1>Inventory management</h1>
      */
@@ -1429,6 +1537,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     @SideOnly(Side.CLIENT)
     public float[][] bogieModelOffsets(){return null;}
 
+    @SideOnly(Side.CLIENT)
+    public float[] simpleBogieModelOffsets(){return null;}
+
     /**returns a list of models to be used for the bogies
      * example:
      * return new ModelBase[]{new MyModel1(), new myModel2(), etc...};
@@ -1538,8 +1649,28 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public float getMaxFuel(){return 0;}
 
 
+    @SideOnly(Side.CLIENT)
+    public float[] getParticleData(int id){
+        switch (id){
+            case 0:{return new float[]{3f, 1f, 0x232323};}//smoke
+            case 1:{return new float[]{5f, 1f, 0x232323};}//heavy smoke
+            case 2:{return new float[]{2f, 1f, 0xEEEEEE};}//steam
+            case 3:{return new float[]{6f, 1f, 0xCECDCB};}//led lamp
+            case 4:{return new float[]{3f, 0.5f, 0xCC0000};}//reverse lamp
+            case 5:{return new float[]{3f, 0.5f, 0xCCCC00};}//small sphere lamp
+            default:{return new float[]{6f, 1f, 0xCCCC00};}//lamp
+        }
+    }
 
-
+    /**
+     * returns an animator instance, should fully support classes that extend StaticModelAnimator but have different logic.
+     * if this fails, we may need to rely on some form of abstraction, or direct class calls.
+     * NOTE: even though it's marked side only for client, imports can still load, so use the full class address to avoid importing client only classes.
+     */
+    @SideOnly(Side.CLIENT)
+    public ebf.tim.models.StaticModelAnimator customAnimator(fexcraft.tmt.slim.ModelRendererTurbo model){
+        return new ebf.tim.models.StaticModelAnimator().init(model);
+    }
 
 
     /**defines the weight of the transport.*/

@@ -4,7 +4,6 @@ package ebf.tim.utility;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
-import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
@@ -13,7 +12,6 @@ import ebf.tim.gui.*;
 import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -37,26 +35,26 @@ public class ClientProxy extends CommonProxy {
 
     public static double[][] devSplineModification = {{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
     public static int devSplineCurrentPoint=0;
+    /**Instance the event handler, This is used for event based functionality, things like when you right-click an entity.*/
+    public static EventManager eventManager = new EventManager();
 
     /*
      * <h3>keybinds</h3>
      * Initialize the default values for keybinds.
      * Default values courtesy of Ferdinand
      */
-    /**whether or not lights should be enabled*/
-    public static boolean EnableLights = true;
     /**whether or not smoke and steam should be enabled*/
-    public static boolean EnableSmokeAndSteam = true;
+    public static boolean EnableParticles = true;
     /**whether or not animations should be enabled*/
     public static boolean EnableAnimations = true;
-    /**whether or not to use the 3D rails*/
-    public static boolean Enable3DRails = true;
     /**whether or not to use HD skins*/
     public static boolean useHDSkins = false;
     /**whether or not to force texture binding*/
     public static boolean ForceTextureBinding = false;
     /**defines if the inventory graphics should be loaded from a TiM URI or if vanilla graphics should be used*/
     public static boolean useVanillaInventoryTextures = true;
+
+    public static boolean enableTransportTooltip=true;
     /**the keybind for the lamp toggle*/
     public static KeyBinding KeyLamp = new KeyBinding("Lamp Toggle", Keyboard.KEY_L, "Trains in Motion");
     /**the keybind for the horn/whistle*/
@@ -77,7 +75,6 @@ public class ClientProxy extends CommonProxy {
 
     public static KeyBinding raildevtoolNextPoint = new KeyBinding("Next Point", Keyboard.KEY_ADD, "Trains in Motion Dev");
     public static KeyBinding raildevtoolLastPoint = new KeyBinding("Previous Point", Keyboard.KEY_SUBTRACT, "Trains in Motion Dev");
-
 
     /**
      * <h2> Client GUI Redirect </h2>
@@ -126,29 +123,22 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void loadConfig(Configuration config){
         super.loadConfig(config);
-        config.addCustomCategoryComment("Quality (Client only)", "Lamps take up a lot of extra processing on client side due to forced chunk reloading");
-        EnableLights = config.get("Quality (Client only)", "EnableLamp", true).getBoolean(true);
-        config.addCustomCategoryComment("Quality (Client only)", "Smoke and steam effects are more lightweight than those of normal minecraft. These shouldn't cause much lag if any, but its client only so if you wanna disable it you can.");
-        EnableSmokeAndSteam = config.get("Quality (Client only)", "EnableSmokeAndSteam", true).getBoolean(true);
+        config.addCustomCategoryComment("Quality (Client only)", "Smoke, steam, sparks, and lighting effects are several hundred more lightweight than those of normal minecraft. These shouldn't cause much lag if any, but its client only so if you wanna disable it you can.");
+        EnableParticles = config.get("Quality (Client only)", "EnableParticles", true).getBoolean(true);
         config.addCustomCategoryComment("Quality (Client only)", "Animations are calculated by vector positioning and rotation every frame. These shouldn't cause much lag if any, but its client only so if you wanna disable it you can.");
         EnableAnimations = config.get("Quality (Client only)", "EnableAnimations", true).getBoolean(true);
-        config.addCustomCategoryComment("Quality (Client only)", "Overrides the render of vanilla rails to make them use a more detailed 3D render which supports more detailed switches and diagonals.");
-        Enable3DRails = config.get("Quality (Client only)", "Enable3DRails", false).getBoolean(false);
         config.addCustomCategoryComment("Quality (Client only)", "Overrides the render of train and rollingstock inventories to use textures from vanilla (including resourcepacks), so you can use textures in a texturepack specifically for this mod");
         useVanillaInventoryTextures = config.get("Quality (Client only)", "UseVanillaInventoryTextures", true).getBoolean(true);
         config.addCustomCategoryComment("Quality (Client only)", "Overrides the render of train and rollingstock inventories to use textures from vanilla (including resourcepacks), so you can use textures in a texturepack specifically for this mod");
         useVanillaInventoryTextures = config.get("Quality (Client only)", "UseVanillaInventoryTextures", true).getBoolean(true);
         config.addCustomCategoryComment("Quality (Client only)", "Forces textures to be bound, slows performance on some machines, speeds it up on others, and fixes a rare bug where the the texture does not get bound. So... This REALLY depends on your machine, see what works best for you.");
         ForceTextureBinding = config.get("Quality (Client only)", "ForceTextureBinding", false).getBoolean(false);
-        config.addCustomCategoryComment("Quality (Client only)", "Defines the number of segments per block of rail, higher numbers will make smoother models, but lower numbers get better FPS. Minimum: 4");
-        railLoD = config.get("Quality (Client only)", "RailLoD", 8).getInt(8);
-        if (railLoD<4){
-            railLoD=4;
-        }
 
-        config.addCustomCategoryComment("Quality (Client only)", "Defines the skin to use. 0: flat 2D rail similar to vanilla. 1: basic 3D rail. 2: Normal 3D rail. 3: High detail 3D rail");
+        config.addCustomCategoryComment("Quality (Client only)", "Defines the skin to use. 0: flat 2D rail similar to vanilla. 1: basic 3D rail similar to an extruded 2D. 2: Normal 3D rail. 3: High detail 3D rail");
         railLoD = config.get("Quality (Client only)", "railSkin", 2).getInt(2);
 
+        config.addCustomCategoryComment("Quality (Client only)", "Adds a Waila-esk tooltip for trains (Waila is not needed), if Waila is found then their configs will be used.");
+        enableTransportTooltip = config.get("Quality (Client only)", "EnableTooltip", true).getBoolean(true);
 
         config.addCustomCategoryComment("Keybinds (Client only)", "accepted values can be set from in-game, or defined using the key code values from: http://minecraft.gamepedia.com/Key_codes");
 
@@ -164,8 +154,6 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void register() {
         super.register();
-        //hitboxes
-        RenderingRegistry.registerEntityRenderingHandler(HitboxHandler.MultipartHitbox.class, nullRender);
         //bogies
         RenderingRegistry.registerEntityRenderingHandler(EntityBogie.class, nullRender);
         //seats
@@ -179,14 +167,16 @@ public class ClientProxy extends CommonProxy {
         ClientRegistry.registerKeyBinding(KeyLamp);
         ClientRegistry.registerKeyBinding(KeyInventory);
 
-        ClientRegistry.registerKeyBinding(raildevtoolUp);
-        ClientRegistry.registerKeyBinding(raildevtoolDown);
-        ClientRegistry.registerKeyBinding(raildevtoolLeft);
-        ClientRegistry.registerKeyBinding(raildevtoolRight);
-        ClientRegistry.registerKeyBinding(raildevtoolRaise);
-        ClientRegistry.registerKeyBinding(raildevtoolLower);
-        ClientRegistry.registerKeyBinding(raildevtoolNextPoint);
-        ClientRegistry.registerKeyBinding(raildevtoolLastPoint);
+        if(DebugUtil.dev()) {
+            ClientRegistry.registerKeyBinding(raildevtoolUp);
+            ClientRegistry.registerKeyBinding(raildevtoolDown);
+            ClientRegistry.registerKeyBinding(raildevtoolLeft);
+            ClientRegistry.registerKeyBinding(raildevtoolRight);
+            ClientRegistry.registerKeyBinding(raildevtoolRaise);
+            ClientRegistry.registerKeyBinding(raildevtoolLower);
+            ClientRegistry.registerKeyBinding(raildevtoolNextPoint);
+            ClientRegistry.registerKeyBinding(raildevtoolLastPoint);
+        }
 
 
 

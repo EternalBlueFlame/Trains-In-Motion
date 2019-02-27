@@ -1,5 +1,6 @@
 package ebf.tim.models.rails;
 
+import ebf.tim.utility.DebugUtil;
 import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -19,6 +20,7 @@ public class Model1x1Rail {
     //NOTE: this method is not thread safe, in the case of multi-threaded rendering this may cause problems, in that case revert to the variant in RailUtility.
     private static void rotateVertexPoint(float x, float y, float z, float pitch, float yaw) {
         vert[0]=x;vert[1]=y;vert[2]=z;
+
         //rotate pitch
         if (pitch != 0.0F) {
             pitch *= radianF;

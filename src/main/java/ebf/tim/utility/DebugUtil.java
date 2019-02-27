@@ -44,7 +44,13 @@ public class DebugUtil {
 
 
 	public static void printStackTrace(){
-		DebugUtil.println(Thread.currentThread().getStackTrace(),"");
+		if(dev()) {
+			System.out.println("------------------TiM Debug------------------");
+			for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
+				System.out.println(e);
+			}
+			System.out.println("------------------TiM Debug------------------");
+		}
 	}
 
 	/**

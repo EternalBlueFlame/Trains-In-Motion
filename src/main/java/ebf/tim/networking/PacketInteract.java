@@ -4,6 +4,7 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.utility.DebugUtil;
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -46,7 +47,8 @@ public class PacketInteract implements IMessage {
             //First it has to check if it was actually received by the proper entity, because if not, it crashes.
             try {
                 //if (message.key == -1) {
-                    ((GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId)).interact(context.getServerHandler().playerEntity, false, false, message.key);
+                    ((GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId)).
+                            interact(context.getServerHandler().playerEntity, false, false, message.key);
                 //} else {
                     //((GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId)).ProcessPacket(message.key, context.getServerHandler().playerEntity.getEntityId());
                 //}

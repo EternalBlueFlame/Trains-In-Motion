@@ -29,11 +29,11 @@ public class ParticleFX {
     /*returns if the particle should render or not*/
     public boolean shouldRender = false;
     /*the color to render the particle as*/
-    private final int color;
+    private int color;
     /*the ticks the particle has existed, float is used so render can divide it into decimals*/
     public Float ticksExisted=null, scale=null;
     /*the offset to tint the particle color*/
-    private int colorTint;
+    private int colorTint, colorTemp;
     /*the bounding box of the particle to use for rendering and collision, if it's null we render it as a static particle*/
     private final AxisAlignedBB boundingBox;
     /*the motion of the particle*/
@@ -48,7 +48,7 @@ public class ParticleFX {
     private GenericRailTransport host;
     /*the position offset to move based on the transport's rotation*/
     private float[] offset, pos;
-    private int particleID=0, colorTemp;
+    private int particleID=0;
 
     /**
      * Initialize the particle, basically for spawning it
@@ -165,11 +165,10 @@ public class ParticleFX {
             shouldRender=host.getBoolean(GenericRailTransport.boolValues.LAMP);
             pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, host.rotationPitch, host.rotationYaw, 0);
             pos= new float[]{pos[0],pos[1],pos[2]};
-            //in this case color is used as an ID of sorts.
-            colorTint=Integer.parseInt(host.renderData.particleRecolors[color],16);
+            colorTint=(int)host.getParticleData(color)[2];
             return;
         } else if(particleID==4 && this.ticksExisted > this.lifespan){
-            if(host.vectorCache[7][1]>0.005){
+            if(host.vectorCache[1][1]>0.005){
                 colorTint = (rand.nextInt(75) - 30);
                 lifespan = rand.nextInt(80) +140;
                 ticksExisted =0f;
@@ -185,7 +184,7 @@ public class ParticleFX {
         }else if (hostIsRunning && this.ticksExisted > this.lifespan) {
             //if the lifespan is out we reset the information, as if we just spawned a new particle.
             colorTint = (rand.nextInt(75) - 30);
-            colorTemp=Integer.parseInt(host.renderData.particleRecolors[color],16);
+            colorTemp=(int)host.getParticleData(color)[2];
             lifespan = rand.nextInt(80) +140;
             ticksExisted =0f;
             //recalculating it throws away the rotation value, but that's only used for the cone lamp, which doesn't even run this, so we don't need it anyway.

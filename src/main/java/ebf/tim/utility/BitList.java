@@ -7,7 +7,7 @@ package ebf.tim.utility;
  * @author Eternal Blue Flame
  */
 public class BitList {
-    private boolean[] bits = new boolean[16];
+    private boolean[] bits = new boolean[]{false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
 
     /*get a value in the array, index must be between 0 and 15*/
     public boolean get(int index){
@@ -40,6 +40,13 @@ public class BitList {
             } else {
                 output &= ~(1 << i);
             }
+        }
+        return output;
+    }
+    public static int newInt(){
+        int output = 0;
+        for (int i=0; i<16; i++){
+            output &= ~(1 << i);
         }
         return output;
     }

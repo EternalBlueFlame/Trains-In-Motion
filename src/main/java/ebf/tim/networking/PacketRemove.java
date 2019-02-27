@@ -4,7 +4,6 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.utility.HitboxHandler;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -55,9 +54,6 @@ public class PacketRemove implements IMessage {
                 }
                 //be sure we drop the inventory items on death.
                 ((GenericRailTransport) entity).dropAllItems();
-                for(HitboxHandler.MultipartHitbox hitbox : ((GenericRailTransport) entity).hitboxHandler.hitboxList) {
-                    context.getServerHandler().playerEntity.worldObj.removeEntity(hitbox);
-                }
                 context.getServerHandler().playerEntity.worldObj.removeEntity(((GenericRailTransport) entity).backBogie);
                 context.getServerHandler().playerEntity.worldObj.removeEntity(((GenericRailTransport) entity).frontBogie);
                 context.getServerHandler().playerEntity.worldObj.removeEntity(entity);

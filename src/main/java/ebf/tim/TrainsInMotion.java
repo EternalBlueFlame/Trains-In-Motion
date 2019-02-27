@@ -10,6 +10,7 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.blocks.OreGen;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
@@ -19,18 +20,11 @@ import ebf.tim.items.TiMTab;
 import ebf.tim.networking.PacketInteract;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.TiMGenericRegistry;
-import ebf.tim.utility.ChunkHandler;
-import ebf.tim.utility.ClientProxy;
-import ebf.tim.utility.CommonProxy;
-import ebf.tim.utility.EventManager;
+import ebf.tim.utility.*;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static sun.security.x509.ReasonFlags.UNUSED;
 
@@ -72,11 +66,9 @@ public class TrainsInMotion {
     public static SimpleNetworkWrapper keyChannel;
 
 
-    /**Instance the event handler, This is used for event based functionality, things like when you right-click an entity.*/
-    private static EventManager eventManager = new EventManager();
-
     /**Instance a new chunk handler, this class manages chunk loading events and functionality.*/
-    private static ChunkHandler chunkHandler = new ChunkHandler();
+    public static ChunkHandler chunkHandler = new ChunkHandler();
+
 
     /**
      * <h3>enums</h3>
@@ -160,9 +152,13 @@ public class TrainsInMotion {
         proxy.register();
         //register the worldgen
         GameRegistry.registerWorldGenerator(new OreGen(), 0);
-        //register the event handler
-        MinecraftForge.EVENT_BUS.register(eventManager);
-        FMLCommonHandler.instance().bus().register(eventManager);
+        if(event.getSide().isClient()) {
+            //register the event handler
+            MinecraftForge.EVENT_BUS.register(ClientProxy.eventManager);
+            FMLCommonHandler.instance().bus().register(ClientProxy.eventManager);
+        }
+        MinecraftForge.EVENT_BUS.register(CommonProxy.eventManagerServer);
+        FMLCommonHandler.instance().bus().register(CommonProxy.eventManagerServer);
 
         //register GUI, model renders, Keybinds, client only blocks, and HUD
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);

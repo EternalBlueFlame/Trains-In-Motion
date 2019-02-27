@@ -6,12 +6,17 @@ import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static ebf.tim.models.rails.Model1x1Rail.addVertexWithOffset;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class ModelRail {
 
+
+
+    //todo: rework the method to pre-cache the vectors in an array based on the shape OR, if possible cache the end result render in a displaylist.
     public static void model3DRail(List<float[]> points, float[] railOffsets, ItemStack railBlock){
 
         GL11.glPushMatrix();

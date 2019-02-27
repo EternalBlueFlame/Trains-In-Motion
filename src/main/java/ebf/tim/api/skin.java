@@ -12,7 +12,7 @@ public class skin {
     public ResourceLocation[] bogieTextures;
     public List<int[]> partialRecolors = new ArrayList<>();
     public String name;
-    public String description;
+    private String description;
 
     public skin(ResourceLocation texture, @Nullable ResourceLocation[] bogieTextures, @Nullable int[][] recolor, String skinName, String skinDescription){
         this.texture=texture;
@@ -32,4 +32,6 @@ public class skin {
 
         return bogieTextures[0];
     }
+
+    public String[] getDescription(){return description.split("\n");}
 }

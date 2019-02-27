@@ -1,5 +1,7 @@
 package ebf.tim.api;
 
+import cpw.mods.fml.common.Loader;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.util.ResourceLocation;
 
@@ -13,24 +15,44 @@ public class SkinRegistry {
     public static Map<String, Map<String, skin>> transports = new HashMap<String, Map<String, skin>>();
 
     public static void addSkin(Class c, String modid, String textureURI, String name, String description){
-        addSkinRecolor(c,modid,textureURI,null, null,name,description);
+        addSkinRecolor(c.getName(),modid,textureURI,null, null,name,description);
     }
 
     public static void addSkin(Class c, String modid, String textureURI, String bogieTextureURI, String name, String description){
-        addSkinRecolor(c,modid,textureURI,new String[]{bogieTextureURI},null,name,description);
+        addSkinRecolor(c.getName(),modid,textureURI,new String[]{bogieTextureURI},null,name,description);
     }
 
     public static void addSkin(Class c, String modid, String textureURI, @Nullable String[] bogieTextureURIs, String name, String description){
-        addSkinRecolor(c,modid,textureURI,bogieTextureURIs,null,name,description);
+        addSkinRecolor(c.getName(),modid,textureURI,bogieTextureURIs,null,name,description);
     }
 
+    public static void addSkin(String c, String modid, String textureURI, String name, String description){
+        addSkinRecolor(c,modid,textureURI,null, null,name,description);
+    }
+
+    public static void addSkin(String c, String modid, String textureURI, String bogieTextureURI, String name, String description){
+        addSkinRecolor(c,modid,textureURI,new String[]{bogieTextureURI},null,name,description);
+    }
+
+    public static void addSkin(String c, String modid, String textureURI, @Nullable String[] bogieTextureURIs, String name, String description){
+        addSkinRecolor(c,modid,textureURI,bogieTextureURIs,null,name,description);
+    }
     public static void addSkinRecolor(Class c,String modid, String textureURI, String[] bogieTextureURI, @Nullable int[][] recolor, String skinName, String skinDescription){
-        if (!transports.containsKey(c.getName())){
-            transports.put(c.getName(), new HashMap<String, skin>());
-            //add the default/null skin
-            transports.get(c.getName()).put(modid + ":" + "-1", new skin(new ResourceLocation(modid, textureURI),resourceList(modid,bogieTextureURI), recolor, skinName, skinDescription));
+        addSkinRecolor(c.getName(),modid,textureURI,bogieTextureURI,recolor,skinName,skinDescription);
+    }
+
+    public static void addSkinRecolor(String c,String modid, String textureURI, String[] bogieTextureURI, @Nullable int[][] recolor, String skinName, String skinDescription){
+        if(Loader.isModLoaded(modid) /*todo || CommonProxy.forceSkinRegister*/) {
+            if (DebugUtil.dev()) {
+                DebugUtil.println("REGISTERING SKIN", c, "MODID: " + modid, textureURI, skinName);
+            }
+            if (!transports.containsKey(c)) {
+                transports.put(c, new HashMap<String, skin>());
+                //add the default/null skin
+                transports.get(c).put(modid + ":" + "-1", new skin(new ResourceLocation(modid, textureURI), resourceList(modid, bogieTextureURI), recolor, skinName, skinDescription));
+            }
+            transports.get(c).put(modid + ":" + textureURI, new skin(new ResourceLocation(modid, textureURI), resourceList(modid, bogieTextureURI), recolor, skinName, skinDescription));
         }
-        transports.get(c.getName()).put(modid + ":" + textureURI, new skin(new ResourceLocation(modid, textureURI),resourceList(modid,bogieTextureURI), recolor, skinName, skinDescription));
     }
 
     private static ResourceLocation[] resourceList(String modid, String[] URIs){
@@ -76,8 +98,8 @@ public class SkinRegistry {
         return RailUtility.translate(transports.get(c.getName()).get(modid + ":" + textureURI).name);
     }
 
-    public static String getSkinDescription(Class c,String modid, String textureURI){
-        return RailUtility.translate(transports.get(c.getName()).get(modid + ":" + textureURI).description);
+    public static String[] getSkinDescription(Class c,String modid, String textureURI){
+        return RailUtility.multiTranslate(transports.get(c.getName()).get(modid + ":" + textureURI).getDescription());
     }
 
 }

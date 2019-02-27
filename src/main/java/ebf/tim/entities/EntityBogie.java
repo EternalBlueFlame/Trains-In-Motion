@@ -5,6 +5,7 @@ import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IMinecart;
@@ -171,7 +172,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @see RailUtility
      * returns true or false depending on whether or not it derails from having no rail.
      */
-    public boolean minecartMove(float yaw, float pitch, boolean isRunning, boolean isTrain, boolean parking,  float weight, boolean isLinked)   {
+    public boolean minecartMove(float yaw, float pitch, boolean hasDrag, boolean parking,  float weight)   {
         //define the yaw from the super
         this.setRotation(yaw, pitch);
 
@@ -217,9 +218,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                     this.cartVelocityZ *= 0.9-(0.01* (weight * 0.0007457));
                 }
             }
+//            DebugUtil.println(parking,cartVelocityX, cartVelocityZ, motionX, motionZ,isRunning,isTrain);
 
             //apply drag
-            if (((!isRunning && isTrain) || !isTrain)){
+            if (hasDrag){
                 if (motionX <0.005 && motionX >-0.005){
                     this.cartVelocityX = motionX =0;
                 } else {
@@ -239,7 +241,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             if (block instanceof BlockRailBase) {
                 moveBogie(this.motionX * ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ),
                         this.motionZ * ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ),
-                        floorX, floorY, floorZ, (BlockRailBase) block, isLinked|| isTrain);
+                        floorX, floorY, floorZ, (BlockRailBase) block);
                 //update on ZnD rails, and ones that don't extend block rail base.
             } else if (block instanceof ITrackBase) {
                 //update position for ZnD rails.
@@ -262,7 +264,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @param floorZ the floored Z value of the next position.
      * @param block the block at the next position
      */
-    private void moveBogie(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, BlockRailBase block, boolean train) {
+    private void moveBogie(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, BlockRailBase block) {
         cachedMotionX = currentMotionX;
         cachedMotionZ = currentMotionZ;
         //define the incrementation of movement, use the cache to store the real value and increment it down, and then throw it to the next loop, then use current for the clamped to calculate movement'
@@ -293,10 +295,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
         //add the uphill/downhill velocity
         switch (railMetadata){
-            case 2:{if (!train){currentMotionX -= 0.0078125D;} this.posY = (double)(floorY + 1); isOnSlope=true; break;}
-            case 3:{if (!train){currentMotionX += 0.0078125D;} this.posY = (double)(floorY + 1); isOnSlope=true; break;}
-            case 4:{if (!train){currentMotionZ += 0.0078125D;} this.posY = (double)(floorY + 1); isOnSlope=true; break;}
-            case 5:{if (!train){currentMotionZ -= 0.0078125D;} this.posY = (double)(floorY + 1); isOnSlope=true; break;}
+            case 2:{currentMotionX -= 0.0078125D; this.posY = (double)(floorY + 1); isOnSlope=true; break;}
+            case 3:{currentMotionX += 0.0078125D; this.posY = (double)(floorY + 1); isOnSlope=true; break;}
+            case 4:{currentMotionZ += 0.0078125D; this.posY = (double)(floorY + 1); isOnSlope=true; break;}
+            case 5:{currentMotionZ -= 0.0078125D; this.posY = (double)(floorY + 1); isOnSlope=true; break;}
             default:{isOnSlope=false;}
         }
 
@@ -382,7 +384,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         blockNext = this.worldObj.getBlock(floorX, floorY, floorZ);
         //now loop this again for the next increment of movement, if there is one
         if (blockNext instanceof BlockRailBase && (cachedMotionX !=0 || cachedMotionZ !=0)) {
-            moveBogie(cachedMotionX, cachedMotionZ, floorX, floorY, floorZ, (BlockRailBase) blockNext, train);
+            moveBogie(cachedMotionX, cachedMotionZ, floorX, floorY, floorZ, (BlockRailBase) blockNext);
         }
     }
 

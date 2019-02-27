@@ -5,6 +5,7 @@ import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.blocks.rails.RailVanillaShapes;
 import ebf.tim.items.ItemRail;
 import ebf.tim.models.rails.Model1x1Rail;
+import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.crash.CrashReportCategory;
@@ -61,6 +62,7 @@ public class RailTileEntity extends TileEntity {
                 return;
             }
             //DebugUtil.println(segmentLength);
+            Tessellator.adjustLightFixture(worldObj,xCoord,yCoord,zCoord);
             Model1x1Rail.Model3DRail(points, gauge750mm, segmentLength, ties, ballast, rail);
         } else {super.func_145828_a(report);}
     }
@@ -111,52 +113,52 @@ public class RailTileEntity extends TileEntity {
 
 
         points= new ArrayList<>();
-        //todo: process these directly into quad/triProcessPoints on server, then sync the offsets over the NBT network packet.
+        //todo: process these directly into quad/processPoints(); on server, then sync the offsets over the NBT network packet.
             switch (worldObj.getBlockMetadata(xCoord, yCoord, zCoord)){
                 //Z straight
                 case 0: {
-                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaZStraight(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
+                    RailShapeCore.processPoints(RailVanillaShapes.vanillaZStraight(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 //X straight
                 case 1: {
-                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
+                    RailShapeCore.processPoints(RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
 
                 //curves
                 case 9: {
-                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
+                    RailShapeCore.processPoints(RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 case 8: {
-                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
+                    RailShapeCore.processPoints(RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 case 7: {
-                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
+                    RailShapeCore.processPoints(RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 case 6: {
-                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaCurve6(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
+                    RailShapeCore.processPoints(RailVanillaShapes.vanillaCurve6(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 //Z slopes
                 case 5 :{
-                    RailShapeCore.quadProcessPoints(RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
+                    RailShapeCore.processPoints(RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 case 4 :{
-                    RailShapeCore.quadProcessPoints(RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
+                    RailShapeCore.processPoints(RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 //X slopes
                 case 2 :{
-                    RailShapeCore.quadProcessPoints(RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
+                    RailShapeCore.processPoints(RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
                 case 3 :{
-                    RailShapeCore.quadProcessPoints(RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
+                    RailShapeCore.processPoints(RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
                     break;
                 }
             }

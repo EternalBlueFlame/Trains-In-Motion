@@ -142,7 +142,7 @@ public class EntityBrigadelok080 extends TrainBase {
 
     @Override
     public float[] getHitboxSize() {
-        return new float[]{3,2,1.5f};
+        return new float[]{3.6f,2.1f,1.3f};
     }
 
     /**

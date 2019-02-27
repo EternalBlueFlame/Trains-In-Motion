@@ -28,6 +28,7 @@ public abstract class Model<T> {
 	
 	/** render sub-model array */
 	public void render(ModelRendererTurbo[] model){
+		if(model==null){return;}
 		for(ModelRendererTurbo sub : model){
 			sub.render();
 		}

@@ -32,8 +32,8 @@ public class ChunkHandler implements ForgeChunkManager.LoadingCallback, ForgeChu
     @SuppressWarnings("unused")
     @SubscribeEvent
     public void entityEnteredChunk(EntityEvent.EnteringChunk event) {
-        if(event.entity instanceof HitboxHandler.MultipartHitbox && !event.entity.worldObj.isRemote) {
-            forceChunkLoading(((HitboxHandler.MultipartHitbox) event.entity).parent, event.newChunkX, event.newChunkZ);
+        if(event.entity instanceof GenericRailTransport && !event.entity.worldObj.isRemote) {
+            forceChunkLoading(((GenericRailTransport) event.entity), event.newChunkX, event.newChunkZ);
         }
     }
 
@@ -63,13 +63,11 @@ public class ChunkHandler implements ForgeChunkManager.LoadingCallback, ForgeChu
             * this should also find 9 chunks, per hitbox. But we only add the ones we don't already know,
             *     and we clamp the list length to the max chunk count for the ticket,
             *     since the user can change that value in forge, and we don't wanna try and bite off more than we can chew*/
-            for(HitboxHandler.MultipartHitbox hitbox : transport.hitboxHandler.hitboxList){
-                for(int x = hitbox.chunkCoordX - 1; x <= hitbox.chunkCoordX + 1; ++x) {
-                    for(int z = hitbox.chunkCoordZ - 1; z <= hitbox.chunkCoordZ + 1; ++z) {
-                        pair = new ChunkCoordIntPair(x, z);
-                        if (!newChunks.contains(pair) && newChunks.size() < transport.getChunkTicket().getMaxChunkListDepth()) {
-                            newChunks.add(pair);
-                        }
+            for(int x = transport.chunkCoordX - 1; x <= transport.chunkCoordX + 1; ++x) {
+                for(int z = transport.chunkCoordZ - 1; z <= transport.chunkCoordZ + 1; ++z) {
+                    pair = new ChunkCoordIntPair(x, z);
+                    if (!newChunks.contains(pair) && newChunks.size() < transport.getChunkTicket().getMaxChunkListDepth()) {
+                        newChunks.add(pair);
                     }
                 }
             }

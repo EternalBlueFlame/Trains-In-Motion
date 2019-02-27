@@ -90,7 +90,7 @@ public class Brigadelok_080 extends ModelBase //Same as Filename
 		bodyModel[57] = new ModelRendererTurbo(this, 1, 113, textureX, textureY); // Box 59
 		bodyModel[58] = new ModelRendererTurbo(this, 97, 113, textureX, textureY); // Box 60
 		bodyModel[59] = new ModelRendererTurbo(this, 57, 81, textureX, textureY); // Box 61
-		bodyModel[60] = new ModelRendererTurbo(this, 145, 113, textureX, textureY); // Box 62
+		bodyModel[60] = new ModelRendererTurbo(this, 145, 113, textureX, textureY,tagLamp("cone",-0.0001f, 0)); // Box 62
 		bodyModel[61] = new ModelRendererTurbo(this, 73, 81, textureX, textureY); // Box 63
 		bodyModel[62] = new ModelRendererTurbo(this, 161, 113, textureX, textureY); // Box 64
 		bodyModel[63] = new ModelRendererTurbo(this, 97, 57, textureX, textureY); // Box 65
@@ -141,7 +141,7 @@ public class Brigadelok_080 extends ModelBase //Same as Filename
 		bodyModel[108] = new ModelRendererTurbo(this, 65, 121, textureX, textureY); // Box 109
 		bodyModel[109] = new ModelRendererTurbo(this, 209, 57, textureX, textureY); // Box 110
 		bodyModel[110] = new ModelRendererTurbo(this, 59, 38, textureX, textureY); // Box 111
-		bodyModel[111] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, tagLamp("cone",1.5f, 0)); // lamp
+		bodyModel[111] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, tagLamp("cone",0.01f, 0)); // lamp
 		bodyModel[112] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "smoke 3 3"); // smoke
 		bodyModel[113] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "steam 1 4"); // steam
 		bodyModel[114] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "steam 1 4"); // steam
@@ -488,6 +488,7 @@ public class Brigadelok_080 extends ModelBase //Same as Filename
 
 		bodyModel[111].addBox(0F, 0F, 0F, 1, 1, 1, 0F); // lamp
 		bodyModel[111].setRotationPoint(-25F, -10F, -0.5F);
+		bodyModel[111].rotateAngleX=0.78539816F;
 
 		bodyModel[112].addBox(0F, 0F, 0F, 1, 1, 1, 0F); // smoke
 		bodyModel[112].setRotationPoint(-23F, -28F, -0.5F);

@@ -2,26 +2,17 @@ package fexcraft.tmt.slim;
 
 import net.minecraft.entity.Entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
 * Similar to 'FlansMod'-type Models, for a fast convert.
 * @Author Ferdinand Calo' (FEX___96)
 */
 public class ModelBase extends Model<Object> {
-	
-	public ModelRendererTurbo base[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo bodyModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo open[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo closed[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo r1[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo r2[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo r3[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo r4[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo r5[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo r6[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo r7[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo r8[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo r9[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo r0[] = new ModelRendererTurbo[0];
+
+	public List<String> creators = new ArrayList<>();
+	public ModelRendererTurbo base[],bodyModel[],open[],closed[],r1[],r2[],r3[],r4[],r5[],r6[],r7[],r8[],r9[],r0[];
 	   
 	public void render(){
 		render(base);
