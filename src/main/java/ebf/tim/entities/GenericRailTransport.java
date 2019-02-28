@@ -581,8 +581,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
         }
 
-        DebugUtil.println("fully loaded?");
-
         updateWatchers = true;
     }
     /**saves the entity to server world*/

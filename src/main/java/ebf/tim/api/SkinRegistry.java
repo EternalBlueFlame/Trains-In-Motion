@@ -5,13 +5,13 @@ import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import net.minecraft.util.ResourceLocation;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SkinRegistry {
 
+    public static boolean forceSkinRegister=false,debugSkinRegistration=true;
     public static Map<String, Map<String, skin>> transports = new HashMap<String, Map<String, skin>>();
 
     public static void addSkin(Class c, String modid, String textureURI, String name, String description){
@@ -42,8 +42,8 @@ public class SkinRegistry {
     }
 
     public static void addSkinRecolor(String c,String modid, String textureURI, String[] bogieTextureURI, @Nullable int[][] recolor, String skinName, String skinDescription){
-        if(Loader.isModLoaded(modid) /*todo || CommonProxy.forceSkinRegister*/) {
-            if (DebugUtil.dev()) {
+        if(Loader.isModLoaded(modid) || forceSkinRegister) {
+            if (debugSkinRegistration) {
                 DebugUtil.println("REGISTERING SKIN", c, "MODID: " + modid, textureURI, skinName);
             }
             if (!transports.containsKey(c)) {

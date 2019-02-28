@@ -14,7 +14,6 @@ import ebf.tim.registry.TiMGenericRegistry;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.FuelHandler;
 import fexcraft.tmt.slim.ModelBase;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
@@ -26,8 +25,6 @@ import net.minecraftforge.fluids.FluidRegistry;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import static ebf.tim.utility.RailUtility.DefineStack;
 
 /**
  * <h1>Brigadelok 0-8-0 entity</h1>

@@ -1,45 +1,32 @@
 package ebf.tim.utility;
 
 
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.IGuiHandler;
-import cpw.mods.fml.common.registry.GameRegistry;
 import ebf.tim.TrainsInMotion;
+import ebf.tim.api.SkinRegistry;
 import ebf.tim.blocks.BlockDynamic;
-import ebf.tim.blocks.BlockTrainFluid;
-import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.items.*;
-import ebf.tim.registry.TiMGenericRegistry;
-import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialLiquid;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidContainerRegistry;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 
 import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
-import static ebf.tim.registry.TiMGenericRegistry.RegisterFluid;
-import static ebf.tim.registry.TiMGenericRegistry.RegisterItem;
-import static ebf.tim.registry.TiMGenericRegistry.registerBlock;
+import static ebf.tim.registry.TiMGenericRegistry.*;
 
 
 /**
@@ -81,7 +68,23 @@ public class CommonProxy implements IGuiHandler {
      * <h2>Load config</h2>
      * this loads the config values that will only effect server.
      */
-    public void loadConfig(Configuration config){}
+    public void loadConfig(FMLPreInitializationEvent event){
+
+        Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+        config.load();
+        config.addCustomCategoryComment("Debug (Common)", "Used on server and client.");
+        SkinRegistry.forceSkinRegister = config.getBoolean("ForceSkinRegister", "Debug (Common)", false,
+                "Forces skins to register even if the add-on for said skin is not available, doesn't cause instability just uses unnecessary ram.");
+
+        config.addCustomCategoryComment("Debug (Common, IDE Only)", "Only runs from IDE instances.");
+        SkinRegistry.debugSkinRegistration = config.getBoolean("DebugSkinRegister", "Debug (Common, IDE Only)",false,
+                "Logs all skin registration events to debug console.");
+
+        config.save();
+
+
+
+    }
 
     /**
      * <h2>load entity from UUID</h2>

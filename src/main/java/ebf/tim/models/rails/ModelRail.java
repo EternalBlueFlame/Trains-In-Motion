@@ -1,13 +1,10 @@
 package ebf.tim.models.rails;
 
 import fexcraft.tmt.slim.Tessellator;
-import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import static ebf.tim.models.rails.Model1x1Rail.addVertexWithOffset;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;

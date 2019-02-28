@@ -6,6 +6,7 @@ import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.Tessellator;
+import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderBlocks;
@@ -178,9 +179,9 @@ public class RenderEntity extends Render {
          * @see net.minecraft.client.renderer.entity.RenderEnderman#renderEquippedItems(EntityEnderman, float)
          */
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
-        Tessellator.adjustLightFixture(entity.worldObj,(int)entity.posX,(int)entity.posY,(int)entity.posZ);
+        TextureManager.adjustLightFixture(entity.worldObj,(int)entity.posX,(int)entity.posY,(int)entity.posZ);
         for(i=0; i< entity.renderData.modelList.length;i++) {
-            Tessellator.maskColors(entity.getTexture().texture, null);
+            TextureManager.maskColors(entity.getTexture().texture, null);
             if(entity.modelOffsets()!=null && entity.modelOffsets().length>i) {
                 GL11.glTranslated(entity.modelOffsets()[i][0],entity.modelOffsets()[i][1],entity.modelOffsets()[i][2]);
             }

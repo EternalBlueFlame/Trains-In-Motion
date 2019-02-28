@@ -1,6 +1,5 @@
 package ebf.tim.items;
 
-import ebf.tim.TrainsInMotion;
 import ebf.tim.registry.TiMGenericRegistry;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;

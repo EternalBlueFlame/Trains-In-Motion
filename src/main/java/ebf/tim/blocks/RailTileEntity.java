@@ -1,15 +1,12 @@
 package ebf.tim.blocks;
 
-import cpw.mods.fml.common.registry.GameData;
 import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.blocks.rails.RailVanillaShapes;
-import ebf.tim.items.ItemRail;
 import ebf.tim.models.rails.Model1x1Rail;
-import fexcraft.tmt.slim.Tessellator;
+import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -40,8 +37,6 @@ public class RailTileEntity extends TileEntity {
     public int snow=0;
     public int timer=0;
     public int overgrowth=0;
-    //render data
-    public int metal = 0xcccccc;
 
     public float getRailSpeed(){
         return 0.4f;
@@ -62,7 +57,7 @@ public class RailTileEntity extends TileEntity {
                 return;
             }
             //DebugUtil.println(segmentLength);
-            Tessellator.adjustLightFixture(worldObj,xCoord,yCoord,zCoord);
+            TextureManager.adjustLightFixture(worldObj,xCoord,yCoord,zCoord);
             Model1x1Rail.Model3DRail(points, gauge750mm, segmentLength, ties, ballast, rail);
         } else {super.func_145828_a(report);}
     }

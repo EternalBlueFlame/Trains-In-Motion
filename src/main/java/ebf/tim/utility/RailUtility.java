@@ -2,8 +2,8 @@ package ebf.tim.utility;
 
 
 import ebf.tim.entities.GenericRailTransport;
-import fexcraft.fcl.common.math.Vec3f;
 import fexcraft.tmt.slim.Vec3d;
+import fexcraft.tmt.slim.Vec3f;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,7 +19,6 @@ import zoranodensha.api.structures.tracks.ITrackBase;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <h1>utilities</h1>
@@ -49,7 +48,7 @@ public class RailUtility {
 
     public static String translate(String text){
         if (StatCollector.translateToLocal(text).equals(text) && !loggedLangChecks.contains(text)){
-            DebugUtil.println("Missing lang entry for: ",text);
+            DebugUtil.println("Missing lang entry for: ",text,Thread.currentThread().getStackTrace()[2]);
             loggedLangChecks.add(text);
             return text;
         } else {

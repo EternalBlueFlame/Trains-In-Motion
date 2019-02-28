@@ -23,7 +23,9 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.*;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ReportedException;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -221,6 +223,7 @@ public class EventManager {
 
                 for(GenericRailTransport t : stock){
                     if(t.collisionHandler.containsPoint(vert.xCoord, vert.yCoord-1, vert.zCoord)){
+                        ClientProxy.toggleWaila(false);
                         ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft(),Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
                         left=res.getScaledWidth()/2;
                         disp=getStaticStrings(t);
@@ -231,22 +234,8 @@ public class EventManager {
                                 longest=s.length()*2;
                             }
                         }
-                        if(Loader.isModLoaded("Waila")){
-                            if(!waila) {
-                                waila = mcp.mobius.waila.api.impl.ConfigHandler.instance().getConfig("general", mcp.mobius.waila.utils.Constants.CFG_WAILA_SHOW, true);
-                            }
-                            drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length),
-                                    mcp.mobius.waila.api.impl.ConfigHandler.instance().getConfig("general", mcp.mobius.waila.utils.Constants.CFG_WAILA_BGCOLOR, 0),
-                                    mcp.mobius.waila.api.impl.ConfigHandler.instance().getConfig("general", mcp.mobius.waila.utils.Constants.CFG_WAILA_GRADIENT1, 0),
-                                    mcp.mobius.waila.api.impl.ConfigHandler.instance().getConfig("general", mcp.mobius.waila.utils.Constants.CFG_WAILA_GRADIENT2, 0),
-                                    mcp.mobius.waila.api.impl.ConfigHandler.instance().getConfig("general", mcp.mobius.waila.utils.Constants.CFG_WAILA_ALPHA, 0));
-                            font = mcp.mobius.waila.api.impl.ConfigHandler.instance().getConfig("general", mcp.mobius.waila.utils.Constants.CFG_WAILA_FONTCOLOR, 0);
 
-
-                            mcp.mobius.waila.api.impl.ConfigHandler.instance().setConfig("general","waila.cfg.show",false);
-                        } else{
-                            drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length), 1048592, 5243135, 2621567,0xEE);
-                        }
+                        drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length), ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,ClientProxy.WAILA_ALPHA);
 
                         GL11.glTranslatef(0.0F, 0.0F, 32.0F);
                         itemRender.renderItemAndEffectIntoGUI(Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().getTextureManager(),
@@ -254,20 +243,19 @@ public class EventManager {
                         GL11.glDisable(GL11.GL_LIGHTING);
                         for(int ii=0; ii<disp.length;ii++) {
                             Minecraft.getMinecraft().fontRenderer.drawString(disp[ii],
-                                    40+left-(longest*3)+ ((longest-disp[ii].length())*2), 8+(ii*10),ii==0?0xFFFFFFFF:font);
+                                    40+left-(longest*3)+ ((longest-disp[ii].length())*2), 8+(ii*10),ii==0?0xFFFFFFFF:ClientProxy.WAILA_FONTCOLOR);
                         }
                         GL11.glEnable(GL11.GL_LIGHTING);
                         //todo: draw an array of strings for the tooltip info, derrived from the transport's class.
+
+                        ClientProxy.toggleWaila(true);
                         return;
                     }
                 }
             }
         }
-        if(waila) {
-            mcp.mobius.waila.api.impl.ConfigHandler.instance().setConfig("general", "waila.cfg.show", true);
-        }
     }
-    private static int left=0,longest, font =10526880;
+    private static int left=0,longest;
     private static String[] disp;
     private static boolean waila=false;
     private static RenderItem itemRender = new RenderItem();
@@ -283,9 +271,7 @@ public class EventManager {
     @SubscribeEvent
     @SuppressWarnings("unused")
     public void playerQuitEvent(PlayerEvent.PlayerLoggedOutEvent event){
-        if(waila) {
-            mcp.mobius.waila.api.impl.ConfigHandler.instance().setConfig("general", "waila.cfg.show", true);
-        }
+        ClientProxy.toggleWaila(ClientProxy.WAILA_TOGGLE);
     }
 
     public static void drawGradientRect(int x, int y, int w, int h, int grad1, int grad2, int alpha) {

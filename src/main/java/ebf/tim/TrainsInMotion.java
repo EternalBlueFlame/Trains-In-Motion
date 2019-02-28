@@ -10,7 +10,6 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.blocks.OreGen;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
@@ -20,7 +19,9 @@ import ebf.tim.items.TiMTab;
 import ebf.tim.networking.PacketInteract;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.TiMGenericRegistry;
-import ebf.tim.utility.*;
+import ebf.tim.utility.ChunkHandler;
+import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.CommonProxy;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -103,12 +104,8 @@ public class TrainsInMotion {
     @SuppressWarnings("unused")
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        Configuration config = new Configuration(event.getSuggestedConfigurationFile());
 
-        config.load();
-        proxy.loadConfig(config);
-        //settings that effect client and server here.
-        config.save();
+        proxy.loadConfig(event);
         ForgeChunkManager.setForcedChunkLoadingCallback(TrainsInMotion.instance, chunkHandler);
         MinecraftForge.EVENT_BUS.register(chunkHandler);
         creativeTab=new TiMTab(event.getSide().isClient(),"Trains in Motion", MODID, "TiM");

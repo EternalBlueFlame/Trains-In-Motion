@@ -1,24 +1,18 @@
 package ebf.tim.utility;
 
-import com.sun.javafx.geom.Vec3d;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
-import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
-import fexcraft.fcl.common.math.Vec3f;
-import net.minecraft.client.Minecraft;
+import fexcraft.tmt.slim.Vec3f;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.*;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
-import static ebf.tim.utility.RailUtility.radianF;
 
 
 public class HitboxDynamic {

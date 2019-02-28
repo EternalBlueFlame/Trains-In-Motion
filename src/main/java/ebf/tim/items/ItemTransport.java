@@ -33,23 +33,25 @@ public class ItemTransport extends Item {
         super();
         setUnlocalizedName(cart.transportName().replace(" ",""));
         if(cart.transportFuelType()!=null && !cart.transportFuelType().equals("")) {
-            subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.fueltype") + ": " + RailUtility.translate(cart.transportFuelType()));
+            subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.fueltype") + ": " +
+                    RailUtility.translate("menu.item."+cart.transportFuelType().toLowerCase()));
         }
         subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.year") +": " + cart.transportYear());
-        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.country") + ": " + RailUtility.translate(cart.transportcountry()));
+        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.country") + ": " +
+                RailUtility.translate("menu.item."+cart.transportcountry().toLowerCase()));
         subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.weight") +": " + cart.weightKg() + "kg");
         if (cart.transportTopSpeed()!=0){
-            subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.speed") +": " + cart.transportTopSpeed() +"km");
+            subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.speed") +": " + cart.transportTopSpeed() +" km/h");
 
             if (cart.transportMetricHorsePower() !=0){
                 subtext.add(EnumChatFormatting.GREEN +RailUtility.translate("menu.item.mhp") +": " + cart.weightKg());
             }
             if (cart.transportTractiveEffort() != 0){
-                subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.tractiveeffort") +": " + cart.weightKg() + "lbf");
+                subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.tractiveeffort") +": " + cart.weightKg() + " lbf");
             }
         }
         if (cart.isFictional()){
-            subtext.add(RailUtility.translate(EnumChatFormatting.BLUE + "menu.item.fictional"));
+            subtext.add(EnumChatFormatting.BLUE +RailUtility.translate("menu.item.fictional"));
         }
 
         if (cart.additionalItemText()!=null){

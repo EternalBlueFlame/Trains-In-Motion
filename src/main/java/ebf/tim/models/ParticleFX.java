@@ -1,10 +1,9 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelRendererTurbo;
-import fexcraft.tmt.slim.Tessellator;
+import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.AxisAlignedBB;
 import org.lwjgl.opengl.GL11;
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.Random;
 
 import static fexcraft.tmt.slim.ModelRendererTurbo.MR_TOP;
-import static fexcraft.tmt.slim.Tessellator.b;
+import static fexcraft.tmt.slim.TextureManager.b;
 import static org.lwjgl.opengl.GL11.*;
 
 /**
@@ -365,19 +364,19 @@ public class ParticleFX {
         int pos=0;
         for(int i=0; i<8192; i+=4) {
             if(entity.colorTint!= 0x000000 && (!isCone || getY(pos)>7)) {
-                Tessellator.renderPixels.put(i, b(entity.colorTint >> 16 & 0xFF));
-                Tessellator.renderPixels.put(i + 1, b(entity.colorTint >> 8 & 0xFF));
-                Tessellator.renderPixels.put(i + 2, b(entity.colorTint & 0xFF));
-                Tessellator.renderPixels.put(i + 3, b(getY(pos)-7));
+                TextureManager.renderPixels.put(i, b(entity.colorTint >> 16 & 0xFF));
+                TextureManager.renderPixels.put(i + 1, b(entity.colorTint >> 8 & 0xFF));
+                TextureManager.renderPixels.put(i + 2, b(entity.colorTint & 0xFF));
+                TextureManager.renderPixels.put(i + 3, b(getY(pos)-7));
             } else {
-                Tessellator.renderPixels.put(i+3,b(0));
+                TextureManager.renderPixels.put(i+3,b(0));
             }
 
             pos++;
         }
 
-        glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, 32, 64, GL_RGBA, GL_UNSIGNED_BYTE, Tessellator.renderPixels);
-        Tessellator.renderPixels.clear();//reset the buffer to all 0's.
+        glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, 32, 64, GL_RGBA, GL_UNSIGNED_BYTE, TextureManager.renderPixels);
+        TextureManager.renderPixels.clear();//reset the buffer to all 0's.
     }
 
     public static int getY(int pos){

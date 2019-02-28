@@ -1,21 +1,13 @@
 package ebf.tim.gui;
 
-import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.items.ItemAdminBook;
 import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.utility.DebugUtil;
-import ebf.tim.utility.ServerLogger;
 import fexcraft.tmt.slim.Tessellator;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;

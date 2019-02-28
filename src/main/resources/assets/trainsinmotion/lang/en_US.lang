@@ -27,49 +27,54 @@ gui.dropkey=Copy Ownership Key.
 
 container.traincrafting=Train Crafting Table
 
-
-<!-- ## Items ## -->
-menu.item.era=Era
 menu.item.steam=Steam
 menu.item.diesel=Diesel
-menu.item.Electric=Electric
+menu.item.electric=Electric
 menu.item.hydrogen=Hydro-electric
-menu.item.maglev=Maglev
 menu.item.nuclearsteam=Nuclear Steam
 menu.item.nuclearelectric=Nuclear Electric
 menu.item.speed=Speed
 menu.item.year=Year
 menu.item.country=Country
-menu.item.germany=Germany
-menu.item.america=USA
 menu.item.pullingpower=Pulling power
 menu.item.tons=Tons
 menu.item.weight=Weight
+menu.item.mhp=Metric Horsepower
 menu.item.seats=Seats
-menu.item.weight=Players
+menu.item.weight=Weight
 menu.item.iszeof=Inventory size of
 menu.item.slots=Slots
+menu.item.fictional=Fictional
 menu.noties=No Ties
 menu.nowires=No Overhead Wires
 menu.noballast=No Ballast
 menu.item=Item
 menu.items=Items
-US=USA
+menu.item.fueltype=Fuel Type
+menu.ties=Ties
+menu.ballast=Ballast
+item=Item
+menu.item.us=USA
+menu.item.germany=Germany
 
+
+<!-- ## Items ## -->
 item.oilbucket=Oil bucket
-
+item.adminbook=Admin Book
+item.adminbook=Recipe Book
+item.transportkey=Transport Key
+item.transportticket=Transport Ticker
 
 <!-- ## Blocks ## -->
 fluid.oil=Oil
-block.traintable.name=Train crafting table
-tile.block.traintable=Train crafting table
-item.item.timrail.name=Rail
-item.transportticket.name=Train Ticket
-item.transportkey.name=Train Key
-item.adminbook.name=Trains in Motion Admin Book
-tile.block.diesel.name=Diesel Fluid
-fluid.diesel.name=Diesel Fluid
-tile.block.oil.name=Oil Fluid
+block.traintable.name=Train Crafting Table
+tile.block.traintable=Train Crafting Table
+tile.block.railtable=Track Crafting Table
+item.item.timrail=Rail
+tile.block.timrail=Rail
+tile.block.diesel=Diesel Fluid
+fluid.diesel=Diesel Fluid
+tile.block.oil=Oil Fluid
 fluid.oil.name=Oil Fluid
 
 <!-- ## Trains ## -->

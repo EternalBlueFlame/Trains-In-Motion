@@ -4,7 +4,6 @@ import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 
-
 import static ebf.tim.utility.RailUtility.degreesF;
 
 /**
