@@ -2,6 +2,7 @@ package ebf.tim.utility;
 
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent;
@@ -161,7 +162,7 @@ public class EventManager {
             arraylist = getTrainsInRange();
 
             for (GenericRailTransport t : arraylist) {
-                if(t.riddenByEntity==Minecraft.getMinecraft().thePlayer){continue;}
+                if(Minecraft.getMinecraft().thePlayer.ridingEntity==t){continue;}
                 for (int i = 0; i < (Minecraft.getMinecraft().playerController.extendedReach() ? 32 : 16); i++) {
                     if (t.collisionHandler.containsPoint(
                             Minecraft.getMinecraft().thePlayer.posX + (cacheVec.xCoord * i),
@@ -169,10 +170,8 @@ public class EventManager {
                             Minecraft.getMinecraft().thePlayer.posZ + (cacheVec.zCoord * i))) {
                         if(Mouse.isButtonDown(1)) {
                             t.interact(Minecraft.getMinecraft().thePlayer, false, false, -1);
-                            event.setCanceled(true);
                         } else {
                             Minecraft.getMinecraft().thePlayer.attackTargetEntityWithCurrentItem(t);
-                            event.setCanceled(true);
                         }
                         return;
                     }
@@ -207,6 +206,11 @@ public class EventManager {
     public void onRenderTick(TickEvent.RenderTickEvent event) {
         if (ClientProxy.enableTransportTooltip&&
                 Minecraft.getMinecraft().renderViewEntity != null && Minecraft.getMinecraft().theWorld != null) {
+
+            if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof GenericRailTransport ||
+                    Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntitySeat){
+                return;
+            }
 
             //get all the trains and stock in reach
             if(stock==null || Minecraft.getMinecraft().thePlayer.ticksExisted %5==0) {

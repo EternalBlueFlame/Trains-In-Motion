@@ -84,7 +84,7 @@ public class FuelHandler{
 				burnTime = MathHelper.ceiling_double_int(burnHeat *0.1);
 				burnTimeMax = burnTime;
 				if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
-					slotId.decrStackSize(1);
+					train.getSlotIndexByID(400).decrStackSize(1);
 				}
 			} else {
 				burnHeat = 0;
@@ -159,25 +159,26 @@ public class FuelHandler{
 
 	public void manageElectric(EntityTrainCore train){
 		//add redstone to the fuel tank
-		if(train.getStackInSlot(400) !=null) {
-			if (train.getStackInSlot(400).getItem() == Items.redstone) {
-				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) >= 100) {
+		ItemStackSlot slotId=train.getSlotIndexByID(400);
+		if(slotId !=null && slotId.getStack()!=null) {
+			if (slotId.getItem() == Items.redstone) {
+				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) == 0) {
 					train.fill(null, new FluidStack(FluidRegistry.WATER, 100), true);
-					train.decrStackSize(400, 1);
+					train.getSlotIndexByID(400).decrStackSize(1);
 				}
-			} else if (train.getStackInSlot(400).getItem() == Item.getItemFromBlock(Blocks.redstone_block)) {
-				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 1000), false) >= 1000) {
+			} else if (slotId.getItem() == Item.getItemFromBlock(Blocks.redstone_block)) {
+				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 1000), false) == 0) {
 					train.fill(null, new FluidStack(FluidRegistry.WATER, 1000), true);
-					train.decrStackSize(400, 1);
+					train.getSlotIndexByID(400).decrStackSize(1);
 				}
-			} else if (train.getStackInSlot(400).getItem() instanceof IEnergyContainerItem) {
-				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) >= 100) {
+			} else if (slotId.getItem() instanceof IEnergyContainerItem) {
+				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) == 0) {
 					train.fill(null, new FluidStack(FluidRegistry.WATER,
-							((IEnergyContainerItem) train.getStackInSlot(400).getItem())
-									.extractEnergy(train.getStackInSlot(400), 100, false)), true);
+							((IEnergyContainerItem) train.getSlotIndexByID(400).getItem())
+									.extractEnergy(slotId.getStack(), 100, false)), true);
 				}
 			}
-			if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) >= 100) {
+			if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) == 0) {
 				int draw = 0;
 				TileEntity te;
 				Block b;

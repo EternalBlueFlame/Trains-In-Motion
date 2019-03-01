@@ -10,6 +10,7 @@ import ebf.tim.entities.rollingstock.EntityPullmansPalace;
 import ebf.tim.entities.rollingstock.EntityUP3Bay100TonHopper;
 import ebf.tim.entities.rollingstock.EntityVATLogCar;
 import ebf.tim.entities.trains.EntityBrigadelok080;
+import ebf.tim.entities.trains.EntityBrigadelok080Electric;
 import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RecipeManager;
@@ -168,7 +169,7 @@ public class TiMGenericRegistry {
 
 
     public static GenericRailTransport[] listSteamTrains() {
-        return new GenericRailTransport[]{new EntityBrigadelok080(null)};
+        return new GenericRailTransport[]{new EntityBrigadelok080(null), new EntityBrigadelok080Electric(null)};
     }
 
     public static GenericRailTransport[] listPassenger() {

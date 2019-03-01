@@ -1419,7 +1419,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * @return the amount of fluid that was or could be put into the tank.*/
     @Override
     public int fill(@Nullable ForgeDirection from, FluidStack resource, boolean doFill){
-
+        if(getTankCapacity()==null){return resource.amount;}
         int leftoverDrain=resource.amount;
         for(int stack =0; stack<getTankCapacity().length;stack++) {
             if(getTankFilters(stack)!=null) {

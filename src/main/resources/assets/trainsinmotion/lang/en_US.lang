@@ -6,10 +6,11 @@
 <!-- ## GUI ## -->
 gui.waterboiler=Water Boiler
 gui.creativemode=Creative Mode is 
-gui.brake=Brake is 
-gui.lamp=Lamp is 
+gui.brake.false=Brakes Are Disabled.
+gui.brake.true=Brakes Are Enabled.
+gui.lamp.true=Lamp Is On.
+gui.lamp.false=Lamp Is Off.
 gui.horn=Use Horn.
-gui.trainisrunning=Train is 
 gui.on=on.
 gui.off=off.
 gui.coupler.true=Couplers are open.
@@ -24,6 +25,10 @@ gui.of= of
 gui.buckets=Buckets.
 gui.unlink=Unlink couplers.
 gui.dropkey=Copy Ownership Key.
+gui.running.false=Locomotive is off.
+gui.running.true=Locomotive is on.
+gui.creative.false=Creative Mode Disabled.
+gui.creative.true=Creative Mode Enabled.
 
 container.traincrafting=Train Crafting Table
 
@@ -42,7 +47,7 @@ menu.item.weight=Weight
 menu.item.mhp=Metric Horsepower
 menu.item.seats=Seats
 menu.item.weight=Weight
-menu.item.iszeof=Inventory size of
+menu.item.isizeof=Inventory size of
 menu.item.slots=Slots
 menu.item.fictional=Fictional
 menu.noties=No Ties
@@ -51,11 +56,12 @@ menu.noballast=No Ballast
 menu.item=Item
 menu.items=Items
 menu.item.fueltype=Fuel Type
+menu.item.seats=Seats
 menu.ties=Ties
 menu.ballast=Ballast
-item=Item
 menu.item.us=USA
 menu.item.germany=Germany
+
 
 
 <!-- ## Items ## -->

@@ -33,25 +33,31 @@ public class ItemTransport extends Item {
         super();
         setUnlocalizedName(cart.transportName().replace(" ",""));
         if(cart.transportFuelType()!=null && !cart.transportFuelType().equals("")) {
-            subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.fueltype") + ": " +
-                    RailUtility.translate("menu.item."+cart.transportFuelType().toLowerCase()));
+            subtext.add(EnumChatFormatting.GRAY + t("menu.item.fueltype") + ": " +
+                    t("menu.item."+cart.transportFuelType().toLowerCase()));
         }
-        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.year") +": " + cart.transportYear());
-        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.country") + ": " +
-                RailUtility.translate("menu.item."+cart.transportcountry().toLowerCase()));
-        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.weight") +": " + cart.weightKg() + "kg");
+        subtext.add(EnumChatFormatting.GRAY + t("menu.item.year") +": " + cart.transportYear());
+        subtext.add(EnumChatFormatting.GRAY + t("menu.item.country") + ": " +
+                t("menu.item."+cart.transportcountry().toLowerCase()));
+        subtext.add(EnumChatFormatting.GRAY + t("menu.item.weight") +": " + cart.weightKg() + "kg");
         if (cart.transportTopSpeed()!=0){
-            subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.speed") +": " + cart.transportTopSpeed() +" km/h");
+            subtext.add(EnumChatFormatting.GREEN + t("menu.item.speed") +": " + cart.transportTopSpeed() +" km/h");
 
             if (cart.transportMetricHorsePower() !=0){
-                subtext.add(EnumChatFormatting.GREEN +RailUtility.translate("menu.item.mhp") +": " + cart.weightKg());
+                subtext.add(EnumChatFormatting.GREEN +t("menu.item.mhp") +": " + cart.weightKg());
             }
             if (cart.transportTractiveEffort() != 0){
-                subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.tractiveeffort") +": " + cart.weightKg() + " lbf");
+                subtext.add(EnumChatFormatting.GREEN + t("menu.item.tractiveeffort") +": " + cart.weightKg() + " lbf");
             }
         }
+        if(cart.getInventoryRows()>0){
+            subtext.add(EnumChatFormatting.GREEN +t("menu.item.isizeof")+ ": " + (cart.getInventoryRows()*9) + " " + t("menu.item.slots"));
+        }
+        if(cart.getRiderOffsets()!=null){
+            subtext.add(EnumChatFormatting.GREEN +t("menu.item.seats")+ ": " + cart.getRiderOffsets().length);
+        }
         if (cart.isFictional()){
-            subtext.add(EnumChatFormatting.BLUE +RailUtility.translate("menu.item.fictional"));
+            subtext.add(EnumChatFormatting.BLUE +t("menu.item.fictional"));
         }
 
         if (cart.additionalItemText()!=null){
@@ -104,6 +110,10 @@ public class ItemTransport extends Item {
         	DebugUtil.log("Failed to cast : " + transport.toString() + "to a new generic transport entity");
         }
         return true;
+    }
+
+    private static String t(String translate){
+        return RailUtility.translate(translate);
     }
 
 }

@@ -129,6 +129,7 @@ public class ItemStackSlot extends Slot {
      */
     @Override
     public boolean isItemValid(ItemStack p_75214_1_) {
+        if(stack==null || stack.getItem()==null){return true;}
         return inventory.isItemValidForSlot(getSlotID(), p_75214_1_);
     }
 
