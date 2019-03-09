@@ -35,6 +35,7 @@ public abstract class Model<T> {
 	}
 	
 	public void render(ModelRendererTurbo[] model, float scale, boolean rotorder){
+		if(model==null){return;}
 		for(ModelRendererTurbo sub : model){
 			sub.render(scale, rotorder, true);
 		}
@@ -44,6 +45,7 @@ public abstract class Model<T> {
 	public abstract void render(T type, Entity entity);
 	
 	protected void translate(ModelRendererTurbo[] model, float x, float y, float z){
+		if(model==null){return;}
 		for(ModelRendererTurbo mod : model){
 			mod.rotationPointX += x;
 			mod.rotationPointY += y;
@@ -56,6 +58,7 @@ public abstract class Model<T> {
 	public abstract void translateAll(float x, float y, float z);
 	
 	protected void rotate(ModelRendererTurbo[] model, float x, float y, float z) {
+		if(model==null){return;}
 		for(ModelRendererTurbo mod : model){
 			mod.rotateAngleX += x;
 			mod.rotateAngleY += y;

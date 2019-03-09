@@ -23,13 +23,25 @@ public class StaticModelAnimator extends AnimationBase {
     /**tag for wheels, adds support for the sparks on top of what tagSimpleRotate does.*/
     public static final String tagWheel = "wheel";
 
+    //todo: type by id?
     public static String tagLamp(String type, float scale, int id){
         return "lamp "+ type+" "+scale+" "+id;
+    }
+
+    public static String tagLamp(int type, float scale, int id){
+        switch (type) {
+            case 1: return "lamp sphere" + " " + scale + " " + id;
+            case 2: return "lamp mars" + " " + scale + " " + id; //todo: does that weird Y/Z oogly spinning
+            case 3: return "lamp siren" + " " + scale + " " + id;//todo:spins on X at a set rate
+            case 4: return "lamp glare" + " " + scale + " " + id;//todo: perhaps render at point and disable 3d and depth?
+            default: return "lamp cone" + " " + scale + " " + id;
+        }
     }
 
     public static String tagDoor(String type, int side, boolean mirror){
         return "";
     }
+    //todo: door types - swing, swing up, slide sideways, slide vertical(stair covers), slide out (retractable stairs).
 
     public static String tagSmoke(int id){
         return "smoke " + id;

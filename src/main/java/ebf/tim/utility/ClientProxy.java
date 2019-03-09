@@ -70,15 +70,15 @@ public class ClientProxy extends CommonProxy {
     /**the skin to use for the rail*/
     public static int railSkin = 2;
 
-    public static KeyBinding raildevtoolUp = new KeyBinding("Move Point Z+", Keyboard.KEY_UP, "Trains in Motion Dev");
-    public static KeyBinding raildevtoolDown = new KeyBinding("Move Point Z-", Keyboard.KEY_DOWN, "Trains in Motion Dev");
-    public static KeyBinding raildevtoolLeft = new KeyBinding("Move Point X+", Keyboard.KEY_LEFT, "Trains in Motion Dev");
-    public static KeyBinding raildevtoolRight = new KeyBinding("Move Point X-", Keyboard.KEY_RIGHT, "Trains in Motion Dev");
-    public static KeyBinding raildevtoolRaise = new KeyBinding("Move Point Y+", Keyboard.KEY_PRIOR, "Trains in Motion Dev");
-    public static KeyBinding raildevtoolLower = new KeyBinding("Move Point Y-", Keyboard.KEY_NEXT, "Trains in Motion Dev");
+    public static KeyBinding raildevtoolUp;
+    public static KeyBinding raildevtoolDown;
+    public static KeyBinding raildevtoolLeft;
+    public static KeyBinding raildevtoolRight;
+    public static KeyBinding raildevtoolRaise;
+    public static KeyBinding raildevtoolLower;
 
-    public static KeyBinding raildevtoolNextPoint = new KeyBinding("Next Point", Keyboard.KEY_ADD, "Trains in Motion Dev");
-    public static KeyBinding raildevtoolLastPoint = new KeyBinding("Previous Point", Keyboard.KEY_SUBTRACT, "Trains in Motion Dev");
+    public static KeyBinding raildevtoolNextPoint;
+    public static KeyBinding raildevtoolLastPoint;
 
 
     private static Configuration wailaConfig=null;
@@ -213,6 +213,17 @@ public class ClientProxy extends CommonProxy {
         ClientRegistry.registerKeyBinding(KeyInventory);
 
         if(DebugUtil.dev()) {
+            raildevtoolUp = new KeyBinding("Move Point Z+", Keyboard.KEY_UP, "Trains in Motion Dev");
+            raildevtoolDown = new KeyBinding("Move Point Z-", Keyboard.KEY_DOWN, "Trains in Motion Dev");
+            raildevtoolLeft = new KeyBinding("Move Point X+", Keyboard.KEY_LEFT, "Trains in Motion Dev");
+            raildevtoolRight = new KeyBinding("Move Point X-", Keyboard.KEY_RIGHT, "Trains in Motion Dev");
+            raildevtoolRaise = new KeyBinding("Move Point Y+", Keyboard.KEY_PRIOR, "Trains in Motion Dev");
+            raildevtoolLower = new KeyBinding("Move Point Y-", Keyboard.KEY_NEXT, "Trains in Motion Dev");
+
+            raildevtoolNextPoint = new KeyBinding("Next Point", Keyboard.KEY_ADD, "Trains in Motion Dev");
+            raildevtoolLastPoint = new KeyBinding("Previous Point", Keyboard.KEY_SUBTRACT, "Trains in Motion Dev");
+
+
             ClientRegistry.registerKeyBinding(raildevtoolUp);
             ClientRegistry.registerKeyBinding(raildevtoolDown);
             ClientRegistry.registerKeyBinding(raildevtoolLeft);

@@ -264,6 +264,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                     frontBogie.posZ - backBogie.posZ,
                     frontBogie.posX - backBogie.posX)),
                     MathHelper.floor_double(Math.acos(frontBogie.posY / backBogie.posY)*RailUtility.degreesD));
+            updateRiderPosition();
         }else {
             this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
         }
@@ -1125,7 +1126,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
 
     public @Nullable GenericRailTransport getOtherLink(@Nullable Integer notThisOne){
-        return frontLinkedID.equals(notThisOne)?
+        return frontLinkedID == notThisOne?
                 backLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(backLinkedID):
                 frontLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
     }

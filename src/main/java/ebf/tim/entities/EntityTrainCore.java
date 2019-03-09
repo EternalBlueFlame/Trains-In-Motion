@@ -1,6 +1,7 @@
 package ebf.tim.entities;
 
 import ebf.tim.registry.NBTKeys;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.FuelHandler;
 import ebf.tim.utility.RailUtility;
 import io.netty.buffer.ByteBuf;
@@ -10,6 +11,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -145,8 +147,17 @@ public class EntityTrainCore extends GenericRailTransport {
         return (accelerator*0.16666666666f)*0.05f;
     }
 
-    private float powerNewtons=0;
     private float maxPowerNewtons=0;
+
+    @Override
+    public void setValuesOnLinkUpdate(List<GenericRailTransport> consist){
+        maxPowerNewtons=0;
+        pullingWeight=0;
+        for(GenericRailTransport t : consist) {
+            maxPowerNewtons +=t.getMaxPower();
+            pullingWeight +=t.weightKg();
+        }
+    }
 
     /**
      * <h2>Calculate speed increase rate</h2>
@@ -157,19 +168,20 @@ public class EntityTrainCore extends GenericRailTransport {
         float weight=pullingWeight * (getBoolean(boolValues.BRAKE)?2:1);
         if (accelerator !=0) {
             //speed is defined by the power in newtons divided by the weight, divided by the number of ticks in a second.
-            if(powerNewtons!=0) {
+            if(maxPowerNewtons!=0) {
                 //745.7 converts to watts, which seems more accurate.
-                vectorCache[1][0] += ((powerNewtons/weight)/745.7);//applied power
+                vectorCache[1][0] += ((maxPowerNewtons/weight)/745.7);//applied power
 
 
-                vectorCache[1][1]=Math.abs((maxPowerNewtons/weight)/745.7f)-Math.abs(vectorCache[1][0]);//max power produced without drag, minus the current power
+                vectorCache[1][1]=(Math.abs((maxPowerNewtons/weight)/745.7f)*(accelerator*0.16666666666f))-Math.abs(vectorCache[1][0]);//max power produced without drag, minus the current power
                 if(vectorCache[1][1]>0.005){
                     //todo: add sparks to animator.
-                    vectorCache[1][0] -= (((powerNewtons/weight)/745.7)*0.5f);
+                    vectorCache[1][0] -= (((maxPowerNewtons/weight)/745.7)*0.5f);
                 }
 
                 vectorCache[1][0]*=(accelerator*0.16666666666);
-
+            } else {
+                updateConsist();
             }
 
         } else {
@@ -230,33 +242,6 @@ public class EntityTrainCore extends GenericRailTransport {
             frontVelocityZ = frontBogie.motionZ;
         }
 
-        /*
-        GenericRailTransport t=this, previous=null;
-        while (t!=null){
-            if(t.frontLinkedID !=null && t.frontLinkedID != previous.getEntityId()){
-                previous=t;
-                t=(GenericRailTransport) worldObj.getEntityByID(t.frontLinkedID);
-                if(t instanceof EntityTrainCore){
-                    maxPowerNewtons += t.
-                }
-                pullingWeight+=t.weightKg();
-
-                continue;
-            } else if (previous ==null || t.backLinkedID!=previous.getEntityId()){
-                previous=t;
-                t=(GenericRailTransport) worldObj.getEntityByID(t.backLinkedID);
-                if(t instanceof EntityTrainCore){
-
-                }
-                pullingWeight+=t.weightKg();
-
-
-                continue;
-            }
-            t=null;
-            break;
-        }*/
-
 
         super.onUpdate();
     }
@@ -267,7 +252,9 @@ public class EntityTrainCore extends GenericRailTransport {
      * @see GenericRailTransport#manageLinks(GenericRailTransport)
      */
     @Override
-    public void manageLinks(GenericRailTransport linkedTransport){}
+    public void manageLinks(GenericRailTransport linkedTransport){
+
+    }
 
 
     @Override

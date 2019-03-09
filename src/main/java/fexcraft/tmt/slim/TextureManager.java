@@ -2,19 +2,23 @@ package fexcraft.tmt.slim;
 
 import ebf.tim.TrainsInMotion;
 import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.DebugUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
@@ -149,8 +153,104 @@ public class TextureManager {
     }
 
 
+    /**Lighting fix*/
     public static void adjustLightFixture(World world, int i, int j, int k) {
         skyLight = world.getLightBrightnessForSkyBlocks(i, j, k, 0);
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit,  skyLight % 65536,  skyLight / 65536f);
+    }
+
+    /**
+     * Ingot color textures
+     */
+
+
+    public static void collectIngotColors(){
+        String[] ores = OreDictionary.getOreNames();
+
+        Map<String, int[]> colors = new TreeMap<>();//map of delegate, color
+        for(String o: ores){
+            if (o.contains("ingot")){
+                for (ItemStack s : OreDictionary.getOres(o)){
+                    IIcon itm = s.getItem().getIcon(s,0);
+
+                    bindTexture(TextureMap.locationItemsTexture);
+
+                    int texturewidth=GL11.glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
+
+                    /*GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, bufferTexturePixels);
+                    int width = (int) ((itm.getMaxU()-itm.getMinU())*16f);
+                    int height = (int) ((itm.getMaxV()-itm.getMinV())*16f);
+                    int[] texture = new int[((width*height)*4)+2];
+                    i=0;
+
+                    //loop for the pixels fo the texture and collect the entire texture
+                    for (int x=(int)(itm.getMinU()*16f); x<itm.getMaxU()*16f; x++){
+                        for (int y=(int)(itm.getMinV()*16f); y<itm.getMaxV()*16f; y++){
+                            int pos = (texturewidth*y)+x;
+                            texture[i+3]=bufferTexturePixels.get(pos+3);//alpha
+                            texture[i+2]=bufferTexturePixels.get(pos+2);//Red
+                            texture[i+1]=bufferTexturePixels.get(pos+1);//Green
+                            texture[i]=bufferTexturePixels.get(pos);//Blue
+                            i++;
+                        }
+                    }*/
+
+
+
+                    pixels = loadTexture(TextureMap.locationItemsTexture);
+                    if(pixels.length==2){
+                        return;
+                    }
+                    length = ((pixels[0]*pixels[1])*4)-4;
+
+
+                    //todo: we got the sprite in pixels now, so we need to average out the color
+                    // add all the colors, then divide by how many were actually added
+                    //this could probably be compressed into the above method.
+                    int[] color={0,0,0};
+                    int divisor=0;
+                    int x=-1,y=0;
+                    int[] pixel = new int[]{0,0,0,0};
+                    for(i=0; i<length; i+=4) {
+                        x++;
+                        if(x>texturewidth){
+                            x=0;
+                            y++;
+                        }
+                        ////if(x<minx||x>maxX||y<miny||y>maxy){
+                          //  continue;
+                       // }
+
+                        pixel[3]=pixels[i+3];//alpha is always from host texture.
+                        if (pixels[i+3] == fullAlpha){
+                            continue;//skip pixels with no color
+                        }
+
+
+
+                        divisor++;
+                        color[0]+=pixels[i];
+                        color[1]+=pixels[i+1];
+                        color[2]+=pixels[i+2];
+                    }
+
+
+                    DebugUtil.println(" colors for ingot " + s.getDisplayName(),color[0]+":"+color[1]+":"+color[2]);
+
+                    if(divisor!=0) {
+                        color[0] = color[0] / divisor;
+                        color[1] = color[1] / divisor;
+                        color[2] = color[2] / divisor;
+                    }
+
+                    //now add to list
+                    colors.put(s.getItem().delegate.name(), color);
+                }
+            }
+        }
+
+
+
+
     }
 }

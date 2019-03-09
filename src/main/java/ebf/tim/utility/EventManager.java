@@ -90,7 +90,7 @@ public class EventManager {
                     TrainsInMotion.keyChannel.sendToServer(new PacketInteract(15, player.ridingEntity.getEntityId()));
                 }
             }
-        } else {
+        } else if(DebugUtil.dev()) {
             if (ClientProxy.raildevtoolUp.isPressed()){
                 ClientProxy.devSplineModification[ClientProxy.devSplineCurrentPoint][0]+=0.0625;
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("current spline shape is " +
@@ -354,6 +354,7 @@ public class EventManager {
                     }
                 }
             }
+
 
 
 
