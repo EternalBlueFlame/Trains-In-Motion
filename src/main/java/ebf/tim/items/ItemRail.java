@@ -126,9 +126,9 @@ public class ItemRail extends Item implements ITrackItem {
         if( stack.hasTagCompound()){
             if(stack.getTagCompound().getTag("count")!=null) {
                 stringList.add(stack.getTagCompound().getInteger("count")+" "+
-                        RailUtility.translate("items"));
+                        RailUtility.translate("menu.items"));
             } else {
-                stringList.add("1 "+RailUtility.translate("item"));
+                stringList.add("1 "+RailUtility.translate("menu.item"));
             }
 
             if(stack.getTagCompound().getTag("rail")!=null) {

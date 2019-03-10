@@ -203,7 +203,7 @@ public class RenderEntity extends Render {
          */
         if (entity.renderData.bogieRenders != null && entity.renderData.bogieRenders.length >0){
             if(entity.simpleBogieModelOffsets()!=null){
-                for (i = 0; i < entity.simpleBogieModelOffsets().length; i++) {
+                for (i = 0; entity.simpleBogieModelOffsets()!=null && i < entity.simpleBogieModelOffsets().length; i++) {
                     GL11.glPushMatrix();
                     //bind the texture
                     if (entity.getTexture().getBogieSkin(i) != null) {
@@ -215,7 +215,7 @@ public class RenderEntity extends Render {
                             RailOffset, 0,
                             entity.rotationPitch, entity.rotationYaw, 0);
                     GL11.glTranslated(entity.renderData.animationCache[1][0] + x, entity.renderData.animationCache[1][1] + y, entity.renderData.animationCache[1][2] + z);
-                    entity.renderData.bogieRenders[i].setPositionAndRotation(entity, entity.simpleBogieModelOffsets()[i]);
+                    entity.renderData.bogieRenders[i].setRotation(entity);
                     //set the rotation
                     GL11.glRotatef(-entity.renderData.bogieRenders[i].rotationYaw - 180f, 0.0f, 1.0f, 0);
                     GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
@@ -226,7 +226,7 @@ public class RenderEntity extends Render {
                     GL11.glPopMatrix();
                 }
             } else {
-                for (i = 0; i < entity.bogieModelOffsets().length; i++) {
+                for (i = 0; entity.bogieModelOffsets() !=null && i < entity.bogieModelOffsets().length; i++) {
                     GL11.glPushMatrix();
                     //bind the texture
                     if (entity.getTexture().getBogieSkin(i) != null) {
@@ -239,7 +239,7 @@ public class RenderEntity extends Render {
                             , entity.bogieModelOffsets()[i][2],
                             entity.rotationPitch, entity.rotationYaw, 0);
                     GL11.glTranslated(entity.renderData.animationCache[1][0] + x, entity.renderData.animationCache[1][1] + y, entity.renderData.animationCache[1][2] + z);
-                    entity.renderData.bogieRenders[i].setPositionAndRotation(entity, entity.bogieModelOffsets()[i][0]);
+                    entity.renderData.bogieRenders[i].setRotation(entity);
                     //set the rotation
                     GL11.glRotatef(-entity.renderData.bogieRenders[i].rotationYaw - 180f, 0.0f, 1.0f, 0);
                     GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);

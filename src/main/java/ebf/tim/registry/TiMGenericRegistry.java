@@ -89,7 +89,7 @@ public class TiMGenericRegistry {
         if(isClient){
             itm.setTextureName(MODID+":"+unlocalizedName);
         }
-        GameRegistry.registerItem(itm, unlocalizedName);
+        GameRegistry.registerItem(itm,unlocalizedName);
         if(oreDictionaryName!=null){
             OreDictionary.registerOre(oreDictionaryName, itm);
         }
@@ -104,11 +104,11 @@ public class TiMGenericRegistry {
         fluid.setUnlocalizedName(unlocalizedName).setGaseous(isGaseous).setDensity(density);
         FluidRegistry.registerFluid(fluid);
 
-        Block block = new BlockTrainFluid(fluid, new MaterialLiquid(color)).setBlockName("block."+unlocalizedName).setBlockTextureName(MODID+":block_"+unlocalizedName);
+        Block block = new BlockTrainFluid(fluid, new MaterialLiquid(color)).setBlockName("block."+unlocalizedName.replace(".item","")).setBlockTextureName(MODID+":block_"+unlocalizedName);
         GameRegistry.registerBlock(block, "block."+unlocalizedName);
         fluid.setBlock(block);
 
-        Item bucket = new ItemBucket(block).setCreativeTab(tab).setUnlocalizedName("item." + unlocalizedName + ".bucket").setContainerItem(Items.bucket);
+        Item bucket = new ItemBucket(block).setCreativeTab(tab).setUnlocalizedName(unlocalizedName + ".bucket").setContainerItem(Items.bucket);
                 if(isClient){
                     bucket.setTextureName(MODID+":bucket_"+unlocalizedName);
                 }
@@ -146,7 +146,7 @@ public class TiMGenericRegistry {
                     registry.getClass(),
                     registry.transportName().replace(" ","") + ".entity",
                     registryPosition, TrainsInMotion.instance, 60, 1, true);
-            GameRegistry.registerItem(registry.getCartItem().getItem(), registry.transportName());
+            GameRegistry.registerItem(registry.getCartItem().getItem(), registry.getCartItem().getItem().getUnlocalizedName());
             registry.registerSkins();
             if(registry.getRecipie()!=null){
                 RecipeManager.registerRecipe(registry.getCartItem(), registry.getRecipie());

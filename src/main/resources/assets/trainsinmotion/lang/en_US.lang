@@ -59,25 +59,54 @@ menu.item.fueltype=Fuel Type
 menu.item.seats=Seats
 menu.ties=Ties
 menu.ballast=Ballast
+item.TiM=Trains in Motion
+
+<!-- ## Countries ## -->
 menu.item.us=USA
 menu.item.germany=Germany
+menu.item.japan=Japan
+menu.item.belgium=Belgium
+menu.item.russia=Russia
+menu.item.england=England
+menu.item.china=China
+menu.item.north korea=North Korea
+menu.item.south korea=South Korea
+menu.item.undefined=Undefined
+menu.item.canada=Canada
+menu.item.mexico=Mexico
+menu.item.africa=Africa
+menu.item.scotland=Scotland
+menu.item.poland=Poland
+menu.item.wales=Wales
+menu.item.north ireland=Northern Ireland
+menu.item.ireland=Ireland
+menu.item.south ireland=Republic of Ireland
+menu.item.united kingdom=United Kingdom
+menu.item.india=India
+menu.item.france=France
+menu.item.spain=Spain
+menu.item.australia=Australia
+menu.item.austria=Austria
+menu.item.brazil=Brazil
+menu.item.italy=Italy
 
 
 
 <!-- ## Items ## -->
-item.oilbucket=Oil bucket
-item.adminbook=Admin Book
-item.adminbook=Recipe Book
-item.transportkey=Transport Key
-item.transportticket=Transport Ticker
+item.oil.bucket.name=Oil bucket
+item.diesel.bucket.name=Diesel bucket
+item.adminbook.name=Admin Book
+item.craftbook.name=Recipe Book
+item.transportkey.name=Transport Key
+item.transportticket.name=Transport Ticket
 
 <!-- ## Blocks ## -->
 fluid.oil=Oil
-block.traintable.name=Train Crafting Table
-tile.block.traintable=Train Crafting Table
+tile.block.traintable.name=Train Crafting Table
+Track Crafting Table.name=Track Crafting Table
 tile.block.railtable=Track Crafting Table
-item.item.timrail=Rail
-tile.block.timrail=Rail
+item.timrail.name=Track
+tile.block.timrail.name=Track
 tile.block.diesel=Diesel Fluid
 fluid.diesel=Diesel Fluid
 tile.block.oil=Oil Fluid
@@ -85,7 +114,12 @@ fluid.oil.name=Oil Fluid
 
 <!-- ## Trains ## -->
 <!-- ## These are actually defined from the item name, so one name covers all areas ## -->
-item.brigadelok080.name=Brigadelok 0-8-0
+item.HenschelBrigadelok.name=Brigadelok 0-8-0
+item.HenschelBrigadelok-E.name=Brigadelok 0-8-0 (Electric)
+item.GATX13000GallonTanker.name=GATX 13000 Gallon Tanker
+item.V.A.TLogcar.name=V.A.T Logcar
+item.UnionPacific3-bayHopper.name=UP 3-Bay Hopper
+item.Pullman'sPalace.name=Pullman's Palace
 
 
 <!-- ## Rollingstock ## -->

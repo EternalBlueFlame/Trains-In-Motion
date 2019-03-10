@@ -993,13 +993,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         if (getRiderOffsets() != null) {
             if (riddenByEntity != null) {
                 vectorCache[2] = rotatePointF(getRiderOffsets()[0][0],getRiderOffsets()[0][1],getRiderOffsets()[0][2], rotationPitch, rotationYaw, 0);
-                riddenByEntity.setPosition(vectorCache[2][0] + this.posX, vectorCache[2][1] + this.posY, vectorCache[2][2] + this.posZ);
+                riddenByEntity.setPosition(vectorCache[2][0] + this.posX, vectorCache[2][1] + this.posY+(worldObj.isRemote?0:1, vectorCache[2][2] + this.posZ);
             }
 
             for (int i = 0; i < seats.size(); i++) {
                 vectorCache[2] = rotatePointF(getRiderOffsets()[i][0],getRiderOffsets()[i][1],getRiderOffsets()[i][2], rotationPitch, rotationYaw, 0);
                 vectorCache[2][0] += posX;
-                vectorCache[2][1] += posY;
+                vectorCache[2][1] += posY+(worldObj.isRemote?0:1);
                 vectorCache[2][2] += posZ;
                 seats.get(i).setPosition(vectorCache[2][0], vectorCache[2][1], vectorCache[2][2]);
             }

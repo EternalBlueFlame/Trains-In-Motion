@@ -56,32 +56,17 @@ public class Bogie {
      * updates the positions of the model, and then uses that data to set the rotations.
      * @param entity the GenericRailTransport to get the pitch from.
      */
-    public void setPositionAndRotation(GenericRailTransport entity, float distance){
+    public void setRotation(GenericRailTransport entity){
         //update positions
-        offset[0] = distance;
         if(prevPos == null){
-            prevPos = RailUtility.rotatePointF(offset[0], offset[1], offset[2], 0, entity.rotationYaw,0);
-            prevPos[0] += entity.posX;
-            prevPos[2] += entity.posZ;
             rotationYaw = entity.rotationYaw;
+            sqrtPos= oldSqrtPos = Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ);
+        } else if (sqrtPos - 2 > oldSqrtPos || sqrtPos + 2 <oldSqrtPos) {
             oldSqrtPos = Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ);
-        } else if (shouldUpdate()) {
-            oldSqrtPos = Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ);
-            position = RailUtility.rotatePointF(offset[0], offset[1], offset[2], 0, entity.rotationYaw,0);
-            position[0] += entity.posX;
-            position[2] += entity.posZ;
-            //don't update if we aren't moving fast enough.
-            if ((position[0] - prevPos[0] <0.01 && position[0] - prevPos[0] >-0.01) && (position[2] - prevPos[2] <0.01 && position[2] - prevPos[2] >-0.01)){
-                return;
-            }
             rotationYaw = RailUtility.atan2degreesf(position[2] - prevPos[2], position[0] - prevPos[0]);
             prevPos = position;
         } else {
             sqrtPos = Math.sqrt(entity.posX * entity.posX) + Math.sqrt(entity.posZ * entity.posZ);
         }
-    }
-
-    private boolean shouldUpdate(){
-        return sqrtPos -2 > oldSqrtPos || sqrtPos + 2 <oldSqrtPos;
     }
 }

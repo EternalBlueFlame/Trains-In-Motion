@@ -25,9 +25,14 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -169,7 +174,7 @@ public class EventManager {
                             Minecraft.getMinecraft().thePlayer.posY + (cacheVec.yCoord * i)-1,
                             Minecraft.getMinecraft().thePlayer.posZ + (cacheVec.zCoord * i))) {
                         if(Mouse.isButtonDown(1)) {
-                            t.interact(Minecraft.getMinecraft().thePlayer, false, false, -1);
+                            MinecraftForge.EVENT_BUS.post(new EntityInteractEvent(Minecraft.getMinecraft().thePlayer, t));
                         } else {
                             Minecraft.getMinecraft().thePlayer.attackTargetEntityWithCurrentItem(t);
                         }
@@ -179,6 +184,7 @@ public class EventManager {
             }
         }
     }
+
 
 
     private static List<GenericRailTransport> getTrainsInRange(){
@@ -208,7 +214,8 @@ public class EventManager {
                 Minecraft.getMinecraft().renderViewEntity != null && Minecraft.getMinecraft().theWorld != null) {
 
             if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof GenericRailTransport ||
-                    Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntitySeat){
+                    Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntitySeat ||
+            Minecraft.getMinecraft().currentScreen!=null){
                 return;
             }
 
@@ -261,12 +268,11 @@ public class EventManager {
     }
     private static int left=0,longest;
     private static String[] disp;
-    private static boolean waila=false;
     private static RenderItem itemRender = new RenderItem();
 
     private static String[] getStaticStrings(GenericRailTransport t){
         return new String[]{
-                StatCollector.translateToLocal(t.getItem().getUnlocalizedName()),
+                StatCollector.translateToLocal(t.getItem().getUnlocalizedName()+".name"),
                 "owner: " + t.getOwnerName(),
                 "skin: " + SkinRegistry.getSkin(t.getClass(), t.getDataWatcher().getWatchableObjectString(24)).name
         };
