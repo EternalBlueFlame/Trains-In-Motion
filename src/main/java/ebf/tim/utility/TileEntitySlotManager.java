@@ -156,10 +156,10 @@ public class TileEntitySlotManager extends Container{
                         craftingTable.getStackInSlot(6), craftingTable.getStackInSlot(7), craftingTable.getStackInSlot(8)
                 });
             } else if(craftingTable.storageType==1){
-                if(craftingTable.getStackInSlot(4).getItem() instanceof ItemRail &&
-                        craftingTable.getStackInSlot(0)==(ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ingot"))) &&
-                        craftingTable.getStackInSlot(1)==(ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ties"))) &&
-                        craftingTable.getStackInSlot(2)==(ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ballast")))
+                if(craftingTable.getStackInSlot(3).getItem() instanceof ItemRail &&
+                        craftingTable.getStackInSlot(0)==(ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(0).getTagCompound().getCompoundTag("ingot"))) &&
+                        craftingTable.getStackInSlot(1)==(ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(1).getTagCompound().getCompoundTag("ties"))) &&
+                        craftingTable.getStackInSlot(2)==(ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(2).getTagCompound().getCompoundTag("ballast")))
                 ){
                     ItemStack rail = ItemRail.setStackData(new ItemStack(new ItemRail()),
                             craftingTable.getStackInSlot(0),

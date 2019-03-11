@@ -37,6 +37,7 @@ public class RailTileEntity extends TileEntity {
     public int snow=0;
     public int timer=0;
     public int overgrowth=0;
+    Integer railGLID=null;
 
     public float getRailSpeed(){
         return 0.4f;
@@ -58,7 +59,15 @@ public class RailTileEntity extends TileEntity {
             }
             //DebugUtil.println(segmentLength);
             TextureManager.adjustLightFixture(worldObj,xCoord,yCoord,zCoord);
-            Model1x1Rail.Model3DRail(points, gauge750mm, segmentLength, ties, ballast, rail);
+            if(railGLID!=null){
+                org.lwjgl.opengl.GL11.glCallList(railGLID);
+            } else {
+
+                railGLID = net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1);
+                org.lwjgl.opengl.GL11.glNewList(railGLID, org.lwjgl.opengl.GL11.GL_COMPILE);
+                Model1x1Rail.Model3DRail(points, gauge750mm, segmentLength, ties, ballast, rail);
+                org.lwjgl.opengl.GL11.glEndList();
+            }
         } else {super.func_145828_a(report);}
     }
 

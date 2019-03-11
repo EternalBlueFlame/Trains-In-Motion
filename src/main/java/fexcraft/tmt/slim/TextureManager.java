@@ -31,6 +31,7 @@ public class TextureManager {
     private static int i,ii, length, skyLight;
     private static int[] RGBint, pixels;
     private static final byte fullAlpha=(byte)0;
+    private static Set MCResourcePacks;
 
     //2 bytes for idk GL does something with them, then 4 bytes per pixel at 4kx4k resolution. any bigger breaks intel GPU's anyway.
     private static ByteBuffer bufferTexturePixels = GLAllocation.createDirectByteBuffer(67108866);
@@ -77,6 +78,12 @@ public class TextureManager {
     }
 
     public static int[] loadTexture(ResourceLocation resource){
+        //if the list of loaded resource packs has changed, invalidate our texture cache as well.
+        if(Minecraft.getMinecraft().getResourceManager().getResourceDomains() != MCResourcePacks){
+            MCResourcePacks = Minecraft.getMinecraft().getResourceManager().getResourceDomains();
+            tmtTextureMap =new HashMap<>();
+        }
+
         int[] texture = tmtTextureMap.get(resource);
 
         bindTexture(resource);

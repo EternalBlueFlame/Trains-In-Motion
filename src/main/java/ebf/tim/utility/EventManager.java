@@ -173,11 +173,9 @@ public class EventManager {
                             Minecraft.getMinecraft().thePlayer.posX + (cacheVec.xCoord * i),
                             Minecraft.getMinecraft().thePlayer.posY + (cacheVec.yCoord * i)-1,
                             Minecraft.getMinecraft().thePlayer.posZ + (cacheVec.zCoord * i))) {
-                        if(Mouse.isButtonDown(1)) {
-                            MinecraftForge.EVENT_BUS.post(new EntityInteractEvent(Minecraft.getMinecraft().thePlayer, t));
-                        } else {
-                            Minecraft.getMinecraft().thePlayer.attackTargetEntityWithCurrentItem(t);
-                        }
+
+                        (t).interact(Minecraft.getMinecraft().thePlayer.getEntityId(), false, false, Mouse.isButtonDown(1)?-1:-999);
+                        MinecraftForge.EVENT_BUS.post(new EntityInteractEvent(Minecraft.getMinecraft().thePlayer, t));
                         return;
                     }
                 }
@@ -185,6 +183,13 @@ public class EventManager {
         }
     }
 
+
+    @SubscribeEvent
+    public void EntityInteractEvent(EntityInteractEvent e){
+        if(e.target instanceof GenericRailTransport){
+            e.setCanceled(true);
+        }
+    }
 
 
     private static List<GenericRailTransport> getTrainsInRange(){
@@ -245,6 +250,7 @@ public class EventManager {
                                 longest=s.length()*2;
                             }
                         }
+                        longest+=10;
 
                         drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length), ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,ClientProxy.WAILA_ALPHA);
 

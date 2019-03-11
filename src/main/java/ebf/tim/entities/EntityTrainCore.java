@@ -258,7 +258,7 @@ public class EntityTrainCore extends GenericRailTransport {
 
 
     @Override
-    public boolean interact(EntityPlayer player, boolean isFront, boolean isBack, int key) {
+    public boolean interact(int player, boolean isFront, boolean isBack, int key) {
         if (!super.interact(player, isFront, isBack, key)){
             switch (key){
                 case 8:{ //toggle ignition

@@ -46,7 +46,7 @@ public class PacketInteract implements IMessage {
             //First it has to check if it was actually received by the proper entity, because if not, it crashes.
             try {
                 ((GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId)).
-                        interact(context.getServerHandler().playerEntity, false, false, message.key);
+                        interact(context.getServerHandler().playerEntity.getEntityId(), false, false, message.key);
 
             } catch (Exception e){
                 System.out.println("Forge must have confused trains with chickens... You should tell Eternal, and send him this entire stacktrace, just to be sure.");

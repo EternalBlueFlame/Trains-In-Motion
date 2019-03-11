@@ -19,6 +19,7 @@ import fexcraft.tmt.slim.ModelBase;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
@@ -279,66 +280,71 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
     @Override
     public boolean interactFirst(EntityPlayer p_130002_1_) {
-        return worldObj.isRemote?interact(p_130002_1_,false,false, -1):super.interactFirst(p_130002_1_);
+        return worldObj.isRemote?interact(p_130002_1_.getEntityId(),false,false, -1):super.interactFirst(p_130002_1_);
     }
 
-    public boolean interact(EntityPlayer player, boolean isFront, boolean isBack, int key) {
+    public boolean interact(int player, boolean isFront, boolean isBack, int key) {
         if (worldObj.isRemote) {
             TrainsInMotion.keyChannel.sendToServer(new PacketInteract(key, getEntityId()));
         } else {
+            EntityPlayer p =((EntityPlayer)worldObj.getEntityByID(player));
             //check if the player has permission first.
-            if (!getPermissions(player, false, false)) {
-                player.addChatMessage(new ChatComponentText(RailUtility.translate("You don't have permission to do that.")));
+            if (!getPermissions(p, false, false)) {
+                p.addChatMessage(new ChatComponentText(RailUtility.translate("You don't have permission to do that.")));
                 return false;
             }
             switch (key){
+                case -999:{//entity attacked
+                    p.attackTargetEntityWithCurrentItem(this);
+                    break;
+                }
                 case -1: {//right click
-                    if (player.getHeldItem() != null) {
-                        if (player.getHeldItem().getItem() instanceof ItemKey) {
-                            if (ItemKey.getHostList(player.getHeldItem()) !=null) {
-                                for (UUID transport : ItemKey.getHostList(player.getHeldItem())) {
+                    if (p.getHeldItem() != null) {
+                        if (p.getHeldItem().getItem() instanceof ItemKey) {
+                            if (ItemKey.getHostList(p.getHeldItem()) !=null) {
+                                for (UUID transport : ItemKey.getHostList(p.getHeldItem())) {
                                     if (transport.equals(getPersistentID())) {
                                         return true;//end the function here if it already has the key.
                                     }
                                 }
                             }
-                            if(((ItemKey) player.getHeldItem().getItem()).selectedEntity ==null || ((ItemKey) player.getHeldItem().getItem()).selectedEntity != getEntityId()){
-                                ((ItemKey) player.getHeldItem().getItem()).selectedEntity = getEntityId();
-                                player.addChatComponentMessage(new ChatComponentText(
+                            if(((ItemKey) p.getHeldItem().getItem()).selectedEntity ==null || ((ItemKey) p.getHeldItem().getItem()).selectedEntity != getEntityId()){
+                                ((ItemKey) p.getHeldItem().getItem()).selectedEntity = getEntityId();
+                                p.addChatComponentMessage(new ChatComponentText(
                                         RailUtility.translate("Click again to add the ") + transportName() +
                                                 RailUtility.translate(" to the Item's list.")
 
                                 ));
                                 return true;//end the function here if it already has the key.
                             } else {
-                                ItemKey.addHost(player.getHeldItem(), getPersistentID(), transportName());
-                                player.addChatComponentMessage(new ChatComponentText(
+                                ItemKey.addHost(p.getHeldItem(), getPersistentID(), transportName());
+                                p.addChatComponentMessage(new ChatComponentText(
                                         RailUtility.translate("added ") + transportName() +
                                                 RailUtility.translate(" to the Item's list.")
 
                                 ));
-                                ((ItemKey) player.getHeldItem().getItem()).selectedEntity=null;
+                                ((ItemKey) p.getHeldItem().getItem()).selectedEntity=null;
                                 return true;//end the function here if it already has the key.
                             }
                         }
                         //TODO: else if(player.getHeldItem() instanceof stakeItem) {do linking/unlinking stuff dependant on if it was front or not;}
                     }
                     //be sure the player has permission to enter the transport, and that the transport has the main seat open.
-                    if (getRiderOffsets() != null && riddenByEntity == null && getPermissions(player, false, true)) {
-                        player.mountEntity(this);
+                    if (getRiderOffsets() != null && riddenByEntity == null && getPermissions(p, false, true)) {
+                        p.mountEntity(this);
                         return true;
                         //if the player had permission but the main seat isnt open, check for seat entities to mount.
                     } else {
                         for (EntitySeat seat : seats) {
-                            if (seat.riddenByEntity == null && getPermissions(player, false, true)) {
-                                player.mountEntity(seat);
+                            if (seat.riddenByEntity == null && getPermissions(p, false, true)) {
+                                p.mountEntity(seat);
                                 return true;
                             }
                         }
                     }
                 }
                 case 1:{ //open GUI
-                    player.openGui(TrainsInMotion.instance, getEntityId(), worldObj, 0, 0, 0);
+                    p.openGui(TrainsInMotion.instance, getEntityId(), worldObj, 0, 0, 0);
                     return true;
                 }case 15: {//toggle brake
                     setBoolean(boolValues.BRAKE, !getBoolean(boolValues.BRAKE));
@@ -396,7 +402,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
         }
 
-        return super.interactFirst(player);
+        return super.interactFirst((EntityPlayer) worldObj.getEntityByID(player));
 
     }
 
@@ -993,7 +999,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         if (getRiderOffsets() != null) {
             if (riddenByEntity != null) {
                 vectorCache[2] = rotatePointF(getRiderOffsets()[0][0],getRiderOffsets()[0][1],getRiderOffsets()[0][2], rotationPitch, rotationYaw, 0);
-                riddenByEntity.setPosition(vectorCache[2][0] + this.posX, vectorCache[2][1] + this.posY+(worldObj.isRemote?0:1, vectorCache[2][2] + this.posZ);
+                riddenByEntity.setPosition(vectorCache[2][0] + this.posX, vectorCache[2][1] + this.posY+(worldObj.isRemote?0:1), vectorCache[2][2] + this.posZ);
             }
 
             for (int i = 0; i < seats.size(); i++) {

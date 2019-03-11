@@ -30,6 +30,7 @@ import java.util.Random;
 public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     RailTileEntity tile = null;
+    private static final int[] updateMatrix = {-1,0,1};
 
 
     public BlockRailCore(){
@@ -136,6 +137,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
+        //todo: return the generated item you'd get from middle click
         return null;
     }
 
@@ -185,8 +187,29 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     //stuff from block container to make tile entity more reliable.
     @Override
     public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_) {
-        super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
         p_149749_1_.removeTileEntity(p_149749_2_, p_149749_3_, p_149749_4_);
+        for(int x : updateMatrix){
+            for(int z : updateMatrix){
+                for(int y : updateMatrix){
+                    if(p_149749_1_.getBlock(x+p_149749_2_,y+p_149749_3_,z+p_149749_4_) instanceof  BlockRailCore){
+                        p_149749_1_.getBlock(x+p_149749_2_,y+p_149749_3_,z+p_149749_4_).onNeighborBlockChange(p_149749_1_,p_149749_2_,p_149749_3_,p_149749_4_, this);
+                    }
+                }
+            }
+        }
+    }
+
+    public int onBlockPlaced(World p_149660_1_, int p_149660_2_, int p_149660_3_, int p_149660_4_, int p_149660_5_, float p_149660_6_, float p_149660_7_, float p_149660_8_, int p_149660_9_) {
+        for(int x : updateMatrix){
+            for(int z : updateMatrix){
+                for(int y : updateMatrix){
+                    if(p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_) instanceof  BlockRailCore){
+                        p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_).onNeighborBlockChange(p_149660_1_,p_149660_2_,p_149660_3_,p_149660_4_, this);
+                    }
+                }
+            }
+        }
+        return p_149660_9_;
     }
 
     @Override

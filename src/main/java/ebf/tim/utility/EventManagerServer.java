@@ -38,13 +38,4 @@ public class EventManagerServer {
             event.setCanceled(true);
         }
     }
-
-    @SubscribeEvent
-    public void EntityInteractEvent(EntityInteractEvent e){
-        if(e.target instanceof GenericRailTransport){
-            ((GenericRailTransport)e.target).interact(Minecraft.getMinecraft().thePlayer, false, false, -1);
-            e.setCanceled(true);
-        }
-    }
-
 }

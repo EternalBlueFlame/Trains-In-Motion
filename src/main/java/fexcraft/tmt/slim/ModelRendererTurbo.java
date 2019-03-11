@@ -1752,7 +1752,7 @@ public class ModelRendererTurbo {
     		Collection<TextureGroup> textures = textureGroup.values();
     		Iterator<TextureGroup> itr = textures.iterator();
     		for(int i = 0; itr.hasNext(); i++){
-    			TextureGroup curTexGroup = (TextureGroup)itr.next();
+    			TextureGroup curTexGroup = itr.next();
     			curTexGroup.loadTexture();
     			GL11.glCallList(displayListArray[i]);
     			if(!defaultTexture.equals("")){

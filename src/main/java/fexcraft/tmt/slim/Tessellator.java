@@ -15,6 +15,7 @@ import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.HashMap;
@@ -33,15 +34,15 @@ public class Tessellator{
 	public static Tessellator INSTANCE = new Tessellator();
 
 	private static int verts, dm;
-	private static boolean translated=false, texture4d=false, isQuad =true;
-	private static float x, y, z;
+	private static boolean texture4d=false;
+	private static Float x, y, z;
 	//supports up to 1024 vertex points for support of larger
-	private static FloatBuffer bufferVertex = GLAllocation.createDirectByteBuffer(4096*6).asFloatBuffer();//one for each vertex
-	private static IntBuffer bufferIndex = GLAllocation.createDirectByteBuffer(4096*2).asIntBuffer();//one per set of vertex points
-	private static FloatBuffer bufferTexture = GLAllocation.createDirectByteBuffer(4096*8).asFloatBuffer();//one for each texture vertex, yes there's 4 for some compatibility reason.
+	private static FloatBuffer bufferVertex = ByteBuffer.allocateDirect((4096*6)).order(ByteOrder.nativeOrder()).asFloatBuffer();//GLAllocation.createDirectByteBuffer(4096*6).asFloatBuffer();//one for each vertex
+	private static IntBuffer bufferIndex = ByteBuffer.allocateDirect((4096*2)).order(ByteOrder.nativeOrder()).asIntBuffer();//GLAllocation.createDirectByteBuffer(4096*2).asIntBuffer();//one per set of vertex points
+	private static FloatBuffer bufferTexture = ByteBuffer.allocateDirect((4096*8)).order(ByteOrder.nativeOrder()).asFloatBuffer();//GLAllocation.createDirectByteBuffer(4096*8).asFloatBuffer();//one for each texture vertex, yes there's 4 for some compatibility reason.
 
 	//rendering quads is far more common than other shapes, so they get their own specific system that's slightly more efficient by using a preset variable for the index.
-	private static final IntBuffer quadIndex = (IntBuffer) GLAllocation.createDirectIntBuffer(4).put(new int[]{0,1,2,3}).flip();
+	private static final IntBuffer quadIndex = ByteBuffer.allocateDirect(16).order(ByteOrder.nativeOrder()).asIntBuffer().put(new int[]{0,1,2,3});//(IntBuffer) GLAllocation.createDirectIntBuffer(4).put(new int[]{0,1,2,3}).flip();
 
 	public static Tessellator getInstance(){
 		return INSTANCE;
@@ -52,10 +53,8 @@ public class Tessellator{
 		dm = i;
 		bufferVertex.clear();
 		bufferTexture.clear();
-		isQuad = dm == GL11.GL_QUADS;
-		if (!isQuad){
+		if (dm != GL11.GL_QUADS){
 			bufferIndex.clear();
-			isQuad = false;
 			verts =0;
 		}
 		//GL11.glColor4f(255, 255, 255, 255);//fixes alpha layering bugs with other mods that don't clear their GL cache
@@ -73,7 +72,7 @@ public class Tessellator{
 		bufferVertex.flip();
 		bufferTexture.flip();
 
-		if(isQuad){
+		if(dm == GL11.GL_QUADS){
 			GL11.glVertexPointer(3, 0, bufferVertex);
 			GL11.glTexCoordPointer(texture4d?4:2, 0, bufferTexture);
 			GL11.glDrawElements(dm, quadIndex);
@@ -92,7 +91,7 @@ public class Tessellator{
 		bufferVertex.flip();
 		bufferTexture.flip();
 
-		if(isQuad){
+		if(dm == GL11.GL_QUADS){
 			GL11.glVertexPointer(3, 0, bufferVertex);
 			GL11.glTexCoordPointer(texture4d?4:2, 0, bufferTexture);
 			GL11.glDrawElements(dm, quadIndex);
@@ -106,7 +105,7 @@ public class Tessellator{
 	}
 	
 	public void addVertex(float par1, float par3, float par5){
-		if(translated) {
+		if(x!=null) {
 			bufferVertex.put(par1 + x);
 			bufferVertex.put(par3 + y);
 			bufferVertex.put(par5 + z);
@@ -115,7 +114,7 @@ public class Tessellator{
 			bufferVertex.put(par3);
 			bufferVertex.put(par5);
 		}
-		if (!isQuad) {
+		if (dm != GL11.GL_QUADS) {
 			bufferIndex.put(verts);
 			verts++;
 		}
@@ -150,15 +149,13 @@ public class Tessellator{
 		bufferTexture.put(w);
 		texture4d=true;
 	}
-	
-	public void setTranslation(float x, float y, float z){
-		this.x = x; this.y = y; this.z = z;
-		translated=true;
+
+	public static void setTranslation(float xOffset, float yOffset, float zOffset){
+		x = xOffset; y = yOffset; z = zOffset;
 	}
 	
-	public void addTranslation(float x, float y, float z){
-		this.x += x; this.y += y; this.z += z;
-		translated=true;
+	public static void addTranslation(float xOffset, float yOffset, float zOffset){
+		x += xOffset; y += yOffset; z += zOffset;
 	}
 
 	public static void bindTexture(ResourceLocation uri){
