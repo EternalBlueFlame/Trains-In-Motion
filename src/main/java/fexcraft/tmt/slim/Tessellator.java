@@ -4,6 +4,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.DebugUtil;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GLAllocation;
@@ -13,6 +14,7 @@ import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -34,15 +36,11 @@ public class Tessellator{
 	public static Tessellator INSTANCE = new Tessellator();
 
 	private static int verts, dm;
-	private static boolean texture4d=false;
 	private static Float x, y, z;
 	//supports up to 1024 vertex points for support of larger
 	private static FloatBuffer bufferVertex = ByteBuffer.allocateDirect((4096*6)).order(ByteOrder.nativeOrder()).asFloatBuffer();//GLAllocation.createDirectByteBuffer(4096*6).asFloatBuffer();//one for each vertex
 	private static IntBuffer bufferIndex = ByteBuffer.allocateDirect((4096*2)).order(ByteOrder.nativeOrder()).asIntBuffer();//GLAllocation.createDirectByteBuffer(4096*2).asIntBuffer();//one per set of vertex points
-	private static FloatBuffer bufferTexture = ByteBuffer.allocateDirect((4096*8)).order(ByteOrder.nativeOrder()).asFloatBuffer();//GLAllocation.createDirectByteBuffer(4096*8).asFloatBuffer();//one for each texture vertex, yes there's 4 for some compatibility reason.
-
-	//rendering quads is far more common than other shapes, so they get their own specific system that's slightly more efficient by using a preset variable for the index.
-	private static final IntBuffer quadIndex = ByteBuffer.allocateDirect(16).order(ByteOrder.nativeOrder()).asIntBuffer().put(new int[]{0,1,2,3});//(IntBuffer) GLAllocation.createDirectIntBuffer(4).put(new int[]{0,1,2,3}).flip();
+	private static FloatBuffer bufferTexture = ByteBuffer.allocateDirect((4096*4)).order(ByteOrder.nativeOrder()).asFloatBuffer();//GLAllocation.createDirectByteBuffer(4096*8).asFloatBuffer();//one for each texture vertex, yes there's 4 for some compatibility reason.
 
 	public static Tessellator getInstance(){
 		return INSTANCE;
@@ -53,12 +51,8 @@ public class Tessellator{
 		dm = i;
 		bufferVertex.clear();
 		bufferTexture.clear();
-		if (dm != GL11.GL_QUADS){
-			bufferIndex.clear();
-			verts =0;
-		}
-		//GL11.glColor4f(255, 255, 255, 255);//fixes alpha layering bugs with other mods that don't clear their GL cache
-		//todo call this from the actual render rather than tessellation, it breaks the recolor system here.
+		bufferIndex.clear();
+		verts =0;
 	}
 
 	/**
@@ -66,23 +60,17 @@ public class Tessellator{
 	 * use the enable and disable calls around the render of the model as a whole and call
 	 * @see #arrayEnabledDraw() instead so they don't have to be enabled and disabled during the render of every face.
 	 */
+	@Deprecated
 	public void draw(){
 		GL11.glEnable(GL11.GL_VERTEX_ARRAY);
 		GL11.glEnable(GL11.GL_TEXTURE_COORD_ARRAY);
 		bufferVertex.flip();
 		bufferTexture.flip();
+		bufferIndex.flip();
 
-		if(dm == GL11.GL_QUADS){
-			GL11.glVertexPointer(3, 0, bufferVertex);
-			GL11.glTexCoordPointer(texture4d?4:2, 0, bufferTexture);
-			GL11.glDrawElements(dm, quadIndex);
-		} else {
-			bufferIndex.flip();
-
-			GL11.glVertexPointer(3, 0, bufferVertex);
-			GL11.glTexCoordPointer(texture4d?4:2, 0, bufferTexture);
-			GL11.glDrawElements(dm, bufferIndex);
-		}
+		GL11.glVertexPointer(3, 0, bufferVertex);
+		GL11.glTexCoordPointer(4, 0, bufferTexture);
+		GL11.glDrawElements(dm, bufferIndex);
 		GL11.glDisable(GL11.GL_TEXTURE_COORD_ARRAY);
 		GL11.glDisable(GL11.GL_VERTEX_ARRAY);
 	}
@@ -90,17 +78,16 @@ public class Tessellator{
 	public void arrayEnabledDraw(){
 		bufferVertex.flip();
 		bufferTexture.flip();
+		bufferIndex.flip();
 
-		if(dm == GL11.GL_QUADS){
-			GL11.glVertexPointer(3, 0, bufferVertex);
-			GL11.glTexCoordPointer(texture4d?4:2, 0, bufferTexture);
-			GL11.glDrawElements(dm, quadIndex);
-		} else {
-			bufferIndex.flip();
-
-			GL11.glVertexPointer(3, 0, bufferVertex);
-			GL11.glTexCoordPointer(texture4d?4:2, 0, bufferTexture);
-			GL11.glDrawElements(dm, bufferIndex);
+		GL11.glVertexPointer(3, 0, bufferVertex);
+		GL11.glTexCoordPointer(4, 0, bufferTexture);
+		GL11.glDrawElements(dm, bufferIndex);
+		int err;
+		for(;;) {
+			err = glGetError();
+			if (err == GL_NO_ERROR){ break;}
+			else {System.out.println("Error: %s  : " + GLU.gluErrorString(err));}
 		}
 	}
 	
@@ -114,10 +101,8 @@ public class Tessellator{
 			bufferVertex.put(par3);
 			bufferVertex.put(par5);
 		}
-		if (dm != GL11.GL_QUADS) {
-			bufferIndex.put(verts);
-			verts++;
-		}
+		bufferIndex.put(verts);
+		verts++;
 	}
 	
 	public void addVertexWithUV(float i, float j, float k, float u, float v){
@@ -140,6 +125,8 @@ public class Tessellator{
 	public void setTextureUV(float u, float v){
 		bufferTexture.put(u);
 		bufferTexture.put(v);
+		bufferTexture.put(0.0f);
+		bufferTexture.put(1f);
 	}
 	
 	public void setTextureUVW(float u, float v, float w){
@@ -147,7 +134,6 @@ public class Tessellator{
 		bufferTexture.put(v);
 		bufferTexture.put(0.0f);
 		bufferTexture.put(w);
-		texture4d=true;
 	}
 
 	public static void setTranslation(float xOffset, float yOffset, float zOffset){

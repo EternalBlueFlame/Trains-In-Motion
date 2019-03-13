@@ -59,14 +59,16 @@ public class ModelTies {
                 continue;
             }
 
-            Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
+
+            Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
             float d1 = iicon.getMinU()+ ((iicon.getMaxU()-iicon.getMinU())*0.09f);
 
             addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, 0.0625f,iicon.getMinU(),iicon.getMinV());
             addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, 0.0625f,d1,iicon.getMinV());
 
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.0625f,d1,iicon.getMaxV());
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.0625f,d1,iicon.getMaxV());
+
             Tessellator.getInstance().arrayEnabledDraw();
         }
 
@@ -126,10 +128,14 @@ public class ModelTies {
             Tessellator.getInstance().arrayEnabledDraw();
         }
 
-       // GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         GL11.glPopMatrix();
 
 
+    }
+
+    public void modelHDTies(List<float[]> points, float maxWidth, float minWidth, Block block){
+        model3DTies(points, maxWidth, minWidth, block);
+        //todo HD ties should all the nails
     }
 }

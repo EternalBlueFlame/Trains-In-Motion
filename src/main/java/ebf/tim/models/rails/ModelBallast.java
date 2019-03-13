@@ -14,16 +14,11 @@ import static ebf.tim.models.rails.Model1x1Rail.addVertexWithOffsetAndUV;
 
 public class ModelBallast {
     public static IIcon iicon;
-    public static void model3DBallast(List<float[]> points, float maxWidth, float minWidth, Block b, float segmentLength){
 
+    public static void modelPotatoBallast(List<float[]> points, float maxWidth, float minWidth, Block b, float segmentLength){
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.1, 0);
 
-        float dist = (Math.abs(maxWidth) + Math.abs(minWidth))*0.5f;
-        dist*=3.0769;
-
-        Tessellator.bindTexture(TextureMap.locationBlocksTexture);
-        //top side
         iicon=  RenderBlocks.getInstance().getBlockIconFromSide(b, ForgeDirection.UP.ordinal());
         Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
         float ballastloop=0;
@@ -38,10 +33,20 @@ public class ModelBallast {
             ballastloop++;
         }
         Tessellator.getInstance().arrayEnabledDraw();
+        GL11.glPopMatrix();
+    }
+
+    public static void model3DBallast(List<float[]> points, float maxWidth, float minWidth, Block b, float segmentLength){
+        modelPotatoBallast(points, maxWidth, minWidth, b, segmentLength);
+
+        GL11.glPushMatrix();
+        GL11.glTranslated(0, 0.1, 0);
+
+        float d0;
         //west side
         iicon=  RenderBlocks.getInstance().getBlockIconFromSide(b, ForgeDirection.WEST.ordinal());
         Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
-        ballastloop=0;
+        float ballastloop=0;
         for (float[] p : points) {
             d0 = iicon.getMinU();
             d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/segmentLength));

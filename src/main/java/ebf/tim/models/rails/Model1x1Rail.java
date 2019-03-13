@@ -1,5 +1,7 @@
 package ebf.tim.models.rails;
 
+import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.DebugUtil;
 import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
@@ -60,9 +62,9 @@ public class Model1x1Rail {
 
 
     //todo use the return value to manage displaylists
-    public static boolean Model3DRail(List<float[]> points, float[] railOffsets, float segmentLength, @Nullable Block ballast, @Nullable Block ties, ItemStack railBlock){
+    public static void Model3DRail(List<float[]> points, float[] railOffsets, float segmentLength, @Nullable Block ballast, @Nullable Block ties, ItemStack railBlock){
         if(railOffsets==null || points ==null){
-            return false;
+            return;
         }
 
         if(points.size()>0) {
@@ -82,15 +84,32 @@ public class Model1x1Rail {
             GL11.glEnable(GL11.GL_TEXTURE_COORD_ARRAY);
             GL11.glDisable(GL11.GL_LIGHTING);
 
+            //DebugUtil.println(ClientProxy.railLoD);
             //renders the rails, also defines min and max width
-            ModelRail.model3DRail(points,railOffsets, railBlock);
-            //shouldnt even need to define models like the rails, only need 2, flat and 3d, get a boolean operator config.ispotato?.
+            switch (ClientProxy.railLoD){
+                case 0:{ModelRail.modelPotatoRail(points, railOffsets, railBlock); break;}
+                case 1:{ModelRail.model3DRail(points, railOffsets, railBlock); break;}
+                case 2://todo normal rail
+                case 3:{ModelRail.model3DRail(points, railOffsets, railBlock); break;}//todo HD rail
+            }
 
             if(ties!=null) {
-                ModelTies.model3DTies(points, maxWidth, minWidth, ties);
+                if(ClientProxy.railLoD==0){
+                    ModelTies.modelPotatoTies(points, maxWidth, minWidth, ties);
+                } else if (ClientProxy.railLoD<3){
+                    ModelTies.model3DTies(points, maxWidth, minWidth, ties);
+                } else {
+                    //todo: HD ties
+                    ModelTies.model3DTies(points, maxWidth, minWidth, ties);
+                }
+
             }
             if(ballast!=null) {
-                ModelBallast.model3DBallast(points, maxWidth, minWidth, ballast, segmentLength);
+                if(ClientProxy.railLoD==0){
+                    ModelBallast.modelPotatoBallast(points, maxWidth, minWidth, ballast, segmentLength);
+                } else {
+                    ModelBallast.model3DBallast(points, maxWidth, minWidth, ballast, segmentLength);
+                }
             }
 
 
@@ -101,6 +120,6 @@ public class Model1x1Rail {
         }
 
 
-        return true;
+        return;
     }
 }

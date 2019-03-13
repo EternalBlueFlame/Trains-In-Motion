@@ -164,6 +164,7 @@ public class TextureManager {
     public static void adjustLightFixture(World world, int i, int j, int k) {
         skyLight = world.getLightBrightnessForSkyBlocks(i, j, k, 0);
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit,  skyLight % 65536,  skyLight / 65536f);
+        GL11.glColor4f(255, 255, 255, 255);//fixes alpha layering bugs with other mods that don't clear their GL cache
     }
 
     /**

@@ -1,6 +1,8 @@
 package fexcraft.tmt.slim;
 
+import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.entity.Entity;
+import org.lwjgl.opengl.GL11;
 
 /**
 * Converter to use Flansmod-Type vehicle models.
@@ -12,6 +14,7 @@ public class ModelConverter extends Model<Object> {
 	public ModelRendererTurbo model[] = new ModelRendererTurbo[0];
 	public ModelRendererTurbo bodyDoorOpenModel[] = new ModelRendererTurbo[0];
 	public ModelRendererTurbo bodyDoorCloseModel[] = new ModelRendererTurbo[0];
+	private Integer GLDisplaylistID=null;
 	
 	public ModelRendererTurbo turretModel[] = new ModelRendererTurbo[0];
 	public ModelRendererTurbo barrelModel[] = new ModelRendererTurbo[0];
@@ -29,23 +32,30 @@ public class ModelConverter extends Model<Object> {
 	public ModelRendererTurbo steeringWheelModel[] = new ModelRendererTurbo[0];
 	
 	public void render(){
-		render(bodyModel);
-		render(model);
-		render(bodyDoorCloseModel);
-		render(turretModel);
-		render(barrelModel);
-		render(frontWheelModel);
-		render(backWheelModel);
-		render(leftFrontWheelModel);
-		render(rightFrontWheelModel);
-		render(leftBackWheelModel);
-		render(rightBackWheelModel);
-		render(rightTrackModel);
-		render(leftTrackModel);
-		render(rightTrackWheelModels);
-		render(leftTrackWheelModels);
-		render(trailerModel);
-		render(steeringWheelModel);
+		if(GLDisplaylistID==null) {
+			GLDisplaylistID = GLAllocation.generateDisplayLists(1);
+			GL11.glNewList(GLDisplaylistID, GL11.GL_COMPILE);
+			render(bodyModel);
+			render(model);
+			render(bodyDoorCloseModel);
+			render(turretModel);
+			render(barrelModel);
+			render(frontWheelModel);
+			render(backWheelModel);
+			render(leftFrontWheelModel);
+			render(rightFrontWheelModel);
+			render(leftBackWheelModel);
+			render(rightBackWheelModel);
+			render(rightTrackModel);
+			render(leftTrackModel);
+			render(rightTrackWheelModels);
+			render(leftTrackWheelModels);
+			render(trailerModel);
+			render(steeringWheelModel);
+			GL11.glEndList();
+		} else {
+			org.lwjgl.opengl.GL11.glCallList(GLDisplaylistID);
+		}
 	}
 
 	@Override
