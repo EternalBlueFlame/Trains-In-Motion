@@ -12,11 +12,12 @@ package ebf.tim.models.trains; //Path where the model is located
 
 import ebf.tim.models.StaticModelAnimator;
 import fexcraft.tmt.slim.ModelBase;
+import fexcraft.tmt.slim.ModelConverter;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 
 import static ebf.tim.models.StaticModelAnimator.tagLamp;
 
-public class Brigadelok_080 extends ModelBase //Same as Filename
+public class Brigadelok_080 extends ModelConverter //Same as Filename
 {
 	int textureX = 256;
 	int textureY = 256;

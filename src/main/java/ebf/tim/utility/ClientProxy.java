@@ -98,7 +98,7 @@ public class ClientProxy extends CommonProxy {
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         if (player != null) {
             if(x==0&&y==0&&z==0&&ID==-1 && player.getHeldItem().getItem() instanceof ItemCraftGuide){
-                return new GUIGuideBook((ItemCraftGuide) player.getHeldItem().getItem());
+                return new GUICraftBook();
             }
             //Trains
             if (player.worldObj.getEntityByID(ID) instanceof GenericRailTransport && !((GenericRailTransport) player.worldObj.getEntityByID(ID)).hasCustomGUI()) {

@@ -552,7 +552,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         owner = new UUID(tag.getLong(NBTKeys.ownerMost),tag.getLong(NBTKeys.ownerLeast));
         ownerName = tag.getString(NBTKeys.ownerName);
 
-        dataWatcher.updateObject(24, tag.getString(NBTKeys.skinURI));
+        String skin = tag.getString(NBTKeys.skinURI);
+        if(SkinRegistry.getSkin(this.getClass(),skin)!=null) {
+            dataWatcher.updateObject(24, skin);
+        } else {
+            dataWatcher.updateObject(24, SkinRegistry.getDefaultTexture(this.getClass()));
+        }
+
 
         //load bogie velocities
         frontVelocityX = tag.getDouble(NBTKeys.frontBogieX);

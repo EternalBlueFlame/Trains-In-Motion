@@ -11,8 +11,10 @@ import ebf.tim.entities.rollingstock.EntityUP3Bay100TonHopper;
 import ebf.tim.entities.rollingstock.EntityVATLogCar;
 import ebf.tim.entities.trains.EntityBrigadelok080;
 import ebf.tim.entities.trains.EntityBrigadelok080Electric;
+import ebf.tim.gui.GUICraftBook;
 import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.utility.DebugUtil;
+import ebf.tim.utility.Recipe;
 import ebf.tim.utility.RecipeManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
@@ -133,7 +135,7 @@ public class TiMGenericRegistry {
     private static List<String>usedNames = new ArrayList<>();
     private static int registryPosition =17;
 
-    public static void registerTransports(boolean isClient, GenericRailTransport[] entities, Object entityRender){
+    public static void registerTransports(boolean isClient, String MODID, GenericRailTransport[] entities, Object entityRender){
         if(registryPosition==-1){
             DebugUtil.println("ERROR", "ADDING TRANSPORT REGISTRY ITEMS OUTSIDE MOD INIT", "PLEASE REGISTER YOUR ENTITIES IN THE FOLLOWING EVENT:",
                     "@Mod.EventHandler public void init(FMLInitializationEvent event)");
@@ -147,6 +149,18 @@ public class TiMGenericRegistry {
                     registry.transportName().replace(" ","") + ".entity",
                     registryPosition, TrainsInMotion.instance, 60, 1, true);
             GameRegistry.registerItem(registry.getCartItem().getItem(), registry.getCartItem().getItem().getUnlocalizedName());
+            if(GUICraftBook.recipesInMods.containsKey(MODID)){
+                GUICraftBook.recipesInMods.get(MODID).add(new Recipe(registry.getCartItem(),
+                        registry.getRecipie()[0], registry.getRecipie()[1], registry.getRecipie()[2]
+                        , registry.getRecipie()[3], registry.getRecipie()[4], registry.getRecipie()[5]
+                        , registry.getRecipie()[6], registry.getRecipie()[7], registry.getRecipie()[8]));
+            } else {
+                GUICraftBook.recipesInMods.put(MODID, new ArrayList<Recipe>());
+                GUICraftBook.recipesInMods.get(MODID).add(new Recipe(registry.getCartItem(),
+                        registry.getRecipie()[0], registry.getRecipie()[1], registry.getRecipie()[2]
+                        , registry.getRecipie()[3], registry.getRecipie()[4], registry.getRecipie()[5]
+                        , registry.getRecipie()[6], registry.getRecipie()[7], registry.getRecipie()[8]));
+            }
             registry.registerSkins();
             if(registry.getRecipie()!=null){
                 RecipeManager.registerRecipe(registry.getCartItem(), registry.getRecipie());

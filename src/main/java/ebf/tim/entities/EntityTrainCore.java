@@ -174,7 +174,7 @@ public class EntityTrainCore extends GenericRailTransport {
 
 
                 vectorCache[1][1]=(Math.abs((maxPowerNewtons/weight)/745.7f)*(accelerator*0.16666666666f))-Math.abs(vectorCache[1][0]);//max power produced without drag, minus the current power
-                if(vectorCache[1][1]>0.005){
+                if(vectorCache[1][1]>0.005 || vectorCache[1][1]<-0.005){
                     //todo: add sparks to animator.
                     vectorCache[1][0] -= (((maxPowerNewtons/weight)/745.7)*0.5f);
                 }

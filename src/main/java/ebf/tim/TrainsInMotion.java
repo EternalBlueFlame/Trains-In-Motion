@@ -13,6 +13,7 @@ import cpw.mods.fml.relauncher.Side;
 import ebf.tim.blocks.OreGen;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
+import ebf.tim.gui.GUICraftBook;
 import ebf.tim.items.ItemAdminBook;
 import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.items.TiMTab;
@@ -22,6 +23,7 @@ import ebf.tim.registry.TiMGenericRegistry;
 import ebf.tim.utility.ChunkHandler;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.CommonProxy;
+import ebf.tim.utility.DebugUtil;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -132,10 +134,14 @@ public class TrainsInMotion {
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", 15, TrainsInMotion.instance, 60, 1, true);
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntitySeat.class, "Seat", 16, TrainsInMotion.instance, 60, 2, true);
 
-        TiMGenericRegistry.registerTransports(event.getSide().isClient(), TiMGenericRegistry.listSteamTrains(), null);
-        TiMGenericRegistry.registerTransports(event.getSide().isClient(), TiMGenericRegistry.listFreight(), null);
-        TiMGenericRegistry.registerTransports(event.getSide().isClient(), TiMGenericRegistry.listPassenger(), null);
-        TiMGenericRegistry.registerTransports(event.getSide().isClient(), TiMGenericRegistry.listTanker(), null);
+        if(event.getSide().isClient()){
+            GUICraftBook.infoPages.put(MODID, new String[]{"TRAINS IN MOTION\nBy Eternal Blue Flame\nAdditional credit to Fexcraft", "PAGE 2 OF INfO GARBAGE"});
+        }
+
+        TiMGenericRegistry.registerTransports(event.getSide().isClient(), MODID, TiMGenericRegistry.listSteamTrains(), null);
+        TiMGenericRegistry.registerTransports(event.getSide().isClient(), MODID, TiMGenericRegistry.listFreight(), null);
+        TiMGenericRegistry.registerTransports(event.getSide().isClient(), MODID, TiMGenericRegistry.listPassenger(), null);
+        TiMGenericRegistry.registerTransports(event.getSide().isClient(), MODID, TiMGenericRegistry.listTanker(), null);
 
 
         //register the networking instances and channels

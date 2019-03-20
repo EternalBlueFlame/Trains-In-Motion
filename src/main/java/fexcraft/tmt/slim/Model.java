@@ -34,10 +34,10 @@ public abstract class Model<T> {
 		}
 	}
 	
-	public void render(ModelRendererTurbo[] model, float scale, boolean rotorder){
+	public void render(ModelRendererTurbo[] model, float scale){
 		if(model==null){return;}
 		for(ModelRendererTurbo sub : model){
-			sub.render(scale, rotorder, true);
+			sub.render(scale);
 		}
 	}
 	
