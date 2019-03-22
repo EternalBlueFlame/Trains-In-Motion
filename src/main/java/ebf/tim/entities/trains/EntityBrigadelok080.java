@@ -106,7 +106,7 @@ public class EntityBrigadelok080 extends TrainBase {
      * Must always go from front to back. First and last values must always be exact opposites.
      */
     @Override
-    public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-0.75, 0.75);}
+    public List<Double> getRenderBogieOffsets(){return  null;}
     /**
      * <h2>Inventory Size</h2>
      * @return the size of the inventory not counting any fuel or crafting slots, those are defined by the type.
@@ -204,7 +204,7 @@ public class EntityBrigadelok080 extends TrainBase {
 
     @Override
     public float[] bogieLengthFromCenter() {
-        return new float[]{1, -1};
+        return new float[]{1, 0.1f};
     }
 
     @Override

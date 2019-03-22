@@ -172,14 +172,16 @@ public class EntityTrainCore extends GenericRailTransport {
                 //745.7 converts to watts, which seems more accurate.
                 vectorCache[1][0] += ((maxPowerNewtons/weight)/745.7);//applied power
 
+                vectorCache[1][0]*=(accelerator*0.16666666666);//effected by the state of the throttle
 
-                vectorCache[1][1]=(Math.abs((maxPowerNewtons/weight)/745.7f)*(accelerator*0.16666666666f))-Math.abs(vectorCache[1][0]);//max power produced without drag, minus the current power
-                if(vectorCache[1][1]>0.005 || vectorCache[1][1]<-0.005){
+                vectorCache[1][1]=((float)(motionX*motionX+motionZ*motionZ));
+
+
+                if(vectorCache[1][1]>0.12 || vectorCache[1][1]<-0.12){
                     //todo: add sparks to animator.
-                    vectorCache[1][0] -= (((maxPowerNewtons/weight)/745.7)*0.5f);
+                    vectorCache[1][0] *=0.33;
                 }
 
-                vectorCache[1][0]*=(accelerator*0.16666666666);
             } else {
                 updateConsist();
             }

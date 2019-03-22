@@ -81,7 +81,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public String destination ="";
     /**used to initialize a large number of variables that are used to calculate everything from movement to linking.
      * this is so we don't have to initialize each of these variables every tick, saves CPU.*/
-    public float[][] vectorCache = new float[6][3];
+    public float[][] vectorCache = new float[7][3];
     /**the health of the entity, similar to that of EntityLiving*/
     private int health = 20;
     /**the fluidTank tank*/
@@ -256,15 +256,17 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_) {
         if (frontBogie!=null && backBogie!= null){
-            setPosition(
-                    (frontBogie.posX + backBogie.posX) * 0.5D,
-                    (frontBogie.posY + backBogie.posY) * 0.5D,
-                    (frontBogie.posZ + backBogie.posZ) * 0.5D);
 
             setRotation((float)Math.toDegrees(RailUtility.atan2f(
                     frontBogie.posZ - backBogie.posZ,
                     frontBogie.posX - backBogie.posX)),
                     MathHelper.floor_double(Math.acos(frontBogie.posY / backBogie.posY)*RailUtility.degreesD));
+
+            //base the position from the front bogie and it's offset
+            vectorCache[5] = RailUtility.rotatePointF(-this.bogieLengthFromCenter()[0],0,0,this.rotationPitch, this.rotationYaw,0);
+            //position this
+            setPosition(vectorCache[5][0]+frontBogie.posX,vectorCache[5][1]+frontBogie.posY,vectorCache[5][2]+frontBogie.posZ);
+
             updateRiderPosition();
         }else {
             this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
@@ -671,18 +673,18 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         backVelocityZ = backBogie.motionZ;
 
 
-        //position this
-        setPosition(
-                ((frontBogie.posX + backBogie.posX) * 0.5D),
-                ((frontBogie.posY + backBogie.posY) * 0.5D),
-                ((frontBogie.posZ + backBogie.posZ) * 0.5D));
-        collisionHandler.position(posX, posY, posZ, rotationPitch, rotationYaw);
-
         setRotation((RailUtility.atan2degreesf(
                 frontBogie.posZ - backBogie.posZ,
                 frontBogie.posX - backBogie.posX)),
                 MathHelper.floor_double(Math.acos(frontBogie.posY / backBogie.posY)*RailUtility.degreesD),
                 rotationYaw-prevRotationYaw);
+
+        //base the position from the front bogie and it's offset
+        vectorCache[5] = RailUtility.rotatePointF(-this.bogieLengthFromCenter()[0],0,0,this.rotationPitch, this.rotationYaw,0);
+        //position this
+        setPosition(vectorCache[5][0]+frontBogie.posX,vectorCache[5][1]+frontBogie.posY,vectorCache[5][2]+frontBogie.posZ);
+        collisionHandler.position(posX, posY, posZ, rotationPitch, rotationYaw);
+
     }
 
 
@@ -825,6 +827,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
 
             if (!worldObj.isRemote && getBoolean(boolValues.DERAILED) && !displayDerail){
+                //todo
                 //MinecraftServer.getServer().addChatMessage(new ChatComponentText(getOwner().getName()+"'s " + StatCollector.translateToLocal(getItem().getUnlocalizedName()) + " has derailed!"));
                 displayDerail = true;
             }
