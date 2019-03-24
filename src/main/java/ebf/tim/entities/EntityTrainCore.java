@@ -174,10 +174,9 @@ public class EntityTrainCore extends GenericRailTransport {
 
                 vectorCache[1][0]*=(accelerator*0.16666666666);//effected by the state of the throttle
 
-                vectorCache[1][1]=((float)(motionX*motionX+motionZ*motionZ));
+                vectorCache[1][1]=( (0.75f /*todo:* isBadWeather?0.5:1*/) *this.weightKg());
 
-
-                if(vectorCache[1][1]>0.12 || vectorCache[1][1]<-0.12){
+                if(Math.abs(vectorCache[1][0])*745.7>vectorCache[1][1]){
                     //todo: add sparks to animator.
                     vectorCache[1][0] *=0.33;
                 }
@@ -255,7 +254,9 @@ public class EntityTrainCore extends GenericRailTransport {
      */
     @Override
     public void manageLinks(GenericRailTransport linkedTransport){
-
+        if(accelerator==0){
+            super.manageLinks(linkedTransport);
+        }
     }
 
 

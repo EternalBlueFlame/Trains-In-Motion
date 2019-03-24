@@ -148,7 +148,7 @@ public class HitboxDynamic {
                                         }
                                     }
                                 }
-                                if(host.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT)) {
+                                if(host.getBoolean(GenericRailTransport.boolValues.COUPLINGBACK)) {
                                     vec = RailUtility.rotateDistance(-longest - 0.25f, host.rotationPitch, host.rotationYaw);
                                     vec.addVector(host.posX, host.posY + 0.25, host.posZ);
                                     if (stock.collisionHandler.containsPoint(vec.xCoord, vec.yCoord, vec.zCoord)) {

@@ -768,7 +768,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         //collision = hitboxHandler.getCollision(this);
         if (frontBogie!=null && backBogie != null && (!getBoolean(boolValues.DERAILED) || ticksExisted==1)){
             //handle movement.
-            if (!worldObj.isRemote && !(this instanceof EntityTrainCore)) {
+            if (!worldObj.isRemote) {
                 if (frontLinkedID != null && worldObj.getEntityByID(frontLinkedID) instanceof GenericRailTransport) {
                     manageLinks((GenericRailTransport) worldObj.getEntityByID(frontLinkedID));
                 }

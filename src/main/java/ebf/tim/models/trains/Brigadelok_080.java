@@ -143,7 +143,7 @@ public class Brigadelok_080 extends ModelConverter //Same as Filename
 		bodyModel[109] = new ModelRendererTurbo(this, 209, 57, textureX, textureY); // Box 110
 		bodyModel[110] = new ModelRendererTurbo(this, 59, 38, textureX, textureY); // Box 111
 		bodyModel[111] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, tagLamp("cone",0.01f, 0)); // lamp
-		bodyModel[112] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "smoke 3 3"); // smoke
+		bodyModel[112] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "smoke 2 3"); // smoke
 		bodyModel[113] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "steam 1 4"); // steam
 		bodyModel[114] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "steam 1 4"); // steam
 		bodyModel[115] = new ModelRendererTurbo(this, 169, 137, textureX, textureY); // Box 115
