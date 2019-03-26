@@ -11,6 +11,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -148,12 +149,16 @@ public class EntityTrainCore extends GenericRailTransport {
     }
 
     private float maxPowerNewtons=0;
+    private List<GenericRailTransport> heading = new ArrayList<>();
 
     @Override
     public void setValuesOnLinkUpdate(List<GenericRailTransport> consist){
         maxPowerNewtons=0;
         pullingWeight=0;
         for(GenericRailTransport t : consist) {
+            if(t instanceof EntityTrainCore || t.getMaxPower()!=0){
+                heading.add(t);
+            }
             maxPowerNewtons +=t.getMaxPower();
             pullingWeight +=t.weightKg();
         }
@@ -165,6 +170,15 @@ public class EntityTrainCore extends GenericRailTransport {
      * speed calculation provided by zodiacmal
      */
     public void calculateAcceleration(){
+        if(ticksExisted%20==0){
+            maxPowerNewtons=0;
+            for(GenericRailTransport t : heading) {
+                if(t.getBoolean(boolValues.RUNNING)){
+                    maxPowerNewtons +=t.getMaxPower();
+                }
+            }
+        }
+
         float weight=pullingWeight * (getBoolean(boolValues.BRAKE)?2:1);
         if (accelerator !=0) {
             //speed is defined by the power in newtons divided by the weight, divided by the number of ticks in a second.
@@ -174,9 +188,11 @@ public class EntityTrainCore extends GenericRailTransport {
 
                 vectorCache[1][0]*=(accelerator*0.16666666666);//effected by the state of the throttle
 
-                vectorCache[1][1]=( (0.75f /*todo:* isBadWeather?0.5:1*/) *this.weightKg());
 
-                if(Math.abs(vectorCache[1][0])*745.7>vectorCache[1][1]){
+                vectorCache[1][1]=( (1.75f * (worldObj.isRaining()?0.5f:1)) *this.weightKg());
+                //todo: debuff for pulled weight
+
+                if(Math.abs(vectorCache[1][0])*745.7>vectorCache[1][1]/745.7){
                     //todo: add sparks to animator.
                     vectorCache[1][0] *=0.33;
                 }
@@ -233,9 +249,9 @@ public class EntityTrainCore extends GenericRailTransport {
                     this.dataWatcher.updateObject(18, accelerator);
                 }
             }
-            vectorCache[3] = RailUtility.rotatePointF(vectorCache[1][0],vectorCache[1][1],vectorCache[1][2], rotationPitch, rotationYaw, 0);
-            frontBogie.setVelocity(vectorCache[3][0], vectorCache[3][1], vectorCache[3][2]);
-            backBogie.setVelocity(vectorCache[3][0], vectorCache[3][1], vectorCache[3][2]);
+            vectorCache[3] = RailUtility.rotatePointF(vectorCache[1][0],0,0, rotationPitch, rotationYaw, 0);
+            frontBogie.addVelocity(vectorCache[3][0], vectorCache[3][1], vectorCache[3][2]);
+            backBogie.addVelocity(vectorCache[3][0], vectorCache[3][1], vectorCache[3][2]);
 
             frontVelocityX = frontBogie.motionX;
             backVelocityX = backBogie.motionX;

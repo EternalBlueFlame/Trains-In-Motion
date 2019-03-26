@@ -16,6 +16,7 @@ import fexcraft.tmt.slim.ModelConverter;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 
 import static ebf.tim.models.StaticModelAnimator.tagLamp;
+import static ebf.tim.models.StaticModelAnimator.tagSmoke;
 
 public class Brigadelok_080 extends ModelConverter //Same as Filename
 {
@@ -91,7 +92,7 @@ public class Brigadelok_080 extends ModelConverter //Same as Filename
 		bodyModel[57] = new ModelRendererTurbo(this, 1, 113, textureX, textureY); // Box 59
 		bodyModel[58] = new ModelRendererTurbo(this, 97, 113, textureX, textureY); // Box 60
 		bodyModel[59] = new ModelRendererTurbo(this, 57, 81, textureX, textureY); // Box 61
-		bodyModel[60] = new ModelRendererTurbo(this, 145, 113, textureX, textureY,tagLamp("cone",-0.0001f, 0)); // Box 62
+		bodyModel[60] = new ModelRendererTurbo(this, 145, 113, textureX, textureY,tagLamp(1, 0)); // Box 62
 		bodyModel[61] = new ModelRendererTurbo(this, 73, 81, textureX, textureY); // Box 63
 		bodyModel[62] = new ModelRendererTurbo(this, 161, 113, textureX, textureY); // Box 64
 		bodyModel[63] = new ModelRendererTurbo(this, 97, 57, textureX, textureY); // Box 65
@@ -142,10 +143,10 @@ public class Brigadelok_080 extends ModelConverter //Same as Filename
 		bodyModel[108] = new ModelRendererTurbo(this, 65, 121, textureX, textureY); // Box 109
 		bodyModel[109] = new ModelRendererTurbo(this, 209, 57, textureX, textureY); // Box 110
 		bodyModel[110] = new ModelRendererTurbo(this, 59, 38, textureX, textureY); // Box 111
-		bodyModel[111] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, tagLamp("cone",0.01f, 0)); // lamp
-		bodyModel[112] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "smoke 2 3"); // smoke
-		bodyModel[113] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "steam 1 4"); // steam
-		bodyModel[114] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, "steam 1 4"); // steam
+		bodyModel[111] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, tagLamp(1, 0)); // lamp
+		bodyModel[112] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, tagSmoke(1)); // smoke
+		bodyModel[113] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, tagSmoke(2)); // steam
+		bodyModel[114] = new ModelRendererTurbo(this, 0, 0, textureX, textureY, tagSmoke(2)); // steam
 		bodyModel[115] = new ModelRendererTurbo(this, 169, 137, textureX, textureY); // Box 115
 		bodyModel[116] = new ModelRendererTurbo(this, 169, 137, textureX, textureY); // Box 116
 

@@ -1,6 +1,7 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.TextureManager;
@@ -27,12 +28,10 @@ public class ParticleFX {
     private int lifespan =-1;
     /*returns if the particle should render or not*/
     public boolean shouldRender = false;
-    /*the color to render the particle as*/
-    private int color;
     /*the ticks the particle has existed, float is used so render can divide it into decimals*/
-    public Float ticksExisted=null, scale=null;
+    public Float ticksExisted=null;
     /*the offset to tint the particle color*/
-    private int colorTint, colorTemp;
+    private int colorTint;
     /*the bounding box of the particle to use for rendering and collision, if it's null we render it as a static particle*/
     private final AxisAlignedBB boundingBox;
     /*the motion of the particle*/
@@ -47,30 +46,28 @@ public class ParticleFX {
     private GenericRailTransport host;
     /*the position offset to move based on the transport's rotation*/
     private float[] offset, pos;
-    private int particleID=0;
+    private int particleID=0, particleType=0;
 
     /**
      * Initialize the particle, basically for spawning it
-     * @param color the color of the particle.
      */
-    public ParticleFX(GenericRailTransport transport, int color, float scale, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, int id) {
+    public ParticleFX(int id, int type, GenericRailTransport transport, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ) {
         host = transport;
         particleID=id;
-        this.scale=scale;
-        this.offset = new float[]{offsetX, id==4?(float)transport.posY:offsetY, offsetZ, rotationX*RailUtility.degreesF, rotationY*RailUtility.degreesF, rotationZ*RailUtility.degreesF};
+        particleType=type;
+        this.offset = new float[]{offsetX, type==4?(float)transport.posY:offsetY, offsetZ, rotationX*RailUtility.degreesF, rotationY*RailUtility.degreesF, rotationZ*RailUtility.degreesF};
         pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, transport.rotationPitch, transport.rotationYaw, 0);
         pos= new float[]{pos[0],pos[1],pos[2]};
-        this.color = color;
 
-        switch (particleID) {
+        switch (particleType) {
             case 0:case 1:{//smoke, steam
                 motionX = (rand.nextInt(40) - 20) * 0.001f;
-                motionY = particleID==0f?0.15f:0.0005f;
+                motionY = particleType==0f?0.15f:0.0005f;
                 motionZ = (rand.nextInt(40) - 20) * 0.001f;
 
                 this.boundingBox = AxisAlignedBB.getBoundingBox(pos[0] + transport.posX - 0.1, pos[1] + transport.posY - 0.1, pos[2] + transport.posZ - 0.1, pos[0] + transport.posX + 0.1, pos[1] + transport.posY + 0.1, pos[2] + transport.posZ + 0.1);
                 break;
-            }case 4:{//sparks
+            }case 2:{//sparks
                 motionX = (rand.nextInt(40) - 20) * 0.0005f;
                 motionY = 0.001f;
                 motionZ = (rand.nextInt(40) - 20) * 0.0005f;
@@ -79,7 +76,7 @@ public class ParticleFX {
                 this.boundingBox = AxisAlignedBB.getBoundingBox(pos[0] + transport.posX - 0.05, pos[1] + transport.posY - 0.05, pos[2] + transport.posZ - 0.05, pos[0] + transport.posX + 0.05, pos[1] + transport.posY + 0.05, pos[2] + transport.posZ + 0.05);
                 break;
             }
-            case 2:case 3: default:{
+            case 3:case 4:case 5:case 6:case 7: default:{
                 motionX = 1;
                 this.boundingBox = null;
                 break;
@@ -87,37 +84,16 @@ public class ParticleFX {
         }
     }
 
-    public ParticleFX(GenericRailTransport transport, int color, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, int id, float scale){
-        this(transport, color, scale, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id);
-    }
 
-    public static int getParticleIDFronName(String name){
-        if(name.toLowerCase().contains("smoke")){
-            return 0;
-        } else if(name.toLowerCase().contains("steam")){
-            return 1;
-        } else if (name.toLowerCase().contains("lamp")){
-            if(name.toLowerCase().contains("cone")){
-                return 2;
-            }else if(name.toLowerCase().contains("sphere")) {
-                return 3;
-            }
-        }  else if (name.toLowerCase().contains(StaticModelAnimator.tagWheel)){
-            return 4;
-        }
-
-        return -1;//invalid part
-    }
-
-    public static List<ParticleFX> newParticleItterator(Float strength, float scale, int color, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, GenericRailTransport host, String partname){
+    public static List<ParticleFX> newParticleItterator(String boxName, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, GenericRailTransport host){
+        int[] data = parseData(boxName);
         List<ParticleFX> list = new ArrayList<>();
-        int id= getParticleIDFronName(partname);
-        if(id==0 || id==1) {
-            for (int i = 0; i < strength*20; i++) {
-                list.add(new ParticleFX(host, color, scale, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id));
+        if(data[1]==0 || data[1]==1) {
+            for (int i = 0; i < host.getParticleData(data[0])[0]*20; i++) {
+                list.add(new ParticleFX(data[0], data[1], host, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ));
             }
         } else {
-            list.add(new ParticleFX(host, color, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, id, strength));
+            list.add(new ParticleFX(data[0], data[1], host,offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ));
         }
         return list;
     }
@@ -130,19 +106,28 @@ public class ParticleFX {
         }
     }
 
-    public static float[] parseData(String s){
+
+    public static int[] parseData(String s){
         if (s.contains("smoke")) {
-            String[] smoke = s.substring(s.indexOf("smoke ")+6).split(" ");
-            return new float[]{Float.parseFloat(smoke[0]), 1f, Float.parseFloat(smoke[1])};
-        } else if (s.contains("lamp")){
-            String[] lamp = s.substring(s.indexOf("lamp ")+5).split(" ");
-            return new float[]{1f, Float.parseFloat(lamp[1]), Float.parseFloat(lamp[2])};
-        } else if (s.contains(StaticModelAnimator.tagWheel)){
-            return new float[]{4f, 1f, 0xCCCC00};
-        } else {
-            String[] smoke = s.substring(s.indexOf("steam ")+6).split(" ");
-            return new float[]{Float.parseFloat(smoke[0]), 1f, Float.parseFloat(smoke[1])};
+            return new int[]{Integer.parseInt(s.split(" ")[1]), 0};
+        } else if (s.contains("steam")) {
+            return new int[]{Integer.parseInt(s.split(" ")[1]), 1};
+        }  else if (s.toLowerCase().contains("wheel")){
+            return new int[]{0, 2};
+        } else if (s.toLowerCase().contains("lamp")){
+            if(s.toLowerCase().contains("cone")){
+                return new int[]{Integer.parseInt(s.split(" ")[2]), 3};
+            }else if(s.toLowerCase().contains("sphere")) {
+                return new int[]{Integer.parseInt(s.split(" ")[2]), 4};
+            }else if(s.toLowerCase().contains("mars")) {
+                return new int[]{Integer.parseInt(s.split(" ")[2]), 5};
+            }else if(s.toLowerCase().contains("siren")) {
+                return new int[]{Integer.parseInt(s.split(" ")[2]), 6};
+            }else if(s.toLowerCase().contains("glare")) {
+                return new int[]{Integer.parseInt(s.split(" ")[2]), 7};
+            }
         }
+        return null;//this states the box is not a supported particle
     }
 
     /**
@@ -159,14 +144,15 @@ public class ParticleFX {
         }
 
 
-        //update lamps
-        if (particleID==3 || particleID==2){
+        if (particleType==3 || particleType==4 || particleType==5){//lamps
             shouldRender=host.getBoolean(GenericRailTransport.boolValues.LAMP);
             pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, host.rotationPitch, host.rotationYaw, 0);
             pos= new float[]{pos[0],pos[1],pos[2]};
-            colorTint=(int)host.getParticleData(color)[2];
+            if(particleType==5){
+                //todo mars lamp stuff
+            }
             return;
-        } else if(particleID==4 && this.ticksExisted > this.lifespan){
+        } else if(particleType==2 && this.ticksExisted > this.lifespan){//wheel sparks
             if(host.vectorCache[1][1]>0.005){
                 colorTint = (rand.nextInt(75) - 30);
                 lifespan = rand.nextInt(80) +140;
@@ -180,24 +166,23 @@ public class ParticleFX {
                 shouldRender = true;
             }
 
-        }else if (hostIsRunning && this.ticksExisted > this.lifespan) {
+        }else if (hostIsRunning && this.ticksExisted > this.lifespan) {//smoke and steam
             //if the lifespan is out we reset the information, as if we just spawned a new particle.
             colorTint = (rand.nextInt(75) - 30);
-            colorTemp=(int)host.getParticleData(color)[2];
             lifespan = rand.nextInt(80) +140;
             ticksExisted =0f;
             //recalculating it throws away the rotation value, but that's only used for the cone lamp, which doesn't even run this, so we don't need it anyway.
             pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, host.rotationPitch, host.rotationYaw, 0);
             this.boundingBox.setBounds(host.posX+pos[0] -0.1, host.posY+pos[1] -0.1, host.posZ+pos[2] -0.1, host.posX+pos[0] +0.1,  host.posY+pos[1] +0.1, host.posZ+pos[2] +0.1);
             motionX = (rand.nextInt(40) - 20) * 0.001f;
-            if(particleID==0) {
+            if(particleType==0) {
                 motionY = rand.nextInt(15)*0.003f;
-            } else if (particleID==1){
+            } else if (particleType==1){
                 motionY = rand.nextInt(15)*0.00005f;
             }
             motionZ = (rand.nextInt(40) - 20) * 0.001f;
             shouldRender = true;
-        } else if (this.ticksExisted > this.lifespan) {
+        } else if (this.ticksExisted > this.lifespan) {//smoke and steam while train is off
             //if the transport isn't running and this has finished it's movement, set it' position to the transport and set that it shouldn't render.
             this.boundingBox.setBounds(host.posX, host.posY, host.posZ, host.posX,  host.posY, host.posZ);
             shouldRender = false;
@@ -205,13 +190,16 @@ public class ParticleFX {
         }
 
 
-        if(particleID==4){
-
+        if(particleID==5){//sparks skip physics calculations
             boundingBox.offset(motionX,motionY,motionZ);
             ticksExisted++;
 
             return;
         }
+
+        /*
+        the rest of this is physics for smoke and steam
+        */
 
         //set the old motion values so we can compare them later.
         oldX = motionX;
@@ -289,12 +277,14 @@ public class ParticleFX {
         GL11.glPushMatrix();
         //DebugUtil.println(entity.host.rotationYaw);
 
-        if (entity.particleID==2) {//cone lamps
+        if (entity.particleType==3) {//cone lamps
             GL11.glTranslated(x+entity.pos[0] , y+entity.pos[1]+0.3, z+entity.pos[2]);
             GL11.glRotated(270+entity.offset[4]+entity.host.rotationPitch,1,0,0);
             GL11.glRotated(entity.offset[5],0,1,0);
             GL11.glRotated(270-(entity.offset[3]+entity.host.rotationYaw),0,0,1);
-            GL11.glScalef(5.5f*entity.scale,5.5f*entity.scale,5.5f*entity.scale);
+            GL11.glScalef(entity.host.getParticleData(entity.particleID)[1]*0.055f,
+                    entity.host.getParticleData(entity.particleID)[1]*0.055f,
+                    entity.host.getParticleData(entity.particleID)[1]*0.055f);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
             glAlphaFunc(GL_LEQUAL, 1f);
@@ -313,10 +303,12 @@ public class ParticleFX {
             Minecraft.getMinecraft().entityRenderer.enableLightmap(1D);
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glDepthMask(true);
-        } else if (entity.particleID==3) {//sphere lamps
+        } else if (entity.particleType==4) {//sphere lamps
             GL11.glTranslated(x+entity.pos[0] , y+entity.pos[1]+0.3, z+entity.pos[2]);
             GL11.glRotated(270-entity.pos[3]+entity.host.rotationYaw,0,0,1);
-            GL11.glScalef(entity.scale,entity.scale,entity.scale);
+            GL11.glScalef(entity.host.getParticleData(entity.particleID)[1]*0.01f,
+                    entity.host.getParticleData(entity.particleID)[1]*0.01f,
+                    entity.host.getParticleData(entity.particleID)[1]*0.01f);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
             glAlphaFunc(GL_LEQUAL, 1f);
@@ -341,13 +333,13 @@ public class ParticleFX {
 
             GL11.glDisable(GL11.GL_TEXTURE_2D);
             //set the color with the tint.   * 0.00392156863 is the same as /255, but multiplication is more efficient than division.
-            GL11.glColor4f(((entity.colorTemp >> 16 & 0xFF)-entity.colorTint)* 0.00392156863f,
-                    ((entity.colorTemp >> 8 & 0xFF)-entity.colorTint)* 0.00392156863f,
-                    ((entity.colorTemp & 0xFF)-entity.colorTint)* 0.00392156863f,
+            GL11.glColor4f(((entity.host.getParticleData(entity.particleID)[2] >> 16 & 0xFF)-entity.colorTint)* 0.00392156863f,
+                    ((entity.host.getParticleData(entity.particleID)[2] >> 8 & 0xFF)-entity.colorTint)* 0.00392156863f,
+                    ((entity.host.getParticleData(entity.particleID)[2] & 0xFF)-entity.colorTint)* 0.00392156863f,
                     1f-(entity.ticksExisted/entity.lifespan));
             //set the position
             GL11.glTranslated( x + entity.boundingBox.minX - entity.host.posX, y+ entity.boundingBox.minY-entity.host.posY, z+ entity.boundingBox.minZ - entity.host.posZ);
-            if(entity.particleID==4){
+            if(entity.particleType==4){
                 GL11.glScalef(0.5f,0.5f,0.5f);
             }
             particle.render(0.0625f);

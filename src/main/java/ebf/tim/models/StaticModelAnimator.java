@@ -23,18 +23,19 @@ public class StaticModelAnimator extends AnimationBase {
     /**tag for wheels, adds support for the sparks on top of what tagSimpleRotate does.*/
     public static final String tagWheel = "wheel";
 
-    //todo: type by id?
-    public static String tagLamp(String type, float scale, int id){
-        return "lamp "+ type+" "+scale+" "+id;
-    }
-
-    public static String tagLamp(int type, float scale, int id){
+    /**
+     * Note that types 2, 3, and 4 are not yet implemented.
+     * @param type 0/unknown:cone. 1: sphere. 2:mars. 3:siren. 4:glare
+     * @param id the ID associated with the transport method to define density, scale, and color:
+     * @see GenericRailTransport#getParticleData(int)
+     */
+    public static String tagLamp(int type, int id){
         switch (type) {
-            case 1: return "lamp sphere" + " " + scale + " " + id;
-            case 2: return "lamp mars" + " " + scale + " " + id; //todo: does that weird Y/Z oogly spinning
-            case 3: return "lamp siren" + " " + scale + " " + id;//todo:spins on X at a set rate
-            case 4: return "lamp glare" + " " + scale + " " + id;//todo: perhaps render at point and disable 3d and depth?
-            default: return "lamp cone" + " " + scale + " " + id;
+            case 1: return "lamp sphere " + id;
+            case 2: return "lamp mars " + id; //todo: does that weird Y/Z oogly spinning
+            case 3: return "lamp siren " + id;//todo:spins on X at a set rate
+            case 4: return "lamp glare " + id;//todo: perhaps render at point and disable 3d and depth?
+            default: return "lamp cone " + id;
         }
     }
 
@@ -44,7 +45,10 @@ public class StaticModelAnimator extends AnimationBase {
     //todo: door types - swing, swing up, slide sideways, slide vertical(stair covers), slide out (retractable stairs).
 
     public static String tagSmoke(int id){
-        return "smoke " + id;
+        return "smoke 0 " + id;
+    }
+    public static String tagSteam(int id){
+        return "smoke 1 " + id;
     }
 
     /**

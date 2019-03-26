@@ -17,6 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
 
 /**
  * <h2>Entity Rendering</h2>
@@ -74,6 +75,10 @@ public class RenderEntity extends Render {
      */
     public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw){
 
+        if(entity.frontBogie==null){
+            return;
+        }
+
         if (entity.renderData.modelList == null) {
             entity.renderData = new TransportRenderData();
             entity.renderData.modelList = entity.getModel();
@@ -108,13 +113,10 @@ public class RenderEntity extends Render {
                             }
                             render.showModel = false;
                         }
-                        if(ParticleFX.getParticleIDFronName(render.boxName)!=-1){
-                            density = ParticleFX.parseData(render.boxName.toLowerCase());
-                            entity.renderData.particles.addAll(ParticleFX.newParticleItterator(density[0],
-                                    density[1], (int)density[2],
+                        if(ParticleFX.parseData(render.boxName)!=null){
+                            entity.renderData.particles.addAll(ParticleFX.newParticleItterator(render.boxName,
                                     render.rotationPointX, render.rotationPointY, render.rotationPointZ,
-                                    render.rotateAngleX,render.rotateAngleY,render.rotateAngleZ,
-                                    entity, render.boxName));
+                                    render.rotateAngleX,render.rotateAngleY,render.rotateAngleZ, entity));
                         }
                     }
                 }
@@ -142,7 +144,7 @@ public class RenderEntity extends Render {
 
         GL11.glPushMatrix();
         //set the render position
-        GL11.glTranslated(x, y+ RailOffset + (entity.getRenderScale()-0.0625f)*10, z);
+        GL11.glTranslated(x, y+ RailOffset + ((entity.getRenderScale()-0.0625f)*10)+entity.frontBogie.yOffset, z);
         //rotate the model.
         GL11.glRotatef(-yaw - 180f, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
@@ -180,8 +182,8 @@ public class RenderEntity extends Render {
          */
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
         TextureManager.adjustLightFixture(entity.worldObj,(int)entity.posX,(int)entity.posY,(int)entity.posZ);
+        TextureManager.maskColors(entity.getTexture().texture, null);
         for(i=0; i< entity.renderData.modelList.length;i++) {
-            TextureManager.maskColors(entity.getTexture().texture, null);
             if(entity.modelOffsets()!=null && entity.modelOffsets().length>i) {
                 GL11.glTranslated(entity.modelOffsets()[i][0],entity.modelOffsets()[i][1],entity.modelOffsets()[i][2]);
             }
@@ -214,7 +216,7 @@ public class RenderEntity extends Render {
                             entity.simpleBogieModelOffsets()[i],
                             RailOffset, 0,
                             entity.rotationPitch, entity.rotationYaw, 0);
-                    GL11.glTranslated(entity.renderData.animationCache[1][0] + x, entity.renderData.animationCache[1][1] + y, entity.renderData.animationCache[1][2] + z);
+                    GL11.glTranslated(entity.renderData.animationCache[1][0] + x, entity.renderData.animationCache[1][1] + y+entity.frontBogie.yOffset, entity.renderData.animationCache[1][2] + z);
                     entity.renderData.bogieRenders[i].setRotation(entity);
                     //set the rotation
                     GL11.glRotatef(-entity.renderData.bogieRenders[i].rotationYaw - 180f, 0.0f, 1.0f, 0);
@@ -238,7 +240,7 @@ public class RenderEntity extends Render {
                             RailOffset + entity.bogieModelOffsets()[i][1]
                             , entity.bogieModelOffsets()[i][2],
                             entity.rotationPitch, entity.rotationYaw, 0);
-                    GL11.glTranslated(entity.renderData.animationCache[1][0] + x, entity.renderData.animationCache[1][1] + y, entity.renderData.animationCache[1][2] + z);
+                    GL11.glTranslated(entity.renderData.animationCache[1][0] + x, entity.renderData.animationCache[1][1] + y+entity.frontBogie.yOffset, entity.renderData.animationCache[1][2] + z);
                     entity.renderData.bogieRenders[i].setRotation(entity);
                     //set the rotation
                     GL11.glRotatef(-entity.renderData.bogieRenders[i].rotationYaw - 180f, 0.0f, 1.0f, 0);

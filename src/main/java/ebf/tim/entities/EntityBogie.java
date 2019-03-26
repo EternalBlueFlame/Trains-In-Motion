@@ -5,6 +5,7 @@ import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.utility.RailUtility;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IMinecart;
@@ -72,6 +73,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
     public EntityBogie(World world) {
         super(world);
+        yOffset=0.2f;
     }
 
     /**
@@ -86,6 +88,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         posZ = zPos;
         parentId = parent;
         isFront = front;
+        yOffset=0.2f;
     }
 
     /**Small networking check to add the bogie to the host train/rollingstock. Or to remove the bogie from the world if the host doesn't exist.*/
@@ -238,8 +241,9 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             Block block = worldObj.getBlock(floorX, floorY, floorZ);
             //update on normal rails
             if (block instanceof BlockRailBase) {
-                moveBogie(this.motionX * ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ),
-                        this.motionZ * ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, floorX, floorY, floorZ),
+                this.yOffset=(block instanceof BlockRailCore?0.2f:0.125f);
+                moveBogie(this.motionX * ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, floorY,floorX, floorZ),
+                        this.motionZ * ((BlockRailBase)block).getRailMaxSpeed(worldObj, this, floorY, floorX, floorZ),
                         floorX, floorY, floorZ, (BlockRailBase) block);
                 //update on ZnD rails, and ones that don't extend block rail base.
             } else if (block instanceof ITrackBase) {

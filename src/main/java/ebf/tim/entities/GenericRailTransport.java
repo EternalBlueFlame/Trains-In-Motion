@@ -131,7 +131,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * @see #setBoolean(boolValues, boolean)
      */
     private BitList bools = new BitList();
-    public enum boolValues{BRAKE(0), LOCKED(1), LAMP(2), CREATIVE(3), COUPLINGFRONT(4), COUPLINGBACK(5), WHITELIST(6), RUNNING(7), DERAILED(8);
+    public enum boolValues{BRAKE(0), LOCKED(1), LAMP(2), CREATIVE(3), COUPLINGFRONT(4), COUPLINGBACK(5), WHITELIST(6), RUNNING(7), @Deprecated DERAILED(8);
         public int index;
         boolValues(int index){this.index = index;}
     }
@@ -765,7 +765,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
          *
          * this stops updating if the transport derails. Why update positions of something that doesn't move? We compensate for first tick to be sure hitboxes, bogies, etc, spawn on join.
          */
-        //collision = hitboxHandler.getCollision(this);
         if (frontBogie!=null && backBogie != null && (!getBoolean(boolValues.DERAILED) || ticksExisted==1)){
             //handle movement.
             if (!worldObj.isRemote) {
@@ -1008,13 +1007,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         if (getRiderOffsets() != null) {
             if (riddenByEntity != null) {
                 vectorCache[2] = rotatePointF(getRiderOffsets()[0][0],getRiderOffsets()[0][1],getRiderOffsets()[0][2], rotationPitch, rotationYaw, 0);
-                riddenByEntity.setPosition(vectorCache[2][0] + this.posX, vectorCache[2][1] + this.posY+(worldObj.isRemote?0:1), vectorCache[2][2] + this.posZ);
+                riddenByEntity.setPosition(vectorCache[2][0] + this.posX, vectorCache[2][1] + this.posY+(worldObj.isRemote?0:1)+(frontBogie==null?0:frontBogie.yOffset), vectorCache[2][2] + this.posZ);
             }
 
             for (int i = 0; i < seats.size(); i++) {
                 vectorCache[2] = rotatePointF(getRiderOffsets()[i][0],getRiderOffsets()[i][1],getRiderOffsets()[i][2], rotationPitch, rotationYaw, 0);
                 vectorCache[2][0] += posX;
-                vectorCache[2][1] += posY+(worldObj.isRemote?0:1);
+                vectorCache[2][1] += posY+(worldObj.isRemote?0:1)+(frontBogie==null?0:frontBogie.yOffset);
                 vectorCache[2][2] += posZ;
                 seats.get(i).setPosition(vectorCache[2][0], vectorCache[2][1], vectorCache[2][2]);
             }
@@ -1663,16 +1662,25 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public float getMaxFuel(){return 0;}
 
 
+    /**
+     * returns an array of integers.
+     * the first is density.
+     * the second is scale in percentage.
+     * the third is color in hex.
+     * todo: the fourth is speed in percentage (does not apply to cone or sphere lamps)
+     * @param id the index of the particle defined in the model
+     */
     @SideOnly(Side.CLIENT)
-    public float[] getParticleData(int id){
+    public int[] getParticleData(int id){
+        //DebugUtil.println(id);
         switch (id){
-            case 0:{return new float[]{3f, 1f, 0x232323};}//smoke
-            case 1:{return new float[]{5f, 1f, 0x232323};}//heavy smoke
-            case 2:{return new float[]{2f, 1f, 0xEEEEEE};}//steam
-            case 3:{return new float[]{6f, 1f, 0xCECDCB};}//led lamp
-            case 4:{return new float[]{3f, 0.5f, 0xCC0000};}//reverse lamp
-            case 5:{return new float[]{3f, 0.5f, 0xCCCC00};}//small sphere lamp
-            default:{return new float[]{6f, 1f, 0xCCCC00};}//lamp
+            case 0:{return new int[]{3, 100, 0x232323};}//smoke
+            case 1:{return new int[]{5, 100, 0x232323};}//heavy smoke
+            case 2:{return new int[]{2, 100, 0xEEEEEE};}//steam
+            case 3:{return new int[]{6, 100, 0xCECDCB};}//led lamp
+            case 4:{return new int[]{3, 50, 0xCC0000};}//reverse lamp
+            case 5:{return new int[]{3, 50, 0xCCCC00};}//small sphere lamp
+            default:{return new int[]{6, 100, 0xCCCC00};}//lamp
         }
     }
 
