@@ -2,6 +2,7 @@ package ebf.tim.utility;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.launchwrapper.Launch;
 
 /**
@@ -30,6 +31,16 @@ public class DebugUtil {
 			for (Object obj : o){
 				System.out.println(obj);
 			}
+			System.out.println("------------------TiM Debug------------------");
+		}
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static void printGLError(int glerror){
+		if(glerror!=0x0){
+			System.out.println("------------------TiM Debug------------------");
+			System.out.println(Thread.currentThread().getStackTrace()[2]);//print what function just called this
+			System.out.println(org.lwjgl.util.glu.GLU.gluErrorString(glerror));
 			System.out.println("------------------TiM Debug------------------");
 		}
 	}

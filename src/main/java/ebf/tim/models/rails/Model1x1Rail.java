@@ -53,6 +53,7 @@ public class Model1x1Rail {
     public static void addVertexWithOffset(float[] p, float width, float height, float depth){
         rotateVertexPoint(depth,height,width,p[3],p[4]);
         Tessellator.getInstance().addVertex(vert[0]+p[0],vert[1]+p[1], vert[2]+p[2]);
+        Tessellator.getInstance().addVertexWithUV(vert[0]+p[0],vert[1]+p[1], vert[2]+p[2],0,0);
     }
 
     public static void addVertexWithOffsetAndUV(float[] p, float width, float height, float depth, float U, float V){
