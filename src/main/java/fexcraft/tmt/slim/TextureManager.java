@@ -1,19 +1,15 @@
 package fexcraft.tmt.slim;
 
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
@@ -181,7 +177,7 @@ public class TextureManager {
                     texture=null;
                     red =0;green=0;blue=0;divisor=0;
                     Item item = s.getItem();
-                    String textureName = ObfuscationReflectionHelper.getPrivateValue(Item.class, item, "iconString");
+                    String textureName = item.getIcon(s,0).getIconName();
                     if(textureName != null){
                         if(textureName.split(":").length == 1){
                             textureName = "minecraft:" + textureName;
