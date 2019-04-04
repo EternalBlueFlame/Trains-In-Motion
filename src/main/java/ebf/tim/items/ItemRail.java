@@ -74,15 +74,16 @@ public class ItemRail extends Item implements ITrackItem {
                 } else {
                     ((RailTileEntity) world.getTileEntity(x,y,z)).rail = new ItemStack(Items.iron_ingot);
                 }
-                if(stack.getTagCompound().getTag("ballast")!=null) {
-                    ((RailTileEntity) world.getTileEntity(x,y,z)).ties = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ballast")).getItem());
-                }
                 if(stack.getTagCompound().getTag("ties")!=null) {
-                    ((RailTileEntity) world.getTileEntity(x,y,z)).ballast = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties")).getItem());
+                    ((RailTileEntity) world.getTileEntity(x,y,z)).ties = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties")).getItem());
+                }
+                if(stack.getTagCompound().getTag("ballast")!=null) {
+                    ((RailTileEntity) world.getTileEntity(x,y,z)).ballast = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ballast")).getItem());
                 }
                 if(stack.getTagCompound().getTag("wires")!=null) {
-                    ((RailTileEntity) world.getTileEntity(x,y,z)).ballast = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("wires")).getItem());
+                    ((RailTileEntity) world.getTileEntity(x,y,z)).wires = ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("wires")).getItem();
                 }
+                ((RailTileEntity) world.getTileEntity(x,y,z)).updateShape();
             } else if(stack.hasTagCompound()) {
                 System.out.println("Trains In Motion ERROR, TILE ENTITY NOT SPAWNED FAST ENOUGH, that can happen?");
             }
@@ -125,58 +126,53 @@ public class ItemRail extends Item implements ITrackItem {
 
         if( stack.hasTagCompound()){
             if(stack.getTagCompound().getTag("count")!=null) {
-                stringList.add(stack.getTagCompound().getInteger("count")+" "+
-                        RailUtility.translate("menu.items"));
+                stringList.add(RailUtility.translate("menu.items") + stack.getTagCompound().getInteger("count"));
             } else {
                 stringList.add("1 "+RailUtility.translate("menu.item"));
             }
 
-            if(stack.getTagCompound().getTag("rail")!=null) {
-               stringList.add(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("rail")).getDisplayName()+
-                       RailUtility.translate("menu.rails"));
+            if(stack.getTagCompound().hasKey("rail")) {
+                stringList.add(RailUtility.translate("menu.rails") + " " + ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("rail")).getDisplayName());
             } else {
                 stringList.add("default rails");
             }
 
-            if(stack.getTagCompound().getTag("ballast")!=null) {
-                stringList.add(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ballast")).getDisplayName()+
-                        RailUtility.translate("menu.ballast"));
+            //todo: for some reason i ill never understand, the lang file returns ties and ballast backwards.
+            if(stack.getTagCompound().hasKey("ballast")) {
+                stringList.add(RailUtility.translate("menu.ties")+ " " + ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ballast")).getDisplayName());
+            } else {
+                stringList.add(RailUtility.translate("menu.noties"));
+            }
+            if(stack.getTagCompound().hasKey("ties")) {
+                stringList.add(RailUtility.translate("menu.ballast")+ " " + ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties")).getDisplayName());
             } else {
                 stringList.add(RailUtility.translate("menu.noballast"));
             }
 
-            if(stack.getTagCompound().getTag("ties")!=null) {
-                stringList.add(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties")).getDisplayName()+
-                        RailUtility.translate("menu.ties"));
-            } else {
-                stringList.add(RailUtility.translate("menu.noties"));
-            }
-
-            if(stack.getTagCompound().getTag("wires")!=null) {
-                stringList.add(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("wires")).getDisplayName()+
-                        RailUtility.translate("menu.wires"));
+            if(stack.getTagCompound().hasKey("wires")) {
+                stringList.add(RailUtility.translate("menu.wires") + " " +ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("wires")).getDisplayName());
             } else {
                 stringList.add(RailUtility.translate("menu.nowires"));
             }
         }
     }
 
-    public static ItemStack setStackData(ItemStack stack, ItemStack ingot, Block ballast, Block ties, Block wires){
+    public static ItemStack setStackData(ItemStack stack, ItemStack ingot, Block ballast, Block ties, Item wires){
         //init stack NBT
         stack.setTagCompound(new NBTTagCompound());
         //add a tag for the stack then put the stack in it.
         if(ingot!=null) {
-            stack.getTagCompound().setTag("ingot", new NBTTagCompound());
-            ingot.writeToNBT(stack.getTagCompound().getCompoundTag("ingot"));
+            stack.getTagCompound().setTag("rail", new NBTTagCompound());
+            ingot.writeToNBT(stack.getTagCompound().getCompoundTag("rail"));
         }
         //rinse and repeat
-        if(ballast!=null) {
-            stack.getTagCompound().setTag("ballast",new NBTTagCompound());
-            new ItemStack(ballast).writeToNBT(stack.getTagCompound().getCompoundTag("ballast"));
-        }
         if(ties!=null) {
             stack.getTagCompound().setTag("ties",new NBTTagCompound());
             new ItemStack(ties).writeToNBT(stack.getTagCompound().getCompoundTag("ties"));
+        }
+        if(ballast!=null) {
+            stack.getTagCompound().setTag("ballast",new NBTTagCompound());
+            new ItemStack(ballast).writeToNBT(stack.getTagCompound().getCompoundTag("ballast"));
         }
         if(wires!=null) {
             stack.getTagCompound().setTag("wires",new NBTTagCompound());
@@ -189,10 +185,10 @@ public class ItemRail extends Item implements ITrackItem {
     @SideOnly(Side.CLIENT)
     public void getSubItems(Item p_150895_1_, CreativeTabs p_150895_2_, List tabItems) {
         if(p_150895_1_ instanceof ItemRail) {
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.gravel, Blocks.log, null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.gravel, Blocks.planks, null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.gravel, null, null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.stone, null, null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.log, Blocks.gravel,null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.planks, Blocks.gravel, null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, Blocks.gravel,null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, Blocks.stone, null));
             tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, null, null));
         } else {
             tabItems.add(new ItemStack(p_150895_1_));

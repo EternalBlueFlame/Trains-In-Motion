@@ -16,6 +16,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
@@ -142,6 +143,8 @@ public class CommonProxy implements IGuiHandler {
 
     public static BlockRailCore railBlock = new BlockRailCore();
 
+    public static Item railItem;
+
     /**
      * <h2>Server Register</h2>
      * Used for registering server only functions.
@@ -153,12 +156,12 @@ public class CommonProxy implements IGuiHandler {
         RegisterFluid(TrainsInMotion.proxy.isClient(),fluidDiesel, TrainsInMotion.MODID, "diesel", false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
 
 
-        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", null, TrainsInMotion.creativeTab, null);
-        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemCraftGuide(),TrainsInMotion.MODID, "craftbook", null, TrainsInMotion.creativeTab, null);
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", TrainsInMotion.creativeTab);
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemCraftGuide(),TrainsInMotion.MODID, "craftbook", TrainsInMotion.creativeTab);
 
-        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemKey(),TrainsInMotion.MODID,  "transportkey",null, TrainsInMotion.creativeTab, null);
-        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemTicket(),TrainsInMotion.MODID,  "transportticket",null, TrainsInMotion.creativeTab, null);
-        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemRail(),TrainsInMotion.MODID,  "timrail", null, TrainsInMotion.creativeTab, null);
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemKey(),TrainsInMotion.MODID,  "transportkey", TrainsInMotion.creativeTab);
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemTicket(),TrainsInMotion.MODID,  "transportticket", TrainsInMotion.creativeTab);
+        railItem = RegisterItem(TrainsInMotion.proxy.isClient(),new ItemRail(),TrainsInMotion.MODID,  "timrail", TrainsInMotion.creativeTab);
 
         registerBlock(isClient(), railBlock, null, "block.timrail", null, getTESR());
 
@@ -168,23 +171,6 @@ public class CommonProxy implements IGuiHandler {
 
         addRecipe(new ItemStack(registerBlock(isClient(), railTable, TrainsInMotion.creativeTab,"block.railtable", null, null),1),
                 "III", "I I", "I I", 'I', Items.iron_ingot);
-
-        for (ItemStack i : new ItemStack[]{new ItemStack(Items.iron_ingot),new ItemStack(Items.gold_ingot)}) {
-            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,Blocks.gravel, Blocks.planks, null),
-                    "IWI", "IWI", "IBI", 'W', Blocks.planks, 'I', i, 'B', Blocks.gravel);
-
-            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,null, Blocks.planks, null),
-                    "IWI", "IWI", "I I", 'W', Blocks.planks, 'I', i);
-
-            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,Blocks.gravel, null, null),
-                    "I I", "I I", "IBI", 'I', i, 'B', Blocks.gravel);
-
-            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,Blocks.stone, null, null),
-                    "I I", "I I", "IBI", 'I', i, 'B', Blocks.stone);
-
-            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,null, null, null),
-                    "I I", "I I", "I I", 'I', i);
-        }
     }
 
 }

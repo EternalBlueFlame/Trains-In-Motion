@@ -9,7 +9,15 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.inventory.SlotCrafting;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.oredict.OreDictionary;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <h1>Tile Entity Container</h1>
@@ -49,23 +57,23 @@ public class TileEntitySlotManager extends Container{
 
         if (craftingTable.storageType == 1) {
 
-            //tile entity's output slot
-            this.addSlotToContainer(new SlotCrafting(iinventory.player, craftingTable, craftingTable, 10, 124, 44));
-            this.addSlotToContainer(new SlotCrafting(iinventory.player, craftingTable, craftingTable, 4, 124, 0));
             //tile entity's crafting grid
             for (int l = 0; l < 3; ++l) {
-                this.addSlotToContainer(new craftingSlot(craftingTable, l, 30, 2 + (l * 20)));
+                addSlotToContainer(new craftingSlot(craftingTable, l, 30, 2 + (l * 20)));
             }
+            //tile entity's output slot
+            addSlotToContainer(new Slot(craftingTable, 3, 124, 44));
+            addSlotToContainer(new craftingSlot(craftingTable, 4, 124, 0));
 
         } else {
-            //tile entity's output slot
-            this.addSlotToContainer(new SlotCrafting(iinventory.player, craftingTable, craftingTable, 10, 124, 35));
             //tile entity's crafting grid
             for (int l = 0; l < 3; ++l) {
                 for (int i1 = 0; i1 < 3; ++i1) {
-                    this.addSlotToContainer(new craftingSlot(craftingTable, i1 + l * 3, 30 + i1 * 18, 17 + l * 18));
+                    addSlotToContainer(new craftingSlot(craftingTable, i1 + l * 3, 30 + i1 * 18, 17 + l * 18));
                 }
             }
+            //tile entity's output slot
+            addSlotToContainer(new Slot(craftingTable, 10, 124, 35));
         }
         onCraftMatrixChanged(craftingTable);
     }
@@ -130,15 +138,29 @@ public class TileEntitySlotManager extends Container{
         return craftingTable != null;
     }
 
+    public void putStackInSlot(int slot, ItemStack stack, boolean isPlayerInventory) {
+        ((Slot)this.inventorySlots.get(isPlayerInventory?slot:slot+36)).putStack(stack);
+    }
 
     /**
      * <h2>craft matrix updater redirect</h2>
      * vanilla redirect for updating the craft matrix.
-     * @see TileEntitySlotManager#findMatchingRecipe() for the actual use.
      */
     @Override
     public void onCraftMatrixChanged(IInventory inventory) {
-        this.craftingTable.setInventorySlotContents(10, findMatchingRecipe());
+        if(craftingTable!=null) {
+            switch (craftingTable.storageType) {
+                case 0: {
+                    putStackInSlot(10, transportRecipe(), false);
+                    break;
+                }
+                case 1: {
+                    putStackInSlot(3, railRecipe(), false);
+                    break;
+                }
+            }
+        }
+        super.onCraftMatrixChanged(inventory);
     }
 
     /**
@@ -146,38 +168,92 @@ public class TileEntitySlotManager extends Container{
      * manages crafting recipes, and their outputs.
      * the current implementation only supports shaped recipes.
      */
-    private ItemStack findMatchingRecipe() {
-        //if this is for a crafting table
-        if (craftingTable != null) {
-            if(craftingTable.storageType==0) {
-                return RecipeManager.getResult(new ItemStack[]{
-                        craftingTable.getStackInSlot(0), craftingTable.getStackInSlot(1), craftingTable.getStackInSlot(2),
-                        craftingTable.getStackInSlot(3), craftingTable.getStackInSlot(4), craftingTable.getStackInSlot(5),
-                        craftingTable.getStackInSlot(6), craftingTable.getStackInSlot(7), craftingTable.getStackInSlot(8)
-                });
-            } else if(craftingTable.storageType==1){
-                if(craftingTable.getStackInSlot(3).getItem() instanceof ItemRail &&
-                        craftingTable.getStackInSlot(0)==(ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(0).getTagCompound().getCompoundTag("ingot"))) &&
-                        craftingTable.getStackInSlot(1)==(ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(1).getTagCompound().getCompoundTag("ties"))) &&
-                        craftingTable.getStackInSlot(2)==(ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(2).getTagCompound().getCompoundTag("ballast")))
-                ){
-                    ItemStack rail = ItemRail.setStackData(new ItemStack(new ItemRail()),
-                            craftingTable.getStackInSlot(0),
-                            Block.getBlockFromItem(craftingTable.getStackInSlot(1).getItem()),
-                            Block.getBlockFromItem(craftingTable.getStackInSlot(2).getItem()),
-                            null
-                    );
-                    rail.getTagCompound().setInteger("count", craftingTable.getStackInSlot(4).getTagCompound().getInteger("count")+1);
-                    return rail;
+    @Deprecated
+    private ItemStack transportRecipe() {
+        return RecipeManager.getResult(new ItemStack[]{
+                craftingTable.getStackInSlot(0), craftingTable.getStackInSlot(1), craftingTable.getStackInSlot(2),
+                craftingTable.getStackInSlot(3), craftingTable.getStackInSlot(4), craftingTable.getStackInSlot(5),
+                craftingTable.getStackInSlot(6), craftingTable.getStackInSlot(7), craftingTable.getStackInSlot(8)
+        });
+    }
+
+
+    public ItemStack railRecipe(){
+        if(craftingTable.getStackInSlot(4)!=null && craftingTable.getStackInSlot(4).getItem() instanceof ItemRail){
+            DebugUtil.println("there was a rail in the slot");
+        }
+
+        //handle adding to an existing stack
+        if(craftingTable.getStackInSlot(4)!=null && craftingTable.getStackInSlot(4).getItem() instanceof ItemRail &&
+                craftingTable.getStackInSlot(0)==getStackIngot() &&
+                craftingTable.getStackInSlot(1)==getStackTies() &&
+                craftingTable.getStackInSlot(2)==getStackBallast()){
+
+            ItemStack rail = ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
+                    craftingTable.getStackInSlot(0),
+                    craftingTable.getStackInSlot(1)==null?null:Block.getBlockFromItem(craftingTable.getStackInSlot(1).getItem()),
+                    craftingTable.getStackInSlot(2)==null?null:Block.getBlockFromItem(craftingTable.getStackInSlot(2).getItem()),
+                    null);
+
+            rail.getTagCompound().setInteger("count",
+                    craftingTable.getStackInSlot(4).getTagCompound().getInteger("count")+1);
+            return rail;
+        }
+        //handle making a new stack
+        if(craftingTable.getStackInSlot(0)!=null && ingotInDirectory(craftingTable.getStackInSlot(0).getItem())) {
+            return ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
+                    craftingTable.getStackInSlot(0),
+                    craftingTable.getStackInSlot(1) == null ? null : Block.getBlockFromItem(craftingTable.getStackInSlot(1).getItem()),
+                    craftingTable.getStackInSlot(2) == null ? null : Block.getBlockFromItem(craftingTable.getStackInSlot(2).getItem()),
+                    null);
+        }
+        //todo: works, but goes to wrong slot,
+        //maybe issue is that the host inventory this sorts into prioritizes the player's inventory before the crafters
+        //potential fix would be to compensate for player inventory space as a buffer since the value is reliably static unlike storage
+        return null;
+
+    }
+
+    public @Nullable ItemStack getStackBallast(){
+        return !craftingTable.getStackInSlot(4).getTagCompound().hasKey("ballast")?null:
+                ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ballast"));
+    }
+    public @Nullable ItemStack getStackTies(){
+        return !craftingTable.getStackInSlot(4).getTagCompound().hasKey("ties")?null:
+                ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ties"));
+    }
+    public @Nullable ItemStack getStackIngot(){
+        return !craftingTable.getStackInSlot(4).getTagCompound().hasKey("ingot")?null:
+                ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ingot"));
+    }
+
+
+
+    public static boolean stackMatches(ItemStack slot, ItemStack recipe){
+        if(slot==null && recipe==null){
+            return true;
+        } else if(slot==null || recipe==null){
+            return false;
+        } else if(slot.getItem()==recipe.getItem()){
+            return slot.stackSize>=recipe.stackSize;
+        }
+        return false;
+    }
+
+    private static List<Item> ingotDirectory = new ArrayList<>();
+
+    public static boolean ingotInDirectory(Item i){
+        if(ingotDirectory.size()==0){
+            String[] ores = OreDictionary.getOreNames();
+            for(String o: ores) {
+                if (o.contains("ingot")) {
+                    for (ItemStack s : OreDictionary.getOres(o)) {
+                        ingotDirectory.add(s.getItem());
+                    }
                 }
-                return ItemRail.setStackData(new ItemStack(new ItemRail()),
-                        craftingTable.getStackInSlot(0),
-                        Block.getBlockFromItem(craftingTable.getStackInSlot(1).getItem()),
-                        Block.getBlockFromItem(craftingTable.getStackInSlot(2).getItem()),
-                        null);
             }
         }
-        return null;
+        return ingotDirectory.contains(i);
 
     }
 

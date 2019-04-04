@@ -1,5 +1,6 @@
 package fexcraft.tmt.slim;
 
+import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
@@ -9,6 +10,7 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
@@ -17,6 +19,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
+import javax.annotation.Nullable;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -33,10 +37,7 @@ public class TextureManager {
     private static final byte fullAlpha=(byte)0;
     private static Set MCResourcePacks;
 
-    //2 bytes for idk GL does something with them, then 4 bytes per pixel at 4kx4k resolution. any bigger breaks intel GPU's anyway.
-    private static ByteBuffer bufferTexturePixels = GLAllocation.createDirectByteBuffer(67108866);
-
-    public static int[] ingotColors = new int[]{};
+    public static Map<String,int[]> ingotColors = new HashMap<>();
 
 
     private static Map<ResourceLocation, Integer> tmtMap = new HashMap<>();
@@ -77,7 +78,7 @@ public class TextureManager {
         return true;
     }
 
-    public static int[] loadTexture(ResourceLocation resource){
+    public static @Nullable int[] loadTexture(ResourceLocation resource){
         //if the list of loaded resource packs has changed, invalidate our texture cache as well.
         if(Minecraft.getMinecraft().getResourceManager().getResourceDomains() != MCResourcePacks){
             MCResourcePacks = Minecraft.getMinecraft().getResourceManager().getResourceDomains();
@@ -88,21 +89,17 @@ public class TextureManager {
 
         bindTexture(resource);
         if(texture==null){
-            int width =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
-            int height =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
 
-            GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, bufferTexturePixels);
-
-            texture = new int[((width*height)*4)+2];
-            texture[0]=width;
-            texture[1]=height;
-            for (int i=2; i<((width*height)*(4))-2; i+=(4)){
-                texture[i+3]=bufferTexturePixels.get(i+3);//alpha
-                texture[i+2]=bufferTexturePixels.get(i+2);//Red
-                texture[i+1]=bufferTexturePixels.get(i+1);//Green
-                texture[i]=bufferTexturePixels.get(i);//Blue
+            try {
+                texture = TextureUtil.readImageData(Minecraft.getMinecraft().getResourceManager(), resource);
+            } catch (IOException e){
+                System.out.println("TRAINS IN MOTION WARNING");
+                System.out.println("TEXTURE FAILED TO LOAD: " + resource.getResourceDomain()+":"+resource.getResourcePath());
+                texture=null;
             }
-            tmtTextureMap.put(resource, texture);
+            if(texture!=null) {
+                tmtTextureMap.put(resource, texture);
+            }
         }
 
         return texture;
@@ -111,9 +108,9 @@ public class TextureManager {
 
 
 
-    public static void maskColors(ResourceLocation textureURI, List<int[]> colors){
+    public static void maskColors(ResourceLocation textureURI, List<Integer> colors){
         pixels = loadTexture(textureURI);
-        if(pixels.length==2){
+        if(pixels==null){
             return;
         }
         length = ((pixels[0]*pixels[1])*4)-4;
@@ -124,15 +121,15 @@ public class TextureManager {
                 continue;//skip pixels with no color
             }
             //for each set of recoloring
-            if (colors!=null) {
-                for (ii = 0; ii < colors.size(); ii++) {
-                    RGBint = colors.get(ii);
+            if (colors!=null && colors.size()>0) {
+                for (Integer col: colors) {
+                    RGBint = hexTorgba(col);
                     //if it's within 10 RGB, add the actual color we want to the differences
                     if (colorInRange(pixels[i] & 0xFF, pixels[i + 1] & 0xFF, pixels[i + 2] & 0xFF,
-                            RGBint[0] & 0xFF, (RGBint[0] >> 8) & 0xFF, (RGBint[0] >> 16) & 0xFF)) {
-                        renderPixels.put(i, b(RGBint[1]));
-                        renderPixels.put(i + 1, b(RGBint[1] >> 8));
-                        renderPixels.put(i + 2, b(RGBint[1] >> 16));
+                            RGBint[0], RGBint[1], RGBint[2])) {
+                        renderPixels.put(i, b(RGBint[0]));
+                        renderPixels.put(i + 1, b(RGBint[1]));
+                        renderPixels.put(i + 2, b(RGBint[2]));
                     } else {
                         renderPixels.put(i, b(pixels[i]));
                         renderPixels.put(i + 1, b(pixels[i + 1]));
@@ -167,98 +164,61 @@ public class TextureManager {
         GL11.glColor4f(255, 255, 255, 255);//fixes alpha layering bugs with other mods that don't clear their GL cache
     }
 
+
     /**
      * Ingot color textures
      */
-
-
     public static void collectIngotColors(){
         String[] ores = OreDictionary.getOreNames();
 
-        Map<String, int[]> colors = new TreeMap<>();//map of delegate, color
+        int red,green,blue,divisor;
+        int[]rgb;
+        ResourceLocation texture;
         for(String o: ores){
             if (o.contains("ingot")){
                 for (ItemStack s : OreDictionary.getOres(o)){
-                    IIcon itm = s.getItem().getIcon(s,0);
 
-                    bindTexture(TextureMap.locationItemsTexture);
-
-                    int texturewidth=GL11.glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
-
-                    /*GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, bufferTexturePixels);
-                    int width = (int) ((itm.getMaxU()-itm.getMinU())*16f);
-                    int height = (int) ((itm.getMaxV()-itm.getMinV())*16f);
-                    int[] texture = new int[((width*height)*4)+2];
-                    i=0;
-
-                    //loop for the pixels fo the texture and collect the entire texture
-                    for (int x=(int)(itm.getMinU()*16f); x<itm.getMaxU()*16f; x++){
-                        for (int y=(int)(itm.getMinV()*16f); y<itm.getMaxV()*16f; y++){
-                            int pos = (texturewidth*y)+x;
-                            texture[i+3]=bufferTexturePixels.get(pos+3);//alpha
-                            texture[i+2]=bufferTexturePixels.get(pos+2);//Red
-                            texture[i+1]=bufferTexturePixels.get(pos+1);//Green
-                            texture[i]=bufferTexturePixels.get(pos);//Blue
-                            i++;
+                    texture=null;
+                    red =0;green=0;blue=0;divisor=0;
+                    Item item = s.getItem();
+                    String textureName = ObfuscationReflectionHelper.getPrivateValue(Item.class, item, "iconString");
+                    if(textureName != null){
+                        if(textureName.split(":").length == 1){
+                            textureName = "minecraft:" + textureName;
                         }
-                    }*/
-
-
-
-                    pixels = loadTexture(TextureMap.locationItemsTexture);
-                    if(pixels.length==2){
-                        return;
+                        texture = new ResourceLocation(textureName.split(":")[0], "textures/items/" + textureName.split(":")[1] + ".png");
                     }
-                    length = ((pixels[0]*pixels[1])*4)-4;
 
-
-                    //todo: we got the sprite in pixels now, so we need to average out the color
-                    // add all the colors, then divide by how many were actually added
-                    //this could probably be compressed into the above method.
-                    int[] color={0,0,0};
-                    int divisor=0;
-                    int x=-1,y=0;
-                    int[] pixel = new int[]{0,0,0,0};
-                    for(i=0; i<length; i+=4) {
-                        x++;
-                        if(x>texturewidth){
-                            x=0;
-                            y++;
-                        }
-                        ////if(x<minx||x>maxX||y<miny||y>maxy){
-                          //  continue;
-                       // }
-
-                        pixel[3]=pixels[i+3];//alpha is always from host texture.
-                        if (pixels[i+3] == fullAlpha){
-                            continue;//skip pixels with no color
+                    if(texture != null){
+                        try {
+                            int[] colorBuff = TextureUtil.readImageData(Minecraft.getMinecraft().getResourceManager(), texture);
+                            for(int c : colorBuff){
+                                rgb=hexTorgba(c);
+                                if(rgb[3]>128) {
+                                    if(rgb[0]+rgb[1]+rgb[2]>20) {
+                                        red+=rgb[2];
+                                        blue+=rgb[1];
+                                        green+=rgb[0];
+                                        divisor++;
+                                    }
+                                }
+                            }
+                            ingotColors.put(item.delegate.name(), new int[]{red/divisor,blue/divisor,green/divisor});
+                        } catch (IOException e) {
+                            DebugUtil.println("Caught exception while parsing texture to get color: ");
+                            e.printStackTrace();
                         }
 
-
-
-                        divisor++;
-                        color[0]+=pixels[i];
-                        color[1]+=pixels[i+1];
-                        color[2]+=pixels[i+2];
                     }
 
 
-                    DebugUtil.println(" colors for ingot " + s.getDisplayName(),color[0]+":"+color[1]+":"+color[2]);
-
-                    if(divisor!=0) {
-                        color[0] = color[0] / divisor;
-                        color[1] = color[1] / divisor;
-                        color[2] = color[2] / divisor;
-                    }
-
-                    //now add to list
-                    colors.put(s.getItem().delegate.name(), color);
                 }
             }
         }
+    }
 
 
-
-
+    public static int[] hexTorgba(int hex){
+        return new int[]{hex&0xFF, (hex>>8)&0xFF, (hex>>16)&0xFF, (hex>>24)&0xFF};
     }
 }

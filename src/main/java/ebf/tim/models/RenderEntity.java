@@ -137,8 +137,6 @@ public class RenderEntity extends Render {
 
 
 
-        GL11.glEnable(GL11.GL_VERTEX_ARRAY);
-        GL11.glEnable(GL11.GL_TEXTURE_COORD_ARRAY);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL11.GL_BLEND);
 
@@ -182,7 +180,7 @@ public class RenderEntity extends Render {
          */
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
         TextureManager.adjustLightFixture(entity.worldObj,(int)entity.posX,(int)entity.posY,(int)entity.posZ);
-        TextureManager.maskColors(entity.getTexture().texture, null);
+        TextureManager.maskColors(entity.getTexture().texture, entity.colors);
         for(i=0; i< entity.renderData.modelList.length;i++) {
             if(entity.modelOffsets()!=null && entity.modelOffsets().length>i) {
                 GL11.glTranslated(entity.modelOffsets()[i][0],entity.modelOffsets()[i][1],entity.modelOffsets()[i][2]);
@@ -264,8 +262,6 @@ public class RenderEntity extends Render {
         }
 
         GL11.glDisable(GL11.GL_BLEND);
-        GL11.glDisable(GL11.GL_TEXTURE_COORD_ARRAY);
-        GL11.glDisable(GL11.GL_VERTEX_ARRAY);
 
 
 

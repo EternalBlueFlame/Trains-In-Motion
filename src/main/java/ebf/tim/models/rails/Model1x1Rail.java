@@ -3,10 +3,16 @@ package ebf.tim.models.rails;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
 import fexcraft.tmt.slim.Tessellator;
+import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -52,7 +58,6 @@ public class Model1x1Rail {
 
     public static void addVertexWithOffset(float[] p, float width, float height, float depth){
         rotateVertexPoint(depth,height,width,p[3],p[4]);
-        Tessellator.getInstance().addVertex(vert[0]+p[0],vert[1]+p[1], vert[2]+p[2]);
         Tessellator.getInstance().addVertexWithUV(vert[0]+p[0],vert[1]+p[1], vert[2]+p[2],0,0);
     }
 
@@ -63,7 +68,7 @@ public class Model1x1Rail {
 
 
     //todo use the return value to manage displaylists
-    public static void Model3DRail(List<float[]> points, float[] railOffsets, float segmentLength, @Nullable Block ballast, @Nullable Block ties, ItemStack railBlock){
+    public static void Model3DRail(World world, int xPos, int yPos, int zPos, List<float[]> points, float[] railOffsets, float segmentLength, @Nullable Block ballast, @Nullable Block ties, int[] railColor){
         if(railOffsets==null || points ==null){
             return;
         }
@@ -81,18 +86,27 @@ public class Model1x1Rail {
             }
 
 
-            GL11.glEnable(GL11.GL_VERTEX_ARRAY);
-            GL11.glEnable(GL11.GL_TEXTURE_COORD_ARRAY);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            GL11.glEnable(GL11.GL_BLEND);
             GL11.glDisable(GL11.GL_LIGHTING);
+
+            Minecraft.getMinecraft().entityRenderer.enableLightmap(1);
+            TextureManager.adjustLightFixture(world,xPos,yPos,zPos);
+            //GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
             //DebugUtil.println(ClientProxy.railLoD);
             //renders the rails, also defines min and max width
             switch (ClientProxy.railLoD){
-                case 0:{ModelRail.modelPotatoRail(points, railOffsets, railBlock); break;}
-                case 1:{ModelRail.model3DRail(points, railOffsets, railBlock); break;}
+                case 0:{ModelRail.modelPotatoRail(points, railOffsets, railColor); break;}
+                case 1:{ModelRail.model3DRail(points, railOffsets, railColor); break;}
                 case 2://todo normal rail
-                case 3:{ModelRail.model3DRail(points, railOffsets, railBlock); break;}//todo HD rail
+                case 3:{ModelRail.model3DRail(points, railOffsets, railColor); break;}//todo HD rail
             }
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            GL11.glClearColor(1.0f,1.0f,1.0f,1.0f);
+            Tessellator.bindTexture(TextureMap.locationBlocksTexture);
+            // clear the display buffer to the clear colour
+            //GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
             if(ties!=null) {
                 if(ClientProxy.railLoD==0){
@@ -113,10 +127,8 @@ public class Model1x1Rail {
                 }
             }
 
-
             GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glDisable(GL11.GL_TEXTURE_COORD_ARRAY);
-            GL11.glDisable(GL11.GL_VERTEX_ARRAY);
+            GL11.glDisable(GL11.GL_BLEND);
 
         }
 

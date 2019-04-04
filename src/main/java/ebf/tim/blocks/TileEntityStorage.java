@@ -2,6 +2,7 @@ package ebf.tim.blocks;
 
 
 import ebf.tim.TrainsInMotion;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.TileEntitySlotManager;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,6 +13,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.oredict.OreDictionary;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,14 +83,14 @@ public class TileEntityStorage extends TileEntity implements IInventory {
     @Override
     public int getSizeInventory() {
         switch (storageType){
-            case 1:{return 3;}
-            default:{return 9;}
+            case 1:{return 4;}
+            default:{return 10;}
         }
     }
 
 
     @Override
-    public ItemStack getStackInSlot(int slot) {
+    public @Nullable ItemStack getStackInSlot(int slot) {
         if (slot <0 || slot >= getSizeInventory()){
             return null;
         } else {

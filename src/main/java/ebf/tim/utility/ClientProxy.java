@@ -11,17 +11,26 @@ import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.gui.*;
 import ebf.tim.items.ItemCraftGuide;
+import ebf.tim.items.ItemRail;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
+import ebf.tim.models.rails.ModelBallast;
+import fexcraft.fcl.common.lang.ArrayList;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -29,6 +38,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * <h1>client proxy</h1>
@@ -264,6 +274,26 @@ public class ClientProxy extends CommonProxy {
         @Override
         protected void bindTexture(ResourceLocation p_147499_1_){}
     };
+
+    public class railItemRederer extends ItemRenderer{
+        public railItemRederer(Minecraft p_i1247_1_) {
+            super(p_i1247_1_);
+        }
+        @Override
+        public void renderItem(EntityLivingBase p_78443_1_, ItemStack p_78443_2_, int p_78443_3_, IItemRenderer.ItemRenderType type) {
+            if(p_78443_2_.getItem() instanceof ItemRail){
+                if(p_78443_2_.getTagCompound().hasKey("ballast")){
+                    List<float[]> p = new ArrayList<>();
+                    p.add(new float[]{-0.5f,0f,0f});
+                    p.add(new float[]{0.5f,0f,0f});
+                    ModelBallast.modelPotatoBallast(p,0.5f,-0.5f,
+                            Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(p_78443_2_.getTagCompound().getCompoundTag("ballast")).getItem()),
+                            1);
+                }
+            }
+
+        }
+    }
 
     private static final RenderEntity transportRenderer = new RenderEntity();
 

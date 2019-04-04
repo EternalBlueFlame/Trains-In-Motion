@@ -57,8 +57,9 @@ menu.item=Item
 menu.items=Items
 menu.item.fueltype=Fuel Type
 menu.item.seats=Seats
-menu.ties=Ties
-menu.ballast=Ballast
+menu.ties=Ties:
+menu.ballast=Ballast:
+menu.rails=Rails:
 item.TiM=Trains in Motion
 
 <!-- ## Countries ## -->

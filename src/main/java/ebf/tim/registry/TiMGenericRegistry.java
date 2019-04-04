@@ -20,6 +20,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.MaterialLiquid;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
@@ -27,6 +28,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -80,7 +83,11 @@ public class TiMGenericRegistry {
         return block;
     }
 
-    public static Item RegisterItem(boolean isClient, Item itm, String MODID, String unlocalizedName, @Nullable String oreDictionaryName, @Nullable CreativeTabs tab, @Nullable Item container){
+    public static Item RegisterItem(boolean isClient, Item itm, String MODID, String unlocalizedName, CreativeTabs tab){
+        return RegisterItem(isClient, itm, MODID, unlocalizedName,null,tab, null,null);
+    }
+
+    public static Item RegisterItem(boolean isClient, Item itm, String MODID, String unlocalizedName, @Nullable String oreDictionaryName, @Nullable CreativeTabs tab, @Nullable Item container, @Nullable Object itemRender){
         if (tab!=null) {
             itm.setCreativeTab(tab);
         }
@@ -95,8 +102,11 @@ public class TiMGenericRegistry {
         if(oreDictionaryName!=null){
             OreDictionary.registerOre(oreDictionaryName, itm);
         }
-        if (TrainsInMotion.proxy!=null &&TrainsInMotion.proxy.isClient() && itm.getUnlocalizedName().equals(StatCollector.translateToLocal(itm.getUnlocalizedName()))){
+        if (TrainsInMotion.proxy!=null && isClient && itm.getUnlocalizedName().equals(StatCollector.translateToLocal(itm.getUnlocalizedName()))){
             DebugUtil.println("Item missing lang entry: " + itm.getUnlocalizedName());
+        }
+        if(isClient && itemRender!=null){
+            MinecraftForgeClient.registerItemRenderer(itm, (IItemRenderer)itemRender);
         }
         return itm;
     }

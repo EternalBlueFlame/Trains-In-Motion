@@ -1,8 +1,11 @@
 package fexcraft.tmt.slim;
 
+import ebf.tim.utility.DebugUtil;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+
+import static org.lwjgl.opengl.GL11.glGetError;
 
 
 public class TexturedPolygon {
@@ -50,11 +53,8 @@ public class TexturedPolygon {
         for (PositionTransformVertex positionTexturevertex : vertices){
         	Tessellator.getInstance().addVertexWithUV(positionTexturevertex.vector3F.xCoord * f, positionTexturevertex.vector3F.yCoord * f, positionTexturevertex.vector3F.zCoord * f, positionTexturevertex.textureX, positionTexturevertex.textureY);
 		}
-		if(!GL11.glGetBoolean(GL11.GL_VERTEX_ARRAY)) {
-			Tessellator.getInstance().draw();
-		} else {
-			Tessellator.getInstance().arrayEnabledDraw();
-		}
+		DebugUtil.printGLError(glGetError());
+		Tessellator.getInstance().arrayEnabledDraw();
     }
 
 
@@ -67,5 +67,5 @@ public class TexturedPolygon {
 
 		this.vertices = apositiontexturevertex;
 	}
-	
+
 }

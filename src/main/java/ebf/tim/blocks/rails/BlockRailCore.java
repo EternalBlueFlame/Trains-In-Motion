@@ -2,8 +2,10 @@ package ebf.tim.blocks.rails;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.items.ItemRail;
+import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.Vec3f;
 import net.minecraft.block.Block;
@@ -14,9 +16,11 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialLogic;
 import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -136,17 +140,14 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
     @Override
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
-        //todo: return the generated item you'd get from middle click
-        return null;
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z, EntityPlayer player) {
+        return getPickBlock(target, world, x, y, z);
     }
-
-    @SideOnly(Side.CLIENT)
     @Override
-    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_) {
-        return null;
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
+        return ItemRail.setStackData(
+                new ItemStack(CommonProxy.railItem, 1),tile.rail, tile.ballast, tile.ties, tile.wires);
     }
-
     @Override
     public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune) {
         ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
@@ -154,7 +155,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         int count = quantityDropped(metadata, fortune, world.rand);
         for(int i = 0; i < count; i++) {
             ret.add(ItemRail.setStackData(
-                    new ItemStack(new ItemRail(), 1),tile.rail, tile.ballast, tile.ties, tile.wires));
+                    new ItemStack(CommonProxy.railItem, 1),tile.rail, tile.ballast, tile.ties, tile.wires));
         }
         return ret;
     }

@@ -3,6 +3,7 @@ package ebf.tim.blocks;
 import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.blocks.rails.RailVanillaShapes;
 import ebf.tim.models.rails.Model1x1Rail;
+import ebf.tim.utility.DebugUtil;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
@@ -31,9 +32,10 @@ public class RailTileEntity extends TileEntity {
     private AxisAlignedBB boundingBox = null;
     //management variables
     public ItemStack rail;
+    private int[] railColor=null;
     public Block ballast;
     public Block ties;
-    public Block wires;
+    public Item wires;
     public int snow=0;
     public int timer=0;
     public int overgrowth=0;
@@ -63,9 +65,17 @@ public class RailTileEntity extends TileEntity {
                 org.lwjgl.opengl.GL11.glCallList(railGLID);
             } else {
 
+                if(railColor==null){
+                    if(rail !=null && TextureManager.ingotColors!=null && TextureManager.ingotColors.containsKey(rail.getItem().delegate.name())){
+                        railColor=TextureManager.ingotColors.get(rail.getItem().delegate.name());
+                    } else {
+                        railColor=new int[]{0,0,0};
+                    }
+                }
+
                 railGLID = net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1);
                 org.lwjgl.opengl.GL11.glNewList(railGLID, org.lwjgl.opengl.GL11.GL_COMPILE);
-                Model1x1Rail.Model3DRail(points, gauge750mm, segmentLength, ties, ballast, rail);
+                Model1x1Rail.Model3DRail(worldObj,xCoord,yCoord,zCoord,points, gauge750mm, segmentLength, ties, ballast, railColor);
                 org.lwjgl.opengl.GL11.glEndList();
             }
         } else {super.func_145828_a(report);}
@@ -73,7 +83,7 @@ public class RailTileEntity extends TileEntity {
 
     @Override
     public boolean shouldRefresh(Block oldBlock, Block newBlock, int oldMeta, int newMeta, World world, int x, int y, int z) {
-        return oldMeta != newMeta;
+        return oldMeta != newMeta || points.size()==0;
     }
 
     @Override
@@ -237,7 +247,7 @@ public class RailTileEntity extends TileEntity {
         }
         if(wires!=null) {
             compound = new NBTTagCompound();
-            new ItemStack(Item.getItemFromBlock(wires)).writeToNBT(compound);
+            new ItemStack(wires).writeToNBT(compound);
             tag.setTag("wires", compound);
         }
 
@@ -270,7 +280,7 @@ public class RailTileEntity extends TileEntity {
             ties = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ties")).getItem());
         }
         if(tag.hasKey("wires")) {
-            wires = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("wires")).getItem());
+            wires = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("wires")).getItem();
         }
 
         if (tag.hasKey("segmentLength")) {

@@ -6,6 +6,8 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -159,6 +161,7 @@ public class TrainsInMotion {
             //register the event handler
             MinecraftForge.EVENT_BUS.register(ClientProxy.eventManager);
             FMLCommonHandler.instance().bus().register(ClientProxy.eventManager);
+            fexcraft.tmt.slim.TextureManager.collectIngotColors();
         }
         MinecraftForge.EVENT_BUS.register(CommonProxy.eventManagerServer);
         FMLCommonHandler.instance().bus().register(CommonProxy.eventManagerServer);

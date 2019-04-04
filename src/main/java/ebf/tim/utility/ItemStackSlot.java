@@ -111,6 +111,7 @@ public class ItemStackSlot extends Slot {
                 this.onCrafting(p_75220_1_, i);
             }
         }
+        this.inventory.markDirty();
     }
 
     /*

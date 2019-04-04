@@ -3,7 +3,6 @@ package ebf.tim.models.rails;
 import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
@@ -56,6 +55,10 @@ public class ModelBallast {
             ballastloop++;
         }
         Tessellator.getInstance().arrayEnabledDraw();
+
+        GL11.glPopMatrix();
+        GL11.glPushMatrix();
+        GL11.glTranslated(0, 0.1, 0);
 
         //east side
         iicon=  RenderBlocks.getInstance().getBlockIconFromSide(b, ForgeDirection.EAST.ordinal());

@@ -19,8 +19,6 @@ public class ModelTies {
     public static void modelPotatoTies(List<float[]> points, float maxWidth, float minWidth, Block block){
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.125, 0);
-
-        Tessellator.bindTexture(TextureMap.locationBlocksTexture);
         //top side
         IIcon iicon=  RenderBlocks.getInstance().getBlockIconFromSide(block, ForgeDirection.WEST.ordinal());
         boolean first = true;

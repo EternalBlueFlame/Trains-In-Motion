@@ -63,7 +63,6 @@ public class Tessellator{
 			GL11.glVertex3f(f[0],f[1],f[2]);
 		}
 		GL11.glEnd();
-		DebugUtil.printGLError(glGetError());
 	}
 
 	public void arrayEnabledDraw(){
@@ -74,7 +73,6 @@ public class Tessellator{
 			GL11.glVertex3f(f[0],f[1],f[2]);
 		}
 		GL11.glEnd();
-		DebugUtil.printGLError(glGetError());
 	}
 	
 	public void addVertex(float i, float j, float k){
