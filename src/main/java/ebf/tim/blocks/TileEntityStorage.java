@@ -155,11 +155,15 @@ public class TileEntityStorage extends TileEntity implements IInventory {
         switch (storageType){
             case 1:{
                 if(slot==0){return OreDictionary.getOres("ingot").contains(itemStack);}
-                if(slot==1||slot==2){return Block.getBlockFromItem(itemStack.getItem())!=null && Block.getBlockFromItem(itemStack.getItem()).isOpaqueCube();}
+                if(slot==1||slot==2){
+                    //todo: if block.modid==chisel return false;
+                    return Block.getBlockFromItem(itemStack.getItem())!=null && Block.getBlockFromItem(itemStack.getItem()).isOpaqueCube();
+                }
             }
         }
         return true;
     }
+
 
     /**
      * <h2>unused</h2>
