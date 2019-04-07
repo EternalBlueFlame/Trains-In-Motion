@@ -23,6 +23,7 @@ public class ModelTies {
         GL11.glTranslated(0, 0.125, 0);
         //top side
         IIcon iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.WEST.ordinal(), block);
+        if(iicon==null){return;}
         boolean first = true;
         for (float[] p :points) {
             if(first){
@@ -52,6 +53,7 @@ public class ModelTies {
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.125, 0);
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.NORTH.ordinal(),block);
+        if(iicon==null){return;}
         boolean first = true;
         for (float[] p :points) {
             if(first){

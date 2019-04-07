@@ -22,6 +22,7 @@ public class ModelBallast {
         GL11.glTranslated(0, 0.1, 0);
 
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.UP.ordinal(), b);
+        if(iicon==null){return;}
 
         Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
         float ballastloop=0;
@@ -48,6 +49,7 @@ public class ModelBallast {
         float d0;
         //west side
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.WEST.ordinal(), b);
+        if(iicon==null){return;}
 
         Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
         float ballastloop=0;
