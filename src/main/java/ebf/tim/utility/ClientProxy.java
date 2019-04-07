@@ -287,7 +287,7 @@ public class ClientProxy extends CommonProxy {
                     p.add(new float[]{-0.5f,0f,0f});
                     p.add(new float[]{0.5f,0f,0f});
                     ModelBallast.modelPotatoBallast(p,0.5f,-0.5f,
-                            Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(p_78443_2_.getTagCompound().getCompoundTag("ballast")).getItem()),
+                            ItemStack.loadItemStackFromNBT(p_78443_2_.getTagCompound().getCompoundTag("ballast")),
                             1);
                 }
             }

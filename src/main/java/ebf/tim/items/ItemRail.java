@@ -75,15 +75,15 @@ public class ItemRail extends Item implements ITrackItem {
                     ((RailTileEntity) world.getTileEntity(x,y,z)).rail = new ItemStack(Items.iron_ingot);
                 }
                 if(stack.getTagCompound().getTag("ties")!=null) {
-                    ((RailTileEntity) world.getTileEntity(x,y,z)).ties = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties")).getItem());
+                    ((RailTileEntity) world.getTileEntity(x,y,z)).ties = ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties"));
                 }
                 if(stack.getTagCompound().getTag("ballast")!=null) {
-                    ((RailTileEntity) world.getTileEntity(x,y,z)).ballast = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ballast")).getItem());
+                    ((RailTileEntity) world.getTileEntity(x,y,z)).ballast = ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ballast"));
                 }
                 if(stack.getTagCompound().getTag("wires")!=null) {
-                    ((RailTileEntity) world.getTileEntity(x,y,z)).wires = ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("wires")).getItem();
+                    ((RailTileEntity) world.getTileEntity(x,y,z)).wires = ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("wires"));
                 }
-                ((RailTileEntity) world.getTileEntity(x,y,z)).updateShape();
+                world.getTileEntity(x,y,z).markDirty();
             } else if(stack.hasTagCompound()) {
                 System.out.println("Trains In Motion ERROR, TILE ENTITY NOT SPAWNED FAST ENOUGH, that can happen?");
             }
@@ -157,7 +157,7 @@ public class ItemRail extends Item implements ITrackItem {
         }
     }
 
-    public static ItemStack setStackData(ItemStack stack, ItemStack ingot, Block ballast, Block ties, Item wires){
+    public static ItemStack setStackData(ItemStack stack, ItemStack ingot, ItemStack ballast, ItemStack ties, ItemStack wires){
         //init stack NBT
         stack.setTagCompound(new NBTTagCompound());
         //add a tag for the stack then put the stack in it.
@@ -168,15 +168,15 @@ public class ItemRail extends Item implements ITrackItem {
         //rinse and repeat
         if(ties!=null) {
             stack.getTagCompound().setTag("ties",new NBTTagCompound());
-            new ItemStack(ties).writeToNBT(stack.getTagCompound().getCompoundTag("ties"));
+            ties.writeToNBT(stack.getTagCompound().getCompoundTag("ties"));
         }
         if(ballast!=null) {
             stack.getTagCompound().setTag("ballast",new NBTTagCompound());
-            new ItemStack(ballast).writeToNBT(stack.getTagCompound().getCompoundTag("ballast"));
+            ballast.writeToNBT(stack.getTagCompound().getCompoundTag("ballast"));
         }
         if(wires!=null) {
             stack.getTagCompound().setTag("wires",new NBTTagCompound());
-            new ItemStack(wires).writeToNBT(stack.getTagCompound().getCompoundTag("wires"));
+            wires.writeToNBT(stack.getTagCompound().getCompoundTag("wires"));
         }
         return stack;
     }
@@ -185,10 +185,10 @@ public class ItemRail extends Item implements ITrackItem {
     @SideOnly(Side.CLIENT)
     public void getSubItems(Item p_150895_1_, CreativeTabs p_150895_2_, List tabItems) {
         if(p_150895_1_ instanceof ItemRail) {
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.log, Blocks.gravel,null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), Blocks.planks, Blocks.gravel, null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, Blocks.gravel,null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, Blocks.stone, null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), new ItemStack(Blocks.log), new ItemStack(Blocks.gravel),null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), new ItemStack(Blocks.planks), new ItemStack(Blocks.gravel), null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, new ItemStack(Blocks.gravel),null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, new ItemStack(Blocks.stone), null));
             tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, null, null));
         } else {
             tabItems.add(new ItemStack(p_150895_1_));

@@ -1144,6 +1144,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 backLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(backLinkedID):
                 frontLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
     }
+
+    @SideOnly(Side.CLIENT)
+    public boolean isInRangeToRenderDist(double p_70112_1_)
+    {
+        return p_70112_1_ > 1D;
+    }
+
+
     /*
      * <h1>Inventory management</h1>
      */

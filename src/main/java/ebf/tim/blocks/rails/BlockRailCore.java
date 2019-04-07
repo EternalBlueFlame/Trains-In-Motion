@@ -145,19 +145,27 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
     @Override
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
-        return ItemRail.setStackData(
-                new ItemStack(CommonProxy.railItem, 1),tile.rail, tile.ballast, tile.ties, tile.wires);
+        if(getTile(world,x,y,z)!=null) {
+            return ItemRail.setStackData(
+                    new ItemStack(CommonProxy.railItem, 1), tile.rail, tile.ballast, tile.ties, tile.wires);
+        } else {
+            return null;
+        }
     }
     @Override
     public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune) {
-        ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
+        if(getTile(world,x,y,z)!=null) {
+            ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
 
-        int count = quantityDropped(metadata, fortune, world.rand);
-        for(int i = 0; i < count; i++) {
-            ret.add(ItemRail.setStackData(
-                    new ItemStack(CommonProxy.railItem, 1),tile.rail, tile.ballast, tile.ties, tile.wires));
+            int count = quantityDropped(metadata, fortune, world.rand);
+            for (int i = 0; i < count; i++) {
+                ret.add(ItemRail.setStackData(
+                        new ItemStack(CommonProxy.railItem, 1), tile.rail, tile.ballast, tile.ties, tile.wires));
+            }
+            return ret;
+        } else {
+            return null;
         }
-        return ret;
     }
 
     @Override
@@ -166,22 +174,13 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
 
-    @Override
-    public void updateTick(World worldObj, int xCoord, int yCoord, int zCoord, Random p_149674_5_) {
-        //super.updateTick(worldObj, xCoord,yCoord,zCoord,p_149674_5_);
-        if(!worldObj.isRemote && tile ==null && worldObj.getTileEntity(xCoord,yCoord,zCoord) instanceof RailTileEntity){
-            tile = (RailTileEntity) worldObj.getTileEntity(xCoord,yCoord,zCoord);
-        }
-    }
-
-
 
 
     @Override
     public void onNeighborBlockChange(World worldObj, int x, int y, int z, Block b) {
         super.onNeighborBlockChange(worldObj, x, y, z, b);
-        if(this.tile!=null){
-            this.tile.updateShape();
+        if(getTile(worldObj,x,y,z)!=null){
+            getTile(worldObj,x,y,z).markDirty();
         }
     }
 
@@ -206,6 +205,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 for(int y : updateMatrix){
                     if(p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_) instanceof  BlockRailCore){
                         p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_).onNeighborBlockChange(p_149660_1_,p_149660_2_,p_149660_3_,p_149660_4_, this);
+                        p_149660_1_.getTileEntity(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_).markDirty();
                     }
                 }
             }

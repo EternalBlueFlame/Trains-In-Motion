@@ -331,7 +331,7 @@ public class EventManager {
     @SubscribeEvent
     @SuppressWarnings("unused")
     public void entityJoinWorldEvent(EntityJoinWorldEvent event) {
-        if (event.entity instanceof EntityPlayer) {
+        if (event.world.isRemote && event.entity instanceof EntityPlayer) {
 
             List<String[]> ids = new ArrayList<>();
             try {
@@ -358,7 +358,7 @@ public class EventManager {
 
 
             for(String[] entry : ids){
-                if(event.entity.getUniqueID() == UUID.fromString(entry[0])){
+                if(event.entity.getUniqueID().equals(UUID.fromString(entry[0]))){
                     if(entry[1].equals("0")){
                         throw new ReportedException(CrashReport.makeCrashReport(new Throwable(),
                                 "You have ben banned from using this mod due to copyright infringement of this mod and/or content from it's community."));

@@ -1,9 +1,12 @@
 package ebf.tim.models.rails;
 
 import fexcraft.tmt.slim.Tessellator;
+import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
 
@@ -14,11 +17,12 @@ import static ebf.tim.models.rails.Model1x1Rail.addVertexWithOffsetAndUV;
 public class ModelBallast {
     public static IIcon iicon;
 
-    public static void modelPotatoBallast(List<float[]> points, float maxWidth, float minWidth, Block b, float segmentLength){
+    public static void modelPotatoBallast(List<float[]> points, float maxWidth, float minWidth, ItemStack b, float segmentLength){
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.1, 0);
 
-        iicon=  RenderBlocks.getInstance().getBlockIconFromSide(b, ForgeDirection.UP.ordinal());
+        iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.UP.ordinal(), b);
+
         Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
         float ballastloop=0;
         float d0;
@@ -35,7 +39,7 @@ public class ModelBallast {
         GL11.glPopMatrix();
     }
 
-    public static void model3DBallast(List<float[]> points, float maxWidth, float minWidth, Block b, float segmentLength){
+    public static void model3DBallast(List<float[]> points, float maxWidth, float minWidth, ItemStack b, float segmentLength){
         modelPotatoBallast(points, maxWidth, minWidth, b, segmentLength);
 
         GL11.glPushMatrix();
@@ -43,7 +47,8 @@ public class ModelBallast {
 
         float d0;
         //west side
-        iicon=  RenderBlocks.getInstance().getBlockIconFromSide(b, ForgeDirection.WEST.ordinal());
+        iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.WEST.ordinal(), b);
+
         Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
         float ballastloop=0;
         for (float[] p : points) {
@@ -61,7 +66,7 @@ public class ModelBallast {
         GL11.glTranslated(0, 0.1, 0);
 
         //east side
-        iicon=  RenderBlocks.getInstance().getBlockIconFromSide(b, ForgeDirection.EAST.ordinal());
+        TextureManager.bindBlockTextureFromSide(ForgeDirection.EAST.ordinal(), b);
         Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
         ballastloop=0;
         for (float[] p : points) {

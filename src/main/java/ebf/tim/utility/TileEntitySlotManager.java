@@ -190,9 +190,7 @@ public class TileEntitySlotManager extends Container{
                 craftingTable.getStackInSlot(2)==getStackBallast()){
 
             ItemStack rail = ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
-                    craftingTable.getStackInSlot(0),
-                    craftingTable.getStackInSlot(1)==null?null:Block.getBlockFromItem(craftingTable.getStackInSlot(1).getItem()),
-                    craftingTable.getStackInSlot(2)==null?null:Block.getBlockFromItem(craftingTable.getStackInSlot(2).getItem()),
+                    craftingTable.getStackInSlot(0),craftingTable.getStackInSlot(1),craftingTable.getStackInSlot(2),
                     null);
 
             rail.getTagCompound().setInteger("count",
@@ -202,9 +200,7 @@ public class TileEntitySlotManager extends Container{
         //handle making a new stack
         if(craftingTable.getStackInSlot(0)!=null && ingotInDirectory(craftingTable.getStackInSlot(0).getItem())) {
             return ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
-                    craftingTable.getStackInSlot(0),
-                    craftingTable.getStackInSlot(1) == null ? null : Block.getBlockFromItem(craftingTable.getStackInSlot(1).getItem()),
-                    craftingTable.getStackInSlot(2) == null ? null : Block.getBlockFromItem(craftingTable.getStackInSlot(2).getItem()),
+                    craftingTable.getStackInSlot(0),craftingTable.getStackInSlot(1),craftingTable.getStackInSlot(2),
                     null);
         }
         //todo: works, but goes to wrong slot,
@@ -215,16 +211,28 @@ public class TileEntitySlotManager extends Container{
     }
 
     public @Nullable ItemStack getStackBallast(){
-        return !craftingTable.getStackInSlot(4).getTagCompound().hasKey("ballast")?null:
-                ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ballast"));
+        if(craftingTable.getStackInSlot(4)==null || craftingTable.getStackInSlot(4).getTagCompound()==null){
+            return null;
+        } else {
+            return !craftingTable.getStackInSlot(4).getTagCompound().hasKey("ballast") ? null :
+                    ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ballast"));
+        }
     }
     public @Nullable ItemStack getStackTies(){
-        return !craftingTable.getStackInSlot(4).getTagCompound().hasKey("ties")?null:
-                ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ties"));
+        if(craftingTable.getStackInSlot(4)==null || craftingTable.getStackInSlot(4).getTagCompound()==null){
+            return null;
+        } else {
+            return !craftingTable.getStackInSlot(4).getTagCompound().hasKey("ties") ? null :
+                    ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ties"));
+        }
     }
     public @Nullable ItemStack getStackIngot(){
-        return !craftingTable.getStackInSlot(4).getTagCompound().hasKey("ingot")?null:
-                ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ingot"));
+        if(craftingTable.getStackInSlot(4)==null || craftingTable.getStackInSlot(4).getTagCompound()==null){
+            return null;
+        } else {
+            return !craftingTable.getStackInSlot(4).getTagCompound().hasKey("ingot") ? null :
+                    ItemStack.loadItemStackFromNBT(craftingTable.getStackInSlot(4).getTagCompound().getCompoundTag("ingot"));
+        }
     }
 
 

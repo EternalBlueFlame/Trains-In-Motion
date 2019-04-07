@@ -157,7 +157,7 @@ public class TiMGenericRegistry {
             cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(
                     registry.getClass(),
                     registry.transportName().replace(" ","") + ".entity",
-                    registryPosition, TrainsInMotion.instance, 60, 1, true);
+                    registryPosition, TrainsInMotion.instance, 3000, 1, true);
             GameRegistry.registerItem(registry.getCartItem().getItem(), registry.getCartItem().getItem().getUnlocalizedName());
             if(GUICraftBook.recipesInMods.containsKey(MODID)){
                 GUICraftBook.recipesInMods.get(MODID).add(new Recipe(registry.getCartItem(),

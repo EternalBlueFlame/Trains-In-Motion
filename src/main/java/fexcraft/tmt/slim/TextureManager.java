@@ -3,13 +3,18 @@ package fexcraft.tmt.slim;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
@@ -28,12 +33,12 @@ public class TextureManager {
 
 
     public static ByteBuffer renderPixels = ByteBuffer.allocateDirect((4096*4096)*4);
-    private static int i,ii, length, skyLight;
+    private static int i, length, skyLight;
     private static int[] RGBint, pixels;
     private static final byte fullAlpha=(byte)0;
     private static Set MCResourcePacks;
 
-    public static Map<String,int[]> ingotColors = new HashMap<>();
+    public static Map<ItemStack,int[]> ingotColors = new HashMap<>();
 
 
     private static Map<ResourceLocation, Integer> tmtMap = new HashMap<>();
@@ -89,8 +94,11 @@ public class TextureManager {
             try {
                 texture = TextureUtil.readImageData(Minecraft.getMinecraft().getResourceManager(), resource);
             } catch (IOException e){
-                System.out.println("TRAINS IN MOTION WARNING");
-                System.out.println("TEXTURE FAILED TO LOAD: " + resource.getResourceDomain()+":"+resource.getResourcePath());
+                if(!transportTextureFails.contains(resource.getResourcePath())) {
+                    System.out.println("TRAINS IN MOTION WARNING");
+                    System.out.println("TEXTURE FAILED TO LOAD: " + resource.getResourceDomain() + ":" + resource.getResourcePath());
+                    transportTextureFails.add(resource.getResourcePath());
+                }
                 texture=null;
             }
             if(texture!=null) {
@@ -101,6 +109,7 @@ public class TextureManager {
         return texture;
     }
 
+    private static List<String> transportTextureFails = new ArrayList<>();
 
 
 
@@ -168,7 +177,7 @@ public class TextureManager {
         String[] ores = OreDictionary.getOreNames();
 
         int red,green,blue,divisor;
-        int[]rgb;
+        int[]rgb, colorBuff;
         ResourceLocation texture;
         for(String o: ores){
             if (o.contains("ingot")){
@@ -187,7 +196,7 @@ public class TextureManager {
 
                     if(texture != null){
                         try {
-                            int[] colorBuff = TextureUtil.readImageData(Minecraft.getMinecraft().getResourceManager(), texture);
+                            colorBuff = TextureUtil.readImageData(Minecraft.getMinecraft().getResourceManager(), texture);
                             for(int c : colorBuff){
                                 rgb=hexTorgba(c);
                                 if(rgb[3]>128) {
@@ -199,7 +208,7 @@ public class TextureManager {
                                     }
                                 }
                             }
-                            ingotColors.put(item.delegate.name(), new int[]{red/divisor,blue/divisor,green/divisor});
+                            ingotColors.put(s, new int[]{red/divisor,blue/divisor,green/divisor});
                         } catch (IOException e) {
                             DebugUtil.println("Caught exception while parsing texture to get color: ");
                             e.printStackTrace();
@@ -213,6 +222,16 @@ public class TextureManager {
         }
     }
 
+    public static IIcon bindBlockTextureFromSide(int side, ItemStack b){
+        if(!(b.getItem() instanceof ItemBlock)) {
+            IIcon texture = RenderBlocks.getInstance().getBlockIconFromSideAndMetadata(Block.getBlockFromItem(b.getItem()), side,b.getItemDamage());
+            if (RenderBlocks.getInstance().hasOverrideBlockTexture()) {
+                texture = RenderBlocks.getInstance().overrideBlockTexture;
+            }
+            return texture;
+        }
+        return null;
+    }
 
     public static int[] hexTorgba(int hex){
         return new int[]{hex&0xFF, (hex>>8)&0xFF, (hex>>16)&0xFF, (hex>>24)&0xFF};

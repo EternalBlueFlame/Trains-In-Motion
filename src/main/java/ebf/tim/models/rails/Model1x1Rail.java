@@ -68,7 +68,7 @@ public class Model1x1Rail {
 
 
     //todo use the return value to manage displaylists
-    public static void Model3DRail(World world, int xPos, int yPos, int zPos, List<float[]> points, float[] railOffsets, float segmentLength, @Nullable Block ballast, @Nullable Block ties, int[] railColor){
+    public static void Model3DRail(World world, int xPos, int yPos, int zPos, List<float[]> points, float[] railOffsets, float segmentLength, @Nullable ItemStack ballast, @Nullable ItemStack ties, int[] railColor){
         if(railOffsets==null || points ==null){
             return;
         }
@@ -103,7 +103,7 @@ public class Model1x1Rail {
                 case 3:{ModelRail.model3DRail(points, railOffsets, railColor); break;}//todo HD rail
             }
             GL11.glEnable(GL11.GL_TEXTURE_2D);
-            GL11.glClearColor(1.0f,1.0f,1.0f,1.0f);
+            GL11.glColor4f(1.0f,1.0f,1.0f,1.0f);
             Tessellator.bindTexture(TextureMap.locationBlocksTexture);
             // clear the display buffer to the clear colour
             //GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);

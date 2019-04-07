@@ -1,9 +1,11 @@
 package ebf.tim.models.rails;
 
 import fexcraft.tmt.slim.Tessellator;
+import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
@@ -16,11 +18,11 @@ public class ModelTies {
 
     public static IIcon iicon;
 
-    public static void modelPotatoTies(List<float[]> points, float maxWidth, float minWidth, Block block){
+    public static void modelPotatoTies(List<float[]> points, float maxWidth, float minWidth, ItemStack block){
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.125, 0);
         //top side
-        IIcon iicon=  RenderBlocks.getInstance().getBlockIconFromSide(block, ForgeDirection.WEST.ordinal());
+        IIcon iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.WEST.ordinal(), block);
         boolean first = true;
         for (float[] p :points) {
             if(first){
@@ -43,13 +45,13 @@ public class ModelTies {
     }
 
 
-    public static void model3DTies(List<float[]> points, float maxWidth, float minWidth, Block block){
+    public static void model3DTies(List<float[]> points, float maxWidth, float minWidth, ItemStack block){
 
         modelPotatoTies(points, maxWidth, minWidth, block);
 
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.125, 0);
-        iicon=  RenderBlocks.getInstance().getBlockIconFromSide(block, ForgeDirection.NORTH.ordinal());
+        iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.NORTH.ordinal(),block);
         boolean first = true;
         for (float[] p :points) {
             if(first){
@@ -70,7 +72,7 @@ public class ModelTies {
             Tessellator.getInstance().arrayEnabledDraw();
         }
 
-        iicon=  RenderBlocks.getInstance().getBlockIconFromSide(block, ForgeDirection.SOUTH.ordinal());
+        iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.SOUTH.ordinal(), block);
         first = true;
         for (float[] p :points) {
             if(first){
@@ -90,7 +92,7 @@ public class ModelTies {
         }
 
 
-        iicon=  RenderBlocks.getInstance().getBlockIconFromSide(block, ForgeDirection.UP.ordinal());
+        iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.UP.ordinal(), block);
         first = true;
         for (float[] p :points) {
             if(first){
@@ -108,7 +110,7 @@ public class ModelTies {
             Tessellator.getInstance().arrayEnabledDraw();
         }
 
-        iicon=  RenderBlocks.getInstance().getBlockIconFromSide(block, ForgeDirection.DOWN.ordinal());
+        iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.DOWN.ordinal(), block);
         first = true;
         for (float[] p :points) {
             if(first){
@@ -132,7 +134,7 @@ public class ModelTies {
 
     }
 
-    public void modelHDTies(List<float[]> points, float maxWidth, float minWidth, Block block){
+    public void modelHDTies(List<float[]> points, float maxWidth, float minWidth, ItemStack block){
         model3DTies(points, maxWidth, minWidth, block);
         //todo HD ties should all the nails
     }

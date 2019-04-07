@@ -25,6 +25,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class RailTileEntity extends TileEntity {
@@ -33,9 +34,9 @@ public class RailTileEntity extends TileEntity {
     //management variables
     public ItemStack rail;
     private int[] railColor=null;
-    public Block ballast;
-    public Block ties;
-    public Item wires;
+    public ItemStack ballast;
+    public ItemStack ties;
+    public ItemStack wires;
     public int snow=0;
     public int timer=0;
     public int overgrowth=0;
@@ -66,9 +67,16 @@ public class RailTileEntity extends TileEntity {
             } else {
 
                 if(railColor==null){
-                    if(rail !=null && TextureManager.ingotColors!=null && TextureManager.ingotColors.containsKey(rail.getItem().delegate.name())){
-                        railColor=TextureManager.ingotColors.get(rail.getItem().delegate.name());
-                    } else {
+                    if(rail !=null && TextureManager.ingotColors!=null) {
+                        for(Map.Entry<ItemStack, int[]> e : TextureManager.ingotColors.entrySet()){
+                            if(e.getKey().getItem()==rail.getItem()&&
+                                    e.getKey().getTagCompound()==rail.getTagCompound() &&
+                                        e.getKey().getItemDamage()==rail.getItemDamage()) {
+                                railColor = TextureManager.ingotColors.get(e.getKey());
+                            }
+                        }
+                    }
+                    if(railColor==null){
                         railColor=new int[]{0,0,0};
                     }
                 }
@@ -91,7 +99,7 @@ public class RailTileEntity extends TileEntity {
 
     public static final float[] gauge750mm={0.3125f, -0.3125f};
 
-    int[] meta = new int[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};//3x3x3. value -1 is for blocks that aren't a rail
+    //int[] meta = new int[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};//3x3x3. value -1 is for blocks that aren't a rail
     int tickOffset=0;
     @Override
     public void updateEntity(){
@@ -100,32 +108,9 @@ public class RailTileEntity extends TileEntity {
         if(tickOffset>20){
             tickOffset=1;
         }
-        if(tickOffset!=1){
-            return;
-        }
-        int itteration = 0;
-        for (int x = -1; x < 2; x++) {
-            for (int y = -1; y < 2; y++) {
-                for (int z = -1; z < 2; z++) {
-                    if (meta[itteration] != ((worldObj.getBlock(xCoord + x, yCoord + y, zCoord + z) instanceof BlockRailBase) ?
-                            worldObj.getBlockMetadata(xCoord + x, yCoord + y, zCoord + z) :
-                            -1)) {
-                        meta[itteration] = ((worldObj.getBlock(xCoord + x, yCoord + y, zCoord + z) instanceof BlockRailBase) ?
-                                worldObj.getBlockMetadata(xCoord + x, yCoord + y, zCoord + z) :
-                                -1);
-                        updateShape();
-                    }
-                    itteration++;
-                }
-            }
-        }
     }
 
     public void updateShape() {
-
-        List<float[]> oldPoints = points;//hold on to check if we need update.
-
-
         points= new ArrayList<>();
         //todo: process these directly into quad/processPoints(); on server, then sync the offsets over the NBT network packet.
             switch (worldObj.getBlockMetadata(xCoord, yCoord, zCoord)){
@@ -177,11 +162,6 @@ public class RailTileEntity extends TileEntity {
                 }
             }
 
-            if(oldPoints != points) {
-                this.markDirty();
-            }
-            oldPoints=null;//clean it out of ram, we dont need it now, save GC the effort.
-
     }
 
     @Override
@@ -207,13 +187,13 @@ public class RailTileEntity extends TileEntity {
                 }
             }
             this.worldObj.func_147453_f(this.xCoord, this.yCoord, this.zCoord, this.getBlockType());
+            updateShape();
         }
 
     }
 
     @Override
     public Packet getDescriptionPacket() {
-            updateShape();
         NBTTagCompound nbttagcompound = new NBTTagCompound();
         this.writeToNBT(nbttagcompound);
         return new S35PacketUpdateTileEntity(this.xCoord, this.yCoord, this.zCoord, 0, nbttagcompound);
@@ -224,6 +204,7 @@ public class RailTileEntity extends TileEntity {
         super.onDataPacket(net, pkt);
         if(pkt ==null){return;}
         readFromNBT(pkt.func_148857_g());
+        markDirty();
     }
 
 
@@ -237,17 +218,17 @@ public class RailTileEntity extends TileEntity {
         }
         if(ballast!=null) {
             compound = new NBTTagCompound();
-            new ItemStack(Item.getItemFromBlock(ballast)).writeToNBT(compound);
+            ballast.writeToNBT(compound);
             tag.setTag("ballast", compound);
         }
         if(ties!=null) {
             compound = new NBTTagCompound();
-            new ItemStack(Item.getItemFromBlock(ties)).writeToNBT(compound);
+            ties.writeToNBT(compound);
             tag.setTag("ties", compound);
         }
         if(wires!=null) {
             compound = new NBTTagCompound();
-            new ItemStack(wires).writeToNBT(compound);
+            wires.writeToNBT(compound);
             tag.setTag("wires", compound);
         }
 
@@ -274,13 +255,13 @@ public class RailTileEntity extends TileEntity {
             rail = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("rail"));
         }
         if(tag.hasKey("ballast")) {
-            ballast = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ballast")).getItem());
+            ballast = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ballast"));
         }
         if(tag.hasKey("ties")) {
-            ties = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ties")).getItem());
+            ties = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ties"));
         }
         if(tag.hasKey("wires")) {
-            wires = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("wires")).getItem();
+            wires = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("wires"));
         }
 
         if (tag.hasKey("segmentLength")) {
