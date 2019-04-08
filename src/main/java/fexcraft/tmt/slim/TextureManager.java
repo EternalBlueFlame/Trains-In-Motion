@@ -223,14 +223,11 @@ public class TextureManager {
     }
 
     public static IIcon bindBlockTextureFromSide(int side, ItemStack b){
-        if(!(b.getItem() instanceof ItemBlock)) {
-            IIcon texture = RenderBlocks.getInstance().getBlockIconFromSideAndMetadata(Block.getBlockFromItem(b.getItem()), side,b.getItemDamage());
-            if (RenderBlocks.getInstance().hasOverrideBlockTexture()) {
-                texture = RenderBlocks.getInstance().overrideBlockTexture;
-            }
-            return texture;
+        IIcon texture = RenderBlocks.getInstance().getBlockIconFromSideAndMetadata(Block.getBlockFromItem(b.getItem()), side,b.getItemDamage());
+        if (RenderBlocks.getInstance().hasOverrideBlockTexture()) {
+            texture = RenderBlocks.getInstance().overrideBlockTexture;
         }
-        return null;
+        return texture;
     }
 
     public static int[] hexTorgba(int hex){

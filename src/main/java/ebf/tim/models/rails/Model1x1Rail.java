@@ -108,7 +108,7 @@ public class Model1x1Rail {
             // clear the display buffer to the clear colour
             //GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
-            if(ties!=null) {
+            if(ties!=null && ties.getItem()!=null) {
                 if(ClientProxy.railLoD==0){
                     ModelTies.modelPotatoTies(points, maxWidth, minWidth, ties);
                 } else if (ClientProxy.railLoD<3){
@@ -119,7 +119,7 @@ public class Model1x1Rail {
                 }
 
             }
-            if(ballast!=null) {
+            if(ballast!=null && ballast.getItem()!=null) {
                 if(ClientProxy.railLoD==0){
                     ModelBallast.modelPotatoBallast(points, maxWidth, minWidth, ballast, segmentLength);
                 } else {
@@ -131,8 +131,5 @@ public class Model1x1Rail {
             GL11.glDisable(GL11.GL_BLEND);
 
         }
-
-
-        return;
     }
 }

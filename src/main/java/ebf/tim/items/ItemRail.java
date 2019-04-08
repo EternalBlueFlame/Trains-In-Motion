@@ -4,6 +4,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.utility.CommonProxy;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import mods.railcraft.api.core.items.ITrackItem;
 import net.minecraft.block.Block;
@@ -161,24 +162,39 @@ public class ItemRail extends Item implements ITrackItem {
         //init stack NBT
         stack.setTagCompound(new NBTTagCompound());
         //add a tag for the stack then put the stack in it.
-        if(ingot!=null) {
+        if(ingot!=null && ingot.getItem()!=null) {
             stack.getTagCompound().setTag("rail", new NBTTagCompound());
             ingot.writeToNBT(stack.getTagCompound().getCompoundTag("rail"));
         }
+
         //rinse and repeat
-        if(ties!=null) {
+        if(ties!=null && ties.getItem()!=null && !isItemBanned(ties)) {
             stack.getTagCompound().setTag("ties",new NBTTagCompound());
             ties.writeToNBT(stack.getTagCompound().getCompoundTag("ties"));
+        } else if(ties!=null && ties.getItem()!=null){
+            return null;
         }
-        if(ballast!=null) {
+        if(ballast!=null && ballast.getItem()!=null && !isItemBanned(ballast)) {
             stack.getTagCompound().setTag("ballast",new NBTTagCompound());
             ballast.writeToNBT(stack.getTagCompound().getCompoundTag("ballast"));
+        } else if(ballast!=null && ballast.getItem()!=null){
+            return null;
         }
-        if(wires!=null) {
+        if(wires!=null && wires.getItem()!=null && !isItemWires(wires)) {
             stack.getTagCompound().setTag("wires",new NBTTagCompound());
             wires.writeToNBT(stack.getTagCompound().getCompoundTag("wires"));
+        } else if(wires!=null && wires.getItem()!=null){
+            return null;
         }
         return stack;
+    }
+
+    public static boolean isItemWires(ItemStack s){
+        return true;
+    }
+
+    public static boolean isItemBanned(ItemStack s){
+        return s.getItem().delegate.name().contains("chisel");
     }
 
     //adds custom versions of this to the creative menu, with the necessary NBT and metadata
