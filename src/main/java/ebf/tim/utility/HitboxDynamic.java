@@ -135,9 +135,6 @@ public class HitboxDynamic {
 
                             if(obj instanceof GenericRailTransport) {
                                 stock=(GenericRailTransport)obj;
-                                if(host.frontLinkedTransport== stock.getUniqueID() || host.backLinkedTransport==stock.getUniqueID()) {
-                                    continue;
-                                }
                                 Vec3 vec;
                                 if(host.getBoolean(GenericRailTransport.boolValues.COUPLINGFRONT)) {
                                     vec =RailUtility.rotateDistance(longest+0.25f, host.rotationPitch, host.rotationYaw);

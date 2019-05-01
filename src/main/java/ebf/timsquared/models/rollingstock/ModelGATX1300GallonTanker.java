@@ -7,7 +7,7 @@
 // Created on: 14.05.2017 - 15:36:58
 // Last changed on: 14.05.2017 - 15:36:58
 
-package ebf.tim.models.rollingstock;
+package ebf.timsquared.models.rollingstock;
 
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;

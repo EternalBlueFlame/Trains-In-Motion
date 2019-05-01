@@ -13,7 +13,7 @@ import java.util.List;
 public abstract class Model<T> {
 	
 	public static final Model<Object> EMPTY;
-	public List<ModelRendererTurbo> boxList = new ArrayList<>();
+	private List<ModelRendererTurbo> boxList = new ArrayList<>();
 	static {
 		EMPTY = new Model<Object>(){
 			@Override public void render(){}
@@ -30,7 +30,9 @@ public abstract class Model<T> {
 	public void render(ModelRendererTurbo[] model){
 		if(model==null){return;}
 		for(ModelRendererTurbo sub : model){
-			sub.render();
+			if(sub!=null) {
+				sub.render();
+			}
 		}
 	}
 	
@@ -85,5 +87,13 @@ public abstract class Model<T> {
 			}
 		}
 	}
-	
+
+	public List<ModelRendererTurbo> getParts(){
+		return boxList;
+	}
+
+	public List<ModelRendererTurbo> addPart(ModelRendererTurbo part){
+		boxList.add(part);
+		return boxList;
+	}
 }

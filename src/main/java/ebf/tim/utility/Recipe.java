@@ -50,7 +50,7 @@ public class Recipe {
     public void nextDisplayItem(){
         for(int i=0;i<10;i++) {
             displayItem[i]++;
-            if (displayItem[i] > items[i].length) {
+            if (displayItem[i] >= items[i].length) {
                 displayItem[i] = 0;
             }
         }

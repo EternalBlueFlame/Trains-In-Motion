@@ -24,7 +24,9 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.crash.CrashReport;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ReportedException;
@@ -54,8 +56,9 @@ import java.util.UUID;
  */
 public class EventManager {
 
-    private static List<GenericRailTransport> arraylist,stock;
-    private static Vec3d vert, vec, cacheVec;
+    private static List<GenericRailTransport> stock;
+    private static Vec3d vert, vec;
+    private static GenericRailTransport selected=null;
 
     /**
      * <h2>Keybind management</h2>
@@ -164,23 +167,9 @@ public class EventManager {
     @SubscribeEvent
     public void onClientKeyPress(InputEvent.MouseInputEvent event) {
         if (Mouse.isButtonDown(1) || Mouse.isButtonDown(0)) {
-            cacheVec = RailUtility.rotateDistance(0.2f, Minecraft.getMinecraft().thePlayer.rotationPitch, 810+Minecraft.getMinecraft().thePlayer.rotationYawHead);
-
-            arraylist = getTrainsInRange();
-
-            for (GenericRailTransport t : arraylist) {
-                if(Minecraft.getMinecraft().thePlayer.ridingEntity==t){continue;}
-                for (int i = 0; i < (Minecraft.getMinecraft().playerController.extendedReach() ? 32 : 16); i++) {
-                    if (t.collisionHandler.containsPoint(
-                            Minecraft.getMinecraft().thePlayer.posX + (cacheVec.xCoord * i),
-                            Minecraft.getMinecraft().thePlayer.posY + (cacheVec.yCoord * i)-1,
-                            Minecraft.getMinecraft().thePlayer.posZ + (cacheVec.zCoord * i))) {
-
-                        (t).interact(Minecraft.getMinecraft().thePlayer.getEntityId(), false, false, Mouse.isButtonDown(1)?-1:-999);
-                        MinecraftForge.EVENT_BUS.post(new EntityInteractEvent(Minecraft.getMinecraft().thePlayer, t));
-                        return;
-                    }
-                }
+            if (selected != null) {
+                (selected).interact(Minecraft.getMinecraft().thePlayer.getEntityId(), false, false, Mouse.isButtonDown(1) ? -1 : -999);
+                MinecraftForge.EVENT_BUS.post(new EntityInteractEvent(Minecraft.getMinecraft().thePlayer, selected));
             }
         }
     }
@@ -194,84 +183,86 @@ public class EventManager {
     }
 
 
-    private static List<GenericRailTransport> getTrainsInRange(){
+    private static List<GenericRailTransport> getTrainsInRange(Entity entity){
         ArrayList<GenericRailTransport> list =new ArrayList<>();
-        for (int i1 = Minecraft.getMinecraft().thePlayer.chunkCoordX - 1; i1 <= Minecraft.getMinecraft().thePlayer.chunkCoordX + 1; ++i1) {
-            for (int j1 = Minecraft.getMinecraft().thePlayer.chunkCoordZ - 1; j1 <= Minecraft.getMinecraft().thePlayer.chunkCoordX + 1; ++j1) {
-                if (Minecraft.getMinecraft().thePlayer.worldObj.getChunkProvider().chunkExists(i1, j1)) {
-                    List[] e = Minecraft.getMinecraft().thePlayer.worldObj.getChunkFromChunkCoords(i1, j1).entityLists;
-                    for (List olist : e) {
-                        for (Object obj : olist) {
-                            if (obj instanceof GenericRailTransport) {
-                                list.add((GenericRailTransport) obj);
-                            }
+        List e = entity.worldObj.getLoadedEntityList();
+            for (Object obj : e) {
+                if (obj instanceof GenericRailTransport) {
+                    list.add((GenericRailTransport) obj);
+                }
+            }
+        return list;
+    }
+
+    @SubscribeEvent
+    public void onTick(TickEvent.PlayerTickEvent e){
+        //every 10 player ticks get the nearby trains and cache if the player is looking at said train.
+        if(e.player.worldObj!= null && e.player.ticksExisted%10==0){
+            //skip when riding train/stock
+            if(e.player.ridingEntity instanceof GenericRailTransport ||
+                    e.player.ridingEntity instanceof EntitySeat){
+                return;
+            }
+
+            stock = getTrainsInRange(e.player);
+
+            if(stock!=null && stock.size()>0){
+                vec = RailUtility.rotateDistance(0.1875f, e.player.rotationPitch, 90+e.player.rotationYawHead);
+                for (GenericRailTransport t : stock) {
+                    if(t.collisionHandler.containsPlayer(e.player)){
+                        continue;
+                    }
+                    //loop for each index in distance.
+                    for (int i=0; i<(Minecraft.getMinecraft().playerController.extendedReach()?32:16); i++) {
+                        vert = vec.crossProduct(i);
+                        if (t.collisionHandler.containsPoint(
+                                vert.xCoord+e.player.posX,
+                                vert.yCoord+e.player.posY,
+                                vert.zCoord+e.player.posZ)) {
+                            selected=t;
+                            return;
                         }
                     }
                 }
             }
+            selected=null;
         }
-        return list;
+
+
     }
+
 
 
     @SubscribeEvent
     @SuppressWarnings("unused")
     public void onRenderTick(TickEvent.RenderTickEvent event) {
-        if (ClientProxy.enableTransportTooltip&&
-                Minecraft.getMinecraft().renderViewEntity != null && Minecraft.getMinecraft().theWorld != null) {
-
-            if(Minecraft.getMinecraft().thePlayer.ridingEntity instanceof GenericRailTransport ||
-                    Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntitySeat ||
-            Minecraft.getMinecraft().currentScreen!=null){
-                return;
-            }
-
-            //get all the trains and stock in reach
-            if(stock==null || Minecraft.getMinecraft().thePlayer.ticksExisted %5==0) {
-                stock = getTrainsInRange();
-            }
-            if(stock.size()<1){return;}
-
-            //calculate if vector is in the hitbox at any point along the path. safest is to check by microblock for the 3 to 6 block length, but quarter would be WAY more efficient
-
-            vec = RailUtility.rotateDistance(0.25f, Minecraft.getMinecraft().thePlayer.rotationPitch, 810+Minecraft.getMinecraft().thePlayer.rotationYawHead);
-            for (int i=0; i<(Minecraft.getMinecraft().playerController.extendedReach()?16:8); i++){
-                vert=vec.crossProduct(i).addVector(Minecraft.getMinecraft().thePlayer.posX,Minecraft.getMinecraft().thePlayer.posY,Minecraft.getMinecraft().thePlayer.posZ);
-
-
-                for(GenericRailTransport t : stock){
-                    if(t.collisionHandler.containsPoint(vert.xCoord, vert.yCoord-1, vert.zCoord)){
-                        ClientProxy.toggleWaila(false);
-                        ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft(),Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
-                        left=res.getScaledWidth()/2;
-                        disp=getStaticStrings(t);
-                        if(disp==null){return;}
-                        longest=0;
-                        for(String s: disp){
-                            if(s.length()>longest*2){
-                                longest=s.length()*2;
-                            }
-                        }
-                        longest+=10;
-
-                        drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length), ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,ClientProxy.WAILA_ALPHA);
-
-                        GL11.glTranslatef(0.0F, 0.0F, 32.0F);
-                        itemRender.renderItemAndEffectIntoGUI(Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().getTextureManager(),
-                                t.getCartItem(), left-(longest)-30, 12);
-                        GL11.glDisable(GL11.GL_LIGHTING);
-                        for(int ii=0; ii<disp.length;ii++) {
-                            Minecraft.getMinecraft().fontRenderer.drawString(disp[ii],
-                                    40+left-(longest*3)+ ((longest-disp[ii].length())*2), 8+(ii*10),ii==0?0xFFFFFFFF:ClientProxy.WAILA_FONTCOLOR);
-                        }
-                        GL11.glEnable(GL11.GL_LIGHTING);
-                        //todo: draw an array of strings for the tooltip info, derrived from the transport's class.
-
-                        ClientProxy.toggleWaila(true);
-                        return;
-                    }
+        if(Minecraft.getMinecraft().currentScreen==null && selected!=null && selected.getCartItem()!=null){
+            ClientProxy.toggleWaila(false);
+            ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft(),Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+            left=res.getScaledWidth()/2;
+            disp=getStaticStrings(selected);
+            longest=0;
+            for(String s: disp){
+                if(s.length()>longest*2){
+                    longest=s.length()*2;
                 }
             }
+            longest+=10;
+
+            drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length), ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,ClientProxy.WAILA_ALPHA);
+
+            GL11.glTranslatef(0.0F, 0.0F, 32.0F);
+            itemRender.renderItemAndEffectIntoGUI(Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().getTextureManager(),
+                    selected.getCartItem(), left-(longest)-30, 12);
+            GL11.glDisable(GL11.GL_LIGHTING);
+            for(int ii=0; ii<disp.length;ii++) {
+                Minecraft.getMinecraft().fontRenderer.drawString(disp[ii],
+                        40+left-(longest*3)+ ((longest-disp[ii].length())*2), 8+(ii*10),ii==0?0xFFFFFFFF:ClientProxy.WAILA_FONTCOLOR);
+            }
+            GL11.glEnable(GL11.GL_LIGHTING);
+            //todo: draw an array of strings for the tooltip info, derrived from the transport's class.
+
+            ClientProxy.toggleWaila(true);
         }
     }
     private static int left=0,longest;
@@ -374,10 +365,9 @@ public class EventManager {
 
 
             //add alpha notice
-            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("You are currently playing a pre-alpha release of Trains In Motion."));
+            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("You are currently playing a pre-alpha of Trains In Motion."));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("For official releases, check out https://github.com/EternalBlueFlame/Trains-In-Motion/"));
             ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Keep in mind that everything in this mod currently is subject to change."));
-            ((EntityPlayer) event.entity).addChatMessage(new ChatComponentText("Good luck and thanks for the assistance. - Eternal Blue Flame."));
 
             //use an HTTP request and parse to check for new versions of the mod from github.
             try {

@@ -1,10 +1,14 @@
 package ebf.tim.gui;
 
+import ebf.tim.models.ModelBook;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Recipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -32,25 +36,48 @@ public class GUICraftBook extends GuiScreen {
     public static Map<String, String[]> infoPages=new HashMap<>();
     public static int guiLeft=0,guiTop=0, page=0;
     private static List<Object> pageData = null;
+    private static ModelBook book = new ModelBook();
     int frame=0;
 
     public static @Nullable Object getPage(int current){
         if(pageData==null) {
             List<Object> pages = new ArrayList<>();
-            for (String mod : recipesInMods.keySet()) {
-                Collections.addAll(pages, infoPages.get(mod));
+            //first add all mods that don't have recipes
+            for(String m : infoPages.keySet()){
+                if(!recipesInMods.containsKey(m)){
+                    Collections.addAll(pages, infoPages.get(m));
+                }
+            }
 
-                Collections.addAll(pages, recipesInMods.get(mod));
+            for (String mod : recipesInMods.keySet()) {
+                DebugUtil.println("adding pages for : " + mod);
+                if(infoPages.containsKey(mod)) {
+                    Collections.addAll(pages, infoPages.get(mod));
+                }
+                DebugUtil.println(recipesInMods.get(mod).size());
+                for(Recipe r : recipesInMods.get(mod)){
+                    if(r.getresult()!=null) {//for some unknown reason this must be called for the recipe to initialize at all...
+                        pages.add(r);
+                    }
+                }
             }
             pageData=pages;
         }
-        return pageData.get(current);
+        return pageData.size()>current?pageData.get(current):null;
     }
 
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float par3){
         super.drawScreen(mouseX, mouseY, par3);
+
+        GL11.glPushMatrix();
+        //GL11.glTranslatef(percentLeft(25),percentTop(35),0);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        book.render();
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glPopMatrix();
+
         GL11.glPushMatrix();
         GL11.glDisable(GL11.GL_LIGHTING);
 
@@ -72,30 +99,44 @@ public class GUICraftBook extends GuiScreen {
         }
     }
 
+    public static void renderItem(ItemStack itm, int left, int top){
+        if(itm!=null && itm.getItem()!=null) {
+            GL11.glDisable(GL11.GL_LIGHTING);
+            //render the item and the overlay
+            itemRender.renderItemAndEffectIntoGUI(Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().getTextureManager(),
+                    itm, left, top);
+            itemRender.renderItemOverlayIntoGUI(Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().getTextureManager(),
+                    itm, left, top, null);
+        }
+    }
+    public static void renderSlot(int left, int top){
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GUITransport.drawTexturedRect(left-2, top-2, 54, 51, 20, 20);
+    }
+
+
+
+    public static int getBookSlotPlacement(boolean x, int index){
+        if(x){
+            return 32* (index>8?1:index>5?index-6:index>2?index-3:index);
+        } else {
+            return index>8?-32:index>5?64:index>2?32:0;
+        }
+    }
 
     public static void renderpage(boolean leftPage){
         if(getPage(leftPage?page:page+1)==null){return;}
-        int x=0; int y=0;
         if(getPage(leftPage?page:page+1) instanceof Recipe) {
+
+            Minecraft.getMinecraft().getTextureManager().bindTexture(GUITransport.vanillaInventory);
             for (int slot = 0; slot < 10; slot++) {
-                //todo: render slot background
-
-                //render the item and the overlay
-                itemRender.renderItemAndEffectIntoGUI(Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().getTextureManager(), ((Recipe)getPage(leftPage?page:page+1)).getDisplayArray()[slot],
-                        percentLeft(leftPage?20:55)+ x,percentLeft(35)+ y);
-                itemRender.renderItemOverlayIntoGUI(Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().getTextureManager(), ((Recipe)getPage(leftPage?page:page+1)).getDisplayArray()[slot],
-                        percentLeft(leftPage?20:55)+x, percentLeft(35)+y, null);
-
-                //add the grid offset
-                x += 32;
-                if (x > 96 && y <= 64) {
-                    x = 0;
-                    y += 32;
-                } else if (x > 96) {
-                    x=32;
-                    y=-32;
-
-                }
+                renderSlot(percentLeft(leftPage?25:57)+ getBookSlotPlacement(true, slot),
+                        percentTop(35)+ getBookSlotPlacement(false, slot));
+            }
+            for (int slot = 0; slot < 10; slot++) {
+                renderItem(((Recipe)getPage(leftPage?page:page+1)).getDisplayArray()[slot],
+                        percentLeft(leftPage?25:57)+ getBookSlotPlacement(true, slot),
+                        percentTop(35)+ getBookSlotPlacement(false, slot));
             }
         } else if(getPage(leftPage?page:page+1) instanceof String){
             String[] disp = ((String)getPage(leftPage?page:page+1)).split("\n");
@@ -131,7 +172,7 @@ public class GUICraftBook extends GuiScreen {
                 break;
             }
             case 1:{
-                if (page+1<pageData.size()){page+=2;}
+                if (page+2<pageData.size()){page+=2;}
                 break;
             }
         }

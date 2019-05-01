@@ -10,16 +10,18 @@ import java.util.List;
 public class skin {
     public ResourceLocation texture;
     public ResourceLocation[] bogieTextures;
+    public ResourceLocation[] subBogieTextures;
     public List<int[]> partialRecolors = new ArrayList<>();
     public String name;
     private String description;
 
-    public skin(ResourceLocation texture, @Nullable ResourceLocation[] bogieTextures, @Nullable int[][] recolor, String skinName, String skinDescription){
+    public skin(ResourceLocation texture, @Nullable ResourceLocation[] bogieTextures, @Nullable ResourceLocation[] subBogieTextures, @Nullable int[][] recolor, String skinName, String skinDescription){
         this.texture=texture;
         name=skinName;
         description=skinDescription;
         partialRecolors = recolor==null?null:Arrays.asList(recolor);
         this.bogieTextures= bogieTextures;
+        this.subBogieTextures= subBogieTextures;
     }
 
     public ResourceLocation getBogieSkin(int index){
@@ -30,7 +32,18 @@ public class skin {
             return bogieTextures[index];
         }
 
-        return bogieTextures[0];
+        return null;
+    }
+
+    public ResourceLocation getSubBogieSkin(int index){
+        if(subBogieTextures ==null){
+            return null;
+        }
+        if(subBogieTextures.length>index){
+            return subBogieTextures[index];
+        }
+
+        return null;
     }
 
     public String[] getDescription(){return description.split("\n");}

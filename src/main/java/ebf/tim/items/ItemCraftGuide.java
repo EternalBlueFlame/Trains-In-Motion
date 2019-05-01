@@ -34,11 +34,11 @@ public class ItemCraftGuide extends Item {
     }
 
     @Override
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int meta, float p_77648_8_, float p_77648_9_, float p_77648_10_) {
+    public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
         if(world.isRemote){
             player.openGui(TrainsInMotion.MODID, -1, world,0,0,0);
         }
-        return false;
+        return stack;
     }
 
     //modid, then info page

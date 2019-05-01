@@ -9,6 +9,7 @@ import ebf.tim.api.SkinRegistry;
 import ebf.tim.api.skin;
 import ebf.tim.items.ItemKey;
 import ebf.tim.items.ItemTicket;
+import ebf.tim.models.Bogie;
 import ebf.tim.models.ParticleFX;
 import ebf.tim.models.TransportRenderData;
 import ebf.tim.networking.PacketInteract;
@@ -1555,18 +1556,32 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * example:
      * return new float[][]{{x1,y1,z1},{x2,y2,z2}, etc...};
      * may return null.*/
+    @Deprecated
     @SideOnly(Side.CLIENT)
     public float[][] bogieModelOffsets(){return null;}
-
-    @SideOnly(Side.CLIENT)
-    public float[] simpleBogieModelOffsets(){return null;}
 
     /**returns a list of models to be used for the bogies
      * example:
      * return new ModelBase[]{new MyModel1(), new myModel2(), etc...};
      * may return null. */
+    @Deprecated
     @SideOnly(Side.CLIENT)
     public ModelBase[] bogieModels(){return null;}
+
+
+    @SideOnly(Side.CLIENT)
+    public Bogie[] bogies(){
+        if(bogieModelOffsets()==null){return null;}
+        Bogie[] ret = new Bogie[bogieModelOffsets().length];
+        for(int i=0; i<bogieModelOffsets().length;i++){
+            if(i>=bogieModels().length){
+                ret[i] = new Bogie(bogieModels()[0], bogieModelOffsets()[i]);
+            } else {
+                ret[i] = new Bogie(bogieModels()[i], bogieModelOffsets()[i]);
+            }
+        }
+        return ret;
+    }
 
     /**defines the points that the entity uses for path-finding and rotation, with 0 being the entity center.
      * Usually the point where the front and back bogies would connect to the transport.

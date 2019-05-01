@@ -34,7 +34,7 @@ import java.util.List;
 public class GUITransport extends GUIContainerNoNEI {
 
     /**a reference to the resource location of the vanilla furnace texture, this also gets overridden by texturepacks*/
-    private static final ResourceLocation vanillaInventory =
+    public static final ResourceLocation vanillaInventory =
             ClientProxy.useVanillaInventoryTextures?new ResourceLocation("textures/gui/container/furnace.png"):
                     new ResourceLocation(TrainsInMotion.MODID, "textures/gui/furnace.png");
     /**a reference to the resource location of the vanilla chest texture, this also gets overridden by texturepacks*/

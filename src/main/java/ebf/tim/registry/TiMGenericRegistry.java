@@ -5,12 +5,6 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.entities.rollingstock.EntityGTAX13000GallonTanker;
-import ebf.tim.entities.rollingstock.EntityPullmansPalace;
-import ebf.tim.entities.rollingstock.EntityUP3Bay100TonHopper;
-import ebf.tim.entities.rollingstock.EntityVATLogCar;
-import ebf.tim.entities.trains.EntityBrigadelok080;
-import ebf.tim.entities.trains.EntityBrigadelok080Electric;
 import ebf.tim.gui.GUICraftBook;
 import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.utility.DebugUtil;
@@ -20,7 +14,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.MaterialLiquid;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
@@ -190,23 +183,5 @@ public class TiMGenericRegistry {
     public static void endRegistration(){
         usedNames =null; registryPosition=-1;
     }
-
-
-    public static GenericRailTransport[] listSteamTrains() {
-        return new GenericRailTransport[]{new EntityBrigadelok080(null), new EntityBrigadelok080Electric(null)};
-    }
-
-    public static GenericRailTransport[] listPassenger() {
-        return new GenericRailTransport[]{new EntityPullmansPalace(null)};
-    }
-
-    public static GenericRailTransport[] listFreight() {
-        return new GenericRailTransport[]{new EntityVATLogCar(null), new EntityUP3Bay100TonHopper(null)};
-    }
-
-    public static GenericRailTransport[] listTanker() {
-        return new GenericRailTransport[]{new EntityGTAX13000GallonTanker(null)};
-    }
-
 
 }

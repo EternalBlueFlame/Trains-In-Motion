@@ -9,7 +9,7 @@
  * @author Eternal Blue Flame
  */
 
-package ebf.tim.models.rollingstock;
+package ebf.timsquared.models.rollingstock;
 
 import ebf.tim.models.GroupedModelRender;
 import fexcraft.tmt.slim.ModelBase;

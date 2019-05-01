@@ -3,6 +3,7 @@ package ebf.tim.models;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
+import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.client.Minecraft;
@@ -380,11 +381,11 @@ public class ParticleFX {
     }
 
 
-    public static ModelRendererTurbo particle = new ModelRendererTurbo(null, 0, 0, 16, 16)
+    public static ModelRendererTurbo particle = new ModelRendererTurbo((ModelBase) null, 0, 0, 16, 16)
             .addBox(0,0,0, 4, 4, 4).setRotationPoint(-2F, 2F, -1F);
-    public static ModelRendererTurbo lampCone = new ModelRendererTurbo(null, 0, 0, 32, 64)
+    public static ModelRendererTurbo lampCone = new ModelRendererTurbo((ModelBase) null, 0, 0, 32, 64)
             .addCylinder(-0.00625f, -4.025f, -0.0125f, 1, 4, 16, 1F, 0.01F, MR_TOP, 1,1, 6);
-    public static ModelRendererTurbo lampSphere = new ModelRendererTurbo(null, 0, 0, 64, 64)
+    public static ModelRendererTurbo lampSphere = new ModelRendererTurbo((ModelBase) null, 0, 0, 64, 64)
             .addSphere(0,0,0, 2, 8, 8,1,1);
 
 }

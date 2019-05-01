@@ -1,7 +1,8 @@
-package ebf.tim.entities.trains;
+package ebf.timsquared.entities.trains;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.timsquared.TiMSquared;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.api.SkinRegistry;
 import ebf.tim.api.TrainBase;
@@ -9,13 +10,11 @@ import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.items.ItemTransport;
 import ebf.tim.models.Bogie;
-import ebf.tim.models.trains.Brigadelok_080;
+import ebf.timsquared.models.trains.ModelBrigadelok_080;
 import ebf.tim.registry.TiMGenericRegistry;
 import ebf.tim.registry.URIRegistry;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.FuelHandler;
 import fexcraft.tmt.slim.ModelBase;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
@@ -24,7 +23,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,7 +32,7 @@ import java.util.UUID;
  * This class is intended to serve as the primary example for API use.
  * @author Eternal Blue Flame
  */
-public class EntityBrigadelok080Electric extends TrainBase {
+public class EntityBrigadelok080 extends TrainBase {
     /**
      * <h2>Basic Train Constructor</h2>
      * To make your own custom train or rollingstock, create a new class that is a copy of the train or rollingstockShapeBox that is closest to what you are adding,
@@ -56,30 +54,30 @@ public class EntityBrigadelok080Electric extends TrainBase {
      */
 
 
-    public static final Item thisItem = new ItemTransport(new EntityBrigadelok080Electric(null), TrainsInMotion.MODID,TrainsInMotion.creativeTab);
+    public static final Item thisItem = new ItemTransport(new EntityBrigadelok080(null), TiMSquared.MODID, TiMSquared.creativeTab);
 
     /**
      * these basic constructors only need to have their names changed to that of this class, that is assuming your editor doesn't automatically do that.
      * Be sure the one that takes more than a world is always first, unless you wanna compensate for that in the item declaration.
      * @see EntityTrainCore
      */
-    public EntityBrigadelok080Electric(UUID owner, World world, double xPos, double yPos, double zPos) {
+    public EntityBrigadelok080(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);
     }
-    public EntityBrigadelok080Electric(World world){
+    public EntityBrigadelok080(World world){
         super(world);
     }
 
     @Override
-    public String transportName(){return "Henschel Brigadelok-E";}
+    public String transportName(){return "Henschel Brigadelok";}
     @Override
     public String transportcountry(){return "Germany";}
     @Override
     public String transportYear(){return "1918";}
     @Override
-    public String transportFuelType(){return "Electric";}
+    public String transportFuelType(){return "Steam";}
     @Override
-    public boolean isFictional(){return true;}
+    public boolean isFictional(){return false;}
     @Override
     public float transportTractiveEffort(){return 0;}
 
@@ -108,7 +106,7 @@ public class EntityBrigadelok080Electric extends TrainBase {
      * Must always go from front to back. First and last values must always be exact opposites.
      */
     @Override
-    public List<Double> getRenderBogieOffsets(){return  Arrays.asList(-0.75, 0.75);}
+    public List<Double> getRenderBogieOffsets(){return  null;}
     /**
      * <h2>Inventory Size</h2>
      * @return the size of the inventory not counting any fuel or crafting slots, those are defined by the type.
@@ -120,7 +118,7 @@ public class EntityBrigadelok080Electric extends TrainBase {
      * @return the type which will define it's features, GUI, a degree of storage (like crafting slots), and a number of other things.
      */
     @Override
-    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.ELECTRIC;}
+    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.STEAM;}
     /**
      * <h2>Max Fuel</h2>
      * @return the maxstorage of fuel the train can store.
@@ -154,7 +152,7 @@ public class EntityBrigadelok080Electric extends TrainBase {
 
     @Override
     public String[] additionalItemText() {
-        return new String[]{"Testing entity for electric trains"};
+        return null;
     }
 
     @Override
@@ -206,7 +204,7 @@ public class EntityBrigadelok080Electric extends TrainBase {
 
     @Override
     public float[] bogieLengthFromCenter() {
-        return new float[]{1, -1};
+        return new float[]{1, 0.1f};
     }
 
     @Override
@@ -240,7 +238,7 @@ public class EntityBrigadelok080Electric extends TrainBase {
      * <h2>Fluid Tank Capacity</h2>
      */
     @Override
-    public int[] getTankCapacity(){return new int[]{8000};}
+    public int[] getTankCapacity(){return new int[]{9161, 800};}
 
     @Override
     public int getRFCapacity() {
@@ -255,8 +253,11 @@ public class EntityBrigadelok080Electric extends TrainBase {
     @Override
     public String[] getTankFilters(int tank){
         switch (tank){
-            default:{
+            case 0:{
                 return new String[]{FluidRegistry.WATER.getName()};
+            }
+            default:{
+                return new String[]{FluidRegistry.LAVA.getName()};
             }
         }
     }
@@ -266,7 +267,8 @@ public class EntityBrigadelok080Electric extends TrainBase {
     @Override
     public boolean isItemValidForSlot(int slot, ItemStack stack){
         switch (slot){
-            case 400:{return stack!=null && stack.getItem() ==Items.redstone;}
+            case 400:{return TileEntityFurnace.getItemBurnTime(stack)>0;}
+            case 401:{return FluidContainerRegistry.getFluidForFilledItem(stack)!=null && canFill(null, FluidContainerRegistry.getFluidForFilledItem(stack).getFluid());}
             default:{return true;}
         }
     }
@@ -277,7 +279,7 @@ public class EntityBrigadelok080Electric extends TrainBase {
      */
     @Override
     public void manageFuel(){
-        fuelHandler.manageElectric(this);
+        fuelHandler.manageSteam(this);
     }
 
     /**
@@ -294,7 +296,7 @@ public class EntityBrigadelok080Electric extends TrainBase {
     public Bogie[] getBogieModels(){return null;}
 
     @Override
-    public ModelBase[] getModel(){return new ModelBase[]{new Brigadelok_080()};}
+    public ModelBase[] getModel(){return new ModelBase[]{new ModelBrigadelok_080()};}
 
     /**
      * <h2>sets the resource location for sounds, like horn and the sound made for the engine running</h2>

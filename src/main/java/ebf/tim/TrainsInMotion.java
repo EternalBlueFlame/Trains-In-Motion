@@ -6,8 +6,6 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -25,13 +23,9 @@ import ebf.tim.registry.TiMGenericRegistry;
 import ebf.tim.utility.ChunkHandler;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.CommonProxy;
-import ebf.tim.utility.DebugUtil;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
-
-import static sun.security.x509.ReasonFlags.UNUSED;
 
 
 /**
@@ -105,7 +99,6 @@ public class TrainsInMotion {
      * we use the pre-init to load the config file.
      * Most of the configs are decided by the proxy, no need to setup controls on the server.
      */
-    @SuppressWarnings("unused")
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
 
@@ -130,7 +123,6 @@ public class TrainsInMotion {
      * This could be done in pre-init but that would brake compatibility with Dragon API and a number of 3rd party mods.
      */
     @Mod.EventHandler
-    @SuppressWarnings(UNUSED)
     public void init(FMLInitializationEvent event) {
         //loop for registering the entities. the values needed are the class, entity name, entity ID, mod instance, update range, update rate, and if it does velocity things,
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntityBogie.class, "Bogie", 15, TrainsInMotion.instance, 60, 1, true);
@@ -140,10 +132,6 @@ public class TrainsInMotion {
             GUICraftBook.infoPages.put(MODID, new String[]{"TRAINS IN MOTION\nBy Eternal Blue Flame\nAdditional credit to Fexcraft", "PAGE 2 OF INfO GARBAGE"});
         }
 
-        TiMGenericRegistry.registerTransports(event.getSide().isClient(), MODID, TiMGenericRegistry.listSteamTrains(), null);
-        TiMGenericRegistry.registerTransports(event.getSide().isClient(), MODID, TiMGenericRegistry.listFreight(), null);
-        TiMGenericRegistry.registerTransports(event.getSide().isClient(), MODID, TiMGenericRegistry.listPassenger(), null);
-        TiMGenericRegistry.registerTransports(event.getSide().isClient(), MODID, TiMGenericRegistry.listTanker(), null);
 
 
         //register the networking instances and channels
@@ -171,7 +159,6 @@ public class TrainsInMotion {
     }
 
     @Mod.EventHandler
-    @SuppressWarnings(UNUSED)
     public void postinit(FMLPostInitializationEvent event) {
         TiMGenericRegistry.endRegistration();
     }

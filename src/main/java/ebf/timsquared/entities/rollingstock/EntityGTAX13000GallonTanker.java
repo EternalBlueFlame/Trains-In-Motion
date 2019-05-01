@@ -1,18 +1,18 @@
-package ebf.tim.entities.rollingstock;
+package ebf.timsquared.entities.rollingstock;
 
+import ebf.timsquared.TiMSquared;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.api.RollingstockBase;
 import ebf.tim.api.SkinRegistry;
-import ebf.tim.entities.trains.EntityBrigadelok080;
+import ebf.timsquared.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemTransport;
-import ebf.tim.models.bogies.CMDBogie;
-import ebf.tim.models.rollingstock.ModelGATX1300GallonTanker;
+import ebf.timsquared.models.bogies.CMDBogie;
+import ebf.timsquared.models.rollingstock.ModelGATX1300GallonTanker;
 import ebf.tim.utility.FuelHandler;
 import fexcraft.tmt.slim.ModelBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import java.util.UUID;
@@ -27,10 +27,10 @@ import static ebf.tim.utility.RailUtility.DefineStack;
  */
 public class EntityGTAX13000GallonTanker extends RollingstockBase {
 
-    public static final String[] itemDescription = new String[]{
+/*    public static final String[] itemDescription = new String[]{
             "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 4" + StatCollector.translateToLocal("menu.item.tons"),
-            "\u00A77" + StatCollector.translateToLocal("menu.item.sizeof") +": 13.4" + StatCollector.translateToLocal("gui.buckets")};
-    public static final Item thisItem = new ItemTransport(new EntityGTAX13000GallonTanker(null), TrainsInMotion.MODID, TrainsInMotion.creativeTab);
+            "\u00A77" + StatCollector.translateToLocal("menu.item.sizeof") +": 13.4" + StatCollector.translateToLocal("gui.buckets")};*/
+    public static final Item thisItem = new ItemTransport(new EntityGTAX13000GallonTanker(null), TiMSquared.MODID, TiMSquared.creativeTab);
 
     public EntityGTAX13000GallonTanker(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);

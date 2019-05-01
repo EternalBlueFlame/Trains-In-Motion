@@ -1,41 +1,38 @@
-package ebf.tim.entities.rollingstock;
+package ebf.timsquared.entities.rollingstock;
 
+import ebf.timsquared.TiMSquared;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.api.RollingstockBase;
 import ebf.tim.api.SkinRegistry;
-import ebf.tim.entities.trains.EntityBrigadelok080;
+import ebf.timsquared.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemTransport;
-import ebf.tim.models.bogies.CMDBogie;
-import ebf.tim.models.rollingstock.UP3Bay100TonHopper;
+import ebf.timsquared.models.rollingstock.PullmansPalace;
 import fexcraft.tmt.slim.ModelBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import java.util.UUID;
 
 import static ebf.tim.utility.RailUtility.DefineStack;
 
-
 /**
- * <h1>Union Pacific 3-Bay 100-Ton Hopper entity</h1>
+ * <h1>Pullman's Palace entity</h1>
  * For more information on the overrides and functions:
  * @see EntityBrigadelok080
  * @author Eternal Blue Flame
  */
-public class EntityUP3Bay100TonHopper extends RollingstockBase {
+public class EntityPullmansPalace extends RollingstockBase {
+    /*private static final String[] itemDescription = new String[]{
+            "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2 " + StatCollector.translateToLocal("menu.item.tons"),
+            "\u00A77" + StatCollector.translateToLocal("menu.item.seats") +": 4 " + StatCollector.translateToLocal("menu.item.players")};*/
+    public static final Item thisItem = new ItemTransport(new EntityPullmansPalace(null), TiMSquared.MODID, TiMSquared.creativeTab);
 
-    public static final String[] itemDescription = new String[]{
-            "\u00A77" + StatCollector.translateToLocal("menu.item.weight") +": 2" + StatCollector.translateToLocal("menu.item.tons"),
-            "\u00A77" + StatCollector.translateToLocal("menu.item.sizeof") +": 27" + StatCollector.translateToLocal("menu.item.slots")};
-    public static final Item thisItem = new ItemTransport(new EntityUP3Bay100TonHopper(null), TrainsInMotion.MODID, TrainsInMotion.creativeTab);
-
-    public EntityUP3Bay100TonHopper(UUID owner, World world, double xPos, double yPos, double zPos) {
+    public EntityPullmansPalace(UUID owner, World world, double xPos, double yPos, double zPos) {
         super(owner, world, xPos, yPos, zPos);
     }
-    public EntityUP3Bay100TonHopper(World world){
+    public EntityPullmansPalace(World world){
         super(world);
     }
 
@@ -43,21 +40,21 @@ public class EntityUP3Bay100TonHopper extends RollingstockBase {
      * <h1>Variable Overrides</h1>
      */
 
-    /**
-     * <h2>Bogie Offset</h2>
-     */
     @Override
     public float[][] bogieModelOffsets() {
-        return new float[][]{{1,0,0},{-1,0,0}};
+        return new float[][]{{2,0,0},{-2,0,0}};
     }
 
     @Override
     public ModelBase[] bogieModels() {
-        return new ModelBase[]{new CMDBogie()};
+        return null;
     }
 
+    /**
+     * <h2>Bogie Offset</h2>
+     */
     @Override
-    public float[] bogieLengthFromCenter(){return new float[]{1,-1};}
+    public float[] bogieLengthFromCenter(){return new float[]{2,-2};}
 
     @Override
     public float getRenderScale() {
@@ -71,9 +68,8 @@ public class EntityUP3Bay100TonHopper extends RollingstockBase {
 
     @Override
     public void registerSkins() {
-        SkinRegistry.addSkin(this.getClass(), TrainsInMotion.MODID, "textures/UP3Bay100TonHopper.png",
-                new String[]{"textures/hd/rollingstock/cmd_bogie.png"},
-                "UP 3 Bay hopper", "Primarily used for transporting coal");
+        SkinRegistry.addSkin(this.getClass(), TrainsInMotion.MODID, "textures/pullmanspalace.png",
+                "Pullman's Palace", "A fictional passenger car from \"Railroads!\", based off the Federal #98 Pullman Private Car");
     }
 
     @Override
@@ -103,13 +99,13 @@ public class EntityUP3Bay100TonHopper extends RollingstockBase {
 
     @Override
     public float weightKg() {
-        return 9071.847f;
+        return 1814.3f;
     }
 
     @Override
     public ItemStack[] getRecipie() {
         return new ItemStack[]{
-                DefineStack(Items.coal, 1), null, null,
+                DefineStack(Items.bed, 1), null, null,
                 null, null, null,
                 null, null, null
         };
@@ -117,7 +113,7 @@ public class EntityUP3Bay100TonHopper extends RollingstockBase {
 
     @Override
     public String transportName() {
-        return "Union Pacific 3-bay Hopper";
+        return "Pullman's Palace";
     }
 
     @Override
@@ -127,12 +123,12 @@ public class EntityUP3Bay100TonHopper extends RollingstockBase {
 
     @Override
     public String transportYear() {
-        return "1960";
+        return "1911";
     }
 
     @Override
     public String transportFuelType() {
-        return "Steam-Diesel";
+        return "Steam";
     }
 
     @Override
@@ -142,7 +138,7 @@ public class EntityUP3Bay100TonHopper extends RollingstockBase {
 
     @Override
     public boolean isFictional() {
-        return false;
+        return true;
     }
 
     @Override
@@ -169,21 +165,21 @@ public class EntityUP3Bay100TonHopper extends RollingstockBase {
      * <h2>Inventory Size</h2>
      */
     @Override
-    public int getInventoryRows(){return 3;}
+    public int getInventoryRows(){return 0;}
     /**
      * <h2>Type</h2>
      */
     @Override
-    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.HOPPER;}
+    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.PASSENGER;}
     /**
      * <h2>Rider offsets</h2>
      */
     @Override
-    public float[][] getRiderOffsets(){return null;}
+    public float[][] getRiderOffsets(){return new float[][]{{2f,0.5f, 0.2f},{0.75f,0.5f, 0.2f},{-0.75f,0.5f, 0.2f},{-2f,0.5f, 0.2f}};}
 
     @Override
     public float[] getHitboxSize() {
-        return new float[]{4,1.5f, 1.2f};
+        return new float[]{5,2,1.5f};
     }
 
     @Override
@@ -191,9 +187,8 @@ public class EntityUP3Bay100TonHopper extends RollingstockBase {
         return 0;
     }
 
-
     @Override
-    public ModelBase[] getModel(){return new ModelBase[]{new UP3Bay100TonHopper()};}
+    public ModelBase[] getModel(){return new ModelBase[]{new PullmansPalace()};}
 
     /**
      * <h2>pre-asigned values</h2>

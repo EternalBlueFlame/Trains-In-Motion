@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static ebf.tim.models.rails.Model1x1Rail.addVertexWithOffset;
+import static org.lwjgl.opengl.GL11.GL_LIGHTING;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class ModelRail {
@@ -46,12 +47,13 @@ public class ModelRail {
         GL11.glPushMatrix();
         GL11.glDisable(GL_TEXTURE_2D);
         GL11.glTranslated(0, 0.225, 0);
-        GL11.glColor4f(
-                (color[0])* 0.00392156863f,
-                (color[1])* 0.00392156863f,
-                (color[2])* 0.00392156863f, 1);
 
         for(float rail : railOffsets) {
+
+            GL11.glColor4f(
+                    (color[0])* 0.00392156863f,
+                    (color[1])* 0.00392156863f,
+                    (color[2])* 0.00392156863f, 1);
             Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
             for (float[] p : points) {
                 addVertexWithOffset(p, 0.0625f+rail, 0, 0);
@@ -59,6 +61,11 @@ public class ModelRail {
             }
             Tessellator.getInstance().arrayEnabledDraw();
 
+
+            GL11.glColor4f(
+                    (color[0]-20)* 0.00392156863f,
+                    (color[1]-20)* 0.00392156863f,
+                    (color[2]-20)* 0.00392156863f, 1);
             Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
             for (float[] p : points) {
                 addVertexWithOffset(p, 0.0625f+rail, -0.085f, 0);

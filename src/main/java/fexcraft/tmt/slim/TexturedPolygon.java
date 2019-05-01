@@ -36,6 +36,7 @@ public class TexturedPolygon {
 
 	public void draw(float f){
 
+		DebugUtil.printGLError(glGetError());
 		switch (vertices.length){
 			case 3:{
 				Tessellator.getInstance().startDrawing(GL11.GL_TRIANGLES);

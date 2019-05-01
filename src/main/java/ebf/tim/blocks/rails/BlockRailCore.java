@@ -284,38 +284,4 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         tile.segmentLength=segmentation;
 
     }
-
-    @Deprecated
-    protected static void triGenModel(Vec3f P1, Vec3f P2, Vec3f P3, float[] railOffsets, float segmentation, RailTileEntity tile){
-        segmentation=Math.max(segmentation, 1);
-
-        float originalT =Math.abs(P1.xCoord)+Math.abs(P1.zCoord);
-        originalT+=Math.abs(P2.xCoord)+Math.abs(P2.zCoord);
-        originalT+=Math.abs(P3.xCoord)+Math.abs(P3.zCoord);
-        originalT= originalT/(originalT*segmentation);
-
-        float t=-originalT;
-        int i;
-        //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
-        List<float[]> points = new ArrayList<>();
-        for (i=0; i<segmentation+3;i++){
-            //define position
-            points.add(new float[]{
-                    (((1-t)*(1-t)) * P1.xCoord) + (2 * (1-t) * t * P2.xCoord) + ((t*t) * P3.xCoord),//X
-                    (((1-t)*(1-t)) * P1.yCoord) + (2 * (1-t) * t * P2.yCoord) + ((t*t) * P3.yCoord),//Y
-                    (((1-t)*(1-t)) * P1.zCoord) + (2 * (1-t) * t * P2.zCoord) + ((t*t) * P3.zCoord),//X
-            });
-            t += originalT;
-        }
-
-        for (i=1; i < points.size() - 1; i++) {
-            tile.points.add(
-                    new float[]{points.get(i)[0],points.get(i)[1],points.get(i)[2],0, RailUtility.atan2degreesf(
-                            points.get(i-1)[2] - (points.get(i+1)[2]),
-                            points.get(i-1)[0] - (points.get(i+1)[0])),0}
-            );
-        }
-        tile.railGauges =railOffsets;
-        tile.segmentLength=segmentation;
-    }
 }

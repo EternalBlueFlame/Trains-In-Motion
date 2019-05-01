@@ -21,6 +21,8 @@ import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -85,26 +87,30 @@ public class TextureManager {
             MCResourcePacks = Minecraft.getMinecraft().getResourceManager().getResourceDomains();
             tmtTextureMap =new HashMap<>();
         }
+        DebugUtil.printGLError(GL11.glGetError());
 
         int[] texture = tmtTextureMap.get(resource);
 
         bindTexture(resource);
         if(texture==null){
 
-            try {
-                texture = TextureUtil.readImageData(Minecraft.getMinecraft().getResourceManager(), resource);
-            } catch (IOException e){
-                if(!transportTextureFails.contains(resource.getResourcePath())) {
-                    System.out.println("TRAINS IN MOTION WARNING");
-                    System.out.println("TEXTURE FAILED TO LOAD: " + resource.getResourceDomain() + ":" + resource.getResourcePath());
-                    transportTextureFails.add(resource.getResourcePath());
+                int width =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
+                int height =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
+
+                GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, renderPixels);
+                DebugUtil.printGLError(GL11.glGetError());
+                texture = new int[((width*height)*4)+2];
+                texture[0]=width;
+                texture[1]=height;
+                for (int i=2; i<((width*height)*(4))-2; i+=(4)){
+                    texture[i+3]=renderPixels.get(i+3);//alpha
+                    texture[i+2]=renderPixels.get(i+2);//Red
+                    texture[i+1]=renderPixels.get(i+1);//Green
+                    texture[i]=renderPixels.get(i);//Blue
                 }
-                texture=null;
-            }
-            if(texture!=null) {
-                tmtTextureMap.put(resource, texture);
-            }
+            tmtTextureMap.put(resource, texture);
         }
+        DebugUtil.printGLError(GL11.glGetError());
 
         return texture;
     }
@@ -122,7 +128,7 @@ public class TextureManager {
 
         for(i=0; i<length; i+=4) {
             renderPixels.put(i+3, b(pixels[i+3]));//alpha is always from host texture.
-            if (pixels[i+3] == fullAlpha){
+            if (pixels[i+3] <0x10){
                 continue;//skip pixels with no color
             }
             //for each set of recoloring
@@ -147,9 +153,10 @@ public class TextureManager {
                 renderPixels.put(i + 2, b(pixels[i + 2]));
             }
         }
-
+        DebugUtil.printGLError(GL11.glGetError());
         glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, pixels[0], pixels[1], GL_RGBA, GL_UNSIGNED_BYTE, renderPixels);
         renderPixels.clear();//reset the buffer to all 0's.
+        DebugUtil.printGLError(GL11.glGetError());
     }
 
     //most compilers should process this type of function faster than a normal typecast.

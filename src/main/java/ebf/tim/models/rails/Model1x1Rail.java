@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static ebf.tim.utility.RailUtility.radianF;
+import static org.lwjgl.opengl.GL11.GL_LIGHTING;
 
 public class Model1x1Rail {
 

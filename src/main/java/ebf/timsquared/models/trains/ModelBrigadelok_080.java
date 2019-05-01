@@ -7,23 +7,22 @@
 // Created on: 13.06.2017 - 17:47:26
 // Last changed on: 13.06.2017 - 17:47:26
 
-package ebf.tim.models.trains; //Path where the model is located
+package ebf.timsquared.models.trains; //Path where the model is located
 
 
 import ebf.tim.models.StaticModelAnimator;
-import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelConverter;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 
 import static ebf.tim.models.StaticModelAnimator.tagLamp;
 import static ebf.tim.models.StaticModelAnimator.tagSmoke;
 
-public class Brigadelok_080 extends ModelConverter //Same as Filename
+public class ModelBrigadelok_080 extends ModelConverter //Same as Filename
 {
 	int textureX = 256;
 	int textureY = 256;
 
-	public Brigadelok_080() //Same as Filename
+	public ModelBrigadelok_080() //Same as Filename
 	{
 		bodyModel = new ModelRendererTurbo[117];
 

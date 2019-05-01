@@ -16,7 +16,7 @@ public class TransportRenderData {
     /**the base model of the entity, this holds every piece of sub-geometry and their texture mappings*/
     public ModelBase[] modelList = null;
     /**the models, textures, and other data for each bogie to render*/
-    public Bogie[] bogieRenders = null;
+    public Bogie[] bogies = null;
     /**a cached list of all the animatedPart, and other geometry that just spins.
      * all the actual work related to this variable is handled in
      * @see StaticModelAnimator*/

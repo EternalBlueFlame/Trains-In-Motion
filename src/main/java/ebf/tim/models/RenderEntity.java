@@ -2,7 +2,10 @@ package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
+import fexcraft.fvtm.PartModel;
+import fexcraft.fvtm.model.TurboList;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.Tessellator;
@@ -28,7 +31,7 @@ import org.lwjgl.opengl.GL20;
 public class RenderEntity extends Render {
 
     private static final float RailOffset = 0.34f;
-    private static int i=0;
+    private static int i=0, ii=0, iii=0;
 
     //public RenderEntity() {}
 
@@ -79,17 +82,17 @@ public class RenderEntity extends Render {
             return;
         }
 
-        if (entity.renderData.modelList == null) {
+        if (entity.renderData.modelList == null || entity.renderData.needsModelUpdate) {
             entity.renderData = new TransportRenderData();
             entity.renderData.modelList = entity.getModel();
-            entity.renderData.bogieRenders = Bogie.genBogies(entity.bogieModels(), entity.bogieModelOffsets(), entity.rotationYaw);
+            entity.renderData.bogies = entity.bogies();
+
 
             //cache animating parts
             if (ClientProxy.EnableAnimations && entity.renderData.needsModelUpdate) {
                 boolean isAdded;
-                float[] density;
                 for (ModelBase part : entity.renderData.modelList) {
-                    for (ModelRendererTurbo render : part.boxList) {
+                    for (ModelRendererTurbo render : part.getParts()) {
                         if (render.boxName ==null){continue;}
                         //attempt to cache the parts for the main transport model
                         if(render.boxName.toLowerCase().contains("hide") || render.boxName.toLowerCase().contains("cull")){
@@ -120,12 +123,22 @@ public class RenderEntity extends Render {
                         }
                     }
                 }
-                //cache the animating parts for bogies.
-                if (entity.renderData.bogieRenders != null) {
-                    for (Bogie bogie : entity.renderData.bogieRenders) {
-                        for (ModelRendererTurbo box : bogie.bogieModel.boxList) {
-                            if(entity.customAnimator(box) !=null) {
-                                entity.renderData.animatedPart.add(entity.customAnimator(box));
+                //cache the animating parts on the bogies.
+                if (entity.renderData.bogies != null) {
+                    for (Bogie bogie : entity.renderData.bogies) { {
+                            for (ModelRendererTurbo box : bogie.bogieModel.getParts()) {
+                                if (entity.customAnimator(box) != null) {
+                                    entity.renderData.animatedPart.add(entity.customAnimator(box));
+                                }
+                            }
+                            if(bogie.subBogies==null){continue;}
+                            //cache the animating parts on sub-bogies
+                            for(Bogie subBogie : bogie.subBogies){
+                                for(ModelRendererTurbo box : subBogie.bogieModel.getParts()){
+                                    if (entity.customAnimator(box) != null) {
+                                        entity.renderData.animatedPart.add(entity.customAnimator(box));
+                                    }
+                                }
                             }
                         }
                     }
@@ -180,12 +193,15 @@ public class RenderEntity extends Render {
          */
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
         TextureManager.adjustLightFixture(entity.worldObj,(int)entity.posX,(int)entity.posY,(int)entity.posZ);
-        TextureManager.maskColors(entity.getTexture().texture, entity.colors);
+        //TextureManager.maskColors(entity.getTexture().texture, entity.colors);
+        TextureManager.bindTexture(entity.getTexture().texture);
         for(i=0; i< entity.renderData.modelList.length;i++) {
+            GL11.glPushMatrix();
             if(entity.modelOffsets()!=null && entity.modelOffsets().length>i) {
                 GL11.glTranslated(entity.modelOffsets()[i][0],entity.modelOffsets()[i][1],entity.modelOffsets()[i][2]);
             }
             entity.renderData.modelList[i].render(null, 0, 0, 0, 0, 0, entity.getRenderScale());
+            GL11.glPopMatrix();
         }
 
 
@@ -194,68 +210,51 @@ public class RenderEntity extends Render {
             entity.renderData.blockCargoRenders.get(i).doRender(field_147909_c, entity.getFirstBlock(i), this, entity.getRenderScale(), entity);
         }
 
-        GL11.glPopMatrix();
-
         /*
          * <h4> render bogies</h4>
          * in TiM here we render the bogies. This will be removed in TC.
          * this loops for every bogie defined in the registry for the transport, that way we can have different bogies.
          */
-        if (entity.renderData.bogieRenders != null && entity.renderData.bogieRenders.length >0){
-            if(entity.simpleBogieModelOffsets()!=null){
-                for (i = 0; entity.simpleBogieModelOffsets()!=null && i < entity.simpleBogieModelOffsets().length; i++) {
-                    GL11.glPushMatrix();
-                    //bind the texture
-                    if (entity.getTexture().getBogieSkin(i) != null) {
-                        Tessellator.bindTexture(entity.getTexture().getBogieSkin(i));
-                    }
-                    //set the offset
-                    entity.renderData.animationCache[1] = RailUtility.rotatePointF(
-                            entity.simpleBogieModelOffsets()[i],
-                            RailOffset, 0,
-                            entity.rotationPitch, entity.rotationYaw, 0);
-                    GL11.glTranslated(entity.renderData.animationCache[1][0] + x, entity.renderData.animationCache[1][1] + y+entity.frontBogie.yOffset, entity.renderData.animationCache[1][2] + z);
-                    entity.renderData.bogieRenders[i].setRotation(entity);
-                    //set the rotation
-                    GL11.glRotatef(-entity.renderData.bogieRenders[i].rotationYaw - 180f, 0.0f, 1.0f, 0);
-                    GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
-                    //render the geometry
-                    for (ModelRendererTurbo modelBogiePart : entity.renderData.bogieRenders[i].bogieModel.boxList) {
-                        modelBogiePart.render();
-                    }
-                    GL11.glPopMatrix();
+
+
+        if (entity.renderData.bogies != null) {
+            for(Bogie b : entity.renderData.bogies) {
+                ii=0;
+                GL11.glPushMatrix();
+                //bind the texture
+                if (entity.getTexture().getBogieSkin(ii) != null) {
+                    Tessellator.bindTexture(entity.getTexture().getBogieSkin(i));
                 }
-            } else {
-                for (i = 0; entity.bogieModelOffsets() !=null && i < entity.bogieModelOffsets().length; i++) {
-                    GL11.glPushMatrix();
-                    //bind the texture
-                    if (entity.getTexture().getBogieSkin(i) != null) {
-                        Tessellator.bindTexture(entity.getTexture().getBogieSkin(i));
+                GL11.glTranslated(-b.offset[0], -b.offset[1], -b.offset[2]);
+                b.setRotation(entity);
+                GL11.glPushMatrix();
+                GL11.glRotatef(b.rotationYaw-yaw, 0.0f, 1.0f, 0);
+                //GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
+                b.bogieModel.render(null, 0, 0, 0, 0, 0, entity.getRenderScale());
+                GL11.glPopMatrix();
+                if(b.subBogies!=null) {
+                    iii=0;
+                    for (Bogie sub : b.subBogies) {
+                        TextureManager.bindTexture(entity.getTexture().getSubBogieSkin(iii));
+                        GL11.glPushMatrix();
+                        GL11.glTranslated(sub.offset[0], sub.offset[1], sub.offset[2]);
+                        sub.setRotation(entity);
+                        GL11.glRotatef(sub.rotationYaw, 0.0f, 1.0f, 0);
+                        GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
+                        sub.bogieModel.render(null, 0, 0, 0, 0, 0, entity.getRenderScale());
+                        GL11.glPopMatrix();
+                        iii++;
                     }
-                    //set the offset
-                    entity.renderData.animationCache[1] = RailUtility.rotatePointF(
-                            entity.bogieModelOffsets()[i][0],
-                            RailOffset + entity.bogieModelOffsets()[i][1]
-                            , entity.bogieModelOffsets()[i][2],
-                            entity.rotationPitch, entity.rotationYaw, 0);
-                    GL11.glTranslated(entity.renderData.animationCache[1][0] + x, entity.renderData.animationCache[1][1] + y+entity.frontBogie.yOffset, entity.renderData.animationCache[1][2] + z);
-                    entity.renderData.bogieRenders[i].setRotation(entity);
-                    //set the rotation
-                    GL11.glRotatef(-entity.renderData.bogieRenders[i].rotationYaw - 180f, 0.0f, 1.0f, 0);
-                    GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
-                    //render the geometry
-                    for (ModelRendererTurbo modelBogiePart : entity.renderData.bogieRenders[i].bogieModel.boxList) {
-                        modelBogiePart.render();
-                    }
-                    GL11.glPopMatrix();
                 }
+
+                GL11.glPopMatrix();
+                ii++;
             }
         }
 
 
 
-
-
+        GL11.glPopMatrix();
         //render the particles, if there are any.
         for(ParticleFX particle : entity.renderData.particles){
             ParticleFX.doRender(particle, x,y,z);

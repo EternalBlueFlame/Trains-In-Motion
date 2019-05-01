@@ -81,10 +81,9 @@ public class RailShapeCore {
     }
 
     /**
-     * defines a path based on the provided x/y/z vectors.
+     * centers the path based on the provided x/y/z vectors.
      * this is intended for use with
-     * @see BlockRailCore#triGenModel(Vec3f, Vec3f, Vec3f, float[], float, RailTileEntity)
-     * @param yaw rotates the path if it's not 0
+     * @see BlockRailCore#multiTriGenModel(Vec3f[], float[], float, RailTileEntity)
      * @return
      */
     public static Vec3f[] normalizeVectors(float[][] vectors) {
@@ -96,9 +95,8 @@ public class RailShapeCore {
     }
 
     /**
-     * defines a path based on the provided x/y/z vectors. this one is aimed more-so at defining individual points to replace points of a path.
+     * centers the path based on the provided x/y/z vectors. this one is aimed more-so at defining individual points to replace points of a path.
      * good for deforms or other weird edits.
-     * @param yaw rotates the path if it's not 0
      * @return
      */
     public static Vec3f normalizeVector(float x1, float y1, float z1) {

@@ -3,6 +3,7 @@ package ebf.tim.items;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.blocks.RailTileEntity;
+import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
@@ -39,9 +40,7 @@ public class ItemRail extends Item implements ITrackItem {
     public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int meta, float p_77648_8_, float p_77648_9_, float p_77648_10_) {
         net.minecraft.block.Block block = world.getBlock(x, y, z);
 
-        if (block == Blocks.snow_layer && (world.getBlockMetadata(x, y, z) & 7) < 1) {
-            meta = 1;
-        } else if (block != Blocks.vine && block != Blocks.tallgrass && block != Blocks.deadbush) {
+        if (block != Blocks.vine && block != Blocks.tallgrass && block != Blocks.deadbush) {
             switch (meta) {
                 case 0:{--y;break;}
                 case 1:{++y;break;}
@@ -52,17 +51,19 @@ public class ItemRail extends Item implements ITrackItem {
             }
         }
 
-        if (!player.canPlayerEdit(x, y, z, meta, stack) || stack.stackSize==0) {
+        if (!player.canPlayerEdit(x,y,z, meta, stack) || stack.stackSize==0 ||
+        !world.getChunkProvider().chunkExists(
+                x>>4, z>>4)) {
             return false;
         } else {
-            if (world.canPlaceEntityOnSide(getPlacedBlock(), x, y, z, false, meta, null, stack))
+            if (world.canPlaceEntityOnSide(getPlacedBlock(),x,y,z, false, meta, null, stack))
             {
-                int i1 = getPlacedBlock().onBlockPlaced(world, x, y, z, meta, p_77648_8_, p_77648_9_, p_77648_10_, 0);
+                int i1 = getPlacedBlock().onBlockPlaced(world, x,y,z, meta, p_77648_8_, p_77648_9_, p_77648_10_, 0);
 
-                if (world.setBlock(x, y, z, getPlacedBlock(), 0, 3)) {
-                    if (world.getBlock(x, y, z) == getPlacedBlock()) {
-                        getPlacedBlock().onBlockPlacedBy(world, x, y, z, player, stack);
-                        getPlacedBlock().onPostBlockPlaced(world, x, y, z, i1);
+                if (world.setBlock(x,y,z, getPlacedBlock(), 0, 3)) {
+                    if (world.getBlock(x,y,z) == getPlacedBlock()) {
+                        getPlacedBlock().onBlockPlacedBy(world, x,y,z, player, stack);
+                        getPlacedBlock().onPostBlockPlaced(world, x,y,z, i1);
                     }
 
                     world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, getPlacedBlock().stepSound.func_150496_b(), (getPlacedBlock().stepSound.getVolume() + 1.0F) / 2.0F, getPlacedBlock().stepSound.getPitch() * 0.8F);
@@ -194,7 +195,7 @@ public class ItemRail extends Item implements ITrackItem {
     }
 
     public static boolean isItemBanned(ItemStack s){
-        return s.getItem().delegate.name().contains("chisel");
+        return s.getItem().delegate.name().contains("chisel") || Block.getBlockFromItem(s.getItem()).hasTileEntity(s.getItemDamage());
     }
 
     //adds custom versions of this to the creative menu, with the necessary NBT and metadata
