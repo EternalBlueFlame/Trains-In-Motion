@@ -76,7 +76,7 @@ public class SkinRegistry {
     }
 
     private static ResourceLocation[] resourceList(String modid, String[] URIs){
-        if(URIs == null){
+        if(URIs == null || URIs.length==0){
             return null;
         }
         ResourceLocation[] value = new ResourceLocation[URIs.length];

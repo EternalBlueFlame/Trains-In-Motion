@@ -238,15 +238,15 @@ public class EventManager {
     public void onRenderTick(TickEvent.RenderTickEvent event) {
         if(Minecraft.getMinecraft().currentScreen==null && selected!=null && selected.getCartItem()!=null){
             ClientProxy.toggleWaila(false);
-            ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft(),Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
-            left=res.getScaledWidth()/2;
+            left=new ScaledResolution(Minecraft.getMinecraft(),Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight).getScaledWidth()/2;
             disp=getStaticStrings(selected);
             longest=0;
             for(String s: disp){
-                if(s.length()>longest*2){
-                    longest=s.length()*2;
+                if(Minecraft.getMinecraft().fontRenderer.getStringWidth(s)>longest){
+                    longest=Minecraft.getMinecraft().fontRenderer.getStringWidth(s);
                 }
             }
+            longest*=0.3;
             longest+=10;
 
             drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length), ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,ClientProxy.WAILA_ALPHA);

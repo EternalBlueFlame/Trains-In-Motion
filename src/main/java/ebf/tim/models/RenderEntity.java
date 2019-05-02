@@ -150,10 +150,9 @@ public class RenderEntity extends Render {
 
 
 
+        GL11.glPushMatrix();
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL11.GL_BLEND);
-
-        GL11.glPushMatrix();
         //set the render position
         GL11.glTranslated(x, y+ RailOffset + ((entity.getRenderScale()-0.0625f)*10)+entity.frontBogie.yOffset, z);
         //rotate the model.
@@ -215,7 +214,6 @@ public class RenderEntity extends Render {
          * in TiM here we render the bogies. This will be removed in TC.
          * this loops for every bogie defined in the registry for the transport, that way we can have different bogies.
          */
-
 
         if (entity.renderData.bogies != null) {
             for(Bogie b : entity.renderData.bogies) {
