@@ -3,12 +3,11 @@ package ebf.tim.blocks;
 import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.blocks.rails.RailVanillaShapes;
 import ebf.tim.models.rails.Model1x1Rail;
-import ebf.tim.utility.DebugUtil;
+import ebf.tim.utility.CommonProxy;
+import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockRailBase;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -25,9 +24,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
+@Deprecated
 public class RailTileEntity extends TileEntity {
 
     private AxisAlignedBB boundingBox = null;
@@ -47,10 +46,7 @@ public class RailTileEntity extends TileEntity {
     }
 
     //used for the actual path, and rendered
-    public List<float[]> points = new ArrayList<>();
-    public float segmentLength=0;
-    //used to define the number of rails and their offset from the center.
-    public float[] railGauges;
+    public RailShapeCore points = new RailShapeCore();
     //TODO: only rendered, to show other paths, maybe rework so they are all in the same list and just have a bool for which is active?
     //public List<RailPointData> cosmeticPoints = new ArrayList<>();
 
@@ -66,6 +62,7 @@ public class RailTileEntity extends TileEntity {
                 org.lwjgl.opengl.GL11.glCallList(railGLID);
             } else {
 
+                /*
                 if(railColor==null){
                     if(rail !=null && TextureManager.ingotColors!=null) {
                         for(Map.Entry<ItemStack, int[]> e : TextureManager.ingotColors.entrySet()){
@@ -79,11 +76,11 @@ public class RailTileEntity extends TileEntity {
                     if(railColor==null){
                         railColor=new int[]{0,0,0};
                     }
-                }
+                }*/
 
                 railGLID = net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1);
                 org.lwjgl.opengl.GL11.glNewList(railGLID, org.lwjgl.opengl.GL11.GL_COMPILE);
-                Model1x1Rail.Model3DRail(worldObj,xCoord,yCoord,zCoord,points, gauge750mm, segmentLength, ties, ballast, railColor);
+                Model1x1Rail.Model3DRail(worldObj,xCoord,yCoord,zCoord,points, ties, ballast, rail);
                 org.lwjgl.opengl.GL11.glEndList();
             }
         } else {super.func_145828_a(report);}
@@ -91,7 +88,7 @@ public class RailTileEntity extends TileEntity {
 
     @Override
     public boolean shouldRefresh(Block oldBlock, Block newBlock, int oldMeta, int newMeta, World world, int x, int y, int z) {
-        return oldMeta != newMeta || points.size()==0;
+        return oldMeta != newMeta || points.activePath.size()==0;
     }
 
     @Override
@@ -111,7 +108,7 @@ public class RailTileEntity extends TileEntity {
     }
 
     public void updateShape() {
-        points= new ArrayList<>();
+        points= new RailShapeCore();
         //todo: process these directly into quad/processPoints(); on server, then sync the offsets over the NBT network packet.
             switch (worldObj.getBlockMetadata(xCoord, yCoord, zCoord)){
                 //Z straight
@@ -232,24 +229,15 @@ public class RailTileEntity extends TileEntity {
             tag.setTag("wires", compound);
         }
 
-        tag.setFloat("segmentLength", segmentLength);
-        try {
-            ByteArrayOutputStream bo = new ByteArrayOutputStream();
-            ObjectOutputStream so = new ObjectOutputStream(bo);
-            so.writeObject(points);
-            tag.setByteArray("path", bo.toByteArray());
-            so.flush();
-            bo.close();
-
-        } catch (Exception e){
-            System.out.println("HOW DID YOU GET AN IO EXCEPTION WITHOUT WRITING TO FILE?");
-            e.printStackTrace();
+        if(points.activePath.size()>0) {
+            tag.setString("route", points.toString());
         }
 
     }
 
     @Override
     public void readFromNBT(NBTTagCompound tag){
+        if(tag==null || worldObj==null){return;}
         super.readFromNBT(tag);
         if(tag.hasKey("rail")) {
             rail = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("rail"));
@@ -264,16 +252,12 @@ public class RailTileEntity extends TileEntity {
             wires = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("wires"));
         }
 
-        if (tag.hasKey("segmentLength")) {
-            segmentLength = tag.getFloat("segmentLength");
+        if (tag.hasKey("route")) {
+            points = new RailShapeCore().parseString(tag.getString("route"));
         }
 
-        byte[] b = tag.getByteArray("path");
-        try {
-          points = (List<float[]>) new ObjectInputStream(new ByteArrayInputStream(b)).readObject();
-        } catch (Exception e){
-          e.printStackTrace();
-        }
+
+        CommonProxy.getRailMap(worldObj).add(xCoord,yCoord,zCoord,tag);
     }
 
 }

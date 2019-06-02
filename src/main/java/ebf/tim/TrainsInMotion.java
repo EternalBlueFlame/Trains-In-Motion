@@ -17,6 +17,7 @@ import ebf.tim.gui.GUICraftBook;
 import ebf.tim.items.ItemAdminBook;
 import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.items.TiMTab;
+import ebf.tim.networking.PacketBlockNBTMap;
 import ebf.tim.networking.PacketInteract;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.TiMGenericRegistry;
@@ -63,6 +64,7 @@ public class TrainsInMotion {
     /**instance the network wrapper for the channels.
      * Every wrapper runs on it's own thread, so heavy traffic should go on it's own wrapper, using channels to separate packet types.*/
     public static SimpleNetworkWrapper keyChannel;
+    public static SimpleNetworkWrapper trackChannel;
 
 
     /**Instance a new chunk handler, this class manages chunk loading events and functionality.*/
@@ -140,7 +142,8 @@ public class TrainsInMotion {
         TrainsInMotion.keyChannel.registerMessage(PacketRemove.Handler.class, PacketRemove.class, 2, Side.SERVER);
         TrainsInMotion.keyChannel.registerMessage(ItemAdminBook.PacketAdminBook.Handler.class, ItemAdminBook.PacketAdminBook.class, 3, Side.CLIENT);
         TrainsInMotion.keyChannel.registerMessage(ItemAdminBook.PacketAdminBookClient.Handler.class, ItemAdminBook.PacketAdminBookClient.class, 4, Side.SERVER);
-
+        TrainsInMotion.trackChannel = NetworkRegistry.INSTANCE.newSimpleChannel("TiM.track");
+	    TrainsInMotion.trackChannel.registerMessage(PacketBlockNBTMap.Handler.class, PacketBlockNBTMap.class,1,Side.CLIENT);
 
         proxy.register();
         //register the worldgen

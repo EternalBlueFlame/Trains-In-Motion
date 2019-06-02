@@ -18,12 +18,22 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.MapStorage;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.Fluid;
 
 import javax.annotation.Nullable;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
@@ -39,6 +49,32 @@ public class CommonProxy implements IGuiHandler {
 
 
     public static EventManagerServer eventManagerServer = new EventManagerServer();
+    private static HashMap<Integer,BlockNBTMap> railMap = new HashMap<Integer, BlockNBTMap>();
+    public static Map<String, List<Recipe>> recipesInMods = new HashMap<>();
+
+    public static BlockNBTMap clientList = new BlockNBTMap("clientMap");
+
+
+    public static BlockNBTMap getRailMap(World worldObj){
+        if(!railMap.containsKey(worldObj.provider.dimensionId)){
+
+            MapStorage storage = worldObj.perWorldStorage;
+            BlockNBTMap m = (BlockNBTMap) storage.loadData(BlockNBTMap.class, "railMap");
+
+            if (m == null) {
+                m=new BlockNBTMap("railMap");
+                storage.setData("railMap", m);
+            }
+            railMap.put(worldObj.provider.dimensionId, m);
+        }
+        return railMap.get(worldObj.provider.dimensionId);
+    }
+
+    public static void setRailMap(World worldObj, BlockNBTMap map){
+        railMap.put(worldObj.provider.dimensionId, map).setDirty(true);
+    }
+
+
 
     /**
      * <h2> Server GUI Redirect </h2>

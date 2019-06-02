@@ -5,8 +5,8 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.gui.GUICraftBook;
 import ebf.tim.items.ItemCraftGuide;
+import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Recipe;
 import ebf.tim.utility.RecipeManager;
@@ -152,14 +152,14 @@ public class TiMGenericRegistry {
                     registry.transportName().replace(" ","") + ".entity",
                     registryPosition, TrainsInMotion.instance, 3000, 1, true);
             GameRegistry.registerItem(registry.getCartItem().getItem(), registry.getCartItem().getItem().getUnlocalizedName());
-            if(GUICraftBook.recipesInMods.containsKey(MODID)){
-                GUICraftBook.recipesInMods.get(MODID).add(new Recipe(registry.getCartItem(),
+            if(CommonProxy.recipesInMods.containsKey(MODID)){
+                CommonProxy.recipesInMods.get(MODID).add(new Recipe(registry.getCartItem(),
                         registry.getRecipie()[0], registry.getRecipie()[1], registry.getRecipie()[2]
                         , registry.getRecipie()[3], registry.getRecipie()[4], registry.getRecipie()[5]
                         , registry.getRecipie()[6], registry.getRecipie()[7], registry.getRecipie()[8]));
             } else {
-                GUICraftBook.recipesInMods.put(MODID, new ArrayList<Recipe>());
-                GUICraftBook.recipesInMods.get(MODID).add(new Recipe(registry.getCartItem(),
+                CommonProxy.recipesInMods.put(MODID, new ArrayList<Recipe>());
+                CommonProxy.recipesInMods.get(MODID).add(new Recipe(registry.getCartItem(),
                         registry.getRecipie()[0], registry.getRecipie()[1], registry.getRecipie()[2]
                         , registry.getRecipie()[3], registry.getRecipie()[4], registry.getRecipie()[5]
                         , registry.getRecipie()[6], registry.getRecipie()[7], registry.getRecipie()[8]));

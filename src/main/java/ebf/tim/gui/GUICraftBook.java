@@ -1,13 +1,13 @@
 package ebf.tim.gui;
 
 import ebf.tim.models.ModelBook;
+import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Recipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
@@ -32,7 +32,6 @@ import java.util.*;
 
 public class GUICraftBook extends GuiScreen {
 
-    public static Map<String, List<Recipe>> recipesInMods = new HashMap<>();
     public static Map<String, String[]> infoPages=new HashMap<>();
     public static int guiLeft=0,guiTop=0, page=0;
     private static List<Object> pageData = null;
@@ -44,18 +43,17 @@ public class GUICraftBook extends GuiScreen {
             List<Object> pages = new ArrayList<>();
             //first add all mods that don't have recipes
             for(String m : infoPages.keySet()){
-                if(!recipesInMods.containsKey(m)){
+                if(!CommonProxy.recipesInMods.containsKey(m)){
                     Collections.addAll(pages, infoPages.get(m));
                 }
             }
 
-            for (String mod : recipesInMods.keySet()) {
+            for (String mod : CommonProxy.recipesInMods.keySet()) {
                 DebugUtil.println("adding pages for : " + mod);
                 if(infoPages.containsKey(mod)) {
                     Collections.addAll(pages, infoPages.get(mod));
                 }
-                DebugUtil.println(recipesInMods.get(mod).size());
-                for(Recipe r : recipesInMods.get(mod)){
+                for(Recipe r : CommonProxy.recipesInMods.get(mod)){
                     if(r.getresult()!=null) {//for some unknown reason this must be called for the recipe to initialize at all...
                         pages.add(r);
                     }
@@ -72,15 +70,13 @@ public class GUICraftBook extends GuiScreen {
         super.drawScreen(mouseX, mouseY, par3);
 
         GL11.glPushMatrix();
-        //GL11.glTranslatef(percentLeft(25),percentTop(35),0);
+        //GL11.glTranslatef(,, 300);
+        GL11.glColor4f(1,1,1,1);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        book.render();
+        GUITransport.drawTexturedRect(percentLeft(14),percentTop(15),0,0,percentLeft(75),percentTop(60));
+
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glPopMatrix();
-
-        GL11.glPushMatrix();
         GL11.glDisable(GL11.GL_LIGHTING);
-
         renderpage(true);
         renderpage(false);
 

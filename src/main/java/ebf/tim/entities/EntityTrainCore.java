@@ -149,16 +149,12 @@ public class EntityTrainCore extends GenericRailTransport {
     }
 
     private float maxPowerNewtons=0;
-    private List<GenericRailTransport> heading = new ArrayList<>();
 
     @Override
     public void setValuesOnLinkUpdate(List<GenericRailTransport> consist){
         maxPowerNewtons=0;
         pullingWeight=0;
         for(GenericRailTransport t : consist) {
-            if(t instanceof EntityTrainCore || t.getMaxPower()!=0){
-                heading.add(t);
-            }
             maxPowerNewtons +=t.getMaxPower();
             pullingWeight +=t.weightKg();
         }
@@ -170,17 +166,8 @@ public class EntityTrainCore extends GenericRailTransport {
      * speed calculation provided by zodiacmal
      */
     public void calculateAcceleration(){
-        if(ticksExisted%20==0){
-            maxPowerNewtons=0;
-            for(GenericRailTransport t : heading) {
-                if(t.getBoolean(boolValues.RUNNING)){
-                    maxPowerNewtons +=t.getMaxPower();
-                }
-            }
-        }
-
         float weight=pullingWeight * (getBoolean(boolValues.BRAKE)?2:1);
-        if (accelerator !=0) {
+        if (accelerator !=0 && ticksExisted%20!=0) {
             //speed is defined by the power in newtons divided by the weight, divided by the number of ticks in a second.
             if(maxPowerNewtons!=0) {
                 //745.7 converts to watts, which seems more accurate.

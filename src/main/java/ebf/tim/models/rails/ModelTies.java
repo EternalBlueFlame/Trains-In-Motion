@@ -1,16 +1,13 @@
 package ebf.tim.models.rails;
 
+import ebf.tim.blocks.rails.RailShapeCore;
+import ebf.tim.utility.Vec5f;
 import fexcraft.tmt.slim.Tessellator;
 import fexcraft.tmt.slim.TextureManager;
-import net.minecraft.block.Block;
-import net.minecraft.client.renderer.RenderBlocks;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
-
-import java.util.List;
 
 import static ebf.tim.models.rails.Model1x1Rail.addVertexWithOffsetAndUV;
 
@@ -18,13 +15,13 @@ public class ModelTies {
 
     public static IIcon iicon;
 
-    public static void modelPotatoTies(List<float[]> points, float maxWidth, float minWidth, ItemStack block){
+    public static void modelPotatoTies(RailShapeCore shape, float maxWidth, float minWidth, ItemStack block){
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.125, 0);
         //top side
         IIcon iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.WEST.ordinal(), block);
         boolean first = true;
-        for (float[] p :points) {
+        for (Vec5f p :shape.activePath) {
             if(first){
                 first=false;
                 continue;
@@ -45,15 +42,15 @@ public class ModelTies {
     }
 
 
-    public static void model3DTies(List<float[]> points, float maxWidth, float minWidth, ItemStack block){
+    public static void model3DTies(RailShapeCore shape, float maxWidth, float minWidth, ItemStack block){
 
-        modelPotatoTies(points, maxWidth, minWidth, block);
+        modelPotatoTies(shape, maxWidth, minWidth, block);
 
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.125, 0);
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.NORTH.ordinal(),block);
         boolean first = true;
-        for (float[] p :points) {
+        for (Vec5f p :shape.activePath) {
             if(first){
                 first=false;
                 continue;
@@ -74,7 +71,7 @@ public class ModelTies {
 
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.SOUTH.ordinal(), block);
         first = true;
-        for (float[] p :points) {
+        for (Vec5f p :shape.activePath) {
             if(first){
                 first=false;
                 continue;
@@ -94,7 +91,7 @@ public class ModelTies {
 
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.UP.ordinal(), block);
         first = true;
-        for (float[] p :points) {
+        for (Vec5f p :shape.activePath) {
             if(first){
                 first=false;
                 continue;
@@ -112,7 +109,7 @@ public class ModelTies {
 
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.DOWN.ordinal(), block);
         first = true;
-        for (float[] p :points) {
+        for (Vec5f p :shape.activePath) {
             if(first){
                 first=false;
                 continue;
@@ -134,8 +131,8 @@ public class ModelTies {
 
     }
 
-    public void modelHDTies(List<float[]> points, float maxWidth, float minWidth, ItemStack block){
-        model3DTies(points, maxWidth, minWidth, block);
+    public void modelHDTies(RailShapeCore shape, float maxWidth, float minWidth, ItemStack block){
+        model3DTies(shape, maxWidth, minWidth, block);
         //todo HD ties should all the nails
     }
 }

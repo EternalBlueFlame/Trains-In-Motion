@@ -41,6 +41,8 @@ public class DebugUtil {
 			System.out.println("------------------TiM Debug------------------");
 			System.out.println(Thread.currentThread().getStackTrace()[2]);//print what function just called this
 			System.out.println(org.lwjgl.util.glu.GLU.gluErrorString(glerror));
+
+			printStackTrace();
 			System.out.println("------------------TiM Debug------------------");
 		}
 	}

@@ -11,11 +11,14 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.api.SkinRegistry;
+import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.models.rails.Model1x1Rail;
 import ebf.tim.networking.PacketInteract;
 import fexcraft.tmt.slim.Tessellator;
+import fexcraft.tmt.slim.TextureManager;
 import fexcraft.tmt.slim.Vec3d;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -27,6 +30,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ReportedException;
@@ -45,9 +49,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * <h1>event management</h1>
@@ -233,6 +235,7 @@ public class EventManager {
 
 
 
+
     @SubscribeEvent
     @SuppressWarnings("unused")
     public void onRenderTick(TickEvent.RenderTickEvent event) {
@@ -265,6 +268,7 @@ public class EventManager {
             ClientProxy.toggleWaila(true);
         }
     }
+
     private static int left=0,longest;
     private static String[] disp;
     private static RenderItem itemRender = new RenderItem();
@@ -276,6 +280,34 @@ public class EventManager {
                 "skin: " + SkinRegistry.getSkin(t.getClass(), t.getDataWatcher().getWatchableObjectString(24)).name
         };
     }
+
+
+
+    HashMap<Vec3i, Integer> railGLIDs = new HashMap<Vec3i, Integer>();
+
+    @SubscribeEvent
+    public void BlockRenderEvent(RenderWorldEvent.Pre event){
+        for (HashMap<Vec3i, NBTTagCompound> map : CommonProxy.clientList.data.values()){
+
+
+            for(Vec3i v : map.keySet()) {
+                TextureManager.adjustLightFixture(event.renderer.worldObj, v.x, v.y, v.z);
+                if (railGLIDs.get(v) != null) {
+                    org.lwjgl.opengl.GL11.glCallList(railGLIDs.get(v));
+                } else {
+                    org.lwjgl.opengl.GL11.glNewList(railGLIDs.put(v, net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1)), org.lwjgl.opengl.GL11.GL_COMPILE);
+                    Model1x1Rail.Model3DRail(event.renderer.worldObj, v.x, v.y, v.z, new RailShapeCore().parseString(map.get(v).getString("shape")), ItemStack.loadItemStackFromNBT(map.get(v).getCompoundTag("ties")), ItemStack.loadItemStackFromNBT(map.get(v).getCompoundTag("ballast")), ItemStack.loadItemStackFromNBT(map.get(v).getCompoundTag("rail")));
+                    org.lwjgl.opengl.GL11.glEndList();
+                }
+            }
+
+        }
+    }
+
+
+
+
+
 
     @SubscribeEvent
     @SuppressWarnings("unused")

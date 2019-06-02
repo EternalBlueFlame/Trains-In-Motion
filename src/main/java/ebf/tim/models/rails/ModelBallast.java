@@ -1,23 +1,20 @@
 package ebf.tim.models.rails;
 
+import ebf.tim.blocks.rails.RailShapeCore;
+import ebf.tim.utility.Vec5f;
 import fexcraft.tmt.slim.Tessellator;
 import fexcraft.tmt.slim.TextureManager;
-import net.minecraft.block.Block;
-import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
-
-import java.util.List;
 
 import static ebf.tim.models.rails.Model1x1Rail.addVertexWithOffsetAndUV;
 
 public class ModelBallast {
     public static IIcon iicon;
 
-    public static void modelPotatoBallast(List<float[]> points, float maxWidth, float minWidth, ItemStack b, float segmentLength){
+    public static void modelPotatoBallast(RailShapeCore shape, float maxWidth, float minWidth, ItemStack b){
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.1, 0);
 
@@ -27,9 +24,9 @@ public class ModelBallast {
         float ballastloop=0;
         float d0;
         //todo loop this dependant on @dist, if it's greater than 1.75
-        for (float[] p : points) {
+        for (Vec5f p : shape.activePath) {
             d0 = iicon.getMinU();
-            d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/segmentLength));
+            d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/shape.segmentLength));
 
             addVertexWithOffsetAndUV(p, 0.0625f + maxWidth, 0, 0,d0,iicon.getMinV());
             addVertexWithOffsetAndUV(p, -0.0625f + minWidth, 0, 0,d0,iicon.getMaxV());
@@ -39,8 +36,8 @@ public class ModelBallast {
         GL11.glPopMatrix();
     }
 
-    public static void model3DBallast(List<float[]> points, float maxWidth, float minWidth, ItemStack b, float segmentLength){
-        modelPotatoBallast(points, maxWidth, minWidth, b, segmentLength);
+    public static void model3DBallast(RailShapeCore shape, float maxWidth, float minWidth, ItemStack b){
+        modelPotatoBallast(shape, maxWidth, minWidth, b);
 
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.1, 0);
@@ -51,9 +48,9 @@ public class ModelBallast {
 
         Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
         float ballastloop=0;
-        for (float[] p : points) {
+        for (Vec5f p : shape.activePath) {
             d0 = iicon.getMinU();
-            d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/segmentLength));
+            d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/shape.segmentLength));
 
             addVertexWithOffsetAndUV(p, 0.1825f + maxWidth, -0.0625f, 0,d0,iicon.getMinV());
             addVertexWithOffsetAndUV(p, 0.0625f + maxWidth, 0, 0,d0,iicon.getMinV()+((iicon.getMaxV()-iicon.getMinV())*0.15f));
@@ -69,9 +66,9 @@ public class ModelBallast {
         TextureManager.bindBlockTextureFromSide(ForgeDirection.EAST.ordinal(), b);
         Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
         ballastloop=0;
-        for (float[] p : points) {
+        for (Vec5f p : shape.activePath) {
             d0 = iicon.getMinU();
-            d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/segmentLength));
+            d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/shape.segmentLength));
 
             addVertexWithOffsetAndUV(p, -0.0625f + minWidth, 0, 0,d0,iicon.getMinV());
             addVertexWithOffsetAndUV(p, -0.1825f + minWidth, -0.0625f, 0,d0,iicon.getMinV()+((iicon.getMaxV()-iicon.getMinV())*0.15f));

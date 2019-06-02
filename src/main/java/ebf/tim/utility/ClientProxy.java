@@ -6,6 +6,7 @@ import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import ebf.tim.blocks.TileEntityStorage;
+import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.entities.EntityBogie;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.GenericRailTransport;
@@ -283,12 +284,12 @@ public class ClientProxy extends CommonProxy {
         public void renderItem(EntityLivingBase p_78443_1_, ItemStack p_78443_2_, int p_78443_3_, IItemRenderer.ItemRenderType type) {
             if(p_78443_2_.getItem() instanceof ItemRail){
                 if(p_78443_2_.getTagCompound().hasKey("ballast")){
-                    List<float[]> p = new ArrayList<>();
-                    p.add(new float[]{-0.5f,0f,0f});
-                    p.add(new float[]{0.5f,0f,0f});
+                    RailShapeCore p = new RailShapeCore();
+                    p.activePath.add(new Vec5f(-0.5f,0f,0f,0,0));
+                    p.activePath.add(new Vec5f(0.5f,0f,0f,0,0));
+                    p.gauge=new int[]{375};
                     ModelBallast.modelPotatoBallast(p,0.5f,-0.5f,
-                            ItemStack.loadItemStackFromNBT(p_78443_2_.getTagCompound().getCompoundTag("ballast")),
-                            1);
+                            ItemStack.loadItemStackFromNBT(p_78443_2_.getTagCompound().getCompoundTag("ballast")));
                 }
             }
 

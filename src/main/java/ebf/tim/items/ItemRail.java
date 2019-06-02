@@ -36,6 +36,7 @@ public class ItemRail extends Item implements ITrackItem {
      * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
      * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
+    @Deprecated
     @Override
     public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int meta, float p_77648_8_, float p_77648_9_, float p_77648_10_) {
         net.minecraft.block.Block block = world.getBlock(x, y, z);
@@ -70,6 +71,28 @@ public class ItemRail extends Item implements ITrackItem {
                     --stack.stackSize;
                 }
             }
+
+            NBTTagCompound c = new NBTTagCompound();
+            NBTTagCompound rail = new NBTTagCompound();
+            if(stack.getTagCompound().getTag("rail")!=null) {
+                rail = stack.getTagCompound().getCompoundTag("rail");
+            } else {
+                (new ItemStack(Items.iron_ingot)).writeToNBT(rail);
+            }
+            c.setTag("rail", rail);
+
+            if(stack.getTagCompound().getTag("ties")!=null) {
+                c.setTag("ties",stack.getTagCompound().getCompoundTag("ties"));
+            }
+            if(stack.getTagCompound().getTag("ballast")!=null) {
+                c.setTag("ballast",stack.getTagCompound().getCompoundTag("ballast"));
+            }
+            if(stack.getTagCompound().getTag("wires")!=null) {
+                c.setTag("wires",stack.getTagCompound().getCompoundTag("wires"));
+            }
+
+
+            {//DEPRECIATED
             if(world.getTileEntity(x,y,z) instanceof RailTileEntity && stack.hasTagCompound()){
                 if(stack.getTagCompound().getTag("rail")!=null) {
                     ((RailTileEntity) world.getTileEntity(x,y,z)).rail = ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("rail"));
@@ -88,6 +111,7 @@ public class ItemRail extends Item implements ITrackItem {
                 world.getTileEntity(x,y,z).markDirty();
             } else if(stack.hasTagCompound()) {
                 System.out.println("Trains In Motion ERROR, TILE ENTITY NOT SPAWNED FAST ENOUGH, that can happen?");
+            }
             }
             return true;
         }
