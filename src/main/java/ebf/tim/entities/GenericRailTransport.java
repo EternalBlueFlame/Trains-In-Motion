@@ -961,24 +961,18 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public void updateConsist(){
         List<GenericRailTransport> transports = new ArrayList<>();
         transports.add(this);
-        GenericRailTransport n =this, old;
 
         //check the front, then loop for every transport linked to it in opposite direction of this.
-        GenericRailTransport front = frontLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
-        while(front!=null){
-            transports.add(front);
-            old=front;
-            front=front.getOtherLink(n.getEntityId());
-            n=old;
+        GenericRailTransport link = frontLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
+        while(link!=null){
+            transports.add(link);
+            link = link.frontLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(link.frontLinkedID);
         }
         //do it again, but for the back one
-        n=this;
-        front= backLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(backLinkedID);
-        while(front!=null){
-            transports.add(front);
-            old=front;
-            front=front.getOtherLink(n.getEntityId());
-            n=old;
+        link= backLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(backLinkedID);
+        while(link!=null){
+            transports.add(link);
+            link = link.backLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(link.backLinkedID);
         }
 
         //now tell everything in the list, including this, that there's a new list, and provide said list.
@@ -1139,12 +1133,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         return renderData.particles;
     }
 
-
-    public @Nullable GenericRailTransport getOtherLink(@Nullable Integer notThisOne){
-        return frontLinkedID == notThisOne?
-                backLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(backLinkedID):
-                frontLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
-    }
 
     @SideOnly(Side.CLIENT)
     public boolean isInRangeToRenderDist(double p_70112_1_)
