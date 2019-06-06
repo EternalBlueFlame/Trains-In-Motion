@@ -19,6 +19,7 @@ import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -26,6 +27,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -203,7 +205,7 @@ public class BlockRailCore extends BlockRail {
     @Override
     public void onNeighborBlockChange(World worldObj, int x, int y, int z, Block b) {
         super.onNeighborBlockChange(worldObj, x, y, z, b);
-        updateShape(x,y,z,worldObj);
+        updateShape(x,y,z,worldObj, null);
         //if(getTile(worldObj,x,y,z)!=null){
         //    getTile(worldObj,x,y,z).markDirty();
         //}
@@ -218,11 +220,12 @@ public class BlockRailCore extends BlockRail {
                 for(int y : updateMatrix){
                     if(p_149749_1_.getBlock(x+p_149749_2_,y+p_149749_3_,z+p_149749_4_) instanceof  BlockRailCore){
                         p_149749_1_.getBlock(x+p_149749_2_,y+p_149749_3_,z+p_149749_4_).onNeighborBlockChange(p_149749_1_,p_149749_2_,p_149749_3_,p_149749_4_, this);
-                        updateShape(x,y,z,p_149749_1_);
+                        updateShape(x,y,z,p_149749_1_, null);
                     }
                 }
             }
         }
+        CommonProxy.getRailMap(p_149749_1_).remove(p_149749_2_,p_149749_3_,p_149749_4_);
     }
 
     public int onBlockPlaced(World p_149660_1_, int p_149660_2_, int p_149660_3_, int p_149660_4_, int p_149660_5_, float p_149660_6_, float p_149660_7_, float p_149660_8_, int p_149660_9_) {
@@ -232,7 +235,7 @@ public class BlockRailCore extends BlockRail {
                     if(p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_) instanceof  BlockRailCore){
                         p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_).onNeighborBlockChange(p_149660_1_,p_149660_2_,p_149660_3_,p_149660_4_, this);
                         //p_149660_1_.getTileEntity(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_).markDirty();
-                        updateShape(x,y,z,p_149660_1_);
+//                        updateShape(x,y,z,p_149660_1_, null);
                     }
                 }
             }
@@ -245,7 +248,7 @@ public class BlockRailCore extends BlockRail {
             for(int z : matrix){
                 for(int y : matrix){
                     if(w.getBlock(x+xPos,y+yPos,z+zPos) instanceof  BlockRailCore){
-                        updateShape(x,y,z,w);
+                        updateShape(x,y,z,w, null);
                     }
                 }
             }
@@ -260,54 +263,54 @@ public class BlockRailCore extends BlockRail {
 
     public static final int[] gauge750mm={375, -375};
 
-    public static void updateShape(int xPos, int yPos, int zPos, World worldObj){
+    public static void updateShape(int xPos, int yPos, int zPos, World worldObj, @Nullable NBTTagCompound data){
         //List<> points= new ArrayList<>();
         //todo: process these directly into quad/processPoints(); on server, then sync the offsets over the NBT network packet.
         switch (worldObj.getBlockMetadata(xPos, yPos, zPos)){
             //Z straight
             case 0: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaZStraight(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaZStraight(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
                 break;
             }
             //X straight
             case 1: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaXStraight(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaXStraight(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
                 break;
             }
 
             //curves
             case 9: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve9(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve9(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
                 break;
             }
             case 8: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve8(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve8(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
                 break;
             }
             case 7: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve7(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve7(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
                 break;
             }
             case 6: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve6(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve6(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
                 break;
             }
             //Z slopes
             case 5 :{
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeZ5(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeZ5(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
                 break;
             }
             case 4 :{
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeZ4(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeZ4(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
                 break;
             }
             //X slopes
             case 2 :{
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeX2(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeX2(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
                 break;
             }
             case 3 :{
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeX3(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeX3(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
                 break;
             }
         }

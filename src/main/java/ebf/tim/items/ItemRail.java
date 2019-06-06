@@ -39,6 +39,7 @@ public class ItemRail extends Item implements ITrackItem {
     @Deprecated
     @Override
     public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int meta, float p_77648_8_, float p_77648_9_, float p_77648_10_) {
+        if(world.isRemote){return true;}
         net.minecraft.block.Block block = world.getBlock(x, y, z);
 
         if (block != Blocks.vine && block != Blocks.tallgrass && block != Blocks.deadbush) {
@@ -65,30 +66,31 @@ public class ItemRail extends Item implements ITrackItem {
                     if (world.getBlock(x,y,z) == getPlacedBlock()) {
                         getPlacedBlock().onBlockPlacedBy(world, x,y,z, player, stack);
                         getPlacedBlock().onPostBlockPlaced(world, x,y,z, i1);
+
+                        NBTTagCompound c = new NBTTagCompound();
+                        if(stack.getTagCompound().getTag("rail")!=null) {
+                            c.setTag("rail",stack.getTagCompound().getCompoundTag("rail"));
+                        } else {
+                            NBTTagCompound rail = new NBTTagCompound();
+                            (new ItemStack(Items.iron_ingot)).writeToNBT(rail);
+                            c.setTag("rail", rail);
+                        }
+
+                        if(stack.getTagCompound().getTag("ties")!=null) {
+                            c.setTag("ties",stack.getTagCompound().getCompoundTag("ties"));
+                        }
+                        if(stack.getTagCompound().getTag("ballast")!=null) {
+                            c.setTag("ballast",stack.getTagCompound().getCompoundTag("ballast"));
+                        }
+                        if(stack.getTagCompound().getTag("wires")!=null) {
+                            c.setTag("wires",stack.getTagCompound().getCompoundTag("wires"));
+                        }
+                        BlockRailCore.updateShape(x,y,z,world,c);
                     }
 
                     world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, getPlacedBlock().stepSound.func_150496_b(), (getPlacedBlock().stepSound.getVolume() + 1.0F) / 2.0F, getPlacedBlock().stepSound.getPitch() * 0.8F);
                     --stack.stackSize;
                 }
-            }
-
-            NBTTagCompound c = new NBTTagCompound();
-            NBTTagCompound rail = new NBTTagCompound();
-            if(stack.getTagCompound().getTag("rail")!=null) {
-                rail = stack.getTagCompound().getCompoundTag("rail");
-            } else {
-                (new ItemStack(Items.iron_ingot)).writeToNBT(rail);
-            }
-            c.setTag("rail", rail);
-
-            if(stack.getTagCompound().getTag("ties")!=null) {
-                c.setTag("ties",stack.getTagCompound().getCompoundTag("ties"));
-            }
-            if(stack.getTagCompound().getTag("ballast")!=null) {
-                c.setTag("ballast",stack.getTagCompound().getCompoundTag("ballast"));
-            }
-            if(stack.getTagCompound().getTag("wires")!=null) {
-                c.setTag("wires",stack.getTagCompound().getCompoundTag("wires"));
             }
 
 

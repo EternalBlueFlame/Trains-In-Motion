@@ -47,9 +47,11 @@ public class EventManagerServer {
     @SubscribeEvent
     @SuppressWarnings("unused")
     public void playerEnterchunkEvent(EntityEvent.EnteringChunk event){
-        if(event.entity instanceof EntityPlayerMP && event.entity.worldObj!=null && event.entity.worldObj.isRemote) {
+        if(event.entity instanceof EntityPlayerMP && event.entity.worldObj!=null && !event.entity.worldObj.isRemote) {
             if(CommonProxy.getRailMap(event.entity.worldObj).clientChunks(8,event.newChunkX, event.newChunkZ)!=null) {
-                TrainsInMotion.trackChannel.sendTo(new PacketBlockNBTMap(CommonProxy.getRailMap(event.entity.worldObj).clientChunks(8,event.newChunkX, event.newChunkZ)), (EntityPlayerMP) event.entity);
+                TrainsInMotion.trackChannel.sendTo(
+                        new PacketBlockNBTMap(
+                                CommonProxy.getRailMap(event.entity.worldObj)), (EntityPlayerMP) event.entity);
             }
         }
     }

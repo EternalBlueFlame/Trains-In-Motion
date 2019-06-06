@@ -10,6 +10,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import org.apache.commons.codec.binary.Base64;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,24 +30,26 @@ public class RailShapeCore {
         }
     }
 
-    public static void processPoints(int x, int y, int z, List<Vec3f[]> coordList, int[] mmFromCenter, float length, World dimension){
-        NBTTagCompound paths = CommonProxy.getRailMap(dimension).get(x,y,z);
-        if(paths==null){
-            paths=new NBTTagCompound();
+    public static void processPoints(int x, int y, int z, List<Vec3f[]> coordList, int[] mmFromCenter, float length, World dimension, @Nullable NBTTagCompound data){
+        if(data==null){
+            data = CommonProxy.getRailMap(dimension).get(x,y,z);
+            if(data==null) {
+                data = new NBTTagCompound();
+            }
         }
         RailShapeCore s = multiTriGenModel(coordList.get(0), mmFromCenter, length);
         if(s!=null) {
-            paths.setString("route", s.toString());
+            data.setString("route", s.toString());
         }
 
         for(int i=1; i< coordList.size();i++) {
             s = multiTriGenModel(coordList.get(i), mmFromCenter, length);
             if(s!=null) {
-                paths.setString("subroute" + i, s.toString());
+                data.setString("subroute" + i, s.toString());
             }
         }
 
-        CommonProxy.getRailMap(dimension).add(x,y,z, paths);
+        CommonProxy.getRailMap(dimension).add(x,y,z, data);
     }
 
 

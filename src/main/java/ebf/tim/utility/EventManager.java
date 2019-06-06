@@ -283,22 +283,35 @@ public class EventManager {
 
 
 
-    HashMap<Vec3i, Integer> railGLIDs = new HashMap<Vec3i, Integer>();
+    HashMap<int[], Integer> railGLIDs = new HashMap<int[], Integer>();
 
     @SubscribeEvent
     public void BlockRenderEvent(RenderWorldEvent.Pre event){
-        for (HashMap<Vec3i, NBTTagCompound> map : CommonProxy.clientList.data.values()){
+        //DebugUtil.println("rendering?");
+        if(true){return;}
+        for (HashMap<List<Integer>, NBTTagCompound> map : CommonProxy.clientList.data.values()){
+            DebugUtil.println(map.keySet().size());
 
 
-            for(Vec3i v : map.keySet()) {
-                TextureManager.adjustLightFixture(event.renderer.worldObj, v.x, v.y, v.z);
+            for(List<Integer> v : map.keySet()) {
+                TextureManager.adjustLightFixture(event.renderer.worldObj, v.get(0),v.get(1),v.get(2));
+                DebugUtil.println(v.get(0),v.get(1),v.get(2),
+                        map.get(v).hasKey("path"), map.get(v).hasKey("route"),
+                        map.get(v).hasKey("shape"), map.get(v).hasKey("rail"));
+                /*Model1x1Rail.Model3DRail(event.renderer.worldObj, v.x, v.y, v.z,
+                        new RailShapeCore().parseString(map.get(v).getString("shape")),
+                        ItemStack.loadItemStackFromNBT(map.get(v).getCompoundTag("ties")),
+                        ItemStack.loadItemStackFromNBT(map.get(v).getCompoundTag("ballast")),
+                        ItemStack.loadItemStackFromNBT(map.get(v).getCompoundTag("rail")));
+                /*
                 if (railGLIDs.get(v) != null) {
                     org.lwjgl.opengl.GL11.glCallList(railGLIDs.get(v));
                 } else {
-                    org.lwjgl.opengl.GL11.glNewList(railGLIDs.put(v, net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1)), org.lwjgl.opengl.GL11.GL_COMPILE);
-                    Model1x1Rail.Model3DRail(event.renderer.worldObj, v.x, v.y, v.z, new RailShapeCore().parseString(map.get(v).getString("shape")), ItemStack.loadItemStackFromNBT(map.get(v).getCompoundTag("ties")), ItemStack.loadItemStackFromNBT(map.get(v).getCompoundTag("ballast")), ItemStack.loadItemStackFromNBT(map.get(v).getCompoundTag("rail")));
+                    org.lwjgl.opengl.GL11.glNewList(
+                            railGLIDs.put(v, net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1)), org.lwjgl.opengl.GL11.GL_COMPILE);
+
                     org.lwjgl.opengl.GL11.glEndList();
-                }
+                }*/
             }
 
         }
