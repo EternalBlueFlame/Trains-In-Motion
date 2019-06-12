@@ -10,9 +10,11 @@ import fexcraft.tmt.slim.TextureManager;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.SerializationUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,48 +34,17 @@ public class PacketBlockNBTMap implements IMessage {
     public PacketBlockNBTMap(BlockNBTMap m) {
         this.map=m;
     }
-    /**reads the packet on server to get the variables from the Byte Buffer*/
+    /**reads the packet on client to get the variables from the Byte Buffer*/
     @Override
     public void fromBytes(ByteBuf bbuf) {
-        map = new BlockNBTMap("client");
-        map.readFromNBT(ByteBufUtils.readTag(bbuf));
+        map = new BlockNBTMap();
+        map.readFromString(ByteBufUtils.readUTF8String(bbuf));
     }
-    /**puts the variables into a Byte Buffer so they can be sent to server*/
+    /**puts the variables into a Byte Buffer so they can be sent to client*/
     @Override
     public void toBytes(ByteBuf bbuf) {
-        NBTTagCompound tag = new NBTTagCompound();
-        map.writeToNBT(tag);
-        ByteBufUtils.writeTag(bbuf, tag);
+        ByteBufUtils.writeUTF8String(bbuf, map.writeToString());
 
-        StringBuilder str = new StringBuilder();
-        str.append("\n number of chunks:");
-        str.append(map.data.size());
-        for (List<Integer> vec : map.data.keySet()) {
-            str.append("\n the chunk was:");
-            str.append(vec.get(0));
-            str.append(",");
-            str.append(vec.get(1));
-            str.append("\n");
-            for (Map.Entry<List<Integer>, NBTTagCompound> v : map.data.get(vec).entrySet()) {
-                str.append("\n");
-                str.append(v.getKey().get(0));
-                str.append(",");
-                str.append(v.getKey().get(1));
-                str.append(",");
-                str.append(v.getKey().get(2));
-                str.append("\n");
-                str.append(v.getValue().hasKey("route"));
-                str.append(":");
-                str.append(v.getValue().hasKey("rail"));
-                str.append(":");
-                if(v.getValue().hasKey("route")){
-                    str.append("\n");
-                    str.append(new String(Base64.decodeBase64(v.getValue().getString("route"))));
-                }
-            }
-        }
-        DebugUtil.println(str.toString());
-        DebugUtil.println("Total packet size " + bbuf.array().length +" Bytes.");
     }
 
     /**
@@ -83,7 +54,40 @@ public class PacketBlockNBTMap implements IMessage {
     public static class Handler implements IMessageHandler<PacketBlockNBTMap, IMessage> {
         @Override
         public IMessage onMessage(PacketBlockNBTMap message, MessageContext context) {
-            DebugUtil.println(context.side, message.map.data.size());
+
+            BlockNBTMap map = message.map;
+
+            StringBuilder str = new StringBuilder();
+            str.append("\n number of chunks:");
+            str.append(map.data.size());
+            for (List<Integer> vec : map.data.keySet()) {
+                str.append("\n the chunk was:");
+                str.append(vec.get(0));
+                str.append(",");
+                str.append(vec.get(1));
+                str.append("\n");
+                for (Map.Entry<List<Integer>, NBTTagCompound> v : map.data.get(vec).entrySet()) {
+                    str.append("\n");
+                    str.append(v.getKey().get(0));
+                    str.append(",");
+                    str.append(v.getKey().get(1));
+                    str.append(",");
+                    str.append(v.getKey().get(2));
+                    str.append("\n");
+                    str.append(v.getValue().hasKey("route"));
+                    str.append(":");
+                    str.append(v.getValue().hasKey("rail"));
+                    str.append(":");
+                    if(v.getValue().hasKey("route")){
+                        str.append("\n");
+                        str.append(v.getValue().getString("route"));
+                        str.append(v.getValue().toString());
+                    } else {
+                        str.append(v.getValue().toString());
+                    }
+                }
+            }
+            DebugUtil.println(str.toString());
             CommonProxy.clientList =message.map;
         return null;
         }

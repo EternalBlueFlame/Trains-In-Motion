@@ -52,7 +52,7 @@ public class CommonProxy implements IGuiHandler {
     private static HashMap<Integer,BlockNBTMap> railMap = new HashMap<Integer, BlockNBTMap>();
     public static Map<String, List<Recipe>> recipesInMods = new HashMap<>();
 
-    public static BlockNBTMap clientList = new BlockNBTMap("clientMap");
+    public static BlockNBTMap clientList = new BlockNBTMap();
 
 
     public static BlockNBTMap getRailMap(World worldObj){
@@ -62,7 +62,7 @@ public class CommonProxy implements IGuiHandler {
             BlockNBTMap m = (BlockNBTMap) storage.loadData(BlockNBTMap.class, "railMap");
 
             if (m == null) {
-                m=new BlockNBTMap("railMap");
+                m=new BlockNBTMap();
                 storage.setData("railMap", m);
             }
             railMap.put(worldObj.provider.dimensionId, m);

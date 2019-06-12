@@ -1,6 +1,7 @@
 package ebf.tim.utility;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
 
 import java.io.Serializable;
@@ -12,11 +13,11 @@ public class BlockNBTMap extends WorldSavedData {
 	public HashMap<List<Integer>,HashMap<List<Integer>, NBTTagCompound>> data = new HashMap<>();
 	private HashMap<List<Integer>,NBTTagCompound> shorthand = new HashMap<List<Integer>,NBTTagCompound>();
 
-	public BlockNBTMap(String id){
-		super(id);
+	public BlockNBTMap(){
+		super("railMap");
 	}
 
-	public void add(int x, int y, int z, NBTTagCompound tag){
+	public void add(int x, int y, int z, NBTTagCompound tag, World worldObj){
 		//DebugUtil.printStackTrace();
 		HashMap<List<Integer>, NBTTagCompound> oldTag = data.get(chunkCoord(x,z));
 		if(oldTag==null) {
@@ -25,9 +26,10 @@ public class BlockNBTMap extends WorldSavedData {
 		oldTag.put(vector(x,y,z), tag);
 		data.put(chunkCoord(x,z), oldTag);
 		markDirty();
+		worldObj.perWorldStorage.setData("railMap", this);
 	}
 
-	public void remove(int x, int y, int z){
+	public void remove(int x, int y, int z, World worldObj){
 		if(data.containsKey(chunkCoord(x,z))) {
 			data.get(chunkCoord(x,z)).remove(vector(x, y, z));
 		}
@@ -35,6 +37,7 @@ public class BlockNBTMap extends WorldSavedData {
 			data.remove(chunkCoord(x,z));
 		}
 		markDirty();
+		worldObj.perWorldStorage.setData("railMap", this);
 	}
 
 
@@ -65,7 +68,7 @@ public class BlockNBTMap extends WorldSavedData {
 	private int coordX,coordZ;
 	//distance should be half the client's view distance, rounded up.
 	public BlockNBTMap clientChunks(int distance, int x, int z){
-		CommonProxy.clientList= new BlockNBTMap(this.mapName);
+		CommonProxy.clientList= new BlockNBTMap();
 		for (coordX=-distance; coordX<distance;coordX++){
 			for(coordZ=-distance; coordZ<distance;coordZ++){
 				if(data.containsKey(Arrays.asList((x>>4)+coordX,(z>>4)+coordZ))) {
@@ -84,6 +87,7 @@ public class BlockNBTMap extends WorldSavedData {
 	 */
 	@Override
 	public void readFromNBT(NBTTagCompound p_76184_1_) {
+		if(p_76184_1_==null){return;}
 		data= new HashMap<>();
 		int i=0, ii;
 		while(p_76184_1_.hasKey("chunk"+i)){
@@ -95,8 +99,7 @@ public class BlockNBTMap extends WorldSavedData {
 				NBTTagCompound d = p_76184_1_.getCompoundTag("data"+ii);
 
 				List<Integer> v = Arrays.asList(d.getInteger("posX"), d.getInteger("posY") ,d.getInteger("posZ"));
-
-				chunkData.put(v, d.getCompoundTag("blockData"));
+				chunkData.put(v, d.getCompoundTag("data"));
 
 				ii++;
 			}
@@ -114,7 +117,7 @@ public class BlockNBTMap extends WorldSavedData {
 	@Override
 	public void writeToNBT(NBTTagCompound p_76187_1_) {
 		int i=0,ii;
-		NBTTagCompound chunkTag, innerTag;
+		NBTTagCompound chunkTag, innerTag, tempTag;
 		for(List<Integer> chunk : data.keySet()){
 			ii=0;
 			chunkTag=new NBTTagCompound();
@@ -126,7 +129,7 @@ public class BlockNBTMap extends WorldSavedData {
 				innerTag.setInteger("posX", pos.get(0));
 				innerTag.setInteger("posY", pos.get(1));
 				innerTag.setInteger("posZ", pos.get(2));
-				innerTag.setTag("blockData", data.get(chunk).get(pos));
+				innerTag.setTag("data", data.get(chunk).get(pos));
 				chunkTag.setTag("data"+ii, innerTag);
 				ii++;
 			}
@@ -139,39 +142,54 @@ public class BlockNBTMap extends WorldSavedData {
 	}
 
 
-	/*
-	public void readFromFile(String data){
 
-		String[] values = data.split(";;;"), current;
+	public void readFromString(String data){
+		String[] values = RailUtility.decompressString(data).split(";;;"), current,blocks, blockTag;
 
+		DebugUtil.println(data);
 		for(String v : values){
+			if(v.equals("")){continue;}
 			current=v.split(":::");
-			List<Integer> chunkPos= new List<Integer>(Integer.parseInt(current[0]), Integer.parseInt(current[1]));
-			Map<List<Integer>, NBTTagCompound> dat =
+			List<Integer> chunkPos= Arrays.asList(Integer.parseInt(current[0]), Integer.parseInt(current[1]));
+
+			HashMap<List<Integer>, NBTTagCompound> map = new HashMap<>();
+			NBTTagCompound chunkData;
+			blocks=current[2].split("---");
+			for(String b : blocks) {
+				blockTag=b.split(",");
+				if(blockTag.length<4){continue;}
+				chunkData = new NBTTagCompound();
+				chunkData.setString("route",blockTag[3]);
+
+				map.put(Arrays.asList(Integer.parseInt(blockTag[0]),Integer.parseInt(blockTag[1]),Integer.parseInt(blockTag[2])), chunkData);
+			}
+			this.data.put(chunkPos, map);
 		}
 
 	}
 
 
-	public String writeToFile(){
+	public String writeToString(){
 		StringBuilder sb = new StringBuilder();
-		for(List<Integer> key : this.keySet()){
-			sb.append(key.x);
+		for(List<Integer> key : this.data.keySet()){
+			sb.append(key.get(0));
 			sb.append(":::");
-			sb.append(key.z);
+			sb.append(key.get(1));
 			sb.append(":::");
-			for(List<Integer> pos : this.get(key).keySet()){
-				sb.append(pos.x);
+			for(List<Integer> pos : data.get(key).keySet()){
+				sb.append(pos.get(0));
 				sb.append(",");
-				sb.append(pos.y);
+				sb.append(pos.get(1));
 				sb.append(",");
-				sb.append(pos.z);
+				sb.append(pos.get(2));
 				sb.append(",");
-				this.get(key).get(pos).toString();
+				sb.append(data.get(key).get(pos).getString("route"));
+				sb.append(",");
+				sb.append("---");
 			}
 			sb.append(";;;");
 		}
-		return sb.toString();
-	}*/
+		return RailUtility.compressString(sb.toString());
+	}
 
 }

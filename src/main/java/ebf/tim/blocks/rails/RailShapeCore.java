@@ -8,10 +8,8 @@ import fexcraft.tmt.slim.Vec3f;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import org.apache.commons.codec.binary.Base64;
 
 import javax.annotation.Nullable;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +47,7 @@ public class RailShapeCore {
             }
         }
 
-        CommonProxy.getRailMap(dimension).add(x,y,z, data);
+        CommonProxy.getRailMap(dimension).add(x,y,z, data, dimension);
     }
 
 
@@ -77,11 +75,10 @@ public class RailShapeCore {
             sb.append("!");
         }
         sb.append("::");
-        return Base64.encodeBase64String(sb.toString().getBytes());
+        return sb.toString();
     }
 
     public RailShapeCore parseString(String s){
-        s=new String(Base64.decodeBase64(s));
         String[] vars = s.split("::"),currentParse, subParse;
 
         currentParse= vars[0].split(",");

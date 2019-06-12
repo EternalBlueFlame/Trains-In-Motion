@@ -257,7 +257,7 @@ public class RailTileEntity extends TileEntity {
         }
 
 
-        CommonProxy.getRailMap(worldObj).add(xCoord,yCoord,zCoord,tag);
+        CommonProxy.getRailMap(worldObj).add(xCoord,yCoord,zCoord,tag, worldObj);
     }
 
 }

@@ -14,11 +14,16 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import zoranodensha.api.structures.tracks.ITrackBase;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.zip.*;
 
 /**
  * <h1>utilities</h1>
@@ -65,6 +70,29 @@ public class RailUtility {
         return ret;
     }
 
+    public static String compressString(String str){
+        try {
+            ByteArrayOutputStream obj = new ByteArrayOutputStream();
+            GZIPOutputStream gzip = new GZIPOutputStream(obj);
+            gzip.write(str.getBytes(StandardCharsets.UTF_8));
+            IOUtils.closeQuietly(gzip);
+            return Base64.encodeBase64String(obj.toByteArray());
+        } catch (IOException e){return "";}
+    }
+
+    public static String decompressString(String str){
+        try {
+            GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(Base64.decodeBase64(str)));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(gis, StandardCharsets.UTF_8));
+            StringBuilder outStr = new StringBuilder();
+
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                outStr.append(line);
+            }
+            return outStr.toString();
+        } catch (Exception e){return "";}
+    }
 
     /**
      * replacement for system atan2 function.

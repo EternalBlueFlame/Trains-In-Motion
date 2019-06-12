@@ -225,7 +225,7 @@ public class BlockRailCore extends BlockRail {
                 }
             }
         }
-        CommonProxy.getRailMap(p_149749_1_).remove(p_149749_2_,p_149749_3_,p_149749_4_);
+        CommonProxy.getRailMap(p_149749_1_).remove(p_149749_2_,p_149749_3_,p_149749_4_, p_149749_1_);
     }
 
     public int onBlockPlaced(World p_149660_1_, int p_149660_2_, int p_149660_3_, int p_149660_4_, int p_149660_5_, float p_149660_6_, float p_149660_7_, float p_149660_8_, int p_149660_9_) {
