@@ -1,11 +1,9 @@
 package ebf.tim.blocks.rails;
 
+import ebf.XmlBuilder;
 import ebf.tim.blocks.RailTileEntity;
-import ebf.tim.utility.CommonProxy;
-import ebf.tim.utility.RailUtility;
-import ebf.tim.utility.Vec5f;
+import ebf.tim.utility.*;
 import fexcraft.tmt.slim.Vec3f;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -22,32 +20,41 @@ public class RailShapeCore {
     public int[] gauge;
     public float segmentLength;
 
-    public static void processPoints(List<Vec3f[]> coordList, float[] gauge, RailTileEntity tile, float length){
-        for(Vec3f[] coords : coordList) {
-            multiTriGenModel(coords, gauge, length, tile);
+    public static void processPoints(List<RailSimpleShape> coordList, float[] gauge, RailTileEntity tile){
+        for(RailSimpleShape coords : coordList) {
+            multiTriGenModel(coords, gauge, tile);
         }
     }
 
-    public static void processPoints(int x, int y, int z, List<Vec3f[]> coordList, int[] mmFromCenter, float length, World dimension, @Nullable NBTTagCompound data){
+    public static void processPoints(int x, int y, int z,
+                                     List<RailSimpleShape> coordList, int[] mmFromCenter,
+                                     World dimension, @Nullable XmlBuilder data){
+
         if(data==null){
-            data = CommonProxy.getRailMap(dimension).get(x,y,z);
+            if (dimension.getTileEntity(x,y,z) instanceof RailTileEntity) {
+                data = ((RailTileEntity)dimension.getTileEntity(x, y, z)).data;
+                //data = CommonProxy.getRailMap(dimension).data.getXml(BlockNBTMap.vector(x, y, z));
+            }
             if(data==null) {
-                data = new NBTTagCompound();
+                data = new XmlBuilder();
             }
         }
-        RailShapeCore s = multiTriGenModel(coordList.get(0), mmFromCenter, length);
+        RailShapeCore s = multiTriGenModel(coordList.get(0), mmFromCenter);
         if(s!=null) {
-            data.setString("route", s.toString());
+            data.putString("route", s.toString());
         }
 
         for(int i=1; i< coordList.size();i++) {
-            s = multiTriGenModel(coordList.get(i), mmFromCenter, length);
+            s = multiTriGenModel(coordList.get(i), mmFromCenter);
             if(s!=null) {
-                data.setString("subroute" + i, s.toString());
+                data.putString("subroute" + i, s.toString());
             }
         }
+        if (dimension.getTileEntity(x,y,z) instanceof RailTileEntity) {
+            ((RailTileEntity) dimension.getTileEntity(x, y, z)).data = data;
+        }
 
-        CommonProxy.getRailMap(dimension).add(x,y,z, data, dimension);
+        //CommonProxy.getRailMap(dimension).add(x,y,z, data, dimension);
     }
 
 
@@ -74,11 +81,14 @@ public class RailShapeCore {
             sb.append(vector.v);
             sb.append("!");
         }
+        //sb.append("::");
+        //todo: loop above for tie paths
         sb.append("::");
         return sb.toString();
     }
 
     public RailShapeCore parseString(String s){
+        if(s==null){return this;}
         String[] vars = s.split("::"),currentParse, subParse;
 
         currentParse= vars[0].split(",");
@@ -94,30 +104,34 @@ public class RailShapeCore {
             activePath.add(new Vec5f(Float.parseFloat(subParse[0]),Float.parseFloat(subParse[1]),Float.parseFloat(subParse[2]),
                     Float.parseFloat(subParse[3]),Float.parseFloat(subParse[4])));
         }
+        //todo: loop above for tie paths
+        /*
+        currentParse= vars[3].split("!");
+        for(String str : currentParse) {
+         */
+
+
         return this;
     }
 
-    public static void multiTriGenModel(Vec3f[] shape, float[] railOffsets, float segmentation, RailTileEntity tile){
-
+    public static void multiTriGenModel(RailSimpleShape shape, float[] railOffsets, RailTileEntity tile){
         RailShapeCore s = new RailShapeCore();
-        for(int v=0;v<shape.length-2;v+=3) {
-            segmentation = Math.max(segmentation, 1);
-
-            float originalT = Math.abs(shape[v].xCoord) + Math.abs(shape[v].zCoord);
-            originalT += Math.abs(shape[v+1].xCoord) + Math.abs(shape[v+1].zCoord);
-            originalT += Math.abs(shape[v+2].xCoord) + Math.abs(shape[v+2].zCoord);
-            originalT = originalT / (originalT * segmentation);
+        for(int v=0;v<shape.getPath().length-2;v+=3) {
+            float originalT = Math.abs(shape.getPath()[v].xCoord) + Math.abs(shape.getPath()[v].zCoord);
+            originalT += Math.abs(shape.getPath()[v+1].xCoord) + Math.abs(shape.getPath()[v+1].zCoord);
+            originalT += Math.abs(shape.getPath()[v+2].xCoord) + Math.abs(shape.getPath()[v+2].zCoord);
+            originalT = originalT / (originalT * shape.getPathLength());
 
             float t = -originalT;
             int i;
             //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
             List<float[]> points = new ArrayList<>();
-            for (i = 0; i < segmentation + 3; i++) {
+            for (i = 0; i < shape.getPathLength() + 3; i++) {
                 //define position
                 points.add(new float[]{
-                        (((1 - t) * (1 - t)) * shape[v].xCoord) + (2 * (1 - t) * t * shape[v+1].xCoord) + ((t * t) * shape[v+2].xCoord),//X
-                        (((1 - t) * (1 - t)) * shape[v].yCoord) + (2 * (1 - t) * t * shape[v+1].yCoord) + ((t * t) * shape[v+2].yCoord),//Y
-                        (((1 - t) * (1 - t)) * shape[v].zCoord) + (2 * (1 - t) * t * shape[v+1].zCoord) + ((t * t) * shape[v+2].zCoord),//X
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].xCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].xCoord) + ((t * t) * shape.getPath()[v+2].xCoord),//X
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].yCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].yCoord) + ((t * t) * shape.getPath()[v+2].yCoord),//Y
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].zCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].zCoord) + ((t * t) * shape.getPath()[v+2].zCoord),//X
                 });
                 t += originalT;
             }
@@ -137,46 +151,50 @@ public class RailShapeCore {
             intOffsets[i]= (int)railOffsets[i];
         }
         s.gauge=intOffsets;
-        tile.points=s;
+        //tile.points=s;
     }
 
     public float[] getGaugePositions(){
         float[] pos = new float[gauge.length+1];
-        pos[0]=-gauge[0]*0.000833333333f;
-        for(int i=0; i<gauge.length;i++){
-            pos[i+1]=gauge[i]*0.000833333333f;
+        pos[0]=-gauge[0]*0.00041666666f;//83333333f;
+        if(gauge[0]!=0.0) {
+            for (int i = 0; i < gauge.length; i++) {
+                pos[i + 1] = gauge[i] * 0.00041666666f;
+            }
         }
         return pos;
     }
 
-    public static RailShapeCore multiTriGenModel(Vec3f[] shape, int[] railOffsets, float segmentation){
+    //TODO: path for ties needs to be it's own thing
+    public static RailShapeCore multiTriGenModel(RailSimpleShape shape, int[] railOffsets){
         RailShapeCore sc = new RailShapeCore();
+        sc.gauge=railOffsets;
+        sc.segmentLength=shape.getPathLength();
+        sc.activePath = new ArrayList<>();
+        List<float[]> points;
+        float originalT, t;
+        int i;
 
-        for(int v=0;v<shape.length-2;v+=3) {
-            segmentation = Math.max(segmentation, 1);
+        for(int v=0;v<shape.getPath().length-2;v+=3) {
 
-            float originalT = Math.abs(shape[v].xCoord) + Math.abs(shape[v].zCoord);
-            originalT += Math.abs(shape[v+1].xCoord) + Math.abs(shape[v+1].zCoord);
-            originalT += Math.abs(shape[v+2].xCoord) + Math.abs(shape[v+2].zCoord);
-            originalT = originalT / (originalT * segmentation);
+            originalT = Math.abs(shape.getPath()[v].xCoord) + Math.abs(shape.getPath()[v].zCoord);
+            originalT += Math.abs(shape.getPath()[v+1].xCoord) + Math.abs(shape.getPath()[v+1].zCoord);
+            originalT += Math.abs(shape.getPath()[v+2].xCoord) + Math.abs(shape.getPath()[v+2].zCoord);
+            originalT = originalT / (originalT * shape.getPathLength());
 
-            float t = -originalT;
-            int i;
+            t = -originalT;
             //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
-            List<float[]> points = new ArrayList<>();
-            for (i = 0; i < segmentation + 3; i++) {
+            points = new ArrayList<>();
+            for (i = 0; i < shape.getPathLength() + 3; i++) {
                 //define position
                 points.add(new float[]{
-                        (((1 - t) * (1 - t)) * shape[v].xCoord) + (2 * (1 - t) * t * shape[v+1].xCoord) + ((t * t) * shape[v+2].xCoord),//X
-                        (((1 - t) * (1 - t)) * shape[v].yCoord) + (2 * (1 - t) * t * shape[v+1].yCoord) + ((t * t) * shape[v+2].yCoord),//Y
-                        (((1 - t) * (1 - t)) * shape[v].zCoord) + (2 * (1 - t) * t * shape[v+1].zCoord) + ((t * t) * shape[v+2].zCoord),//X
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].xCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].xCoord) + ((t * t) * shape.getPath()[v+2].xCoord),//X
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].yCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].yCoord) + ((t * t) * shape.getPath()[v+2].yCoord),//Y
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].zCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].zCoord) + ((t * t) * shape.getPath()[v+2].zCoord),//X
                 });
                 t += originalT;
             }
 
-
-
-            sc.activePath = new ArrayList<>();
             for (i=1; i < points.size() - 1; i++) {
                 sc.activePath.add(
                         new Vec5f(points.get(i)[0],points.get(i)[1],points.get(i)[2],0, RailUtility.atan2degreesf(
@@ -185,90 +203,25 @@ public class RailShapeCore {
                 );
             }
 
-            for(i=0; i<railOffsets.length;i++) {
-                railOffsets[i] *= 0.00083333333;
-            }
-            sc.gauge=railOffsets;
-            sc.segmentLength=segmentation;
+            //TODO: tie position math here, should be more or less the same as above.
+            //will need new variable in this class for the ties.
 
-            return sc;
         }
-
-        return null;
+        return sc;
     }
 
-
-    /**
-     * rotates an already defined path
-     * @param path already defined path
-     * @param yaw yaw to rotate around, if 0 returns path
-     * @return
-     */
-    public static Vec3f[] normalizeVector(Vec3f[] path, float yaw) {
-        //rotate yaw
-        if (yaw != 0.0F) {
-            yaw *= radianF;
-            float cos = MathHelper.cos(yaw);
-            float sin = MathHelper.sin(yaw);
-            float xCoord;
-            float zCoord;
-            for(Vec3f xyz: path) {
-                xCoord =xyz.xCoord-0.5f;
-                zCoord =xyz.zCoord-0.5f;
-                xyz.xCoord = (xCoord * cos) - (zCoord * sin);
-                xyz.zCoord = (xCoord * sin) + (zCoord * cos);
-                xyz.xCoord+=0.5f;
-                xyz.zCoord+=0.5f;
-            }
-        }
-        return path;
-    }
-
-    /**
-     * defines a path based on the provided x/y/z vectors.
-     * @param yaw rotates the path if it's not 0
-     * @return
-     */
-    public static Vec3f[] normalizeVector(float yaw, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4) {
-        //rotate yaw
-        if (yaw != 0.0F) {
-            yaw *= radianF;
-            float cos = MathHelper.cos(yaw);
-            float sin = MathHelper.sin(yaw);
-
-            float xCoord =x1;
-            float zCoord =z1;
-            x1 = (xCoord * cos) - (zCoord * sin);
-            z1 = (xCoord * sin) + (zCoord * cos);
-
-            xCoord =x2;
-            zCoord =z2;
-            x2 = (xCoord * cos) - (zCoord * sin);
-            z2 = (xCoord * sin) + (zCoord * cos);
-
-            xCoord =x3;
-            zCoord =z3;
-            x3 = (xCoord * cos) - (zCoord * sin);
-            z3 = (xCoord * sin) + (zCoord * cos);
-
-            xCoord =x4;
-            zCoord =z4;
-            x4 = (xCoord * cos) - (zCoord * sin);
-            z4 = (xCoord * sin) + (zCoord * cos);
-        }
-        return new Vec3f[]{new Vec3f(x1+0.5f, y1, z1+0.5f), new Vec3f(x2+0.5f, y2, z2+0.5f), new Vec3f(x3+0.5f, y3, z3+0.5f), new Vec3f(x4+0.5f, y4, z4+0.5f)};
-    }
 
     /**
      * centers the path based on the provided x/y/z vectors.
      * this is intended for use with
-     * @see RailShapeCore#multiTriGenModel(Vec3f[], float[], float, RailTileEntity)
+     * @see RailShapeCore#multiTriGenModel(RailSimpleShape, float[], RailTileEntity)
      * @return
      */
+    @Deprecated //todo: this is unnecessary overhead converting arrays of floats to vec3's.
     public static Vec3f[] normalizeVectors(float[][] vectors) {
         Vec3f[] values = new Vec3f[vectors.length];
         for (int i=0; i<vectors.length;i++){
-            values[i]= new Vec3f(vectors[i][0]+0.5f,vectors[i][1],vectors[i][2]+0.5f);
+            values[i]= new Vec3f(vectors[i][0],vectors[i][1],vectors[i][2]);
         }
         return values;
     }
@@ -278,7 +231,8 @@ public class RailShapeCore {
      * good for deforms or other weird edits.
      * @return
      */
+    @Deprecated
     public static Vec3f normalizeVector(float x1, float y1, float z1) {
-        return new Vec3f(x1+0.5f, y1, z1+0.5f);
+        return new Vec3f(x1+0f, y1, z1+0f);
     }
 }

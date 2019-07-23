@@ -2,6 +2,7 @@ package ebf.tim.blocks.rails;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.XmlBuilder;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.items.ItemRail;
@@ -35,7 +36,7 @@ import java.util.Random;
 /**
  * @author Eternal Blue Flame
  */
-public class BlockRailCore extends BlockRail {
+public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     //RailTileEntity tile = null;
     private static final int[] updateMatrix = {-1,0,1};
@@ -65,12 +66,13 @@ public class BlockRailCore extends BlockRail {
         setCreativeTab(null);
     }
 
-
+    @Override
     public boolean hasTileEntity(int metadata) {
         return true;
     }
+
     @Override
-    public int tickRate(World world){return 10;}
+    public int tickRate(World world){return 40;}
 
 
     @Override
@@ -99,18 +101,17 @@ public class BlockRailCore extends BlockRail {
         return 0.4f;//getTile(world, x, y, z)!=null?getTile(world, x, y, z).getRailSpeed():0.4f;
     }
 
-    /*
+
     @Override
     public TileEntity createNewTileEntity(World world, int meta){
         return new RailTileEntity();
     }
 
-    @Override
-    public TileEntity createTileEntity(World world, int metadata){
-        return new RailTileEntity();
-    }
+    //@Override
+    //public TileEntity createTileEntity(World world, int metadata){
+    //    return new RailTileEntity();
+    //}
 
-*/
     @Override
     public int getBasicRailMetadata(IBlockAccess world, EntityMinecart cart, int x, int y, int z) {
         int meta = super.getBasicRailMetadata(world, cart, x, y, z);
@@ -171,27 +172,28 @@ public class BlockRailCore extends BlockRail {
     }
     @Override
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
-        /*if(getTile(world,x,y,z)!=null) {
+        if(world.getTileEntity(x,y,z) instanceof RailTileEntity) {
+            XmlBuilder xml =new XmlBuilder(((RailTileEntity) world.getTileEntity(x,y,z)).data.toXMLString());
             return ItemRail.setStackData(
-                    new ItemStack(CommonProxy.railItem, 1), tile.rail, tile.ballast, tile.ties, tile.wires);
-        } else {*/
+                    new ItemStack(CommonProxy.railItem, 1), xml.getItemStack("rail"),
+                    xml.getItemStack("ballast"), xml.getItemStack("ties"), xml.getItemStack("wires"));
+        } else {
             return null;
-        //}
+        }
     }
     @Override
     public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune) {
-       /* if(getTile(world,x,y,z)!=null) {
-            ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
+        if(world.getTileEntity(x,y,z) instanceof RailTileEntity) {
+            XmlBuilder xml =new XmlBuilder(((RailTileEntity) world.getTileEntity(x,y,z)).data.toXMLString());
 
-            int count = quantityDropped(metadata, fortune, world.rand);
-            for (int i = 0; i < count; i++) {
-                ret.add(ItemRail.setStackData(
-                        new ItemStack(CommonProxy.railItem, 1), tile.rail, tile.ballast, tile.ties, tile.wires));
-            }
-            return ret;
-        } else {*/
+            ArrayList<ItemStack> out = new ArrayList<>();
+            out.add(ItemRail.setStackData(
+                    new ItemStack(CommonProxy.railItem, 1), xml.getItemStack("rail"),
+                    xml.getItemStack("ballast"), xml.getItemStack("ties"), xml.getItemStack("wires")));
+            return out;
+        } else {
             return null;
-        //}
+        }
     }
 
     @Override
@@ -204,11 +206,12 @@ public class BlockRailCore extends BlockRail {
 
     @Override
     public void onNeighborBlockChange(World worldObj, int x, int y, int z, Block b) {
+        if(b instanceof BlockRailCore){return;}
         super.onNeighborBlockChange(worldObj, x, y, z, b);
         updateShape(x,y,z,worldObj, null);
-        //if(getTile(worldObj,x,y,z)!=null){
-        //    getTile(worldObj,x,y,z).markDirty();
-        //}
+        if(worldObj.getTileEntity(x,y,z) instanceof RailTileEntity){
+            worldObj.getTileEntity(x,y,z).markDirty();
+        }
     }
 
     //stuff from block container to make tile entity more reliable.
@@ -225,7 +228,6 @@ public class BlockRailCore extends BlockRail {
                 }
             }
         }
-        CommonProxy.getRailMap(p_149749_1_).remove(p_149749_2_,p_149749_3_,p_149749_4_, p_149749_1_);
     }
 
     public int onBlockPlaced(World p_149660_1_, int p_149660_2_, int p_149660_3_, int p_149660_4_, int p_149660_5_, float p_149660_6_, float p_149660_7_, float p_149660_8_, int p_149660_9_) {
@@ -234,8 +236,6 @@ public class BlockRailCore extends BlockRail {
                 for(int y : updateMatrix){
                     if(p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_) instanceof  BlockRailCore){
                         p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_).onNeighborBlockChange(p_149660_1_,p_149660_2_,p_149660_3_,p_149660_4_, this);
-                        //p_149660_1_.getTileEntity(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_).markDirty();
-//                        updateShape(x,y,z,p_149660_1_, null);
                     }
                 }
             }
@@ -261,74 +261,61 @@ public class BlockRailCore extends BlockRail {
         //return getTile(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_) != null && getTile(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_).receiveClientEvent(p_149696_5_, p_149696_6_);
     }
 
-    public static final int[] gauge750mm={375, -375};
+    public static final int[] gauge750mm={750};
 
-    public static void updateShape(int xPos, int yPos, int zPos, World worldObj, @Nullable NBTTagCompound data){
+    public static void updateShape(int xPos, int yPos, int zPos, World worldObj, @Nullable XmlBuilder data){
         //List<> points= new ArrayList<>();
         //todo: process these directly into quad/processPoints(); on server, then sync the offsets over the NBT network packet.
         switch (worldObj.getBlockMetadata(xPos, yPos, zPos)){
             //Z straight
             case 0: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaZStraight(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaZStraight(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
                 break;
             }
             //X straight
             case 1: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaXStraight(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaXStraight(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
                 break;
             }
 
             //curves
             case 9: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve9(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve9(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
                 break;
             }
             case 8: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve8(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve8(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
                 break;
             }
             case 7: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve7(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve7(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
                 break;
             }
             case 6: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve6(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve6(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
                 break;
             }
             //Z slopes
             case 5 :{
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeZ5(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeZ5(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
                 break;
             }
             case 4 :{
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeZ4(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeZ4(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
                 break;
             }
             //X slopes
             case 2 :{
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeX2(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeX2(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
                 break;
             }
             case 3 :{
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeX3(worldObj, xPos, yPos, zPos), gauge750mm, 4, worldObj, data);
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeX3(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
                 break;
             }
         }
     }
 
-
-
-    /*
-    @Deprecated
-    public RailTileEntity getTile(World worldObj, int x, int y, int z){
-        if(tile !=null){
-            return tile;
-        } else if (worldObj.getTileEntity(x,y,z) instanceof RailTileEntity) {
-            return tile = (RailTileEntity) worldObj.getTileEntity(x,y,z);
-        } else {
-            return null;
-        }
-    }*/
 
 
     /**

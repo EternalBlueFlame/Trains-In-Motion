@@ -41,10 +41,8 @@ public class PartModel extends ModelBase {
                 }
             }
             GL11.glEndList();
-            DebugUtil.printGLError(GL11.glGetError());
         } else {
             org.lwjgl.opengl.GL11.glCallList(GLDisplaylistID);
-            DebugUtil.printGLError(GL11.glGetError());
         }
     }
 

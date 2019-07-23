@@ -9,6 +9,7 @@ import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.XmlBuilder;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.api.SkinRegistry;
 import ebf.tim.blocks.rails.RailShapeCore;
@@ -102,7 +103,7 @@ public class EventManager {
                     TrainsInMotion.keyChannel.sendToServer(new PacketInteract(15, player.ridingEntity.getEntityId()));
                 }
             }
-        } else if(DebugUtil.dev()) {
+        } else if(DebugUtil.dev() && false) {
             if (ClientProxy.raildevtoolUp.isPressed()){
                 ClientProxy.devSplineModification[ClientProxy.devSplineCurrentPoint][0]+=0.0625;
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("current spline shape is " +
@@ -199,7 +200,9 @@ public class EventManager {
     @SubscribeEvent
     public void onTick(TickEvent.PlayerTickEvent e){
         //every 10 player ticks get the nearby trains and cache if the player is looking at said train.
-        if(e.player.worldObj!= null && e.player.ticksExisted%10==0){
+        if(e.player.worldObj!= null && e.player.ticksExisted%10==0 && false){
+            DebugUtil.println(e.side);
+            selected=null;
             //skip when riding train/stock
             if(e.player.ridingEntity instanceof GenericRailTransport ||
                     e.player.ridingEntity instanceof EntitySeat){
@@ -209,13 +212,13 @@ public class EventManager {
             stock = getTrainsInRange(e.player);
 
             if(stock!=null && stock.size()>0){
-                vec = RailUtility.rotateDistance(0.1875f, e.player.rotationPitch, 90+e.player.rotationYawHead);
+                vec = RailUtility.rotateDistance(0.0625f, e.player.rotationPitch, (e.player.rotationYawHead%360)-270);
                 for (GenericRailTransport t : stock) {
                     if(t.collisionHandler.containsPlayer(e.player)){
                         continue;
                     }
                     //loop for each index in distance.
-                    for (int i=0; i<(Minecraft.getMinecraft().playerController.extendedReach()?32:16); i++) {
+                    for (int i=0; i<(Minecraft.getMinecraft().playerController.extendedReach()?96:48); i++) {
                         vert = vec.crossProduct(i);
                         if (t.collisionHandler.containsPoint(
                                 vert.xCoord+e.player.posX,
@@ -227,7 +230,6 @@ public class EventManager {
                     }
                 }
             }
-            selected=null;
         }
 
 
@@ -239,10 +241,10 @@ public class EventManager {
     @SubscribeEvent
     @SuppressWarnings("unused")
     public void onRenderTick(TickEvent.RenderTickEvent event) {
-        if(Minecraft.getMinecraft().currentScreen==null && selected!=null && selected.getCartItem()!=null){
+        if(event.side.isClient() && Minecraft.getMinecraft().currentScreen==null && selected!=null){
             ClientProxy.toggleWaila(false);
             left=new ScaledResolution(Minecraft.getMinecraft(),Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight).getScaledWidth()/2;
-            disp=getStaticStrings(selected);
+            disp=getStaticStrings(selected, Minecraft.getMinecraft().thePlayer);
             longest=0;
             for(String s: disp){
                 if(Minecraft.getMinecraft().fontRenderer.getStringWidth(s)>longest){
@@ -255,8 +257,10 @@ public class EventManager {
             drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length), ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,ClientProxy.WAILA_ALPHA);
 
             GL11.glTranslatef(0.0F, 0.0F, 32.0F);
-            itemRender.renderItemAndEffectIntoGUI(Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().getTextureManager(),
-                    selected.getCartItem(), left-(longest)-30, 12);
+            if(selected!=null && selected.getCartItem()!=null) {
+                itemRender.renderItemAndEffectIntoGUI(Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().getTextureManager(),
+                        selected.getCartItem(), left - (longest) - 30, 12);
+            }
             GL11.glDisable(GL11.GL_LIGHTING);
             for(int ii=0; ii<disp.length;ii++) {
                 Minecraft.getMinecraft().fontRenderer.drawString(disp[ii],
@@ -273,48 +277,14 @@ public class EventManager {
     private static String[] disp;
     private static RenderItem itemRender = new RenderItem();
 
-    private static String[] getStaticStrings(GenericRailTransport t){
+    private static String[] getStaticStrings(GenericRailTransport t, EntityPlayer p){
         return new String[]{
                 StatCollector.translateToLocal(t.getItem().getUnlocalizedName()+".name"),
                 "owner: " + t.getOwnerName(),
-                "skin: " + SkinRegistry.getSkin(t.getClass(), t.getDataWatcher().getWatchableObjectString(24)).name
+                "skin: " + t.getTexture(p,false).name
         };
     }
 
-
-
-    HashMap<int[], Integer> railGLIDs = new HashMap<int[], Integer>();
-
-    @SubscribeEvent
-    public void BlockRenderEvent(RenderWorldEvent.Pre event){
-        //DebugUtil.println("rendering?");
-        if(CommonProxy.clientList==null || CommonProxy.clientList.data==null){return;}
-        for (HashMap<List<Integer>, NBTTagCompound> map : CommonProxy.clientList.data.values()){
-            DebugUtil.println(map.keySet().size());
-
-
-            for(List<Integer> v : map.keySet()) {
-                TextureManager.adjustLightFixture(event.renderer.worldObj, v.get(0),v.get(1),v.get(2));
-                /*DebugUtil.println(v.get(0),v.get(1),v.get(2),
-                        map.get(v).toString());*/
-                /*Model1x1Rail.Model3DRail(event.renderer.worldObj, v.get(0), v.get(1), v.get(2),
-                        new RailShapeCore().parseString(map.get(v).getString("shape")),
-                        ItemStack.loadItemStackFromNBT(map.get(v).getCompoundTag("ties")),
-                        ItemStack.loadItemStackFromNBT(map.get(v).getCompoundTag("ballast")),
-                        ItemStack.loadItemStackFromNBT(map.get(v).getCompoundTag("rail")));
-                /
-                if (railGLIDs.get(v) != null) {
-                    org.lwjgl.opengl.GL11.glCallList(railGLIDs.get(v));
-                } else {
-                    org.lwjgl.opengl.GL11.glNewList(
-                            railGLIDs.put(v, net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1)), org.lwjgl.opengl.GL11.GL_COMPILE);
-
-                    org.lwjgl.opengl.GL11.glEndList();
-                }*/
-            }
-
-        }
-    }
 
 
 

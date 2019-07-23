@@ -2,6 +2,7 @@ package ebf.tim.models.rails;
 
 import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Vec5f;
 import fexcraft.tmt.slim.Tessellator;
 import fexcraft.tmt.slim.TextureManager;
@@ -72,9 +73,10 @@ public class Model1x1Rail {
         }
 
 
-            float minWidth=0, maxWidth=0;
+        float minWidth=0, maxWidth=0;
         if(shape.gauge.length>1) {
             for (float offset : shape.getGaugePositions()) {
+                DebugUtil.println(offset);
                 //might as well do this here since we gotta loop it anyway, and only need to do it for the first, not like it changes later.
                 if (offset < minWidth) {
                     minWidth = offset;
@@ -84,8 +86,9 @@ public class Model1x1Rail {
                 }
             }
         } else{
-            minWidth=shape.getGaugePositions()[0];maxWidth=shape.getGaugePositions()[0];
+            minWidth=shape.getGaugePositions()[0];maxWidth=-shape.getGaugePositions()[0];
         }
+        //DebugUtil.println(minWidth,maxWidth);
 
 
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

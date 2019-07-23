@@ -54,24 +54,6 @@ public class EntityTrainCore extends GenericRailTransport {
         super(world);
     }
 
-    /**
-     * <h2> Data Syncing and Saving </h2>
-     * SpawnData is mainly used for data that has to be created on client then sent to the server, like data processed on item use.
-     * NBT is save data, which only happens on server.
-     */
-
-    /**reads the data sent from client on entity spawn*/
-    @Override
-    public void readSpawnData(ByteBuf additionalData) {
-        super.readSpawnData(additionalData);
-        accelerator = additionalData.readInt();
-    }
-    /**sends the data to server from client*/
-    @Override
-    public void writeSpawnData(ByteBuf buffer) {
-        super.writeSpawnData(buffer);
-        buffer.writeInt(accelerator);
-    }
     /**loads the entity's save file*/
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {

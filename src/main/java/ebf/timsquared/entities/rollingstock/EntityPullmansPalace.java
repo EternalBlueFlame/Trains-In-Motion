@@ -42,7 +42,7 @@ public class EntityPullmansPalace extends RollingstockBase {
 
     @Override
     public float[][] bogieModelOffsets() {
-        return new float[][]{{2,0,0},{-2,0,0}};
+        return null;
     }
 
     @Override

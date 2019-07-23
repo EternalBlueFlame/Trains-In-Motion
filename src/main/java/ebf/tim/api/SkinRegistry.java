@@ -1,8 +1,10 @@
 package ebf.tim.api;
 
 import cpw.mods.fml.common.Loader;
+import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -12,7 +14,8 @@ import java.util.Map;
 public class SkinRegistry {
 
     public static boolean forceSkinRegister=false,debugSkinRegistration=true;
-    public static Map<String, Map<String, skin>> transports = new HashMap<String, Map<String, skin>>();
+    private static Map<String, Map<String, skin>> transports = new HashMap<String, Map<String, skin>>();
+    public static Map<String, skin> getTransportSkins(Class c){return transports.containsKey(c.getName())?transports.get(c.getName()):null;}
 
     public static void addSkin(Class c, String modid, String textureURI, String name, String description){
         addSkinRecolor(c.getName(),modid,textureURI,null, null, null,name,description);
@@ -86,40 +89,40 @@ public class SkinRegistry {
         return value;
     }
 
-    public static ResourceLocation getTexture(Class c,String modid, String textureURI){
-        if (!transports.containsKey(c.getName()) || !transports.get(c.getName()).containsKey(modid + ":" + textureURI)){
+    public static ResourceLocation getTexture(GenericRailTransport entity, EntityPlayer player, boolean isPaintBucket, String modid, String textureURI){
+        if (entity.getSkinList(player, isPaintBucket)==null || !entity.getSkinList(player, isPaintBucket).containsKey(modid + ":" + textureURI)){
             return null;
         }
-        return transports.get(c.getName()).get(modid + ":" + textureURI).texture;
+        return entity.getSkinList(player, isPaintBucket).get(modid + ":" + textureURI).texture;
     }
 
-    public static skin getSkin(Class c, String internalResourceURI){
-        if (!transports.containsKey(c.getName()) || !transports.get(c.getName()).containsKey(internalResourceURI)){
+    public static skin getSkin(GenericRailTransport entity, EntityPlayer player, boolean isPaintBucket, String internalResourceURI){
+        if (entity.getSkinList(player, isPaintBucket)==null || !entity.getSkinList(player, isPaintBucket).containsKey(internalResourceURI)){
             return null;
         }
-        return transports.get(c.getName()).get(internalResourceURI);
+        return entity.getSkinList(player, isPaintBucket).get(internalResourceURI);
     }
 
-    public static ResourceLocation getTexture(Class c, String internalResourceURI){
-        if (!transports.containsKey(c.getName()) || !transports.get(c.getName()).containsKey(internalResourceURI)){
+    public static ResourceLocation getTexture(GenericRailTransport entity, EntityPlayer player, boolean isPaintBucket, String internalResourceURI){
+        if (entity.getSkinList(player, isPaintBucket)==null || !entity.getSkinList(player, isPaintBucket).containsKey(internalResourceURI)){
             return null;
         }
-        return transports.get(c.getName()).get(internalResourceURI).texture;
+        return entity.getSkinList(player, isPaintBucket).get(internalResourceURI).texture;
     }
 
-    public static ResourceLocation getDefaultTexture(Class c){
-        if (!transports.containsKey(c.getName()) || transports.get(c.getName()).size()<1){
+    public static ResourceLocation getDefaultTexture(GenericRailTransport entity, EntityPlayer player, boolean isPaintBucket){
+        if (entity.getSkinList(player, isPaintBucket)==null || entity.getSkinList(player, isPaintBucket).size()<1){
             return null;
         }
-        return transports.get(c.getName()).values().iterator().next().texture;
+        return entity.getSkinList(player, isPaintBucket).values().iterator().next().texture;
     }
 
-    public static String getSkinName(Class c,String modid, String textureURI){
-        return RailUtility.translate(transports.get(c.getName()).get(modid + ":" + textureURI).name);
+    public static String getSkinName(GenericRailTransport entity, EntityPlayer player, boolean isPaintBucket, String modid, String textureURI){
+        return RailUtility.translate(entity.getSkinList(player,isPaintBucket).get(modid + ":" + textureURI).name);
     }
 
-    public static String[] getSkinDescription(Class c,String modid, String textureURI){
-        return RailUtility.multiTranslate(transports.get(c.getName()).get(modid + ":" + textureURI).getDescription());
+    public static String[] getSkinDescription(GenericRailTransport entity, EntityPlayer player, boolean isPaintBucket,String modid, String textureURI){
+        return RailUtility.multiTranslate(entity.getSkinList(player,isPaintBucket).get(modid + ":" + textureURI).getDescription());
     }
 
 }

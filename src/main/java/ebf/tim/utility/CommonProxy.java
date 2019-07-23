@@ -49,30 +49,8 @@ public class CommonProxy implements IGuiHandler {
 
 
     public static EventManagerServer eventManagerServer = new EventManagerServer();
-    private static HashMap<Integer,BlockNBTMap> railMap = new HashMap<Integer, BlockNBTMap>();
     public static Map<String, List<Recipe>> recipesInMods = new HashMap<>();
 
-    public static BlockNBTMap clientList = new BlockNBTMap();
-
-
-    public static BlockNBTMap getRailMap(World worldObj){
-        if(!railMap.containsKey(worldObj.provider.dimensionId)){
-
-            MapStorage storage = worldObj.perWorldStorage;
-            BlockNBTMap m = (BlockNBTMap) storage.loadData(BlockNBTMap.class, "railMap");
-
-            if (m == null) {
-                m=new BlockNBTMap();
-                storage.setData("railMap", m);
-            }
-            railMap.put(worldObj.provider.dimensionId, m);
-        }
-        return railMap.get(worldObj.provider.dimensionId);
-    }
-
-    public static void setRailMap(World worldObj, BlockNBTMap map){
-        railMap.put(worldObj.provider.dimensionId, map).setDirty(true);
-    }
 
 
 

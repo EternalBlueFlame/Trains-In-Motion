@@ -26,6 +26,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
@@ -42,9 +43,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.*;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static ebf.tim.utility.RailUtility.rotatePointF;
 
@@ -132,6 +131,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * @see #setBoolean(boolValues, boolean)
      */
     private BitList bools = new BitList();
+
     public enum boolValues{BRAKE(0), LOCKED(1), LAMP(2), CREATIVE(3), COUPLINGFRONT(4), COUPLINGBACK(5), WHITELIST(6), RUNNING(7), @Deprecated DERAILED(8);
         public int index;
         boolValues(int index){this.index = index;}
@@ -199,7 +199,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this.dataWatcher.addObject(23, "");//owner
         this.dataWatcher.addObject(21, 0);//front linked transport
         this.dataWatcher.addObject(22, 0);//back linked transport
-        ResourceLocation s = SkinRegistry.getDefaultTexture(this.getClass());
+        ResourceLocation s = SkinRegistry.getDefaultTexture(this, null, false);
         this.dataWatcher.addObject(24, s==null?"":s.getResourceDomain()+":"+s.getResourcePath());//currently used
     }
 
@@ -527,11 +527,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      */
 
     /**reads the data sent from client on entity spawn*/
+    @Deprecated //todo: send this data over the datawatcher or other more reliable means
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         owner = new UUID(additionalData.readLong(), additionalData.readLong());
         rotationYaw = additionalData.readFloat();
     }
+    @Deprecated //todo: send this data over the datawatcher or other more reliable means
     /**sends the data to server from client*/
     @Override
     public void writeSpawnData(ByteBuf buffer) {
@@ -556,10 +558,10 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         ownerName = tag.getString(NBTKeys.ownerName);
 
         String skin = tag.getString(NBTKeys.skinURI);
-        if(SkinRegistry.getSkin(this.getClass(),skin)!=null) {
+        if(SkinRegistry.getSkin(this, null, false,skin)!=null) {
             dataWatcher.updateObject(24, skin);
         } else {
-            dataWatcher.updateObject(24, SkinRegistry.getDefaultTexture(this.getClass()));
+            dataWatcher.updateObject(24, SkinRegistry.getDefaultTexture(this, null, false));
         }
 
 
@@ -1125,8 +1127,20 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**defines the ID of the owner*/
     public String getOwnerName(){return ownerName.equals("")?this.dataWatcher.getWatchableObjectString(23):ownerName;}
 
-    public skin getTexture(){
-        return SkinRegistry.getSkin(this.getClass(), this.dataWatcher.getWatchableObjectString(24));
+    public skin getTexture(EntityPlayer viewer, boolean isPaintBucket){
+        return SkinRegistry.getSkin(this, viewer, isPaintBucket, this.dataWatcher.getWatchableObjectString(24));
+    }
+
+    /**
+     * Method to allow entities to override skin interactions.
+     * for example, only allowing a specific player to apply a skin from the paint bucket,
+     *     or returning a different skin during render based on the transport's state.
+     *
+     * If the player is null, then the call is being made for saving and loading, and usually should not be modified.
+     * When the player is null, isPaintBucket is false, so that allows null checks to be skipped by checking the bool first, in most cases.
+     */
+    public Map<String, skin> getSkinList(EntityPlayer viewer, boolean isPaintBucket){
+        return SkinRegistry.getTransportSkins(getClass());
     }
 
     public List<ParticleFX> getParticles(){
@@ -1693,16 +1707,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             case 5:{return new int[]{3, 50, 0xCCCC00};}//small sphere lamp
             default:{return new int[]{6, 100, 0xCCCC00};}//lamp
         }
-    }
-
-    /**
-     * returns an animator instance, should fully support classes that extend StaticModelAnimator but have different logic.
-     * if this fails, we may need to rely on some form of abstraction, or direct class calls.
-     * NOTE: even though it's marked side only for client, imports can still load, so use the full class address to avoid importing client only classes.
-     */
-    @SideOnly(Side.CLIENT)
-    public ebf.tim.models.StaticModelAnimator customAnimator(fexcraft.tmt.slim.ModelRendererTurbo model){
-        return new ebf.tim.models.StaticModelAnimator().init(model);
     }
 
 

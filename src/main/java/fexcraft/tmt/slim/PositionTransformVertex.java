@@ -12,6 +12,10 @@ public class PositionTransformVertex{
 		this(new Vec3f(x, y, z), u, v);
 	}
 
+	public PositionTransformVertex(PositionTransformVertex vert){
+		this(vert.vector3F, vert.textureX, vert.textureY);
+	}
+
 	@Deprecated
 	public PositionTransformVertex(PositionTextureVertex vertex, float u, float v){
 		vector3F = new Vec3f(vertex.vector3D);

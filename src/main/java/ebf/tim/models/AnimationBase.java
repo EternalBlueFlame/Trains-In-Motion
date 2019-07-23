@@ -10,7 +10,9 @@ public abstract class AnimationBase {
     /**A copy of the original Vec6F for the model part*/
     public float[] originalRotationValuesXYZ;
 
-    public abstract AnimationBase init(ModelRendererTurbo model);
+    public abstract AnimationBase init(ModelRendererTurbo model, GenericRailTransport transport);
+
+    public abstract boolean isPart(ModelRendererTurbo model);
 
     public abstract void animate(float rotationZ, float[] pistonOffset, GenericRailTransport host);
 }

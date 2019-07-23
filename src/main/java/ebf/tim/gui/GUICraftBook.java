@@ -49,7 +49,6 @@ public class GUICraftBook extends GuiScreen {
             }
 
             for (String mod : CommonProxy.recipesInMods.keySet()) {
-                DebugUtil.println("adding pages for : " + mod);
                 if(infoPages.containsKey(mod)) {
                     Collections.addAll(pages, infoPages.get(mod));
                 }

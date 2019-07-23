@@ -2,6 +2,7 @@ package ebf.tim.items;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.XmlBuilder;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.utility.CommonProxy;
@@ -67,23 +68,21 @@ public class ItemRail extends Item implements ITrackItem {
                         getPlacedBlock().onBlockPlacedBy(world, x,y,z, player, stack);
                         getPlacedBlock().onPostBlockPlaced(world, x,y,z, i1);
 
-                        NBTTagCompound c = new NBTTagCompound();
+                        XmlBuilder c = new XmlBuilder();
                         if(stack.getTagCompound().getTag("rail")!=null) {
-                            c.setTag("rail",stack.getTagCompound().getCompoundTag("rail"));
+                            c.putItemStack("rail",ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("rail")));
                         } else {
-                            NBTTagCompound rail = new NBTTagCompound();
-                            (new ItemStack(Items.iron_ingot)).writeToNBT(rail);
-                            c.setTag("rail", rail);
+                            c.putItemStack("rail", new ItemStack(Items.iron_ingot));
                         }
 
                         if(stack.getTagCompound().getTag("ties")!=null) {
-                            c.setTag("ties",stack.getTagCompound().getCompoundTag("ties"));
+                            c.putItemStack("ties",ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties")));
                         }
                         if(stack.getTagCompound().getTag("ballast")!=null) {
-                            c.setTag("ballast",stack.getTagCompound().getCompoundTag("ballast"));
+                            c.putItemStack("ballast",ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ballast")));
                         }
                         if(stack.getTagCompound().getTag("wires")!=null) {
-                            c.setTag("wires",stack.getTagCompound().getCompoundTag("wires"));
+                            c.putItemStack("wires",ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("wires")));
                         }
                         BlockRailCore.updateShape(x,y,z,world,c);
                     }
@@ -94,6 +93,7 @@ public class ItemRail extends Item implements ITrackItem {
             }
 
 
+            /*
             {//DEPRECIATED
             if(world.getTileEntity(x,y,z) instanceof RailTileEntity && stack.hasTagCompound()){
                 if(stack.getTagCompound().getTag("rail")!=null) {
@@ -114,7 +114,7 @@ public class ItemRail extends Item implements ITrackItem {
             } else if(stack.hasTagCompound()) {
                 System.out.println("Trains In Motion ERROR, TILE ENTITY NOT SPAWNED FAST ENOUGH, that can happen?");
             }
-            }
+            }*/
             return true;
         }
     }

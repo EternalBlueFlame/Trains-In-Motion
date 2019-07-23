@@ -2,7 +2,11 @@ package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.RailUtility;
+import fexcraft.fcl.common.lang.ArrayList;
 import fexcraft.tmt.slim.ModelRendererTurbo;
+
+import java.util.Collections;
+import java.util.List;
 
 import static ebf.tim.utility.RailUtility.degreesF;
 
@@ -13,6 +17,15 @@ import static ebf.tim.utility.RailUtility.degreesF;
  * @author Eternal Blue Flame
  */
 public class StaticModelAnimator extends AnimationBase {
+
+    private static List<AnimationBase> customAnimators = makelist();
+    private static List<AnimationBase> makelist(){
+        List<AnimationBase> list = new ArrayList<>();
+        list.add(new StaticModelAnimator());
+        return list;
+    }
+    public static void addCustomAnimator(AnimationBase anim){customAnimators.add(anim);}
+
 
     /**tag for simple pistons, ones that move in a simple circle such as wheel connectors.*/
     public static final String tagSimplePiston = "simplepiston";
@@ -52,11 +65,10 @@ public class StaticModelAnimator extends AnimationBase {
     }
 
     /**
-     * used to create an instance of this class.
+     * used to create an instance of the class, use this to store any variables from the model or transport before animation starts.
      * @param model a refrence to the model geometry to animate.
      */
-    public StaticModelAnimator init(ModelRendererTurbo model){
-        if(model==null || model.boxName==null){return null;}
+    public AnimationBase init(ModelRendererTurbo model, GenericRailTransport transport){
         switch (model.boxName) {
             case tagAdvancedPiston:
             case tagSimplePiston:
@@ -72,8 +84,25 @@ public class StaticModelAnimator extends AnimationBase {
     }
 
     /**
+     * returns true if the part being checked should be added to the animation list for the entity.
+     * when overriding, do not call the super method, it's unnecessary overhead.
+     * @param part the part to check
+     */
+    public boolean isPart(ModelRendererTurbo part){
+        return part.boxName.contains(tagAdvancedPiston) ||
+                part.boxName.contains(tagSimplePiston) ||
+                part.boxName.contains(tagSimpleRotate) ||
+                part.boxName.contains(tagWheel) ||
+                part.boxName.contains("smoke") ||
+                part.boxName.contains("door") ||
+                part.boxName.contains("lamp");
+    }
+
+
+    /**
      * Actually animate the geometry.
      * to add more animations override this and add your own checks before calling the super.
+     * when overriding, do not call the super method, it's unnecessary overhead.
      * @param rotationZ the rotation degree for the animation.
      */
     public void animate(float rotationZ, float[] pistonOffset, GenericRailTransport host){
@@ -107,5 +136,27 @@ public class StaticModelAnimator extends AnimationBase {
         }
     }
 
+
+    /*
+    Internal methods to iterate all animators when finding support for a specific part.
+     */
+    static AnimationBase initPart(ModelRendererTurbo part, GenericRailTransport entity){
+        if(part==null || part.boxName==null){return null;}
+        for(AnimationBase b : customAnimators){
+            if(b.isPart(part)){
+                return b.init(part, entity);
+            }
+        }
+        return null;
+    }
+
+    static boolean checkAnimators(ModelRendererTurbo part){
+        for (AnimationBase animator : customAnimators){
+            if(animator.isPart(part)){
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

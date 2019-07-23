@@ -6,6 +6,7 @@ import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.Tessellator;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
@@ -143,7 +144,7 @@ public class GroupedModelRender {
             GL11.glPopMatrix();
         } else {
             //render the geometry normally if it's not a block.
-            Tessellator.bindTexture(transport.getTexture().texture);
+            Tessellator.bindTexture(transport.getTexture(Minecraft.getMinecraft().thePlayer, false).texture);
             int liveryIndex=-1;
             String lastLivery="";
             for (ModelRendererTurbo block : boxRefrence) {

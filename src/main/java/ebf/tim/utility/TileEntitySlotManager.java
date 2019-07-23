@@ -139,7 +139,7 @@ public class TileEntitySlotManager extends Container{
     }
 
     public void putStackInSlot(int slot, ItemStack stack, boolean isPlayerInventory) {
-        ((Slot)this.inventorySlots.get(isPlayerInventory?slot:slot+36)).putStack(stack);
+        ((Slot)this.inventorySlots.get(isPlayerInventory?slot:slot+35)).putStack(stack);
     }
 
     /**

@@ -98,9 +98,8 @@ public class RenderEntity extends Render {
                         if(render.boxName.toLowerCase().contains("hide") || render.boxName.toLowerCase().contains("cull")){
                             render.showModel = false;
                         }
-                        //todo: add some sorta animation registry for users to tie into.
-                        if (entity.customAnimator(render) !=null) {
-                            entity.renderData.animatedPart.add(entity.customAnimator(render));
+                        if (StaticModelAnimator.checkAnimators(render)) {
+                            entity.renderData.animatedPart.add(StaticModelAnimator.initPart(render, entity));
                         } else if (GroupedModelRender.canAdd(render)) {
                             //if it's a grouped render we have to figure out if we already have a group for this or not.
                             isAdded = false;
@@ -127,16 +126,16 @@ public class RenderEntity extends Render {
                 if (entity.renderData.bogies != null) {
                     for (Bogie bogie : entity.renderData.bogies) { {
                             for (ModelRendererTurbo box : bogie.bogieModel.getParts()) {
-                                if (entity.customAnimator(box) != null) {
-                                    entity.renderData.animatedPart.add(entity.customAnimator(box));
+                                if (StaticModelAnimator.checkAnimators(box)) {
+                                    entity.renderData.animatedPart.add(StaticModelAnimator.initPart(box, entity));
                                 }
                             }
                             if(bogie.subBogies==null){continue;}
                             //cache the animating parts on sub-bogies
                             for(Bogie subBogie : bogie.subBogies){
                                 for(ModelRendererTurbo box : subBogie.bogieModel.getParts()){
-                                    if (entity.customAnimator(box) != null) {
-                                        entity.renderData.animatedPart.add(entity.customAnimator(box));
+                                    if (StaticModelAnimator.checkAnimators(box)) {
+                                        entity.renderData.animatedPart.add(StaticModelAnimator.initPart(box, entity));
                                     }
                                 }
                             }
@@ -191,9 +190,9 @@ public class RenderEntity extends Render {
          * @see net.minecraft.client.renderer.entity.RenderEnderman#renderEquippedItems(EntityEnderman, float)
          */
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
-        TextureManager.adjustLightFixture(entity.worldObj,(int)entity.posX,(int)entity.posY,(int)entity.posZ);
+        TextureManager.adjustLightFixture(entity.worldObj,(int)entity.posX,(int)entity.posY+1,(int)entity.posZ);
         //TextureManager.maskColors(entity.getTexture().texture, entity.colors);
-        TextureManager.bindTexture(entity.getTexture().texture);
+        TextureManager.bindTexture(entity.getTexture(Minecraft.getMinecraft().thePlayer, false).texture);
         for(i=0; i< entity.renderData.modelList.length;i++) {
             GL11.glPushMatrix();
             if(entity.modelOffsets()!=null && entity.modelOffsets().length>i) {
@@ -220,8 +219,8 @@ public class RenderEntity extends Render {
                 ii=0;
                 GL11.glPushMatrix();
                 //bind the texture
-                if (entity.getTexture().getBogieSkin(ii) != null) {
-                    Tessellator.bindTexture(entity.getTexture().getBogieSkin(i));
+                if (entity.getTexture(Minecraft.getMinecraft().thePlayer, false).getBogieSkin(ii) != null) {
+                    Tessellator.bindTexture(entity.getTexture(Minecraft.getMinecraft().thePlayer, false).getBogieSkin(i));
                 }
                 GL11.glTranslated(-b.offset[0], -b.offset[1], -b.offset[2]);
                 b.setRotation(entity);
@@ -233,7 +232,7 @@ public class RenderEntity extends Render {
                 if(b.subBogies!=null) {
                     iii=0;
                     for (Bogie sub : b.subBogies) {
-                        TextureManager.bindTexture(entity.getTexture().getSubBogieSkin(iii));
+                        TextureManager.bindTexture(entity.getTexture(Minecraft.getMinecraft().thePlayer, false).getSubBogieSkin(iii));
                         GL11.glPushMatrix();
                         GL11.glTranslated(sub.offset[0], sub.offset[1], sub.offset[2]);
                         sub.setRotation(entity);
