@@ -185,24 +185,12 @@ public class ClientProxy extends CommonProxy {
             WAILA_GRADIENT2= wailaConfig.get("general", "waila.cfg.gradient2",2621567).getInt();
             WAILA_ALPHA= wailaConfig.get("general", "waila.cfg.alpha",0xEE).getInt();
             WAILA_FONTCOLOR= wailaConfig.get("general", "waila.cfg.fontcolor",10526880).getInt();
-            WAILA_STATE= WAILA_TOGGLE= wailaConfig.get("general", "waila.cfg.show", false).getBoolean();
 
         }
 
     }
 
     public static int WAILA_BGCOLOR = 1048592,WAILA_GRADIENT1 = 5243135,WAILA_GRADIENT2 = 2621567,WAILA_ALPHA = 0xEE,WAILA_FONTCOLOR=10526880;
-
-    public static boolean WAILA_TOGGLE=false, WAILA_STATE=false;
-
-    public static void toggleWaila(boolean set){
-        if(WAILA_TOGGLE && WAILA_STATE!=set){
-            wailaConfig.getCategory("general").put("waila.cfg.show", new Property("waila.cfg.show", String.valueOf(set), Property.Type.BOOLEAN));
-            wailaConfig.save();
-            WAILA_STATE=set;
-        }
-    }
-
     /**
      * <h2>Client Register</h2>
      * Used for registering client only functions and redirecting registering the items in the train registry with their own textures and models.

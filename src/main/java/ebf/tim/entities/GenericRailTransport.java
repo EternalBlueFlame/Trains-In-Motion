@@ -1128,7 +1128,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public String getOwnerName(){return ownerName.equals("")?this.dataWatcher.getWatchableObjectString(23):ownerName;}
 
     public skin getTexture(EntityPlayer viewer, boolean isPaintBucket){
-        return SkinRegistry.getSkin(this, viewer, isPaintBucket, this.dataWatcher.getWatchableObjectString(24));
+        return getSkinList(viewer, isPaintBucket).get(this.dataWatcher.getWatchableObjectString(24));
     }
 
     /**

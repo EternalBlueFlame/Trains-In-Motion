@@ -200,8 +200,7 @@ public class EventManager {
     @SubscribeEvent
     public void onTick(TickEvent.PlayerTickEvent e){
         //every 10 player ticks get the nearby trains and cache if the player is looking at said train.
-        if(e.player.worldObj!= null && e.player.ticksExisted%10==0 && false){
-            DebugUtil.println(e.side);
+        if(e.player.worldObj!= null && e.player.ticksExisted%10==0){
             selected=null;
             //skip when riding train/stock
             if(e.player.ridingEntity instanceof GenericRailTransport ||
@@ -241,8 +240,7 @@ public class EventManager {
     @SubscribeEvent
     @SuppressWarnings("unused")
     public void onRenderTick(TickEvent.RenderTickEvent event) {
-        if(event.side.isClient() && Minecraft.getMinecraft().currentScreen==null && selected!=null){
-            ClientProxy.toggleWaila(false);
+        if(event.phase == TickEvent.Phase.END && event.side.isClient() && Minecraft.getMinecraft().currentScreen==null && selected!=null){
             left=new ScaledResolution(Minecraft.getMinecraft(),Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight).getScaledWidth()/2;
             disp=getStaticStrings(selected, Minecraft.getMinecraft().thePlayer);
             longest=0;
@@ -253,8 +251,8 @@ public class EventManager {
             }
             longest*=0.3;
             longest+=10;
-
-            drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length), ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,ClientProxy.WAILA_ALPHA);
+            //GL11.glTranslatef(0.0F, 0.0F, 100);
+            drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length), ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,100);
 
             GL11.glTranslatef(0.0F, 0.0F, 32.0F);
             if(selected!=null && selected.getCartItem()!=null) {
@@ -268,8 +266,6 @@ public class EventManager {
             }
             GL11.glEnable(GL11.GL_LIGHTING);
             //todo: draw an array of strings for the tooltip info, derrived from the transport's class.
-
-            ClientProxy.toggleWaila(true);
         }
     }
 
@@ -279,7 +275,7 @@ public class EventManager {
 
     private static String[] getStaticStrings(GenericRailTransport t, EntityPlayer p){
         return new String[]{
-                StatCollector.translateToLocal(t.getItem().getUnlocalizedName()+".name"),
+                StatCollector.translateToLocal(t.getInventoryName().replace(".storage","")+".name"),
                 "owner: " + t.getOwnerName(),
                 "skin: " + t.getTexture(p,false).name
         };
@@ -287,15 +283,6 @@ public class EventManager {
 
 
 
-
-
-
-
-    @SubscribeEvent
-    @SuppressWarnings("unused")
-    public void playerQuitEvent(PlayerEvent.PlayerLoggedOutEvent event){
-        ClientProxy.toggleWaila(ClientProxy.WAILA_TOGGLE);
-    }
 
     public static void drawGradientRect(int x, int y, int w, int h, int grad1, int grad2, int alpha) {
         Tessellator.getInstance().startDrawing(GL11.GL_QUADS);

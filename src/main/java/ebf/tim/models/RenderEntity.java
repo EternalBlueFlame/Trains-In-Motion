@@ -177,6 +177,7 @@ public class RenderEntity extends Render {
                 entity.renderData.animationCache[0][0] = entity.getPistonOffset();
                 //animate the tagged parts
                 for (AnimationBase partToAnimate : entity.renderData.animatedPart) {
+                    if(partToAnimate==null){continue;}
                     partToAnimate.animate(entity.renderData.wheelPitch, entity.renderData.animationCache[0], entity);
                 }
             }
