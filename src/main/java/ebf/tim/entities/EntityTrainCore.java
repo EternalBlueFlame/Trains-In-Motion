@@ -153,7 +153,7 @@ public class EntityTrainCore extends GenericRailTransport {
             //speed is defined by the power in newtons divided by the weight, divided by the number of ticks in a second.
             if(maxPowerNewtons!=0) {
                 //745.7 converts to watts, which seems more accurate.
-                vectorCache[1][0] += ((maxPowerNewtons/weight)/745.7);//applied power
+                vectorCache[1][0] += ((maxPowerNewtons/weight)/7457);//applied power
 
                 vectorCache[1][0]*=(accelerator*0.16666666666);//effected by the state of the throttle
 
@@ -161,8 +161,10 @@ public class EntityTrainCore extends GenericRailTransport {
                 vectorCache[1][1]=( (1.75f * (worldObj.isRaining()?0.5f:1)) *this.weightKg());
                 //todo: debuff for pulled weight
 
-                if(Math.abs(vectorCache[1][0])*745.7>vectorCache[1][1]/745.7){
+                if(Math.abs(vectorCache[1][0])*-745.7>vectorCache[1][1]/7457){
                     //todo: add sparks to animator.
+                    DebugUtil.println("SCREECH","wheelspin: " + (vectorCache[1][0]*-745.7),
+                            "Grip: " + (vectorCache[1][1]/7457), "i really need to get those spark particles in..");
                     vectorCache[1][0] *=0.33;
                 }
 
@@ -186,10 +188,10 @@ public class EntityTrainCore extends GenericRailTransport {
         }
 
         //cap movement to the max speed
-        if (vectorCache[1][0] > (transportTopSpeed()*0.0138889f)){
-            vectorCache[1][0] = (transportTopSpeed()*0.0138889f);
-        } else if (vectorCache[1][0] < (-transportTopSpeed()*0.0138889f)){
-            vectorCache[1][0] = (-transportTopSpeed()*0.0138889f);
+        if (vectorCache[1][0] > (transportTopSpeed()*0.00694445f)){
+            vectorCache[1][0] = (transportTopSpeed()*0.00694445f);
+        } else if (vectorCache[1][0] < (-transportTopSpeed()*0.00694445f)){
+            vectorCache[1][0] = (-transportTopSpeed()*0.00694445f);
         }
         //todo: make the max reduced when going reverse
 

@@ -12,6 +12,7 @@ import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.gui.*;
 import ebf.tim.items.ItemCraftGuide;
+import ebf.tim.items.ItemPaintBucket;
 import ebf.tim.items.ItemRail;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
@@ -62,8 +63,6 @@ public class ClientProxy extends CommonProxy {
     public static boolean EnableParticles = true;
     /**whether or not animations should be enabled*/
     public static boolean EnableAnimations = true;
-    /**whether or not to use HD skins*/
-    public static boolean useHDSkins = false;
     /**whether or not to force texture binding*/
     public static boolean ForceTextureBinding = false;
     /**defines if the inventory graphics should be loaded from a TiM URI or if vanilla graphics should be used*/
@@ -108,8 +107,12 @@ public class ClientProxy extends CommonProxy {
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         if (player != null) {
-            if(x==0&&y==0&&z==0&&ID==-1 && player.getHeldItem().getItem() instanceof ItemCraftGuide){
-                return new GUICraftBook();
+            if(x==0&&y==0&&z==0&&ID==-1) {
+                if (player.getHeldItem().getItem() instanceof ItemCraftGuide) {
+                    return new GUICraftBook();
+                } else if (player.getHeldItem().getItem() instanceof ItemPaintBucket){
+                    return new GUISkinManager();
+                }
             }
             //Trains
             if (player.worldObj.getEntityByID(ID) instanceof GenericRailTransport && !((GenericRailTransport) player.worldObj.getEntityByID(ID)).hasCustomGUI()) {

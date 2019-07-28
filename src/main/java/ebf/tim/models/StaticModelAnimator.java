@@ -152,7 +152,7 @@ public class StaticModelAnimator extends AnimationBase {
 
     static boolean checkAnimators(ModelRendererTurbo part){
         for (AnimationBase animator : customAnimators){
-            if(animator.isPart(part)){
+            if(animator!=null && animator.isPart(part)){
                 return true;
             }
         }

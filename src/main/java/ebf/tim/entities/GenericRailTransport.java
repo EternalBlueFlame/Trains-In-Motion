@@ -8,6 +8,7 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.api.SkinRegistry;
 import ebf.tim.api.skin;
 import ebf.tim.items.ItemKey;
+import ebf.tim.items.ItemPaintBucket;
 import ebf.tim.items.ItemTicket;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.ParticleFX;
@@ -303,7 +304,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 }
                 case -1: {//right click
                     if (p.getHeldItem() != null) {
-                        if (p.getHeldItem().getItem() instanceof ItemKey) {
+                        if (p.getHeldItem().getItem() instanceof ItemPaintBucket) {
+                            System.out.println("It works.");
+                            p.openGui(TrainsInMotion.instance, -1, worldObj, 0, 0, 0);
+                        }
+                        else if (p.getHeldItem().getItem() instanceof ItemKey) {
                             if (ItemKey.getHostList(p.getHeldItem()) !=null) {
                                 for (UUID transport : ItemKey.getHostList(p.getHeldItem())) {
                                     if (transport.equals(getPersistentID())) {
@@ -1718,7 +1723,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * return new ItemStack[]{new ItemStack(Blocks.dirt, 2), new ItemStack(Blocks.glass,1), etc};
      * array must contain 9 values. may not return null.*/
     public ItemStack[] getRecipie(){return new ItemStack[]{
-      new ItemStack(Blocks.dirt),null,null,null,null,null,null,null,null
+            new ItemStack(Blocks.dirt),null,null,null,null,null,null,null,null
     };}
 
 
