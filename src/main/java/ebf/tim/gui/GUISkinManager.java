@@ -3,6 +3,7 @@ package ebf.tim.gui;
 
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.Bogie;
+import ebf.tim.utility.DebugUtil;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.client.Minecraft;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -25,9 +27,14 @@ public class GUISkinManager extends GuiScreen {
     public static String name;
     public static String[] description;
 
+    public GUISkinManager(GenericRailTransport p_i1072_1_) { }
+
+
     @Override
     public void initGui()
     {
+        super.initGui();
+        DebugUtil.println("GUI INIT");
         buttonList.clear();
         Keyboard.enableRepeatEvents(true);
         buttonLeft = new GuiButton(0, 1,1, 20, 20, I18n.format("<"));
@@ -39,6 +46,7 @@ public class GUISkinManager extends GuiScreen {
     @Override
     public void updateScreen()
     {
+        super.updateScreen();
         buttonLeft.visible=true;
         buttonRight.visible=true;
         buttonApply.visible=true;
@@ -55,7 +63,7 @@ public class GUISkinManager extends GuiScreen {
     @Override
     public void drawScreen(int parWidth, int parHeight, float p_73863_3_)
     {
-        initGui();
+        super.drawScreen(parWidth,parHeight,p_73863_3_);
         GL11.glColor4f(1F, 1F, 1F, 0.5F);
         float offsetFromScreenLeft = width * 0.5f;
 

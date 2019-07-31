@@ -75,7 +75,7 @@ public class CommonProxy implements IGuiHandler {
         return null;
     }
 
-    public void adminGui(String datacsv){};
+    public void adminGui(String datacsv){}
 
     public boolean isClient(){return false;}
 

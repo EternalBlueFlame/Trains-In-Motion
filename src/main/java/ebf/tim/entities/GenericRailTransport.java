@@ -306,7 +306,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                     if (p.getHeldItem() != null) {
                         if (p.getHeldItem().getItem() instanceof ItemPaintBucket) {
                             System.out.println("It works.");
-                            p.openGui(TrainsInMotion.instance, -1, worldObj, 0, 0, 0);
+                            p.openGui(TrainsInMotion.instance, getEntityId(), worldObj, 0, 0, 0);
+                            break;
                         }
                         else if (p.getHeldItem().getItem() instanceof ItemKey) {
                             if (ItemKey.getHostList(p.getHeldItem()) !=null) {

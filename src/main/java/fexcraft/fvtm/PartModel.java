@@ -22,7 +22,9 @@ public class PartModel extends ModelBase {
 
     public List<TurboList> groups = new ArrayList<>();
     public PartModel(){}
-    private Integer GLDisplaylistID=null;
+    private int GLDisplaylistID=-1;
+    private boolean refreshModel=true;
+
 
     public void addToCreators(String s){
         creators.add(s);
@@ -30,7 +32,10 @@ public class PartModel extends ModelBase {
 
     @Override
     public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5){
-        if(GLDisplaylistID==null) {
+        if(GLDisplaylistID!=-1){
+            org.lwjgl.opengl.GL11.glCallList(GLDisplaylistID);
+        }
+        if(refreshModel) {
             GLDisplaylistID = GLAllocation.generateDisplayLists(1);
             GL11.glNewList(GLDisplaylistID, GL11.GL_COMPILE);
             for (TurboList list : groups) {
@@ -41,8 +46,6 @@ public class PartModel extends ModelBase {
                 }
             }
             GL11.glEndList();
-        } else {
-            org.lwjgl.opengl.GL11.glCallList(GLDisplaylistID);
         }
     }
 
