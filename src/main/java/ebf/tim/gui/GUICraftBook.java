@@ -72,7 +72,7 @@ public class GUICraftBook extends GuiScreen {
         //GL11.glTranslatef(,, 300);
         GL11.glColor4f(1,1,1,1);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GUITransport.drawTexturedRect(percentLeft(14),percentTop(15),0,0,percentLeft(75),percentTop(60));
+        GUITransport.drawTexturedRect(percentLeft(14),percentTop(15),0,0,percentLeft(72),percentTop(60));
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_LIGHTING);
@@ -154,8 +154,9 @@ public class GUICraftBook extends GuiScreen {
 
         buttonList =new ArrayList();
 
-        buttonList.add(new GuiButton(-1, percentLeft(30),percentTop(75), 16,16,"<"));//left
-        buttonList.add(new GuiButton(1,percentLeft(70),percentTop(75),16,16,">"));//right
+        buttonList.add(new GuiButton(-1, percentLeft(30)-10,percentTop(80)-10, 20,20,"<"));//left
+        buttonList.add(new GuiButton(1,percentLeft(70)-10,percentTop(80)-10,20,20,">"));//right
+
     }
 
 

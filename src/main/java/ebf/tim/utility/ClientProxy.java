@@ -107,11 +107,10 @@ public class ClientProxy extends CommonProxy {
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         if (player != null) {
-            if(x==0&&y==0&&z==0) {
+            if(x==0&&y==0&&z==0 && player.getHeldItem()!=null) {
                 if (player.getHeldItem().getItem() instanceof ItemCraftGuide) {
                     return new GUICraftBook();
                 } else if (player.getHeldItem().getItem() instanceof ItemPaintBucket){
-                    DebugUtil.println("client proxy calling gui");
                     return new GUISkinManager((GenericRailTransport) player.worldObj.getEntityByID(ID));
                 }
             }

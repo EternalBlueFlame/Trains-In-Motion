@@ -172,19 +172,10 @@ public class EventManager {
         if (Mouse.isButtonDown(1) || Mouse.isButtonDown(0)) {
             if (selected != null) {
                 (selected).interact(Minecraft.getMinecraft().thePlayer.getEntityId(), false, false, Mouse.isButtonDown(1) ? -1 : -999);
-                MinecraftForge.EVENT_BUS.post(new EntityInteractEvent(Minecraft.getMinecraft().thePlayer, selected));
+                //MinecraftForge.EVENT_BUS.post(new EntityInteractEvent(Minecraft.getMinecraft().thePlayer, selected));
             }
         }
     }
-
-
-    @SubscribeEvent
-    public void EntityInteractEvent(EntityInteractEvent e){
-        if(e.target instanceof GenericRailTransport){
-            e.setCanceled(true);
-        }
-    }
-
 
     private static List<GenericRailTransport> getTrainsInRange(Entity entity){
         ArrayList<GenericRailTransport> list =new ArrayList<>();

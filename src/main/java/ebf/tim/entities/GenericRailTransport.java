@@ -288,10 +288,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     }
 
     public boolean interact(int player, boolean isFront, boolean isBack, int key) {
+        EntityPlayer p =((EntityPlayer)worldObj.getEntityByID(player));
         if (worldObj.isRemote) {
+            if (p.getHeldItem()!=null && p.getHeldItem().getItem() instanceof ItemPaintBucket) {
+                p.openGui(TrainsInMotion.instance, getEntityId(), worldObj, 0, 0, 0);
+                return true;
+            }
             TrainsInMotion.keyChannel.sendToServer(new PacketInteract(key, getEntityId()));
         } else {
-            EntityPlayer p =((EntityPlayer)worldObj.getEntityByID(player));
             //check if the player has permission first.
             if (!getPermissions(p, false, false)) {
                 p.addChatMessage(new ChatComponentText(RailUtility.translate("You don't have permission to do that.")));
@@ -304,12 +308,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 }
                 case -1: {//right click
                     if (p.getHeldItem() != null) {
-                        if (p.getHeldItem().getItem() instanceof ItemPaintBucket) {
-                            System.out.println("It works.");
-                            p.openGui(TrainsInMotion.instance, getEntityId(), worldObj, 0, 0, 0);
-                            break;
-                        }
-                        else if (p.getHeldItem().getItem() instanceof ItemKey) {
+                        if (p.getHeldItem().getItem() instanceof ItemKey) {
                             if (ItemKey.getHostList(p.getHeldItem()) !=null) {
                                 for (UUID transport : ItemKey.getHostList(p.getHeldItem())) {
                                     if (transport.equals(getPersistentID())) {
@@ -353,7 +352,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                     }
                 }
                 case 1:{ //open GUI
-                    p.openGui(TrainsInMotion.instance, getEntityId(), worldObj, 0, 0, 0);
+                    p.openGui(TrainsInMotion.instance, getEntityId(), worldObj, 0, (int)posY, 0);
                     return true;
                 }case 15: {//toggle brake
                     setBoolean(boolValues.BRAKE, !getBoolean(boolValues.BRAKE));

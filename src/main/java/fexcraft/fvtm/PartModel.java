@@ -46,6 +46,7 @@ public class PartModel extends ModelBase {
                 }
             }
             GL11.glEndList();
+            refreshModel=false;
         }
     }
 
