@@ -89,6 +89,7 @@ public class StaticModelAnimator extends AnimationBase {
      * @param part the part to check
      */
     public boolean isPart(ModelRendererTurbo part){
+        if(part==null || part.boxName==null){return false;}
         return part.boxName.contains(tagAdvancedPiston) ||
                 part.boxName.contains(tagSimplePiston) ||
                 part.boxName.contains(tagSimpleRotate) ||
