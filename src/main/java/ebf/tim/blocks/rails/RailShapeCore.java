@@ -16,6 +16,7 @@ import static ebf.tim.utility.RailUtility.radianF;
 public class RailShapeCore {
 
     public List<Vec5f> activePath = new ArrayList<>();
+    public boolean[] ends = {true, true};
     public List<List<Vec5f>> inactivePaths = new ArrayList<>();
     public int[] gauge;
     public float segmentLength;

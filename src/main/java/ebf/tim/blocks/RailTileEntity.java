@@ -77,7 +77,7 @@ public class RailTileEntity extends TileEntity {
                         new RailShapeCore().parseString(data.getString("route")),
                         data.getItemStack("ties"),
                         data.getItemStack("ballast"),
-                        data.getItemStack("rail"));
+                        data.getItemStack("rail"), null);
                 //org.lwjgl.opengl.GL11.glEndList();
             }
         } else {super.func_145828_a(report);}

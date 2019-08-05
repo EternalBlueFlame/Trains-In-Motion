@@ -67,7 +67,7 @@ public class Model1x1Rail {
 
 
     //todo use the return value to manage displaylists
-    public static void Model3DRail(World world, int xPos, int yPos, int zPos, RailShapeCore shape, @Nullable ItemStack ballast, @Nullable ItemStack ties, @Nullable ItemStack rail){
+    public static void Model3DRail(World world, int xPos, int yPos, int zPos, RailShapeCore shape, @Nullable ItemStack ballast, @Nullable ItemStack ties, @Nullable ItemStack rail, @Nullable int[] colors){
         if(shape.gauge==null || shape.activePath ==null || rail==null){
             return;
         }
@@ -98,21 +98,22 @@ public class Model1x1Rail {
         Minecraft.getMinecraft().entityRenderer.enableLightmap(1);
         TextureManager.adjustLightFixture(world,xPos,yPos,zPos);
         //GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-        int[] railColor = new int[]{0,0,0};
-        for (Map.Entry<ItemStack, int[]> e : TextureManager.ingotColors.entrySet()) {
-            if (e.getKey().getItem() == rail.getItem() &&
-                    e.getKey().getTagCompound() == rail.getTagCompound() &&
-                    e.getKey().getItemDamage() == rail.getItemDamage()) {
-                railColor = TextureManager.ingotColors.get(e.getKey());
+        if(colors==null) {
+            for (Map.Entry<ItemStack, int[]> e : TextureManager.ingotColors.entrySet()) {
+                if (e.getKey().getItem() == rail.getItem() &&
+                        e.getKey().getTagCompound() == rail.getTagCompound() &&
+                        e.getKey().getItemDamage() == rail.getItemDamage()) {
+                    colors = TextureManager.ingotColors.get(e.getKey());
+                }
             }
         }
         //DebugUtil.println(ClientProxy.railLoD);
         //renders the rails, also defines min and max width
-        switch (ClientProxy.railLoD){
-            case 0:{ModelRail.modelPotatoRail(shape, railColor); break;}
-            case 1:{ModelRail.model3DRail(shape, railColor); break;}
+        switch (ClientProxy.railSkin){
+            case 0:{ModelRail.modelPotatoRail(shape, colors); break;}
+            case 1:{ModelRail.modelExtrudedRail(shape, colors); break;}
             case 2://todo normal rail
-            case 3:{ModelRail.model3DRail(shape, railColor); break;}//todo HD rail
+            case 3:{ModelRail.model3DRail(shape, colors); break;}//todo HD rail
         }
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glColor4f(1.0f,1.0f,1.0f,1.0f);

@@ -103,7 +103,7 @@ public class EventManager {
                     TrainsInMotion.keyChannel.sendToServer(new PacketInteract(15, player.ridingEntity.getEntityId()));
                 }
             }
-        } else if(DebugUtil.dev() && false) {
+        } else if(DebugUtil.dev()) {
             if (ClientProxy.raildevtoolUp.isPressed()){
                 ClientProxy.devSplineModification[ClientProxy.devSplineCurrentPoint][0]+=0.0625;
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("current spline shape is " +
@@ -152,16 +152,20 @@ public class EventManager {
 
             if (ClientProxy.raildevtoolNextPoint.isPressed()){
                 ClientProxy.devSplineCurrentPoint++;
-                if (ClientProxy.devSplineCurrentPoint>3){
-                    ClientProxy.devSplineCurrentPoint = 0;
-                }
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("current point is now " + ClientProxy.devSplineCurrentPoint));
             } else if (ClientProxy.raildevtoolLastPoint.isPressed()){
                 ClientProxy.devSplineCurrentPoint--;
                 if (ClientProxy.devSplineCurrentPoint<0){
-                    ClientProxy.devSplineCurrentPoint = 3;
+                    ClientProxy.devSplineCurrentPoint = 0;
                 }
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("current point is now " + ClientProxy.devSplineCurrentPoint));
+            }
+            if (ClientProxy.raildevtoolQuality.isPressed()){
+                ClientProxy.railSkin++;
+                if(ClientProxy.railSkin>3){
+                    ClientProxy.railSkin=0;
+                }
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("Displaying rail model " + ClientProxy.railSkin));
             }
         }
     }

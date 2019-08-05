@@ -35,6 +35,11 @@ public class GUISkinManager extends GuiScreen {
 
     public static int guiTop;
     public static int guiLeft;
+    public GenericRailTransport entity;
+
+    public GUISkinManager(GenericRailTransport t){
+        entity=t;
+    }
 
     @Override
     public void initGui()
@@ -51,7 +56,6 @@ public class GUISkinManager extends GuiScreen {
         buttonList.add(new GuiButton(-1, percentLeft(50)-16,percentTop(80), 32,20,"Apply"));//apply
     }
 
-    public GenericRailTransport entity;
     @Override
     public void updateScreen()
     {

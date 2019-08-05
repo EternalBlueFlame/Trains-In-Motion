@@ -80,15 +80,12 @@ public class ClientProxy extends CommonProxy {
     /**the skin to use for the rail*/
     public static int railSkin = 2;
 
-    public static KeyBinding raildevtoolUp;
-    public static KeyBinding raildevtoolDown;
-    public static KeyBinding raildevtoolLeft;
-    public static KeyBinding raildevtoolRight;
-    public static KeyBinding raildevtoolRaise;
-    public static KeyBinding raildevtoolLower;
+    public static KeyBinding raildevtoolUp, raildevtoolDown,
+            raildevtoolLeft, raildevtoolRight, raildevtoolRaise, raildevtoolLower;
 
-    public static KeyBinding raildevtoolNextPoint;
-    public static KeyBinding raildevtoolLastPoint;
+    public static KeyBinding raildevtoolNextPoint, raildevtoolLastPoint;
+
+    public static KeyBinding raildevtoolQuality;
 
 
     private static Configuration wailaConfig=null;
@@ -208,6 +205,7 @@ public class ClientProxy extends CommonProxy {
         //player scaler
         RenderingRegistry.registerEntityRenderingHandler(EntityPlayer.class, new RenderScaledPlayer());
 
+        //Minecraft.getMinecraft().render
 
 
         //keybinds
@@ -225,6 +223,8 @@ public class ClientProxy extends CommonProxy {
             raildevtoolNextPoint = new KeyBinding("Next Point", Keyboard.KEY_ADD, "Trains in Motion Dev");
             raildevtoolLastPoint = new KeyBinding("Previous Point", Keyboard.KEY_SUBTRACT, "Trains in Motion Dev");
 
+            raildevtoolQuality = new KeyBinding("Track Model Quality", Keyboard.KEY_DIVIDE, "Trains in Motion Dev");
+
 
             ClientRegistry.registerKeyBinding(raildevtoolUp);
             ClientRegistry.registerKeyBinding(raildevtoolDown);
@@ -234,6 +234,7 @@ public class ClientProxy extends CommonProxy {
             ClientRegistry.registerKeyBinding(raildevtoolLower);
             ClientRegistry.registerKeyBinding(raildevtoolNextPoint);
             ClientRegistry.registerKeyBinding(raildevtoolLastPoint);
+            ClientRegistry.registerKeyBinding(raildevtoolQuality);
         }
 
 
