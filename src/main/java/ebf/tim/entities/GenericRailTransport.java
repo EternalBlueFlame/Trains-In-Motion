@@ -963,7 +963,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
     /**
      * iterates all the links to check if the stock has a train
-     * todo: use this, ever
      */
     public void updateConsist(){
         List<GenericRailTransport> transports = new ArrayList<>();
@@ -1132,8 +1131,26 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**defines the ID of the owner*/
     public String getOwnerName(){return ownerName.equals("")?this.dataWatcher.getWatchableObjectString(23):ownerName;}
 
-    public skin getTexture(EntityPlayer viewer, boolean isPaintBucket){
-        return getSkinList(viewer, isPaintBucket).get(this.dataWatcher.getWatchableObjectString(24));
+    public skin getTexture(EntityPlayer viewer){
+        return getSkinList(viewer, false).get(this.dataWatcher.getWatchableObjectString(24));
+    }
+
+    /**
+     * NOTE: lists are hash maps, their index order is different every time an entry is added or removed.
+     * todo: reliability improvement: make a version of this that builds a list of the keys
+     *     and then use the indexes of the keys to iterate, keys could also be cached on init of the skins
+     *     or we could move to some form of ordered map, although that would damage normal render performance.
+     * @param viewer
+     * @param isPaintBucket
+     * @param skinIndex
+     * @return
+     */
+    public skin getTextureByIndex(EntityPlayer viewer, boolean isPaintBucket, int skinIndex){
+        Iterator<skin> s =getSkinList(viewer, isPaintBucket).values().iterator();
+        for(int i=0;i<skinIndex;i++){
+            s.next();
+        }
+        return s.next();
     }
 
     /**

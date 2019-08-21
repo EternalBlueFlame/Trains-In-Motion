@@ -2,6 +2,7 @@ package ebf.tim.items;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
@@ -27,6 +28,8 @@ public class ItemTransport extends Item {
     private final List<String> subtext = new ArrayList<>();
     /**the class for the entity*/
     private final Class<? extends GenericRailTransport> transport;
+    @SideOnly(Side.CLIENT)
+    GenericRailTransport entity;
     /**the main constructor.
      * @param cart the class for the entity*/
     public ItemTransport(GenericRailTransport cart, String MODID, CreativeTabs tabs) {
@@ -68,6 +71,9 @@ public class ItemTransport extends Item {
         transport=cart.getClass();
         setTextureName(MODID+":transports/"+getUnlocalizedName());
         setCreativeTab(tabs);
+        if(TrainsInMotion.proxy.isClient()){
+            entity=cart;
+        }
     }
 
     /**

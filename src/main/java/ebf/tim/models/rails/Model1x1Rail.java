@@ -65,6 +65,11 @@ public class Model1x1Rail {
         Tessellator.getInstance().addVertexWithUV(vert[0]+p.xCoord,vert[1]+p.yCoord, vert[2]+p.zCoord,U,V);
     }
 
+    public static void addTieVertexWithOffsetAndUV(Vec5f p, float width, float height, float depth, float U, float V){
+        rotateVertexPoint(depth,height,width,p.u,p.v);
+        Tessellator.getInstance().addVertexWithUV(vert[0]+p.xCoord,vert[1]+p.yCoord, vert[2]+p.zCoord,U,V);
+    }
+
 
     //todo use the return value to manage displaylists
     public static void Model3DRail(World world, int xPos, int yPos, int zPos, RailShapeCore shape, @Nullable ItemStack ballast, @Nullable ItemStack ties, @Nullable ItemStack rail, @Nullable int[] colors){
@@ -122,9 +127,9 @@ public class Model1x1Rail {
         //GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
         if(ties!=null && ties.getItem()!=null) {
-            if(ClientProxy.railLoD==0){
+            if(ClientProxy.railSkin==0){
                 ModelTies.modelPotatoTies(shape, maxWidth, minWidth, ties);
-            } else if (ClientProxy.railLoD<3){
+            } else if (ClientProxy.railSkin<3){
                 ModelTies.model3DTies(shape, maxWidth, minWidth, ties);
             } else {
                 //todo: HD ties
@@ -133,7 +138,7 @@ public class Model1x1Rail {
 
         }
         if(ballast!=null && ballast.getItem()!=null) {
-            if(ClientProxy.railLoD==0){
+            if(ClientProxy.railSkin==0){
                 ModelBallast.modelPotatoBallast(shape, maxWidth, minWidth, ballast);
             } else {
                 ModelBallast.model3DBallast(shape, maxWidth, minWidth, ballast);

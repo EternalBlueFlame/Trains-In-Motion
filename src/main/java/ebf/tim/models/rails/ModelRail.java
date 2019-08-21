@@ -13,21 +13,41 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class ModelRail {
 
+    public static void drawFace(List<Vec5f> path, float gaugeOffset, float x1, float x2, float y1, float y2){
+        Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
+        for (Vec5f p : path) {
+            addVertexWithOffset(p, x1 + gaugeOffset, y1, 0);
+            addVertexWithOffset(p, x2 + gaugeOffset, y2, 0);
+        }
+        Tessellator.getInstance().arrayEnabledDraw();
+    }
+
+    private static void centerShading(float offset, int[] color, int dark, boolean pass0){
+        if(offset>0 ^ !pass0) {
+            GL11.glColor4f(
+                    (color[0]) * 0.00392156863f,
+                    (color[1]) * 0.00392156863f,
+                    (color[2]) * 0.00392156863f, 1);
+        } else {
+            GL11.glColor4f(
+                    (color[0]-dark)* 0.00392156863f,
+                    (color[1]-dark)* 0.00392156863f,
+                    (color[2]-dark)* 0.00392156863f, 1);
+        }
+    }
+
     public static void modelPotatoRail(RailShapeCore shape, int[] color){
         GL11.glPushMatrix();
         GL11.glDisable(GL_TEXTURE_2D);
         GL11.glTranslated(0, 0.15, 0);
         for(float rail : shape.getGaugePositions()) {
-            GL11.glColor4f(
-                    (color[0])* 0.00392156863f,
-                    (color[1])* 0.00392156863f,
-                    (color[2])* 0.00392156863f, 1);
-            drawFace(shape.activePath, rail, 0.0625f,0,0,0);
-            GL11.glColor4f(
-                    (color[0]-30)* 0.00392156863f,
-                    (color[1]-30)* 0.00392156863f,
-                    (color[2]-30)* 0.00392156863f, 1);
-            drawFace(shape.activePath, rail, 0,-0.0625f,0,0);
+
+            centerShading(rail,color,30,true);
+            drawFace(shape.activePath, rail, 0.0625f, 0,0,0);
+
+            centerShading(rail,color,30,false);
+            drawFace(shape.activePath, rail, 0, -0.0625f,0,0);
+
         }
         GL11.glPopMatrix();
         GL11.glEnable(GL_TEXTURE_2D);
@@ -40,27 +60,16 @@ public class ModelRail {
 
         for (float rail : shape.getGaugePositions()) {
 
-            GL11.glColor4f(
-                    (color[0])* 0.00392156863f,
-                    (color[1])* 0.00392156863f,
-                    (color[2])* 0.00392156863f, 1);
+            centerShading(rail,color,30,true);
             drawFace(shape.activePath, rail, 0.0625f, 0,0,0);
 
-            GL11.glColor4f(
-                    (color[0]-30)* 0.00392156863f,
-                    (color[1]-30)* 0.00392156863f,
-                    (color[2]-30)* 0.00392156863f, 1);
+            centerShading(rail,color,30,false);
             drawFace(shape.activePath, rail, 0, -0.0625f,0,0);
 
-            GL11.glColor4f(
-                    (color[0]-20)* 0.00392156863f,
-                    (color[1]-20)* 0.00392156863f,
-                    (color[2]-20)* 0.00392156863f, 1);
+            centerShading(rail,color,20,true);
             drawFace(shape.activePath, rail, 0.0625f, 0.0625f,-0.085f,0);
-            GL11.glColor4f(
-                    (color[0])* 0.00392156863f,
-                    (color[1])* 0.00392156863f,
-                    (color[2])* 0.00392156863f, 1);
+
+            centerShading(rail,color,20,false);
             drawFace(shape.activePath, rail, -0.0625f, -0.0625f,0, -0.085f);
 
 
@@ -86,16 +95,6 @@ public class ModelRail {
             }
         }
         GL11.glPopMatrix();
-    }
-
-
-    public static void drawFace(List<Vec5f> path, float gaugeOffset, float x1, float x2, float y1, float y2){
-        Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
-        for (Vec5f p : path) {
-            addVertexWithOffset(p, x1 + gaugeOffset, y1, 0);
-            addVertexWithOffset(p, x2 + gaugeOffset, y2, 0);
-        }
-        Tessellator.getInstance().arrayEnabledDraw();
     }
 
 

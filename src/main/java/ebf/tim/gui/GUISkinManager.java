@@ -96,6 +96,7 @@ public class GUISkinManager extends GuiScreen {
                 (int)(offsetFromScreenLeft - fontRendererObj.getStringWidth(description[0])*0.5f),
                 (int)((height*0.1f)*7), 0, false);
 
+        renderTransport(entity,page);
 
     }
 
@@ -140,7 +141,7 @@ public class GUISkinManager extends GuiScreen {
         return true;
     }
 
-    void onRender(GenericRailTransport entity, int i) {
+    void renderTransport(GenericRailTransport entity, int i) {
 
         //get skin from page
         ebf.tim.api.skin s = entity.getSkinList(Minecraft.getMinecraft().thePlayer, true)

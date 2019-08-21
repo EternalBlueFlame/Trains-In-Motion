@@ -55,7 +55,6 @@ public class RailShapeCore {
             ((RailTileEntity) dimension.getTileEntity(x, y, z)).data = data;
         }
 
-        //CommonProxy.getRailMap(dimension).add(x,y,z, data, dimension);
     }
 
 

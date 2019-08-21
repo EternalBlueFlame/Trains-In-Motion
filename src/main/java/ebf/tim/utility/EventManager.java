@@ -272,7 +272,7 @@ public class EventManager {
         return new String[]{
                 StatCollector.translateToLocal(t.getInventoryName().replace(".storage","")+".name"),
                 "owner: " + t.getOwnerName(),
-                "skin: " + t.getTexture(p,false).name
+                "skin: " + t.getTexture(p).name
         };
     }
 

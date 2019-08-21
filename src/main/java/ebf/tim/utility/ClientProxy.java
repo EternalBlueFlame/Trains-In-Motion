@@ -67,16 +67,16 @@ public class ClientProxy extends CommonProxy {
     public static boolean ForceTextureBinding = false;
     /**defines if the inventory graphics should be loaded from a TiM URI or if vanilla graphics should be used*/
     public static boolean useVanillaInventoryTextures = true;
-
+    /**enables the fake waila tooltip*/
     public static boolean enableTransportTooltip=true;
+    /**enables 3d items for trains and stock*/
+    public static boolean hdTransportItems = true;
     /**the keybind for the lamp toggle*/
     public static KeyBinding KeyLamp = new KeyBinding("Lamp Toggle", Keyboard.KEY_L, "Trains in Motion");
     /**the keybind for the horn/whistle*/
     public static KeyBinding KeyHorn = new KeyBinding("Use Horn/Whistle", Keyboard.KEY_H, "Trains in Motion");
     /**the keybind for opening the inventory*/
     public static KeyBinding KeyInventory = new KeyBinding("Open Train/rollingstock GUI",  Keyboard.KEY_I, "Trains in Motion");
-    /**the value for rail detail*/
-    public static int railLoD = 8;
     /**the skin to use for the rail*/
     public static int railSkin = 2;
 
@@ -130,10 +130,6 @@ public class ClientProxy extends CommonProxy {
     @Override
     public boolean isClient(){return true;}
 
-    public int getRailLoD(){
-        return 3;
-    }
-
     /**
      * <h2>Load config</h2>
      * this loads the config values that will only effect client.
@@ -155,13 +151,13 @@ public class ClientProxy extends CommonProxy {
         useVanillaInventoryTextures = config.getBoolean("UseVanillaInventoryTextures","Quality (Client only)", true,
                 "Overrides the render of train and rollingstock inventories to use textures from vanilla (including resourcepacks), so you can use textures in a texturepack specifically for this mod");
 
-        useVanillaInventoryTextures = config.getBoolean("UseVanillaInventoryTextures","Quality (Client only)", true,
-                "Overrides the render of train and rollingstock inventories to use textures from vanilla (including resourcepacks), so you can use textures in a texturepack specifically for this mod");
+        hdTransportItems = config.getBoolean("3dTransportItems","Quality (Client only)", true,
+                "Overrides the render of train and rollingstock items to use their full model. NOTICE: after the pre-alpha stages this should default to false.");
 
         ForceTextureBinding = config.getBoolean("ForceTextureBinding","Quality (Client only)", false,
                 "Forces textures to be bound, slows performance on some machines, speeds it up on others, and fixes a rare bug where the the texture does not get bound. So... This REALLY depends on your machine, see what works best for you.");
 
-        railLoD = config.getInt("railSkin","Quality (Client only)", 2,0,3,
+        railSkin = config.getInt("railSkin","Quality (Client only)", 2,0,3,
                 "Defines the skin to use. 0: flat 2D rail similar to vanilla. 1: basic 3D rail similar to an extruded 2D. 2: Normal 3D rail. 3: High detail 3D rail");
 
         enableTransportTooltip = config.getBoolean("EnableTooltip","Quality (Client only)", true,
@@ -288,7 +284,7 @@ public class ClientProxy extends CommonProxy {
         }
     }
 
-    private static final RenderEntity transportRenderer = new RenderEntity();
+    public static final RenderEntity transportRenderer = new RenderEntity();
 
     /**
      * <h3>null render</h3>

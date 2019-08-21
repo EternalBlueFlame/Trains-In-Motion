@@ -78,9 +78,9 @@ public class RailVanillaShapes extends RailShapeCore{
         RailSimpleShape shape = new RailSimpleShape();
         shape.setSegments(4);
         shape.addPoints(normalizeVectors(new float[][]{
-                {-0.5f, 0, 0},
+                {0.5f, 0, 0},
                 {0f, 0, 0},
-                {0.5f, 0, 0}
+                {-0.5f, 0, 0}
         }));
 
         //intersections

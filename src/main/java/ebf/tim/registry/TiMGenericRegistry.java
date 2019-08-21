@@ -2,14 +2,14 @@ package ebf.tim.registry;
 
 
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.items.CustomItemModel;
 import ebf.tim.items.ItemCraftGuide;
-import ebf.tim.utility.CommonProxy;
-import ebf.tim.utility.DebugUtil;
-import ebf.tim.utility.Recipe;
-import ebf.tim.utility.RecipeManager;
+import ebf.tim.utility.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.MapColor;
@@ -135,6 +135,9 @@ public class TiMGenericRegistry {
         }
     }
 
+    @SideOnly(Side.CLIENT)
+    private static CustomItemModel trainmodel = new CustomItemModel();
+
     private static List<String>usedNames = new ArrayList<>();
     private static int registryPosition =17;
 
@@ -157,6 +160,9 @@ public class TiMGenericRegistry {
             } else {
                 CommonProxy.recipesInMods.put(MODID, new ArrayList<Recipe>());
                 CommonProxy.recipesInMods.get(MODID).add(getRecipe(registry.getRecipie(), registry.getCartItem()));
+            }
+            if(isClient && ClientProxy.hdTransportItems){
+                MinecraftForgeClient.registerItemRenderer(registry.getCartItem().getItem(), trainmodel);
             }
             registry.registerSkins();
             if(registry.getRecipie()!=null){
