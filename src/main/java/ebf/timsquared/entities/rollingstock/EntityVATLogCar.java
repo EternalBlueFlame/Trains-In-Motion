@@ -184,7 +184,7 @@ public class EntityVATLogCar extends RollingstockBase {
 
     @Override
     public float[] getHitboxSize() {
-        return new float[]{3.5f,1.5f,1.2f};
+        return new float[]{4f,1.5f,1.2f};
     }
 
     @Override

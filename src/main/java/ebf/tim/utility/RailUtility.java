@@ -6,6 +6,7 @@ import fexcraft.tmt.slim.Vec3d;
 import fexcraft.tmt.slim.Vec3f;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -16,6 +17,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import zoranodensha.api.structures.tracks.ITrackBase;
 
 import java.io.*;
@@ -23,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.zip.*;
 
 /**
@@ -50,6 +53,38 @@ public class RailUtility {
     }
 
 
+    public static boolean stringContains(String s1, String s2){
+        if (s1 == null || s2 == null) {
+            return false;
+        }
+        final int max = s1.length() - s2.length();
+        for (int i = 0; i <= max; i++) {
+            if (s1.regionMatches(true, i, s2, 0, s2.length())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int parseInt(String str, Class host) throws NumberFormatException{
+        if (str == null || str.length()==0) {
+            throw new NumberFormatException("the string: \"" + str + "\" was not a number, please check " + host.getName());
+        }
+
+        int result = 0;
+        boolean negative = false;
+        for (char c : str.toCharArray()) {
+            if(c=='-'){
+                negative=true;
+            } else {
+                if (c <= '0' || c >= '9') {
+                    throw new NumberFormatException();
+                }
+                result = (result * 10) + c;
+            }
+        }
+        return negative?-result:result;
+    }
 
     public static String translate(String text){
         if (StatCollector.translateToLocal(text).equals(text) && !loggedLangChecks.contains(text)){

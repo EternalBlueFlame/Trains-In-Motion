@@ -90,13 +90,13 @@ public class StaticModelAnimator extends AnimationBase {
      */
     public boolean isPart(ModelRendererTurbo part){
         if(part==null || part.boxName==null){return false;}
-        return part.boxName.contains(tagAdvancedPiston) ||
-                part.boxName.contains(tagSimplePiston) ||
-                part.boxName.contains(tagSimpleRotate) ||
-                part.boxName.contains(tagWheel) ||
-                part.boxName.contains("smoke") ||
-                part.boxName.contains("door") ||
-                part.boxName.contains("lamp");
+        return RailUtility.stringContains(part.boxName,tagAdvancedPiston) ||
+                RailUtility.stringContains(part.boxName,tagSimplePiston) ||
+                RailUtility.stringContains(part.boxName,tagSimpleRotate) ||
+                RailUtility.stringContains(part.boxName,tagWheel) ||
+                RailUtility.stringContains(part.boxName,"smoke") ||
+                RailUtility.stringContains(part.boxName,"door") ||
+                RailUtility.stringContains(part.boxName,"lamp");
     }
 
 

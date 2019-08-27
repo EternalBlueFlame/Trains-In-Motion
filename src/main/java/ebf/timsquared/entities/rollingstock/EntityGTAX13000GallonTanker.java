@@ -88,7 +88,7 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
 
     @Override
     public float[] getHitboxSize() {
-        return new float[]{4,1.5f,1.2f};
+        return new float[]{6,1.5f,1.2f};
     }
 
     @Override

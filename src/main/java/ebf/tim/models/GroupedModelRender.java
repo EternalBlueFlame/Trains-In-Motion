@@ -79,8 +79,8 @@ public class GroupedModelRender {
      */
     public GroupedModelRender add(ModelRendererTurbo boxToRender){
         boxRefrence.add(boxToRender);
-        isBlock = (boxToRender.boxName.contains(tagRenderBlockCargo) || boxToRender.boxName.contains(tagBlockScaleInventory));;
-        isScaled = (boxToRender.boxName.contains(tagScaleInventory) || boxToRender.boxName.contains(tagBlockScaleInventory));
+        isBlock = (RailUtility.stringContains(boxToRender.boxName,tagRenderBlockCargo) || RailUtility.stringContains(boxToRender.boxName,tagBlockScaleInventory));;
+        isScaled = (RailUtility.stringContains(boxToRender.boxName,tagScaleInventory) || RailUtility.stringContains(boxToRender.boxName,tagBlockScaleInventory));
         return this;
     }
 
@@ -90,8 +90,8 @@ public class GroupedModelRender {
      * @return if the box refrence can be added
      */
     public static boolean canAdd(ModelRendererTurbo modelReference){
-        return ClientProxy.EnableAnimations && (modelReference.boxName.contains(tagRenderModelCargo) || modelReference.boxName.contains(tagRenderBlockCargo) ||  modelReference.boxName.contains(tagScaleInventory)
-        ||  modelReference.boxName.contains(tagBlockScaleInventory));
+        return ClientProxy.EnableAnimations && (RailUtility.stringContains(modelReference.boxName,tagRenderModelCargo) || RailUtility.stringContains(modelReference.boxName,tagRenderBlockCargo) ||  RailUtility.stringContains(modelReference.boxName,tagScaleInventory)
+        ||  RailUtility.stringContains(modelReference.boxName,tagBlockScaleInventory));
     }
 
     /**
@@ -100,7 +100,7 @@ public class GroupedModelRender {
      * @return if the box is supposed to be scaled with the percentage of inventory used.
      */
     public static boolean isLivery(ModelRendererTurbo modelReference){
-        return (modelReference.boxName.contains(tagLivery));
+        return (RailUtility.stringContains(modelReference.boxName,tagLivery));
     }
 
     /**

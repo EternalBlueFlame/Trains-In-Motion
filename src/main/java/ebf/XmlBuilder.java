@@ -3,6 +3,7 @@ package ebf;
 import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ebf.tim.utility.DebugUtil;
+import ebf.tim.utility.RailUtility;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -232,12 +233,12 @@ public class XmlBuilder {
     }
 
     private int getType(String s){
-        return s.contains("xml")?0:
-                s.contains("string")?1:
-                        s.contains("int")?2:
-                                s.contains("bool")?3:
-                                        s.contains("float")?4:
-                                                s.contains("item")?11:
+        return RailUtility.stringContains(s, "xml")?0:
+                RailUtility.stringContains(s,"string")?1:
+                        RailUtility.stringContains(s,"int")?2:
+                                RailUtility.stringContains(s,"bool")?3:
+                                        RailUtility.stringContains(s,"float")?4:
+                                                RailUtility.stringContains(s,"item")?11:
                                                 -1;
     }
 

@@ -176,7 +176,9 @@ public class CommonProxy implements IGuiHandler {
 	RegisterItem(TrainsInMotion.proxy.isClient(),new ItemPaintBucket(),TrainsInMotion.MODID, "paintbucket", TrainsInMotion.creativeTab); 
         RegisterItem(TrainsInMotion.proxy.isClient(),new ItemKey(),TrainsInMotion.MODID,  "transportkey", TrainsInMotion.creativeTab);
         RegisterItem(TrainsInMotion.proxy.isClient(),new ItemTicket(),TrainsInMotion.MODID,  "transportticket", TrainsInMotion.creativeTab);
-        railItem = RegisterItem(TrainsInMotion.proxy.isClient(),new ItemRail(),TrainsInMotion.MODID,  "timrail", TrainsInMotion.creativeTab);
+        if(!isClient()) {
+            railItem = RegisterItem(TrainsInMotion.proxy.isClient(), new ItemRail(), TrainsInMotion.MODID, "timrail", TrainsInMotion.creativeTab);
+        }
 
         registerBlock(isClient(), railBlock, null, "block.timrail", null, getTESR());
 

@@ -91,30 +91,6 @@ public class ItemRail extends Item implements ITrackItem {
                     --stack.stackSize;
                 }
             }
-
-
-            /*
-            {//DEPRECIATED
-            if(world.getTileEntity(x,y,z) instanceof RailTileEntity && stack.hasTagCompound()){
-                if(stack.getTagCompound().getTag("rail")!=null) {
-                    ((RailTileEntity) world.getTileEntity(x,y,z)).rail = ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("rail"));
-                } else {
-                    ((RailTileEntity) world.getTileEntity(x,y,z)).rail = new ItemStack(Items.iron_ingot);
-                }
-                if(stack.getTagCompound().getTag("ties")!=null) {
-                    ((RailTileEntity) world.getTileEntity(x,y,z)).ties = ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties"));
-                }
-                if(stack.getTagCompound().getTag("ballast")!=null) {
-                    ((RailTileEntity) world.getTileEntity(x,y,z)).ballast = ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ballast"));
-                }
-                if(stack.getTagCompound().getTag("wires")!=null) {
-                    ((RailTileEntity) world.getTileEntity(x,y,z)).wires = ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("wires"));
-                }
-                world.getTileEntity(x,y,z).markDirty();
-            } else if(stack.hasTagCompound()) {
-                System.out.println("Trains In Motion ERROR, TILE ENTITY NOT SPAWNED FAST ENOUGH, that can happen?");
-            }
-            }*/
             return true;
         }
     }
@@ -167,12 +143,12 @@ public class ItemRail extends Item implements ITrackItem {
 
             //todo: for some reason i ill never understand, the lang file returns ties and ballast backwards.
             if(stack.getTagCompound().hasKey("ballast")) {
-                stringList.add(RailUtility.translate("menu.ties")+ " " + ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ballast")).getDisplayName());
+                stringList.add(RailUtility.translate("menu.ballast")+ " " + ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ballast")).getDisplayName());
             } else {
                 stringList.add(RailUtility.translate("menu.noties"));
             }
             if(stack.getTagCompound().hasKey("ties")) {
-                stringList.add(RailUtility.translate("menu.ballast")+ " " + ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties")).getDisplayName());
+                stringList.add(RailUtility.translate("menu.ties")+ " " + ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties")).getDisplayName());
             } else {
                 stringList.add(RailUtility.translate("menu.noballast"));
             }
@@ -221,17 +197,17 @@ public class ItemRail extends Item implements ITrackItem {
     }
 
     public static boolean isItemBanned(ItemStack s){
-        return s.getItem().delegate.name().contains("chisel") || Block.getBlockFromItem(s.getItem()).hasTileEntity(s.getItemDamage());
+        return RailUtility.stringContains(s.getItem().delegate.name(),"chisel") || Block.getBlockFromItem(s.getItem()).hasTileEntity(s.getItemDamage());
     }
 
     //adds custom versions of this to the creative menu, with the necessary NBT and metadata
     @SideOnly(Side.CLIENT)
     public void getSubItems(Item p_150895_1_, CreativeTabs p_150895_2_, List tabItems) {
         if(p_150895_1_ instanceof ItemRail) {
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), new ItemStack(Blocks.log), new ItemStack(Blocks.gravel),null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), new ItemStack(Blocks.planks), new ItemStack(Blocks.gravel), null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, new ItemStack(Blocks.gravel),null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, new ItemStack(Blocks.stone), null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), new ItemStack(Blocks.gravel), new ItemStack(Blocks.log),null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), new ItemStack(Blocks.gravel), new ItemStack(Blocks.planks), null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), new ItemStack(Blocks.gravel), null,null));
+            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot),  new ItemStack(Blocks.stone), null,null));
             tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, null, null));
         } else {
             tabItems.add(new ItemStack(p_150895_1_));

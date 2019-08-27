@@ -970,13 +970,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
         //check the front, then loop for every transport linked to it in opposite direction of this.
         GenericRailTransport link = frontLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
-        while(link!=null){
+        while(link!=null && !transports.contains(link)){
             transports.add(link);
             link = link.frontLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(link.frontLinkedID);
         }
         //do it again, but for the back one
         link= backLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(backLinkedID);
-        while(link!=null){
+        while(link!=null && !transports.contains(link)){
             transports.add(link);
             link = link.backLinkedID==null?null:(GenericRailTransport) worldObj.getEntityByID(link.backLinkedID);
         }
@@ -1473,7 +1473,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             if(getTankFilters(stack)!=null) {
                 boolean check=false;
                 for (String filter : getTankFilters(stack)) {
-                    if (filter.length()==0 || filter.contains(resource.getFluid().getName())){
+                    if (filter.length()==0 || RailUtility.stringContains(filter,resource.getFluid().getName())){
                         check=false;
                         break;
                     } else {

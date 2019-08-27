@@ -2,6 +2,7 @@ package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.Tessellator;
@@ -90,7 +91,7 @@ public class RenderEntity extends Render {
                     for (ModelRendererTurbo render : part.getParts()) {
                         if (render.boxName ==null){continue;}
                         //attempt to cache the parts for the main transport model
-                        if(render.boxName.toLowerCase().contains("hide") || render.boxName.toLowerCase().contains("cull")){
+                        if(RailUtility.stringContains(render.boxName,"hide") || RailUtility.stringContains(render.boxName,"cull")){
                             render.showModel = false;
                         }
                         if (StaticModelAnimator.checkAnimators(render)) {
@@ -110,7 +111,7 @@ public class RenderEntity extends Render {
                             }
                             render.showModel = false;
                         }
-                        if(ParticleFX.parseData(render.boxName)!=null){
+                        if(ParticleFX.parseData(render.boxName, entity.getClass())!=null){
                             entity.renderData.particles.addAll(ParticleFX.newParticleItterator(render.boxName,
                                     render.rotationPointX, render.rotationPointY, render.rotationPointZ,
                                     render.rotateAngleX,render.rotateAngleY,render.rotateAngleZ, entity));

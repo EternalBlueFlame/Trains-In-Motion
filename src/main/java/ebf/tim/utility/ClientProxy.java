@@ -5,6 +5,7 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.entities.EntityBogie;
@@ -17,6 +18,7 @@ import ebf.tim.items.ItemRail;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
 import ebf.tim.models.rails.ModelBallast;
+import ebf.tim.registry.TiMGenericRegistry;
 import fexcraft.fcl.common.lang.ArrayList;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -41,6 +43,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.File;
 import java.util.List;
+
+import static ebf.tim.registry.TiMGenericRegistry.RegisterItem;
 
 /**
  * <h1>client proxy</h1>
@@ -201,6 +205,9 @@ public class ClientProxy extends CommonProxy {
         //player scaler
         RenderingRegistry.registerEntityRenderingHandler(EntityPlayer.class, new RenderScaledPlayer());
 
+        //oveides the server registration of the rail item, so the client can have a complex model.
+        //   server can't load the CustomItemModel class due to it's reliance on GL imports.
+        railItem = RegisterItem(TrainsInMotion.proxy.isClient(),new ItemRail(),TrainsInMotion.MODID,  "timrail", null, TrainsInMotion.creativeTab, null, TiMGenericRegistry.itemModel);
         //Minecraft.getMinecraft().render
 
 

@@ -1,7 +1,6 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
@@ -87,7 +86,7 @@ public class ParticleFX {
 
 
     public static List<ParticleFX> newParticleItterator(String boxName, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, GenericRailTransport host){
-        int[] data = parseData(boxName);
+        int[] data = parseData(boxName, host.getClass());
         List<ParticleFX> list = new ArrayList<>();
         if(data[1]==0 || data[1]==1) {
             for (int i = 0; i < host.getParticleData(data[0])[0]*20; i++) {
@@ -108,24 +107,24 @@ public class ParticleFX {
     }
 
 
-    public static int[] parseData(String s){
-        if (s.contains("smoke")) {
-            return new int[]{Integer.parseInt(s.split(" ")[1]), 0};
-        } else if (s.contains("steam")) {
-            return new int[]{Integer.parseInt(s.split(" ")[1]), 1};
-        }  else if (s.toLowerCase().contains("wheel")){
+    public static int[] parseData(String s, Class host){
+        if (RailUtility.stringContains(s,"smoke")) {
+            return new int[]{RailUtility.parseInt(s.split(" ")[1], host), 0};
+        } else if (RailUtility.stringContains(s,"steam")) {
+            return new int[]{RailUtility.parseInt(s.split(" ")[1], host), 1};
+        }  else if (RailUtility.stringContains(s,"wheel")){
             return new int[]{0, 2};
-        } else if (s.toLowerCase().contains("lamp")){
-            if(s.toLowerCase().contains("cone")){
-                return new int[]{Integer.parseInt(s.split(" ")[2]), 3};
-            }else if(s.toLowerCase().contains("sphere")) {
-                return new int[]{Integer.parseInt(s.split(" ")[2]), 4};
-            }else if(s.toLowerCase().contains("mars")) {
-                return new int[]{Integer.parseInt(s.split(" ")[2]), 5};
-            }else if(s.toLowerCase().contains("siren")) {
-                return new int[]{Integer.parseInt(s.split(" ")[2]), 6};
-            }else if(s.toLowerCase().contains("glare")) {
-                return new int[]{Integer.parseInt(s.split(" ")[2]), 7};
+        } else if (RailUtility.stringContains(s,"lamp")){
+            if(RailUtility.stringContains(s,"cone")){
+                return new int[]{RailUtility.parseInt(s.split(" ")[2], host), 3};
+            }else if(RailUtility.stringContains(s,"sphere")) {
+                return new int[]{RailUtility.parseInt(s.split(" ")[2], host), 4};
+            }else if(RailUtility.stringContains(s,"mars")) {
+                return new int[]{RailUtility.parseInt(s.split(" ")[2], host), 5};
+            }else if(RailUtility.stringContains(s,"siren")) {
+                return new int[]{RailUtility.parseInt(s.split(" ")[2], host), 6};
+            }else if(RailUtility.stringContains(s,"glare")) {
+                return new int[]{RailUtility.parseInt(s.split(" ")[2], host), 7};
             }
         }
         return null;//this states the box is not a supported particle

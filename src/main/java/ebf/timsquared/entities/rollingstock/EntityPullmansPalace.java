@@ -179,7 +179,7 @@ public class EntityPullmansPalace extends RollingstockBase {
 
     @Override
     public float[] getHitboxSize() {
-        return new float[]{5,2,1.5f};
+        return new float[]{6.25f,2,1.5f};
     }
 
     @Override

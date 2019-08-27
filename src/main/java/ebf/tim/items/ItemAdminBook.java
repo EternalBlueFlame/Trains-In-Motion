@@ -6,6 +6,7 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
+import ebf.tim.utility.RailUtility;
 import ebf.tim.utility.ServerLogger;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.item.EntityItem;
@@ -165,11 +166,11 @@ public class ItemAdminBook extends Item{
                                 sb.append(document.substring(document.indexOf("<pos_y>") + 7, document.indexOf("</pos_y>")));
                                 sb.append("- Z:");
                                 sb.append(document.substring(document.indexOf("<pos_z>") + 7, document.indexOf("</pos_z>")));
-                                if (document.contains("<fuel>")) {
+                                if (RailUtility.stringContains(document, "<fuel>")) {
                                     sb.append(",Fuel amount: ");
                                     sb.append(document.substring(document.indexOf("<fuel>") + 6, document.indexOf("</fuel>")));
                                 }
-                                if (document.contains("<inventory>")) {
+                                if (RailUtility.stringContains(document,"<inventory>")) {
                                     sb.append(",");
                                     sb.append(document.substring(document.indexOf("<inventory>"), document.indexOf("</inventory>") + 12));
                                 }

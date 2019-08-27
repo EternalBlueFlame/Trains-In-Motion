@@ -136,7 +136,7 @@ public class TiMGenericRegistry {
     }
 
     @SideOnly(Side.CLIENT)
-    private static CustomItemModel trainmodel = new CustomItemModel();
+    public static CustomItemModel itemModel = new CustomItemModel();
 
     private static List<String>usedNames = new ArrayList<>();
     private static int registryPosition =17;
@@ -162,7 +162,7 @@ public class TiMGenericRegistry {
                 CommonProxy.recipesInMods.get(MODID).add(getRecipe(registry.getRecipie(), registry.getCartItem()));
             }
             if(isClient && ClientProxy.hdTransportItems){
-                MinecraftForgeClient.registerItemRenderer(registry.getCartItem().getItem(), trainmodel);
+                MinecraftForgeClient.registerItemRenderer(registry.getCartItem().getItem(), itemModel);
             }
             registry.registerSkins();
             if(registry.getRecipie()!=null){
