@@ -77,8 +77,8 @@ public class RailUtility {
             if(c=='-'){
                 negative=true;
             } else {
-                if (c <= '0' || c >= '9') {
-                    throw new NumberFormatException();
+                if (c < '0' || c > '9') {
+                    throw new NumberFormatException("the string: \"" + str + "\" was not a number, please check " + host.getName());
                 }
                 result = (result * 10) + c;
             }

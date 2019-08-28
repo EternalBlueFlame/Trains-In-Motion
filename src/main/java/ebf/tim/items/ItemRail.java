@@ -145,12 +145,12 @@ public class ItemRail extends Item implements ITrackItem {
             if(stack.getTagCompound().hasKey("ballast")) {
                 stringList.add(RailUtility.translate("menu.ballast")+ " " + ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ballast")).getDisplayName());
             } else {
-                stringList.add(RailUtility.translate("menu.noties"));
+                stringList.add(RailUtility.translate("menu.noballast"));
             }
             if(stack.getTagCompound().hasKey("ties")) {
                 stringList.add(RailUtility.translate("menu.ties")+ " " + ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties")).getDisplayName());
             } else {
-                stringList.add(RailUtility.translate("menu.noballast"));
+                stringList.add(RailUtility.translate("menu.ties"));
             }
 
             if(stack.getTagCompound().hasKey("wires")) {
