@@ -8,6 +8,7 @@ import fexcraft.tmt.slim.ModelBase;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -38,7 +39,7 @@ public abstract class RollingstockBase extends EntityRollingStockCore{
      *
      * @see TrainsInMotion.transportTypes
      */
-    public abstract TrainsInMotion.transportTypes getType();
+    public abstract List<TrainsInMotion.transportTypes> getTypes();
 
     /**
      * returns the rider offsets, each of the outer arrays represents a new rider seat,

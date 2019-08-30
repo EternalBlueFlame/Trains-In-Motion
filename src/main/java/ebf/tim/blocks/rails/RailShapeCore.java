@@ -2,16 +2,14 @@ package ebf.tim.blocks.rails;
 
 import ebf.XmlBuilder;
 import ebf.tim.blocks.RailTileEntity;
-import ebf.tim.utility.*;
+import ebf.tim.utility.RailUtility;
+import ebf.tim.utility.Vec5f;
 import fexcraft.tmt.slim.Vec3f;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-
-import static ebf.tim.utility.RailUtility.radianF;
 
 public class RailShapeCore {
 

@@ -2,7 +2,6 @@ package ebf.tim.gui;
 
 import ebf.tim.models.ModelBook;
 import ebf.tim.utility.CommonProxy;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Recipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;

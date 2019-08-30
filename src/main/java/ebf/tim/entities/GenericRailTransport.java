@@ -1,5 +1,6 @@
 package ebf.tim.entities;
 
+import cofh.api.energy.IEnergyContainerItem;
 import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
@@ -21,14 +22,13 @@ import fexcraft.tmt.slim.ModelBase;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -46,6 +46,7 @@ import net.minecraftforge.fluids.*;
 import javax.annotation.Nullable;
 import java.util.*;
 
+import static ebf.tim.TrainsInMotion.transportTypes.*;
 import static ebf.tim.utility.RailUtility.rotatePointF;
 
 /**
@@ -895,7 +896,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                     continue;
                 }
                 if (e instanceof EntityItem) {
-                    if (getType().isHopper() && e.posY > this.posY + 0.5f &&
+                    if (getTypes().contains(TrainsInMotion.transportTypes.HOPPER) && this.posY > this.posY + 0.5f &&
                             isItemValidForSlot(0, ((EntityItem) e).getEntityItem())) {
                         addItem(((EntityItem) e).getEntityItem());
                         worldObj.removeEntity(e);
@@ -1254,6 +1255,13 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         return new ItemStack(getItem(),1);
     }
 
+
+    /**returns the type of transport, this is planned to be removed in favor of a few more methods.
+     * for a list of options:
+     * @see TrainsInMotion.transportTypes
+     * may not return null.*/
+    public List<TrainsInMotion.transportTypes> getTypes(){return TrainsInMotion.transportTypes.SLUG.singleton();}
+
     /**
      * <h2>is Locked</h2>
      * returns if the entity is locked, and if it is, if the player is the owner.
@@ -1274,23 +1282,25 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public boolean isItemValidForSlot(int slot, ItemStack itemStack) {
         if (itemStack == null){return true;}
         //compensate for specific rollingstock
-        switch (getType()) {
-            case LOGCAR: {
-                return RailUtility.isLog(itemStack) || RailUtility.isPlank(itemStack);
+        for(TrainsInMotion.transportTypes type : getTypes()){
+            if(type==LOGCAR && (RailUtility.isLog(itemStack) || RailUtility.isPlank(itemStack))){
+                return true;
             }
-            case COALHOPPER: {
-                return RailUtility.isCoal(itemStack);
+            if (type==COALHOPPER && RailUtility.isCoal(itemStack)){
+                return true;
             }
-            case STEAM: {
+            if (type==STEAM){
                 if (slot == 36) {
                     return TileEntityFurnace.getItemBurnTime(itemStack) > 0;
                 } else if (slot ==37) {
                     return itemStack.getItem() instanceof ItemBucket || FuelHandler.isUseableFluid(itemStack, this) != null;
-                } else {
-                    return true;
                 }
             }
-            case ELECTRIC: case DIESEL: case B_UNIT: case TANKER:{return slot==0 && FuelHandler.isUseableFluid(itemStack, this) != null;}
+            if (type==ELECTRIC && slot==36){
+                return itemStack.getItem() == Items.redstone ||
+                        itemStack.getItem() == Item.getItemFromBlock(Blocks.redstone_block) ||
+                        itemStack.getItem() instanceof IEnergyContainerItem;
+            }
         }
         return true;
     }
@@ -1768,26 +1778,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * may return null.*/
     public String[] additionalItemText(){return null;}
 
-
-
-    /*
-    <h1>stuff i need to replace soon</h1>
-     */
-
-
-    /**returns the type of transport, this is planned to be removed in favor of a few more methods.
-     * for a list of options:
-     * @see TrainsInMotion.transportTypes
-     * may not return null.*/
-    @Deprecated
-    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.SLUG;}
-
     /**returns the item of this transport, this should be a static value in the transport's class.
      * example:
      * public static final Item thisItem = new ItemTransport(new EntityThis(null));
      * Item getItem(){return thisItem;}
      * may not return null*/
-    @Deprecated
     public Item getItem(){return null;}
 
 }

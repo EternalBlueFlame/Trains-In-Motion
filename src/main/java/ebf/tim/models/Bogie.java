@@ -2,7 +2,6 @@ package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.RailUtility;
-import fexcraft.fvtm.PartModel;
 import fexcraft.tmt.slim.ModelBase;
 
 import javax.annotation.Nullable;

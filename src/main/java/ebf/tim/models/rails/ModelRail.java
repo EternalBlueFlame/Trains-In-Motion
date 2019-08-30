@@ -1,7 +1,6 @@
 package ebf.tim.models.rails;
 
 import ebf.tim.blocks.rails.RailShapeCore;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Vec5f;
 import fexcraft.tmt.slim.Tessellator;
 import org.lwjgl.opengl.GL11;

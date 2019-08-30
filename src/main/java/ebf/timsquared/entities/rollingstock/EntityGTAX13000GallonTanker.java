@@ -15,6 +15,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
+import java.util.List;
 import java.util.UUID;
 
 import static ebf.tim.utility.RailUtility.DefineStack;
@@ -82,7 +83,7 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
     @Override
     public int getInventoryRows(){return 0;}
     @Override
-    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.TANKER;}
+    public List<TrainsInMotion.transportTypes> getTypes(){return TrainsInMotion.transportTypes.TANKER.singleton();}
     @Override
     public float[][] getRiderOffsets(){return null;}
 

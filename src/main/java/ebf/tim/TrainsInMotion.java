@@ -27,6 +27,9 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
 
+import java.util.Collections;
+import java.util.List;
+
 
 /**
  * <h1>Main class</h1>
@@ -76,7 +79,6 @@ public class TrainsInMotion {
      */
 
      /**define the transport types*/
-     @Deprecated //obsolete in favor of interfaces or type classes
     public enum transportTypes {
         STEAM,DIESEL,HYDROGEN_DIESEL,ELECTRIC,NUCLEAR_STEAM,NUCLEAR_ELECTRIC, //trains
         PASSENGER, FREIGHT, HOPPER, TANKER, WORKCAR, SLUG, B_UNIT, //generic rollingstock
@@ -93,6 +95,7 @@ public class TrainsInMotion {
          public boolean isTanker(){
              return this == TANKER || this == LAVATANKER || this == OILCAR || this == FUELTANKER;
          }
+         public List<transportTypes> singleton(){return Collections.singletonList(this);}
     }
 
     /**

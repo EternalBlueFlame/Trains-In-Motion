@@ -229,7 +229,7 @@ public class GUITransport extends GUIContainerNoNEI {
                     }
                 });
             }
-            if (transport.getType() != TrainsInMotion.transportTypes.STEAM) {
+            if (!transport.getTypes().contains(TrainsInMotion.transportTypes.STEAM)) {
                 this.buttons.add(new GUIButton(guiLeft + 202, guiTop + 166, 18, 18, null, null){
 
                     @Override

@@ -2,15 +2,10 @@ package ebf.tim.blocks;
 
 import ebf.XmlBuilder;
 import ebf.tim.blocks.rails.RailShapeCore;
-import ebf.tim.blocks.rails.RailVanillaShapes;
 import ebf.tim.models.rails.Model1x1Rail;
-import ebf.tim.utility.CommonProxy;
-import ebf.tim.utility.DebugUtil;
-import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.block.Block;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -20,12 +15,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class RailTileEntity extends TileEntity {

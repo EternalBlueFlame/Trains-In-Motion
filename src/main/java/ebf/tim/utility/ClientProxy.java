@@ -19,8 +19,6 @@ import ebf.tim.models.RenderEntity;
 import ebf.tim.models.RenderScaledPlayer;
 import ebf.tim.models.rails.ModelBallast;
 import ebf.tim.registry.TiMGenericRegistry;
-import fexcraft.fcl.common.lang.ArrayList;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.entity.Render;
@@ -29,7 +27,6 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
@@ -37,12 +34,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.io.File;
-import java.util.List;
 
 import static ebf.tim.registry.TiMGenericRegistry.RegisterItem;
 

@@ -2,8 +2,6 @@ package ebf.tim.utility;
 
 import net.minecraft.item.ItemStack;
 
-import java.util.List;
-
 public class Recipe {
 
     private ItemStack[][] items = new ItemStack[10][];

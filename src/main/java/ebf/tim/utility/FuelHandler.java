@@ -3,6 +3,7 @@ package ebf.tim.utility;
 
 import cofh.api.energy.IEnergyContainerItem;
 import cofh.api.energy.IEnergyHandler;
+import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import mods.railcraft.api.electricity.IElectricGrid;
@@ -33,10 +34,7 @@ public class FuelHandler{
 	private float burnTimeMax =0;
 
 	public float maxHeat(GenericRailTransport transport){
-		switch (transport.getType()){
-			case STEAM:{return transport.getMaxFuel() * 750;}
-		}
-		return 0;
+		return transport.getMaxFuel() * 750;
 	}
 
 	/**
@@ -47,21 +45,19 @@ public class FuelHandler{
 	 */
 	@Deprecated
 	public static FluidStack isUseableFluid(ItemStack itemStack, GenericRailTransport transport){
-		switch (transport.getType()){
-			case ELECTRIC:{
-				if (itemStack.getItem() == Items.redstone){
-					return new FluidStack(FluidRegistry.WATER, 250);
-				} else if (itemStack.getItem() == Item.getItemFromBlock(Blocks.redstone_block)){
-					return new FluidStack(FluidRegistry.WATER,2250);
-				}else if (itemStack.getItem() instanceof IEnergyContainerItem){
-					return new FluidStack(FluidRegistry.WATER, ((IEnergyContainerItem) itemStack.getItem()).extractEnergy(itemStack, 250, false));
-				}
-				return null;
+
+		if(transport.getTypes().contains(TrainsInMotion.transportTypes.ELECTRIC)) {
+			if (itemStack.getItem() == Items.redstone) {
+				return new FluidStack(FluidRegistry.WATER, 250);
+			} else if (itemStack.getItem() == Item.getItemFromBlock(Blocks.redstone_block)) {
+				return new FluidStack(FluidRegistry.WATER, 2250);
+			} else if (itemStack.getItem() instanceof IEnergyContainerItem) {
+				return new FluidStack(FluidRegistry.WATER, ((IEnergyContainerItem) itemStack.getItem()).extractEnergy(itemStack, 250, false));
 			}
-			default:{
-				return FluidContainerRegistry.getFluidForFilledItem(itemStack);
-			}
+			return null;
 		}
+
+		return FluidContainerRegistry.getFluidForFilledItem(itemStack);
 	}
 
 	public FluidStack getFluidForSlot(GenericRailTransport train, int slot){

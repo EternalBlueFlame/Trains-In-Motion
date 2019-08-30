@@ -1,10 +1,7 @@
 package ebf.tim.blocks.rails;
 
-import ebf.tim.utility.DebugUtil;
-import fexcraft.tmt.slim.Vec3f;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

@@ -1,15 +1,10 @@
 package ebf.tim.items;
 
-import ebf.XmlBuilder;
-import ebf.tim.models.RenderEntity;
 import ebf.tim.models.rails.ModelRail;
 import ebf.tim.utility.ClientProxy;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Vec5f;
-import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.Tessellator;
 import fexcraft.tmt.slim.TextureManager;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.item.Item;
@@ -20,10 +15,10 @@ import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static ebf.tim.models.rails.Model1x1Rail.addVertexWithOffsetAndUV;
-import static net.minecraft.init.Blocks.rail;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class CustomItemModel implements IItemRenderer /*ICustomModelLoader*/ {
