@@ -109,6 +109,7 @@ public class Model1x1Rail {
                         e.getKey().getTagCompound() == rail.getTagCompound() &&
                         e.getKey().getItemDamage() == rail.getItemDamage()) {
                     colors = TextureManager.ingotColors.get(e.getKey());
+                    break;
                 }
             }
         }
@@ -125,6 +126,13 @@ public class Model1x1Rail {
         Tessellator.bindTexture(TextureMap.locationBlocksTexture);
         // clear the display buffer to the clear colour
         //GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+        if(ballast!=null && ballast.getItem()!=null) {
+            if(ClientProxy.railSkin==0){
+                ModelBallast.modelPotatoBallast(shape, maxWidth, minWidth, ballast);
+            } else {
+                ModelBallast.model3DBallast(shape, maxWidth, minWidth, ballast);
+            }
+        }
 
         if(ties!=null && ties.getItem()!=null) {
             if(ClientProxy.railSkin==0){
@@ -136,13 +144,6 @@ public class Model1x1Rail {
                 ModelTies.model3DTies(shape, maxWidth, minWidth, ties);
             }
 
-        }
-        if(ballast!=null && ballast.getItem()!=null) {
-            if(ClientProxy.railSkin==0){
-                ModelBallast.modelPotatoBallast(shape, maxWidth, minWidth, ballast);
-            } else {
-                ModelBallast.model3DBallast(shape, maxWidth, minWidth, ballast);
-            }
         }
 
         GL11.glEnable(GL11.GL_LIGHTING);

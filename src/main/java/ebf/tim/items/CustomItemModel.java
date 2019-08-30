@@ -1,6 +1,8 @@
 package ebf.tim.items;
 
+import ebf.XmlBuilder;
 import ebf.tim.models.RenderEntity;
+import ebf.tim.models.rails.ModelRail;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Vec5f;
@@ -21,6 +23,8 @@ import org.lwjgl.opengl.GL11;
 import java.util.*;
 
 import static ebf.tim.models.rails.Model1x1Rail.addVertexWithOffsetAndUV;
+import static net.minecraft.init.Blocks.rail;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class CustomItemModel implements IItemRenderer /*ICustomModelLoader*/ {
 
@@ -80,6 +84,12 @@ public class CustomItemModel implements IItemRenderer /*ICustomModelLoader*/ {
                     GL11.glTranslatef(0,-0.85f,0);
                     break;
                 }
+                default:{//item frame case
+                    GL11.glRotatef(90,0,1,0);
+                    GL11.glScalef(0.5f,0.5f,0.5f);
+                    GL11.glTranslatef(0,-0.5f,0);
+                }
+
             }
             ClientProxy.transportRenderer.doRender(((ItemTransport)item.getItem()).entity,0,0,0,0,0, true);
             GL11.glPopMatrix();
@@ -88,7 +98,7 @@ public class CustomItemModel implements IItemRenderer /*ICustomModelLoader*/ {
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glDisable(GL11.GL_LIGHTING);
-            GL11.glTranslated(0, 0.1, 0);
+            GL11.glTranslated(0, 0.05, 0);
             Tessellator.bindTexture(TextureMap.locationBlocksTexture);
 
             if(type==ItemRenderType.INVENTORY){
@@ -98,7 +108,6 @@ public class CustomItemModel implements IItemRenderer /*ICustomModelLoader*/ {
                 GL11.glScalef(1.4f,1f,1.2f);
             }
             if(item.getTagCompound().hasKey("ballast")) {
-                //todo: ties are ballast and ballast is ties what the fuck
                 IIcon iicon = TextureManager.bindBlockTextureFromSide(ForgeDirection.UP.ordinal(),
                         ItemStack.loadItemStackFromNBT(item.getTagCompound().getCompoundTag("ballast")));
 
@@ -116,7 +125,7 @@ public class CustomItemModel implements IItemRenderer /*ICustomModelLoader*/ {
                         ItemStack.loadItemStackFromNBT(item.getTagCompound().getCompoundTag("ties")));
 
                 GL11.glPushMatrix();
-                GL11.glTranslatef(-0.4f,0.01f,0);
+                GL11.glTranslatef(-0.45f,0.01f,0);
                 Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
                 addVertexWithOffsetAndUV(tieStart, 0.625f, 0, 0, iicon.getMinU(), iicon.getMinV());
                 addVertexWithOffsetAndUV(tieStart, -0.625f, 0, 0, iicon.getMinU(), iicon.getMaxV());
@@ -145,6 +154,55 @@ public class CustomItemModel implements IItemRenderer /*ICustomModelLoader*/ {
                 addVertexWithOffsetAndUV(tieEnd, -0.625f, 0, 0, iicon.getMaxU(), iicon.getMaxV());
                 Tessellator.getInstance().arrayEnabledDraw();
 
+                GL11.glPopMatrix();
+            }
+
+            if(item.getTagCompound().hasKey("rail")) {
+                int[] color = {255,255,255};
+                for (Map.Entry<ItemStack, int[]> e : TextureManager.ingotColors.entrySet()) {
+                    if (e.getKey().getItem() == ItemStack.loadItemStackFromNBT(item.getTagCompound().getCompoundTag("rail")).getItem() &&
+                            e.getKey().getTagCompound() == ItemStack.loadItemStackFromNBT(item.getTagCompound().getCompoundTag("rail")).getTagCompound() &&
+                            e.getKey().getItemDamage() == ItemStack.loadItemStackFromNBT(item.getTagCompound().getCompoundTag("rail")).getItemDamage()) {
+                        color = TextureManager.ingotColors.get(e.getKey());
+                        break;
+                    }
+                }
+
+                GL11.glPushMatrix();
+                GL11.glDisable(GL_TEXTURE_2D);
+                GL11.glTranslatef(0f,0.02f,-0.05f);
+                ModelRail.centerShading(-0.4f,color,30,true);
+                Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
+                addVertexWithOffsetAndUV(start, -0.3f, 0, 0, 0,0);
+                addVertexWithOffsetAndUV(start, -0.4f, 0, 0, 0,0);
+                addVertexWithOffsetAndUV(end, -0.3f, 0, 0, 0,0);
+                addVertexWithOffsetAndUV(end, -0.4f, 0, 0, 0, 0);
+                Tessellator.getInstance().arrayEnabledDraw();
+
+                ModelRail.centerShading(-0.4f,color,30,false);
+                Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
+                addVertexWithOffsetAndUV(start, -0.2f, 0, 0, 0,0);
+                addVertexWithOffsetAndUV(start, -0.3f, 0, 0, 0,0);
+                addVertexWithOffsetAndUV(end, -0.2f, 0, 0, 0,0);
+                addVertexWithOffsetAndUV(end, -0.3f, 0, 0, 0, 0);
+                Tessellator.getInstance().arrayEnabledDraw();
+
+                ModelRail.centerShading(0.4f,color,30,true);
+                Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
+                addVertexWithOffsetAndUV(start, 0.5f, 0, 0, 0,0);
+                addVertexWithOffsetAndUV(start, 0.4f, 0, 0, 0,0);
+                addVertexWithOffsetAndUV(end, 0.5f, 0, 0, 0,0);
+                addVertexWithOffsetAndUV(end, 0.4f, 0, 0, 0, 0);
+                Tessellator.getInstance().arrayEnabledDraw();
+
+                ModelRail.centerShading(0.4f,color,30,false);
+                Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
+                addVertexWithOffsetAndUV(start, 0.4f, 0, 0, 0,0);
+                addVertexWithOffsetAndUV(start, 0.3f, 0, 0, 0,0);
+                addVertexWithOffsetAndUV(end, 0.4f, 0, 0, 0,0);
+                addVertexWithOffsetAndUV(end, 0.3f, 0, 0, 0, 0);
+                Tessellator.getInstance().arrayEnabledDraw();
+                GL11.glEnable(GL_TEXTURE_2D);
                 GL11.glPopMatrix();
             }
 

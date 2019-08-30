@@ -155,7 +155,7 @@ public class TileEntitySlotManager extends Container{
                     break;
                 }
                 case 1: {
-                    putStackInSlot(3, railRecipe(), false);
+                    putStackInSlot(4, railRecipe(), false);
                     break;
                 }
             }
@@ -286,6 +286,10 @@ public class TileEntitySlotManager extends Container{
         public void onSlotChanged(){
             super.onSlotChanged();
             onCraftMatrixChanged(craftingTable);
+        }
+        @Override
+        public void putStack(ItemStack p_75215_1_) {
+            this.inventory.setInventorySlotContents(this.getSlotIndex(), p_75215_1_);
         }
     }
 

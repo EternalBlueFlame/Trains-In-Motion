@@ -21,6 +21,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.List;
 
@@ -150,7 +151,7 @@ public class ItemRail extends Item implements ITrackItem {
             if(stack.getTagCompound().hasKey("ties")) {
                 stringList.add(RailUtility.translate("menu.ties")+ " " + ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties")).getDisplayName());
             } else {
-                stringList.add(RailUtility.translate("menu.ties"));
+                stringList.add(RailUtility.translate("menu.noties"));
             }
 
             if(stack.getTagCompound().hasKey("wires")) {
@@ -204,11 +205,12 @@ public class ItemRail extends Item implements ITrackItem {
     @SideOnly(Side.CLIENT)
     public void getSubItems(Item p_150895_1_, CreativeTabs p_150895_2_, List tabItems) {
         if(p_150895_1_ instanceof ItemRail) {
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), new ItemStack(Blocks.gravel), new ItemStack(Blocks.log),null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), new ItemStack(Blocks.gravel), new ItemStack(Blocks.planks), null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), new ItemStack(Blocks.gravel), null,null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot),  new ItemStack(Blocks.stone), null,null));
-            tabItems.add(setStackData(new ItemStack(p_150895_1_), new ItemStack(Items.iron_ingot), null, null, null));
+            for(Item ingot : new Item[]{Items.iron_ingot, Items.gold_ingot}){
+                for(Block b : new Block[]{null, Blocks.gravel, Blocks.stone}){
+                    for(Block t : new Block[]{Blocks.log, Blocks.planks, Blocks.double_stone_slab, null})
+                    tabItems.add(setStackData(new ItemStack(p_150895_1_),new ItemStack(ingot), new ItemStack(b),new ItemStack(t), null));
+                }
+            }
         } else {
             tabItems.add(new ItemStack(p_150895_1_));
         }

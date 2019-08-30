@@ -22,7 +22,7 @@ public class ModelRail {
         Tessellator.getInstance().arrayEnabledDraw();
     }
 
-    private static void centerShading(float offset, int[] color, int dark, boolean pass0){
+    public static void centerShading(float offset, int[] color, int dark, boolean pass0){
         if(offset>0 ^ !pass0) {
             GL11.glColor4f(
                     (color[0]) * 0.00392156863f,
