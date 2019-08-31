@@ -13,6 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
+import java.util.List;
 import java.util.UUID;
 
 import static ebf.tim.utility.RailUtility.DefineStack;
@@ -170,7 +171,7 @@ public class EntityPullmansPalace extends RollingstockBase {
      * <h2>Type</h2>
      */
     @Override
-    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.PASSENGER;}
+    public List<TrainsInMotion.transportTypes> getTypes(){return TrainsInMotion.transportTypes.PASSENGER.singleton();}
     /**
      * <h2>Rider offsets</h2>
      */
