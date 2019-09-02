@@ -89,7 +89,7 @@ public class EntityVATLogCar extends RollingstockBase {
     }
 
     @Override
-    public String[] getTankFilters(int tankID) {
+    public String[][] getTankFilters() {
         return null;
     }
 

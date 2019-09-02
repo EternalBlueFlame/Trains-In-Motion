@@ -88,7 +88,7 @@ public class EntityUP3Bay100TonHopper extends RollingstockBase {
     }
 
     @Override
-    public String[] getTankFilters(int tankID) {
+    public String[][] getTankFilters() {
         return null;
     }
 

@@ -1480,9 +1480,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         if(getTankCapacity()==null){return resource.amount;}
         int leftoverDrain=resource.amount;
         for(int stack =0; stack<getTankCapacity().length;stack++) {
-            if(getTankFilters(stack)!=null) {
+            if(getTankFilters()!=null && getTankFilters()[stack]!=null) {
                 boolean check=false;
-                for (String filter : getTankFilters(stack)) {
+                for (String filter : getTankFilters()[stack]) {
                     if (filter.length()==0 || RailUtility.stringContains(filter,resource.getFluid().getName())){
                         check=false;
                         break;
@@ -1697,11 +1697,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * may return null*/
     public int[] getTankCapacity(){return null;}
 
-    /** defines the whitelist of fluid names for the tank defined by tankID
+    /** defines the whitelist of fluid names for fluid tanks in order.
+     * null will accept any fluid.
      * example:
-     * if(tankID==0){return new String[]{"water", "diesel"}} else { return null}*/
-    @Deprecated //replace with an array of string arrays, more similar to other methods
-    public String[] getTankFilters(int tankID){return null;}
+     * return new String[][]{{"water", "diesel"}, {"lava"}, null}*/
+    public String[][] getTankFilters(){return null;}
 
 
     /**this function allows individual trains and rollingstock to implement custom fuel consumption and management

@@ -62,7 +62,7 @@ public class ParticleFX {
         switch (particleType) {
             case 0:case 1:{//smoke, steam
                 motionX = (rand.nextInt(40) - 20) * 0.001f;
-                motionY = particleType==0f?0.15f:0.0005f;
+                motionY = particleType==0?0.15f:0.0005f;
                 motionZ = (rand.nextInt(40) - 20) * 0.001f;
 
                 this.boundingBox = AxisAlignedBB.getBoundingBox(pos[0] + transport.posX - 0.1, pos[1] + transport.posY - 0.1, pos[2] + transport.posZ - 0.1, pos[0] + transport.posX + 0.1, pos[1] + transport.posY + 0.1, pos[2] + transport.posZ + 0.1);

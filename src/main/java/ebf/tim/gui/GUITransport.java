@@ -431,8 +431,8 @@ public class GUITransport extends GUIContainerNoNEI {
                                     transport.getTankInfo(null)[i].fluid.amount+"mb/"+ transport.getTankInfo(null)[i].capacity+"mb", mouseX-guiLeft, mouseY-guiTop);
 
                 } else {
-                    if (transport.getTankFilters(i)!=null && transport.getTankFilters(i).length>0) {
-                        drawCreativeTabHoveringText(transport.getTankFilters(i)[0] + ", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX-guiLeft, mouseY-guiTop);
+                    if (transport.getTankFilters()!=null && transport.getTankFilters()[i]!=null && transport.getTankFilters()[i].length>0) {
+                        drawCreativeTabHoveringText(transport.getTankFilters()[i][0] + ", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX-guiLeft, mouseY-guiTop);
                     }else{
                         drawCreativeTabHoveringText(", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX-guiLeft, mouseY-guiTop);
 

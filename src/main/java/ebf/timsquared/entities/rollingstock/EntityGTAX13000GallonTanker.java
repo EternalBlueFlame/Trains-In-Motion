@@ -105,7 +105,7 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
     public int[] getTankCapacity(){return new int[]{13400};}
 
     @Override
-    public String[] getTankFilters(int tankID) {
+    public String[][] getTankFilters() {
         return null;
     }
 
