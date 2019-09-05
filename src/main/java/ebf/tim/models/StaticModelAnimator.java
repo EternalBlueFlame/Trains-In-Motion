@@ -57,10 +57,10 @@ public class StaticModelAnimator extends AnimationBase {
     //todo: door types - swing, swing up, slide sideways, slide vertical(stair covers), slide out (retractable stairs).
 
     public static String tagSmoke(int id){
-        return "smoke" + id;
+        return "smoke " + id;
     }
     public static String tagSteam(int id){
-        return "steam" + id;
+        return "steam " + id;
     }
 
     /**

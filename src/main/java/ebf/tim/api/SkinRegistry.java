@@ -56,6 +56,10 @@ public class SkinRegistry {
         addSkinRecolor(c,modid,textureURI,bogieTextureURIs,subBogieTextureURIs,null,name,description);
     }
 
+    public static void addSkinRecolor(Class c,String modid, String textureURI, @Nullable int[][] recolor, String skinName, String skinDescription){
+        addSkinRecolor(c.getName(),modid,textureURI,null,null,recolor,skinName,skinDescription);
+    }
+
     public static void addSkinRecolor(Class c,String modid, String textureURI, String[] bogieTextureURI, @Nullable int[][] recolor, String skinName, String skinDescription){
         addSkinRecolor(c.getName(),modid,textureURI,bogieTextureURI,null,recolor,skinName,skinDescription);
     }

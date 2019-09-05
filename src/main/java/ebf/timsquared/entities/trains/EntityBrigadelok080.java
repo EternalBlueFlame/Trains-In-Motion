@@ -85,6 +85,9 @@ public class EntityBrigadelok080 extends TrainBase {
     public void registerSkins(){
         SkinRegistry.addSkin(this.getClass(),TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png",
         "default", "Used by Germany in WWI as a transport for solders and equipment");
+        SkinRegistry.addSkinRecolor(this.getClass(),TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png",
+                new int[][]{{},{}},
+                "purple", "A fictional skin created for testing the recolor system, \nthe gui multi-line support and the paint bucket skin selector. \n Might keep it longrun to pay hommage to the development of the mod.");
     }
 
     /*

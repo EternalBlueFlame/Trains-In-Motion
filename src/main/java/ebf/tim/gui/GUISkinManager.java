@@ -1,8 +1,11 @@
 package ebf.tim.gui;
 
 
+import ebf.tim.TrainsInMotion;
+import ebf.tim.api.skin;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.Bogie;
+import ebf.tim.networking.PacketPaint;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.client.Minecraft;
@@ -25,8 +28,7 @@ public class GUISkinManager extends GuiScreen {
     public GuiButton buttonRight;
     public GuiButton buttonApply;
 
-    public static String name;
-    public static String[] description;
+    public static skin s;
 
     protected int xSize = 176;
     protected int ySize = 166;
@@ -49,24 +51,20 @@ public class GUISkinManager extends GuiScreen {
         Keyboard.enableRepeatEvents(true);
 
         buttonList =new ArrayList();
-        buttonList.add(new GuiButton(-1, percentLeft(10)-10,percentTop(65), 20,20,"<<"));//left
-        buttonList.add(new GuiButton(-1, percentLeft(90)-10,percentTop(65), 20,20,">>"));//right
-        buttonList.add(new GuiButton(-1, percentLeft(50)-16,percentTop(80), 32,20,"Apply"));//apply
+        buttonList.add(buttonLeft = new GuiButton(-1, percentLeft(10)-10,percentTop(65), 20,20,"<<"));//left
+        buttonList.add(buttonRight = new GuiButton(-1, percentLeft(90)-10,percentTop(65), 20,20,">>"));//right
+        buttonList.add(buttonApply = new GuiButton(-1, percentLeft(50)-16,percentTop(80), 32,20,"Apply"));//apply
     }
 
     @Override
     public void updateScreen()
     {
-        buttonLeft.visible=true;
-        buttonRight.visible=true;
+        buttonLeft.visible=page>0;
+        buttonRight.visible=entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().toArray().length>=page;
         buttonApply.visible=true;
 
-        ebf.tim.api.skin s = entity.getSkinList(Minecraft.getMinecraft().thePlayer, true)
+        s = entity.getSkinList(Minecraft.getMinecraft().thePlayer, true)
                 .get(entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().toArray()[page]);
-
-        name=s.name;
-
-        description=s.getDescription();
 
     }
 
@@ -79,21 +77,24 @@ public class GUISkinManager extends GuiScreen {
         super.drawScreen(parWidth, parHeight, p_73863_3_);
 
         initGui();
+        if(s==null){return;}
         GL11.glPushMatrix();
         GL11.glColor4f(1F, 1F, 1F, 0.5F);
         GL11.glPopMatrix();
         float offsetFromScreenLeft = width * 0.5f;
 
 
-        fontRendererObj.drawString(name,
-                (int)(offsetFromScreenLeft - fontRendererObj.getStringWidth(name)*0.5f),
+        fontRendererObj.drawString(s.name,
+                (int)(offsetFromScreenLeft - fontRendererObj.getStringWidth(s.name)*0.5f),
                 (int)((height*0.1f)*6),0,false);
 
-        //todo: loop for each entry in description. each entry is a new line, so add an additional y offset each iteration.
-        fontRendererObj.drawString(description[0],
-                (int)(offsetFromScreenLeft - fontRendererObj.getStringWidth(description[0])*0.5f),
-                (int)((height*0.1f)*7), 0, false);
-
+        if(s.getDescription()!=null) {
+            for(int i=0; i<s.getDescription().length;i++) {
+                fontRendererObj.drawString(s.getDescription()[i],
+                        (int) (offsetFromScreenLeft - fontRendererObj.getStringWidth(s.getDescription()[0]) * 0.5f),
+                        (int) ((height * 0.1f) * 7)+(10*i), 0, false);
+            }
+        }
         renderTransport(entity,page);
 
     }
@@ -106,7 +107,7 @@ public class GUISkinManager extends GuiScreen {
     {
         if (parButton==buttonApply) {
             applySkin();
-            mc.displayGuiScreen((GuiScreen)null);
+            mc.displayGuiScreen(null);//todo make an actual close button
         }
         else if (parButton==buttonLeft) {
             onLeftClick();
@@ -128,9 +129,7 @@ public class GUISkinManager extends GuiScreen {
     }//add one to page, loop back to 0 when it gets larger than size
 
     void applySkin(){
-        ebf.tim.api.skin s = entity.getSkinList(Minecraft.getMinecraft().thePlayer, true)
-                .get(entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().toArray()[page]);
-        TextureManager.bindTexture(s.texture);
+        TrainsInMotion.keyChannel.sendToServer(new PacketPaint((String)entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().toArray()[page], entity.getEntityId()));
     }
 
     @Override
@@ -157,6 +156,9 @@ public class GUISkinManager extends GuiScreen {
             GL11.glPopMatrix();
         }
 
+        if(entity.bogies()==null){
+            return;
+        }
         //render bogies with textures and offsets
         int b = 0, sb = 0;
         for (Bogie m : entity.bogies()) {
