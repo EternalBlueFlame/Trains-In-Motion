@@ -93,14 +93,14 @@ public class RailVanillaShapes extends RailShapeCore{
         if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,9},{xCoord-1, yCoord,zCoord-1,7}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,6},{xCoord-1, yCoord,zCoord+1,8}})){
 
-            shape.setPoint(0,0,0,0)
-                    .setPoint(1,0.25f,0,0)
+            shape.setPoint(1,0.25f,0,0)
+                    .setPoint(2,0f,0,0)
                     .setSegments(2);
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,7}, {xCoord+1, yCoord,zCoord+1,9}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,8},{xCoord+1, yCoord,zCoord-1,6}})){
 
-            shape.setPoint(2,0,0,0)
-                    .setPoint(1,-0.25f,0,0)
+            shape.setPoint(1,-0.25f,0,0)
+                    .setPoint(0,0,0,0)
                     .setSegments(2);
         } else if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,9}}) ||
                 checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,6}})){

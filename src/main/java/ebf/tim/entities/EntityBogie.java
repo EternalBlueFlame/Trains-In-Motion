@@ -267,6 +267,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
      * @param floorZ the floored Z value of the next position.
      * @param block the block at the next position
      */
+    @Deprecated
     private void moveBogie(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, BlockRailBase block) {
         cachedMotionX = currentMotionX;
         cachedMotionZ = currentMotionZ;
@@ -391,6 +392,84 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         }
     }
 
+    private void segmentMovement(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, BlockRailBase block){
+        cachedMotionX = currentMotionX;
+        cachedMotionZ = currentMotionZ;
+        //define the incrementation of movement, use the cache to store the real value and increment it down, and then throw it to the next loop, then use current for the clamped to calculate movement'
+        if (currentMotionX>0.3){
+            currentMotionX= 0.3;
+            cachedMotionX -= 0.3;
+        } else if (currentMotionX <-0.3){
+            currentMotionX = -0.3;
+            cachedMotionX += 0.3;
+        } else {
+            cachedMotionX= Math.copySign(0, currentMotionX);
+        }
+        if (currentMotionZ>0.3){
+            currentMotionZ= 0.3;
+            cachedMotionZ -=0.3;
+        } else if (currentMotionZ <-0.3){
+            currentMotionZ = -0.3;
+            cachedMotionZ += 0.3;
+        } else {
+            cachedMotionZ= Math.copySign(0, currentMotionZ);
+        }
+
+        //actually do move
+        moveBogieVanillaDirectional(currentMotionX, currentMotionZ, floorX,floorY,floorZ, block);
+
+        //update the last used block to the one we just used, if it's actually different.
+        floorX = MathHelper.floor_double(this.posX);
+        floorY = MathHelper.floor_double(this.posY);
+        floorZ = MathHelper.floor_double(this.posZ);
+        blockNext = this.worldObj.getBlock(floorX, floorY, floorZ);
+        //now loop this again for the next increment of movement, if there is one
+        if (blockNext instanceof BlockRailBase && (cachedMotionX !=0 || cachedMotionZ !=0)) {
+            moveBogie(cachedMotionX, cachedMotionZ, floorX, floorY, floorZ, (BlockRailBase) blockNext);
+        }
+
+    }
+
+
+    private void moveBogieVanillaDirectional(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, BlockRailBase block){
+
+
+        //get the direction of the rail from it's metadata
+        if (worldObj.getTileEntity(floorX, floorY, floorZ) instanceof ITrackTile && (((ITrackTile)worldObj.getTileEntity(floorX, floorY, floorZ)).getTrackInstance() instanceof ITrackSwitch)){
+            railMetadata =((ITrackTile)worldObj.getTileEntity(floorX, floorY, floorZ)).getTrackInstance().getBasicRailMetadata(this);//railcraft support
+        } else {
+            railMetadata = block.getBasicRailMetadata(worldObj, this, floorX, floorY, floorZ);
+        }
+
+        //add the uphill/downhill velocity
+        switch (railMetadata){
+            case 2:{currentMotionX -= 0.0078125D; this.posY = (double)(floorY + 1); isOnSlope=true; break;}
+            case 3:{currentMotionX += 0.0078125D; this.posY = (double)(floorY + 1); isOnSlope=true; break;}
+            case 4:{currentMotionZ += 0.0078125D; this.posY = (double)(floorY + 1); isOnSlope=true; break;}
+            case 5:{currentMotionZ -= 0.0078125D; this.posY = (double)(floorY + 1); isOnSlope=true; break;}
+            default:{isOnSlope=false;}
+        }
+
+        //beginMagic();
+
+        //figure out the current rail's direction
+        railPathX = (vanillaRailMatrix[railMetadata][1][0] - vanillaRailMatrix[railMetadata][0][0]);
+        railPathZ = (vanillaRailMatrix[railMetadata][1][2] - vanillaRailMatrix[railMetadata][0][2]);
+        railPathSqrt = Math.sqrt(railPathX * railPathX + railPathZ * railPathZ);
+
+        //if it ends up being reverse of what it should be, inverse the motion.
+        if (currentMotionX * railPathX + currentMotionZ * railPathZ < 0.0D) {
+            railPathX = -railPathX;
+            railPathZ = -railPathZ;
+        }
+
+        //endMagic();
+
+        //todo:get train movement direction
+
+        //compare and clamp to rail direction
+
+    }
 
 
     private void moveBogieZnD(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, ITrackBase track){

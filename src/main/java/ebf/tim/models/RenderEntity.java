@@ -327,6 +327,8 @@ public class RenderEntity extends Render {
             Tessellator.getInstance().addVertex(entity.collisionHandler.renderShape[7].xCoord, entity.collisionHandler.renderShape[7].yCoord, entity.collisionHandler.renderShape[7].zCoord);
             Tessellator.getInstance().draw();
 
+            //TODO:add wireframe (that weird red/green/blue, XYZ center thing) for rotation points on bogie and bogie offsets.
+
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glEnable(GL11.GL_LIGHTING);
             GL11.glEnable(GL11.GL_TEXTURE_2D);

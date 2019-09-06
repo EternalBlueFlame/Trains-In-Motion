@@ -297,7 +297,7 @@ public class GUITransport extends GUIContainerNoNEI {
             drawTexturedRect(guiLeft + 113, guiTop + 16 - i1, 176, 14 - i1, 16, i1);
         }
 
-        drawTextOutlined(fontRendererObj, "burn heat: " + transport.getDataWatcher().getWatchableObjectInt(13), 10, 70, 16777215);
+        drawTextOutlined(fontRendererObj, "burn time: " + transport.getDataWatcher().getWatchableObjectInt(13), 10, 70, 16777215);
         drawTextOutlined(fontRendererObj, "boiler heat: " + transport.getDataWatcher().getWatchableObjectFloat(16), 10, 80, 16777215);
 
     }
