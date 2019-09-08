@@ -115,12 +115,14 @@ public class Model1x1Rail {
         }
         //DebugUtil.println(ClientProxy.railLoD);
         //renders the rails, also defines min and max width
+        GL11.glPushMatrix();
         switch (ClientProxy.railSkin){
             case 0:{ModelRail.modelPotatoRail(shape, colors); break;}
             case 1:{ModelRail.modelExtrudedRail(shape, colors); break;}
             case 2://todo normal rail
             case 3:{ModelRail.model3DRail(shape, colors); break;}//todo HD rail
         }
+        GL11.glPopMatrix();
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glColor4f(1.0f,1.0f,1.0f,1.0f);
         Tessellator.bindTexture(TextureMap.locationBlocksTexture);
