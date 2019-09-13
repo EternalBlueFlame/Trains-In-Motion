@@ -25,6 +25,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.*;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -87,7 +88,7 @@ public class TextureManager {
             MCResourcePacks = Minecraft.getMinecraft().getResourceManager().getResourceDomains();
             tmtTextureMap =new HashMap<>();
         }
-        DebugUtil.printGLError(GL11.glGetError());
+        //DebugUtil.printGLError(GL11.glGetError());
 
         int[] texture = tmtTextureMap.get(resource);
 
@@ -98,7 +99,7 @@ public class TextureManager {
                 int height =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
 
                 GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, renderPixels);
-                DebugUtil.printGLError(GL11.glGetError());
+                //DebugUtil.printGLError(GL11.glGetError());
                 texture = new int[((width*height)*4)+2];
                 texture[0]=width;
                 texture[1]=height;
@@ -110,7 +111,7 @@ public class TextureManager {
                 }
             tmtTextureMap.put(resource, texture);
         }
-        DebugUtil.printGLError(GL11.glGetError());
+        //DebugUtil.printGLError(GL11.glGetError());
 
         return texture;
     }
@@ -120,6 +121,7 @@ public class TextureManager {
 
 
     public static void maskColors(ResourceLocation textureURI, List<Integer> colors){
+        if(textureURI==null || textureURI.getResourcePath().equals("")){return;}
         pixels = loadTexture(textureURI);
         if(pixels==null){
             return;
@@ -153,10 +155,10 @@ public class TextureManager {
                 renderPixels.put(i + 2, b(pixels[i + 2]));
             }
         }
-        DebugUtil.printGLError(GL11.glGetError());
-        glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, pixels[0], pixels[1], GL_RGBA, GL_UNSIGNED_BYTE, renderPixels);
+        //DebugUtil.printGLError(GL11.glGetError());
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, Minecraft.getMinecraft().gameSettings.mipmapLevels, GL11.GL_RGBA, pixels[0], pixels[1], 0, GL_RGBA, GL_UNSIGNED_INT, renderPixels);
         renderPixels.clear();//reset the buffer to all 0's.
-        DebugUtil.printGLError(GL11.glGetError());
+        //DebugUtil.printGLError(GL11.glGetError());
     }
 
     //most compilers should process this type of function faster than a normal typecast.
