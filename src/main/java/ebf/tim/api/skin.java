@@ -1,10 +1,10 @@
 package ebf.tim.api;
 
 import net.minecraft.util.ResourceLocation;
-import scala.actors.threadpool.Arrays;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class skin {
@@ -19,7 +19,7 @@ public class skin {
         this.texture=texture;
         name=skinName;
         description=skinDescription;
-        partialRecolors = recolor==null?null:Arrays.asList(recolor);
+        partialRecolors = recolor==null?null: Arrays.asList(recolor);
         this.bogieTextures= bogieTextures;
         this.subBogieTextures= subBogieTextures;
     }
