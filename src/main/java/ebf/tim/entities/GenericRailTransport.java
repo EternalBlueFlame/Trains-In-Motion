@@ -19,6 +19,7 @@ import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.NBTKeys;
 import ebf.tim.utility.*;
 import fexcraft.tmt.slim.ModelBase;
+import fexcraft.tmt.slim.Vec3f;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
 import net.minecraft.block.Block;
@@ -47,6 +48,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 import static ebf.tim.TrainsInMotion.transportTypes.*;
+import static ebf.tim.utility.RailUtility.rotatePoint;
 import static ebf.tim.utility.RailUtility.rotatePointF;
 
 /**
@@ -672,9 +674,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public boolean hasDrag(){return true;}
 
     public void updatePosition(){
-        frontBogie.minecartMove(rotationPitch, rotationYaw, hasDrag(), getBoolean(boolValues.BRAKE),
+        frontBogie.minecartMove(this, hasDrag(), getBoolean(boolValues.BRAKE),
                 weightKg() * (frontBogie.isOnSlope?1.5f:1) * (backBogie.isOnSlope?2:1));
-        backBogie.minecartMove(rotationPitch, rotationYaw, hasDrag(), getBoolean(boolValues.BRAKE),
+        backBogie.minecartMove(this, hasDrag(), getBoolean(boolValues.BRAKE),
                 weightKg() * (frontBogie.isOnSlope?1.5f:1) * (backBogie.isOnSlope?2:1));
         motionX = frontVelocityX = frontBogie.motionX;
         motionZ = frontVelocityZ = frontBogie.motionZ;
@@ -786,12 +788,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
             updatePosition();
 
-            if (ticksExisted %2 ==0) {
+            if ((frontBogie.posX*frontBogie.posX + frontBogie.posZ * frontBogie.posZ)-
+                    (backBogie.posX*backBogie.posX + backBogie.posZ * backBogie.posZ)>
+                    Math.abs(bogieLengthFromCenter()[0])+Math.abs(bogieLengthFromCenter()[1])+1) {
                 //align bogies
-                vectorCache[0] = rotatePointF(bogieLengthFromCenter()[0], 0, 0, rotationPitch, rotationYaw, 0.0f);
-                frontBogie.setPosition(vectorCache[0][0] + posX, frontBogie.posY, vectorCache[0][2] + posZ);
-                vectorCache[0] = rotatePointF(bogieLengthFromCenter()[1], 0, 0, rotationPitch, rotationYaw, 0.0f);
-                backBogie.setPosition(vectorCache[0][0] + posX, backBogie.posY, vectorCache[0][2] + posZ);
+                double[] vec = rotatePoint(new double[]{bogieLengthFromCenter()[0],0,0}, rotationPitch, rotationYaw, 0.0f);
+                frontBogie.setPosition(vec[0] + posX, frontBogie.posY, vec[2] + posZ);
+                vec = rotatePoint(new double[]{bogieLengthFromCenter()[1], 0, 0}, rotationPitch, rotationYaw, 0.0f);
+                backBogie.setPosition(vec[0] + posX, backBogie.posY, vec[2] + posZ);
             }
         }
 

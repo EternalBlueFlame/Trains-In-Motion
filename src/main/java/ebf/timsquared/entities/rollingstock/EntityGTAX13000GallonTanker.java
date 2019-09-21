@@ -46,7 +46,7 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
 
     @Override
     public float[][] bogieModelOffsets() {
-        return new float[][]{{2.1f,0,0},{-2.1f,0,0}};
+        return new float[][]{{5.1f,0,0},{-5.1f,0,0}};
     }
 
     @Override
@@ -55,7 +55,7 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
     }
 
     @Override
-    public float[] bogieLengthFromCenter(){return new float[]{2,-2};}
+    public float[] bogieLengthFromCenter(){return new float[]{5,-5};}
 
     @Override
     public float getRenderScale() {

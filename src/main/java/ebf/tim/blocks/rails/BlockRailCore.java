@@ -29,7 +29,7 @@ import java.util.Random;
 public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     //RailTileEntity tile = null;
-    private static final int[] updateMatrix = {-1,0,1};
+    private static final int[] updateMatrix = {-2,-1,0,1,2};
 
     /*
     public ItemStack rail;
@@ -226,6 +226,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 for(int y : updateMatrix){
                     if(p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_) instanceof  BlockRailCore){
                         p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_).onNeighborBlockChange(p_149660_1_,p_149660_2_,p_149660_3_,p_149660_4_, this);
+                        updateShape(x,y,z,p_149660_1_, null);
                     }
                 }
             }

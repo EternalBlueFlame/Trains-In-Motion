@@ -107,6 +107,11 @@ public class Vec3f implements Serializable {
         return Math.sqrt(xCoord * xCoord + yCoord * yCoord + zCoord * zCoord);
     }
 
+
+    public double length2d(){
+        return Math.sqrt(xCoord * xCoord + zCoord * zCoord);
+    }
+
     public static double length(float... arr){
         return Math.sqrt(arr[0] * arr[0] + arr[1] * arr[1] + arr[2] * arr[2]);
     }
