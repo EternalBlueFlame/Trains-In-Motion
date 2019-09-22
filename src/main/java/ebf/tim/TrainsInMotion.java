@@ -18,6 +18,7 @@ import ebf.tim.items.ItemAdminBook;
 import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.items.TiMTab;
 import ebf.tim.networking.PacketInteract;
+import ebf.tim.networking.PacketPaint;
 import ebf.tim.networking.PacketRemove;
 import ebf.tim.registry.TiMGenericRegistry;
 import ebf.tim.utility.ChunkHandler;
@@ -144,6 +145,7 @@ public class TrainsInMotion {
         TrainsInMotion.keyChannel.registerMessage(PacketRemove.Handler.class, PacketRemove.class, 2, Side.SERVER);
         TrainsInMotion.keyChannel.registerMessage(ItemAdminBook.PacketAdminBook.Handler.class, ItemAdminBook.PacketAdminBook.class, 3, Side.CLIENT);
         TrainsInMotion.keyChannel.registerMessage(ItemAdminBook.PacketAdminBookClient.Handler.class, ItemAdminBook.PacketAdminBookClient.class, 4, Side.SERVER);
+        TrainsInMotion.keyChannel.registerMessage(PacketPaint.Handler.class, PacketPaint.class, 6, Side.CLIENT);
         TrainsInMotion.trackChannel = NetworkRegistry.INSTANCE.newSimpleChannel("TiM.track");
 
         proxy.register();

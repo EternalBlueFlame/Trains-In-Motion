@@ -59,8 +59,6 @@ public class GUISkinManager extends GuiScreen {
     @Override
     public void updateScreen()
     {
-        buttonLeft.visible=page>0;
-        buttonRight.visible=entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().toArray().length>=page;
         buttonApply.visible=true;
 
         s = entity.getSkinList(Minecraft.getMinecraft().thePlayer, true)
@@ -99,9 +97,6 @@ public class GUISkinManager extends GuiScreen {
 
     }
 
-
-    public GenericRailTransport Transport;
-
     @Override
     protected void actionPerformed(GuiButton parButton)
     {
@@ -117,19 +112,19 @@ public class GUISkinManager extends GuiScreen {
         }
     }
 
-    int page = 1;
-    private EntityPlayer Player;
+    int page = 0;
 
     void onLeftClick() {
-        page = (page <= 1 ? Transport.getSkinList(Player, true).entrySet().size() : page - 1);
+        page = (page <= 0 ? entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().size() : page - 1);
     }//subtract one from page, loop to end when less than 1
 
     void onRightClick() {
-        page = (page >= Transport.getSkinList(Player, true).entrySet().size() ? 1 : page + 1);
+        page = (page+1 >= entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().size() ? 0 : page + 1);
     }//add one to page, loop back to 0 when it gets larger than size
 
     void applySkin(){
         TrainsInMotion.keyChannel.sendToServer(new PacketPaint((String)entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().toArray()[page], entity.getEntityId()));
+        entity.renderData.needsModelUpdate=true;
     }
 
     @Override
