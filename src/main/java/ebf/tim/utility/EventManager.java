@@ -181,10 +181,11 @@ public class EventManager {
     public void onTick(TickEvent.PlayerTickEvent e){
         //every 10 player ticks get the nearby trains and cache if the player is looking at said train.
         if(e.player.worldObj!= null && e.player.ticksExisted%10==0){
-            selected=null;
+            //selected=null;
             //skip when riding train/stock
             if(e.player.ridingEntity instanceof GenericRailTransport ||
                     e.player.ridingEntity instanceof EntitySeat){
+                selected=null;
                 return;
             }
 
@@ -193,9 +194,6 @@ public class EventManager {
             if(stock!=null && stock.size()>0){
                 vec = RailUtility.rotateDistance(0.0625f, e.player.rotationPitch, (e.player.rotationYawHead%360)-270);
                 for (GenericRailTransport t : stock) {
-                    if(t.collisionHandler.containsPlayer(e.player)){
-                        continue;
-                    }
                     //loop for each index in distance.
                     for (int i=0; i<(Minecraft.getMinecraft().playerController.extendedReach()?96:48); i++) {
                         vert = vec.crossProduct(i);
@@ -209,6 +207,7 @@ public class EventManager {
                     }
                 }
             }
+            selected=null;
         }
 
 

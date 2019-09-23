@@ -2,11 +2,9 @@ package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
-import fexcraft.tmt.slim.ModelBase;
-import fexcraft.tmt.slim.ModelRendererTurbo;
-import fexcraft.tmt.slim.Tessellator;
-import fexcraft.tmt.slim.TextureManager;
+import fexcraft.tmt.slim.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderBlocks;
@@ -287,6 +285,7 @@ public class RenderEntity extends Render {
             GL11.glDisable(GL11.GL_ALPHA_TEST);
             //GL11.glDepthMask(false);
 
+            GL11.glPushMatrix();
             //todo: likely the issue is that x/y/z already deal with the entity position, but the pos _also_ have the position
             //todo: so we need to seperate the position from the hitbox, likely by processing it seperatley here, or an additional gl translate if possible...
             GL11.glTranslated(x,y,z);
@@ -329,6 +328,57 @@ public class RenderEntity extends Render {
             Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
             Tessellator.getInstance().addVertex(entity.collisionHandler.renderShape[3].xCoord, entity.collisionHandler.renderShape[3].yCoord, entity.collisionHandler.renderShape[3].zCoord);
             Tessellator.getInstance().addVertex(entity.collisionHandler.renderShape[7].xCoord, entity.collisionHandler.renderShape[7].yCoord, entity.collisionHandler.renderShape[7].zCoord);
+            Tessellator.getInstance().draw();
+            GL11.glPopMatrix();
+
+
+            Vec3f bogiePos, b = new Vec3f(entity.frontBogie.posX-entity.posX,entity.frontBogie.posY-entity.posY,entity.frontBogie.posZ-entity.posZ);
+            GL11.glTranslated(x,y,z);
+            GL11.glColor3f(0,0,1);
+            Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
+            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord+3, b.zCoord);
+            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord, b.zCoord);
+            Tessellator.getInstance().draw();
+
+            GL11.glColor3f(1,0,0);
+            Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
+            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord, b.zCoord);
+            bogiePos = RailUtility.rotatePoint(new Vec3f(0,0,-3),entity.rotationPitch, entity.rotationYaw,0).add(b);
+            Tessellator.getInstance().addVertex(bogiePos.xCoord,bogiePos.yCoord, bogiePos.zCoord);
+            Tessellator.getInstance().draw();
+
+
+            GL11.glColor3f(0,1,0);
+            Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
+            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord+3, b.zCoord);
+            bogiePos = RailUtility.rotatePoint(new Vec3f(-3,0,0),entity.rotationPitch, entity.rotationYaw,0).add(b);
+            Tessellator.getInstance().addVertex(bogiePos.xCoord,bogiePos.yCoord+3, bogiePos.zCoord);
+            Tessellator.getInstance().draw();
+
+
+
+
+            b = new Vec3f(entity.backBogie.posX-entity.posX,entity.backBogie.posY-entity.posY,entity.backBogie.posZ-entity.posZ);
+
+            GL11.glColor3f(0,0,1);
+            Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
+            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord+3, b.zCoord);
+            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord, b.zCoord);
+            Tessellator.getInstance().draw();
+
+            GL11.glColor3f(1,0,0);
+            Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
+            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord, b.zCoord);
+            bogiePos = RailUtility.rotatePoint(new Vec3f(0,0,-3),entity.rotationPitch, entity.rotationYaw,0).add(b);
+            Tessellator.getInstance().addVertex(bogiePos.xCoord,bogiePos.yCoord, bogiePos.zCoord);
+            Tessellator.getInstance().draw();
+
+
+            GL11.glColor3f(0,1,0);
+            Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
+            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord+3, b.zCoord);
+            bogiePos = RailUtility.rotatePoint(new Vec3f(-3,0,0),entity.rotationPitch, entity.rotationYaw,0).add(b);
+            Tessellator.getInstance().addVertex(bogiePos.xCoord,bogiePos.yCoord+3, bogiePos.zCoord);
             Tessellator.getInstance().draw();
 
             //TODO:add wireframe (that weird red/green/blue, XYZ center thing) for rotation points on bogie and bogie offsets.

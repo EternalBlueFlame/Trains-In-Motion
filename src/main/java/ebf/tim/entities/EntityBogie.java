@@ -335,13 +335,6 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         motionX = motionSqrt * (railPathX / railPathSqrt);
         motionZ = motionSqrt * (railPathZ / railPathSqrt);
 
-        if (cachedMotionX !=0 || cachedMotionZ !=0) {
-            //define the motion based on the rail path for current movement, and the next, so they are in sync.
-            motionSqrt = Math.sqrt(cachedMotionX * cachedMotionX + cachedMotionZ * cachedMotionZ);
-            cachedMotionX = motionSqrt * railPathX / railPathSqrt;
-            cachedMotionZ = motionSqrt * railPathZ / railPathSqrt;
-        }
-
         //define the rail path again, for reasons.....
         railPathX2 = floorX + 0.5D + vanillaRailMatrix[railMetadata][0][0] * 0.5D;
         railPathZ2 = floorZ + 0.5D + vanillaRailMatrix[railMetadata][0][2] * 0.5D;
@@ -350,10 +343,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
         //pick the bigger one
         if (railPathX == 0.0D) {
-            //this.posX = floorX + 0.5D;
+            this.posX = floorX + 0.5D;
             railPathDirection = this.posZ - floorZ;
         } else if (railPathZ == 0.0D) {
-            //this.posZ = floorZ + 0.5D;
+            this.posZ = floorZ + 0.5D;
             railPathDirection = this.posX - floorX;
         } else {
             railPathDirection = ((this.posX - railPathX2) * railPathX + (this.posZ - railPathZ2) * railPathZ) * 2.0D;

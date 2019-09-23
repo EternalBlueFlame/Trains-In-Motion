@@ -788,14 +788,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
             updatePosition();
 
-            if ((frontBogie.posX*frontBogie.posX + frontBogie.posZ * frontBogie.posZ)-
-                    (backBogie.posX*backBogie.posX + backBogie.posZ * backBogie.posZ)>
-                    Math.abs(bogieLengthFromCenter()[0])+Math.abs(bogieLengthFromCenter()[1])+1) {
-                //align bogies
-                double[] vec = rotatePoint(new double[]{bogieLengthFromCenter()[0],0,0}, rotationPitch, rotationYaw, 0.0f);
-                frontBogie.setPosition(vec[0] + posX, frontBogie.posY, vec[2] + posZ);
-                vec = rotatePoint(new double[]{bogieLengthFromCenter()[1], 0, 0}, rotationPitch, rotationYaw, 0.0f);
-                backBogie.setPosition(vec[0] + posX, backBogie.posY, vec[2] + posZ);
             }
         }
 
