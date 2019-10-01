@@ -223,6 +223,33 @@ public class RailUtility {
         return xyz;
     }
 
+    public static double[] rotatePoint(double f, double pitch, double yaw) {
+        double cos;
+        double sin;
+        double[] xyz = new double[]{f,0,0};
+        //rotate pitch
+        if (pitch != 0.0F) {
+            pitch *= Math.PI / 180.0f;
+            cos = Math.cos(pitch);
+            sin = Math.sin(pitch);
+
+            xyz[0] = (f * cos);
+            xyz[1] = -(f * sin);
+        }
+        //rotate yaw
+        if (yaw != 0.0F) {
+            yaw *= Math.PI / 180.0f;
+            cos = Math.cos(yaw);
+            sin = Math.sin(yaw);
+
+            xyz[0] = (f * cos);
+            xyz[2] = (f * sin);
+        }
+
+        return xyz;
+    }
+
+
     //private static float cos;
     //private static float sin;
     //private static float[] xyz = new float[]{0,0,0};

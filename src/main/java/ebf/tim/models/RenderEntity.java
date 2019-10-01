@@ -357,6 +357,10 @@ public class RenderEntity extends Render {
 
 
 
+            if(entity.frontBogie==null || entity.backBogie==null){
+                return;
+            }
+
 
             b = new Vec3f(entity.backBogie.posX-entity.posX,entity.backBogie.posY-entity.posY,entity.backBogie.posZ-entity.posZ);
 

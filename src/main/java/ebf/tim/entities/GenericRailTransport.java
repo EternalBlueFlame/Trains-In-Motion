@@ -788,6 +788,18 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             }
             updatePosition();
 
+
+            if(ticksExisted%5==0) {
+                double[] v = RailUtility.rotatePoint(bogieLengthFromCenter()[0], 0, rotationYaw);
+                frontBogie.addVelocity(
+                        ((backBogie.posX - posX)-v[0])*0.001,
+                        0,
+                        ((backBogie.posZ - posZ)-v[2])*0.001);
+                v = RailUtility.rotatePoint(bogieLengthFromCenter()[1], 0, rotationYaw);
+                frontBogie.addVelocity(
+                        ((frontBogie.posX - posX)-v[0])*0.001,
+                        0,
+                        ((frontBogie.posZ - posZ)-v[2])*0.001);
             }
         }
 
@@ -1771,7 +1783,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public float transportMetricHorsePower(){return 0;}
 
     /**additional lore for the item, each entry in the array is a new line.
-     * may return null.*/
+     * return null if unused.*/
     public String[] additionalItemText(){return null;}
 
     /**returns the item of this transport, this should be a static value in the transport's class.

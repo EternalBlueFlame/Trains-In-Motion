@@ -14,6 +14,7 @@ import java.util.List;
 public class RailShapeCore {
 
     public List<Vec5f> activePath = new ArrayList<>();
+    public List<Vec5f> activeTiePath = new ArrayList<>();
     public boolean[] ends = {true, true};
     public List<List<Vec5f>> inactivePaths = new ArrayList<>();
     public int[] gauge;
@@ -32,7 +33,6 @@ public class RailShapeCore {
         if(data==null){
             if (dimension.getTileEntity(x,y,z) instanceof RailTileEntity) {
                 data = ((RailTileEntity)dimension.getTileEntity(x, y, z)).data;
-                //data = CommonProxy.getRailMap(dimension).data.getXml(BlockNBTMap.vector(x, y, z));
             }
             if(data==null) {
                 data = new XmlBuilder();
@@ -79,8 +79,20 @@ public class RailShapeCore {
             sb.append(vector.v);
             sb.append("!");
         }
-        //sb.append("::");
-        //todo: loop above for tie paths
+        sb.append("::");
+        for(Vec5f vector : activeTiePath){
+            sb.append(vector.xCoord);
+            sb.append(",");
+            sb.append(vector.yCoord);
+            sb.append(",");
+            sb.append(vector.zCoord);
+            sb.append(",");
+            sb.append(vector.u);
+            sb.append(",");
+            sb.append(vector.v);
+            sb.append("!");
+        }
+        //todo: loop above for inactive paths
         sb.append("::");
         return sb.toString();
     }
@@ -102,16 +114,20 @@ public class RailShapeCore {
             activePath.add(new Vec5f(Float.parseFloat(subParse[0]),Float.parseFloat(subParse[1]),Float.parseFloat(subParse[2]),
                     Float.parseFloat(subParse[3]),Float.parseFloat(subParse[4])));
         }
-        //todo: loop above for tie paths
-        /*
+
         currentParse= vars[3].split("!");
         for(String str : currentParse) {
-         */
+            subParse=str.split(",");
+            activeTiePath.add(new Vec5f(Float.parseFloat(subParse[0]),Float.parseFloat(subParse[1]),Float.parseFloat(subParse[2]),
+                    Float.parseFloat(subParse[3]),Float.parseFloat(subParse[4])));
+        }
+        //todo: loop above for inactive paths
 
 
         return this;
     }
 
+    @Deprecated
     public static void multiTriGenModel(RailSimpleShape shape, float[] railOffsets, RailTileEntity tile){
         RailShapeCore s = new RailShapeCore();
         for(int v=0;v<shape.getPath().length-2;v+=3) {
@@ -201,10 +217,34 @@ public class RailShapeCore {
                 );
             }
 
-            //TODO: tie position math here, should be more or less the same as above.
-            //will need new variable in this class for the ties.
+
+            //now do for ties
+            originalT = 0.4f / (0.4f * shape.getPathLength());
+
+            t = 0.4f;
+            //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
+            points = new ArrayList<>();
+            for (i = 0; i < shape.getPathLength() + 3; i++) {
+                //define position
+                points.add(new float[]{
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].xCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].xCoord) + ((t * t) * shape.getPath()[v+2].xCoord),//X
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].yCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].yCoord) + ((t * t) * shape.getPath()[v+2].yCoord),//Y
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].zCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].zCoord) + ((t * t) * shape.getPath()[v+2].zCoord),//X
+                });
+                t += originalT;
+            }
+
+            for (i=1; i < points.size() - 1; i++) {
+                sc.activeTiePath.add(
+                        new Vec5f(points.get(i)[0],points.get(i)[1],points.get(i)[2],0, RailUtility.atan2degreesf(
+                                points.get(i-1)[2] - (points.get(i+1)[2]),
+                                points.get(i-1)[0] - (points.get(i+1)[0])))
+                );
+            }
+
 
         }
+
         return sc;
     }
 

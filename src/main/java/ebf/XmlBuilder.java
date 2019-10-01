@@ -11,7 +11,6 @@ import net.minecraft.item.ItemStack;
 import java.util.HashMap;
 
 //Cant cover Object. it's raw data isn't safe over networking due to runtime compiling differences on client and server.
-//todo: rename to NBTEnhanced
 public class XmlBuilder {
     public HashMap<String, XmlBuilder> xmlMap = new HashMap<>();
     public HashMap<String, Integer> intMap = new HashMap<>();
