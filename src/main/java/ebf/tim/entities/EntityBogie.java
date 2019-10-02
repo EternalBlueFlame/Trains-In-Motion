@@ -276,7 +276,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
 
         if(velocity>0.3){
             velocity-=0.3;
-        } else if(velocity<0.3){
+        } else if(velocity<-0.3){
             velocity+=0.3;
         } else {
             return;

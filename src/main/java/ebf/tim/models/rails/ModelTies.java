@@ -29,9 +29,11 @@ public class ModelTies {
                 continue;
             }
 
-            Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
             d0 = iicon.getMinU()+ ((iicon.getMaxU()-iicon.getMinU())*0.44f);
             d1 = d0+ ((iicon.getMaxU()-iicon.getMinU())*0.09f);
+            GL11.glPushMatrix();
+            GL11.glRotatef(p.u,1,0,0);
+            Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
             addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, 0.0625f,d0, iicon.getMinV());
             addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, 0.1875f,d1, iicon.getMinV());
@@ -39,6 +41,7 @@ public class ModelTies {
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.1875f,d1,iicon.getMaxV());
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.0625f,d0, iicon.getMaxV());
             Tessellator.getInstance().arrayEnabledDraw();
+            GL11.glPopMatrix();
         }
         GL11.glPopMatrix();
     }
@@ -59,9 +62,10 @@ public class ModelTies {
             }
 
 
-
-            Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
             d1 = iicon.getMinU()+ ((iicon.getMaxU()-iicon.getMinU())*0.09f);
+            GL11.glPushMatrix();
+            GL11.glRotatef(p.u,1,0,0);
+            Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
             addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, 0.1875f,iicon.getMinU(),iicon.getMinV());
             addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, 0.1875f,d1,iicon.getMinV());
@@ -70,6 +74,7 @@ public class ModelTies {
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.1875f,d1,iicon.getMaxV());
 
             Tessellator.getInstance().arrayEnabledDraw();
+            GL11.glPopMatrix();
         }
 
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.SOUTH.ordinal(), block);
@@ -80,8 +85,10 @@ public class ModelTies {
                 continue;
             }
 
-            Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
             d1 = iicon.getMinU()+ ((iicon.getMaxU()-iicon.getMinU())*0.09f);
+            GL11.glPushMatrix();
+            GL11.glRotatef(p.u,1,0,0);
+            Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
 
             addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMinV());
@@ -90,6 +97,7 @@ public class ModelTies {
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.0625f,d1,iicon.getMaxV());
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMaxV());
             Tessellator.getInstance().arrayEnabledDraw();
+            GL11.glPopMatrix();
         }
 
 
@@ -101,6 +109,8 @@ public class ModelTies {
                 continue;
             }
 
+            GL11.glPushMatrix();
+            GL11.glRotatef(p.u,1,0,0);
             Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
             addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMinV());
@@ -109,6 +119,7 @@ public class ModelTies {
             addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0, 0.1875f,iicon.getMaxU(),iicon.getMaxV());
             addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0, 0.0625f,iicon.getMaxU(),iicon.getMinV());
             Tessellator.getInstance().arrayEnabledDraw();
+            GL11.glPopMatrix();
         }
 
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.DOWN.ordinal(), block);
@@ -119,6 +130,9 @@ public class ModelTies {
                 continue;
             }
 
+
+            GL11.glPushMatrix();
+            GL11.glRotatef(p.u,1,0,0);
             Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.1875f,iicon.getMinU(),iicon.getMinV());
@@ -127,6 +141,7 @@ public class ModelTies {
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0, 0.0625f,iicon.getMaxU(),iicon.getMaxV());
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0, 0.1875f,iicon.getMaxU(),iicon.getMinV());
             Tessellator.getInstance().arrayEnabledDraw();
+            GL11.glPopMatrix();
         }
 
 
