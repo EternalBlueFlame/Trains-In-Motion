@@ -203,7 +203,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this.dataWatcher.addObject(23, "");//owner
         this.dataWatcher.addObject(21, 0);//front linked transport
         this.dataWatcher.addObject(22, 0);//back linked transport
-        ResourceLocation s = SkinRegistry.getDefaultTexture(this, null, false);
+        ResourceLocation s = SkinRegistry.getTexture(this, null, false, getDefaultSkin());
         this.dataWatcher.addObject(24, s==null?"":s.getResourceDomain()+":"+s.getResourcePath());//currently used
     }
 
@@ -569,7 +569,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         if(SkinRegistry.getSkin(this, null, false,skin)!=null) {
             dataWatcher.updateObject(24, skin);
         } else {
-            dataWatcher.updateObject(24, SkinRegistry.getDefaultTexture(this, null, false));
+            dataWatcher.updateObject(24, this.getDefaultSkin());
         }
 
 
@@ -1173,6 +1173,12 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     public Map<String, skin> getSkinList(EntityPlayer viewer, boolean isPaintBucket){
         return SkinRegistry.getTransportSkins(getClass());
     }
+
+    /**
+     * return the name for the default skin of the transport.
+     */
+    public String getDefaultSkin(){
+        return getSkinList(null,false)==null?"":getSkinList(null, false).keySet().iterator().next();}
 
     public List<ParticleFX> getParticles(){
         return renderData.particles;

@@ -15,7 +15,9 @@ public class SkinRegistry {
 
     public static boolean forceSkinRegister=false,debugSkinRegistration=true;
     private static Map<String, Map<String, skin>> transports = new HashMap<String, Map<String, skin>>();
-    public static Map<String, skin> getTransportSkins(Class c){return transports.containsKey(c.getName())?transports.get(c.getName()):null;}
+    public static Map<String, skin> getTransportSkins(Class c){
+        return transports.containsKey(c.getName())?transports.get(c.getName()):null;
+    }
 
     public static void addSkin(Class c, String modid, String textureURI, String name, String description){
         addSkinRecolor(c.getName(),modid,textureURI,null, null, null,name,description);
@@ -112,13 +114,6 @@ public class SkinRegistry {
             return null;
         }
         return entity.getSkinList(player, isPaintBucket).get(internalResourceURI).texture;
-    }
-
-    public static ResourceLocation getDefaultTexture(GenericRailTransport entity, EntityPlayer player, boolean isPaintBucket){
-        if (entity.getSkinList(player, isPaintBucket)==null || entity.getSkinList(player, isPaintBucket).size()<1){
-            return null;
-        }
-        return entity.getSkinList(player, isPaintBucket).values().iterator().next().texture;
     }
 
     public static String getSkinName(GenericRailTransport entity, EntityPlayer player, boolean isPaintBucket, String modid, String textureURI){
