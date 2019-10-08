@@ -23,6 +23,7 @@ import fexcraft.tmt.slim.Vec3f;
 import io.netty.buffer.ByteBuf;
 import mods.railcraft.api.carts.IFluidCart;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
@@ -203,8 +204,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this.dataWatcher.addObject(23, "");//owner
         this.dataWatcher.addObject(21, 0);//front linked transport
         this.dataWatcher.addObject(22, 0);//back linked transport
-        ResourceLocation s = SkinRegistry.getTexture(this, null, false, getDefaultSkin());
-        this.dataWatcher.addObject(24, s==null?"":s.getResourceDomain()+":"+s.getResourcePath());//currently used
+        this.dataWatcher.addObject(24,getDefaultSkin());//currently used
     }
 
     /**
@@ -460,6 +460,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         }
         return false;
     }
+
     public void setDead() {
         super.setDead();
         //remove bogies

@@ -146,8 +146,11 @@ public class RenderEntity extends Render {
         GL11.glPushMatrix();
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL11.GL_BLEND);
+
         if(x==0&&y==0&&z==0){
             GL11.glDisable(GL11.GL_LIGHTING);
+        } else {
+            GL11.glEnable(GL11.GL_LIGHTING);
         }
         //set the render position
         GL11.glTranslated(x, y+ RailOffset + ((entity.getRenderScale()-0.0625f)*10)+bogieOffset, z);

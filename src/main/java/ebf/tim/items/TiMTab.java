@@ -18,6 +18,10 @@ public class TiMTab extends CreativeTabs {
         super(CreativeTabs.getNextID(), name);
         tabItem= TiMGenericRegistry.RegisterItem(isClient,new Item(),MODID,textureName,null);
     }
+    public TiMTab(String name, Item tabItem) {
+        super(CreativeTabs.getNextID(), name);
+        this.tabItem= tabItem;
+    }
     /**returns the label of the tab, this is defined in the language files,*/
     @Override
     public String getTranslatedTabLabel() {

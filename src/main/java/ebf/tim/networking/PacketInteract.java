@@ -5,6 +5,9 @@ import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import ebf.tim.entities.GenericRailTransport;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.server.MinecraftServer;
 
 /**
  * <h1>Mount packet</h1>
@@ -15,45 +18,34 @@ import io.netty.buffer.ByteBuf;
  */
 public class PacketInteract implements IMessage {
     /**the ID of the entity to dismount from*/
-    private int entityId;
-    private int key;
+    private int entityId, dimensionId, key, playerId;
 
     public PacketInteract() {}
     public PacketInteract(int key, int entityId) {
         this.key=key;
         this.entityId = entityId;
+        this.dimensionId= Minecraft.getMinecraft().thePlayer.worldObj.provider.dimensionId;
+        this.playerId=Minecraft.getMinecraft().thePlayer.getEntityId();
+
     }
     /**reads the packet on server to get the variables from the Byte Buffer*/
     @Override
     public void fromBytes(ByteBuf bbuf) {
         key = bbuf.readInt();
         entityId = bbuf.readInt();
+        dimensionId=bbuf.readInt();
+        playerId=bbuf.readInt();
+        Entity e = MinecraftServer.getServer().worldServers[dimensionId].getEntityByID(entityId);
+        if (e instanceof GenericRailTransport) {
+            ((GenericRailTransport)e).interact(playerId, false, false, key);
+        }
     }
     /**puts the variables into a Byte Buffer so they can be sent to server*/
     @Override
     public void toBytes(ByteBuf bbuf) {
         bbuf.writeInt(key);
         bbuf.writeInt(entityId);
-    }
-
-    /**
-     * <h2>packet handler</h2>
-     * handles the packet when received by server
-     */
-    public static class Handler implements IMessageHandler<PacketInteract, IMessage> {
-        @Override
-        public IMessage onMessage(PacketInteract message, MessageContext context) {
-            //First it has to check if it was actually received by the proper entity, because if not, it crashes.
-            try {
-                ((GenericRailTransport) context.getServerHandler().playerEntity.worldObj.getEntityByID(message.entityId)).
-                        interact(context.getServerHandler().playerEntity.getEntityId(), false, false, message.key);
-
-            } catch (Exception e){
-                System.out.println("Forge must have confused trains with chickens... You should tell Eternal, and send him this entire stacktrace, just to be sure.");
-                e.printStackTrace();
-            }
-
-            return null;
-        }
+        bbuf.writeInt(dimensionId);
+        bbuf.writeInt(playerId);
     }
 }

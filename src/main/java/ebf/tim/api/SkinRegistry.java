@@ -71,16 +71,19 @@ public class SkinRegistry {
     }
 
     public static void addSkinRecolor(String c,String modid, String textureURI, String[] bogieTextureURI, String[] subBogieTextureURI, @Nullable int[][] recolor, String skinName, String skinDescription){
+
+        if (debugSkinRegistration) {
+            DebugUtil.println("REGISTERING SKIN", c, "MODID: " + modid, textureURI, skinName, Loader.isModLoaded(modid));
+        }
+
         if(Loader.isModLoaded(modid) || forceSkinRegister) {
-            if (debugSkinRegistration) {
-                DebugUtil.println("REGISTERING SKIN", c, "MODID: " + modid, textureURI, skinName);
-            }
             if (!transports.containsKey(c)) {
                 transports.put(c, new HashMap<String, skin>());
-                //add the default/null skin
-                transports.get(c).put(modid + ":" + "-1", new skin(new ResourceLocation(modid, textureURI), resourceList(modid, bogieTextureURI), resourceList(modid, subBogieTextureURI), recolor, skinName, skinDescription));
             }
-            transports.get(c).put(modid + ":" + textureURI, new skin(new ResourceLocation(modid, textureURI), resourceList(modid, bogieTextureURI), resourceList(modid, subBogieTextureURI), recolor, skinName, skinDescription));
+            if(transports.get(c).containsKey(modid + ":" + skinName)){
+                DebugUtil.println("ERROR", "Duplicate skin entry: " + skinName, "In entity: " + c, "Overriding original entry");
+            }
+            transports.get(c).put(modid + ":" + skinName, new skin(new ResourceLocation(modid, textureURI), resourceList(modid, bogieTextureURI), resourceList(modid, subBogieTextureURI), recolor, skinName, skinDescription));
         }
     }
 
