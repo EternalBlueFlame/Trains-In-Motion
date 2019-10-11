@@ -1,6 +1,7 @@
 package ebf.tim.models;
 
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import fexcraft.fcl.common.lang.ArrayList;
 import fexcraft.tmt.slim.ModelRendererTurbo;
@@ -18,13 +19,12 @@ import static ebf.tim.utility.RailUtility.degreesF;
 public class StaticModelAnimator extends AnimationBase {
 
     private static List<AnimationBase> customAnimators = makelist();
-    private static List<AnimationBase> makelist(){
+
+    private static List< AnimationBase> makelist(){
         List<AnimationBase> list = new ArrayList<>();
         list.add(new StaticModelAnimator());
         return list;
     }
-    public static void addCustomAnimator(AnimationBase anim){customAnimators.add(anim);}
-
 
     /**tag for simple pistons, ones that move in a simple circle such as wheel connectors.*/
     public static final String tagSimplePiston = "simplepiston";
@@ -68,15 +68,17 @@ public class StaticModelAnimator extends AnimationBase {
      * @param model a refrence to the model geometry to animate.
      */
     public AnimationBase init(ModelRendererTurbo model, GenericRailTransport transport){
+        StaticModelAnimator s = new StaticModelAnimator();
         switch (model.boxName) {
             case tagAdvancedPiston:
             case tagSimplePiston:
             case tagSimpleRotate:
             case tagWheel: {
-                this.originalRotationValuesXYZ = new float[]{model.rotationPointX, model.rotationPointY, model.rotationPointZ,
+                //DebugUtil.println("registering animated part: ", model.boxName);
+                s.originalRotationValuesXYZ = new float[]{model.rotationPointX, model.rotationPointY, model.rotationPointZ,
                         model.rotateAngleX, model.rotateAngleY, model.rotateAngleZ};
-                modelRefrence = model;
-                return this;
+                s.modelRefrence = model;
+                return s;
             }
             default:{return null;}
         }
@@ -144,7 +146,7 @@ public class StaticModelAnimator extends AnimationBase {
     static AnimationBase initPart(ModelRendererTurbo part, GenericRailTransport entity){
         if(part==null || part.boxName==null){return null;}
         for(AnimationBase b : customAnimators){
-            if(b.isPart(part)){
+            if (b.isPart(part)) {
                 return b.init(part, entity);
             }
         }
@@ -152,8 +154,8 @@ public class StaticModelAnimator extends AnimationBase {
     }
 
     static boolean checkAnimators(ModelRendererTurbo part){
-        for (AnimationBase animator : customAnimators){
-            if(animator!=null && animator.isPart(part)){
+    for (AnimationBase animator : customAnimators){
+            if (animator != null && animator.isPart(part)) {
                 return true;
             }
         }

@@ -86,7 +86,8 @@ public class CustomItemModel implements IItemRenderer /*ICustomModelLoader*/ {
                 }
 
             }
-            ClientProxy.transportRenderer.doRender(((ItemTransport)item.getItem()).entity,0,0,0,0,0, true);
+            ClientProxy.transportRenderer.doRender(
+                    ((ItemTransport)item.getItem()).entity,0,0,0,0,0, true, null);
             GL11.glPopMatrix();
         } else if (item.getItem() instanceof ItemRail){
             GL11.glPushMatrix();

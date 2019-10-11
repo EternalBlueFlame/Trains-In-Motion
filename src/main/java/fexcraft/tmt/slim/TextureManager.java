@@ -29,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.*;
 
+import static org.lwjgl.opengl.EXTFramebufferObject.glGenerateMipmapEXT;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
@@ -36,7 +37,7 @@ import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
 public class TextureManager {
 
 
-    public static ByteBuffer renderPixels = ByteBuffer.allocateDirect((4096*4096)*4);
+    public static ByteBuffer renderPixels = ByteBuffer.allocateDirect((8192*8192)*4);
     private static int i, length, skyLight;
     private static int[] RGBint, pixels;
     private static final byte fullAlpha=(byte)0;
@@ -117,8 +118,6 @@ public class TextureManager {
         return texture;
     }
 
-    private static List<String> transportTextureFails = new ArrayList<>();
-
 
 
     public static void maskColors(ResourceLocation textureURI, List<Integer> colors){
@@ -157,7 +156,10 @@ public class TextureManager {
             }
         }
         //DebugUtil.printGLError(GL11.glGetError());
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, Minecraft.getMinecraft().gameSettings.mipmapLevels, GL11.GL_RGBA, pixels[0], pixels[1], 0, GL_RGBA, GL_UNSIGNED_INT, renderPixels);
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D,1, GL11.GL_RGBA, pixels[0], pixels[1], 0, GL_RGBA, GL_UNSIGNED_INT, renderPixels);
+        glGenerateMipmapEXT(GL_TEXTURE_2D);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         renderPixels.clear();//reset the buffer to all 0's.
         //DebugUtil.printGLError(GL11.glGetError());
     }

@@ -8,7 +8,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SkinRegistry {
@@ -109,6 +111,11 @@ public class SkinRegistry {
         if (entity.getSkinList(player, isPaintBucket)==null || !entity.getSkinList(player, isPaintBucket).containsKey(internalResourceURI)){
             return null;
         }
+        List<String> s = new ArrayList<>();
+        for (String str : entity.getSkinList(player, isPaintBucket).keySet()){
+            s.add(str);
+        }
+
         return entity.getSkinList(player, isPaintBucket).get(internalResourceURI);
     }
 

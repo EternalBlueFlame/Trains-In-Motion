@@ -1155,12 +1155,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * @param skinIndex
      * @return
      */
-    public skin getTextureByIndex(EntityPlayer viewer, boolean isPaintBucket, int skinIndex){
-        Iterator<skin> s =getSkinList(viewer, isPaintBucket).values().iterator();
-        for(int i=0;i<skinIndex;i++){
-            s.next();
-        }
-        return s.next();
+    public skin getTextureByID(EntityPlayer viewer, boolean isPaintBucket, String skinId){
+        return getSkinList(viewer, isPaintBucket).get(skinId);
     }
 
     /**

@@ -5,6 +5,7 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.api.skin;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.Bogie;
+import ebf.tim.models.RenderEntity;
 import ebf.tim.networking.PacketPaint;
 import ebf.tim.utility.DebugUtil;
 import fexcraft.tmt.slim.ModelBase;
@@ -85,7 +86,6 @@ public class GUISkinManager extends GuiScreen {
         float offsetFromScreenLeft = width * 0.5f;
 
 
-        DebugUtil.println(page, skinList.get(0), skinList.get(1));
         fontRendererObj.drawString(currentSkin.name,
                 (int)(offsetFromScreenLeft - fontRendererObj.getStringWidth(currentSkin.name)*0.5f),
                 (int)((height*0.1f)*6),0,false);
@@ -97,6 +97,7 @@ public class GUISkinManager extends GuiScreen {
                         (int) ((height * 0.1f) * 7)+(10*i), 0, false);
             }
         }
+        RenderEntity.instance.doRender(entity,page, 0,0,0,0, true, currentSkin.texture.toString());
         renderTransport(entity,skinList.get(page));
         GL11.glPopMatrix();
 
@@ -109,7 +110,7 @@ public class GUISkinManager extends GuiScreen {
             mc.displayGuiScreen(null);//todo make an actual close button
         }
         else if (parButton==buttonLeft) {
-            DebugUtil.println(page, skinList.size());
+            DebugUtil.println(page, skinList.size(), skinList.get(page), entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(skinList.get(page)).name);
             page = (page <= 0 ? entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().size() -1: page - 1);
             currentSkin=entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(skinList.get(page));
         }
@@ -121,7 +122,7 @@ public class GUISkinManager extends GuiScreen {
 
 
     void applySkin(){
-        TrainsInMotion.keyChannel.sendToServer(new PacketPaint((String)entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().toArray()[page], entity.getEntityId()));
+        TrainsInMotion.keyChannel.sendToServer(new PacketPaint(skinList.get(page), entity.getEntityId()));
         entity.renderData.needsModelUpdate=true;
     }
 

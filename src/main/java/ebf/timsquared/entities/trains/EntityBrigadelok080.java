@@ -2,6 +2,7 @@ package ebf.timsquared.entities.trains;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.utility.DebugUtil;
 import ebf.timsquared.TiMSquared;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.api.SkinRegistry;
@@ -85,6 +86,9 @@ public class EntityBrigadelok080 extends TrainBase {
     public void registerSkins(){
         SkinRegistry.addSkin(this.getClass(),TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png",
         "default", "Used by Germany in WWI as a transport for solders and equipment");
+
+        SkinRegistry.addSkin(this.getClass(),TrainsInMotion.MODID, "textures/hd/train/brigadelok_080.png",
+                "hd", "Used by Germany in WWI as a transport for solders and equipment\nthis incomplete HD skin was done by LunarTales");
         SkinRegistry.addSkinRecolor(this.getClass(),TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png",
                 new int[][]{{},{}},
                 "purple", "A fictional skin created for testing the recolor system, \nthe gui multi-line support and the paint bucket skin selector. \n Might keep it longrun to pay hommage to the development of the mod.");

@@ -1,12 +1,9 @@
 package fexcraft.fvtm;
 
-import ebf.tim.utility.DebugUtil;
 import fexcraft.fvtm.model.TurboList;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
-import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.entity.Entity;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,34 +16,13 @@ import java.util.List;
  */
 
 public class PartModel extends ModelBase {
-
     public List<TurboList> groups = new ArrayList<>();
     public PartModel(){}
-    private int GLDisplaylistID=-1;
-    private boolean refreshModel=true;
-
-
-    public void addToCreators(String s){
-        creators.add(s);
-    }
 
     @Override
     public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5){
-        if(GLDisplaylistID!=-1){
-            org.lwjgl.opengl.GL11.glCallList(GLDisplaylistID);
-        }
-        if(refreshModel) {
-            GLDisplaylistID = GLAllocation.generateDisplayLists(1);
-            GL11.glNewList(GLDisplaylistID, GL11.GL_COMPILE);
-            for (TurboList list : groups) {
-                for (ModelRendererTurbo turbo : list) {
-                    if(turbo!=null) {
-                        turbo.render();
-                    }
-                }
-            }
-            GL11.glEndList();
-            refreshModel=false;
+        for(TurboList list : groups){
+            list.render(entity, f, f1, f2, f3, f4, f5);
         }
     }
 

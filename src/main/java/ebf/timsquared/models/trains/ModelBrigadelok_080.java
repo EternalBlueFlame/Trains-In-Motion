@@ -27,6 +27,7 @@ public class ModelBrigadelok_080 extends ModelConverter //Same as Filename
 		bodyModel = new ModelRendererTurbo[117];
 
 		initbodyModel_1();
+		flipAll();
 	}
 
 	private void initbodyModel_1()
@@ -507,7 +508,5 @@ public class ModelBrigadelok_080 extends ModelConverter //Same as Filename
 		bodyModel[116].addBox(-9F, -0.5F, -0.5F, 9, 1, 1, 0F); // Box 116
 		bodyModel[116].setRotationPoint(-1.5F, 6F, -8F);
 		bodyModel[116].rotateAngleZ = 5.95157275F;
-
-		fixRotation(bodyModel, false, true, true);
 	}
 }

@@ -3,11 +3,7 @@ package fexcraft.tmt.slim;
 import ebf.tim.utility.DebugUtil;
 import fexcraft.fcl.common.Static;
 import fexcraft.fvtm.model.TurboList;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GLAllocation;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
@@ -33,88 +29,50 @@ public class ModelRendererTurbo {
     private TexturedPolygon faces[];
     public int textureOffsetX;
     public int textureOffsetY;
-    private boolean compiled;
-    private Integer displayList =null;
-    private int displayListArray[];
-    private Map<String, TextureGroup> textureGroup;
-    private TextureGroup currentTextureGroup;
+    private Map<String, TextureGroup> textureGroup= new HashMap<>();
     public boolean mirror;
     public boolean flip;
     public boolean rotorder = false;
     public boolean showModel;
     public boolean field_1402_i;
-    public boolean forcedRecompile;
-    public boolean useLegacyCompiler;
     public String boxName = null;
     public boolean isShape = false;
+    public boolean animatedPosition=false,animatedRotation=false, animatedScale=false, animatedShape=false;
     
-    private String defaultTexture;
-    
-    public static final int MR_FRONT = 0;
-    public static final int MR_BACK = 1;
-    public static final int MR_LEFT = 2;
-    public static final int MR_RIGHT = 3;
-    public static final int MR_TOP = 4;
-    public static final int MR_BOTTOM = 5;
+    public static final int MR_FRONT = 0, MR_BACK = 1, MR_LEFT = 2, MR_RIGHT = 3, MR_TOP = 4, MR_BOTTOM = 5;
 
     //Eternal: added scaling to boxes for use with animator.
-    public float xScale;
-    public float yScale;
-    public float zScale;
+    public float xScale,yScale,zScale;
 
     //replaces reliance on ModelRenderer
     public float textureWidth=0;
     public float textureHeight=0;
 
-    public float rotateAngleX=0;
-    public float rotateAngleY=0;
-    public float rotateAngleZ=0;
+    public float rotateAngleX=0,rotateAngleY=0,rotateAngleZ=0;
 
-    public float rotationPointX=0;
-    public float rotationPointY=0;
-    public float rotationPointZ=0;
+    public float rotationPointX=0,rotationPointY=0,rotationPointZ=0;
+
 
 	private static final float pi = (float)Math.PI;
 	
 	public ModelRendererTurbo(ModelBase modelbase, String s){
     	flip = false;
-        compiled = false;
-        if(!(modelbase instanceof ModelConverter)) {
-            displayList = 0;
-        }
         mirror = false;
         showModel = true;
         field_1402_i = false;
         vertices = new PositionTransformVertex[0];
         faces = new TexturedPolygon[0];
-        forcedRecompile = false;
-        textureGroup = new HashMap<String, TextureGroup>();
-        textureGroup.put("0", new TextureGroup());
-        currentTextureGroup = textureGroup.get("0");
         boxName = s;
-        defaultTexture = "";
-        useLegacyCompiler = true;
-        if (modelbase!=null) {
-            modelbase.addPart(this);
-        }
 	}
 
     public ModelRendererTurbo(TurboList modelbase, String s){
         flip = false;
-        compiled = false;
         mirror = false;
         showModel = true;
         field_1402_i = false;
         vertices = new PositionTransformVertex[0];
         faces = new TexturedPolygon[0];
-        forcedRecompile = false;
-        textureGroup = new HashMap<String, TextureGroup>();
-        textureGroup.put("0", new TextureGroup());
-        currentTextureGroup = textureGroup.get("0");
         boxName = s;
-        defaultTexture = "";
-        useLegacyCompiler = true;
-        displayList=0;
 
     }
 
@@ -154,20 +112,12 @@ public class ModelRendererTurbo {
 
     public ModelRendererTurbo(TurboList modelbase, int textureX, int textureY, int textureU, int textureV){
         flip = false;
-        compiled = false;
         mirror = false;
         showModel = true;
         field_1402_i = false;
         vertices = new PositionTransformVertex[0];
         faces = new TexturedPolygon[0];
-        forcedRecompile = false;
-        textureGroup = new HashMap<String, TextureGroup>();
-        textureGroup.put("0", new TextureGroup());
-        currentTextureGroup = textureGroup.get("0");
         boxName = null;
-        defaultTexture = "";
-        useLegacyCompiler = true;
-        displayList=null;
         textureOffsetX = textureX;
         textureOffsetY = textureY;
         textureWidth = textureU;
@@ -1679,13 +1629,11 @@ public class ModelRendererTurbo {
      * which are either resources/models or resources/mods/models.
      */
     public void addObj(String file){
-        useLegacyCompiler = false;
     	addModel(file, ModelPool.OBJ);
     }
     
     public void addObjF(String file){
     	try{
-            useLegacyCompiler = false;
 			addModelF(file, ModelPool.OBJ);
 		}
     	catch(IOException e) {
@@ -1852,64 +1800,11 @@ public class ModelRendererTurbo {
         for(int idx = 0; idx < poly.length; idx++){
         	faces[faces.length - poly.length + idx] = poly[idx];
         	if(copyGroup){
-        		currentTextureGroup.addPoly(poly[idx]);
+        		//currentTextureGroup.addPoly(poly[idx]);
         	}
         }
     }
-    
-    /**
-     * Sets the current texture group, which is used to switch the
-     * textures on a per-model base. Do note that any model that is
-     * rendered afterwards will use the same texture. To counter it,
-     * set a default texture, either at initialization or before
-     * rendering.
-     * @param groupName The name of the texture group. If the texture
-     * group doesn't exist, it creates a new group automatically.
-     */
-    public void setTextureGroup(String groupName){
-    	if(!textureGroup.containsKey(groupName)){
-    		textureGroup.put(groupName, new TextureGroup());
-    	}
-    	currentTextureGroup = textureGroup.get(groupName);
-    }
-    
-    /**
-     * Gets the current texture group.
-     * @return a TextureGroup object.
-     */
-    public TextureGroup getTextureGroup(){
-    	return currentTextureGroup;
-    }
-    
-    /**
-     * Gets the texture group with the given name.
-     * @param groupName the name of the texture group to return
-     * @return a TextureGroup object.
-     */
-    public TextureGroup getTextureGroup(String groupName){
-    	if(!textureGroup.containsKey(groupName))
-    		return null;
-    	return textureGroup.get(groupName);
-    }
-    
-    /**
-     * Sets the texture of the current texture group.
-     * @param s the filename
-     */
-    public void setGroupTexture(String s){
-    	currentTextureGroup.texture = s;
-    }
-    
-    /**
-     * Sets the default texture. When left as an empty string,
-     * it will use the texture that has been set previously.
-     * Note that this will also move on to other rendered models
-     * of the same entity.
-     * @param s the filename
-     */
-    public void setDefaultTexture(String s){
-    	defaultTexture = s;
-    }
+
     
     public void render(){
     	render(0.0625F, rotorder);
@@ -1928,9 +1823,6 @@ public class ModelRendererTurbo {
         if(field_1402_i || !showModel){
             return;
         }
-        if(displayList!=null && (!compiled || forcedRecompile)){
-            compileDisplayList(scale);
-        }
         if(rotateAngleX != 0.0F || rotateAngleY != 0.0F || rotateAngleZ != 0.0F){
             GL11.glPushMatrix();
             GL11.glTranslatef(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
@@ -1941,8 +1833,7 @@ public class ModelRendererTurbo {
                 if(rotateAngleY != 0.0F){
                     GL11.glRotatef(rotateAngleY * 57.29578F, 0.0F, 1.0F, 0.0F);
                 }
-            }
-            else{
+            } else{
                 if(rotateAngleY != 0.0F){
                     GL11.glRotatef(rotateAngleY * 57.29578F, 0.0F, 1.0F, 0.0F);
                 }
@@ -1953,79 +1844,31 @@ public class ModelRendererTurbo {
             if(rotateAngleX != 0.0F){
                 GL11.glRotatef(rotateAngleX * 57.29578F, 1.0F, 0.0F, 0.0F);
             }
-            callDisplayList(scale);
+            drawPolygons(scale);
             GL11.glPopMatrix();
         } else
         if(rotationPointX != 0.0F || rotationPointY != 0.0F || rotationPointZ != 0.0F){
             GL11.glTranslatef(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
-            callDisplayList(scale);
+            drawPolygons(scale);
             GL11.glTranslatef(-rotationPointX * scale, -rotationPointY * scale, -rotationPointZ * scale);
         }
         else{
-        	callDisplayList(scale);
+            drawPolygons(scale);
         }
     }
 
-    private void callDisplayList(float f){
-        if(displayList==null) {
-            compileDisplayList(f);//for the optimized models we actually gotta do stuff backwards.
-        }else if(useLegacyCompiler){
-    		GL11.glCallList(displayList);
-    	}
-    	else{
-    		TextureManager renderEngine = Minecraft.getMinecraft().renderEngine;
-    		Collection<TextureGroup> textures = textureGroup.values();
-    		Iterator<TextureGroup> itr = textures.iterator();
-    		for(int i = 0; itr.hasNext(); i++){
-    			TextureGroup curTexGroup = itr.next();
-    			curTexGroup.loadTexture();
-    			GL11.glCallList(displayListArray[i]);
-    			if(!defaultTexture.equals("")){
-    				renderEngine.bindTexture(new ResourceLocation("", defaultTexture));
-    			}
-    		}
-    	}
-    }
 
-    private void compileDisplayList(float scale){
-    	if(useLegacyCompiler){
-    		compileLegacyDisplayList(scale);
-    	}
-    	else{
-    		Iterator<TextureGroup> itr = textureGroup.values().iterator();
-    		displayListArray = new int[textureGroup.size()];
-    		for(int i = 0; itr.hasNext(); i++){
-    		    if(displayList!=null) {
-                    displayListArray[i] = GLAllocation.generateDisplayLists(1);
-                    GL11.glNewList(displayListArray[i], GL11.GL_COMPILE);
-                    TextureGroup usedGroup = itr.next();
-                    for (int j = 0; j < usedGroup.poly.size(); j++) {
-                        usedGroup.poly.get(j).draw(scale);
-                    }
-                    GL11.glEndList();
-                } else {
-                    TextureGroup usedGroup = itr.next();
-                    for (int j = 0; j < usedGroup.poly.size(); j++) {
-                        usedGroup.poly.get(j).draw(scale);
-                    }
-                }
-    		}
-    	}
-        compiled = true;
-    }
-    
-    private void compileLegacyDisplayList(float scale){
-        if(displayList!=null) {
-            displayList = GLAllocation.generateDisplayLists(1);
-            GL11.glNewList(displayList, GL11.GL_COMPILE);
-            for (TexturedPolygon poly : faces) {
-                poly.draw(scale);
+
+    private void drawPolygons(float scale){
+        if(textureGroup.size()>0){
+            Iterator<TextureGroup> itr = textureGroup.values().iterator();
+            TextureGroup usedGroup = itr.next();
+            for (int j = 0; j < usedGroup.poly.size(); j++) {
+                usedGroup.poly.get(j).draw(scale);
             }
-            GL11.glEndList();
-        } else {
-            for (TexturedPolygon poly : faces) {
-                poly.draw(scale);
-            }
+        }
+        for (TexturedPolygon poly : faces) {
+            poly.draw(scale);
         }
     }
 

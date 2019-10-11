@@ -1,5 +1,6 @@
 package ebf.tim.models;
 
+import ebf.tim.api.SkinRegistry;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
@@ -16,6 +17,8 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
+import javax.annotation.Nullable;
+
 /**
  * <h2>Entity Rendering</h2>
  * used for rendering all trains and rollingstock, along with their particle effects, smoke and steam as examples.
@@ -26,6 +29,7 @@ public class RenderEntity extends Render {
 
     private static final float RailOffset = 0.34f;
     private static int i=0, ii=0, iii=0;
+    public static RenderEntity instance = new RenderEntity();
 
     //public RenderEntity() {}
 
@@ -52,7 +56,7 @@ public class RenderEntity extends Render {
     }
 
     public void render(GenericRailTransport entity, double x, double y, double z, float yaw, boolean isPaintBucket) {
-        doRender(entity,x,y,z,yaw,entity.frontBogie!=null?entity.frontBogie.yOffset:0, isPaintBucket);
+        doRender(entity,x,y,z,yaw,entity.frontBogie!=null?entity.frontBogie.yOffset:0, isPaintBucket, null);
     }
 
     /**
@@ -74,7 +78,7 @@ public class RenderEntity extends Render {
      *                    May be able to use multiple instances of this to have multiple recolorable things on the train.
      *
      */
-    public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw, float bogieOffset, boolean isPaintBucket){
+    public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw, float bogieOffset, boolean isPaintBucket, @Nullable String textureURI){
 
         if (entity.renderData.modelList == null || entity.renderData.needsModelUpdate) {
             entity.renderData = new TransportRenderData();
@@ -94,6 +98,7 @@ public class RenderEntity extends Render {
                         }
                         if (StaticModelAnimator.checkAnimators(render)) {
                             entity.renderData.animatedPart.add(StaticModelAnimator.initPart(render, entity));
+                            render.animatedShape=true;
                         } else if (GroupedModelRender.canAdd(render)) {
                             //if it's a grouped render we have to figure out if we already have a group for this or not.
                             isAdded = false;
@@ -147,7 +152,7 @@ public class RenderEntity extends Render {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL11.GL_BLEND);
 
-        if(x==0&&y==0&&z==0){
+        if(textureURI!=null){
             GL11.glDisable(GL11.GL_LIGHTING);
         } else {
             GL11.glEnable(GL11.GL_LIGHTING);
@@ -169,6 +174,8 @@ public class RenderEntity extends Render {
             }
             //define the rotation angle, if it's going fast enough.
             entity.renderData.wheelPitch += (((entity.frontVelocityX * entity.frontVelocityX) + (entity.frontVelocityZ * entity.frontVelocityZ))*0.3f);
+
+            entity.renderData.wheelPitch+=0.03f;
 
             if (entity.renderData.wheelPitch != entity.renderData.lastWheelPitch) {
                 entity.renderData.lastWheelPitch =entity.renderData.wheelPitch;
@@ -194,17 +201,19 @@ public class RenderEntity extends Render {
         if(entity.worldObj!=null) {
             TextureManager.adjustLightFixture(entity.worldObj, (int) entity.posX, (int) entity.posY + 1, (int) entity.posZ);
             TextureManager.maskColors(entity.getTexture(Minecraft.getMinecraft().thePlayer).texture, entity.colors);
-            //TextureManager.bindTexture(entity.getTexture(Minecraft.getMinecraft().thePlayer).texture);
+        } else if (entity.getTextureByID(
+                Minecraft.getMinecraft().thePlayer, isPaintBucket,textureURI)!=null){
+            TextureManager.maskColors(entity.getTextureByID(
+                    Minecraft.getMinecraft().thePlayer, isPaintBucket,textureURI).texture, entity.colors);
         } else {
-            TextureManager.maskColors(entity.getTextureByIndex(Minecraft.getMinecraft().thePlayer, isPaintBucket,0/*todo use X as skin index?*/).texture, entity.colors);
-            //TextureManager.bindTexture(entity.getTextureByIndex(Minecraft.getMinecraft().thePlayer, isPaintBucket,0/*todo use X as skin index?*/).texture);
+            TextureManager.maskColors(entity.getTextureByID(Minecraft.getMinecraft().thePlayer, false, entity.getDefaultSkin()).texture, entity.colors);
         }
         for(i=0; i< entity.renderData.modelList.length;i++) {
             GL11.glPushMatrix();
             if(entity.modelOffsets()!=null && entity.modelOffsets().length>i) {
                 GL11.glTranslated(entity.modelOffsets()[i][0],entity.modelOffsets()[i][1],entity.modelOffsets()[i][2]);
             }
-            entity.renderData.modelList[i].render(null, 0, 0, 0, 0, 0, entity.getRenderScale());
+            entity.renderData.modelList[i].render(entity, 0, 0, 0, 0, 0, entity.getRenderScale());
             GL11.glPopMatrix();
         }
 
@@ -230,8 +239,9 @@ public class RenderEntity extends Render {
                         Tessellator.bindTexture(entity.getTexture(Minecraft.getMinecraft().thePlayer).getBogieSkin(i));
                     }
                 } else {
-                    if(entity.getTextureByIndex(Minecraft.getMinecraft().thePlayer, true, 0).getBogieSkin(ii) != null) {
-                        Tessellator.bindTexture(entity.getTextureByIndex(Minecraft.getMinecraft().thePlayer, isPaintBucket, 0/*todo use x for skin index?*/).getBogieSkin(i));
+                    if(SkinRegistry.getSkin(entity, Minecraft.getMinecraft().thePlayer, true, textureURI) !=null &&
+                            SkinRegistry.getSkin(entity, Minecraft.getMinecraft().thePlayer, true, textureURI).getBogieSkin(ii) != null) {
+                        Tessellator.bindTexture(SkinRegistry.getSkin(entity, Minecraft.getMinecraft().thePlayer, true, textureURI).getBogieSkin(ii));
                     }
                 }
                 GL11.glTranslated(-b.offset[0], -b.offset[1], -b.offset[2]);
@@ -247,7 +257,7 @@ public class RenderEntity extends Render {
                         if(entity.worldObj!=null) {
                             TextureManager.bindTexture(entity.getTexture(Minecraft.getMinecraft().thePlayer).getSubBogieSkin(iii));
                         } else {
-                            TextureManager.bindTexture(entity.getTextureByIndex(Minecraft.getMinecraft().thePlayer, isPaintBucket, 0/*todo use x for skin index?*/).getSubBogieSkin(iii));
+                            Tessellator.bindTexture(SkinRegistry.getSkin(entity, Minecraft.getMinecraft().thePlayer, true, textureURI).getSubBogieSkin(iii));
                         }
                         GL11.glPushMatrix();
                         GL11.glTranslated(sub.offset[0], sub.offset[1], sub.offset[2]);
@@ -289,8 +299,6 @@ public class RenderEntity extends Render {
             //GL11.glDepthMask(false);
 
             GL11.glPushMatrix();
-            //todo: likely the issue is that x/y/z already deal with the entity position, but the pos _also_ have the position
-            //todo: so we need to seperate the position from the hitbox, likely by processing it seperatley here, or an additional gl translate if possible...
             GL11.glTranslated(x,y,z);
 
             GL11.glColor3f(1,1,1);

@@ -2,6 +2,8 @@ package fexcraft.fvtm.model;
 
 import ebf.tim.utility.RailUtility;
 import fexcraft.fcl.common.lang.ArrayList;
+import fexcraft.fvtm.PartModel;
+import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 /**
  * A compatibility class for FMT models
@@ -9,20 +11,20 @@ import fexcraft.tmt.slim.ModelRendererTurbo;
  *
  * @OriginalAuthor Ferdinand Calo' (FEX___96)
  */
-public class TurboList extends ArrayList<ModelRendererTurbo> {
+public class TurboList extends ModelBase {
 
-    String boxname;
+    public String boxname;
     public TurboList(String name){
         boxname=name;
     }
 
-    @Override
     public boolean add(ModelRendererTurbo t){
 
         t.rotateAngleY *= RailUtility.radianF;
         t.rotateAngleZ *= RailUtility.radianF;
         t.rotateAngleX *= RailUtility.radianF;
-        return super.add(t);
+        super.addPart(t);
+        return true;
     }
 
 }
