@@ -56,13 +56,7 @@ public class Tessellator{
 	 */
 	@Deprecated
 	public void draw(){
-		for(float[] f : verticies){
-			if(f.length>3) {
-				GL11.glTexCoord2f(f[3], f[4]);
-			}
-			GL11.glVertex3f(f[0],f[1],f[2]);
-		}
-		GL11.glEnd();
+		arrayEnabledDraw();
 	}
 
 	public void arrayEnabledDraw(){

@@ -2,6 +2,7 @@ package fexcraft.tmt.slim;
 
 import ebf.tim.utility.DebugUtil;
 import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.Entity;
 import org.lwjgl.opengl.GL11;
 
@@ -27,11 +28,13 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 		    initAllParts();
 		}
 
+		OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
+
 		if(displayList==-1) {
-			displayList = GLAllocation.generateDisplayLists(1);
-			GL11.glNewList(displayList, GL11.GL_COMPILE);
+			//displayList = GLAllocation.generateDisplayLists(1);
+			//GL11.glNewList(displayList, GL11.GL_COMPILE);
 			render(boxList);
-			GL11.glEndList();
+			//GL11.glEndList();
 		} else {
 			GL11.glCallList(displayList);
 		}
@@ -44,7 +47,9 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 		if(model==null){return;}
 		for(ModelRendererTurbo sub : model){
 			if(sub!=null) {
+				GL11.glPushMatrix();
 				sub.render();
+				GL11.glPopMatrix();
 			}
 		}
 	}
@@ -160,10 +165,10 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 
     public void flip(ModelRendererTurbo[] model) {
         if(model==null){return;}
-        for(ModelRendererTurbo sub : model){
-            sub.doMirror(false, true, true);
-            sub.setRotationPoint(sub.rotationPointX, -sub.rotationPointY, -sub.rotationPointZ);
-        }
+		for(ModelRendererTurbo mod : model){
+			mod.rotateAngleX = -mod.rotateAngleX;
+			mod.rotateAngleX = -mod.rotateAngleX;
+		}
     }
 	public void flip(List<ModelRendererTurbo> model) {
 		if(model==null){return;}
@@ -212,6 +217,7 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
     }
 
 	public ModelRendererTurbo[] initList(ModelRendererTurbo[] list){
+	    if(list==null){return null;}
         for(ModelRendererTurbo model : list){
             addPart(model);
         }

@@ -51,6 +51,9 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     /*used by the transport class to apply a weight multiplication if the bogies are on a slope*/
     public boolean isOnSlope=false;
 
+    /**instancing of this here so java GC doesn't have to keep cleaning and remaking it.*/
+    private double dragMultiplier;
+
     /**cached value for the bogie path, prevents need to generate a new variable multiple times per tick*/
     private double[] motionPath;
     /**cached value for the rail path, prevents need to generate a new variable multiple times per tick*/
@@ -221,32 +224,34 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                     this.cartVelocityZ *= 0.9-(0.01* (weight * 0.0007457));
                 }
             }
-//            DebugUtil.println(parking,cartVelocityX, cartVelocityZ, motionX, motionZ,isRunning,isTrain);
 
-            //apply drag
-            if (hasDrag){
-                if (motionX <0.005 && motionX >-0.005){
-                    this.cartVelocityX = motionX =0;
-                } else {
-                    motionX *= 0.9-(weight*0.00000110231);
-                    this.cartVelocityX *= 0.9-(weight*0.00000110231);
-                }
-                if (motionZ <0.005 && motionZ >-0.005){
-                    this.cartVelocityZ =motionZ =0;
-                } else {
-                    motionZ *= 0.9-(weight*0.00000110231);
-                    this.cartVelocityZ *= 0.9-(weight*0.00000110231);
-                }
-            }
-
+            dragMultiplier = Math.pow(weight,-0.07457);
 
             //add the uphill/downhill velocity
             switch (railMetadata){
-                case 2:{motionX -= 0.0078125D; this.posY = (floorY + 1d); isOnSlope=true; break;}
-                case 3:{motionX += 0.0078125D; this.posY = (floorY + 1d); isOnSlope=true; break;}
-                case 4:{motionZ += 0.0078125D; this.posY = (floorY + 1d); isOnSlope=true; break;}
-                case 5:{motionZ -= 0.0078125D; this.posY = (floorY + 1d); isOnSlope=true; break;}
-                default:{isOnSlope=false;}
+                //todo replace with a similar calculation to the drag multiplier
+                case 2:{motionX -= 0.0078125D*dragMultiplier; this.posY = (floorY + 1d); isOnSlope=true; break;}
+                case 3:{motionX += 0.0078125D*dragMultiplier; this.posY = (floorY + 1d); isOnSlope=true; break;}
+                case 4:{motionZ += 0.0078125D*dragMultiplier; this.posY = (floorY + 1d); isOnSlope=true; break;}
+                case 5:{motionZ -= 0.0078125D*dragMultiplier; this.posY = (floorY + 1d); isOnSlope=true; break;}
+                default:{
+                    isOnSlope=false;
+                    //apply drag
+                    if (hasDrag){
+                        if (motionX <0.005 && motionX >-0.005){
+                            this.cartVelocityX = motionX =0;
+                        } else {
+                            motionX *= dragMultiplier;
+                            this.cartVelocityX *= dragMultiplier;
+                        }
+                        if (motionZ <0.005 && motionZ >-0.005){
+                            this.cartVelocityZ =motionZ =0;
+                        } else {
+                            motionZ *= dragMultiplier;
+                            this.cartVelocityZ *= dragMultiplier;
+                        }
+                    }
+                }
             }
 
             Block block = worldObj.getBlock(floorX, floorY, floorZ);

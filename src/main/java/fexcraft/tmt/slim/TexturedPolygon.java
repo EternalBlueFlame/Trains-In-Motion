@@ -52,7 +52,6 @@ public class TexturedPolygon {
         for (PositionTransformVertex positionTexturevertex : vertices){
         	Tessellator.getInstance().addVertexWithUV(positionTexturevertex.vector3F.xCoord * f, positionTexturevertex.vector3F.yCoord * f, positionTexturevertex.vector3F.zCoord * f, positionTexturevertex.textureX, positionTexturevertex.textureY);
 		}
-		DebugUtil.printGLError(glGetError());
 		Tessellator.getInstance().arrayEnabledDraw();
     }
 

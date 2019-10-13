@@ -1152,7 +1152,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      *     or we could move to some form of ordered map, although that would damage normal render performance.
      * @param viewer
      * @param isPaintBucket
-     * @param skinIndex
+     * @param skinId
      * @return
      */
     public skin getTextureByID(EntityPlayer viewer, boolean isPaintBucket, String skinId){
