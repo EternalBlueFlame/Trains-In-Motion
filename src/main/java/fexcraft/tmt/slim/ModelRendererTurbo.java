@@ -1823,7 +1823,6 @@ public class ModelRendererTurbo {
         if(field_1402_i || !showModel){
             return;
         }
-        //GL11.glPushMatrix();
         if(rotateAngleX != 0.0F || rotateAngleY != 0.0F || rotateAngleZ != 0.0F){
             GL11.glTranslatef(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
             if(flipAxis){
@@ -1844,7 +1843,7 @@ public class ModelRendererTurbo {
             if(rotateAngleX != 0.0F){
                 GL11.glRotatef(rotateAngleX * 57.29578F, 1.0F, 0.0F, 0.0F);
             }
-            //drawPolygons(scale);
+            drawPolygons(scale);
         } else
         if(rotationPointX != 0.0F || rotationPointY != 0.0F || rotationPointZ != 0.0F){
             GL11.glTranslatef(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
@@ -1852,9 +1851,8 @@ public class ModelRendererTurbo {
             GL11.glTranslatef(-rotationPointX * scale, -rotationPointY * scale, -rotationPointZ * scale);
         }
         else{
-//            drawPolygons(scale);
+            drawPolygons(scale);
         }
-        //GL11.glPopMatrix();
     }
 
 
