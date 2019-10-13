@@ -40,7 +40,7 @@ public class ModelTies {
 
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.1875f,d1,iicon.getMaxV());
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.0625f,d0, iicon.getMaxV());
-            Tessellator.getInstance().arrayEnabledDraw();
+            Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
         GL11.glPopMatrix();
@@ -73,7 +73,7 @@ public class ModelTies {
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.1875f,iicon.getMinU(),iicon.getMaxV());
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.1875f,d1,iicon.getMaxV());
 
-            Tessellator.getInstance().arrayEnabledDraw();
+            Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
 
@@ -96,7 +96,7 @@ public class ModelTies {
 
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.0625f,d1,iicon.getMaxV());
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMaxV());
-            Tessellator.getInstance().arrayEnabledDraw();
+            Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
 
@@ -118,7 +118,7 @@ public class ModelTies {
 
             addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0, 0.1875f,iicon.getMaxU(),iicon.getMaxV());
             addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0, 0.0625f,iicon.getMaxU(),iicon.getMinV());
-            Tessellator.getInstance().arrayEnabledDraw();
+            Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
 
@@ -140,7 +140,7 @@ public class ModelTies {
 
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0, 0.0625f,iicon.getMaxU(),iicon.getMaxV());
             addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0, 0.1875f,iicon.getMaxU(),iicon.getMinV());
-            Tessellator.getInstance().arrayEnabledDraw();
+            Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
 

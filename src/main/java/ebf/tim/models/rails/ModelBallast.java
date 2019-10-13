@@ -32,7 +32,7 @@ public class ModelBallast {
             addVertexWithOffsetAndUV(p, -0.0625f + minWidth, 0, 0,d0,iicon.getMaxV());
             ballastloop++;
         }
-        Tessellator.getInstance().arrayEnabledDraw();
+        Tessellator.getInstance().draw();
         GL11.glPopMatrix();
     }
 
@@ -56,7 +56,7 @@ public class ModelBallast {
             addVertexWithOffsetAndUV(p, 0.0625f + maxWidth, 0, 0,d0,iicon.getMinV()+((iicon.getMaxV()-iicon.getMinV())*0.15f));
             ballastloop++;
         }
-        Tessellator.getInstance().arrayEnabledDraw();
+        Tessellator.getInstance().draw();
 
         GL11.glPopMatrix();
         GL11.glPushMatrix();
@@ -74,7 +74,7 @@ public class ModelBallast {
             addVertexWithOffsetAndUV(p, -0.1825f + minWidth, -0.0625f, 0,d0,iicon.getMinV()+((iicon.getMaxV()-iicon.getMinV())*0.15f));
             ballastloop++;
         }
-        Tessellator.getInstance().arrayEnabledDraw();
+        Tessellator.getInstance().draw();
         GL11.glPopMatrix();
     }
 }

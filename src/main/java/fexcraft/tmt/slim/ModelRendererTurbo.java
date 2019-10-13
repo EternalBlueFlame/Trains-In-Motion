@@ -1823,8 +1823,10 @@ public class ModelRendererTurbo {
         if(field_1402_i || !showModel){
             return;
         }
-        if(rotateAngleX != 0.0F || rotateAngleY != 0.0F || rotateAngleZ != 0.0F){
+        if(rotationPointX != 0.0F || rotationPointY != 0.0F || rotationPointZ != 0.0F){
             GL11.glTranslatef(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
+        }
+        if(rotateAngleX != 0.0F || rotateAngleY != 0.0F || rotateAngleZ != 0.0F){
             if(flipAxis){
                 if(rotateAngleZ != 0.0F){
                     GL11.glRotatef(rotateAngleZ * 57.29578F, 0.0F, 0.0F, 1.0F);
@@ -1843,15 +1845,10 @@ public class ModelRendererTurbo {
             if(rotateAngleX != 0.0F){
                 GL11.glRotatef(rotateAngleX * 57.29578F, 1.0F, 0.0F, 0.0F);
             }
-            drawPolygons(scale);
-        } else
-        if(rotationPointX != 0.0F || rotationPointY != 0.0F || rotationPointZ != 0.0F){
-            GL11.glTranslatef(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
-            drawPolygons(0.0625f);
-            GL11.glTranslatef(-rotationPointX * scale, -rotationPointY * scale, -rotationPointZ * scale);
         }
-        else{
-            drawPolygons(scale);
+        drawPolygons(scale);
+        if(rotationPointX != 0.0F || rotationPointY != 0.0F || rotationPointZ != 0.0F){
+            GL11.glTranslatef(-rotationPointX * scale, -rotationPointY * scale, -rotationPointZ * scale);
         }
     }
 

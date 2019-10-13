@@ -101,19 +101,24 @@ public class TextureManager {
                 int height =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
 
                 GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, renderPixels);
-                //DebugUtil.printGLError(GL11.glGetError());
                 texture = new int[((width*height)*4)+2];
                 texture[0]=width;
                 texture[1]=height;
                 for (int i=2; i<((width*height)*(4))-2; i+=(4)){
-                    texture[i+3]=renderPixels.get(i+3);//alpha
-                    texture[i+2]=renderPixels.get(i+2);//Red
-                    texture[i+1]=renderPixels.get(i+1);//Green
-                    texture[i]=renderPixels.get(i);//Blue
+                    if(renderPixels.get(i+3)==0){
+                        texture[i]=fullAlpha;
+                        texture[i+1]=fullAlpha;
+                        texture[i+2]=fullAlpha;
+                        texture[i+3]=fullAlpha;
+                    } else {
+                        texture[i + 3] = renderPixels.get(i + 3);//alpha
+                        texture[i + 2] = renderPixels.get(i + 2);//Red
+                        texture[i + 1] = renderPixels.get(i + 1);//Green
+                        texture[i] = renderPixels.get(i);//Blue
+                    }
                 }
             tmtTextureMap.put(resource, texture);
         }
-        //DebugUtil.printGLError(GL11.glGetError());
 
         return texture;
     }
@@ -138,12 +143,16 @@ public class TextureManager {
                 for (Integer col: colors) {
                     RGBint = hexTorgba(col);
                     //if it's within 10 RGB, add the actual color we want to the differences
-                    if (colorInRange(pixels[i] & 0xFF, pixels[i + 1] & 0xFF, pixels[i + 2] & 0xFF,
+                    if (RGBint[3] != fullAlpha && colorInRange(pixels[i] & 0xFF, pixels[i + 1] & 0xFF, pixels[i + 2] & 0xFF,
                             RGBint[0], RGBint[1], RGBint[2])) {
                         renderPixels.put(i, b(RGBint[0]));
                         renderPixels.put(i + 1, b(RGBint[1]));
                         renderPixels.put(i + 2, b(RGBint[2]));
-                    } else {
+                    } else if (RGBint[3] == fullAlpha) {
+                        renderPixels.put(i, fullAlpha);
+                        renderPixels.put(i, fullAlpha);
+                        renderPixels.put(i, fullAlpha);
+                    }else{
                         renderPixels.put(i, b(pixels[i]));
                         renderPixels.put(i + 1, b(pixels[i + 1]));
                         renderPixels.put(i + 2, b(pixels[i + 2]));
@@ -158,10 +167,9 @@ public class TextureManager {
         //DebugUtil.printGLError(GL11.glGetError());
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D,1, GL11.GL_RGBA, pixels[0], pixels[1], 0, GL_RGBA, GL_UNSIGNED_INT, renderPixels);
         glGenerateMipmapEXT(GL_TEXTURE_2D);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         renderPixels.clear();//reset the buffer to all 0's.
-        //DebugUtil.printGLError(GL11.glGetError());
     }
 
     //most compilers should process this type of function faster than a normal typecast.

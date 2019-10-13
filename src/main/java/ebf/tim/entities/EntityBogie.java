@@ -392,6 +392,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
             meta &= 7;
         }
         if (meta >= 2 && meta <= 5) {
+            //todo this seems either important or redundant
            //this.posY = (double)(floorY + 1);
         }
         if (meta == 2) {

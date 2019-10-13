@@ -153,7 +153,7 @@ public class RenderEntity extends Render {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-        if(textureURI!=null){
+        if(y==0){
             GL11.glDisable(GL11.GL_LIGHTING);
         } else {
             GL11.glEnable(GL11.GL_LIGHTING);

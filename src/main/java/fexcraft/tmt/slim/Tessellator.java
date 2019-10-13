@@ -49,17 +49,7 @@ public class Tessellator{
 		GL11.glBegin(mode);
 	}
 
-	/**
-	 * old draw function for compatibility.
-	 * use the enable and disable calls around the render of the model as a whole and call
-	 * @see #arrayEnabledDraw() instead so they don't have to be enabled and disabled during the render of every face.
-	 */
-	@Deprecated
 	public void draw(){
-		arrayEnabledDraw();
-	}
-
-	public void arrayEnabledDraw(){
 		for(float[] f : verticies){
 			if(f.length>3) {
 				GL11.glTexCoord2f(f[3], f[4]);
