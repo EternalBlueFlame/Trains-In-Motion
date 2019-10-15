@@ -39,7 +39,7 @@ public class RailTileEntity extends TileEntity {
                 return;
             }
             TextureManager.adjustLightFixture(worldObj,xCoord,yCoord,zCoord);
-            if(false && railGLID!=null){//TODO: enable displaylist when shape gen is done.
+            if(railGLID!=null){//TODO: enable displaylist when shape gen is done.
                 org.lwjgl.opengl.GL11.glCallList(railGLID);
             } else {
 
@@ -59,15 +59,15 @@ public class RailTileEntity extends TileEntity {
                     }
                 }*/
 
-                //railGLID = net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1);
-                //org.lwjgl.opengl.GL11.glNewList(railGLID, org.lwjgl.opengl.GL11.GL_COMPILE);
+                railGLID = net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1);
+                org.lwjgl.opengl.GL11.glNewList(railGLID, org.lwjgl.opengl.GL11.GL_COMPILE);
                 //DebugUtil.println(data.toXMLString());
                 Model1x1Rail.Model3DRail(worldObj,xCoord,yCoord,zCoord,
                         new RailShapeCore().parseString(data.getString("route")),
                         data.getItemStack("ballast"),
                         data.getItemStack("ties"),
                         data.getItemStack("rail"), null);
-                //org.lwjgl.opengl.GL11.glEndList();
+                org.lwjgl.opengl.GL11.glEndList();
             }
         } else {super.func_145828_a(report);}
     }

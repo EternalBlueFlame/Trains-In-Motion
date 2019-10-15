@@ -1,8 +1,5 @@
 package fexcraft.fvtm.model;
 
-import ebf.tim.utility.RailUtility;
-import fexcraft.fcl.common.lang.ArrayList;
-import fexcraft.fvtm.PartModel;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 /**
@@ -19,12 +16,17 @@ public class TurboList extends ModelBase {
     }
 
     public boolean add(ModelRendererTurbo t){
-
-        t.rotateAngleY *= RailUtility.radianF;
-        t.rotateAngleZ *= RailUtility.radianF;
-        t.rotateAngleX *= RailUtility.radianF;
         super.addPart(t);
         return true;
+    }
+
+    @Override
+    public void flip(ModelRendererTurbo[] model) {
+        if(model==null){return;}
+        for(ModelRendererTurbo mod : model){
+            mod.rotateAngleY = -mod.rotateAngleY;
+            mod.rotateAngleZ = -mod.rotateAngleZ;
+        }
     }
 
 }

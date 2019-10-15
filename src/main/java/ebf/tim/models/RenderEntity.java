@@ -87,7 +87,7 @@ public class RenderEntity extends Render {
 
 
             //cache animating parts
-            if (ClientProxy.EnableAnimations && entity.renderData.needsModelUpdate) {
+            if (y!=0 && ClientProxy.EnableAnimations && entity.renderData.needsModelUpdate) {
                 boolean isAdded;
                 for (ModelBase part : entity.renderData.modelList) {
                     for (ModelRendererTurbo render : part.getParts()) {
@@ -169,7 +169,7 @@ public class RenderEntity extends Render {
          * Be sure animations are enabled in user settings, then check of there is something to animate.
          * if there is, then calculate the vectors and apply the animations
          */
-        if (!Minecraft.getMinecraft().isGamePaused() &&ClientProxy.EnableAnimations) {
+        if (y!=0 && !Minecraft.getMinecraft().isGamePaused() &&ClientProxy.EnableAnimations) {
             if (entity.renderData.wheelPitch >= 6.2831855f || entity.renderData.wheelPitch <=-6.2831855f) {
                 entity.renderData.wheelPitch -= Math.copySign(6.2831855f, entity.renderData.wheelPitch);
             }

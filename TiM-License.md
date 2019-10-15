@@ -36,13 +36,11 @@ Redistribution and use in source and binary forms, with or without modification,
 &nbsp;&nbsp;&nbsp;&nbsp;1.5.1. Texture pack(s) made for Trains in Motion so long as it does not contain any original Trains in Motion code or art assets.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;1.5.2. Videos that display all or part of Trains in Motion.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.5.2.1. You are advised to, but are not required to, provide a link to the Trains in Motion Website.<br/>
-1.6. Unless defined otherwise by this EULA, you may not publicly distribute the Trains in Motion source, mod, and, or assets, without [Eternal Blue Flame](https://github.com/EternalBlueFlame)'s explicit permission.<br/>
+1.6. Unless defined otherwise by this EULA, you may not publicly distribute the Trains in Motion, mod, and, or assets, without [Eternal Blue Flame](https://github.com/EternalBlueFlame)'s explicit permission.<br/>
 1.7. To distribute your addon or modified Trains in Motion via the Official website, you are required to get permission from [Eternal Blue Flame](https://github.com/EternalBlueFlame)<br/>
 1.8. All advertising materials mentioning features or use of this software must display a link to the Trains in Motion GitHub and, or curseforge.<br/>
 1.9. Neither Eternal Blue Flame, Trains in Motion, nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.<br/>
-1.10. You may use limited functions or segments of code from the TiM source towards other unrelated functions, these limitations include:<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.10.1. If the included code is beyond 1000 characters you are required to get permission from [Eternal Blue Flame](https://github.com/EternalBlueFlame)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;1.10.2. You may not use any code from the tmt folder without getting permission from [Ferdinand](https://github.com/Fexcraft)<br/>
+1.10. Source code with licenses such as, but not limited to, CoFH, TMT, and Railcraft is strictly handled by their own licenses.<br/>
 
 
 ## 2. Limitation of liability

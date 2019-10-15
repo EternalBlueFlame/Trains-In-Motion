@@ -14,11 +14,12 @@ import java.util.List;
 public class RailShapeCore {
 
     public List<Vec5f> activePath = new ArrayList<>();
-    public List<Vec5f> activeTiePath = new ArrayList<>();
     public boolean[] ends = {true, true};
     public List<List<Vec5f>> inactivePaths = new ArrayList<>();
     public int[] gauge;
     public float segmentLength;
+    /*CLIENT ONLY*/
+    public List<Vec5f> activeTiePath = new ArrayList<>();
 
     public static void processPoints(List<RailSimpleShape> coordList, float[] gauge, RailTileEntity tile){
         for(RailSimpleShape coords : coordList) {

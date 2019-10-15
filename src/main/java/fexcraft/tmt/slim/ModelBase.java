@@ -31,10 +31,10 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 		OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
 
 		if(displayList==-1) {
-			//displayList = GLAllocation.generateDisplayLists(1);
-			//GL11.glNewList(displayList, GL11.GL_COMPILE);
+			displayList = GLAllocation.generateDisplayLists(1);
+			GL11.glNewList(displayList, GL11.GL_COMPILE);
 			render(boxList);
-			//GL11.glEndList();
+			GL11.glEndList();
 		} else {
 			GL11.glCallList(displayList);
 		}
@@ -123,8 +123,8 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 		if(!flipX && !flipY && !flipZ){return;}
 		for(ModelRendererTurbo mod : model){
 			if(flipX){mod.rotateAngleX = -mod.rotateAngleX;}
-			if(flipY){mod.rotateAngleX = -mod.rotateAngleX;}
-			if(flipZ){mod.rotateAngleX = -mod.rotateAngleX;}
+			if(flipY){mod.rotateAngleY = -mod.rotateAngleY;}
+			if(flipZ){mod.rotateAngleZ = -mod.rotateAngleZ;}
 		}
 	}
 
@@ -166,8 +166,8 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
     public void flip(ModelRendererTurbo[] model) {
         if(model==null){return;}
 		for(ModelRendererTurbo mod : model){
-			mod.rotateAngleX = -mod.rotateAngleX;
-			mod.rotateAngleX = -mod.rotateAngleX;
+			mod.rotateAngleY = -mod.rotateAngleY * 57.29578F;
+			mod.rotateAngleZ = -mod.rotateAngleZ * 57.29578F;
 		}
     }
 	public void flip(List<ModelRendererTurbo> model) {

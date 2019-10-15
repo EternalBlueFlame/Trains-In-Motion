@@ -1829,21 +1829,21 @@ public class ModelRendererTurbo {
         if(rotateAngleX != 0.0F || rotateAngleY != 0.0F || rotateAngleZ != 0.0F){
             if(flipAxis){
                 if(rotateAngleZ != 0.0F){
-                    GL11.glRotatef(rotateAngleZ * 57.29578F, 0.0F, 0.0F, 1.0F);
+                    GL11.glRotatef(rotateAngleZ, 0.0F, 0.0F, 1.0F);
                 }
                 if(rotateAngleY != 0.0F){
-                    GL11.glRotatef(rotateAngleY * 57.29578F, 0.0F, 1.0F, 0.0F);
+                    GL11.glRotatef(rotateAngleY, 0.0F, 1.0F, 0.0F);
                 }
             } else{
                 if(rotateAngleY != 0.0F){
-                    GL11.glRotatef(rotateAngleY * 57.29578F, 0.0F, 1.0F, 0.0F);
+                    GL11.glRotatef(rotateAngleY, 0.0F, 1.0F, 0.0F);
                 }
                 if(rotateAngleZ != 0.0F){
-                    GL11.glRotatef(rotateAngleZ * 57.29578F, 0.0F, 0.0F, 1.0F);
+                    GL11.glRotatef(rotateAngleZ, 0.0F, 0.0F, 1.0F);
                 }
             }
             if(rotateAngleX != 0.0F){
-                GL11.glRotatef(rotateAngleX * 57.29578F, 1.0F, 0.0F, 0.0F);
+                GL11.glRotatef(rotateAngleX, 1.0F, 0.0F, 0.0F);
             }
         }
         drawPolygons(scale);
