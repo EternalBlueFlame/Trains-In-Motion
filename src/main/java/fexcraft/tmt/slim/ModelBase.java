@@ -21,25 +21,38 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 	boolean init=true;
 	public ModelRendererTurbo base[],bodyModel[],open[],closed[],r1[],r2[],r3[],r4[],r5[],r6[],r7[],r8[],r9[],r0[];
 
-	public int displayList=-1;
+	public List<Integer> displayList=new ArrayList<>();
 
 	public void render(){
 		if(init){
+		    displayList.add(-1);
 		    initAllParts();
 		}
 
 		OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
 
-		if(displayList==-1) {
-			displayList = GLAllocation.generateDisplayLists(1);
-			GL11.glNewList(displayList, GL11.GL_COMPILE);
+		if(displayList.get(0)==-1) {
+			displayList.set(0, GLAllocation.generateDisplayLists(1));
+			GL11.glNewList(displayList.get(0), GL11.GL_COMPILE);
 			render(boxList);
 			GL11.glEndList();
 		} else {
-			GL11.glCallList(displayList);
+			GL11.glCallList(displayList.get(0));
 		}
 
-		render(animatedList);
+		if(animatedList==null){return;}
+		for(int i=1;i<animatedList.size();i++){
+			if(displayList.get(i)!=-1){
+				GL11.glCallList(displayList.get(i));
+			} else if(animatedList.get(i)!=null) {
+				displayList.set(i, GLAllocation.generateDisplayLists(1));
+				GL11.glNewList(displayList.get(i), GL11.GL_COMPILE);
+				GL11.glPushMatrix();
+				animatedList.get(i).render();
+				GL11.glPopMatrix();
+				GL11.glEndList();
+			}
+		}
 	}
 
 	/** render sub-model array */
@@ -168,6 +181,7 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 		for(ModelRendererTurbo mod : model){
 			mod.rotateAngleY = -mod.rotateAngleY * 57.29578F;
 			mod.rotateAngleZ = -mod.rotateAngleZ * 57.29578F;
+			mod.rotateAngleX *= 57.29578F;
 		}
     }
 	public void flip(List<ModelRendererTurbo> model) {
@@ -186,7 +200,8 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 	}
 
 	public void addPart(ModelRendererTurbo part){
-		if(part.animatedPosition||part.animatedRotation||part.animatedScale||part.animatedShape){
+		if(part.animated){
+		    displayList.add(-1);
 			animatedList.add(part);
 		} else {
 			boxList.add(part);

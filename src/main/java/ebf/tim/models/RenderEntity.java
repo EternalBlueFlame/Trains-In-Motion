@@ -98,7 +98,7 @@ public class RenderEntity extends Render {
                         }
                         if (StaticModelAnimator.checkAnimators(render)) {
                             entity.renderData.animatedPart.add(StaticModelAnimator.initPart(render, entity));
-                            render.animatedShape=true;
+                            render.animated=true;
                         } else if (GroupedModelRender.canAdd(render)) {
                             //if it's a grouped render we have to figure out if we already have a group for this or not.
                             isAdded = false;

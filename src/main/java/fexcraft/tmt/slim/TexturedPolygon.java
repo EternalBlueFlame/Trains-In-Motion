@@ -10,29 +10,12 @@ import static org.lwjgl.opengl.GL11.glGetError;
 
 public class TexturedPolygon {
 
+	//TODO: this might be easier to work with as a List
 	public PositionTransformVertex[] vertices;
 	
-	public TexturedPolygon(PositionTransformVertex apositionTexturevertex[]){
+	public TexturedPolygon(PositionTransformVertex[] apositionTexturevertex){
 		vertices = apositionTexturevertex;
     }
-
-	/**
-	 * function disabled, normals aren't needed anymore
-	 */
-	@Deprecated
-	public void setInvertNormal(boolean isSet){ }
-
-	/**
-	 * function disabled, normals aren't needed anymore
-	 */
-	@Deprecated
-	public void setNormals(float x, float y, float z){ }
-
-	/**
-	 * function disabled, normals aren't needed anymore
-	 */
-	@Deprecated
-	public void setNormals(ArrayList<Vec3f> iNormal){ }
 
 	public void draw(float f){
 		switch (vertices.length){
