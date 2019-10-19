@@ -1,5 +1,25 @@
 package fexcraft.tmt.slim;
 
+import static org.lwjgl.opengl.EXTFramebufferObject.glGenerateMipmapEXT;
+import static org.lwjgl.opengl.GL11.GL_RGBA;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_HEIGHT;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_WIDTH;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
+import static org.lwjgl.opengl.GL11.glGetTexLevelParameteri;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
+import org.lwjgl.opengl.GL11;
+
 import ebf.tim.TrainsInMotion;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
@@ -9,30 +29,14 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
-import org.lwjgl.opengl.GL11;
-
-import javax.annotation.Nullable;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.util.*;
-
-import static org.lwjgl.opengl.EXTFramebufferObject.glGenerateMipmapEXT;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
 
 public class TextureManager {
 
@@ -41,7 +45,7 @@ public class TextureManager {
     private static int i, length, skyLight;
     private static int[] RGBint, pixels;
     private static final byte fullAlpha=(byte)0;
-    private static Set MCResourcePacks;
+    private static Set<?> MCResourcePacks;
 
     public static Map<ItemStack,int[]> ingotColors = new HashMap<>();
 
