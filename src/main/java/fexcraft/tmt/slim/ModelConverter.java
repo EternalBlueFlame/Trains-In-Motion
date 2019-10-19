@@ -1,9 +1,5 @@
 package fexcraft.tmt.slim;
 
-import net.minecraft.client.renderer.GLAllocation;
-import net.minecraft.entity.Entity;
-import org.lwjgl.opengl.GL11;
-
 /**
 * Converter to use Flansmod-Type vehicle models.
 * @Author Ferdinand Calo' (FEX___96)

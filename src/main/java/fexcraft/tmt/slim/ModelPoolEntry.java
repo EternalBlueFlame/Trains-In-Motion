@@ -1,9 +1,6 @@
 package fexcraft.tmt.slim;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
 
 public abstract class ModelPoolEntry {
 	

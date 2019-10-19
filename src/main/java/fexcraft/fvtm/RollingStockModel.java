@@ -1,23 +1,24 @@
 package fexcraft.fvtm;
 
-import fexcraft.fvtm.model.TurboList;
+import java.util.ArrayList;
+import java.util.List;
+
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import net.minecraft.entity.Entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * A compatibility class for FMT models
+ * A compatibility class for "FVTM Scheme/Format" models.
  * @Author Eternal BlueFlame
  *
  * @OriginalAuthor Ferdinand Calo' (FEX___96)
  */
 
-public class PartModel extends ModelBase {
+public class RollingStockModel extends ModelBase {
+	
     public List<TurboList> groups = new ArrayList<>();
-    public PartModel(){}
+    public int textureX, textureY;
+    public RollingStockModel(){}
 
     @Override
     public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5){
@@ -34,4 +35,5 @@ public class PartModel extends ModelBase {
         }
         return turboList;
     }
+    
 }
