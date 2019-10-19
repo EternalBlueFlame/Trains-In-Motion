@@ -1,19 +1,14 @@
 package ebf.tim.entities;
 
-import ebf.tim.TrainsInMotion;
 import ebf.tim.registry.NBTKeys;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.FuelHandler;
 import ebf.tim.utility.RailUtility;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +17,7 @@ import java.util.UUID;
  * this is the management core for all trains.
  * @author Eternal Blue Flame
  */
-public abstract class EntityTrainCore extends GenericRailTransport {
+public class EntityTrainCore extends GenericRailTransport {
 
     /**manages the items for burnHeat, and the burnHeat itself.*/
     public FuelHandler fuelHandler = new FuelHandler();
@@ -56,31 +51,13 @@ public abstract class EntityTrainCore extends GenericRailTransport {
         super(world);
     }
 
-    /**
-     * <h2> Data Syncing and Saving </h2>
-     * SpawnData is mainly used for data that has to be created on client then sent to the server, like data processed on item use.
-     * NBT is save data, which only happens on server.
-     */
-
-    /**reads the data sent from client on entity spawn*/
-    @Override
-    public void readSpawnData(ByteBuf additionalData) {
-        super.readSpawnData(additionalData);
-        accelerator = additionalData.readInt();
-    }
-    /**sends the data to server from client*/
-    @Override
-    public void writeSpawnData(ByteBuf buffer) {
-        super.writeSpawnData(buffer);
-        buffer.writeInt(accelerator);
-    }
     /**loads the entity's save file*/
     @Override
     protected void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
         accelerator = tag.getInteger(NBTKeys.accelerator);
         dataWatcher.updateObject(16, tag.getFloat(NBTKeys.transportFuel));
-        vectorCache[7][0] = tag.getFloat(NBTKeys.trainSpeed);
+        vectorCache[1][0] = tag.getFloat(NBTKeys.trainSpeed);
 
 
     }
@@ -90,7 +67,7 @@ public abstract class EntityTrainCore extends GenericRailTransport {
         super.writeEntityToNBT(tag);
         tag.setInteger(NBTKeys.accelerator, accelerator);
         tag.setFloat(NBTKeys.transportFuel, dataWatcher.getWatchableObjectFloat(16));
-        tag.setFloat(NBTKeys.trainSpeed, vectorCache[7][0]);
+        tag.setFloat(NBTKeys.trainSpeed, vectorCache[1][0]);
 
     }
 
@@ -112,7 +89,10 @@ public abstract class EntityTrainCore extends GenericRailTransport {
     }
 
 
+    @Override
+    public boolean hasDrag(){return accelerator==0;}
     //in newtons
+    @Override
     public float getPower(){
         if (transportTractiveEffort()<1f){
             //2650 is a conversion factor for newtons, and 0.72 is a rough estimate for efficiency
@@ -125,6 +105,7 @@ public abstract class EntityTrainCore extends GenericRailTransport {
         }
     }
     //gets the max power output to estimate how much the train can support of it's own weight
+    @Override
     public float getMaxPower(){
         if (transportTractiveEffort()<1f){
             //2650 is a conversion factor for newtons, and 0.72 is a rough estimate for efficiency
@@ -146,105 +127,68 @@ public abstract class EntityTrainCore extends GenericRailTransport {
         return (accelerator*0.16666666666f)*0.05f;
     }
 
+    private float maxPowerNewtons=0;
+
+    @Override
+    public void setValuesOnLinkUpdate(List<GenericRailTransport> consist){
+        maxPowerNewtons=0;
+        pullingWeight=0;
+        for(GenericRailTransport t : consist) {
+            maxPowerNewtons +=t.getMaxPower();
+            pullingWeight +=t.weightKg();
+        }
+    }
+
     /**
      * <h2>Calculate speed increase rate</h2>
      *
      * speed calculation provided by zodiacmal
      */
     public void calculateAcceleration(){
-        boolean hasReversed = false;
-        float weight=weightKg() * (getBoolean(boolValues.BRAKE)?2:1);
-        float pullingWeight=weight;
-        float powerNewtons = getPower();
-        float maxPowerNewtons = getMaxPower();
-        List<GenericRailTransport> checked = new ArrayList<>();
-        checked.add(this);
-        GenericRailTransport front = null;
-        if (frontLinkedID!=null){
-            front = (GenericRailTransport) worldObj.getEntityByID(frontLinkedID);
-        } else if (backLinkedID != null){
-            front = (GenericRailTransport) worldObj.getEntityByID(backLinkedID);
-            hasReversed = true;
-        }
-
-        //todo: this should probably be cached so it only has to check every few ticks, like the fuel update for example.
-        while(front != null){
-            //calculate the speed modification
-            if(!(front instanceof EntityTrainCore) && front.weightKg()!=0){
-                weight+= front.weightKg() * (getBoolean(boolValues.BRAKE)?2:1) * (front.frontBogie.isOnSlope?2:1) * (front.backBogie.isOnSlope?2:1);
-            } else if (front instanceof EntityTrainCore) {
-                powerNewtons += front.getBoolean(boolValues.RUNNING)?((EntityTrainCore)front).getPower()*0.75f:0;
-                maxPowerNewtons += front.getBoolean(boolValues.RUNNING)?((EntityTrainCore)front).getMaxPower()*0.75f:0;
-                weight+= front.weightKg() * (getBoolean(boolValues.BRAKE)?4:1) * (front.frontBogie.isOnSlope?2:1) * (front.backBogie.isOnSlope?2:1);
-                pullingWeight +=front.weightKg() * (getBoolean(boolValues.BRAKE)?4:1) * (front.frontBogie.isOnSlope?2:1) * (front.backBogie.isOnSlope?2:1);
-            }
-
-            //add the one we just used to the checked list
-            checked.add(front);
-            //loop to the next rollingstock.
-            @Nullable
-            Entity test = front.frontLinkedID!=null?worldObj.getEntityByID(front.frontLinkedID):null;
-            //if it's null and we haven't reversed yet, start the loop over from the back. if we have reversed though, end the loop.
-            if(test == null){
-                if (!hasReversed){
-                    front = backLinkedID!=null?(GenericRailTransport)worldObj.getEntityByID(backLinkedID):null;
-                    hasReversed = true;
-                } else {
-                    front = null;
-                }
-                //if the list of checked transports doesn't contain the new one then change the loop to the new one,
-            } else if (!checked.contains(test)) {
-                front = (GenericRailTransport) test;
-                //if the list does contain the checked one, and we haven't reversed yet,  start the loop over from the back. if we have reversed though, end the loop.
-            } else {
-                if (!hasReversed){
-                    front = backLinkedID!=null?(GenericRailTransport)worldObj.getEntityByID(backLinkedID):null;
-                    hasReversed = true;
-                } else {
-                    front = null;
-                }
-            }
-        }
-
-
-
-
-        if (accelerator !=0) {
+        float weight=pullingWeight * (getBoolean(boolValues.BRAKE)?2:1);
+        if (accelerator !=0 && ticksExisted%20!=0) {
             //speed is defined by the power in newtons divided by the weight, divided by the number of ticks in a second.
-            if(powerNewtons!=0) {
+            if(maxPowerNewtons!=0) {
                 //745.7 converts to watts, which seems more accurate.
-                vectorCache[7][0] += ((powerNewtons/weight)/745.7);//applied power
+                vectorCache[1][0] += ((maxPowerNewtons/weight)/7457);//applied power
+
+                vectorCache[1][0]*=(accelerator*0.16666666666);//effected by the state of the throttle
 
 
-                vectorCache[7][1]=Math.abs((maxPowerNewtons/pullingWeight)/745.7f)-Math.abs(vectorCache[7][0]);//max power produced without drag, minus the current power
-                if(vectorCache[7][1]>0.005){
+                vectorCache[1][1]=( (1.75f * (worldObj.isRaining()?0.5f:1)) *this.weightKg());
+                //todo: debuff for pulled weight
+
+                if(Math.abs(vectorCache[1][0])*-745.7>vectorCache[1][1]/7457){
                     //todo: add sparks to animator.
-                    vectorCache[7][0] -= ((powerNewtons/weight)/745.7)*0.5f;
+                    DebugUtil.println("SCREECH","wheelspin: " + (vectorCache[1][0]*-745.7),
+                            "Grip: " + (vectorCache[1][1]/7457), "i really need to get those spark particles in..");
+                    vectorCache[1][0] *=0.33;
                 }
 
-
+            } else {
+                updateConsist();
             }
 
         } else {
-            vectorCache[7][1]=0;
-            if (vectorCache[7][0]>0) {
-                vectorCache[7][0] *= (1 - (0.005* (weight * 0.0007457)));
-                if (vectorCache[7][0] <0){
-                    vectorCache[7][0] =0;
+            vectorCache[1][1]=0;
+            if (vectorCache[1][0]>0) {
+                vectorCache[1][0] *= (1 - (0.005* (weight * 0.0007457)));
+                if (vectorCache[1][0] <0){
+                    vectorCache[1][0] =0;
                 }
             } else {
-                vectorCache[7][0] *= (1 - (0.005* (weight * 0.0007457)));
-                if (vectorCache[7][0] >0){
-                    vectorCache[7][0] =0;
+                vectorCache[1][0] *= (1 - (0.005* (weight * 0.0007457)));
+                if (vectorCache[1][0] >0){
+                    vectorCache[1][0] =0;
                 }
             }
         }
 
         //cap movement to the max speed
-        if (vectorCache[7][0] > (transportTopSpeed()*0.0138889f)){
-            vectorCache[7][0] = (transportTopSpeed()*0.0138889f);
-        } else if (vectorCache[7][0] < (-transportTopSpeed()*0.0138889f)){
-            vectorCache[7][0] = (-transportTopSpeed()*0.0138889f);
+        if (vectorCache[1][0] > (transportTopSpeed()*0.00694445f)){
+            vectorCache[1][0] = (transportTopSpeed()*0.00694445f);
+        } else if (vectorCache[1][0] < (-transportTopSpeed()*0.00694445f)){
+            vectorCache[1][0] = (-transportTopSpeed()*0.00694445f);
         }
         //todo: make the max reduced when going reverse
 
@@ -261,27 +205,29 @@ public abstract class EntityTrainCore extends GenericRailTransport {
     @Override
     public void onUpdate() {
 
-        if(frontBogie != null && backBogie != null && !worldObj.isRemote) {
+        if(accelerator!=0 && frontBogie != null && backBogie != null && !worldObj.isRemote) {
             //twice a second, re-calculate the speed.
             if(ticksExisted %10==0){
                 //stop calculation if it can't move, running should be managed from the fuel handler, to be more dynamic
                 if (getBoolean(boolValues.RUNNING)) {
                     calculateAcceleration();
                 } else {
-                    vectorCache[7][0] = 0;
+                    vectorCache[1][0] = 0;
                     accelerator=0;
                     this.dataWatcher.updateObject(18, accelerator);
                 }
             }
-            vectorCache[6] = RailUtility.rotatePointF(vectorCache[7][0],vectorCache[7][1],vectorCache[7][2], rotationPitch, rotationYaw, 0);
-            frontBogie.setVelocity(vectorCache[6][0], vectorCache[6][1], vectorCache[6][2]);
-            backBogie.setVelocity(vectorCache[6][0], vectorCache[6][1], vectorCache[6][2]);
+            vectorCache[3] = RailUtility.rotatePointF(vectorCache[1][0],0,0, rotationPitch, rotationYaw, 0);
+            frontBogie.addVelocity(vectorCache[3][0], vectorCache[3][1], vectorCache[3][2]);
+            backBogie.addVelocity(vectorCache[3][0], vectorCache[3][1], vectorCache[3][2]);
 
             frontVelocityX = frontBogie.motionX;
-            frontVelocityZ = frontBogie.motionZ;
             backVelocityX = backBogie.motionX;
             backVelocityZ = backBogie.motionZ;
+            frontVelocityZ = frontBogie.motionZ;
         }
+
+
         super.onUpdate();
     }
 
@@ -291,11 +237,15 @@ public abstract class EntityTrainCore extends GenericRailTransport {
      * @see GenericRailTransport#manageLinks(GenericRailTransport)
      */
     @Override
-    public void manageLinks(GenericRailTransport linkedTransport){}
+    public void manageLinks(GenericRailTransport linkedTransport){
+        if(accelerator==0){
+            super.manageLinks(linkedTransport);
+        }
+    }
 
 
     @Override
-    public boolean interact(EntityPlayer player, boolean isFront, boolean isBack, int key) {
+    public boolean interact(int player, boolean isFront, boolean isBack, int key) {
         if (!super.interact(player, isFront, isBack, key)){
             switch (key){
                 case 8:{ //toggle ignition
@@ -322,6 +272,9 @@ public abstract class EntityTrainCore extends GenericRailTransport {
         }
         return false;
     }
+
+    @Override
+    public int getMinecartType(){return 10004;}
 
     /*
      * <h2>Inherited variables</h2>

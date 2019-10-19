@@ -12,11 +12,10 @@ import java.util.Map;
 
 public class ModelPool {
 	
-	public static ModelPoolEntry addFile(String file, Class<?> modelClass, Map<String, TextureGroup> textureGroup){
+	public static ModelPoolEntry addFile(String file, Class<?> modelClass){
 		ModelPoolEntry entry = null;
 		if(modelMap.containsKey(file)){
 			entry = modelMap.get(file);
-			entry.applyGroups(textureGroup);
 			return entry;
 		}
 		try{
@@ -38,20 +37,16 @@ public class ModelPool {
 			System.out.println("The model with the name " + file + " does not exist.");
 			return null;
 		}
-		entry.textures = new HashMap<String, TextureGroup>();
 		entry.name = file;
-		entry.setTextureGroup("0");
 		entry.getModel(modelFile);
-		entry.applyGroups(textureGroup);
 		modelMap.put(file, entry);
 		return entry;
 	}
 	
-    public static ModelPoolEntry addFileF(String file, Class<?> modelClass, Map<String, TextureGroup> textureGroup) throws IOException{
+    public static ModelPoolEntry addFileF(String file, Class<?> modelClass) throws IOException{
 		ModelPoolEntry entry = null;
 		if(modelMap.containsKey(file)){
 			entry = modelMap.get(file);
-			entry.applyGroups(textureGroup);
 			return entry;
 		}
 		try{
@@ -74,11 +69,8 @@ public class ModelPool {
 			System.out.println("The model with the name " + file + " does not exist.");
 			return null;
 		}
-		entry.textures = new HashMap<String, TextureGroup>();
 		entry.name = file;
-		entry.setTextureGroup("0");
 		entry.getModel(modelFile);
-		entry.applyGroups(textureGroup);
 		modelMap.put(file, entry);
 		return entry;
 	}

@@ -1,2 +1,2 @@
-0.2.5.0 alpha
+0.31 pre-alpha
 https://github.com/EternalBlueFlame/Trains-In-Motion/releases

@@ -1,26 +1,26 @@
 package ebf.tim.blocks.rails;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import ebf.XmlBuilder;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.items.ItemRail;
-import ebf.tim.utility.DebugUtil;
-import ebf.tim.utility.RailUtility;
-import fexcraft.tmt.slim.Vec3f;
+import ebf.tim.utility.CommonProxy;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRail;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialLogic;
 import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.item.Item;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -28,19 +28,41 @@ import java.util.Random;
  */
 public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
-    RailTileEntity tile = null;
+    //RailTileEntity tile = null;
+    private static final int[] updateMatrix = {-2,-1,0,1,2};
+
+    /*
+    public ItemStack rail;
+    private int[] railColor=null;
+    public ItemStack ballast;
+    public ItemStack ties;
+    public ItemStack wires;
+    public int snow=0;
+    public int timer=0;
+    public int overgrowth=0;
+    Integer railGLID=null;
+
+
+    //used for the actual path, and rendered
+    public List<float[]> points = new ArrayList<>();
+    public float segmentLength=0;
+    //used to define the number of rails and their offset from the center.
+    public float[] railGauges;
+    //TODO: only rendered, to show other paths, maybe rework so they are all in the same list and just have a bool for which is active?
+    //public List<RailPointData> cosmeticPoints = new ArrayList<>();*/
 
 
     public BlockRailCore(){
         setCreativeTab(null);
     }
 
-
+    @Override
     public boolean hasTileEntity(int metadata) {
         return true;
     }
+
     @Override
-    public int tickRate(World world){return 10;}
+    public int tickRate(World world){return 40;}
 
 
     @Override
@@ -66,18 +88,19 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public float getRailMaxSpeed(World world, EntityMinecart cart, int y, int x, int z){
-        return getTile(world, x, y, z)!=null?getTile(world, x, y, z).getRailSpeed():0.4f;
+        return 0.4f;//getTile(world, x, y, z)!=null?getTile(world, x, y, z).getRailSpeed():0.4f;
     }
+
 
     @Override
     public TileEntity createNewTileEntity(World world, int meta){
         return new RailTileEntity();
     }
 
-    @Override
-    public TileEntity createTileEntity(World world, int metadata){
-        return new RailTileEntity();
-    }
+    //@Override
+    //public TileEntity createTileEntity(World world, int metadata){
+    //    return new RailTileEntity();
+    //}
 
     @Override
     public int getBasicRailMetadata(IBlockAccess world, EntityMinecart cart, int x, int y, int z) {
@@ -125,7 +148,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public Material getMaterial(){
-        return Material.circuits;//tells the world not to let entities spawn on it, or things be placed on top of it.
+        return new MaterialLogic(MapColor.mapColorArray[28]);
     }
 
     @Override
@@ -134,26 +157,33 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
     @Override
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
-        return null;
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z, EntityPlayer player) {
+        return getPickBlock(target, world, x, y, z);
     }
-
-    @SideOnly(Side.CLIENT)
     @Override
-    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_) {
-        return null;
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
+        if(world.getTileEntity(x,y,z) instanceof RailTileEntity) {
+            XmlBuilder xml =new XmlBuilder(((RailTileEntity) world.getTileEntity(x,y,z)).data.toXMLString());
+            return ItemRail.setStackData(
+                    new ItemStack(CommonProxy.railItem, 1), xml.getItemStack("rail"),
+                    xml.getItemStack("ballast"), xml.getItemStack("ties"), xml.getItemStack("wires"));
+        } else {
+            return null;
+        }
     }
-
     @Override
     public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune) {
-        ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
+        if(world.getTileEntity(x,y,z) instanceof RailTileEntity) {
+            XmlBuilder xml =new XmlBuilder(((RailTileEntity) world.getTileEntity(x,y,z)).data.toXMLString());
 
-        int count = quantityDropped(metadata, fortune, world.rand);
-        for(int i = 0; i < count; i++) {
-            ret.add(ItemRail.setStackData(
-                    new ItemStack(new ItemRail(), 1),tile.rail, tile.ballast, tile.ties, tile.wires));
+            ArrayList<ItemStack> out = new ArrayList<>();
+            out.add(ItemRail.setStackData(
+                    new ItemStack(CommonProxy.railItem, 1), xml.getItemStack("rail"),
+                    xml.getItemStack("ballast"), xml.getItemStack("ties"), xml.getItemStack("wires")));
+            return out;
+        } else {
+            return null;
         }
-        return ret;
     }
 
     @Override
@@ -162,47 +192,121 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
 
-    @Override
-    public void updateTick(World worldObj, int xCoord, int yCoord, int zCoord, Random p_149674_5_) {
-        //super.updateTick(worldObj, xCoord,yCoord,zCoord,p_149674_5_);
-        if(!worldObj.isRemote && getTile(worldObj,xCoord,yCoord,zCoord) ==null){
-            tile = (RailTileEntity) worldObj.getChunkProvider().loadChunk(xCoord >> 4,zCoord >>4).func_150806_e(xCoord,yCoord,zCoord);
-        }
-    }
-
-
 
 
     @Override
     public void onNeighborBlockChange(World worldObj, int x, int y, int z, Block b) {
+        if(b instanceof BlockRailCore){return;}
         super.onNeighborBlockChange(worldObj, x, y, z, b);
-        if(this.tile!=null){
-            this.tile.updateShape();
+        updateShape(x,y,z,worldObj, null);
+        if(worldObj.getTileEntity(x,y,z) instanceof RailTileEntity){
+            worldObj.getTileEntity(x,y,z).markDirty();
         }
     }
 
     //stuff from block container to make tile entity more reliable.
     @Override
     public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_) {
-        super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
         p_149749_1_.removeTileEntity(p_149749_2_, p_149749_3_, p_149749_4_);
+        for(int x : updateMatrix){
+            for(int z : updateMatrix){
+                for(int y : updateMatrix){
+                    if(p_149749_1_.getBlock(x+p_149749_2_,y+p_149749_3_,z+p_149749_4_) instanceof  BlockRailCore){
+                        p_149749_1_.getBlock(x+p_149749_2_,y+p_149749_3_,z+p_149749_4_).onNeighborBlockChange(p_149749_1_,p_149749_2_,p_149749_3_,p_149749_4_, this);
+                        updateShape(x,y,z,p_149749_1_, null);
+                    }
+                }
+            }
+        }
+    }
+
+    public int onBlockPlaced(World p_149660_1_, int p_149660_2_, int p_149660_3_, int p_149660_4_, int p_149660_5_, float p_149660_6_, float p_149660_7_, float p_149660_8_, int p_149660_9_) {
+        for(int x : updateMatrix){
+            for(int z : updateMatrix){
+                for(int y : updateMatrix){
+                    if(p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_) instanceof  BlockRailCore){
+                        p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_).onNeighborBlockChange(p_149660_1_,p_149660_2_,p_149660_3_,p_149660_4_, this);
+                        updateShape(x,y,z,p_149660_1_, null);
+                    }
+                }
+            }
+        }
+        return p_149660_9_;
+    }
+
+    public static void updateBlocks(int[] matrix, int xPos, int yPos, int zPos, World w){
+        for(int x : matrix){
+            for(int z : matrix){
+                for(int y : matrix){
+                    if(w.getBlock(x+xPos,y+yPos,z+zPos) instanceof  BlockRailCore){
+                        updateShape(x,y,z,w, null);
+                    }
+                }
+            }
+        }
     }
 
     @Override
     public boolean onBlockEventReceived(World p_149696_1_, int p_149696_2_, int p_149696_3_, int p_149696_4_, int p_149696_5_, int p_149696_6_) {
-        super.onBlockEventReceived(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_, p_149696_5_, p_149696_6_);
-        return getTile(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_) != null && getTile(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_).receiveClientEvent(p_149696_5_, p_149696_6_);
+        return super.onBlockEventReceived(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_, p_149696_5_, p_149696_6_);
+        //return getTile(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_) != null && getTile(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_).receiveClientEvent(p_149696_5_, p_149696_6_);
     }
 
-    public RailTileEntity getTile(World worldObj, int x, int y, int z){
-        if(tile !=null){
-            return tile;
-        } else if (worldObj.getTileEntity(x,y,z) instanceof RailTileEntity) {
-            return tile = (RailTileEntity) worldObj.getTileEntity(x,y,z);
-        } else {
-            return null;
+    public static final int[] gauge750mm={750};
+
+    public static void updateShape(int xPos, int yPos, int zPos, World worldObj, @Nullable XmlBuilder data){
+        //List<> points= new ArrayList<>();
+        //todo: process these directly into quad/processPoints(); on server, then sync the offsets over the NBT network packet.
+        switch (worldObj.getBlockMetadata(xPos, yPos, zPos)){
+            //Z straight
+            case 0: {
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaZStraight(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
+                break;
+            }
+            //X straight
+            case 1: {
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaXStraight(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
+                break;
+            }
+
+            //curves
+            case 9: {
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve9(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
+                break;
+            }
+            case 8: {
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve8(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
+                break;
+            }
+            case 7: {
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve7(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
+                break;
+            }
+            case 6: {
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve6(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
+                break;
+            }
+            //Z slopes
+            case 5 :{
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeZ5(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
+                break;
+            }
+            case 4 :{
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeZ4(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
+                break;
+            }
+            //X slopes
+            case 2 :{
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeX2(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
+                break;
+            }
+            case 3 :{
+                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeX3(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
+                break;
+            }
         }
     }
+
 
 
     /**
@@ -222,76 +326,5 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             }
         }
         return true;
-    }
-
-
-    protected static void quadGenModel(Vec3f P1, Vec3f P2, Vec3f P3, Vec3f P4, float[] railOffsets, float segmentation, RailTileEntity tile){
-
-
-        segmentation=Math.max(segmentation, 1);
-
-        float originalT =Math.abs(P1.xCoord)+Math.abs(P1.zCoord);
-        originalT+=Math.abs(P2.xCoord)+Math.abs(P2.zCoord);
-        originalT+=Math.abs(P3.xCoord)+Math.abs(P3.zCoord);
-        originalT= originalT/(originalT*segmentation);
-
-        float t=-originalT;
-        int i;
-        //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
-        List<float[]> points = new ArrayList<>();
-        for (i=0; i<segmentation+3;i++){
-            //define position
-            points.add(new float[]{
-                    (RailUtility.power(1 - t, 3) * P1.xCoord) + (3*((1-t)*(1-t))*t*P2.xCoord) + (3*(1-t)*((1-t)*(1-t))*P3.xCoord) + (RailUtility.power(t,3)*P4.xCoord),//X
-                    (RailUtility.power(1 - t, 3) * P1.yCoord) + (3*((1-t)*(1-t))*t*P2.yCoord) + (3*(1-t)*((1-t)*(1-t))*P3.yCoord) + (RailUtility.power(t,3)*P4.yCoord),//Y
-                    (RailUtility.power(1 - t, 3) * P1.zCoord) + (3*((1-t)*(1-t))*t*P2.zCoord) + (3*(1-t)*((1-t)*(1-t))*P3.zCoord) + (RailUtility.power(t,3)*P4.zCoord)//Z
-            });
-            t += originalT;
-        }
-
-        for (i=1; i < points.size() - 1; i++) {
-            tile.points.add(
-                    new float[]{points.get(i)[0],points.get(i)[1],points.get(i)[2],0, RailUtility.atan2degreesf(
-                            points.get(i-1)[2] - (points.get(i+1)[2]),
-                            points.get(i-1)[0] - (points.get(i+1)[0])),0}
-            );
-        }
-
-
-        tile.railGauges =railOffsets;
-        tile.segmentLength=segmentation;
-    }
-
-    protected static void triGenModel(Vec3f P1, Vec3f P2, Vec3f P3, float[] railOffsets, float segmentation, RailTileEntity tile){
-        segmentation=Math.max(segmentation, 1);
-
-        float originalT =Math.abs(P1.xCoord)+Math.abs(P1.zCoord);
-        originalT+=Math.abs(P2.xCoord)+Math.abs(P2.zCoord);
-        originalT+=Math.abs(P3.xCoord)+Math.abs(P3.zCoord);
-        originalT= originalT/(originalT*segmentation);
-
-        float t=-originalT;
-        int i;
-        //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
-        List<float[]> points = new ArrayList<>();
-        for (i=0; i<segmentation+3;i++){
-            //define position
-            points.add(new float[]{
-                    (((1-t)*(1-t)) * P1.xCoord) + (2 * (1-t) * t * P2.xCoord) + ((t*t) * P3.xCoord),//X
-                    (((1-t)*(1-t)) * P1.yCoord) + (2 * (1-t) * t * P2.yCoord) + ((t*t) * P3.yCoord),//Y
-                    (((1-t)*(1-t)) * P1.zCoord) + (2 * (1-t) * t * P2.zCoord) + ((t*t) * P3.zCoord),//X
-            });
-            t += originalT;
-        }
-
-        for (i=1; i < points.size() - 1; i++) {
-            tile.points.add(
-                    new float[]{points.get(i)[0],points.get(i)[1],points.get(i)[2],0, RailUtility.atan2degreesf(
-                            points.get(i-1)[2] - (points.get(i+1)[2]),
-                            points.get(i-1)[0] - (points.get(i+1)[0])),0}
-            );
-        }
-        tile.railGauges =railOffsets;
-        tile.segmentLength=segmentation;
     }
 }

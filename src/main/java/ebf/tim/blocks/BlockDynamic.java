@@ -20,13 +20,15 @@ public class BlockDynamic extends BlockContainer {
      * 0: standard crafting table
      * 1: rail crafting table , NOT IMPLEMENTED
      * 2: storage blocks like chests, NOT IMPLEMENTED
-     * 3: signals and levers, NOT IMPLEMENTED
-     * 4: signs, NOT IMPLEMENTED*/
+     * 3: signals, NOT IMPLEMENTED
+     * 4: levers, NOT IMPLEMENTED
+     * 5: signs, NOT IMPLEMENTED*/
     private int type = 0;
 
     /**
      * <h2>block initializer</h2>
      *  Defines the material like what is necessary to make it and the creative tab for it, and the block name.
+     *  NOTE; forge materials are fake, don't use them directly, steal them from existing blocks.
      */
     public BlockDynamic(String name, Material material, int blockType){
         super(material);
@@ -48,7 +50,7 @@ public class BlockDynamic extends BlockContainer {
             return true;
         }
         switch (type) {
-            case 0: {
+            case 0: case 1: {
                 TileEntity entity = worldOBJ.getTileEntity(x, y, z);
                 if (entity != null) {
                     player.openGui(TrainsInMotion.instance, 0, worldOBJ, x, y, z);
@@ -68,7 +70,7 @@ public class BlockDynamic extends BlockContainer {
      * spawns the tile entity related to this block, if there isn't one already. Called on placing the block.
      */
     public TileEntity createNewTileEntity(World worldObj, int meta){
-        return new TileEntityStorage();
+        return new TileEntityStorage(type);
     }
 
 }

@@ -3,6 +3,7 @@ package ebf.tim.utility;
 
 import ebf.tim.entities.GenericRailTransport;
 import fexcraft.tmt.slim.Vec3d;
+import fexcraft.tmt.slim.Vec3f;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,9 +14,17 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import zoranodensha.api.structures.tracks.ITrackBase;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * <h1>utilities</h1>
@@ -30,6 +39,7 @@ public class RailUtility {
     /**converts a radians double to degrees*/
     public static final double degreesD = 180.0d / Math.PI;
     public static final float degreesF = (float) (180.0d / Math.PI);
+    private static List<String> loggedLangChecks = new ArrayList<>();
 
 
     /**
@@ -41,16 +51,81 @@ public class RailUtility {
     }
 
 
+    public static boolean stringContains(String s1, String s2){
+        if (s1 == null || s2 == null) {
+            return false;
+        }
+        final int max = s1.length() - s2.length();
+        for (int i = 0; i <= max; i++) {
+            if (s1.regionMatches(true, i, s2, 0, s2.length())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int parseInt(String str, Class host) throws NumberFormatException{
+        if (str == null || str.length()==0) {
+            throw new NumberFormatException("the string: \"" + str + "\" was not a number, please check " + host.getName());
+        }
+
+        int result = 0;
+        boolean negative = false;
+        for (char c : str.toCharArray()) {
+            if(c=='-'){
+                negative=true;
+            } else {
+                if (c < '0' || c > '9') {
+                    throw new NumberFormatException("the string: \"" + str + "\" was not a number, please check " + host.getName());
+                }
+                result = (result * 10) + c;
+            }
+        }
+        return negative?-result:result;
+    }
 
     public static String translate(String text){
-        if (StatCollector.translateToLocal(text).equals(text)){
-            DebugUtil.println("Missing lang entry for: " +text);
+        if (StatCollector.translateToLocal(text).equals(text) && !loggedLangChecks.contains(text)){
+            DebugUtil.println("Missing lang entry for: ",text,Thread.currentThread().getStackTrace()[2]);
+            loggedLangChecks.add(text);
             return text;
         } else {
             return StatCollector.translateToLocal(text);
         }
     }
 
+    public static String[]multiTranslate(String[] s){
+        if(s==null){return null;}
+        String[] ret = new String[s.length];
+        for (int i=0; i<s.length;i++){
+            ret[i]=translate(s[i]);
+        }
+        return ret;
+    }
+
+    public static String compressString(String str){
+        try {
+            ByteArrayOutputStream obj = new ByteArrayOutputStream();
+            GZIPOutputStream gzip = new GZIPOutputStream(obj);
+            gzip.write(str.getBytes(StandardCharsets.UTF_8));
+            IOUtils.closeQuietly(gzip);
+            return Base64.encodeBase64String(obj.toByteArray());
+        } catch (IOException e){return "";}
+    }
+
+    public static String decompressString(String str){
+        try {
+            GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(Base64.decodeBase64(str)));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(gis, StandardCharsets.UTF_8));
+            StringBuilder outStr = new StringBuilder();
+
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                outStr.append(line);
+            }
+            return outStr.toString();
+        } catch (Exception e){return "";}
+    }
 
     /**
      * replacement for system atan2 function.
@@ -102,12 +177,7 @@ public class RailUtility {
 
 
     public static float power(float base, float power){
-        float result = 1.0f;
-        for(float x = 0; x < power; x++) {
-            result *= base;
-        }
-
-        return result;
+        return (float)Math.pow(base,power);
     }
 
 
@@ -153,6 +223,33 @@ public class RailUtility {
         return xyz;
     }
 
+    public static double[] rotatePoint(double f, double pitch, double yaw) {
+        double cos;
+        double sin;
+        double[] xyz = new double[]{f,0,0};
+        //rotate pitch
+        if (pitch != 0.0F) {
+            pitch *= Math.PI / 180.0f;
+            cos = Math.cos(pitch);
+            sin = Math.sin(pitch);
+
+            xyz[0] = (f * cos);
+            xyz[1] = -(f * sin);
+        }
+        //rotate yaw
+        if (yaw != 0.0F) {
+            yaw *= Math.PI / 180.0f;
+            cos = Math.cos(yaw);
+            sin = Math.sin(yaw);
+
+            xyz[0] = (f * cos);
+            xyz[2] = (f * sin);
+        }
+
+        return xyz;
+    }
+
+
     //private static float cos;
     //private static float sin;
     //private static float[] xyz = new float[]{0,0,0};
@@ -190,15 +287,15 @@ public class RailUtility {
         return xyz;
     }
 
-    public static Vec3d rotatePoint(Vec3d f, float pitch, float yaw, float roll) {
-        double cos;
-        double sin;
-        Vec3d xyz = f;
+    public static Vec3f rotatePoint(Vec3f f, float pitch, float yaw, float roll) {
+        float cos;
+        float sin;
+        Vec3f xyz = new Vec3f(f.xCoord, f.yCoord, f.zCoord);
         //rotate pitch
         if (pitch != 0.0F) {
             pitch *= radianF;
-            cos = Math.cos(pitch);
-            sin = Math.sin(pitch);
+            cos = MathHelper.cos(pitch);
+            sin = MathHelper.sin(pitch);
 
             xyz.xCoord = (f.yCoord * sin) + (f.xCoord * cos);
             xyz.yCoord = (f.yCoord * cos) - (f.xCoord * sin);

@@ -31,6 +31,12 @@ public abstract class GUIButton extends GuiButton {
         this.iconTexture=iconUV;
     }
 
+    public GUIButton(int p_i1021_2_, int p_i1021_3_, int p_i1021_4_, int p_i1021_5_, String text, @Nullable ResourceLocation icon, @Nullable int[] iconUV) {
+        super(-1,p_i1021_2_,p_i1021_3_,p_i1021_4_,p_i1021_5_,text);
+        this.icon=icon;
+        this.iconTexture=iconUV;
+    }
+
     @Deprecated
     public int getHoverState(boolean p_146114_1_) {
         return !this.enabled?0:p_146114_1_?2:1;

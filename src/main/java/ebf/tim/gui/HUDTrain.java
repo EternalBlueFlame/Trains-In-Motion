@@ -16,7 +16,6 @@ import org.lwjgl.opengl.GL11;
  * @author Eternal Blue Flame
  */
 public class HUDTrain extends GuiScreen {
-    private Minecraft game;
 
     @Override
     public boolean doesGuiPauseGame()
@@ -36,9 +35,13 @@ public class HUDTrain extends GuiScreen {
     @SubscribeEvent(priority = EventPriority.NORMAL)
     @SuppressWarnings("unused")
     public void onRenderExperienceBar(RenderGameOverlayEvent event) {
-        if (game != null && game.thePlayer != null) {
-            if (game.thePlayer.ridingEntity instanceof EntityTrainCore) {
-                EntityTrainCore trainEntity = (EntityTrainCore) game.thePlayer.ridingEntity;
+        if (Minecraft.getMinecraft() != null && Minecraft.getMinecraft().thePlayer != null) {
+            if (Minecraft.getMinecraft().thePlayer.ridingEntity instanceof EntityTrainCore) {
+                EntityTrainCore trainEntity = (EntityTrainCore) Minecraft.getMinecraft().thePlayer.ridingEntity;
+
+                if(fontRendererObj==null){
+                    fontRendererObj=Minecraft.getMinecraft().fontRenderer;
+                }
 
                 fontRendererObj.drawString("Entity Internal ID: "+StatCollector.translateToLocal(trainEntity.transportName()), 8, 8, 4210752);
                 fontRendererObj.drawString("DEBUG INFO:", 8, 18, 4210752);
@@ -61,9 +64,6 @@ public class HUDTrain extends GuiScreen {
                 //draw the texture
                 //drawTexturedModalRect(0, 50, 0, 150, 137, 90);
             }
-        } else {
-            game = mc = Minecraft.getMinecraft();
-            fontRendererObj = mc.fontRenderer;
         }
     }
 

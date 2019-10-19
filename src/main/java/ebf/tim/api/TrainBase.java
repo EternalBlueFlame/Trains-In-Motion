@@ -1,9 +1,12 @@
 package ebf.tim.api;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.Bogie;
+import fexcraft.tmt.slim.ModelBase;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
 
@@ -117,5 +120,108 @@ public abstract class TrainBase extends EntityTrainCore{
      * for nuclear this is the number of fusion cores, rounded down. (usually 1)
      */
     public abstract float getMaxFuel();
+    /*
+     * <h2>Inherited variables</h2>
+     * these functions are overridden by classes that extend GenericRailTransport, or EntityTrainCore so that way the values can be changed indirectly.
+     */
+
+    /*
+    <h1>Bogies and models</h1>
+    */
+
+    /**returns the x/y/z offset each bogie should render at, with 0 being the entity center, in order with getBogieModels
+     * example:
+     * return new float[][]{{x1,y1,z1},{x2,y2,z2}, etc...};
+     * may return null.*/
+    @SideOnly(Side.CLIENT)
+    public abstract float[][] bogieModelOffsets();
+
+    /**returns a list of models to be used for the bogies
+     * example:
+     * return new ModelBase[]{new MyModel1(), new myModel2(), etc...};
+     * may return null. */
+    @SideOnly(Side.CLIENT)
+    public abstract ModelBase[] bogieModels();
+
+
+    /**returns the x/y/z offset each model should render at, with 0 being the entity center, in order with getModels
+     * example:
+     * return new float[][]{{x1,y1,z1},{x2,y2,z2}, etc...};
+     * may return null.*/
+    @SideOnly(Side.CLIENT)
+    public abstract float[][] modelOffsets();
+
+    /**event is to add skins for the model to the skins registry on mod initialization.
+     * this function can be used to register multiple skins, one after another.
+     * example:
+     * SkinRegistry.addSkin(this.class, MODID, "folder/mySkin.png", new int[][]{{oldHex, newHex},{oldHex, newHex}, etc... }, displayName, displayDescription);
+     * the int[][] for hex recolors may be null.
+     * hex values use "0x" in place of "#"
+     * "0xff00aa" as an example.
+     * the first skin added to the registry for a transport class will be the default
+     * additionally the addSkin function may be called from any other class at any time.
+     * the registerSkins method is only for organization and convenience.*/
+    public abstract void registerSkins();
+
+    /**returns a list of models to be used for the transport
+     * example:
+     * return new MyModel();
+     * may return null. */
+    @SideOnly(Side.CLIENT)
+    public abstract ModelBase[] getModel();
+
+
+    /*
+    <h1>riders and interaction</h1>
+    */
+
+    /**defines the rider position offsets, with 0 being the center of the entity.
+     * Each set of coords represents a new rider seat, with the first one being the "driver"
+     * example:
+     * return new float[][]{{x1,y1,z1},{x2,y2,z2}, etc...};
+     * may return null*/
+    public abstract float[][] getRiderOffsets();
+
+    /**returns the size of the hitbox in blocks.
+     * example:
+     * return new float[]{x,y,z};
+     * may not return null*/
+    public abstract float[] getHitboxSize();
+
+    /*
+    <h1> inventory and fluid tanks </h1>
+    */
+
+    /** defines the whitelist of fluid names for the tank defined by tankID
+     * example:
+     * if(tankID==0){return new String[]{"water", "diesel"}} else { return null}*/
+    @Deprecated //replace with an array of string arrays, more similar to other methods
+    public abstract String[] getTankFilters(int tankID);
+
+
+    /**defines the name used for registration and the default name used in the gui.*/
+    public abstract String transportName();
+    /**defines the country of origin for the transport*/
+    public abstract String transportcountry();
+    /**the year or year range to display for the transport.*/
+    public abstract String transportYear();
+
+    /**the fuel type to display for the transport.*/
+    public abstract String transportFuelType();
+
+    /**the top speed in km/h for the transport.
+     * not used tor rollingstock.*/
+    public abstract float transportTopSpeed();
+    /**displays in item lore if the transport is fictional or not*/
+    public abstract boolean isFictional();
+    /**the tractive effort for the transport, this is a fallback if metric horsepower (mhp) is not available*/
+    public abstract float transportTractiveEffort();
+    /**this is the default value to define the acceleration speed and pulling power of a transport.*/
+    public abstract float transportMetricHorsePower();
+
+    /**additional lore for the item, each entry in the array is a new line.
+     * may return null.*/
+    public abstract String[] additionalItemText();
+
 
 }

@@ -34,7 +34,7 @@ import java.util.List;
 public class GUITransport extends GUIContainerNoNEI {
 
     /**a reference to the resource location of the vanilla furnace texture, this also gets overridden by texturepacks*/
-    private static final ResourceLocation vanillaInventory =
+    public static final ResourceLocation vanillaInventory =
             ClientProxy.useVanillaInventoryTextures?new ResourceLocation("textures/gui/container/furnace.png"):
                     new ResourceLocation(TrainsInMotion.MODID, "textures/gui/furnace.png");
     /**a reference to the resource location of the vanilla chest texture, this also gets overridden by texturepacks*/
@@ -72,7 +72,7 @@ public class GUITransport extends GUIContainerNoNEI {
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 
-        if (transport.getTankCapacity().length>0) {
+        if (transport.getTankCapacity()!=null && transport.getTankCapacity().length>0) {
             renderTankerInventory(mc, mouseX, mouseY);
         }
     }
@@ -229,7 +229,7 @@ public class GUITransport extends GUIContainerNoNEI {
                     }
                 });
             }
-            if (transport.getType() != TrainsInMotion.transportTypes.STEAM) {
+            if (!transport.getTypes().contains(TrainsInMotion.transportTypes.STEAM)) {
                 this.buttons.add(new GUIButton(guiLeft + 202, guiTop + 166, 18, 18, null, null){
 
                     @Override
@@ -297,7 +297,7 @@ public class GUITransport extends GUIContainerNoNEI {
             drawTexturedRect(guiLeft + 113, guiTop + 16 - i1, 176, 14 - i1, 16, i1);
         }
 
-        drawTextOutlined(fontRendererObj, "burn heat: " + transport.getDataWatcher().getWatchableObjectInt(13), 10, 70, 16777215);
+        drawTextOutlined(fontRendererObj, "burn time: " + transport.getDataWatcher().getWatchableObjectInt(13), 10, 70, 16777215);
         drawTextOutlined(fontRendererObj, "boiler heat: " + transport.getDataWatcher().getWatchableObjectFloat(16), 10, 80, 16777215);
 
     }
@@ -362,66 +362,65 @@ public class GUITransport extends GUIContainerNoNEI {
     private void renderTankerInventory(Minecraft mc, int mouseX, int mouseY){
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        for(int i=0; i<transport.getTankCapacity().length;i++) {
-            //System.out.println(transport.getTankInfo(null).length + ":" + transport.getTankCapacity().length +":" +i);
-            //draw the player inventory and toolbar background.
-            Tessellator.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
-            drawTexturedRect(186, 40+(-20*i), 16, 0, 90, 18, 16, 16);
+        if(transport.getTankCapacity()!=null){
+            for(int i=0; i<transport.getTankCapacity().length;i++) {
+                //System.out.println(transport.getTankInfo(null).length + ":" + transport.getTankCapacity().length +":" +i);
+                //draw the player inventory and toolbar background.
+                Tessellator.bindTexture(URIRegistry.GUI_PREFIX.getResource("gui.png"));
+                drawTexturedRect(186, 40 + (-20 * i), 16, 0, 90, 18, 16, 16);
 
-            if(transport.getTankInfo(null)[i]!=null && transport.getTankInfo(null)[i].fluid.amount> 0) {
-                float liquid = transport.getTankInfo(null)[i].fluid.amount;
-                if(liquid!=0){
-                    liquid/=transport.getTankInfo(null)[i].capacity;
-                }
-                GL11.glPushMatrix();
+                if (transport.getTankInfo(null)[i] != null && transport.getTankInfo(null)[i].fluid.amount > 0) {
+                    float liquid = transport.getTankInfo(null)[i].fluid.amount;
+                    if (liquid != 0) {
+                        liquid /= transport.getTankInfo(null)[i].capacity;
+                    }
+                    GL11.glPushMatrix();
 
-                GL11.glColor4f(1,1,1,0.5f);
-                GL11.glTranslatef(186, 40+(-20*i),0);
-                GL11.glScalef(0.125f+liquid,1.125f,1);
-                //render fluid overlay
-                if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
-                        new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
-                        true, zLevel, 0, 0)) {
-                    RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
-                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
-                }
-                GL11.glTranslatef(16,0,0);
-                if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
-                        new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
-                        true, zLevel, 0, 0)) {
-                    RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
-                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
-                }
-                GL11.glTranslatef(16,0,0);
-                if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
-                        new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
-                        true, zLevel, 0, 0)) {
-                    RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
-                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
-                }
-                GL11.glTranslatef(16,0,0);
-                if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
-                        new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
-                        true, zLevel, 0, 0)) {
-                    RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
-                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
-                }
-                GL11.glTranslatef(16,0,0);
-                if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
-                        new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
-                        true, zLevel, 0, 0)) {
-                    RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
-                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
-                }
+                    GL11.glColor4f(1, 1, 1, 0.5f);
+                    GL11.glTranslatef(186, 40 + (-20 * i), 0);
+                    GL11.glScalef(0.125f + liquid, 1.125f, 1);
+                    //render fluid overlay
+                    if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
+                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
+                            true, zLevel, 0, 0)) {
+                        RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
+                                new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
+                    }
+                    GL11.glTranslatef(16, 0, 0);
+                    if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
+                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
+                            true, zLevel, 0, 0)) {
+                        RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
+                                new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
+                    }
+                    GL11.glTranslatef(16, 0, 0);
+                    if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
+                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
+                            true, zLevel, 0, 0)) {
+                        RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
+                                new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
+                    }
+                    GL11.glTranslatef(16, 0, 0);
+                    if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
+                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
+                            true, zLevel, 0, 0)) {
+                        RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
+                                new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
+                    }
+                    GL11.glTranslatef(16, 0, 0);
+                    if (!ForgeHooksClient.renderInventoryItem(RenderBlocks.getInstance(), mc.renderEngine,
+                            new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())),
+                            true, zLevel, 0, 0)) {
+                        RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, mc.renderEngine,
+                                new ItemStack(Item.getItemFromBlock(transport.getTankInfo(null)[i].fluid.getFluid().getBlock())), 0, 0, true);
+                    }
 
-                GL11.glDisable(GL11.GL_LIGHTING);
-                GL11.glColor4f(1,1,1,1);
+                    GL11.glDisable(GL11.GL_LIGHTING);
+                    GL11.glColor4f(1, 1, 1, 1);
 
-                GL11.glPopMatrix();
+                    GL11.glPopMatrix();
+                }
             }
-
-
-
         }
 
 
@@ -432,8 +431,8 @@ public class GUITransport extends GUIContainerNoNEI {
                                     transport.getTankInfo(null)[i].fluid.amount+"mb/"+ transport.getTankInfo(null)[i].capacity+"mb", mouseX-guiLeft, mouseY-guiTop);
 
                 } else {
-                    if (transport.getTankFilters(i)!=null && transport.getTankFilters(i).length>0) {
-                        drawCreativeTabHoveringText(transport.getTankFilters(i)[0] + ", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX-guiLeft, mouseY-guiTop);
+                    if (transport.getTankFilters()!=null && transport.getTankFilters()[i]!=null && transport.getTankFilters()[i].length>0) {
+                        drawCreativeTabHoveringText(transport.getTankFilters()[i][0] + ", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX-guiLeft, mouseY-guiTop);
                     }else{
                         drawCreativeTabHoveringText(", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX-guiLeft, mouseY-guiTop);
 

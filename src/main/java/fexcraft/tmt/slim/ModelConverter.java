@@ -1,60 +1,49 @@
 package fexcraft.tmt.slim;
 
+import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.entity.Entity;
+import org.lwjgl.opengl.GL11;
 
 /**
 * Converter to use Flansmod-Type vehicle models.
 * @Author Ferdinand Calo' (FEX___96)
 */
-public class ModelConverter extends Model<Object> {
+public class ModelConverter extends ModelBase {
+
+	public ModelRendererTurbo model[],bodyDoorOpenModel[], bodyDoorCloseModel[],trailerModel[],steeringWheelModel[];
 	
-	public ModelRendererTurbo bodyModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo model[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo bodyDoorOpenModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo bodyDoorCloseModel[] = new ModelRendererTurbo[0];
-	
-	public ModelRendererTurbo turretModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo barrelModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo frontWheelModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo backWheelModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo leftFrontWheelModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo rightFrontWheelModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo leftBackWheelModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo rightBackWheelModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo rightTrackModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo leftTrackModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo rightTrackWheelModels[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo leftTrackWheelModels[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo trailerModel[] = new ModelRendererTurbo[0];
-	public ModelRendererTurbo steeringWheelModel[] = new ModelRendererTurbo[0];
-	
-	public void render(){
-		render(bodyModel);
-		render(model);
-		render(bodyDoorCloseModel);
-		render(turretModel);
-		render(barrelModel);
-		render(frontWheelModel);
-		render(backWheelModel);
-		render(leftFrontWheelModel);
-		render(rightFrontWheelModel);
-		render(leftBackWheelModel);
-		render(rightBackWheelModel);
-		render(rightTrackModel);
-		render(leftTrackModel);
-		render(rightTrackWheelModels);
-		render(leftTrackWheelModels);
-		render(trailerModel);
-		render(steeringWheelModel);
-	}
+	public ModelRendererTurbo turretModel[],barrelModel[];
+	public ModelRendererTurbo frontWheelModel[],backWheelModel[],
+			leftFrontWheelModel[],rightFrontWheelModel[],leftBackWheelModel[],rightBackWheelModel[];
+	public ModelRendererTurbo rightTrackModel[],leftTrackModel[],
+			rightTrackWheelModels[],leftTrackWheelModels[];
 
 	@Override
-	public void render(Object type, Entity ent){
-		render();
+	public void initAllParts(){
+		model=initList(model);
+		bodyDoorOpenModel=initList(bodyDoorOpenModel);
+		bodyDoorCloseModel=initList(bodyDoorCloseModel);
+		trailerModel=initList(trailerModel);
+		steeringWheelModel=initList(steeringWheelModel);
+		turretModel=initList(turretModel);
+		barrelModel=initList(barrelModel);
+		frontWheelModel=initList(frontWheelModel);
+		backWheelModel=initList(backWheelModel);
+		leftFrontWheelModel=initList(leftFrontWheelModel);
+		rightFrontWheelModel=initList(rightFrontWheelModel);
+		leftBackWheelModel=initList(leftBackWheelModel);
+		rightBackWheelModel=initList(rightBackWheelModel);
+		rightTrackModel=initList(rightTrackModel);
+		leftTrackModel=initList(leftTrackModel);
+		rightTrackWheelModels=initList(rightTrackWheelModels);
+		leftTrackWheelModels=initList(leftTrackWheelModels);
+		super.initAllParts();
 	}
 
+
+	@Override
 	public void translateAll(float x, float y, float z){
-		translate(bodyModel, x, y, z);
+		super.translateAll(x,y,z);
 		translate(model, x, y, z);
 		translate(bodyDoorOpenModel, x, y, z);
 		translate(bodyDoorCloseModel, x, y, z);
@@ -76,7 +65,7 @@ public class ModelConverter extends Model<Object> {
 
 	@Override
 	public void rotateAll(float x, float y, float z){
-		rotate(bodyModel, x, y, z);
+		super.rotateAll(x,y,z);
 		rotate(model, x, y, z);
 		rotate(bodyDoorOpenModel, x, y, z);
 		rotate(bodyDoorCloseModel, x, y, z);
@@ -95,9 +84,10 @@ public class ModelConverter extends Model<Object> {
 		rotate(trailerModel, x, y, z);
 		rotate(steeringWheelModel, x, y, z);
 	}
-	
+
+	@Override
 	public void flipAll(){
-		flip(bodyModel);
+		super.flipAll();
 		flip(model);
 		flip(bodyDoorOpenModel);
 		flip(bodyDoorCloseModel);
@@ -115,13 +105,6 @@ public class ModelConverter extends Model<Object> {
 		flip(leftTrackWheelModels);
 		flip(trailerModel);
 		flip(steeringWheelModel);
-	}
-	
-	private void flip(ModelRendererTurbo[] model) {
-		for(ModelRendererTurbo sub : model){
-			sub.doMirror(false, true, true);
-			sub.setRotationPoint(sub.rotationPointX, -sub.rotationPointY, -sub.rotationPointZ);
-		}
 	}
 	
 }

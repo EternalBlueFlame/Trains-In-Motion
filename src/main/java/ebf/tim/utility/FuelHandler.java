@@ -3,6 +3,7 @@ package ebf.tim.utility;
 
 import cofh.api.energy.IEnergyContainerItem;
 import cofh.api.energy.IEnergyHandler;
+import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import mods.railcraft.api.electricity.IElectricGrid;
@@ -33,10 +34,7 @@ public class FuelHandler{
 	private float burnTimeMax =0;
 
 	public float maxHeat(GenericRailTransport transport){
-		switch (transport.getType()){
-			case STEAM:{return transport.getMaxFuel() * 750;}
-		}
-		return 0;
+		return transport.getMaxFuel() * 750;
 	}
 
 	/**
@@ -47,21 +45,19 @@ public class FuelHandler{
 	 */
 	@Deprecated
 	public static FluidStack isUseableFluid(ItemStack itemStack, GenericRailTransport transport){
-		switch (transport.getType()){
-			case ELECTRIC:{
-				if (itemStack.getItem() == Items.redstone){
-					return new FluidStack(FluidRegistry.WATER, 250);
-				} else if (itemStack.getItem() == Item.getItemFromBlock(Blocks.redstone_block)){
-					return new FluidStack(FluidRegistry.WATER,2250);
-				}else if (itemStack.getItem() instanceof IEnergyContainerItem){
-					return new FluidStack(FluidRegistry.WATER, ((IEnergyContainerItem) itemStack.getItem()).extractEnergy(itemStack, 250, false));
-				}
-				return null;
+
+		if(transport.getTypes().contains(TrainsInMotion.transportTypes.ELECTRIC)) {
+			if (itemStack.getItem() == Items.redstone) {
+				return new FluidStack(FluidRegistry.WATER, 250);
+			} else if (itemStack.getItem() == Item.getItemFromBlock(Blocks.redstone_block)) {
+				return new FluidStack(FluidRegistry.WATER, 2250);
+			} else if (itemStack.getItem() instanceof IEnergyContainerItem) {
+				return new FluidStack(FluidRegistry.WATER, ((IEnergyContainerItem) itemStack.getItem()).extractEnergy(itemStack, 250, false));
 			}
-			default:{
-				return FluidContainerRegistry.getFluidForFilledItem(itemStack);
-			}
+			return null;
 		}
+
+		return FluidContainerRegistry.getFluidForFilledItem(itemStack);
 	}
 
 	public FluidStack getFluidForSlot(GenericRailTransport train, int slot){
@@ -84,7 +80,7 @@ public class FuelHandler{
 				burnTime = MathHelper.ceiling_double_int(burnHeat *0.1);
 				burnTimeMax = burnTime;
 				if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
-					slotId.decrStackSize(1);
+					train.getSlotIndexByID(400).decrStackSize(1);
 				}
 			} else {
 				burnHeat = 0;
@@ -159,25 +155,26 @@ public class FuelHandler{
 
 	public void manageElectric(EntityTrainCore train){
 		//add redstone to the fuel tank
-		if(train.getStackInSlot(400) !=null) {
-			if (train.getStackInSlot(400).getItem() == Items.redstone) {
-				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) >= 100) {
+		ItemStackSlot slotId=train.getSlotIndexByID(400);
+		if(slotId !=null && slotId.getStack()!=null) {
+			if (slotId.getItem() == Items.redstone) {
+				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) == 0) {
 					train.fill(null, new FluidStack(FluidRegistry.WATER, 100), true);
-					train.decrStackSize(400, 1);
+					train.getSlotIndexByID(400).decrStackSize(1);
 				}
-			} else if (train.getStackInSlot(400).getItem() == Item.getItemFromBlock(Blocks.redstone_block)) {
-				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 1000), false) >= 1000) {
+			} else if (slotId.getItem() == Item.getItemFromBlock(Blocks.redstone_block)) {
+				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 1000), false) == 0) {
 					train.fill(null, new FluidStack(FluidRegistry.WATER, 1000), true);
-					train.decrStackSize(400, 1);
+					train.getSlotIndexByID(400).decrStackSize(1);
 				}
-			} else if (train.getStackInSlot(400).getItem() instanceof IEnergyContainerItem) {
-				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) >= 100) {
+			} else if (slotId.getItem() instanceof IEnergyContainerItem) {
+				if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) == 0) {
 					train.fill(null, new FluidStack(FluidRegistry.WATER,
-							((IEnergyContainerItem) train.getStackInSlot(400).getItem())
-									.extractEnergy(train.getStackInSlot(400), 100, false)), true);
+							((IEnergyContainerItem) train.getSlotIndexByID(400).getItem())
+									.extractEnergy(slotId.getStack(), 100, false)), true);
 				}
 			}
-			if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) >= 100) {
+			if (train.fill(null, new FluidStack(FluidRegistry.WATER, 100), false) == 0) {
 				int draw = 0;
 				TileEntity te;
 				Block b;

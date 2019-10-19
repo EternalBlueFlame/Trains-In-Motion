@@ -2,16 +2,14 @@ package ebf.tim.registry;
 
 
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.entities.rollingstock.EntityGTAX13000GallonTanker;
-import ebf.tim.entities.rollingstock.EntityPullmansPalace;
-import ebf.tim.entities.rollingstock.EntityUP3Bay100TonHopper;
-import ebf.tim.entities.rollingstock.EntityVATLogCar;
-import ebf.tim.entities.trains.EntityBrigadelok080;
-import ebf.tim.utility.DebugUtil;
-import ebf.tim.utility.RecipeManager;
+import ebf.tim.items.CustomItemModel;
+import ebf.tim.items.ItemCraftGuide;
+import ebf.tim.utility.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.MapColor;
@@ -23,6 +21,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -76,34 +76,47 @@ public class TiMGenericRegistry {
         return block;
     }
 
-    public static Item RegisterItem(Item itm, String MODID, String unlocalizedName, @Nullable String oreDictionaryName, @Nullable CreativeTabs tab, @Nullable Item container){
+    public static Item RegisterItem(boolean isClient, Item itm, String MODID, String unlocalizedName, CreativeTabs tab){
+        return RegisterItem(isClient, itm, MODID, unlocalizedName,null,tab, null,null);
+    }
+
+    public static Item RegisterItem(boolean isClient, Item itm, String MODID, String unlocalizedName, @Nullable String oreDictionaryName, @Nullable CreativeTabs tab, @Nullable Item container, @Nullable Object itemRender){
         if (tab!=null) {
             itm.setCreativeTab(tab);
         }
         if (container!=null){
             itm.setContainerItem(container);
         }
-        itm.setUnlocalizedName(unlocalizedName).setTextureName(MODID+":"+unlocalizedName);
-        GameRegistry.registerItem(itm, unlocalizedName);
+        itm.setUnlocalizedName(unlocalizedName);
+        if(isClient){
+            itm.setTextureName(MODID+":"+unlocalizedName);
+        }
+        GameRegistry.registerItem(itm,unlocalizedName);
         if(oreDictionaryName!=null){
             OreDictionary.registerOre(oreDictionaryName, itm);
         }
-        if (TrainsInMotion.proxy!=null &&TrainsInMotion.proxy.isClient() && itm.getUnlocalizedName().equals(StatCollector.translateToLocal(itm.getUnlocalizedName()))){
+        if (TrainsInMotion.proxy!=null && isClient && itm.getUnlocalizedName().equals(StatCollector.translateToLocal(itm.getUnlocalizedName()))){
             DebugUtil.println("Item missing lang entry: " + itm.getUnlocalizedName());
+        }
+        if(isClient && itemRender!=null){
+            MinecraftForgeClient.registerItemRenderer(itm, (IItemRenderer)itemRender);
         }
         return itm;
     }
 
 
-    public static void RegisterFluid(Fluid fluid, String MODID, String unlocalizedName, boolean isGaseous, int density, MapColor color, CreativeTabs tab){
+    public static void RegisterFluid(boolean isClient, Fluid fluid, String MODID, String unlocalizedName, boolean isGaseous, int density, MapColor color, CreativeTabs tab){
         fluid.setUnlocalizedName(unlocalizedName).setGaseous(isGaseous).setDensity(density);
         FluidRegistry.registerFluid(fluid);
 
-        Block block = new BlockTrainFluid(fluid, new MaterialLiquid(color)).setBlockName("block."+unlocalizedName).setBlockTextureName(MODID+":block_"+unlocalizedName);
+        Block block = new BlockTrainFluid(fluid, new MaterialLiquid(color)).setBlockName("block."+unlocalizedName.replace(".item","")).setBlockTextureName(MODID+":block_"+unlocalizedName);
         GameRegistry.registerBlock(block, "block."+unlocalizedName);
         fluid.setBlock(block);
 
-        Item bucket = new ItemBucket(block).setCreativeTab(tab).setUnlocalizedName("item." + unlocalizedName + ".bucket").setContainerItem(Items.bucket).setTextureName(MODID+":bucket_"+unlocalizedName);
+        Item bucket = new ItemBucket(block).setCreativeTab(tab).setUnlocalizedName(unlocalizedName + ".bucket").setContainerItem(Items.bucket);
+                if(isClient){
+                    bucket.setTextureName(MODID+":bucket_"+unlocalizedName);
+                }
         GameRegistry.registerItem(bucket, "fluid." + unlocalizedName + ".bucket");
         FluidContainerRegistry.registerFluidContainer(fluid, new ItemStack(bucket), new ItemStack(Items.bucket));
 
@@ -122,10 +135,13 @@ public class TiMGenericRegistry {
         }
     }
 
+    @SideOnly(Side.CLIENT)
+    public static CustomItemModel itemModel = new CustomItemModel();
+
     private static List<String>usedNames = new ArrayList<>();
     private static int registryPosition =17;
 
-    public static void registerTransports(boolean isClient, GenericRailTransport[] entities, Object entityRender){
+    public static void registerTransports(boolean isClient, String MODID, GenericRailTransport[] entities, Object entityRender){
         if(registryPosition==-1){
             DebugUtil.println("ERROR", "ADDING TRANSPORT REGISTRY ITEMS OUTSIDE MOD INIT", "PLEASE REGISTER YOUR ENTITIES IN THE FOLLOWING EVENT:",
                     "@Mod.EventHandler public void init(FMLInitializationEvent event)");
@@ -137,13 +153,23 @@ public class TiMGenericRegistry {
             cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(
                     registry.getClass(),
                     registry.transportName().replace(" ","") + ".entity",
-                    registryPosition, TrainsInMotion.instance, 60, 1, true);
-            GameRegistry.registerItem(registry.getCartItem().getItem(), registry.transportName());
+                    registryPosition, TrainsInMotion.instance, 3000, 1, true);
+            GameRegistry.registerItem(registry.getCartItem().getItem(), registry.getCartItem().getItem().getUnlocalizedName());
+            if(CommonProxy.recipesInMods.containsKey(MODID)){
+                CommonProxy.recipesInMods.get(MODID).add(getRecipe(registry.getRecipie(), registry.getCartItem()));
+            } else {
+                CommonProxy.recipesInMods.put(MODID, new ArrayList<Recipe>());
+                CommonProxy.recipesInMods.get(MODID).add(getRecipe(registry.getRecipie(), registry.getCartItem()));
+            }
+            if(isClient && ClientProxy.hdTransportItems){
+                MinecraftForgeClient.registerItemRenderer(registry.getCartItem().getItem(), itemModel);
+            }
             registry.registerSkins();
             if(registry.getRecipie()!=null){
-                RecipeManager.registerRecipe(registry.getCartItem(), registry.getRecipie());
+                RecipeManager.registerRecipe(getRecipe(registry.getRecipie(), registry.getCartItem()));
             }
             if(isClient){
+                ItemCraftGuide.itemEntries.add(registry.getClass());
                 if(entityRender==null){
                     cpw.mods.fml.client.registry.RenderingRegistry.registerEntityRenderingHandler(registry.getClass(), (net.minecraft.client.renderer.entity.Render)TrainsInMotion.proxy.getEntityRender());
                 } else {
@@ -158,22 +184,80 @@ public class TiMGenericRegistry {
         usedNames =null; registryPosition=-1;
     }
 
-
-    public static GenericRailTransport[] listSteamTrains() {
-        return new GenericRailTransport[]{new EntityBrigadelok080(null)};
+    private static Recipe getRecipe(Object[] obj, ItemStack cartItem){
+        return new Recipe(new ItemStack[]{cartItem},
+                getItem(obj[0]),
+                getItem(obj[1]),
+                getItem(obj[2]),
+                getItem(obj[3]),
+                getItem(obj[4]),
+                getItem(obj[5]),
+                getItem(obj[6]),
+                getItem(obj[7]),
+                getItem(obj[8])
+        );
     }
 
-    public static GenericRailTransport[] listPassenger() {
-        return new GenericRailTransport[]{new EntityPullmansPalace(null)};
+    public static ItemStack[] getItem(Object itm){
+        ItemStack[] list = new ItemStack[1];
+        if(itm==null){
+            return list;
+        }
+        if(itm instanceof ItemStack){
+            list=ODC((ItemStack)itm);
+        }
+        else if (itm instanceof Item){
+            list=ODC(new ItemStack((Item)itm));
+        }
+        else if (itm instanceof Block){
+            list=ODC(new ItemStack((Block)itm));
+        }
+        else if(itm instanceof String){
+            String[] data = ((String) itm).split(" ");
+            int stacksize = data.length>1?Integer.parseInt(data[1].trim()):1;
+            //cover actual items
+            if(data[0].contains(":")){
+                list=ODC(GameRegistry.findItemStack(data[0].split(":")[0], data[0].split(":")[1], stacksize));
+            } else {
+                //cover ore directory values
+                list=OreDictionary.getOres(data[0]).toArray(new ItemStack[]{});
+                for(ItemStack s : list){
+                    s.stackSize=stacksize;
+                }
+            }
+
+        }
+        return list;
     }
 
-    public static GenericRailTransport[] listFreight() {
-        return new GenericRailTransport[]{new EntityVATLogCar(null), new EntityUP3Bay100TonHopper(null)};
+    /**Ore Directory Converter
+     * converts any input to the ore directory version so recipes will have automatic ore directory support*/
+    public static ItemStack[] ODC(ItemStack s){
+        if(s==null){
+            return null;
+        }
+        //cache the old size and set it to 1, the ore directory only contains entries with a stacksize of 1,
+        //   anything else can break the equals check.
+        int oldSize = s.stackSize;
+        s.stackSize=1;
+
+        List<ItemStack> dir = new ArrayList<>();
+        //create a list of ore directory entries
+        for(int oreID : OreDictionary.getOreIDs(s)){
+            dir.addAll(OreDictionary.getOres(oreID));
+        }
+        if(dir.size()>0) {
+            for (ItemStack stack : dir) {
+                stack.stackSize = oldSize;
+            }
+        } else {
+            s.stackSize=oldSize;
+            dir.add(s);
+        }
+        return dir.toArray(new ItemStack[]{});
+
     }
 
-    public static GenericRailTransport[] listTanker() {
-        return new GenericRailTransport[]{new EntityGTAX13000GallonTanker(null)};
-    }
 
 
 }

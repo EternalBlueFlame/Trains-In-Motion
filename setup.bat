@@ -5,11 +5,13 @@
 @ECHO  Gradle startup script for Windows
 @ECHO  This is to prepare the source for use with an IDE.
 @ECHO  Optionally you may compile the .jar as well.
+@ECHO  Be sure to install JDK 8 for your OS: https://www.oracle.com/technetwork/pt/java/javase/downloads/jdk8-downloads-2133151.html
+@ECHO  Also be sure to set it as your JAVA_HOME: https://docs.oracle.com/cd/E19182-01/820-7851/inst_cli_jdk_javahome_t/
 @ECHO. 
 @ECHO ##########################################################################
 
 @ECHO Choose an IDE:
-@ECHO [1] Eclipse - (Does not work)
+@ECHO [1] Eclipse - (Usually does not work)
 @ECHO [2] Idea (Intelij) - (Does work)
 @ECHO [3] Build the source.
 @echo off
@@ -87,7 +89,7 @@ goto quit
 
 :build
 @echo on
-start call gradlew build
+start call gradlew setupDecompWorkspace --refresh-dependencies build
 @echo off
 @ECHO.
 @ECHO.

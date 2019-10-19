@@ -1,4 +1,4 @@
-<!-- ## This is a comment, do no remove or modify these! ## -->
+<!-- ## This is a comment, do no remove or modify these! ## -->http://jabelarminecraft.blogspot.com/p/minecraft-modding-localization.html
 <!-- ## Only replace the words on the right side of "=" ## -->
 
 <!-- ## Credit to Eternal Blue Flame ## -->
@@ -6,10 +6,11 @@
 <!-- ## GUI ## -->
 gui.waterboiler=Water Boiler
 gui.creativemode=Creative Mode is 
-gui.brake=Brake is 
-gui.lamp=Lamp is 
+gui.brake.false=Brakes Are Disabled.
+gui.brake.true=Brakes Are Enabled.
+gui.lamp.true=Lamp Is On.
+gui.lamp.false=Lamp Is Off.
 gui.horn=Use Horn.
-gui.trainisrunning=Train is 
 gui.on=on.
 gui.off=off.
 gui.coupler.true=Couplers are open.
@@ -24,57 +25,102 @@ gui.of= of
 gui.buckets=Buckets.
 gui.unlink=Unlink couplers.
 gui.dropkey=Copy Ownership Key.
+gui.running.false=Locomotive is off.
+gui.running.true=Locomotive is on.
+gui.creative.false=Creative Mode Disabled.
+gui.creative.true=Creative Mode Enabled.
 
 container.traincrafting=Train Crafting Table
 
-
-<!-- ## Items ## -->
-menu.item.era=Era
 menu.item.steam=Steam
 menu.item.diesel=Diesel
-menu.item.Electric=Electric
+menu.item.electric=Electric
 menu.item.hydrogen=Hydro-electric
-menu.item.maglev=Maglev
 menu.item.nuclearsteam=Nuclear Steam
 menu.item.nuclearelectric=Nuclear Electric
 menu.item.speed=Speed
 menu.item.year=Year
 menu.item.country=Country
-menu.item.germany=Germany
-menu.item.america=USA
 menu.item.pullingpower=Pulling power
 menu.item.tons=Tons
 menu.item.weight=Weight
+menu.item.mhp=Metric Horsepower
 menu.item.seats=Seats
-menu.item.weight=Players
-menu.item.iszeof=Inventory size of
+menu.item.weight=Weight
+menu.item.isizeof=Inventory size of
 menu.item.slots=Slots
+menu.item.fictional=Fictional
 menu.noties=No Ties
 menu.nowires=No Overhead Wires
 menu.noballast=No Ballast
 menu.item=Item
 menu.items=Items
-US=USA
+menu.item.fueltype=Fuel Type
+menu.item.seats=Seats
+menu.ties=Ties:
+menu.ballast=Ballast:
+menu.rails=Rails:
+item.TiM=Trains in Motion
 
-item.oilbucket=Oil bucket
+<!-- ## Countries ## -->
+menu.item.us=USA
+menu.item.germany=Germany
+menu.item.japan=Japan
+menu.item.belgium=Belgium
+menu.item.russia=Russia
+menu.item.england=England
+menu.item.china=China
+menu.item.north korea=North Korea
+menu.item.south korea=South Korea
+menu.item.undefined=Undefined
+menu.item.canada=Canada
+menu.item.mexico=Mexico
+menu.item.africa=Africa
+menu.item.scotland=Scotland
+menu.item.poland=Poland
+menu.item.wales=Wales
+menu.item.north ireland=Northern Ireland
+menu.item.ireland=Ireland
+menu.item.south ireland=Republic of Ireland
+menu.item.united kingdom=United Kingdom
+menu.item.india=India
+menu.item.france=France
+menu.item.spain=Spain
+menu.item.australia=Australia
+menu.item.austria=Austria
+menu.item.brazil=Brazil
+menu.item.italy=Italy
 
+
+
+<!-- ## Items ## -->
+item.oil.bucket.name=Oil bucket
+item.diesel.bucket.name=Diesel bucket
+item.adminbook.name=Admin Book
+item.craftbook.name=Recipe Book
+item.transportkey.name=Transport Key
+item.transportticket.name=Transport Ticket
 
 <!-- ## Blocks ## -->
 fluid.oil=Oil
-block.traintable.name=Train crafting table
-tile.block.traintable=Train crafting table
-item.item.timrail.name=Rail
-item.transportticket.name=Train Ticket
-item.transportkey.name=Train Key
-item.adminbook.name=Trains in Motion Admin Book
-tile.block.diesel.name=Diesel Fluid
-fluid.diesel.name=Diesel Fluid
-tile.block.oil.name=Oil Fluid
+tile.block.traintable.name=Train Crafting Table
+Track Crafting Table.name=Track Crafting Table
+tile.block.railtable=Track Crafting Table
+item.timrail.name=Track
+tile.block.timrail.name=Track
+tile.block.diesel=Diesel Fluid
+fluid.diesel=Diesel Fluid
+tile.block.oil=Oil Fluid
 fluid.oil.name=Oil Fluid
 
 <!-- ## Trains ## -->
 <!-- ## These are actually defined from the item name, so one name covers all areas ## -->
-item.brigadelok080.name=Brigadelok 0-8-0
+item.HenschelBrigadelok.name=Brigadelok 0-8-0
+item.HenschelBrigadelok-E.name=Brigadelok 0-8-0 (Electric)
+item.GATX13000GallonTanker.name=GATX 13000 Gallon Tanker
+item.V.A.TLogcar.name=V.A.T Logcar
+item.UnionPacific3-bayHopper.name=UP 3-Bay Hopper
+item.Pullman'sPalace.name=Pullman's Palace
 
 
 <!-- ## Rollingstock ## -->

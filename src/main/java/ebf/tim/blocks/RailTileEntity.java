@@ -1,16 +1,11 @@
 package ebf.tim.blocks;
 
-import cpw.mods.fml.common.registry.GameData;
+import ebf.XmlBuilder;
 import ebf.tim.blocks.rails.RailShapeCore;
-import ebf.tim.blocks.rails.RailVanillaShapes;
-import ebf.tim.items.ItemRail;
 import ebf.tim.models.rails.Model1x1Rail;
+import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockRailBase;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -20,37 +15,20 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class RailTileEntity extends TileEntity {
 
     private AxisAlignedBB boundingBox = null;
     //management variables
-    public ItemStack rail;
-    public Block ballast;
-    public Block ties;
-    public Block wires;
-    public int snow=0;
-    public int timer=0;
-    public int overgrowth=0;
-    //render data
-    public int metal = 0xcccccc;
-
-    public float getRailSpeed(){
-        return 0.4f;
-    }
+    //todo public int snow=0;
+    //todo public int timer=0;
+    //todo public int overgrowth=0;
+    private Integer railGLID=null;
+    public XmlBuilder data = new XmlBuilder();
 
     //used for the actual path, and rendered
-    public List<float[]> points = new ArrayList<>();
-    public float segmentLength=0;
-    //used to define the number of rails and their offset from the center.
-    public float[] railGauges;
+    //public RailShapeCore points = new RailShapeCore();
     //TODO: only rendered, to show other paths, maybe rework so they are all in the same list and just have a bool for which is active?
     //public List<RailPointData> cosmeticPoints = new ArrayList<>();
 
@@ -60,113 +38,51 @@ public class RailTileEntity extends TileEntity {
             if (!worldObj.isRemote) {
                 return;
             }
-            //DebugUtil.println(segmentLength);
-            Model1x1Rail.Model3DRail(points, gauge750mm, segmentLength, ties, ballast, rail);
+            TextureManager.adjustLightFixture(worldObj,xCoord,yCoord,zCoord);
+            if(railGLID!=null){//TODO: enable displaylist when shape gen is done.
+                org.lwjgl.opengl.GL11.glCallList(railGLID);
+            } else {
+
+                /*
+                if(railColor==null){
+                    if(rail !=null && TextureManager.ingotColors!=null) {
+                        for(Map.Entry<ItemStack, int[]> e : TextureManager.ingotColors.entrySet()){
+                            if(e.getKey().getItem()==rail.getItem()&&
+                                    e.getKey().getTagCompound()==rail.getTagCompound() &&
+                                        e.getKey().getItemDamage()==rail.getItemDamage()) {
+                                railColor = TextureManager.ingotColors.get(e.getKey());
+                            }
+                        }
+                    }
+                    if(railColor==null){
+                        railColor=new int[]{0,0,0};
+                    }
+                }*/
+
+                railGLID = net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1);
+                org.lwjgl.opengl.GL11.glNewList(railGLID, org.lwjgl.opengl.GL11.GL_COMPILE);
+                //DebugUtil.println(data.toXMLString());
+                Model1x1Rail.Model3DRail(worldObj,xCoord,yCoord,zCoord,
+                        new RailShapeCore().parseString(data.getString("route")),
+                        data.getItemStack("ballast"),
+                        data.getItemStack("ties"),
+                        data.getItemStack("rail"), null);
+                org.lwjgl.opengl.GL11.glEndList();
+            }
         } else {super.func_145828_a(report);}
     }
 
     @Override
     public boolean shouldRefresh(Block oldBlock, Block newBlock, int oldMeta, int newMeta, World world, int x, int y, int z) {
-        return oldMeta != newMeta;
+        return false;
     }
 
     @Override
-    public boolean canUpdate(){return worldObj!=null && !worldObj.isRemote;}
+    public boolean canUpdate(){return false;}
 
-    public static final float[] gauge750mm={0.3125f, -0.3125f};
-
-    int[] meta = new int[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};//3x3x3. value -1 is for blocks that aren't a rail
-    int tickOffset=0;
+    //int[] meta = new int[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};//3x3x3. value -1 is for blocks that aren't a rail
     @Override
-    public void updateEntity(){
-        if (worldObj.isRemote) return;
-        tickOffset++;
-        if(tickOffset>20){
-            tickOffset=1;
-        }
-        if(tickOffset!=1){
-            return;
-        }
-        int itteration = 0;
-        for (int x = -1; x < 2; x++) {
-            for (int y = -1; y < 2; y++) {
-                for (int z = -1; z < 2; z++) {
-                    if (meta[itteration] != ((worldObj.getBlock(xCoord + x, yCoord + y, zCoord + z) instanceof BlockRailBase) ?
-                            worldObj.getBlockMetadata(xCoord + x, yCoord + y, zCoord + z) :
-                            -1)) {
-                        meta[itteration] = ((worldObj.getBlock(xCoord + x, yCoord + y, zCoord + z) instanceof BlockRailBase) ?
-                                worldObj.getBlockMetadata(xCoord + x, yCoord + y, zCoord + z) :
-                                -1);
-                        updateShape();
-                    }
-                    itteration++;
-                }
-            }
-        }
-    }
-
-    public void updateShape() {
-
-        List<float[]> oldPoints = points;//hold on to check if we need update.
-
-
-        points= new ArrayList<>();
-        //todo: process these directly into quad/triProcessPoints on server, then sync the offsets over the NBT network packet.
-            switch (worldObj.getBlockMetadata(xCoord, yCoord, zCoord)){
-                //Z straight
-                case 0: {
-                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaZStraight(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
-                    break;
-                }
-                //X straight
-                case 1: {
-                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaXStraight(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
-                    break;
-                }
-
-                //curves
-                case 9: {
-                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaCurve9(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
-                    break;
-                }
-                case 8: {
-                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaCurve8(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
-                    break;
-                }
-                case 7: {
-                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaCurve7(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
-                    break;
-                }
-                case 6: {
-                    RailShapeCore.triProcessPoints(RailVanillaShapes.vanillaCurve6(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
-                    break;
-                }
-                //Z slopes
-                case 5 :{
-                    RailShapeCore.quadProcessPoints(RailVanillaShapes.vanillaSlopeZ5(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
-                    break;
-                }
-                case 4 :{
-                    RailShapeCore.quadProcessPoints(RailVanillaShapes.vanillaSlopeZ4(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
-                    break;
-                }
-                //X slopes
-                case 2 :{
-                    RailShapeCore.quadProcessPoints(RailVanillaShapes.vanillaSlopeX2(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
-                    break;
-                }
-                case 3 :{
-                    RailShapeCore.quadProcessPoints(RailVanillaShapes.vanillaSlopeX3(worldObj, xCoord, yCoord, zCoord), gauge750mm, this, 4);
-                    break;
-                }
-            }
-
-            if(oldPoints != points) {
-                this.markDirty();
-            }
-            oldPoints=null;//clean it out of ram, we dont need it now.
-
-    }
+    public void updateEntity(){}
 
     @Override
     public AxisAlignedBB getRenderBoundingBox() {
@@ -197,7 +113,6 @@ public class RailTileEntity extends TileEntity {
 
     @Override
     public Packet getDescriptionPacket() {
-            updateShape();
         NBTTagCompound nbttagcompound = new NBTTagCompound();
         this.writeToNBT(nbttagcompound);
         return new S35PacketUpdateTileEntity(this.xCoord, this.yCoord, this.zCoord, 0, nbttagcompound);
@@ -208,75 +123,24 @@ public class RailTileEntity extends TileEntity {
         super.onDataPacket(net, pkt);
         if(pkt ==null){return;}
         readFromNBT(pkt.func_148857_g());
+        markDirty();
     }
 
 
     @Override
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
-        NBTTagCompound compound = new NBTTagCompound();
-        if(rail!=null) {
-            rail.writeToNBT(compound);
-            tag.setTag("rail", compound);
-        }
-        if(ballast!=null) {
-            compound = new NBTTagCompound();
-            new ItemStack(Item.getItemFromBlock(ballast)).writeToNBT(compound);
-            tag.setTag("ballast", compound);
-        }
-        if(ties!=null) {
-            compound = new NBTTagCompound();
-            new ItemStack(Item.getItemFromBlock(ties)).writeToNBT(compound);
-            tag.setTag("ties", compound);
-        }
-        if(wires!=null) {
-            compound = new NBTTagCompound();
-            new ItemStack(Item.getItemFromBlock(wires)).writeToNBT(compound);
-            tag.setTag("wires", compound);
-        }
-
-        tag.setFloat("segmentLength", segmentLength);
-        try {
-            ByteArrayOutputStream bo = new ByteArrayOutputStream();
-            ObjectOutputStream so = new ObjectOutputStream(bo);
-            so.writeObject(points);
-            tag.setByteArray("path", bo.toByteArray());
-            so.flush();
-            bo.close();
-
-        } catch (Exception e){
-            System.out.println("HOW DID YOU GET AN IO EXCEPTION WITHOUT WRITING TO FILE?");
-            e.printStackTrace();
-        }
+        tag.setString("data", data.toXMLString());
 
     }
 
     @Override
     public void readFromNBT(NBTTagCompound tag){
+        if(tag==null){return;}
         super.readFromNBT(tag);
-        if(tag.hasKey("rail")) {
-            rail = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("rail"));
-        }
-        if(tag.hasKey("ballast")) {
-            ballast = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ballast")).getItem());
-        }
-        if(tag.hasKey("ties")) {
-            ties = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("ties")).getItem());
-        }
-        if(tag.hasKey("wires")) {
-            wires = Block.getBlockFromItem(ItemStack.loadItemStackFromNBT(tag.getCompoundTag("wires")).getItem());
-        }
+        String s = tag.getString("data");
+        data = new XmlBuilder(s);
 
-        if (tag.hasKey("segmentLength")) {
-            segmentLength = tag.getFloat("segmentLength");
-        }
-
-        byte[] b = tag.getByteArray("path");
-        try {
-          points = (List<float[]>) new ObjectInputStream(new ByteArrayInputStream(b)).readObject();
-        } catch (Exception e){
-          e.printStackTrace();
-        }
     }
 
 }

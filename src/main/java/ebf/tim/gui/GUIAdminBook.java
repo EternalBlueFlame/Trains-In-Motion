@@ -102,11 +102,11 @@ public class GUIAdminBook extends GuiScreen {
 
         switch (button.id){
             case -1:{
-                TrainsInMotion.keyChannel.sendToServer(new ItemAdminBook.PacketAdminBookClient( "0:"+list[0].substring(1,list[0].length()), Minecraft.getMinecraft().thePlayer.getEntityId()));//tell server to drop items
+                TrainsInMotion.keyChannel.sendToServer(new ItemAdminBook.PacketAdminBookClient( "0:"+list[0].substring(1)));//tell server to drop items
                 break;
             }
             case 0:{
-                TrainsInMotion.keyChannel.sendToServer(new ItemAdminBook.PacketAdminBookClient( "1:"+list[0].substring(1), Minecraft.getMinecraft().thePlayer.getEntityId()));//tell server to drop items
+                TrainsInMotion.keyChannel.sendToServer(new ItemAdminBook.PacketAdminBookClient( "1:"+list[0].substring(1)));//tell server to drop items
                 break;
             }
             case 1:{
@@ -115,7 +115,7 @@ public class GUIAdminBook extends GuiScreen {
                     buttonList = new ArrayList();
                     initGui();
                 } else {
-                    TrainsInMotion.keyChannel.sendToServer(new ItemAdminBook.PacketAdminBookClient( list[1], Minecraft.getMinecraft().thePlayer.getEntityId()));//tell server to send a new gui
+                    TrainsInMotion.keyChannel.sendToServer(new ItemAdminBook.PacketAdminBookClient(list[1]));//tell server to send a new gui
                 }
 
                 break;
@@ -127,7 +127,7 @@ public class GUIAdminBook extends GuiScreen {
                 break;
             }
             default:{
-                TrainsInMotion.keyChannel.sendToServer(new ItemAdminBook.PacketAdminBookClient( list[button.id-3], Minecraft.getMinecraft().thePlayer.getEntityId()));//tell server to send a new gui
+                TrainsInMotion.keyChannel.sendToServer(new ItemAdminBook.PacketAdminBookClient( list[button.id-3]));//tell server to send a new gui
                 break;
             }
         }

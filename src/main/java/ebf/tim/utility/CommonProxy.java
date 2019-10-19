@@ -1,48 +1,36 @@
 package ebf.tim.utility;
 
 
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.IGuiHandler;
-import cpw.mods.fml.common.registry.GameRegistry;
 import ebf.tim.TrainsInMotion;
+import ebf.tim.api.SkinRegistry;
 import ebf.tim.blocks.BlockDynamic;
-import ebf.tim.blocks.BlockTrainFluid;
-import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.items.ItemAdminBook;
-import ebf.tim.items.ItemKey;
-import ebf.tim.items.ItemRail;
-import ebf.tim.items.ItemTicket;
-import ebf.tim.registry.TiMGenericRegistry;
-import net.minecraft.block.Block;
+import ebf.tim.items.*;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialLiquid;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidContainerRegistry;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
-import static ebf.tim.registry.TiMGenericRegistry.RegisterFluid;
-import static ebf.tim.registry.TiMGenericRegistry.RegisterItem;
-import static ebf.tim.registry.TiMGenericRegistry.registerBlock;
+import static ebf.tim.registry.TiMGenericRegistry.*;
 
 
 /**
@@ -51,6 +39,13 @@ import static ebf.tim.registry.TiMGenericRegistry.registerBlock;
  * @author Eternal Blue Flame
  */
 public class CommonProxy implements IGuiHandler {
+
+
+    public static EventManagerServer eventManagerServer = new EventManagerServer();
+    public static Map<String, List<Recipe>> recipesInMods = new HashMap<>();
+
+
+
 
     /**
      * <h2> Server GUI Redirect </h2>
@@ -62,7 +57,7 @@ public class CommonProxy implements IGuiHandler {
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         //Trains
-        if (player != null) {
+        if (player != null && y!=0) {
             if (player.worldObj.getEntityByID(ID) instanceof GenericRailTransport && !((GenericRailTransport) player.worldObj.getEntityByID(ID)).hasCustomGUI()) {
                 return new TransportSlotManager(player.inventory, (GenericRailTransport) player.worldObj.getEntityByID(ID));
                 //tile entities
@@ -73,7 +68,7 @@ public class CommonProxy implements IGuiHandler {
         return null;
     }
 
-    public void adminGui(String datacsv){};
+    public void adminGui(String datacsv){}
 
     public boolean isClient(){return false;}
 
@@ -81,7 +76,23 @@ public class CommonProxy implements IGuiHandler {
      * <h2>Load config</h2>
      * this loads the config values that will only effect server.
      */
-    public void loadConfig(Configuration config){}
+    public void loadConfig(FMLPreInitializationEvent event){
+
+        Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+        config.load();
+        config.addCustomCategoryComment("Debug (Common)", "Used on server and client.");
+        SkinRegistry.forceSkinRegister = config.getBoolean("ForceSkinRegister", "Debug (Common)", false,
+                "Forces skins to register even if the add-on for said skin is not available, doesn't cause instability just uses unnecessary ram.");
+
+        config.addCustomCategoryComment("Debug (Common, IDE Only)", "Only runs from IDE instances.");
+        SkinRegistry.debugSkinRegistration = config.getBoolean("DebugSkinRegister", "Debug (Common, IDE Only)",false,
+                "Logs all skin registration events to debug console.");
+
+        config.save();
+
+
+
+    }
 
     /**
      * <h2>load entity from UUID</h2>
@@ -133,9 +144,13 @@ public class CommonProxy implements IGuiHandler {
     public static Fluid fluidDiesel = new Fluid("Diesel");
 
     /**the crafting table for trains*/
-    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", Material.wood, 0);
+    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", new Material(MapColor.mapColorArray[13]), 0);
+
+    public static BlockDynamic railTable = new BlockDynamic("blockrailtable", new Material(MapColor.mapColorArray[6]), 1);
 
     public static BlockRailCore railBlock = new BlockRailCore();
+
+    public static Item railItem;
 
     /**
      * <h2>Server Register</h2>
@@ -144,15 +159,19 @@ public class CommonProxy implements IGuiHandler {
      */
     public void register() {
 
-        RegisterFluid(fluidOil, TrainsInMotion.MODID, "oil", false, 700,MapColor.blackColor, TrainsInMotion.creativeTab);
-        RegisterFluid(fluidDiesel, TrainsInMotion.MODID, "diesel", false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
+        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidOil, TrainsInMotion.MODID, "oil", false, 700,MapColor.blackColor, TrainsInMotion.creativeTab);
+        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidDiesel, TrainsInMotion.MODID, "diesel", false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
 
 
-        RegisterItem(new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", null, TrainsInMotion.creativeTab, null);
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", TrainsInMotion.creativeTab);
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemCraftGuide(),TrainsInMotion.MODID, "craftbook", TrainsInMotion.creativeTab);
 
-        RegisterItem(new ItemKey(),TrainsInMotion.MODID,  "transportkey",null, TrainsInMotion.creativeTab, null);
-        RegisterItem(new ItemTicket(),TrainsInMotion.MODID,  "transportticket",null, TrainsInMotion.creativeTab, null);
-        RegisterItem(new ItemRail(),TrainsInMotion.MODID,  "item.timrail", null, TrainsInMotion.creativeTab, null);
+	RegisterItem(TrainsInMotion.proxy.isClient(),new ItemPaintBucket(),TrainsInMotion.MODID, "paintbucket", TrainsInMotion.creativeTab); 
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemKey(),TrainsInMotion.MODID,  "transportkey", TrainsInMotion.creativeTab);
+        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemTicket(),TrainsInMotion.MODID,  "transportticket", TrainsInMotion.creativeTab);
+        if(!isClient()) {
+            railItem = RegisterItem(TrainsInMotion.proxy.isClient(), new ItemRail(), TrainsInMotion.MODID, "timrail", TrainsInMotion.creativeTab);
+        }
 
         registerBlock(isClient(), railBlock, null, "block.timrail", null, getTESR());
 
@@ -160,23 +179,8 @@ public class CommonProxy implements IGuiHandler {
         addRecipe(new ItemStack(registerBlock(isClient(), trainTable, TrainsInMotion.creativeTab,"block.traintable", null, null),1),
                 "WWW", "WIW", "WWW", 'W', Blocks.planks, 'I', Items.iron_ingot);
 
-
-        for (ItemStack i : new ItemStack[]{new ItemStack(Items.iron_ingot),new ItemStack(Items.gold_ingot)}) {
-            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,Blocks.gravel, Blocks.planks, null),
-                    "IWI", "IWI", "IBI", 'W', Blocks.planks, 'I', i, 'B', Blocks.gravel);
-
-            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,null, Blocks.planks, null),
-                    "IWI", "IWI", "I I", 'W', Blocks.planks, 'I', i);
-
-            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,Blocks.gravel, null, null),
-                    "I I", "I I", "IBI", 'I', i, 'B', Blocks.gravel);
-
-            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,Blocks.stone, null, null),
-                    "I I", "I I", "IBI", 'I', i, 'B', Blocks.stone);
-
-            addRecipe(ItemRail.setStackData(new ItemStack(new ItemRail(), 1),i,null, null, null),
-                    "I I", "I I", "I I", 'I', i);
-        }
+        addRecipe(new ItemStack(registerBlock(isClient(), railTable, TrainsInMotion.creativeTab,"block.railtable", null, null),1),
+                "III", "I I", "I I", 'I', Items.iron_ingot);
     }
 
 }

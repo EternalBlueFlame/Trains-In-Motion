@@ -4,16 +4,13 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -31,27 +28,39 @@ public class ItemTransport extends Item {
     private final List<String> subtext = new ArrayList<>();
     /**the class for the entity*/
     private final Class<? extends GenericRailTransport> transport;
+    @SideOnly(Side.CLIENT)
+    GenericRailTransport entity;
     /**the main constructor.
      * @param cart the class for the entity*/
     public ItemTransport(GenericRailTransport cart, String MODID, CreativeTabs tabs) {
         super();
         setUnlocalizedName(cart.transportName().replace(" ",""));
-        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.era") +  ": " + RailUtility.translate(cart.transportEra()));
-        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.year") +": " + cart.transportYear());
-        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.country") + ": " + RailUtility.translate(cart.transportcountry()));
-        subtext.add(EnumChatFormatting.GRAY + RailUtility.translate("menu.item.weight") +": " + cart.weightKg() + "kg");
+        if(cart.transportFuelType()!=null && !cart.transportFuelType().equals("")) {
+            subtext.add(EnumChatFormatting.GRAY + t("menu.item.fueltype") + ": " +
+                    t("menu.item."+cart.transportFuelType().toLowerCase()));
+        }
+        subtext.add(EnumChatFormatting.GRAY + t("menu.item.year") +": " + cart.transportYear());
+        subtext.add(EnumChatFormatting.GRAY + t("menu.item.country") + ": " +
+                t("menu.item."+cart.transportcountry().toLowerCase()));
+        subtext.add(EnumChatFormatting.GRAY + t("menu.item.weight") +": " + cart.weightKg() + "kg");
         if (cart.transportTopSpeed()!=0){
-            subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.speed") +": " + cart.transportTopSpeed() +"km");
+            subtext.add(EnumChatFormatting.GREEN + t("menu.item.speed") +": " + cart.transportTopSpeed() +" km/h");
 
             if (cart.transportMetricHorsePower() !=0){
-                subtext.add(EnumChatFormatting.GREEN +RailUtility.translate("menu.item.mhp") +": " + cart.weightKg());
+                subtext.add(EnumChatFormatting.GREEN +t("menu.item.mhp") +": " + cart.weightKg());
             }
             if (cart.transportTractiveEffort() != 0){
-                subtext.add(EnumChatFormatting.GREEN + RailUtility.translate("menu.item.tractiveeffort") +": " + cart.weightKg() + "lbf");
+                subtext.add(EnumChatFormatting.GREEN + t("menu.item.tractiveeffort") +": " + cart.weightKg() + " lbf");
             }
         }
+        if(cart.getInventoryRows()>0){
+            subtext.add(EnumChatFormatting.GREEN +t("menu.item.isizeof")+ ": " + (cart.getInventoryRows()*9) + " " + t("menu.item.slots"));
+        }
+        if(cart.getRiderOffsets()!=null){
+            subtext.add(EnumChatFormatting.GREEN +t("menu.item.seats")+ ": " + cart.getRiderOffsets().length);
+        }
         if (cart.isFictional()){
-            subtext.add(RailUtility.translate(EnumChatFormatting.BLUE + "menu.item.fictional"));
+            subtext.add(EnumChatFormatting.BLUE +t("menu.item.fictional"));
         }
 
         if (cart.additionalItemText()!=null){
@@ -62,6 +71,9 @@ public class ItemTransport extends Item {
         transport=cart.getClass();
         setTextureName(MODID+":transports/"+getUnlocalizedName());
         setCreativeTab(tabs);
+        if(TrainsInMotion.proxy.isClient()){
+            entity=cart;
+        }
     }
 
     /**
@@ -104,6 +116,10 @@ public class ItemTransport extends Item {
         	DebugUtil.log("Failed to cast : " + transport.toString() + "to a new generic transport entity");
         }
         return true;
+    }
+
+    private static String t(String translate){
+        return RailUtility.translate(translate);
     }
 
 }

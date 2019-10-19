@@ -1,14 +1,20 @@
 package ebf.tim.models.rails;
 
+import ebf.tim.blocks.rails.RailShapeCore;
+import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.DebugUtil;
+import ebf.tim.utility.Vec5f;
 import fexcraft.tmt.slim.Tessellator;
-import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
+import fexcraft.tmt.slim.TextureManager;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.Map;
 
 import static ebf.tim.utility.RailUtility.radianF;
 
@@ -19,6 +25,7 @@ public class Model1x1Rail {
     //NOTE: this method is not thread safe, in the case of multi-threaded rendering this may cause problems, in that case revert to the variant in RailUtility.
     private static void rotateVertexPoint(float x, float y, float z, float pitch, float yaw) {
         vert[0]=x;vert[1]=y;vert[2]=z;
+
         //rotate pitch
         if (pitch != 0.0F) {
             pitch *= radianF;
@@ -48,59 +55,101 @@ public class Model1x1Rail {
         }*/
     }
 
-    public static void addVertexWithOffset(float[] p, float width, float height, float depth){
-        rotateVertexPoint(depth,height,width,p[3],p[4]);
-        Tessellator.getInstance().addVertex(vert[0]+p[0],vert[1]+p[1], vert[2]+p[2]);
+    public static void addVertexWithOffset(Vec5f p, float width, float height, float depth){
+        rotateVertexPoint(depth,height,width,p.u,p.v);
+        Tessellator.getInstance().addVertexWithUV(vert[0]+p.xCoord,vert[1]+p.yCoord, vert[2]+p.zCoord,0,0);
     }
 
-    public static void addVertexWithOffsetAndUV(float[] p, float width, float height, float depth, float U, float V){
-        rotateVertexPoint(depth,height,width,p[3],p[4]);
-        Tessellator.getInstance().addVertexWithUV(vert[0]+p[0],vert[1]+p[1], vert[2]+p[2],U,V);
+    public static void addVertexWithOffsetAndUV(Vec5f p, float width, float height, float depth, float U, float V){
+        rotateVertexPoint(depth,height,width,p.u,p.v);
+        Tessellator.getInstance().addVertexWithUV(vert[0]+p.xCoord,vert[1]+p.yCoord, vert[2]+p.zCoord,U,V);
+    }
+
+    public static void addTieVertexWithOffsetAndUV(Vec5f p, float width, float height, float depth, float U, float V){
+        rotateVertexPoint(depth,height,width,p.u,p.v);
+        Tessellator.getInstance().addVertexWithUV(vert[0]+p.xCoord,vert[1]+p.yCoord, vert[2]+p.zCoord,U,V);
     }
 
 
     //todo use the return value to manage displaylists
-    public static boolean Model3DRail(List<float[]> points, float[] railOffsets, float segmentLength, @Nullable Block ties, @Nullable Block ballast, ItemStack railBlock){
-        if(railOffsets==null || points ==null){
-            return false;
+    public static void Model3DRail(World world, int xPos, int yPos, int zPos, RailShapeCore shape, @Nullable ItemStack ballast, @Nullable ItemStack ties, @Nullable ItemStack rail, @Nullable int[] colors){
+        if(shape.gauge==null || shape.activePath ==null || rail==null){
+            return;
         }
 
-        if(points.size()>0) {
-            float minWidth=0, maxWidth=0;
-            for(float rail : railOffsets) {
+
+        float minWidth=0, maxWidth=0;
+        if(shape.gauge.length>1) {
+            for (float offset : shape.getGaugePositions()) {
+                DebugUtil.println(offset);
                 //might as well do this here since we gotta loop it anyway, and only need to do it for the first, not like it changes later.
-                if (rail < minWidth) {
-                    minWidth = rail;
+                if (offset < minWidth) {
+                    minWidth = offset;
                 }
-                if (rail > maxWidth) {
-                    maxWidth = rail;
+                if (offset > maxWidth) {
+                    maxWidth = offset;
                 }
             }
+        } else{
+            minWidth=shape.getGaugePositions()[0];maxWidth=-shape.getGaugePositions()[0];
+        }
+        //DebugUtil.println(minWidth,maxWidth);
 
 
-            GL11.glEnable(GL11.GL_VERTEX_ARRAY);
-            GL11.glEnable(GL11.GL_TEXTURE_COORD_ARRAY);
-            GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glDisable(GL11.GL_LIGHTING);
 
-            //renders the rails, also defines min and max width
-            ModelRail.model3DRail(points,railOffsets, railBlock);
-            //shouldnt even need to define models like the rails, only need 2, flat and 3d, get a boolean operator config.ispotato?.
-
-            if(ties!=null) {
-                ModelTies.model3DTies(points, maxWidth, minWidth, Blocks.log);
+        Minecraft.getMinecraft().entityRenderer.enableLightmap(1);
+        TextureManager.adjustLightFixture(world,xPos,yPos,zPos);
+        //GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+        if(colors==null) {
+            for (Map.Entry<ItemStack, int[]> e : TextureManager.ingotColors.entrySet()) {
+                if (e.getKey().getItem() == rail.getItem() &&
+                        e.getKey().getTagCompound() == rail.getTagCompound() &&
+                        e.getKey().getItemDamage() == rail.getItemDamage()) {
+                    colors = TextureManager.ingotColors.get(e.getKey());
+                    break;
+                }
             }
-            if(ballast!=null) {
-                ModelBallast.model3DBallast(points, maxWidth, minWidth, Blocks.gravel, segmentLength);
+        }
+        //DebugUtil.println(ClientProxy.railLoD);
+        //renders the rails, also defines min and max width
+        GL11.glPushMatrix();
+        switch (ClientProxy.railSkin){
+            case 0:{ModelRail.modelPotatoRail(shape, colors); break;}
+            case 1:{ModelRail.modelExtrudedRail(shape, colors); break;}
+            case 2://todo normal rail
+            case 3:{ModelRail.model3DRail(shape, colors); break;}//todo HD rail
+        }
+        GL11.glPopMatrix();
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glColor4f(1.0f,1.0f,1.0f,1.0f);
+        Tessellator.bindTexture(TextureMap.locationBlocksTexture);
+        // clear the display buffer to the clear colour
+        //GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+        if(ballast!=null && ballast.getItem()!=null) {
+            if(ClientProxy.railSkin==0){
+                ModelBallast.modelPotatoBallast(shape, maxWidth, minWidth, ballast);
+            } else {
+                ModelBallast.model3DBallast(shape, maxWidth, minWidth, ballast);
             }
+        }
 
-
-            GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glDisable(GL11.GL_TEXTURE_COORD_ARRAY);
-            GL11.glDisable(GL11.GL_VERTEX_ARRAY);
+        if(ties!=null && ties.getItem()!=null) {
+            if(ClientProxy.railSkin==0){
+                ModelTies.modelPotatoTies(shape, maxWidth, minWidth, ties);
+            } else if (ClientProxy.railSkin<3){
+                ModelTies.model3DTies(shape, maxWidth, minWidth, ties);
+            } else {
+                //todo: HD ties
+                ModelTies.model3DTies(shape, maxWidth, minWidth, ties);
+            }
 
         }
 
+        GL11.glEnable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_BLEND);
 
-        return true;
     }
 }
