@@ -4,6 +4,8 @@ bin
 .settings
 .metadata
 eclipse
+.classpath
+.project
 
 # idea
 out
