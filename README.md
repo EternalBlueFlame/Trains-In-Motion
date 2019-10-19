@@ -71,7 +71,7 @@ Date: December, 2016
 <h2>Simplified:</h2>
 <h3>Turbo Model Thingy</h3>
 <ul>
-<li> TMT has it's own license separate from this project. See <a href="https://github.com/EternalBlueFlame/Trains-In-Motion/blob/master/src/main/java/ebf/tim/models/tmt/ModelRendererTurbo.java#L21">src/main/java/ebf/tim/models/tmt/ModelRendererTurbo.java</a></li>
+<li> TMT has it's own license separate from this project. See <a href="https://github.com/EternalBlueFlame/Trains-In-Motion/blob/master/src/main/java/fexcraft/tmt/slim/README.md">src/main/java/fexcraft/tmt/slim/README.md</a></li>
 </ul>
 
 <h3>Modpacks and Servers:</h3>
