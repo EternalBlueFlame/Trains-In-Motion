@@ -12,16 +12,19 @@ public class skin {
     public ResourceLocation[] bogieTextures;
     public ResourceLocation[] subBogieTextures;
     public List<int[]> partialRecolors = new ArrayList<>();
-    public String name;
+    public String name, modid;
     private String description;
+    public int id;
 
-    public skin(ResourceLocation texture, @Nullable ResourceLocation[] bogieTextures, @Nullable ResourceLocation[] subBogieTextures, @Nullable int[][] recolor, String skinName, String skinDescription){
+    public skin(ResourceLocation texture, @Nullable ResourceLocation[] bogieTextures, @Nullable ResourceLocation[] subBogieTextures, @Nullable int[][] recolor, String skinName, String mod, String skinDescription, int id){
         this.texture=texture;
         name=skinName;
+        this.modid=mod;
         description=skinDescription;
         partialRecolors = recolor==null?null: Arrays.asList(recolor);
         this.bogieTextures= bogieTextures;
         this.subBogieTextures= subBogieTextures;
+        this.id=id;
     }
 
     public ResourceLocation getBogieSkin(int index){

@@ -18,8 +18,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  *@author Oskiek
@@ -50,12 +49,21 @@ public class GUISkinManager extends GuiScreen {
     @Override
     public void initGui() {
         super.initGui();
-        skinList=new ArrayList<>();
-        for (String s : entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet()) {
-            skinList.add(s);
+        if(skinList.size()==0) {
+            skinList = new ArrayList<>();
+            List<skin> skins = new ArrayList<>(entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).values());
+            Collections.sort(skins, new Comparator<skin>() {
+                @Override
+                public int compare(skin o1, skin o2) {
+                    return o1.id-o2.id;
+                }
+            });
+            for(skin s:skins){
+                skinList.add(s.modid + ":" + s.name);
+            }
         }
 
-        currentSkin=entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(entity.getDefaultSkin());
+        currentSkin = entity.getTextureByID(Minecraft.getMinecraft().thePlayer,true, skinList.get(page));
         guiLeft=new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight).getScaledWidth();
         guiTop=new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight).getScaledHeight();
 

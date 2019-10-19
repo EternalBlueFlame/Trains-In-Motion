@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ModelPoolObjEntry extends ModelPoolEntry {
 	
@@ -136,10 +137,7 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 						}
 					}
 					while(finalPhase < 1);
-					PositionTransformVertex[] vToArr = new PositionTransformVertex[v.size()];
-					for(int i = 0; i < v.size(); i++){
-						vToArr[i] = v.get(i);
-					}
+					List<PositionTransformVertex> vToArr = new ArrayList<>(v);
 					TexturedPolygon poly = new TexturedPolygon(vToArr);
 					face.add(poly);
 					continue;					

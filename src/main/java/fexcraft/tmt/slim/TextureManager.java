@@ -1,14 +1,11 @@
 package fexcraft.tmt.slim;
 
 import static org.lwjgl.opengl.EXTFramebufferObject.glGenerateMipmapEXT;
-import static org.lwjgl.opengl.GL11.GL_RGBA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_HEIGHT;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_WIDTH;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
-import static org.lwjgl.opengl.GL11.glGetTexLevelParameteri;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.GL_BGRA;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -17,7 +14,9 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 import ebf.tim.TrainsInMotion;
@@ -41,8 +40,8 @@ import net.minecraftforge.oredict.OreDictionary;
 public class TextureManager {
 
 
-    public static ByteBuffer renderPixels = ByteBuffer.allocateDirect((8192*8192)*4);
-    private static int i, length, skyLight;
+    public static ByteBuffer renderPixels = ByteBuffer.allocateDirect((4096*4096)*4);
+    private static int  skyLight;
     private static int[] RGBint, pixels;
     private static final byte fullAlpha=(byte)0;
     private static Set<?> MCResourcePacks;
@@ -52,19 +51,20 @@ public class TextureManager {
 
     private static Map<ResourceLocation, Integer> tmtMap = new HashMap<>();
 
-    private static Map<ResourceLocation, int[]> tmtTextureMap = new HashMap<>();
+    private static Map<String, int[]> tmtTextureMap = new HashMap<>();
 
     private static ITextureObject object;
+
     /**
      * custom texture binding method, generally same as vanilla, but possible to improve performance later.
      * @param textureURI
      */
-    public static boolean bindTexture(ResourceLocation textureURI) {
+    public static void bindTexture(ResourceLocation textureURI) {
         if (textureURI == null){
             textureURI= new ResourceLocation(TrainsInMotion.MODID,"nullTrain");
         }
         if(ClientProxy.ForceTextureBinding) {
-            object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
+            ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
             if (object == null) {
                 object = new SimpleTexture(textureURI);
                 Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
@@ -73,7 +73,7 @@ public class TextureManager {
         } else {
             Integer id = tmtMap.get(textureURI);
             if (id ==null){
-                object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
+                ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
                 if (object == null) {
                     object = new SimpleTexture(textureURI);
                     Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
@@ -85,78 +85,61 @@ public class TextureManager {
                 GL11.glBindTexture(GL_TEXTURE_2D, id);
             }
         }
-        return true;
     }
 
-    public static @Nullable int[] loadTexture(ResourceLocation resource){
-        //if the list of loaded resource packs has changed, invalidate our texture cache as well.
-        if(Minecraft.getMinecraft().getResourceManager().getResourceDomains() != MCResourcePacks){
-            MCResourcePacks = Minecraft.getMinecraft().getResourceManager().getResourceDomains();
-            tmtTextureMap =new HashMap<>();
-        }
-        //DebugUtil.printGLError(GL11.glGetError());
 
+
+    public static int[] loadTexture(ResourceLocation resource, List<Integer> mask){
         int[] texture = tmtTextureMap.get(resource);
 
         bindTexture(resource);
         if(texture==null){
+            int width =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
+            int height =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
 
-                int width =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
-                int height =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
+            ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
 
-                GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, renderPixels);
-                texture = new int[((width*height)*4)+2];
-                texture[0]=width;
-                texture[1]=height;
-                for (int i=2; i<((width*height)*(4))-2; i+=(4)){
-                    if(renderPixels.get(i+3)==0){
-                        texture[i]=fullAlpha;
-                        texture[i+1]=fullAlpha;
-                        texture[i+2]=fullAlpha;
-                        texture[i+3]=fullAlpha;
-                    } else {
-                        texture[i + 3] = renderPixels.get(i + 3);//alpha
-                        texture[i + 2] = renderPixels.get(i + 2);//Red
-                        texture[i + 1] = renderPixels.get(i + 1);//Green
-                        texture[i] = renderPixels.get(i);//Blue
-                    }
-                }
-            tmtTextureMap.put(resource, texture);
+            GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+            texture = new int[((width*height)*4)+2];
+            texture[0]=width;
+            texture[1]=height;
+            for (int i=2; i<((width*height)*(4))-2; i+=(4)){
+                texture[i+3]=buffer.get(i+3);//alpha
+                texture[i+2]=buffer.get(i+2);//Red
+                texture[i+1]=buffer.get(i+1);//Green
+                texture[i]=buffer.get(i);//Blue
+            }
+            tmtTextureMap.put(getID(resource, mask), texture);
         }
 
         return texture;
     }
 
-
-
+    private static int i,ii, length;
     public static void maskColors(ResourceLocation textureURI, List<Integer> colors){
-        if(textureURI==null || textureURI.getResourcePath().equals("")){return;}
-        pixels = loadTexture(textureURI);
-        if(pixels==null){
-            return;
-        }
+        bindAWT(textureURI, null, null);
+
+
+        pixels = loadTexture(textureURI, colors);
         length = ((pixels[0]*pixels[1])*4)-4;
 
         for(i=0; i<length; i+=4) {
-            renderPixels.put(i+3, b(pixels[i+3]));//alpha is always from host texture.
-            if (pixels[i+3] <0x10){
+            if (pixels[i+3] == fullAlpha){
                 continue;//skip pixels with no color
             }
+            renderPixels.put(i+3, b(pixels[i+3]));//alpha is always from host texture.
             //for each set of recoloring
-            if (colors!=null && colors.size()>0) {
-                for (Integer col: colors) {
-                    RGBint = hexTorgba(col);
+            if (colors!=null || true) {
+                for (ii = 0; ii < colors.size(); ii++) {
+                    RGBint = hexTorgba(0xff0000);
                     //if it's within 10 RGB, add the actual color we want to the differences
-                    if (RGBint[3] != fullAlpha && colorInRange(pixels[i] & 0xFF, pixels[i + 1] & 0xFF, pixels[i + 2] & 0xFF,
-                            RGBint[0], RGBint[1], RGBint[2])) {
-                        renderPixels.put(i, b(RGBint[0]));
-                        renderPixels.put(i + 1, b(RGBint[1]));
-                        renderPixels.put(i + 2, b(RGBint[2]));
-                    } else if (RGBint[3] == fullAlpha) {
-                        renderPixels.put(i, fullAlpha);
-                        renderPixels.put(i, fullAlpha);
-                        renderPixels.put(i, fullAlpha);
-                    }else{
+                    if (colorInRange(pixels[i] & 0xFF, pixels[i + 1] & 0xFF, pixels[i + 2] & 0xFF,
+                            RGBint[0] & 0xFF, (RGBint[0] >> 8) & 0xFF, (RGBint[0] >> 16) & 0xFF)) {
+                        renderPixels.put(i, b(RGBint[1]));
+                        renderPixels.put(i + 1, b(RGBint[1] >> 8));
+                        renderPixels.put(i + 2, b(RGBint[1] >> 16));
+                    } else {
                         renderPixels.put(i, b(pixels[i]));
                         renderPixels.put(i + 1, b(pixels[i + 1]));
                         renderPixels.put(i + 2, b(pixels[i + 2]));
@@ -168,13 +151,24 @@ public class TextureManager {
                 renderPixels.put(i + 2, b(pixels[i + 2]));
             }
         }
-        //DebugUtil.printGLError(GL11.glGetError());
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D,1, GL11.GL_RGBA, pixels[0], pixels[1], 0, GL_RGBA, GL_UNSIGNED_INT, renderPixels);
-        glGenerateMipmapEXT(GL_TEXTURE_2D);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, pixels[0], pixels[1], GL_RGBA, GL_UNSIGNED_INT, renderPixels);
         renderPixels.clear();//reset the buffer to all 0's.
     }
+    private static String getID(ResourceLocation location, List<Integer> mask){
+        if (mask == null) {
+            return location.getResourceDomain()+location.getResourcePath();
+        } else {
+            StringBuilder sb = new StringBuilder();
+            sb.append(location.getResourceDomain());
+            sb.append(location.getResourcePath());
+            for(Integer i : mask){
+                sb.append(i);
+            }
+            return sb.toString();
+        }
+    }
+
 
     //most compilers should process this type of function faster than a normal typecast.
     public static byte b(int i){return (byte) i;}
@@ -258,4 +252,80 @@ public class TextureManager {
     public static int[] hexTorgba(int hex){
         return new int[]{hex&0xFF, (hex>>8)&0xFF, (hex>>16)&0xFF, (hex>>24)&0xFF};
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public static void bindAWT(ResourceLocation textureURI, List<Integer> colorsFrom, List<Integer> colorsTo){
+        if(!firstRun){
+            return;
+        } else {
+            firstRun=false;
+        }
+        //do vanilla MC texture bind.
+        ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
+        if (object == null) {
+            object = new SimpleTexture(textureURI);
+            Minecraft.getMinecraft().getTextureManager().loadTexture(textureURI, object);
+        }
+        //dont bother checking if its already bound, there's no way that could happen
+        GL11.glBindTexture(GL_TEXTURE_2D, object.getGlTextureId());
+
+
+        //get image data from the currently bound image
+        int width =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
+        int height =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
+
+        ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
+
+        GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+        //create a buffered image and push the data to it
+        BufferedImage skin = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        //int[] px = ((DataBufferInt)skin.getRaster().getDataBuffer()).getData();
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int i = (x + (width * y)) * 4;
+                int r = buffer.get(i) & 0xff;
+                int g = buffer.get(i + 1) & 0xff;
+                int b = buffer.get(i + 2) & 0xff;
+                int a = buffer.get(i + 3) & 0xff;
+                skin.setRGB(x,y, (a<<24) | (r<<16) | (g<<8) | b);
+
+                //int argb = (a<<24) | (r<<16) | (g<<8) | b;
+                //int off = (x + width * (height-y-1));
+                //px[off] = argb;
+            }
+        }
+
+        try {
+            ImageIO.write(skin, "PNG", new File(ClientProxy.configDirectory+"/test.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private static boolean firstRun = true;
+
+
+
+
+
+
 }

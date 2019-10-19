@@ -85,7 +85,8 @@ public class SkinRegistry {
             if(transports.get(c).containsKey(modid + ":" + skinName)){
                 DebugUtil.println("ERROR", "Duplicate skin entry: " + skinName, "In entity: " + c, "Overriding original entry");
             }
-            transports.get(c).put(modid + ":" + skinName, new skin(new ResourceLocation(modid, textureURI), resourceList(modid, bogieTextureURI), resourceList(modid, subBogieTextureURI), recolor, skinName, skinDescription));
+            transports.get(c).put(modid + ":" + skinName,
+                    new skin(new ResourceLocation(modid, textureURI), resourceList(modid, bogieTextureURI), resourceList(modid, subBogieTextureURI), recolor, skinName, modid, skinDescription, transports.get(c).size()));
         }
     }
 
@@ -111,11 +112,6 @@ public class SkinRegistry {
         if (entity.getSkinList(player, isPaintBucket)==null || !entity.getSkinList(player, isPaintBucket).containsKey(internalResourceURI)){
             return null;
         }
-        List<String> s = new ArrayList<>();
-        for (String str : entity.getSkinList(player, isPaintBucket).keySet()){
-            s.add(str);
-        }
-
         return entity.getSkinList(player, isPaintBucket).get(internalResourceURI);
     }
 

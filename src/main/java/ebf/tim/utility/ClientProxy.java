@@ -4,6 +4,7 @@ package ebf.tim.utility;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.TileEntityStorage;
@@ -89,6 +90,8 @@ public class ClientProxy extends CommonProxy {
 
     private static Configuration wailaConfig=null;
 
+    public static String configDirectory;
+
     /**
      * <h2> Client GUI Redirect </h2>
      *
@@ -169,6 +172,8 @@ public class ClientProxy extends CommonProxy {
         KeyInventory.setKeyCode(config.getInt("InventoryKeybind", "Keybinds (Client only)", Keyboard.KEY_I, 0, 0, ""));
 
         config.save();
+
+        configDirectory = event.getModConfigurationDirectory().getAbsolutePath();
 
         File wailaConf = new File(event.getModConfigurationDirectory(), "Waila.cfg");
 
