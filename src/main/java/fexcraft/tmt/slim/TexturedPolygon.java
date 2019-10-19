@@ -1,12 +1,9 @@
 package fexcraft.tmt.slim;
 
-import ebf.tim.utility.DebugUtil;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.lwjgl.opengl.GL11.glGetError;
 
 
 public class TexturedPolygon {

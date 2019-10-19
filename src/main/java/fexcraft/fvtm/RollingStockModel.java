@@ -1,11 +1,11 @@
 package fexcraft.fvtm;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import net.minecraft.entity.Entity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A compatibility class for "FVTM Scheme/Format" models.

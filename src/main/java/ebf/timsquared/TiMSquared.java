@@ -2,16 +2,16 @@ package ebf.timsquared;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import ebf.tim.TrainsInMotion;
+import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.items.TiMTab;
+import ebf.tim.registry.TiMGenericRegistry;
 import ebf.timsquared.entities.rollingstock.EntityGTAX13000GallonTanker;
 import ebf.timsquared.entities.rollingstock.EntityPullmansPalace;
 import ebf.timsquared.entities.rollingstock.EntityUP3Bay100TonHopper;
 import ebf.timsquared.entities.rollingstock.EntityVATLogCar;
 import ebf.timsquared.entities.trains.EntityBrigadelok080;
 import ebf.timsquared.entities.trains.EntityBrigadelok080Electric;
-import ebf.tim.TrainsInMotion;
-import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.items.TiMTab;
-import ebf.tim.registry.TiMGenericRegistry;
 
 @Mod(modid = TiMSquared.MODID, version = TiMSquared.MOD_VERSION, name = "TiM^2")
 public class TiMSquared {

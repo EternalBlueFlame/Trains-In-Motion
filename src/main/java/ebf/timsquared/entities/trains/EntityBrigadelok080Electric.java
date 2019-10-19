@@ -2,7 +2,6 @@ package ebf.timsquared.entities.trains;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ebf.timsquared.TiMSquared;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.api.SkinRegistry;
 import ebf.tim.api.TrainBase;
@@ -13,6 +12,7 @@ import ebf.tim.models.Bogie;
 import ebf.tim.registry.TiMGenericRegistry;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.FuelHandler;
+import ebf.timsquared.TiMSquared;
 import ebf.timsquared.models.trains.ModelBrigadelok_080;
 import fexcraft.tmt.slim.ModelBase;
 import net.minecraft.init.Items;

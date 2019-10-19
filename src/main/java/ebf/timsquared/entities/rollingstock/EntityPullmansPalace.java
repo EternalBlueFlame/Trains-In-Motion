@@ -1,11 +1,11 @@
 package ebf.timsquared.entities.rollingstock;
 
-import ebf.timsquared.TiMSquared;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.api.RollingstockBase;
 import ebf.tim.api.SkinRegistry;
-import ebf.timsquared.entities.trains.EntityBrigadelok080;
 import ebf.tim.items.ItemTransport;
+import ebf.timsquared.TiMSquared;
+import ebf.timsquared.entities.trains.EntityBrigadelok080;
 import ebf.timsquared.models.rollingstock.PullmansPalace;
 import fexcraft.tmt.slim.ModelBase;
 import net.minecraft.init.Items;

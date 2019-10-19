@@ -1,8 +1,9 @@
 package fexcraft.fcl.common.lang;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
-import javax.annotation.Nullable;;
+;
 
 /**
  * @author Ferdinand Calo' (FEX___96)

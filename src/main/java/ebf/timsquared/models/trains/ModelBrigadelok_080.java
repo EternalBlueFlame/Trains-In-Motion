@@ -8,14 +8,14 @@
 // Last changed on: 13.06.2017 - 17:47:26 
  
 package ebf.timsquared.models.trains; //Path where the model is located 
- 
- 
-import ebf.tim.models.StaticModelAnimator; 
-import fexcraft.tmt.slim.ModelConverter; 
-import fexcraft.tmt.slim.ModelRendererTurbo; 
- 
-import static ebf.tim.models.StaticModelAnimator.tagLamp ;
-import static ebf.tim.models.StaticModelAnimator.tagSmoke ;
+
+
+import ebf.tim.models.StaticModelAnimator;
+import fexcraft.tmt.slim.ModelConverter;
+import fexcraft.tmt.slim.ModelRendererTurbo;
+
+import static ebf.tim.models.StaticModelAnimator.tagLamp;
+import static ebf.tim.models.StaticModelAnimator.tagSmoke;
 
 public class ModelBrigadelok_080 extends ModelConverter //Same as Filename
 {
