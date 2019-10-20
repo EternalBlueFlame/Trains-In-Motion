@@ -63,7 +63,8 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * <h2>variables</h2>
      */
     /**defines the colors, the outer array is for each different color, and the inner int[] is for the RGB color*/
-    public List<Integer> colors = new ArrayList<>();
+    public List<Integer> colorsFrom = new ArrayList<>();
+    public List<Integer> colorsTo = new ArrayList<>();
     /**the server-sided persistent UUID of the owner*/
     private UUID owner = null;
     /**the front entity bogie*/

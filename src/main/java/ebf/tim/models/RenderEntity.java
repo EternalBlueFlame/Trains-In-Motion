@@ -200,13 +200,13 @@ public class RenderEntity extends Render {
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
         if(entity.worldObj!=null) {
             TextureManager.adjustLightFixture(entity.worldObj, (int) entity.posX, (int) entity.posY + 1, (int) entity.posZ);
-            TextureManager.maskColors(entity.getTexture(Minecraft.getMinecraft().thePlayer).texture, entity.colors);
+            TextureManager.bindTexture(entity.getTexture(Minecraft.getMinecraft().thePlayer).texture, entity.colorsFrom, entity.colorsTo);
         } else if (entity.getTextureByID(
                 Minecraft.getMinecraft().thePlayer, isPaintBucket,textureURI)!=null){
-            TextureManager.maskColors(entity.getTextureByID(
-                    Minecraft.getMinecraft().thePlayer, isPaintBucket,textureURI).texture, entity.colors);
+            TextureManager.bindTexture(entity.getTextureByID(
+                    Minecraft.getMinecraft().thePlayer, isPaintBucket,textureURI).texture, entity.colorsFrom, entity.colorsTo);
         } else {
-            TextureManager.maskColors(entity.getTextureByID(Minecraft.getMinecraft().thePlayer, false, entity.getDefaultSkin()).texture, entity.colors);
+            TextureManager.bindTexture(entity.getTextureByID(Minecraft.getMinecraft().thePlayer, false, entity.getDefaultSkin()).texture, entity.colorsFrom, entity.colorsTo);
         }
         for(i=0; i< entity.renderData.modelList.length;i++) {
             GL11.glPushMatrix();

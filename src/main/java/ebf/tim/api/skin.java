@@ -9,21 +9,15 @@ import java.util.List;
 
 public class skin {
     public ResourceLocation texture;
-    public ResourceLocation[] bogieTextures;
-    public ResourceLocation[] subBogieTextures;
-    public List<int[]> partialRecolors = new ArrayList<>();
-    public String name, modid;
-    private String description;
+    public ResourceLocation[] bogieTextures, subBogieTextures;
+    public int[] colorsFrom, colorsTo;
+    public String name, modid, description;
     public int id;
 
-    public skin(ResourceLocation texture, @Nullable ResourceLocation[] bogieTextures, @Nullable ResourceLocation[] subBogieTextures, @Nullable int[][] recolor, String skinName, String mod, String skinDescription, int id){
-        this.texture=texture;
-        name=skinName;
-        this.modid=mod;
-        description=skinDescription;
-        partialRecolors = recolor==null?null: Arrays.asList(recolor);
-        this.bogieTextures= bogieTextures;
-        this.subBogieTextures= subBogieTextures;
+    public skin(String modId, String texture, String name, String descriotion, int id){
+        this.texture=new ResourceLocation(modId,texture);
+        this.description=descriotion;
+        this.name=name;
         this.id=id;
     }
 
@@ -50,4 +44,36 @@ public class skin {
     }
 
     public String[] getDescription(){return description.split("\n");}
+
+
+    public skin setBogieTextures(String... textures){
+        bogieTextures=resourceList(modid,textures);
+        return this;
+    }
+    public skin setSubBogieTextures(String... textures){
+        subBogieTextures=resourceList(modid,textures);
+        return this;
+    }
+    public skin setRecolorsTo(int... recolorsTo){
+        colorsTo=recolorsTo;
+        return this;
+    }
+
+    public skin setRecolorsFrom(int... recolorsFrom){
+        colorsFrom=recolorsFrom;
+        return this;
+    }
+
+
+    private static ResourceLocation[] resourceList(String modid, String[] URIs){
+        ResourceLocation[] value = new ResourceLocation[URIs.length];
+        for (int i=0; i< URIs.length; i++){
+            if(URIs[i].contains(":")){
+                value[i] = new ResourceLocation(URIs[i]);
+            } else {
+                value[i] = new ResourceLocation(modid, URIs[i]);
+            }
+        }
+        return value;
+    }
 }
