@@ -7,6 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
@@ -19,12 +20,17 @@ import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import sun.awt.image.InputStreamImageSource;
+import sun.awt.image.PNGImageDecoder;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
@@ -255,45 +261,19 @@ public class TextureManager {
     private static Integer currentKey;
 
     public static void bindTexture(ResourceLocation textureURI, List<Integer> colorsFrom, List<Integer> colorsTo){
+        GL11.glEnable(GL_TEXTURE_2D);
         if(!tmtBoundTextures.containsKey(getID(textureURI,colorsFrom,colorsTo,false))){
             if(createAWT(textureURI, colorsFrom, colorsTo)){
-                int tex = GL11.glGenTextures();
-                tmtBoundTextures.put(getID(textureURI,colorsFrom,colorsTo,false), tex);
-
                 try {
+                    BufferedImage image = ImageIO.read(new File(getID(textureURI, colorsFrom, colorsTo, true)));
 
-                    BufferedImage image = ImageIO.read(new File(getID(textureURI,colorsFrom,colorsTo, true)));
-
-                    ByteBuffer buffer = BufferUtils.createByteBuffer(image.getWidth() * image.getHeight() * 4);
-
-                    for(int y = 0; y < image.getHeight(); y++){
-                        for(int x = 0; x < image.getWidth(); x++){
-                            Color color = new Color(image.getRGB(x, y), true);
-                            buffer.put((byte)color.getRed());
-                            buffer.put((byte)color.getGreen());
-                            buffer.put((byte)color.getBlue());
-                            buffer.put((byte)color.getAlpha());
-                        }
-                    } buffer.flip();
-
-                    GL11.glGetTexImage(GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-
-                    //delete the old texture
-                    /*ITextureObject object = Minecraft.getMinecraft().getTextureManager().getTexture(textureURI);
-                    if (object != null) {
-                        GL11.glDeleteTextures(object.getGlTextureId());
-                    }*/
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
+                    tmtBoundTextures.put(getID(textureURI, colorsFrom, colorsTo, false),
+                            Minecraft.getMinecraft().getTextureManager().getTexture(
+                                    Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(
+                                            getID(textureURI, colorsFrom, colorsTo, true),
+                                    new DynamicTexture(image))).getGlTextureId());
+                } catch (IOException ignored){}
             }
-
-
-
-
         }
         currentKey=tmtBoundTextures.get(getID(textureURI,colorsFrom,colorsTo,false));
 
