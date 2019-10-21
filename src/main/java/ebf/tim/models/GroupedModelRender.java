@@ -144,7 +144,7 @@ public class GroupedModelRender {
             GL11.glPopMatrix();
         } else {
             //render the geometry normally if it's not a block.
-            Tessellator.bindTexture(transport.getTexture(Minecraft.getMinecraft().thePlayer).texture);
+            Tessellator.bindTexture(transport.getTexture(Minecraft.getMinecraft().thePlayer).getTexture());
             int liveryIndex=-1;
             String lastLivery="";
             for (ModelRendererTurbo block : boxRefrence) {

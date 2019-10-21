@@ -88,7 +88,8 @@ public class SkinRegistry {
                 DebugUtil.println("ERROR", "Duplicate skin entry: " + skinName, "In entity: " + c, "Overriding original entry");
             }
 
-            skin s = new skin(modid, textureURI,skinName,skinDescription,transports.get(c).size());
+            skin s = new skin(modid, textureURI,skinName,skinDescription);
+            s.setId(transports.get(c).size());
             if(bogieTextureURI!=null){
                 s.setBogieTextures(bogieTextureURI);
             }
@@ -102,7 +103,12 @@ public class SkinRegistry {
         }
     }
 
-    public void addSkin(String c, skin s){
+
+    public static void addSkin(Class c, skin s){
+        addSkin(c.getName(),s);
+    }
+
+    public static void addSkin(String c, skin s){
         if (debugSkinRegistration) {
             DebugUtil.println("REGISTERING SKIN", c, "MODID: " + s.modid, s.texture, s.name, Loader.isModLoaded(s.modid));
         }
@@ -114,6 +120,7 @@ public class SkinRegistry {
             if(transports.get(c).containsKey(s.modid + ":" + s.name)){
                 DebugUtil.println("ERROR", "Duplicate skin entry: " + s.name, "In entity: " + c, "Overriding original entry");
             }
+            s.setId(transports.get(c).size());
             transports.get(c).put(s.modid + ":" + s.name, s);
         }
     }

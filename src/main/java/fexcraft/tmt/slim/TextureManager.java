@@ -353,6 +353,11 @@ public class TextureManager {
         }
 
         try {
+            if(!new File(ClientProxy.configDirectory+"/TrainsInMotionCache/"+
+                    resourceLocation(textureURI)).exists()){
+                new File(ClientProxy.configDirectory+"/TrainsInMotionCache/"+
+                        resourceLocation(textureURI)).mkdirs();
+            }
             ImageIO.write(skin, "PNG", new File(getID(textureURI,colorsFrom,colorsTo,true)));
             buffer.clear();
             return true;
@@ -368,11 +373,9 @@ public class TextureManager {
         if(isFile) {
             filePath.append(ClientProxy.configDirectory);
             filePath.append("/TrainsInMotionCache/");
-            filePath.append(textureURI.getResourceDomain());
-            filePath.append("_");
-            filePath.append(textureURI.getResourcePath());
+            filePath.append(resourceLocation(textureURI));
             filePath.append("/");
-            if(colorsFrom==null || colorsTo==null){
+            if(colorsFrom==null || colorsTo==null || colorsFrom.size()+colorsTo.size()==0){
                 filePath.append("000_000");
             } else {
                 for (Integer i : colorsFrom) {
@@ -387,9 +390,9 @@ public class TextureManager {
         } else {
             filePath.append(textureURI.getResourceDomain());
             filePath.append("_");
-            filePath.append(textureURI.getResourcePath());
+            filePath.append(textureURI.getResourcePath().replace("/",""));
             filePath.append(".");
-            if(colorsFrom==null || colorsTo==null){
+            if(colorsFrom==null || colorsTo==null || colorsFrom.size()+colorsTo.size()==0){
                 filePath.append("000_000");
             } else {
                 for (Integer i : colorsFrom) {
@@ -403,5 +406,10 @@ public class TextureManager {
         return filePath.toString();
     }
 
+    private static String resourceLocation(ResourceLocation res){
+        return (res.getResourceDomain() + "/"
+                +res.getResourcePath().
+                substring(res.getResourcePath().lastIndexOf("/"), res.getResourcePath().lastIndexOf(".")));
+    }
 
 }

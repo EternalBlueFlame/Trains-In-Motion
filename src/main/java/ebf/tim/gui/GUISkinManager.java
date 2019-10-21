@@ -144,7 +144,7 @@ public class GUISkinManager extends GuiScreen {
         //get skin from page
         ebf.tim.api.skin s = entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(key);
         //bind skin to render
-        TextureManager.bindTexture(s.texture);
+        TextureManager.bindTexture(s.getTexture());
 
         //render models with offsets
         int i=1;

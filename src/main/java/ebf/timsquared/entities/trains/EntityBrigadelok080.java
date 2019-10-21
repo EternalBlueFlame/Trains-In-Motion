@@ -2,6 +2,7 @@ package ebf.timsquared.entities.trains;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.api.skin;
 import ebf.timsquared.TiMSquared;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.api.SkinRegistry;
@@ -83,14 +84,22 @@ public class EntityBrigadelok080 extends TrainBase {
 
     @Override
     public void registerSkins(){
-        SkinRegistry.addSkin(this.getClass(),TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png",
-        "default", "Used by Germany in WWI as a transport for solders and equipment");
+        //make base skin and register
+        ebf.tim.api.skin s = new skin(TrainsInMotion.MODID,"textures/sd/train/brigadelok_080.png","default",
+                "Used by Germany in WWI as a transport for solders and equipment");
 
-        SkinRegistry.addSkin(this.getClass(),TrainsInMotion.MODID, "textures/hd/train/brigadelok_080.png",
-                "hd", "Used by Germany in WWI as a transport for solders and equipment\nthis incomplete HD skin was done by LunarTales");
-        SkinRegistry.addSkinRecolor(this.getClass(),TrainsInMotion.MODID, "textures/sd/train/brigadelok_080.png",
-                new int[][]{{},{}},
-                "purple", "A fictional skin created for testing the recolor system, \nthe gui multi-line support and the paint bucket skin selector. \n Might keep it longrun to pay hommage to the development of the mod.");
+        SkinRegistry.addSkin(this.getClass(),s);
+
+        //add recolor so current, and register new skin
+        s.setRecolorsFrom(0x68939E).setRecolorsTo(0xaa0000)
+        .setName("red")
+        .setDescription("A fictional skin created for testing the recolor system, \nthe gui multi-line support and the paint bucket skin selector. \n Might keep it longrun to pay hommage to the development of the mod.");
+        SkinRegistry.addSkin(this.getClass(),s);
+
+        //remove recolors, then set new name and texture
+        s= new skin(TrainsInMotion.MODID, "textures/hd/train/brigadelok_080.png", "hd",
+                "Used by Germany in WWI as a transport for solders and equipment\nthis incomplete HD skin was done by LunarTales");
+        SkinRegistry.addSkin(this.getClass(),s);
     }
 
     /*

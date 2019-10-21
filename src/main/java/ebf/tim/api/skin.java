@@ -8,17 +8,17 @@ import java.util.Arrays;
 import java.util.List;
 
 public class skin {
-    public ResourceLocation texture;
+    public String texture;
     public ResourceLocation[] bogieTextures, subBogieTextures;
     public int[] colorsFrom, colorsTo;
     public String name, modid, description;
     public int id;
 
-    public skin(String modId, String texture, String name, String descriotion, int id){
-        this.texture=new ResourceLocation(modId,texture);
+    public skin(String modId, String texture, String name, String descriotion){
+        this.texture=texture;
+        this.modid=modId;
         this.description=descriotion;
         this.name=name;
-        this.id=id;
     }
 
     public ResourceLocation getBogieSkin(int index){
@@ -45,6 +45,8 @@ public class skin {
 
     public String[] getDescription(){return description.split("\n");}
 
+    public ResourceLocation getTexture(){return new ResourceLocation(modid,texture);}
+
 
     public skin setBogieTextures(String... textures){
         bogieTextures=resourceList(modid,textures);
@@ -62,6 +64,32 @@ public class skin {
     public skin setRecolorsFrom(int... recolorsFrom){
         colorsFrom=recolorsFrom;
         return this;
+    }
+
+    public skin setTexture(String texture){
+        this.texture=texture;
+        return this;
+    }
+
+
+    public skin setTexture(String modId, String texture){
+        this.texture=texture;
+        this.modid=modId;
+        return this;
+    }
+
+    public skin setName(String name){
+        this.name=name;
+        return this;
+    }
+
+    public skin setDescription(String description){
+        this.description = description;
+        return this;
+    }
+
+    public void setId(int i){
+        id=i;
     }
 
 
