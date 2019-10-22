@@ -11,6 +11,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class RailShapeCore {
 
@@ -253,8 +254,7 @@ public class RailShapeCore {
             t = -0.25f;
             //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
             points = new ArrayList<>();
-            for (i = 0; t < (0.35*shape.getPathLength()); i++) {
-                //todo only part left also need random Y offset, very small
+            for (i = 0; t < (shape.getPathLength()); i++) {
                 //define position
                 points.add(new float[]{
                         (((1 - t) * (1 - t)) * shape.getPath()[v].xCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].xCoord) + ((t * t) * shape.getPath()[v+2].xCoord),//X
@@ -264,9 +264,11 @@ public class RailShapeCore {
                 t += 0.25f;
             }
 
+            float y;
             for (i=1; i < points.size() - 1; i++) {
+                y=new Random().nextInt(20)*0.00001f;
                 sc.activeTiePath.add(
-                        new Vec5f(points.get(i)[0],points.get(i)[1],points.get(i)[2],0, RailUtility.atan2degreesf(
+                        new Vec5f(points.get(i)[0],points.get(i)[1]+y,points.get(i)[2],0, RailUtility.atan2degreesf(
                                 points.get(i-1)[2] - (points.get(i+1)[2]),
                                 points.get(i-1)[0] - (points.get(i+1)[0])))
                 );

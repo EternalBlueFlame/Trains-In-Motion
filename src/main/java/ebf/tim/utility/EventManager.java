@@ -254,9 +254,9 @@ public class EventManager {
 
     private static String[] getStaticStrings(GenericRailTransport t, EntityPlayer p){
         return new String[]{
-                StatCollector.translateToLocal(t.getInventoryName().replace(".storage","")+".name"),
-                "owner: " + t.getOwnerName(),
-                "skin: " + t.getTexture(p).name
+                RailUtility.translate(t.getInventoryName().replace(".storage","")+".name"),
+                RailUtility.translate("gui.owner") +": " + t.getOwnerName(),
+                RailUtility.translate("gui.skin")+": " + RailUtility.translate(t.getTexture(p).name)
         };
     }
 

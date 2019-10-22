@@ -8,6 +8,7 @@ import ebf.tim.models.Bogie;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.networking.PacketPaint;
 import ebf.tim.utility.DebugUtil;
+import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.client.Minecraft;
@@ -25,7 +26,7 @@ import java.util.List;
 /**
  *@author Oskiek
  */
-public class GUISkinManager extends GuiScreen {
+public class GUIPaintBucket extends GuiScreen {
 
 
     public GuiButton buttonLeft;
@@ -44,7 +45,7 @@ public class GUISkinManager extends GuiScreen {
     public static int guiLeft;
     public GenericRailTransport entity;
 
-    public GUISkinManager(GenericRailTransport t){
+    public GUIPaintBucket(GenericRailTransport t){
         entity=t;
     }
 
@@ -96,7 +97,7 @@ public class GUISkinManager extends GuiScreen {
         float offsetFromScreenLeft = width * 0.5f;
 
 
-        fontRendererObj.drawString(currentSkin.name,
+        fontRendererObj.drawString(RailUtility.translate(currentSkin.name),
                 (int)(offsetFromScreenLeft - fontRendererObj.getStringWidth(currentSkin.name)*0.5f),
                 (int)((height*0.1f)*6),0,false);
 
@@ -120,7 +121,6 @@ public class GUISkinManager extends GuiScreen {
             mc.displayGuiScreen(null);//todo make an actual close button
         }
         else if (parButton==buttonLeft) {
-            DebugUtil.println(page, skinList.size(), skinList.get(page), entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(skinList.get(page)).name);
             page = (page <= 0 ? entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().size() -1: page - 1);
             currentSkin=entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(skinList.get(page));
         }

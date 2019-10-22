@@ -109,7 +109,7 @@ public class ClientProxy extends CommonProxy {
                 if (player.getHeldItem().getItem() instanceof ItemCraftGuide) {
                     return new GUICraftBook();
                 } else if (player.getHeldItem().getItem() instanceof ItemPaintBucket){
-                    return new GUISkinManager((GenericRailTransport) player.worldObj.getEntityByID(ID));
+                    return new GUIPaintBucket((GenericRailTransport) player.worldObj.getEntityByID(ID));
                 }
             }
             //Trains

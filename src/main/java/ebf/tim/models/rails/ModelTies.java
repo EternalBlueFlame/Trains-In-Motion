@@ -53,7 +53,7 @@ public class ModelTies {
         modelPotatoTies(shape, maxWidth, minWidth, block);
 
         GL11.glPushMatrix();
-        GL11.glTranslated(0, -0.125, 0);
+        GL11.glTranslated(0, 0.125, 0);
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.NORTH.ordinal(),block);
         boolean first = true;
         for (Vec5f p :shape.activeTiePath) {
