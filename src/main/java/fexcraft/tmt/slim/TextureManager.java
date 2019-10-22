@@ -267,15 +267,16 @@ public class TextureManager {
                 try {
                     BufferedImage image = ImageIO.read(new File(getID(textureURI, colorsFrom, colorsTo, true)));
 
-                    tmtBoundTextures.put(getID(textureURI, colorsFrom, colorsTo, false),
+                    currentKey =tmtBoundTextures.put(getID(textureURI, colorsFrom, colorsTo, false),
                             Minecraft.getMinecraft().getTextureManager().getTexture(
                                     Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(
                                             getID(textureURI, colorsFrom, colorsTo, true),
                                     new DynamicTexture(image))).getGlTextureId());
                 } catch (IOException ignored){}
             }
+        } else {
+            currentKey = tmtBoundTextures.get(getID(textureURI, colorsFrom, colorsTo, false));
         }
-        currentKey=tmtBoundTextures.get(getID(textureURI,colorsFrom,colorsTo,false));
 
         //if for some reason the texture couldn't be written to I/O, which should never be an issue.
         if(currentKey==null){

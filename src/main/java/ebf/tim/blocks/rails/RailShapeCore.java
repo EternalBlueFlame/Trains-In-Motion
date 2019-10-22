@@ -2,6 +2,7 @@ package ebf.tim.blocks.rails;
 
 import ebf.XmlBuilder;
 import ebf.tim.blocks.RailTileEntity;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import ebf.tim.utility.Vec5f;
 import fexcraft.tmt.slim.Vec3f;
@@ -109,6 +110,8 @@ public class RailShapeCore {
         }
         segmentLength=Float.parseFloat(vars[1]);
 
+
+        if(vars.length<3){return null;}
         currentParse= vars[2].split("!");
         for(String str : currentParse) {
             subParse=str.split(",");
@@ -159,6 +162,31 @@ public class RailShapeCore {
                                 points.get(i-1)[0] - (points.get(i+1)[0])))
                 );
             }
+
+
+
+            //now do for ties
+
+            t = -0.25f;
+            //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
+            points = new ArrayList<>();
+            for (i = 0; i < 0.4f / (0.4f * shape.getPathLength()); i++) {//todo only part left also need random Y offset, very small
+                //define position
+                points.add(new float[]{
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].xCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].xCoord) + ((t * t) * shape.getPath()[v+2].xCoord),//X
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].yCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].yCoord) + ((t * t) * shape.getPath()[v+2].yCoord),//Y
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].zCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].zCoord) + ((t * t) * shape.getPath()[v+2].zCoord),//X
+                });
+                t += 0.25f;
+            }
+
+            for (i=1; i < points.size() - 1; i++) {
+                s.activeTiePath.add(
+                        new Vec5f(points.get(i)[0],points.get(i)[1],points.get(i)[2],0, RailUtility.atan2degreesf(
+                                points.get(i-1)[2] - (points.get(i+1)[2]),
+                                points.get(i-1)[0] - (points.get(i+1)[0])))
+                );
+            }
         }
 
         int[] intOffsets= new int[railOffsets.length];
@@ -187,6 +215,7 @@ public class RailShapeCore {
         sc.gauge=railOffsets;
         sc.segmentLength=shape.getPathLength();
         sc.activePath = new ArrayList<>();
+        sc.activeTiePath= new ArrayList<>();
         List<float[]> points;
         float originalT, t;
         int i;
@@ -221,11 +250,11 @@ public class RailShapeCore {
 
 
             //now do for ties
-
             t = -0.25f;
             //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
             points = new ArrayList<>();
-            for (i = 0; i < 0.4f / (0.4f * shape.getPathLength()); i++) {//todo only part left also need random Y offset, very small
+            for (i = 0; t < (0.35*shape.getPathLength()); i++) {
+                //todo only part left also need random Y offset, very small
                 //define position
                 points.add(new float[]{
                         (((1 - t) * (1 - t)) * shape.getPath()[v].xCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].xCoord) + ((t * t) * shape.getPath()[v+2].xCoord),//X

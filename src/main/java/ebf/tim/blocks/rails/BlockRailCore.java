@@ -196,8 +196,9 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public void onNeighborBlockChange(World worldObj, int x, int y, int z, Block b) {
-        if(b instanceof BlockRailCore){return;}
-        super.onNeighborBlockChange(worldObj, x, y, z, b);
+        if(!(b instanceof BlockRailCore)) {
+            super.onNeighborBlockChange(worldObj, x, y, z, b);
+        }
         updateShape(x,y,z,worldObj, null);
         if(worldObj.getTileEntity(x,y,z) instanceof RailTileEntity){
             worldObj.getTileEntity(x,y,z).markDirty();

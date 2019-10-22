@@ -1,6 +1,7 @@
 package ebf.tim.models.rails;
 
 import ebf.tim.blocks.rails.RailShapeCore;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Vec5f;
 import fexcraft.tmt.slim.Tessellator;
 import fexcraft.tmt.slim.TextureManager;
@@ -52,7 +53,7 @@ public class ModelTies {
         modelPotatoTies(shape, maxWidth, minWidth, block);
 
         GL11.glPushMatrix();
-        GL11.glTranslated(0, 0.125, 0);
+        GL11.glTranslated(0, -0.125, 0);
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.NORTH.ordinal(),block);
         boolean first = true;
         for (Vec5f p :shape.activeTiePath) {
