@@ -9,9 +9,7 @@ import fexcraft.tmt.slim.Vec3f;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class RailShapeCore {
 
@@ -168,10 +166,10 @@ public class RailShapeCore {
 
             //now do for ties
 
-            t = -0.25f;
+            t = -0.15f;
             //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
             points = new ArrayList<>();
-            for (i = 0; i < 0.4f / (0.4f * shape.getPathLength()); i++) {//todo only part left also need random Y offset, very small
+            for (i = 0; t < (0.25f * shape.getPathLength()); i++) {
                 //define position
                 points.add(new float[]{
                         (((1 - t) * (1 - t)) * shape.getPath()[v].xCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].xCoord) + ((t * t) * shape.getPath()[v+2].xCoord),//X
@@ -217,69 +215,86 @@ public class RailShapeCore {
         sc.segmentLength=shape.getPathLength();
         sc.activePath = new ArrayList<>();
         sc.activeTiePath= new ArrayList<>();
-        List<float[]> points;
-        float originalT, t;
+        List<Vec3f> points, tiePoints;
+        float t, trueDistance=0;
         int i;
+
+        for(i=0;i<shape.getPath().length-1;i++){
+            trueDistance+=
+                    (Math.abs(shape.getPath()[i].xCoord)+Math.abs(shape.getPath()[i+1].xCoord)) +
+                            (Math.abs(shape.getPath()[i].zCoord)+Math.abs(shape.getPath()[i+1].zCoord))
+            ;
+        }
+        trueDistance=0;
 
         for(int v=0;v<shape.getPath().length-2;v+=3) {
 
-            originalT = Math.abs(shape.getPath()[v].xCoord) + Math.abs(shape.getPath()[v].zCoord);
-            originalT += Math.abs(shape.getPath()[v+1].xCoord) + Math.abs(shape.getPath()[v+1].zCoord);
-            originalT += Math.abs(shape.getPath()[v+2].xCoord) + Math.abs(shape.getPath()[v+2].zCoord);
-            originalT = originalT / (originalT * shape.getPathLength());
+           // originalT = trueDistance/3;
+
+            float originalT=1f/3f;
 
             t = -originalT;
             //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
             points = new ArrayList<>();
-            for (i = 0; i < shape.getPathLength() + 3; i++) {
+            for (i = 0; t <= 1+originalT; i++) {
                 //define position
-                points.add(new float[]{
+                points.add(new Vec3f(
                         (((1 - t) * (1 - t)) * shape.getPath()[v].xCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].xCoord) + ((t * t) * shape.getPath()[v+2].xCoord),//X
                         (((1 - t) * (1 - t)) * shape.getPath()[v].yCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].yCoord) + ((t * t) * shape.getPath()[v+2].yCoord),//Y
-                        (((1 - t) * (1 - t)) * shape.getPath()[v].zCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].zCoord) + ((t * t) * shape.getPath()[v+2].zCoord),//X
-                });
+                        (((1 - t) * (1 - t)) * shape.getPath()[v].zCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].zCoord) + ((t * t) * shape.getPath()[v+2].zCoord)//X
+                ));
                 t += originalT;
+                trueDistance+=Math.abs(points.get(i).xCoord)+Math.abs(points.get(i).zCoord);
             }
 
             for (i=1; i < points.size() - 1; i++) {
                 sc.activePath.add(
-                        new Vec5f(points.get(i)[0],points.get(i)[1],points.get(i)[2],0, RailUtility.atan2degreesf(
-                                points.get(i-1)[2] - (points.get(i+1)[2]),
-                                points.get(i-1)[0] - (points.get(i+1)[0])))
+                        new Vec5f(points.get(i).xCoord,points.get(i).yCoord,points.get(i).zCoord,0, RailUtility.atan2degreesf(
+                                points.get(i-1).zCoord - (points.get(i+1).zCoord),
+                                points.get(i-1).xCoord - (points.get(i+1).xCoord)))
                 );
             }
 
 
-            //now do for ties
-            t = -0.25f;
-            //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
-            points = new ArrayList<>();
-            for (i = 0; t < (shape.getPathLength()); i++) {
-                //define position
-                points.add(new float[]{
-                        (((1 - t) * (1 - t)) * shape.getPath()[v].xCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].xCoord) + ((t * t) * shape.getPath()[v+2].xCoord),//X
-                        (((1 - t) * (1 - t)) * shape.getPath()[v].yCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].yCoord) + ((t * t) * shape.getPath()[v+2].yCoord),//Y
-                        (((1 - t) * (1 - t)) * shape.getPath()[v].zCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].zCoord) + ((t * t) * shape.getPath()[v+2].zCoord),//X
-                });
-                t += 0.25f;
+
+
+            //do it again for ties
+            if(trueDistance!=0){
+                //DebugUtil.println(trueDistance, points.size(),trueDistance/(points.size()-2), 0.625f*8,shape.tieCount);
+               //trueDistance/=points.size();
             }
 
-            float y;
-            for (i=1; i < points.size() - 1; i++) {
-                y=new Random().nextInt(20)*0.00001f;
+            t=-0.04375f;
+            tiePoints=new ArrayList<>();
+            for(i=0;i<=shape.tieCount+2;i++){//todo length wrong, everything else fine
+                tiePoints.add(getPosition(t, points));
+                t+=(0.0625f*4);
+            }
+            for (i=1; i < tiePoints.size()-1; i++) {
                 sc.activeTiePath.add(
-                        new Vec5f(points.get(i)[0],points.get(i)[1]+y,points.get(i)[2],0, RailUtility.atan2degreesf(
-                                points.get(i-1)[2] - (points.get(i+1)[2]),
-                                points.get(i-1)[0] - (points.get(i+1)[0])))
+                        new Vec5f(tiePoints.get(i).xCoord,tiePoints.get(i).yCoord,tiePoints.get(i).zCoord,0, RailUtility.atan2degreesf(
+                                tiePoints.get(i-1).zCoord - (tiePoints.get(i).zCoord),
+                                tiePoints.get(i-1).xCoord - (tiePoints.get(i).xCoord)))
                 );
             }
-
-
         }
 
         return sc;
     }
 
+    public static Vec3f getPosition(float distance, List<Vec3f> points){
+        float totalTraveled = 0, traveled;
+        for(int i = 0; i < points.size() - 1; i++){
+            traveled = totalTraveled += points.get(i).distance(points.get(i + 1));
+            if(traveled >= distance){
+                if(traveled == distance) {
+                    return points.get(i + 1).distance(points.get(i), distance);
+                }
+                return points.get(i + 1).distance(points.get(i), traveled - distance);
+            }
+        }
+        return points.get(1).distance(points.get(0), -distance);
+    }
 
     /**
      * centers the path based on the provided x/y/z vectors.

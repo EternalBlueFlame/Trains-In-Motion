@@ -36,11 +36,11 @@ public class ModelTies {
             GL11.glRotatef(p.u,1,0,0);
             Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, 0.0625f,d0, iicon.getMinV());
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, 0.1875f,d1, iicon.getMinV());
+            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, -0.0625f,d0, iicon.getMinV());
+            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, 0.0625f,d1, iicon.getMinV());
 
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.1875f,d1,iicon.getMaxV());
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.0625f,d0, iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.0625f,d1,iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, -0.0625f,d0, iicon.getMaxV());
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
@@ -68,11 +68,11 @@ public class ModelTies {
             GL11.glRotatef(p.u,1,0,0);
             Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, 0.1875f,iicon.getMinU(),iicon.getMinV());
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, 0.1875f,d1,iicon.getMinV());
+            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, 0.0625f,iicon.getMinU(),iicon.getMinV());
+            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, 0.0625f,d1,iicon.getMinV());
 
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.1875f,iicon.getMinU(),iicon.getMaxV());
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.1875f,d1,iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.0625f,d1,iicon.getMaxV());
 
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
@@ -92,11 +92,11 @@ public class ModelTies {
             Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
 
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMinV());
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, 0.0625f,d1,iicon.getMinV());
+            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, -0.0625f,iicon.getMinU(),iicon.getMinV());
+            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, -0.0625f,d1,iicon.getMinV());
 
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.0625f,d1,iicon.getMaxV());
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, -0.0625f,d1,iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, -0.0625f,iicon.getMinU(),iicon.getMaxV());
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
@@ -114,11 +114,11 @@ public class ModelTies {
             GL11.glRotatef(p.u,1,0,0);
             Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMinV());
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, 0.1875f,iicon.getMinU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, -0.0625f,iicon.getMinU(),iicon.getMinV());
+            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMaxV());
 
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0, 0.1875f,iicon.getMaxU(),iicon.getMaxV());
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0, 0.0625f,iicon.getMaxU(),iicon.getMinV());
+            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0, 0.0625f,iicon.getMaxU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0, -0.0625f,iicon.getMaxU(),iicon.getMinV());
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
@@ -136,11 +136,11 @@ public class ModelTies {
             GL11.glRotatef(p.u,1,0,0);
             Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.1875f,iicon.getMinU(),iicon.getMinV());
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMinV());
+            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, -0.0625f,iicon.getMinU(),iicon.getMaxV());
 
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0, 0.0625f,iicon.getMaxU(),iicon.getMaxV());
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0, 0.1875f,iicon.getMaxU(),iicon.getMinV());
+            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0, -0.0625f,iicon.getMaxU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0, 0.0625f,iicon.getMaxU(),iicon.getMinV());
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }

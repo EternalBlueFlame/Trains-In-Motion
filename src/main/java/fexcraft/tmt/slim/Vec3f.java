@@ -43,6 +43,12 @@ public class Vec3f implements Serializable {
         zCoord = h;
     }
 
+    public Vec3f(float[] v){
+        xCoord = v[0];
+        yCoord = v[1];
+        zCoord= v[2];
+    }
+
     public Vec3f crossProduct(Vec3f p_72431_1_) {
         return new Vec3f(this.yCoord * p_72431_1_.zCoord - this.zCoord * p_72431_1_.yCoord, this.zCoord * p_72431_1_.xCoord - this.xCoord * p_72431_1_.zCoord, this.xCoord * p_72431_1_.yCoord - this.yCoord * p_72431_1_.xCoord);
     }
@@ -102,6 +108,11 @@ public class Vec3f implements Serializable {
         vec = direction(vec.xCoord - xCoord, vec.yCoord - yCoord, vec.zCoord - zCoord);
         return new Vec3f(xCoord + (vec.xCoord * am), yCoord + (vec.yCoord * am), zCoord + (vec.zCoord * am));
     }
+    public Vec3f distance(float[] dest, float am){
+        Vec3f vec = new Vec3f((xCoord + dest[0]) * 0.5, (yCoord + dest[1]) * 0.5, (zCoord + dest[2]) * 0.5);
+        vec = direction(vec.xCoord - xCoord, vec.yCoord - yCoord, vec.zCoord - zCoord);
+        return new Vec3f(xCoord + (vec.xCoord * am), yCoord + (vec.yCoord * am), zCoord + (vec.zCoord * am));
+    }
 
     public double length(){
         return Math.sqrt(xCoord * xCoord + yCoord * yCoord + zCoord * zCoord);
@@ -141,6 +152,13 @@ public class Vec3f implements Serializable {
         j = Float.floatToIntBits(this.zCoord);
         i = 31 * i + (int)(j ^ j >>> 32);
         return i;
+    }
+
+    public float distance(Vec3f vec){
+        float d0 = vec.xCoord - this.xCoord;
+        float d1 = vec.yCoord - this.yCoord;
+        float d2 = vec.zCoord - this.zCoord;
+        return (float)Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
     }
 
     @Override

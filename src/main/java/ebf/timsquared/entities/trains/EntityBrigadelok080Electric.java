@@ -168,29 +168,11 @@ public class EntityBrigadelok080Electric extends TrainBase {
     }
 
     /**
-     * <h2>Hitbox offsets</h2>
-     * @return defines the positions for the hitboxes in blocks. 0 being the center, negative values being towards the front. the first and last values define the positions of the couplers
-     */
-    @Override
-    public double[][] getHitboxPositions(){return new double[][]{{-1.75d,0.25d,0d},{-1.15d,0.25d,0d},{0d,0.25d,0d},{1.15d, 0.25d,0d},{1.75d,0.25d,0d}};}
-
-    /**
      * <h2>Animation radius</h2>
      * @return defines the radius in microblocks (1/16 of a block) for the piston rotations.
      */
     @Override
     public float getPistonOffset(){return 0.5f;}
-    /**
-     * <h2>Smoke offset</h2>
-     * @return defines the array of positions in blocks for smoke.
-     * the first number in the position defines the X/Z axis, negative values are towards the front of the train.
-     * the second number defines the Y position, 0 is the rails, higher values are towards the sky.
-     * the third number defines left to right, negative values are towards the right.
-     * the forth number defines the grayscale color from 255 (white) to 0 (black)
-     * the 5th number is for density, there's no min/max but larger numbers will create more lag.
-     */
-    @Override
-    public float[][] getSmokeOffset(){return new float[][]{{-1,0,0.5f,0xB2B2B2,30},{-1,0,-0.5f,0xB2B2B2,30},{-1.4f,2f,0,0x3C3C3C,500}};}
 
     @Override
     public float[][] bogieModelOffsets() {
@@ -251,12 +233,8 @@ public class EntityBrigadelok080Electric extends TrainBase {
      * for instance if you have a wooden tanker car, you can deny fluids that are fire sources (like lava).
      */
     @Override
-    public String[] getTankFilters(int tank){
-        switch (tank){
-            default:{
-                return new String[]{FluidRegistry.WATER.getName()};
-            }
-        }
+    public String[][] getTankFilters(){
+        return FuelHandler.DefaultTanks.ELECTRIC.value();
     }
 
     //todo: maybe make some util functions or something to simplify this stuff?

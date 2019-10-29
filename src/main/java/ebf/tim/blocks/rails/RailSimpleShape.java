@@ -1,17 +1,27 @@
 package ebf.tim.blocks.rails;
 
+import ebf.tim.utility.DebugUtil;
 import fexcraft.tmt.slim.Vec3f;
 
 public class RailSimpleShape {
 
     private Vec3f[] path = new Vec3f[0];
-    private float pathLength;
+    int tieCount=0;
 
     public RailSimpleShape setSegments(int s){
-        pathLength=Math.max(s,1);
+        tieCount=s;
         return this;
     }
-    public float getPathLength(){ return pathLength;}
+    public float getPathLength(){
+        if(path.length<1){return 0;}
+        float length =0;
+
+        for (int i=0; i<path.length-1;i++){
+            length+=new Vec3f(path[i]).distance(path[i+1],1).length();
+        }
+        return length;
+
+    }
 
     public Vec3f[] getPath(){return path;}
 

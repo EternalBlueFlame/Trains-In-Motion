@@ -144,7 +144,7 @@ public class GUIPaintBucket extends GuiScreen {
         //get skin from page
         ebf.tim.api.skin s = entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(key);
         //bind skin to render
-        TextureManager.bindTexture(s.getTexture());
+        TextureManager.bindTexture(s.getTexture(), null, null);
 
         //render models with offsets
         int i=1;

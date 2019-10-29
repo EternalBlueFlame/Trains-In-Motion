@@ -254,10 +254,15 @@ public class RenderEntity extends Render {
                 if(b.subBogies!=null) {
                     iii=0;
                     for (Bogie sub : b.subBogies) {
+                        if(SkinRegistry.getSkin(entity, Minecraft.getMinecraft().thePlayer, true, textureURI).getSubBogieSkin(iii)==null){
+                            continue;
+                        }
                         if(entity.worldObj!=null) {
-                            TextureManager.bindTexture(entity.getTexture(Minecraft.getMinecraft().thePlayer).getSubBogieSkin(iii));
+                            TextureManager.bindTexture(entity.getTexture(Minecraft.getMinecraft().thePlayer).getSubBogieSkin(iii),
+                            entity.colorsFrom,entity.colorsTo);
                         } else {
-                            Tessellator.bindTexture(SkinRegistry.getSkin(entity, Minecraft.getMinecraft().thePlayer, true, textureURI).getSubBogieSkin(iii));
+                            TextureManager.bindTexture(SkinRegistry.getSkin(entity, Minecraft.getMinecraft().thePlayer, true, textureURI).getSubBogieSkin(iii),
+                                    entity.colorsFrom,entity.colorsTo);
                         }
                         GL11.glPushMatrix();
                         GL11.glTranslated(sub.offset[0], sub.offset[1], sub.offset[2]);

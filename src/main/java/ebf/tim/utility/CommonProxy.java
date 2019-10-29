@@ -142,6 +142,14 @@ public class CommonProxy implements IGuiHandler {
     public static Fluid fluidOil = new Fluid("Oil");
     /**the diesel fluid*/
     public static Fluid fluidDiesel = new Fluid("Diesel");
+    /**the fuel oil fluid*/
+    public static Fluid fluidfueloil = new Fluid("FuelOil");
+    /**the steam fluid*/
+    public static Fluid fluidSteam = new Fluid("Steam");
+    /**the heavy steam fluid*/
+    public static Fluid fluidHeavySteam = new Fluid("HeavySteam");
+    /**the RF fluid*/
+    public static Fluid fluidRedstone = new Fluid("Redstone");
 
     /**the crafting table for trains*/
     public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", new Material(MapColor.mapColorArray[13]), 0);
@@ -161,6 +169,10 @@ public class CommonProxy implements IGuiHandler {
 
         RegisterFluid(TrainsInMotion.proxy.isClient(),fluidOil, TrainsInMotion.MODID, "oil", false, 700,MapColor.blackColor, TrainsInMotion.creativeTab);
         RegisterFluid(TrainsInMotion.proxy.isClient(),fluidDiesel, TrainsInMotion.MODID, "diesel", false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
+        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidSteam, TrainsInMotion.MODID, "steam", true, 200, MapColor.snowColor, TrainsInMotion.creativeTab);
+        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidHeavySteam, TrainsInMotion.MODID, "heavysteam", true, 600, MapColor.snowColor, TrainsInMotion.creativeTab);
+        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidfueloil, TrainsInMotion.MODID, "fueloil", false, 600, MapColor.brownColor, TrainsInMotion.creativeTab);
+        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidRedstone, TrainsInMotion.MODID, "redstone", false, 100, MapColor.redColor, TrainsInMotion.creativeTab);
 
 
         RegisterItem(TrainsInMotion.proxy.isClient(),new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", TrainsInMotion.creativeTab);

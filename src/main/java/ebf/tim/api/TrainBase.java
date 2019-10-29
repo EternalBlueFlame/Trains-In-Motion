@@ -45,12 +45,6 @@ public abstract class TrainBase extends EntityTrainCore{
     public abstract TrainsInMotion.transportTypes getType();
 
     /**
-     * returns the positions for the hitbox, they are defined by length from center.
-     * must have at least 4 hitboxes, the first and last values are used for coupling positions
-     */
-    public abstract double[][] getHitboxPositions();
-
-    /**
      * returns the item of the transport, this should be a static value in the transport's class.
      */
     public abstract Item getItem();
@@ -65,11 +59,6 @@ public abstract class TrainBase extends EntityTrainCore{
      * defines the radius in microblocks that the pistons animate
      */
     public abstract float getPistonOffset();
-
-    /**
-     * defines smoke positions, the outer array defines each new smoke point, the inner arrays define the X/Y/Z
-     */
-    public abstract float[][] getSmokeOffset();
 
     /**
      * defines the length from center of the transport, thus is used for the motion calculation
@@ -195,8 +184,7 @@ public abstract class TrainBase extends EntityTrainCore{
     /** defines the whitelist of fluid names for the tank defined by tankID
      * example:
      * if(tankID==0){return new String[]{"water", "diesel"}} else { return null}*/
-    @Deprecated //replace with an array of string arrays, more similar to other methods
-    public abstract String[] getTankFilters(int tankID);
+    public abstract String[][] getTankFilters();
 
 
     /**defines the name used for registration and the default name used in the gui.*/
