@@ -7,7 +7,9 @@ import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.models.Bogie;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.networking.PacketPaint;
+import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
+import ebf.tim.utility.EventManager;
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.TextureManager;
@@ -47,6 +49,7 @@ public class GUIPaintBucket extends GuiScreen {
 
     public GUIPaintBucket(GenericRailTransport t){
         entity=t;
+
     }
 
     @Override
@@ -96,16 +99,27 @@ public class GUIPaintBucket extends GuiScreen {
         GL11.glColor4f(1F, 1F, 1F, 0.5F);
         float offsetFromScreenLeft = width * 0.5f;
 
+        int longest =fontRendererObj.getStringWidth(currentSkin.name);
+
+        if(currentSkin.getDescription()!=null) {
+            for (String s : currentSkin.getDescription()){
+                if(fontRendererObj.getStringWidth(s)>longest){
+                    longest=fontRendererObj.getStringWidth(s);
+                }
+            }
+        }
+        EventManager.drawTooltipBox((int)(width*0.125f),(int)(height*0.55f),(int)(width*0.75f),(int)(height*0.35f),  ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,100);
+
 
         fontRendererObj.drawString(RailUtility.translate(currentSkin.name),
                 (int)(offsetFromScreenLeft - fontRendererObj.getStringWidth(currentSkin.name)*0.5f),
-                (int)((height*0.1f)*6),0,false);
+                (int)(height*0.6f),ClientProxy.WAILA_FONTCOLOR,false);
 
         if(currentSkin.getDescription()!=null) {
             for(int i=0; i<currentSkin.getDescription().length;i++) {
                 fontRendererObj.drawString(currentSkin.getDescription()[i],
-                        (int) (offsetFromScreenLeft - fontRendererObj.getStringWidth(currentSkin.getDescription()[0]) * 0.5f),
-                        (int) ((height * 0.1f) * 7)+(10*i), 0, false);
+                        (int) (offsetFromScreenLeft - fontRendererObj.getStringWidth(currentSkin.getDescription()[i]) * 0.5f),
+                        (int) ((height * 0.1f) * 7)+(10*i), ClientProxy.WAILA_FONTCOLOR, false);
             }
         }
         RenderEntity.instance.doRender(entity,page, 0,0,0,0, true, currentSkin.texture.toString());
@@ -123,10 +137,12 @@ public class GUIPaintBucket extends GuiScreen {
         else if (parButton==buttonLeft) {
             page = (page <= 0 ? entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().size() -1: page - 1);
             currentSkin=entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(skinList.get(page));
+            DebugUtil.println(page, currentSkin.name);
         }
         else if (parButton==buttonRight) {
             page = (page+1 >= entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().size() ? 0 : page + 1);
             currentSkin=entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(skinList.get(page));
+            DebugUtil.println(page, currentSkin.name);
         }
     }
 

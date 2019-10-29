@@ -105,7 +105,9 @@ public class SkinRegistry {
 
 
     public static void addSkin(Class c, skin s){
-        addSkin(c.getName(),s);
+        addSkin(c.getName(),new skin(s.modid,s.texture, s.name,s.description)
+                .setRecolorsFrom(s.colorsFrom).setRecolorsTo(s.colorsTo)
+                .setBogieTextures(s.bogieTextures).setSubBogieTextures(s.subBogieTextures));
     }
 
     public static void addSkin(String c, skin s){

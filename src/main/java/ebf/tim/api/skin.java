@@ -52,8 +52,16 @@ public class skin {
         bogieTextures=resourceList(modid,textures);
         return this;
     }
+    public skin setBogieTextures(ResourceLocation... textures){
+        bogieTextures=textures;
+        return this;
+    }
     public skin setSubBogieTextures(String... textures){
         subBogieTextures=resourceList(modid,textures);
+        return this;
+    }
+    public skin setSubBogieTextures(ResourceLocation... textures){
+        subBogieTextures=textures;
         return this;
     }
     public skin setRecolorsTo(int... recolorsTo){
