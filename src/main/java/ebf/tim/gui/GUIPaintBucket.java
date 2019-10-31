@@ -78,7 +78,7 @@ public class GUIPaintBucket extends GuiScreen {
         buttonList =new ArrayList();
         buttonList.add(buttonLeft = new GuiButton(-1, percentLeft(10)-10,percentTop(65), 20,20,"<<"));//left
         buttonList.add(buttonRight = new GuiButton(-1, percentLeft(90)-10,percentTop(65), 20,20,">>"));//right
-        buttonList.add(buttonApply = new GuiButton(-1, percentLeft(50)-16,percentTop(80), 32,20,"Apply"));//apply
+        buttonList.add(buttonApply = new GuiButton(-1, percentLeft(50)-16,percentTop(45), 32,20,"Apply"));//apply
         buttonApply.visible=true;
     }
 
@@ -160,7 +160,7 @@ public class GUIPaintBucket extends GuiScreen {
         //get skin from page
         ebf.tim.api.skin s = entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(key);
         //bind skin to render
-        TextureManager.bindTexture(s.getTexture(), null, null);
+        TextureManager.bindTexture(s.getTexture(), s.colorsFrom, s.colorsTo, null, null);
 
         //render models with offsets
         int i=1;
@@ -187,7 +187,10 @@ public class GUIPaintBucket extends GuiScreen {
             m.bogieModel.render(null, 0, 0, 0, 0, 0, 0.0625f);
             //render the sub bogies with textures if the bogie has any
             if (m.subBogies != null) {
+                sb=0;
                 for (Bogie sub : m.subBogies) {
+                    TextureManager.bindTexture(s.getSubBogieSkin(sb));
+                    sb++;
                     GL11.glPushMatrix();
                     GL11.glTranslated(-sub.offset[0], -sub.offset[1], -sub.offset[2]);
                     sub.bogieModel.render(null, 0, 0, 0, 0, 0, 0.0625f);

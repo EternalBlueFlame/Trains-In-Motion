@@ -1,6 +1,7 @@
 package ebf.tim.models;
 
 import ebf.tim.api.SkinRegistry;
+import ebf.tim.api.skin;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.RailUtility;
@@ -198,16 +199,19 @@ public class RenderEntity extends Render {
          * @see net.minecraft.client.renderer.entity.RenderEnderman#renderEquippedItems(EntityEnderman, float)
          */
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
+        skin s;
         if(entity.worldObj!=null) {
             TextureManager.adjustLightFixture(entity.worldObj, (int) entity.posX, (int) entity.posY + 1, (int) entity.posZ);
-            TextureManager.bindTexture(entity.getTexture(Minecraft.getMinecraft().thePlayer).getTexture(), entity.colorsFrom, entity.colorsTo);
+            s=entity.getTexture(Minecraft.getMinecraft().thePlayer);
         } else if (entity.getTextureByID(
                 Minecraft.getMinecraft().thePlayer, isPaintBucket,textureURI)!=null){
-            TextureManager.bindTexture(entity.getTextureByID(
-                    Minecraft.getMinecraft().thePlayer, isPaintBucket,textureURI).getTexture(), entity.colorsFrom, entity.colorsTo);
+            s=entity.getTextureByID(
+                    Minecraft.getMinecraft().thePlayer, isPaintBucket,textureURI);
         } else {
-            TextureManager.bindTexture(entity.getTextureByID(Minecraft.getMinecraft().thePlayer, false, entity.getDefaultSkin()).getTexture(), entity.colorsFrom, entity.colorsTo);
+            s=entity.getTextureByID(Minecraft.getMinecraft().thePlayer,false, entity.getDefaultSkin());
         }
+        TextureManager.bindTexture(s.getTexture(), s.colorsFrom, s.colorsTo, entity.colorsFrom, entity.colorsTo);
+
         for(i=0; i< entity.renderData.modelList.length;i++) {
             GL11.glPushMatrix();
             if(entity.modelOffsets()!=null && entity.modelOffsets().length>i) {
@@ -234,15 +238,8 @@ public class RenderEntity extends Render {
                 ii=0;
                 GL11.glPushMatrix();
                 //bind the texture
-                if(entity.worldObj!=null){
-                    if (entity.getTexture(Minecraft.getMinecraft().thePlayer).getBogieSkin(ii) != null) {
-                        Tessellator.bindTexture(entity.getTexture(Minecraft.getMinecraft().thePlayer).getBogieSkin(i));
-                    }
-                } else {
-                    if(SkinRegistry.getSkin(entity, Minecraft.getMinecraft().thePlayer, true, textureURI) !=null &&
-                            SkinRegistry.getSkin(entity, Minecraft.getMinecraft().thePlayer, true, textureURI).getBogieSkin(ii) != null) {
-                        Tessellator.bindTexture(SkinRegistry.getSkin(entity, Minecraft.getMinecraft().thePlayer, true, textureURI).getBogieSkin(ii));
-                    }
+                if (s.getBogieSkin(ii) != null) {
+                    TextureManager.bindTexture(s.getBogieSkin(i), s.colorsFrom, s.colorsTo, entity.colorsFrom, entity.colorsTo);
                 }
                 GL11.glTranslated(-b.offset[0], -b.offset[1], -b.offset[2]);
                 b.setRotation(entity);
@@ -254,15 +251,8 @@ public class RenderEntity extends Render {
                 if(b.subBogies!=null) {
                     iii=0;
                     for (Bogie sub : b.subBogies) {
-                        if(SkinRegistry.getSkin(entity, Minecraft.getMinecraft().thePlayer, true, textureURI).getSubBogieSkin(iii)==null){
-                            continue;
-                        }
-                        if(entity.worldObj!=null) {
-                            TextureManager.bindTexture(entity.getTexture(Minecraft.getMinecraft().thePlayer).getSubBogieSkin(iii),
-                            entity.colorsFrom,entity.colorsTo);
-                        } else {
-                            TextureManager.bindTexture(SkinRegistry.getSkin(entity, Minecraft.getMinecraft().thePlayer, true, textureURI).getSubBogieSkin(iii),
-                                    entity.colorsFrom,entity.colorsTo);
+                        if(s.getSubBogieSkin(iii)!=null){
+                            TextureManager.bindTexture(s.getSubBogieSkin(iii), s.colorsFrom, s.colorsTo, entity.colorsFrom, entity.colorsTo);
                         }
                         GL11.glPushMatrix();
                         GL11.glTranslated(sub.offset[0], sub.offset[1], sub.offset[2]);
