@@ -248,6 +248,9 @@ public class TextureManager {
         //get image data from the currently bound image
         int width =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
         int height =glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
+        if(width*height<4){
+            return false;
+        }
 
         ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
 
@@ -357,7 +360,9 @@ public class TextureManager {
                 for (Integer i : skinColorsTo) {
                     filePath.append(Integer.toHexString(i));
                 }
-                filePath.append("+");
+                if(colorsFrom!=null && colorsTo!=null && colorsFrom.size()+colorsTo.size()>1) {
+                    filePath.append("+");
+                }
             }
             if(colorsFrom!=null && colorsTo!=null && colorsFrom.size()+colorsTo.size()>1){
                 for (Integer i : colorsFrom) {
@@ -374,7 +379,7 @@ public class TextureManager {
     private static String resourceLocation(ResourceLocation res){
         return (res.getResourceDomain() + "/"
                 +res.getResourcePath().
-                substring(res.getResourcePath().lastIndexOf("/"), res.getResourcePath().lastIndexOf(".")));
+                substring(0, res.getResourcePath().lastIndexOf(".")));
     }
 
 }

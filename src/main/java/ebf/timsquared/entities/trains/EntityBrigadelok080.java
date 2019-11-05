@@ -85,15 +85,15 @@ public class EntityBrigadelok080 extends TrainBase {
     @Override
     public void registerSkins(){
         //make base skin and register
-        ebf.tim.api.skin s = new skin(TrainsInMotion.MODID,"textures/sd/train/brigadelok_080.png","default",
-                "Used by Germany in WWI\nas a transport for solders and equipment");
+        ebf.tim.api.skin s ;
 
-        SkinRegistry.addSkin(this.getClass(),s);
+        SkinRegistry.addSkin(this.getClass(),new skin(TrainsInMotion.MODID,"textures/sd/train/brigadelok_080.png","default",
+                "Used by Germany in WWI\nas a transport for solders and equipment"));
 
         //add recolor so current, and register new skin
-        s.setRecolorsFrom(0x68939E).setRecolorsTo(0xaa0000)
-        .setName("red")
-        .setDescription("A fictional skin created for testing the recolor system,\nthe gui multi-line support and the paint bucket skin selector. \n Might keep it long run\nto pay homage to the development of the mod.");
+        s = new skin(TrainsInMotion.MODID,"textures/sd/train/brigadelok_080.png", "red",
+                "A fictional skin created for testing the recolor system,\n and the paint bucket skin selector. \n Might keep it long run\nto pay homage to the development of the mod.")
+        .setRecolorsFrom(0x68939E).setRecolorsTo(0xaa0000);
         SkinRegistry.addSkin(this.getClass(),s);
 
         //remove recolors, then set new name and texture

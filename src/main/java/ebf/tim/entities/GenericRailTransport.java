@@ -116,6 +116,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     float rotationRoll;
     public int forceBackupTimer =0;
     public float pullingWeight=0;
+    public boolean onVanillaRails=false;
 
     //@SideOnly(Side.CLIENT)
     public TransportRenderData renderData = new TransportRenderData();
@@ -1614,7 +1615,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
     @SideOnly(Side.CLIENT)
     public Bogie[] bogies(){
-        if(bogieModelOffsets()==null){return null;}
+        if(bogieModelOffsets()==null || bogieModels()==null){return null;}
         Bogie[] ret = new Bogie[bogieModelOffsets().length];
         for(int i=0; i<bogieModelOffsets().length;i++){
             if(i>=bogieModels().length){

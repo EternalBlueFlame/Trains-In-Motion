@@ -74,8 +74,6 @@ public class RenderEntity extends Render {
      * @param z the z position of the entity with offset for the camera position.
      * @param yaw is used to rotate the train's yaw, its exactly the same as entity.rotationYaw.
      *
-     * TODO: texture recolor similar to game maker's colorize partial so we can change the color without effecting grayscale, or lighting like on rivets.
-     *                    May be able to use multiple instances of this to have multiple recolorable things on the train.
      *
      */
     public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw, float bogieOffset, boolean isPaintBucket, @Nullable String textureURI){
@@ -159,7 +157,7 @@ public class RenderEntity extends Render {
             GL11.glEnable(GL11.GL_LIGHTING);
         }
         //set the render position
-        GL11.glTranslated(x, y+ RailOffset + ((entity.getRenderScale()-0.0625f)*10)+bogieOffset, z);
+        GL11.glTranslated(x, y+ (entity.onVanillaRails?0:RailOffset) + ((entity.getRenderScale()-0.0625f)*10)+bogieOffset, z);
         //rotate the model.
         GL11.glRotatef(-yaw - 180f, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);

@@ -108,6 +108,12 @@ public class Vec3f implements Serializable {
         vec = direction(vec.xCoord - xCoord, vec.yCoord - yCoord, vec.zCoord - zCoord);
         return new Vec3f(xCoord + (vec.xCoord * am), yCoord + (vec.yCoord * am), zCoord + (vec.zCoord * am));
     }
+
+    public Vec3f distance(Vec3f dest, double am){
+        Vec3f vec = new Vec3f((xCoord + dest.xCoord) * 0.5, (yCoord + dest.yCoord) * 0.5, (zCoord + dest.zCoord) * 0.5);
+        vec = direction(vec.xCoord - xCoord, vec.yCoord - yCoord, vec.zCoord - zCoord);
+        return new Vec3f(xCoord + (vec.xCoord * am), yCoord + (vec.yCoord * am), zCoord + (vec.zCoord * am));
+    }
     public Vec3f distance(float[] dest, float am){
         Vec3f vec = new Vec3f((xCoord + dest[0]) * 0.5, (yCoord + dest[1]) * 0.5, (zCoord + dest[2]) * 0.5);
         vec = direction(vec.xCoord - xCoord, vec.yCoord - yCoord, vec.zCoord - zCoord);
@@ -159,6 +165,10 @@ public class Vec3f implements Serializable {
         float d1 = vec.yCoord - this.yCoord;
         float d2 = vec.zCoord - this.zCoord;
         return (float)Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+    }
+
+    public float distance2d(Vec3f vec){
+        return Math.abs(this.xCoord - vec.xCoord)+Math.abs(this.zCoord - vec.zCoord);
     }
 
     @Override

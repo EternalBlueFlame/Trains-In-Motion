@@ -26,7 +26,7 @@ public class ModelBallast {
         //todo loop this dependant on @dist, if it's greater than 1.75
         for (Vec5f p : shape.activePath) {
             d0 = iicon.getMinU();
-            d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/shape.segmentLength));
+            d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/(shape.activePath.size()-1)));
 
             addVertexWithOffsetAndUV(p, 0.0625f + maxWidth, 0, 0,d0,iicon.getMinV());
             addVertexWithOffsetAndUV(p, -0.0625f + minWidth, 0, 0,d0,iicon.getMaxV());
@@ -50,7 +50,7 @@ public class ModelBallast {
         float ballastloop=0;
         for (Vec5f p : shape.activePath) {
             d0 = iicon.getMinU();
-            d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/shape.segmentLength));
+            d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/(shape.activePath.size()-1)));
 
             addVertexWithOffsetAndUV(p, 0.1825f + maxWidth, -0.0625f, 0,d0,iicon.getMinV());
             addVertexWithOffsetAndUV(p, 0.0625f + maxWidth, 0, 0,d0,iicon.getMinV()+((iicon.getMaxV()-iicon.getMinV())*0.15f));
@@ -68,7 +68,7 @@ public class ModelBallast {
         ballastloop=0;
         for (Vec5f p : shape.activePath) {
             d0 = iicon.getMinU();
-            d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/shape.segmentLength));
+            d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/(shape.activePath.size()-1)));
 
             addVertexWithOffsetAndUV(p, -0.0625f + minWidth, 0, 0,d0,iicon.getMinV());
             addVertexWithOffsetAndUV(p, -0.1825f + minWidth, -0.0625f, 0,d0,iicon.getMinV()+((iicon.getMaxV()-iicon.getMinV())*0.15f));

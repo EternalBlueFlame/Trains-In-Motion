@@ -20,6 +20,7 @@ public class RailShapeCore {
     public float segmentLength;
     /*CLIENT ONLY*/
     public List<Vec5f> activeTiePath = new ArrayList<>();
+    public static Random rand = new Random();
 
     public static void processPoints(List<RailSimpleShape> coordList, float[] gauge, RailTileEntity tile){
         for(RailSimpleShape coords : coordList) {
@@ -215,85 +216,76 @@ public class RailShapeCore {
         sc.segmentLength=shape.getPathLength();
         sc.activePath = new ArrayList<>();
         sc.activeTiePath= new ArrayList<>();
-        List<Vec3f> points, tiePoints;
-        float t, trueDistance=0;
+        List<Vec5f> points;
+        float t;
         int i;
 
-        for(i=0;i<shape.getPath().length-1;i++){
-            trueDistance+=
-                    (Math.abs(shape.getPath()[i].xCoord)+Math.abs(shape.getPath()[i+1].xCoord)) +
-                            (Math.abs(shape.getPath()[i].zCoord)+Math.abs(shape.getPath()[i+1].zCoord))
-            ;
-        }
-        trueDistance=0;
 
         for(int v=0;v<shape.getPath().length-2;v+=3) {
 
-           // originalT = trueDistance/3;
-
-            float originalT=1f/3f;
+            float originalT=1f/16f;
 
             t = -originalT;
             //calculate the bezier curve, this initial janky version is used to get an accurate gauge of the distance between points.
             points = new ArrayList<>();
             for (i = 0; t <= 1+originalT; i++) {
                 //define position
-                points.add(new Vec3f(
-                        (((1 - t) * (1 - t)) * shape.getPath()[v].xCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].xCoord) + ((t * t) * shape.getPath()[v+2].xCoord),//X
-                        (((1 - t) * (1 - t)) * shape.getPath()[v].yCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].yCoord) + ((t * t) * shape.getPath()[v+2].yCoord),//Y
-                        (((1 - t) * (1 - t)) * shape.getPath()[v].zCoord) + (2 * (1 - t) * t * shape.getPath()[v+1].zCoord) + ((t * t) * shape.getPath()[v+2].zCoord)//X
+                points.add(new Vec5f(
+                        (((1f - t) * (1f - t)) * shape.getPath()[v].xCoord) + (2f * (1f - t) * t * shape.getPath()[v+1].xCoord) + ((t * t) * shape.getPath()[v+2].xCoord),//X
+                        (((1f - t) * (1f - t)) * shape.getPath()[v].yCoord) + (2f * (1f - t) * t * shape.getPath()[v+1].yCoord) + ((t * t) * shape.getPath()[v+2].yCoord),//Y
+                        (((1f - t) * (1f - t)) * shape.getPath()[v].zCoord) + (2f * (1f - t) * t * shape.getPath()[v+1].zCoord) + ((t * t) * shape.getPath()[v+2].zCoord)//X
+                        ,0,0
                 ));
                 t += originalT;
-                trueDistance+=Math.abs(points.get(i).xCoord)+Math.abs(points.get(i).zCoord);
             }
-
+            //define rotations
             for (i=1; i < points.size() - 1; i++) {
-                sc.activePath.add(
-                        new Vec5f(points.get(i).xCoord,points.get(i).yCoord,points.get(i).zCoord,0, RailUtility.atan2degreesf(
-                                points.get(i-1).zCoord - (points.get(i+1).zCoord),
-                                points.get(i-1).xCoord - (points.get(i+1).xCoord)))
-                );
+                points.get(i).setUV(0,RailUtility.atan2degreesf(
+                        points.get(i-1).zCoord - (points.get(i+1).zCoord),
+                        points.get(i-1).xCoord - (points.get(i+1).xCoord)));
+            }
+            //segment path
+            sc.activePath.add(points.get(1));
+            sc.activePath.add(getPosition(0.45f, points));
+            sc.activePath.add(getPosition(0.75f, points));
+            sc.activePath.add(points.get(points.size()-2));
+
+
+            //add offset to counteract overlapping ties.
+            for (i=1; i < points.size() - 1; i++) {
+                points.get(i).yCoord+=rand.nextInt(10)*0.00001f;
+            }
+            //define ties todo: borked on diagonals
+            t=0;
+            while (!positionPastEnd(t, points)){
+                sc.activeTiePath.add(getPosition(t, points));
+                t+=0.25d;
             }
 
-
-
-
-            //do it again for ties
-            if(trueDistance!=0){
-                //DebugUtil.println(trueDistance, points.size(),trueDistance/(points.size()-2), 0.625f*8,shape.tieCount);
-               //trueDistance/=points.size();
-            }
-
-            t=-0.04375f;
-            tiePoints=new ArrayList<>();
-            for(i=0;i<=shape.tieCount+2;i++){//todo length wrong, everything else fine
-                tiePoints.add(getPosition(t, points));
-                t+=(0.0625f*4);
-            }
-            for (i=1; i < tiePoints.size()-1; i++) {
-                sc.activeTiePath.add(
-                        new Vec5f(tiePoints.get(i).xCoord,tiePoints.get(i).yCoord,tiePoints.get(i).zCoord,0, RailUtility.atan2degreesf(
-                                tiePoints.get(i-1).zCoord - (tiePoints.get(i).zCoord),
-                                tiePoints.get(i-1).xCoord - (tiePoints.get(i).xCoord)))
-                );
-            }
         }
 
         return sc;
     }
 
-    public static Vec3f getPosition(float distance, List<Vec3f> points){
-        float totalTraveled = 0, traveled;
+    public static boolean positionPastEnd(float distance, List<Vec5f> points){
+        float totalTraveled = 0;
         for(int i = 0; i < points.size() - 1; i++){
-            traveled = totalTraveled += points.get(i).distance(points.get(i + 1));
-            if(traveled >= distance){
-                if(traveled == distance) {
-                    return points.get(i + 1).distance(points.get(i), distance);
-                }
-                return points.get(i + 1).distance(points.get(i), traveled - distance);
+            if((totalTraveled += points.get(i).distance2d(points.get(i + 1))) > distance){
+                return false;
             }
         }
-        return points.get(1).distance(points.get(0), -distance);
+        return true;
+    }
+
+    public static Vec5f getPosition(float distance, List<Vec5f> points){
+        float totalTraveled = 0, traveled;
+        for(int i = 0; i < points.size() - 1; i++){
+            traveled = totalTraveled += points.get(i).distance2d(points.get(i + 1));
+            if(traveled >= distance){
+                return points.get(i);
+            }
+        }
+        return points.get(1);//.distance(points.get(0), distance);
     }
 
     /**

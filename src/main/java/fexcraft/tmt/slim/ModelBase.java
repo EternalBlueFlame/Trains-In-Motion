@@ -134,6 +134,7 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 	protected final void fixRotation(ModelRendererTurbo[] model, boolean flipX, boolean flipY, boolean flipZ){
 		if(!flipX && !flipY && !flipZ){return;}
 		for(ModelRendererTurbo mod : model){
+			if(mod==null){continue;}
 			if(flipX){mod.rotateAngleX = -mod.rotateAngleX;}
 			if(flipY){mod.rotateAngleY = -mod.rotateAngleY;}
 			if(flipZ){mod.rotateAngleZ = -mod.rotateAngleZ;}
@@ -144,6 +145,7 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 	protected void translate(ModelRendererTurbo[] model, float x, float y, float z){
 		if(model==null){return;}
 		for(ModelRendererTurbo mod : model){
+			if(mod==null){continue;}
 			mod.rotationPointX += x;
 			mod.rotationPointY += y;
 			mod.rotationPointZ += z;
@@ -152,6 +154,7 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 	protected void translate(List<ModelRendererTurbo> model, float x, float y, float z){
 		if(model==null){return;}
 		for(ModelRendererTurbo mod : model){
+			if(mod==null){continue;}
 			mod.rotationPointX += x;
 			mod.rotationPointY += y;
 			mod.rotationPointZ += z;
@@ -161,6 +164,7 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 	protected void rotate(ModelRendererTurbo[] model, float x, float y, float z) {
 		if(model==null){return;}
 		for(ModelRendererTurbo mod : model){
+			if(mod==null){continue;}
 			mod.rotateAngleX += x;
 			mod.rotateAngleY += y;
 			mod.rotateAngleZ += z;
@@ -169,6 +173,7 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 	protected void rotate(List<ModelRendererTurbo> model, float x, float y, float z) {
 		if(model==null){return;}
 		for(ModelRendererTurbo mod : model){
+			if(mod==null){continue;}
 			mod.rotateAngleX += x;
 			mod.rotateAngleY += y;
 			mod.rotateAngleZ += z;
@@ -178,6 +183,7 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
     public void flip(ModelRendererTurbo[] model) {
         if(model==null){return;}
 		for(ModelRendererTurbo mod : model){
+			if(mod==null){continue;}
 			mod.rotateAngleY = -mod.rotateAngleY * 57.29578F;
 			mod.rotateAngleZ = -mod.rotateAngleZ * 57.29578F;
 			mod.rotateAngleX *= 57.29578F;
@@ -186,6 +192,7 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 	public void flip(List<ModelRendererTurbo> model) {
 		if(model==null){return;}
 		for(ModelRendererTurbo sub : model){
+			if(sub==null){continue;}
 			sub.doMirror(false, true, true);
 			sub.setRotationPoint(sub.rotationPointX, -sub.rotationPointY, -sub.rotationPointZ);
 		}
