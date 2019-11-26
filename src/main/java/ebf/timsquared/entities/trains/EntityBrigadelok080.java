@@ -114,7 +114,7 @@ public class EntityBrigadelok080 extends TrainBase {
      * @return the value of the max speed in km/h
      */
     @Override
-    public float transportTopSpeed(){return 70.81f;}
+    public float transportTopSpeed(){return accelerator<0?30f:70.81f;}
     /**
      * <h2>Bogie Offset</h2>
      * @return the list of offsets for the bogies, 0 being the center. negative values are towards the front of the train.
@@ -237,10 +237,6 @@ public class EntityBrigadelok080 extends TrainBase {
     @Override
     public int[] getTankCapacity(){return new int[]{9161, 800};}
 
-    @Override
-    public int getRFCapacity() {
-        return 0;
-    }
 
     /**
      * <h2>fluid filter</h2>

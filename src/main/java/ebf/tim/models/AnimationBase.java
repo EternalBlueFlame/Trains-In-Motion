@@ -14,5 +14,7 @@ public abstract class AnimationBase {
 
     public abstract boolean isPart(ModelRendererTurbo model);
 
+    public abstract boolean culls(ModelRendererTurbo model);
+
     public abstract void animate(float rotationZ, float[] pistonOffset, GenericRailTransport host);
 }

@@ -5,6 +5,7 @@ import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -32,6 +33,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,6 +111,37 @@ public class TextureManager {
         skyLight=world.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, i, j, k) << 20 | (skyLight<0?0:skyLight) << 4;
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit,  skyLight % 65536,  skyLight * 0.00001525878f);
         GL11.glColor4f(255, 255, 255, 255);//fixes alpha layering bugs with other mods that don't clear their GL cache
+    }
+
+    private static FloatBuffer colorBuffer = GLAllocation.createDirectFloatBuffer(16);
+
+    private static FloatBuffer setColorBuffer(float p_74521_0_, float p_74521_1_, float p_74521_2_, float p_74521_3_)
+    {
+        colorBuffer.clear();
+        colorBuffer.put(p_74521_0_).put(p_74521_1_).put(p_74521_2_).put(p_74521_3_);
+        colorBuffer.flip();
+        /** Float buffer used to set OpenGL material colors */
+        return colorBuffer;
+    }
+
+    public static void fixEntityLighting(){
+
+        GL11.glEnable(GL11.GL_LIGHTING);
+        GL11.glEnable(GL11.GL_LIGHT0);
+        GL11.glEnable(GL11.GL_LIGHT1);
+        GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+        GL11.glColorMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT_AND_DIFFUSE);
+        GL11.glLight(GL11.GL_LIGHT0, GL11.GL_POSITION, setColorBuffer(0.16169041989141428f, 0.8084520874101966f, -0.5659164515496377f, 0.0f));
+        GL11.glLight(GL11.GL_LIGHT0, GL11.GL_DIFFUSE, setColorBuffer(0.6F,0.6F,0.6F, 1.0F));
+        GL11.glLight(GL11.GL_LIGHT0, GL11.GL_AMBIENT, setColorBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+        GL11.glLight(GL11.GL_LIGHT0, GL11.GL_SPECULAR, setColorBuffer(0.0F,0.0F,0.0F, 1.0F));
+        GL11.glLight(GL11.GL_LIGHT1, GL11.GL_POSITION, setColorBuffer(-0.16169041989141428f, 0.8084520874101966f,0.5659164515496377f, 0.0f));
+        GL11.glLight(GL11.GL_LIGHT1, GL11.GL_DIFFUSE, setColorBuffer(0.6F,0.6F,0.6F, 1.0F));
+        GL11.glLight(GL11.GL_LIGHT1, GL11.GL_AMBIENT, setColorBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+        GL11.glLight(GL11.GL_LIGHT1, GL11.GL_SPECULAR, setColorBuffer(0.0F,0.0F,0.0F, 1.0F));
+        GL11.glShadeModel(GL11.GL_FLAT);
+        GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, setColorBuffer(0.4F,0.4F,0.4F, 1.0F));
+
     }
 
 
@@ -208,10 +241,7 @@ public class TextureManager {
 
         GL11.glEnable(GL_TEXTURE_2D);
         if(!tmtBoundTextures.containsKey(getID(textureURI,skinColorsFrom, skinColorsTo, colorsFrom,colorsTo,false))){
-            DebugUtil.println("creating texture: ", textureURI.toString(), skinColorsTo!=null, skinColorsFrom!=null,
-                    getID(textureURI,skinColorsFrom, skinColorsTo, colorsFrom,colorsTo,false));
             if(createAWT(textureURI, skinColorsFrom, skinColorsTo, colorsFrom, colorsTo)){
-                DebugUtil.println("AWT Created");
                 try {
                     BufferedImage image = ImageIO.read(new File(getID(textureURI,skinColorsFrom, skinColorsTo, colorsFrom, colorsTo, true)));
 

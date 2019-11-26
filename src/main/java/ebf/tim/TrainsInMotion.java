@@ -118,7 +118,7 @@ public class TrainsInMotion {
         proxy.loadConfig(event);
         ForgeChunkManager.setForcedChunkLoadingCallback(TrainsInMotion.instance, chunkHandler);
         MinecraftForge.EVENT_BUS.register(chunkHandler);
-        creativeTab=new TiMTab(event.getSide().isClient(),"Trains in Motion", MODID, "TiM");
+        creativeTab=new TiMTab("Trains in Motion", MODID, "TiM");
 
         ItemCraftGuide.modInfoPages.put(MODID, "Trains in Motion\nCreator/Dev: Eternal Blue Flame\nArtist: Lunar Tales\n"+
                 "\nHonorable mentions\nfor helping development:\nFerdinand, Zora no Densha\ncam27cam, MothershipQ\n" +
@@ -142,7 +142,8 @@ public class TrainsInMotion {
         cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(EntitySeat.class, "Seat", 16, TrainsInMotion.instance, 60, 2, true);
 
         if(event.getSide().isClient()){
-            GUICraftBook.infoPages.put(MODID, new String[]{"TRAINS IN MOTION\nBy Eternal Blue Flame\nAdditional credit to Fexcraft", "PAGE 2 OF INfO GARBAGE"});
+            GUICraftBook.addPage(MODID, "TRAINS IN MOTION\nBy Eternal Blue Flame\nAdditional credit to Fexcraft");
+            GUICraftBook.addPage(MODID, "PAGE 2 OF INfO GARBAGE");
         }
 
 

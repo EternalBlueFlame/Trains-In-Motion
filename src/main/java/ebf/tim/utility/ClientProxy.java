@@ -206,7 +206,7 @@ public class ClientProxy extends CommonProxy {
 
         //oveides the server registration of the rail item, so the client can have a complex model.
         //   server can't load the CustomItemModel class due to it's reliance on GL imports.
-        railItem = RegisterItem(TrainsInMotion.proxy.isClient(),new ItemRail(),TrainsInMotion.MODID,  "timrail", null, TrainsInMotion.creativeTab, null, TiMGenericRegistry.itemModel);
+        railItem = RegisterItem(new ItemRail(),TrainsInMotion.MODID,  "timrail", null, TrainsInMotion.creativeTab, null, TiMGenericRegistry.itemModel);
         //Minecraft.getMinecraft().render
 
 
@@ -279,8 +279,8 @@ public class ClientProxy extends CommonProxy {
             if(p_78443_2_.getItem() instanceof ItemRail){
                 if(p_78443_2_.getTagCompound().hasKey("ballast")){
                     RailShapeCore p = new RailShapeCore();
-                    p.activePath.add(new Vec5f(-0.5f,0f,0f,0,0));
-                    p.activePath.add(new Vec5f(0.5f,0f,0f,0,0));
+                    p.activePath.add(new Vec6f(-0.5f,0f,0f,0,0));
+                    p.activePath.add(new Vec6f(0.5f,0f,0f,0,0));
                     p.gauge=new int[]{375};
                     ModelBallast.modelPotatoBallast(p,0.5f,-0.5f,
                             ItemStack.loadItemStackFromNBT(p_78443_2_.getTagCompound().getCompoundTag("ballast")));

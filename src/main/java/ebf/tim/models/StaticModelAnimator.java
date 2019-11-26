@@ -4,6 +4,7 @@ import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.RailUtility;
 import fexcraft.fcl.common.lang.ArrayList;
 import fexcraft.tmt.slim.ModelRendererTurbo;
+import net.minecraft.client.Minecraft;
 
 import java.util.List;
 
@@ -25,14 +26,18 @@ public class StaticModelAnimator extends AnimationBase {
         return list;
     }
 
-    /**tag for simple pistons, ones that move in a simple circle such as wheel connectors.*/
-    public static final String tagSimplePiston = "simplepiston";
+    /**tag for rods that move in a simple circle such as wheel connectors.*/
+    public static final String tagConnectingRod = " simplepiston ";
     /**tag for advanced pistons, ones that rotate and move in a simple circle.*/
-    public static final String tagAdvancedPiston = "advancedpiston";
+    public static final String tagAdvancedPiston = " advancedpiston ";
     /**tag for animatedPart, axles, and other geometry that just spins.*/
-    public static final String tagSimpleRotate = "simplerotate";
+    public static final String tagSimpleRotate = " simplerotate ";
     /**tag for wheels, adds support for the sparks on top of what tagSimpleRotate does.*/
-    public static final String tagWheel = "wheel";
+    public static final String tagWheel = " wheel ";
+    /**tag for lamp bases to glow and ignore MC lighting*/
+    public static final String tagGlow=" glow ";
+    /**animation tag to prevent the part from rendering*/
+    public static final String tagHide=" cull ";
 
     /**
      * Note that types 2, 3, and 4 are not yet implemented.
@@ -70,13 +75,17 @@ public class StaticModelAnimator extends AnimationBase {
         StaticModelAnimator s = new StaticModelAnimator();
         switch (model.boxName) {
             case tagAdvancedPiston:
-            case tagSimplePiston:
+            case tagConnectingRod:
             case tagSimpleRotate:
             case tagWheel: {
                 //DebugUtil.println("registering animated part: ", model.boxName);
                 s.originalRotationValuesXYZ = new float[]{model.rotationPointX, model.rotationPointY, model.rotationPointZ,
                         model.rotateAngleX, model.rotateAngleY, model.rotateAngleZ};
                 s.modelRefrence = model;
+                return s;
+            }
+            case tagGlow:{
+                s.modelRefrence.ignoresLighting=true;
                 return s;
             }
             default:{return null;}
@@ -91,13 +100,21 @@ public class StaticModelAnimator extends AnimationBase {
     public boolean isPart(ModelRendererTurbo part){
         if(part==null || part.boxName==null){return false;}
         return RailUtility.stringContains(part.boxName,tagAdvancedPiston) ||
-                RailUtility.stringContains(part.boxName,tagSimplePiston) ||
+                RailUtility.stringContains(part.boxName, tagConnectingRod) ||
                 RailUtility.stringContains(part.boxName,tagSimpleRotate) ||
                 RailUtility.stringContains(part.boxName,tagWheel) ||
                 RailUtility.stringContains(part.boxName,"smoke") ||
                 RailUtility.stringContains(part.boxName,"steam") ||
                 RailUtility.stringContains(part.boxName,"door") ||
-                RailUtility.stringContains(part.boxName,"lamp");
+                RailUtility.stringContains(part.boxName,"lamp") ||
+                RailUtility.stringContains(part.boxName, tagGlow) ||
+                RailUtility.stringContains(part.boxName, tagHide);
+    }
+
+    public boolean culls(ModelRendererTurbo part){
+        return RailUtility.stringContains(part.boxName, tagHide) ||
+                RailUtility.stringContains(part.boxName, "smoke") ||
+                RailUtility.stringContains(part.boxName, "steam");
     }
 
 
@@ -111,30 +128,27 @@ public class StaticModelAnimator extends AnimationBase {
         if(modelRefrence ==null || modelRefrence.boxName ==null){
             return;
         }
-        switch (modelRefrence.boxName){
-            //animate wheels
-            case tagSimpleRotate: case tagWheel:{
-                modelRefrence.rotateAngleZ = rotationZ*-0.5f;
-                break;
-            }
-            //animate simple pistons, just rotates around center
-            case tagSimplePiston:{
-                float[] positionOffset = RailUtility.rotatePointF(pistonOffset[0],pistonOffset[1],pistonOffset[2],
-                        rotationZ *degreesF,
-                        rotationZ *degreesF, 0);
+        //animate wheels
+        if(RailUtility.stringContains(modelRefrence.boxName,tagSimpleRotate)
+                || RailUtility.stringContains(modelRefrence.boxName,tagWheel)){
+            modelRefrence.rotateAngleZ = rotationZ*-0.5f;
+        }
+        //animate simple pistons, just rotates around center
+        if(RailUtility.stringContains(modelRefrence.boxName, tagConnectingRod)){
+            float[] positionOffset = RailUtility.rotatePointF(pistonOffset[0],pistonOffset[1],pistonOffset[2],
+                    rotationZ *degreesF,
+                    rotationZ *degreesF, 0);
 
-                modelRefrence.rotationPointY = originalRotationValuesXYZ[1] -  positionOffset[1];
-                modelRefrence.rotationPointX = originalRotationValuesXYZ[0] - positionOffset[0];
-                break;
-            }
-            //animate advanced pistons, uses position and rotation
-            case tagAdvancedPiston:{
-                float[] positionOffset = RailUtility.rotatePointF(pistonOffset[0],pistonOffset[1],pistonOffset[2],
-                        rotationZ *degreesF,
-                        rotationZ *degreesF, 0);
+            modelRefrence.rotationPointY = originalRotationValuesXYZ[1] -  positionOffset[1];
+            modelRefrence.rotationPointX = originalRotationValuesXYZ[0] - positionOffset[0];
+        }
+        //animate advanced pistons, uses position and rotation
+        if(RailUtility.stringContains(modelRefrence.boxName, tagAdvancedPiston)){
+            float[] positionOffset = RailUtility.rotatePointF(pistonOffset[0],pistonOffset[1],pistonOffset[2],
+                    rotationZ *degreesF,
+                    rotationZ *degreesF, 0);
 
-                modelRefrence.rotateAngleZ = originalRotationValuesXYZ[5] - (float)(positionOffset[2] * -0.1d);
-            }
+            modelRefrence.rotateAngleZ = originalRotationValuesXYZ[5] - (float)(positionOffset[2] * -0.1d);
         }
     }
 
@@ -155,6 +169,14 @@ public class StaticModelAnimator extends AnimationBase {
     static boolean checkAnimators(ModelRendererTurbo part){
     for (AnimationBase animator : customAnimators){
             if (animator != null && animator.isPart(part)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    static boolean checkCulls(ModelRendererTurbo part){
+        for (AnimationBase animator : customAnimators){
+            if (animator != null && animator.culls(part)) {
                 return true;
             }
         }

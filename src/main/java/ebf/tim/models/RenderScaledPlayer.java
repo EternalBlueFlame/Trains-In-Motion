@@ -13,17 +13,21 @@ import org.lwjgl.opengl.GL11;
  */
 public class RenderScaledPlayer extends RenderPlayer {
 
+    GenericRailTransport t;
+
     @Override
     public void doRender(AbstractClientPlayer p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_){
         if (p_76986_1_.ridingEntity instanceof GenericRailTransport) {
+            t=(GenericRailTransport) p_76986_1_.ridingEntity;
             GL11.glPushMatrix();
-            GL11.glScaled(0.75d, 0.75d, 0.75d);
+            GL11.glScalef(t.getPlayerScale(), t.getPlayerScale(), t.getPlayerScale());
             super.doRender(p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
             GL11.glPopMatrix();
 
         } else if (p_76986_1_.ridingEntity instanceof EntitySeat){
+            t=(GenericRailTransport) p_76986_1_.worldObj.getEntityByID(((EntitySeat) p_76986_1_.ridingEntity).parentId);
             GL11.glPushMatrix();
-            GL11.glScaled(0.75d, 0.75d, 0.75d);
+            GL11.glScalef(t.getPlayerScale(), t.getPlayerScale(), t.getPlayerScale());
             if(p_76986_1_.ridingEntity.getLookVec() !=null) {
                 GL11.glRotated(p_76986_1_.ridingEntity.getLookVec().xCoord, 0, 1, 0);
                 GL11.glRotated(p_76986_1_.ridingEntity.getLookVec().yCoord, 0, 0, 1);

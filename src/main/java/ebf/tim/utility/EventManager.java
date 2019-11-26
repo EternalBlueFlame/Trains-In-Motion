@@ -46,7 +46,7 @@ public class EventManager {
 
     private static List<GenericRailTransport> stock;
     private static Vec3d vert, vec;
-    private static GenericRailTransport selected=null;
+    private static GenericRailTransport selected=null, lastSelected=null;
 
     /**
      * <h2>Keybind management</h2>
@@ -166,51 +166,65 @@ public class EventManager {
         }
     }
 
-    private static List<GenericRailTransport> getTrainsInRange(Entity entity){
-        ArrayList<GenericRailTransport> list =new ArrayList<>();
-        List e = entity.worldObj.getLoadedEntityList();
-            for (Object obj : e) {
-                if (obj instanceof GenericRailTransport) {
-                    list.add((GenericRailTransport) obj);
+    private static void getTrainsInRange(Entity entity){
+        stock=new ArrayList<>();
+        List e = new ArrayList();
+        for(int x=-1;x<=1;x++) {
+            for(int z=-1;z<=1;z++) {
+                for (List l : entity.worldObj.
+                        getChunkFromChunkCoords(entity.chunkCoordX + x, entity.chunkCoordZ + z)
+                        .entityLists) {
+                    e.addAll(l);
                 }
             }
-        return list;
+        }
+
+        for (Object obj : e) {
+            if (obj instanceof GenericRailTransport) {
+                stock.add((GenericRailTransport) obj);
+            }
+        }
+    }
+
+    //we have to maintain a backup value during processing because the entire render tick is threaded.
+    //otherwise while the value of selected is being changed it could cause several frames of the tooltip being missing.
+    public static GenericRailTransport getSelected() {
+        return selected==null?lastSelected:selected;
     }
 
     @SubscribeEvent
     public void onTick(TickEvent.PlayerTickEvent e){
+        if(e.side==Side.SERVER){return;}
+        lastSelected=(selected==null?null:(GenericRailTransport) Minecraft.getMinecraft().theWorld.getEntityByID(selected.getEntityId()));
+        if(e.player.worldObj!=null && e.phase== TickEvent.Phase.END && (stock==null || e.player.ticksExisted%100==0)){
+            getTrainsInRange(e.player);
+        }
         //every 10 player ticks get the nearby trains and cache if the player is looking at said train.
-        if(e.player.worldObj!= null && e.player.ticksExisted%10==0){
-            //selected=null;
+        if(e.player.worldObj!= null && e.phase== TickEvent.Phase.END && e.player.ticksExisted%10==0){
             //skip when riding train/stock
             if(e.player.ridingEntity instanceof GenericRailTransport ||
                     e.player.ridingEntity instanceof EntitySeat){
-                selected=null;
+                selected=null; lastSelected=null;
                 return;
             }
-
-            stock = getTrainsInRange(e.player);
-
-            if(stock!=null && stock.size()>0){
-                vec = RailUtility.rotateDistance(0.0625f, e.player.rotationPitch, (e.player.rotationYawHead%360)-270);
+            if(stock.size()>0){
                 for (GenericRailTransport t : stock) {
                     //loop for each index in distance.
-                    for (int i=0; i<(Minecraft.getMinecraft().playerController.extendedReach()?96:48); i++) {
-                        vert = vec.crossProduct(i);
+                    for (int i=0; i<(Minecraft.getMinecraft().playerController.extendedReach()?32:16); i++) {
+                        vert = RailUtility.rotateDistance(0.125f*i, e.player.rotationPitch, (e.player.rotationYawHead%360)-270);
                         if (t.collisionHandler.containsPoint(
                                 vert.xCoord+e.player.posX,
-                                vert.yCoord+e.player.posY,
+                                vert.yCoord+e.player.posY-0.5,
                                 vert.zCoord+e.player.posZ)) {
-                            selected=t;
+                            selected=(GenericRailTransport) Minecraft.getMinecraft().theWorld.getEntityByID(t.getEntityId());
                             return;
                         }
                     }
                 }
             }
             selected=null;
+            lastSelected=null;
         }
-
-
     }
 
 
@@ -219,9 +233,9 @@ public class EventManager {
     @SubscribeEvent
     @SuppressWarnings("unused")
     public void onRenderTick(TickEvent.RenderTickEvent event) {
-        if(event.phase == TickEvent.Phase.END && event.side.isClient() && Minecraft.getMinecraft().currentScreen==null && selected!=null){
+        if(event.side.isClient() && Minecraft.getMinecraft().currentScreen==null && getSelected()!=null){
             left=new ScaledResolution(Minecraft.getMinecraft(),Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight).getScaledWidth()/2;
-            disp=getStaticStrings(selected, Minecraft.getMinecraft().thePlayer);
+            disp=getStaticStrings(getSelected(), Minecraft.getMinecraft().thePlayer);
             longest=0;
             for(String s: disp){
                 if(Minecraft.getMinecraft().fontRenderer.getStringWidth(s)>longest){
@@ -230,13 +244,12 @@ public class EventManager {
             }
             longest*=0.3;
             longest+=10;
-            //GL11.glTranslatef(0.0F, 0.0F, 100);
             drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length), ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,100);
 
             GL11.glTranslatef(0.0F, 0.0F, 32.0F);
-            if(selected!=null && selected.getCartItem()!=null) {
+            if(getSelected()!=null && getSelected().getCartItem()!=null) {
                 itemRender.renderItemAndEffectIntoGUI(Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().getTextureManager(),
-                        selected.getCartItem(), left - (longest) - 30, 12);
+                        getSelected().getCartItem(), left - (longest) - 30, 12);
             }
             GL11.glDisable(GL11.GL_LIGHTING);
             for(int ii=0; ii<disp.length;ii++) {

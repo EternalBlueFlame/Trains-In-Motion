@@ -1,411 +1,493 @@
 package ebf.tim.blocks.rails;
 
+import ebf.tim.utility.DebugUtil;
 import net.minecraft.world.World;
 
-import java.util.Collections;
-import java.util.List;
 
-import static ebf.tim.blocks.rails.BlockRailCore.checkMultiblock;
+import static ebf.tim.blocks.rails.BlockRailCore.checkBlockMeta;
+import static ebf.tim.blocks.rails.BlockRailCore.getNearbyMeta;
 
 /**
  * @author Eternal Blue Flame
  */
 public class RailVanillaShapes extends RailShapeCore{
 
+    private static final float parallelWidth = 0.0625f*1.5f;
 
-    public static List<RailSimpleShape> vanillaZStraight(World worldObj, int xCoord, int yCoord, int zCoord){
+    public static RailSimpleShape vanillaZStraight(World worldObj, int xCoord, int yCoord, int zCoord){
         //new code
         RailSimpleShape shape = new RailSimpleShape();
-        shape.setSegments(4);
-        shape.addPoints(normalizeVectors(new float[][]{
-                {0,0,0.5f},
-                {0,0, 0},
-                {0,0, -0.5f}
-        }));
+        shape.setSleeperCount(4);
+        shape.setStart(0,0,-0.5f).setEnd(0,0,0.5f);
+
+        int[] nearbyMeta = getNearbyMeta(worldObj, xCoord, yCoord, zCoord);
 
 
         //intersections
-        if(checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,1},{xCoord, yCoord,zCoord+2,0}})){
-            shape.setPoint(0,0,0,1);
+        if(nearbyMeta[1]==1 &&
+                checkBlockMeta(worldObj, xCoord, yCoord,zCoord+2,0)){
+            shape.setStart(0,0,1.5f);
         }
-        if(checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,1},{xCoord, yCoord,zCoord-2,0}})){
-            shape.setPoint(0,0,0,-1);
+        if(nearbyMeta[7]==1 && checkBlockMeta(worldObj, xCoord, yCoord,zCoord-2,0)){
+            shape.setStart(0,0,-1.5f);
         }
-        //cover curve blending
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,7},{xCoord-1, yCoord,zCoord-1,9}}) ||
-                checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,6},{xCoord+1, yCoord,zCoord-1,8}})){
-            shape.setPoint(2,0,0,0f)
-                    .setPoint(1,0,0,0.25f);
 
-            shape.setSegments(2);
-        } else if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,9}, {xCoord+1, yCoord,zCoord+1,7}}) ||
-                checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,8},{xCoord-1, yCoord,zCoord+1,6}})){
-            shape.setPoint(0,0,0,0f)
-                    .setPoint(1,0,0,-0.25f)
-                    .setSegments(2);
-        }else if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,7 }}) ||
-                checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1,6}})){
-            shape.setPoint(0,0,0,1.5f)
-                    .setSegments(6);
-        } else if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,9}}) ||
-                checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,8}})) {
-            shape.setPoint(2,0,0,-1.5f)
-                    .setSegments(6);
+        //cover half-lengths
+        if((nearbyMeta[1]==7 && nearbyMeta[0]==9) || (nearbyMeta[1]==6&&nearbyMeta[2]==8) &&
+                (nearbyMeta[7]==8 && nearbyMeta[6]==6) || (nearbyMeta[7]==9 &&nearbyMeta[8]==7)){
+            //covers when both the following are true
+            shape.setStart(0,0,0.025f).setEnd(0,0,-0.025f);
         }
+        else if((nearbyMeta[1]==7 && nearbyMeta[0]==9) || (nearbyMeta[1]==6&&nearbyMeta[2]==8)){
+            shape.setStart(0,0,0).setCenter(0,0,0.25f);
+        }
+        else if((nearbyMeta[7]==8 && nearbyMeta[6]==6) || (nearbyMeta[7]==9 &&nearbyMeta[8]==7)){
+            shape.setEnd(0,0,0).setCenter(0,0,-0.25f);
+        }
+
+        //cover parallels
+        if(nearbyMeta[7]==7 && nearbyMeta[6]==9){
+            shape.setEnd(parallelWidth,0,2f,parallelWidth)
+                    .setCenter(0,0,1.5f)
+                    .setSleeperCount(8);
+        } else if(nearbyMeta[7]==8 && nearbyMeta[6]==9){
+            shape.setEnd(0,0,2f)
+                    .setCenter(0,0,1.5f)
+                    .setSleeperCount(8);
+        }
+
+        if(nearbyMeta[7]==6 && nearbyMeta[8]==8){
+            shape.setEnd(-parallelWidth,0,2f,parallelWidth)
+                    .setCenter(0,0,1f)
+                    .setSleeperCount(8);
+        }else if(nearbyMeta[7]==9 && nearbyMeta[8]==8){
+            shape.setEnd(0,0,2f)
+                    .setCenter(0,0,1f)
+                    .setSleeperCount(8);
+        }
+
+        if(nearbyMeta[1]==9 && nearbyMeta[2]==7){
+            shape.setStart(-parallelWidth,0,-2f,parallelWidth)
+                    .setCenter(0,0,-1.5f)
+                    .setSleeperCount(8);
+        } else if(nearbyMeta[1]==6 && nearbyMeta[2]==7){
+            shape.setStart(0,0,-2f)
+                    .setCenter(0,0,-1f)
+                    .setSleeperCount(8);
+        }
+        if(nearbyMeta[1]==8 && nearbyMeta[0]==6){
+            shape.setStart(parallelWidth,0,-2f,parallelWidth)
+                    .setCenter(0,0,-1f)
+                    .setSleeperCount(8);
+        } else if(nearbyMeta[1]==7 && nearbyMeta[0]==6){
+            shape.setStart(0,0,-2f).setCenter(0,0,-1.5f).setSleeperCount(8);
+        }
+
 
 
         //slopes
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,4}})){
-            shape.setPointY(2,0.15f);
+        if(nearbyMeta[7]==5 && nearbyMeta[1]==4){
+            shape.setStart(0,0.2f,-0.6f).setEnd(0,0.2f,0.6f);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord-1,zCoord+1, 4}})){
-            shape.setPointY(0,-0.15f);
+        else if (nearbyMeta[7]==5){
+            shape.setCenter(0,0,0.2f).setEnd(0,0.2f,0.6f);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1, 5}})){
-            shape.setPointY(0,0.15f);
-        }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord-1,zCoord-1, 5}})){
-            shape.setPointY(2,-0.15f);
+        else if (nearbyMeta[1]==4){
+            shape.setCenter(0,0,-0.2f).setStart(0,0.2f,-0.6f);
         }
 
-        return Collections.singletonList(shape);
+        if(checkBlockMeta(worldObj,xCoord, yCoord-1,zCoord+1, 4) &&
+                checkBlockMeta(worldObj,xCoord, yCoord-1,zCoord-1, 5)){
+            shape.setStart(0,-0.2f,-0.6f).setEnd(0,-0.2f,0.6f);
+        }
+        else if (checkBlockMeta(worldObj,xCoord, yCoord-1,zCoord+1, 4)){
+            shape.setCenter(0,0,0.2f).setEnd(0,-0.2f,0.6f);
+        }
+        else if (checkBlockMeta(worldObj,xCoord, yCoord-1,zCoord-1, 5)){
+            shape.setCenter(0,0,-0.2f).setStart(0,-0.2f,-0.6f);
+        }
+
+        return shape;
     }
 
-    public static List<RailSimpleShape> vanillaXStraight(World worldObj, int xCoord, int yCoord, int zCoord){
+    public static RailSimpleShape vanillaXStraight(World worldObj, int xCoord, int yCoord, int zCoord){
         RailSimpleShape shape = new RailSimpleShape();
-        shape.setSegments(4);
-        shape.addPoints(normalizeVectors(new float[][]{
-                {0.5f, 0, 0},
-                {0f, 0, 0},
-                {-0.5f, 0, 0}
-        }));
+        shape.setSleeperCount(4);
+        shape.setStart(0.5f,0,0).setEnd(-0.5f,0,0);
+
+        int[] nearbyMeta = getNearbyMeta(worldObj, xCoord, yCoord, zCoord);
 
         //intersections
-        if(checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,0},{xCoord-2, yCoord,zCoord,1}})){
-            shape.setPoint(0,-1,0,0);
+        if(checkBlockMeta(worldObj,xCoord-1, yCoord,zCoord,0) && checkBlockMeta(worldObj, xCoord-2, yCoord,zCoord,1)){
+            shape.setStart(-0.5f,0,0);
         }
-        if(checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,0},{xCoord+2, yCoord,zCoord,1}})){
-            shape.setPoint(2,1,0,0);
+        if(checkBlockMeta(worldObj,xCoord+1, yCoord,zCoord,0) && checkBlockMeta(worldObj, xCoord+2, yCoord,zCoord,1)){
+            shape.setEnd(0.5f,0,0);
+        }
+
+        //cover half-lengths
+        if(((nearbyMeta[2]==6 && nearbyMeta[5]==8) || (nearbyMeta[5]==7&&nearbyMeta[8]==9)) &&
+                ((nearbyMeta[0]==7 && nearbyMeta[3]==9) || (nearbyMeta[3]==6 &&nearbyMeta[6]==8))){
+            //covers when both the following are true
+            shape.setStart(0.025f,0,0).setEnd(-0.025f,0,0);
+        }
+        else if((nearbyMeta[2]==6 && nearbyMeta[5]==8) || (nearbyMeta[5]==7&&nearbyMeta[8]==9)){
+            shape.setStart(0,0,0).setCenter(-0.25f,0,0).setEnd(-0.5f,0,0);
+        }
+        else if((nearbyMeta[0]==7 && nearbyMeta[3]==9) || (nearbyMeta[3]==6 &&nearbyMeta[6]==8)){
+            shape.setStart(0,0,0).setCenter(0.25f,0,0).setEnd(0.5f,0,0);
         }
 
 
-        //cover curve blending
-        if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,9},{xCoord-1, yCoord,zCoord-1,7}}) ||
-                checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,6},{xCoord-1, yCoord,zCoord+1,8}})){
+        //cover parallels
+        if((nearbyMeta[3]==9 && nearbyMeta[0]==6) || (nearbyMeta[3]==6 && nearbyMeta[6]==9)){
+            shape.setEnd(-2,0,0)
+                    .setCenter(-1,0,0)
+            .setSleeperCount(8);
+        } else if(nearbyMeta[3]==8 && nearbyMeta[0]==6){
+            shape.setEnd(-2,0,parallelWidth,parallelWidth)
+                    .setCenter(-1,0,0)
+                    .setSleeperCount(8);
+        } else if(nearbyMeta[3]==7 && nearbyMeta[6]==9){
+            shape.setEnd(-2,0,-parallelWidth,parallelWidth)
+                    .setCenter(-1,0,0)
+                    .setSleeperCount(8);
+        }
 
-            shape.setPoint(1,0.25f,0,0)
-                    .setPoint(2,0f,0,0)
-                    .setSegments(2);
-        } else if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,7}, {xCoord+1, yCoord,zCoord+1,9}}) ||
-                checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,8},{xCoord+1, yCoord,zCoord-1,6}})){
-
-            shape.setPoint(1,-0.25f,0,0)
-                    .setPoint(0,0,0,0)
-                    .setSegments(2);
-        } else if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,9}}) ||
-                checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,6}})){
-            shape.setPoint(2,1.5f,0,0);
-        } else if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,7}}) ||
-                checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,8}})){
-            shape.setPoint(0,1.5f,0,0);
+        if((nearbyMeta[5]==8 && nearbyMeta[2]==7) || (nearbyMeta[5]==7 && nearbyMeta[8]==8)){
+            shape.setStart(2,0,0)
+                    .setCenter(1,0,0)
+                    .setSleeperCount(8);
+        } else if(nearbyMeta[5]==9 && nearbyMeta[2]==7){
+            shape.setStart(2,0,parallelWidth,parallelWidth)
+                    .setCenter(1,0,0)
+                    .setSleeperCount(8);
+        } else if(nearbyMeta[5]==6 && nearbyMeta[8]==8){
+            shape.setStart(2,0,-parallelWidth,parallelWidth)
+                    .setCenter(1,0,0)
+                    .setSleeperCount(8);
         }
 
         //slopes
-        if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,3}})){
-            shape.setPointY(0,0.15f);
+        if(nearbyMeta[3]==3 && nearbyMeta[5]==2){
+            shape.setStart(0.6f,0.2f,0).setEnd(-0.6f,0.2f,0);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord-1,zCoord,3}})){
-            shape.setPointY(2,-0.15f);
+        else if (nearbyMeta[3]==3){
+            shape.setEnd(-0.6f,0.2f,0).setCenter(-0.4f,0,0);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,2}})){
-            shape.setPointY(2,0.15f);
-        }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord-1,zCoord,2}})){
-            shape.setPointY(0,-0.15f);
+        else if (nearbyMeta[5]==2){
+            shape.setStart(0.6f,0.2f,0).setCenter(0.4f,0,0);
         }
 
+        if(checkBlockMeta(worldObj,xCoord+1, yCoord-1,zCoord,3) &&
+                checkBlockMeta(worldObj,xCoord-1, yCoord-1,zCoord,2)){
+            shape.setStart(0.6f,-0.2f,0).setEnd(-0.6f,-0.2f,0);
+        }
+        else if (checkBlockMeta(worldObj,xCoord+1, yCoord-1,zCoord,3)){
+            shape.setStart(0.6f,-0.2f,0).setCenter(0.4f,0,0);
+        }
+        else if (checkBlockMeta(worldObj,xCoord-1, yCoord-1,zCoord,2)){
+            shape.setEnd(-0.6f,-0.2f,0).setCenter(-0.4f,0,0);
+        }
 
-        return Collections.singletonList(shape);
+        return shape;
     }
 
 
-    public static List<RailSimpleShape> vanillaCurve6(World worldObj, int xCoord, int yCoord, int zCoord){
+    public static RailSimpleShape vanillaCurve6(World worldObj, int xCoord, int yCoord, int zCoord){
         RailSimpleShape shape = new RailSimpleShape();
-        shape.setSegments(4);
-        shape.addPoints(normalizeVectors(new float[][]{
-                {0f, 0, 0.5f},
-                {0f, 0, 0f},
-                {0.5f, 0, 0f}
-        }));
+        shape.setSleeperCount(4);
 
-        if (checkMultiblock(worldObj, new int[][]{{xCoord+1,yCoord,zCoord,8}}) || checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord+1,8}})) {
-            shape.setPoint(1,normalizeVector( 0.25f, 0, 0.25f))
-                    .setSegments(3);
-            if (checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord+1,0}})){
-                shape.setPoint(0,0,0,1)
-                        .setPoint(1,0f,0,0.5f)
-                        .setSegments(5);
+        shape.setStart(0,0,0.5f).setEnd(0.5f,0,0);
+
+
+        int[] nearbyMeta = getNearbyMeta(worldObj, xCoord, yCoord, zCoord);
+
+
+        //diagonals
+        if (nearbyMeta[5]==8 || nearbyMeta[7]==8) {
+            shape.setCenter(0.25f, 0, 0.25f)
+                    .setSleeperCount(3);
+            if (nearbyMeta[7]==0){
+                shape.setStart(0,0,1)
+                        .setCenter(0f,0,0.5f)
+                        .setSleeperCount(5);
             }
-            if (checkMultiblock(worldObj, new int[][]{{xCoord+1,yCoord,zCoord,1}})){
-                shape.setPoint(2,1,0,0)
-                        .setPoint(1,0.5f,0,0)
-                        .setSegments(5);
+            if (nearbyMeta[5]==1){
+                shape.setEnd(1,0,0)
+                        .setCenter(0.5f,0,0)
+                        .setSleeperCount(5);
             }
         }
 
-        if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord-1,zCoord,3}})){
-            shape.setPointY(2,-0.15f);
-        }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,2}})){
-            shape.setPointY(2,0.15f);
-        }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord-1,zCoord+1, 4}})){
-            shape.setPointY(0,-0.15f);
-        }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1, 5}})){
-            shape.setPointY(0,0.15f);
+        //parallels
+        if(nearbyMeta[1]==0&& nearbyMeta[5]==7){
+            shape.setStart( 0.5f,0,0)
+                    .setCenter( 0.25f, 0,-0.25f)
+                    .setEnd(parallelWidth,0,-1-parallelWidth,0,0,-parallelWidth)
+                    .setSleeperCount(5);
         }
 
-        return Collections.singletonList(shape);
+        if(nearbyMeta[7]==9&& nearbyMeta[5]==1){
+            shape.setEnd( -1-parallelWidth,0,parallelWidth,parallelWidth)
+                    .setCenter( -0.25f, 0,0.25f)
+                    .setStart(0,0,0.5f,0)
+                    .setSleeperCount(5);
+
+        }
+
+
+        //handle slopes
+        if (nearbyMeta[5]==2){
+            shape.setEnd(0.6f,0.2f,0);
+        }
+        else if (checkBlockMeta(worldObj,xCoord+1, yCoord-1,zCoord,3)){
+            shape.setEnd(0.6f,-0.2f,0);
+        }
+        if (nearbyMeta[7]==5){
+            shape.setStart(0,0.2f,0.6f);
+        }
+        else if (checkBlockMeta(worldObj,xCoord, yCoord-1,zCoord+1, 4)){
+            shape.setStart(0,-0.2f,0.6f);
+        }
+
+        return shape;
     }
 
-    public static List<RailSimpleShape> vanillaCurve8(World worldObj, int xCoord, int yCoord, int zCoord){
+    public static RailSimpleShape vanillaCurve8(World worldObj, int xCoord, int yCoord, int zCoord){
         //the base shape
         RailSimpleShape shape = new RailSimpleShape();
-        shape.setSegments(4);
-        shape.addPoints(normalizeVectors(new float[][]{
-                {-0.5f, 0, 0},
-                {0, 0, 0},
-                {0, 0, -0.5f}
-        }));
+        shape.setSleeperCount(4);
 
-        if (checkMultiblock(worldObj, new int[][]{{xCoord-1,yCoord,zCoord,6}}) || checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord-1,6}})) {
+        shape.setStart(-0.5f,0,0).setEnd(0,0,-0.5f);
+
+        int[] nearbyMeta = getNearbyMeta(worldObj, xCoord, yCoord, zCoord);
+
+        if (nearbyMeta[3]==6 ||nearbyMeta[1]==6) {
             //first half of the diagonal
-            shape.setPoint(1,normalizeVector( -0.25f, 0, -0.25f))
-                    .setSegments(3);
-            if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord, zCoord - 1, 0}})) {
+            shape.setCenter( -0.25f, 0, -0.25f)
+                    .setSleeperCount(3);
+            if (nearbyMeta[1]==0) {
                 //extension of one side to match up with a straight block
-                shape.setPoint(2,normalizeVector( 0, 0, -1f))
-                        .setPoint(1,normalizeVector( 0, 0, -0.5f))
-                        .setSegments(5);
+                shape.setEnd( 0, 0, -1f)
+                        .setCenter( 0, 0, -0.5f)
+                        .setSleeperCount(6);
             }
-            if (checkMultiblock(worldObj, new int[][]{{xCoord - 1, yCoord, zCoord, 1}})) {
-                //extension of one side to match up with a straight block
-                shape.setPoint(0,normalizeVector( -1, 0, 0))
-                        .setPoint(1,normalizeVector( -0.5f, 0, 0))
-                        .setSegments(5);
+            if (nearbyMeta[3]==1) {
+                shape.setStart( -1, 0, 0)
+                        .setCenter( -0.5f, 0, 0)
+                        .setSleeperCount(6);
             }
+        }
+
+        //parallels
+        if(nearbyMeta[3]==9 && nearbyMeta[1]==0){
+            shape.setEnd( -0.5f,0,0)
+                    .setCenter( -0.25f,0, 0.25f)
+                    .setStart(-parallelWidth,0,1+parallelWidth,0,0,-parallelWidth)
+                    .setSleeperCount(5);
+        }
+        if(nearbyMeta[1]==7 && nearbyMeta[5]==1){
+            shape.setStart(1+parallelWidth,0,-parallelWidth, parallelWidth)
+            .setCenter(0.25f,0,-0.25f);
         }
 
         //slopes
-        if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,3}})){
-            shape.setPointY(0,0.15f);
+        if (nearbyMeta[3]==3){
+            shape.setStart(-0.6f,0.2f,0);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord-1,zCoord,2}})){
-            shape.setPointY(0,-0.15f);
+        else if (checkBlockMeta(worldObj,xCoord-1, yCoord-1,zCoord,2)){
+            shape.setStart(-0.6f,-0.2f,0);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,4}})){
-            shape.setPointY(2,0.15f);
+        if (nearbyMeta[1]==4){
+            shape.setEnd(0,0.2f,-0.6f);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord-1,zCoord-1, 5}})){
-            shape.setPointY(2,-0.15f);
+        else if (checkBlockMeta(worldObj,xCoord, yCoord-1,zCoord-1, 5)){
+            shape.setEnd(0,-0.2f,-0.6f);
         }
 
-        return Collections.singletonList(shape);
+
+        return shape;
     }
 
 
-    public static List<RailSimpleShape> vanillaCurve7(World worldObj, int xCoord, int yCoord, int zCoord){
+    public static RailSimpleShape vanillaCurve7(World worldObj, int xCoord, int yCoord, int zCoord){
         //the base shape
         RailSimpleShape shape = new RailSimpleShape();
-        shape.setSegments(4);
-        shape.addPoints(normalizeVectors(new float[][]{
-                {-0.5f, 0, 0},
-                {0f, 0, 0},
-                {0, 0, 0.5f}
-        }));
+        shape.setSleeperCount(4);
+        shape.setStart(-0.5f,0,0).setEnd(0,0,0.5f);
+        int[] nearbyMeta = getNearbyMeta(worldObj, xCoord, yCoord, zCoord);
 
-        if (checkMultiblock(worldObj, new int[][]{{xCoord-1,yCoord,zCoord,9}}) || checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord+1,9}})){
-            shape.setPoint(1,normalizeVector( -0.25f,0, 0.25f))
-                    .setSegments(3);
-            if (checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord+1,0}})){
+        //diagonals
+        if (nearbyMeta[7]==9 || nearbyMeta[3]==9){
+            shape.setCenter( -0.25f,0, 0.25f)
+                    .setSleeperCount(3);
+            if (nearbyMeta[7]==0){
                 //extension of one side to match up with a straight block
-                shape.setPoint(2,normalizeVector(0, 0,1))
-                        .setPoint(1,normalizeVector( 0,0, 0.5f))
-                        .setSegments(5);
+                shape.setEnd(0, 0,1)
+                        .setCenter( 0,0, 0.5f)
+                        .setSleeperCount(5);
             }
-            if (checkMultiblock(worldObj, new int[][]{{xCoord-1,yCoord,zCoord,1}})){
+            if (nearbyMeta[3]==1){
                 //extension of one side to match up with a straight block
-                shape.setPoint(0,normalizeVector( -1, 0,0))
-                        .setPoint(1,normalizeVector( -0.5f , 0,0))
-                        .setSegments(5);
+                shape.setStart( -1, 0,0)
+                        .setCenter( -0.5f , 0,0)
+                        .setSleeperCount(5);
             }
+        }
+
+        //parallels
+        if(nearbyMeta[7]==8 && nearbyMeta[5]==1){
+            shape.setEnd( 1+parallelWidth,0,parallelWidth,parallelWidth)
+                    .setCenter( 0.25f, 0,0.25f)
+                    .setStart(0,0,0.5f,0)
+                    .setSleeperCount(5);
+        }
+        if(nearbyMeta[3]==6 && nearbyMeta[1]==0){
+            shape.setStart(-0.5f,0,0)
+                    .setCenter(-0.25f,0,-0.25f)
+                    .setEnd(-parallelWidth,0,-1f-parallelWidth,parallelWidth)
+            .setSleeperCount(6);
         }
 
         //slopes
-        if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord,zCoord,3}})){
-            shape.setPointY(0,0.15f);
+        if (nearbyMeta[3]==3){
+            shape.setStart(-0.6f,0.2f,0f);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord-1,zCoord,2}})){
-            shape.setPointY(0,-0.15f);
+        else if (checkBlockMeta(worldObj,xCoord-1, yCoord-1,zCoord,2)){
+            shape.setStart(-0.6f,-0.2f,0f);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord-1,zCoord+1, 4}})){
-            shape.setPointY(2,-0.15f);
+        if(nearbyMeta[7]==5){
+            shape.setEnd(0,0.2f,0.6f);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord+1, 5}})){
-            shape.setPointY(2,0.15f);
+        else if (checkBlockMeta(worldObj,xCoord, yCoord-1,zCoord+1, 4)){
+            shape.setEnd(0,-0.2f,0.6f);
         }
-
-        return Collections.singletonList(shape);
+        return shape;
     }
 
-    public static List<RailSimpleShape> vanillaCurve9(World worldObj, int xCoord, int yCoord, int zCoord){
+    public static RailSimpleShape vanillaCurve9(World worldObj, int xCoord, int yCoord, int zCoord){
         //the base shape
         RailSimpleShape shape = new RailSimpleShape();
-        shape.setSegments(4);
-        shape.addPoints(normalizeVectors(new float[][]{
-                {0.5f, 0, 0},
-                {0, 0, 0},
-                {0, 0, -0.5f}
-        }));
+        shape.setSleeperCount(4);
+        shape.setStart(0.5f,0,0).setEnd(0,0,-0.5f);
+        int[] nearbyMeta = getNearbyMeta(worldObj, xCoord, yCoord, zCoord);
 
-        if (checkMultiblock(worldObj, new int[][]{{xCoord+1,yCoord,zCoord,7}}) || checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord-1,7}})){
+        if (nearbyMeta[5]==7 || nearbyMeta[1]==7){
             //first half of the diagonal
-            shape.setPoint(1,normalizeVector( 0.25f, 0,-0.25f))
-                    .setSegments(3);
-            if (checkMultiblock(worldObj, new int[][]{{xCoord,yCoord,zCoord-1,0}})){
+            shape.setCenter( 0.25f, 0,-0.25f)
+                    .setSleeperCount(3);
+            if (nearbyMeta[1]==0){
                 //extension of one side to match up with a straight block
-                shape.setPoint(2,normalizeVector( 0,0,-1))
-                        .setPoint(1,normalizeVector( 0, 0,-0.5f))
-                        .setSegments(5);
+                shape.setEnd( 0,0,-1)
+                        .setCenter( 0, 0,-0.5f)
+                        .setSleeperCount(5);
             }
-            if (checkMultiblock(worldObj, new int[][]{{xCoord + 1, yCoord, zCoord, 1}})) {
+            if (nearbyMeta[5]==1) {
                 //extension of one side to match up with a straight block
-                shape.setPoint(0,normalizeVector( 1, 0,0))
-                        .setPoint(1,normalizeVector( 0.5f,0, 0))
-                        .setSegments(5);
+                shape.setStart( 1, 0,0)
+                        .setCenter( 0.5f,0, 0)
+                        .setSleeperCount(5);
             }
         }
-//slopes
-        if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord-1,zCoord,3}})){
-            shape.setPointY(0,-0.15f);
+
+        //parallels
+        if(nearbyMeta[5]==8 && nearbyMeta[1]==0){
+            shape.setStart( 0.5f,0,0)
+                    .setCenter( 0.25f, 0,0.25f)
+                    .setEnd(parallelWidth,0,1+parallelWidth,0,0,-parallelWidth)
+                    .setSleeperCount(5);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord,zCoord,2}})){
-            shape.setPointY(0,0.15f);
-        }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord,zCoord-1,4}})){
-            shape.setPointY(2,0.15f);
-        }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord-1,zCoord-1, 5}})){
-            shape.setPointY(2,-0.15f);
+        if(nearbyMeta[1]==6 && nearbyMeta[3]==1){
+            shape.setStart( -1f-parallelWidth,0,-parallelWidth,-parallelWidth)
+                    .setCenter( -0.25f, 0,-0.25f)
+                    .setEnd(0,0,-0.5f)
+                    .setSleeperCount(5);
         }
 
-        return Collections.singletonList(shape);
+
+        //slopes
+        if (nearbyMeta[5]==2){
+            shape.setStart(0.6f,0.2f,0);
+        }
+        else if (checkBlockMeta(worldObj,xCoord+1, yCoord-1,zCoord,3)){
+            shape.setStart(0.6f,-0.2f,0);
+        }
+        if (nearbyMeta[1]==4){
+            shape.setEnd(0,0.2f,-0.6f);
+        }
+        else if (checkBlockMeta(worldObj,xCoord, yCoord-1,zCoord-1, 5)){
+            shape.setEnd(0,-0.2f,-0.6f);
+        }
+
+        return shape;
     }
 
 
 
 
 
-    public static List<RailSimpleShape> vanillaSlopeZ5(World worldObj, int xCoord, int yCoord, int zCoord){
+    public static RailSimpleShape vanillaSlopeZ5(World worldObj, int xCoord, int yCoord, int zCoord){
         RailSimpleShape shape = new RailSimpleShape();
-        shape.setSegments(4);
-        shape.addPoints(normalizeVectors(new float[][]{
-                {0, 0.15f, -0.5f},
-                {0, 0.2f, -0.25f},
+        shape.setSleeperCount(4);
+        shape.setStart(0,0,-0.5f).setCenter(0,0.5f,0).setEnd(0,1,0.5f);
 
-                {0, 0.5f, 0},
-                {0, 0.5f, 0},
-
-                {0, 0.8f, 0.25f},
-                {0, 0.85f, 0.5f}
-        }));
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord-1,zCoord-1,5}})){
-            shape.setPointY(0,0f)
-                    .setPointY(1,0.25f);
+        if (!checkBlockMeta(worldObj,xCoord, yCoord-1,zCoord-1,5)){
+            shape.setStart(0,0.2f,-0.4f);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord+1,zCoord+1,5}})){
-            shape.setPointY(5,1)
-                    .setPointY(4,0.75f);
+        if (!checkBlockMeta(worldObj,xCoord, yCoord+1,zCoord+1,5)){
+            shape.setEnd(0,0.8f,0.4f);
         }
 
-        return Collections.singletonList(shape);
+        return shape;
     }
 
-    public static List<RailSimpleShape> vanillaSlopeZ4(World worldObj, int xCoord, int yCoord, int zCoord){
+    public static RailSimpleShape vanillaSlopeZ4(World worldObj, int xCoord, int yCoord, int zCoord){
         RailSimpleShape shape = new RailSimpleShape();
-        shape.setSegments(4);
-        shape.addPoints(normalizeVectors(new float[][]{
-                {0, 0.15f, 0.5f},
-                {0, 0.2f, 0.25f},
+        shape.setSleeperCount(4);
+        shape.setStart(0,0,0.5f).setCenter(0,0.5f,0).setEnd(0,1,-0.5f);
 
-                {0, 0.5f, 0},
-                {0, 0.5f, 0},
 
-                {0, 0.8f, -0.25f},
-                {0, 0.85f, -0.5f}
-        }));
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord-1,zCoord+1,4}})){
-            shape.setPointY(0,0)
-                    .setPointY(1,0.25f);
+        if (!checkBlockMeta(worldObj,xCoord, yCoord-1,zCoord+1,4)){
+            shape.setStart(0,0.2f,0.4f);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord, yCoord+1,zCoord-1,4}})){
-            shape.setPointY(5,1f)
-                    .setPointY(4,0.75f);
+        if (!checkBlockMeta(worldObj,xCoord, yCoord+1,zCoord-1,4)){
+            shape.setEnd(0,0.8f,-0.4f);
         }
 
-        return Collections.singletonList(shape);
+        return shape;
     }
 
-    public static List<RailSimpleShape> vanillaSlopeX2(World worldObj, int xCoord, int yCoord, int zCoord){
+    public static RailSimpleShape vanillaSlopeX2(World worldObj, int xCoord, int yCoord, int zCoord){
         RailSimpleShape shape = new RailSimpleShape();
-        shape.setSegments(4);
-        shape.addPoints(normalizeVectors(new float[][]{
-                {-0.5f, 0.15f, 0},
-                {-0.25f, 0.2f, 0},
+        shape.setSleeperCount(4);
 
-                {0, 0.5f, 0},
-                {0, 0.5f, 0},
+        shape.setStart(-0.5f,0,0).setCenter(0,0.5f,0).setEnd(0.5f,1,0);
 
-                {0.25f, 0.8f, 0},
-                {0.5f, 0.85f, 0}
-        }));
-
-        if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord-1,zCoord,2}})){
-            shape.setPointY(0,0)
-                    .setPointY(1,0.25f);
+        if (!checkBlockMeta(worldObj,xCoord-1, yCoord-1,zCoord,2)){
+            shape.setStart(-0.4f,0.2f,0,0);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord+1,zCoord,2}})){
-            shape.setPointY(5,1f)
-                    .setPointY(4,0.75f);
+        if(!checkBlockMeta(worldObj,xCoord+1, yCoord+1,zCoord,2)){
+            shape.setEnd(0.4f,0.8f,0,0);
         }
 
-        return Collections.singletonList(shape);
+        return shape;
     }
 
-    public static List<RailSimpleShape> vanillaSlopeX3(World worldObj, int xCoord, int yCoord, int zCoord){
+    public static RailSimpleShape vanillaSlopeX3(World worldObj, int xCoord, int yCoord, int zCoord){
         RailSimpleShape shape = new RailSimpleShape();
-        shape.setSegments(4);
-        shape.addPoints(normalizeVectors(new float[][]{
-                {0.5f, 0.15f, 0},
-                {0.25f, 0.2f, 0},
+        shape.setSleeperCount(4);
 
-                {0, 0.5f, 0},
-                {0, 0.5f, 0},
+        shape.setStart(0.5f,0,0).setCenter(0,0.5f,0).setEnd(-0.5f,1,0);
 
-                {-0.25f, 0.8f, 0},
-                {-0.5f, 0.85f, 0}
-        }));
-        if (checkMultiblock(worldObj, new int[][]{{xCoord+1, yCoord-1,zCoord,3}})){
-            shape.setPointY(0,0)
-                    .setPointY(1,0.25f);
+        if (!checkBlockMeta(worldObj,xCoord-1, yCoord+1,zCoord,3)){
+            shape.setEnd(-0.4f,0.8f,0,0);
         }
-        if (checkMultiblock(worldObj, new int[][]{{xCoord-1, yCoord+1,zCoord,3}})){
-            shape.setPointY(5,1f)
-                    .setPointY(4,0.75f);
+        if(!checkBlockMeta(worldObj,xCoord+1, yCoord-1,zCoord,3)){
+            shape.setStart(0.4f,0.2f,0,0);
         }
 
-        return Collections.singletonList(shape);
+        return shape;
     }
 
 }

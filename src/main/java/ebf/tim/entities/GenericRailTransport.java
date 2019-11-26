@@ -1641,6 +1641,9 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     /**defines the scale to render the model at. Default is 0.0625*/
     public float getRenderScale(){return 0.0625f;}
 
+    /**defines the scale to render the model at. Default is 0.65*/
+    public float getPlayerScale(){return 0.65f;}
+
     /**returns the x/y/z offset each model should render at, with 0 being the entity center, in order with getModels
      * example:
      * return new float[][]{{x1,y1,z1},{x2,y2,z2}, etc...};
@@ -1747,7 +1750,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             case 3:{return new int[]{6, 100, 0xCECDCB};}//led lamp
             case 4:{return new int[]{3, 50, 0xCC0000};}//reverse lamp
             case 5:{return new int[]{3, 50, 0xCCCC00};}//small sphere lamp
-            default:{return new int[]{6, 100, 0xCCCC00};}//lamp
+            default:{return new int[]{5, 100, 0xCCCC00};}//lamp
         }
     }
 

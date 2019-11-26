@@ -167,31 +167,31 @@ public class CommonProxy implements IGuiHandler {
      */
     public void register() {
 
-        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidOil, TrainsInMotion.MODID, "oil", false, 700,MapColor.blackColor, TrainsInMotion.creativeTab);
-        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidDiesel, TrainsInMotion.MODID, "diesel", false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
-        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidSteam, TrainsInMotion.MODID, "steam", true, 200, MapColor.snowColor, TrainsInMotion.creativeTab);
-        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidHeavySteam, TrainsInMotion.MODID, "heavysteam", true, 600, MapColor.snowColor, TrainsInMotion.creativeTab);
-        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidfueloil, TrainsInMotion.MODID, "fueloil", false, 600, MapColor.brownColor, TrainsInMotion.creativeTab);
-        RegisterFluid(TrainsInMotion.proxy.isClient(),fluidRedstone, TrainsInMotion.MODID, "redstone", false, 100, MapColor.redColor, TrainsInMotion.creativeTab);
+        RegisterFluid(fluidOil, TrainsInMotion.MODID, "oil", false, 700,MapColor.blackColor, TrainsInMotion.creativeTab);
+        RegisterFluid(fluidDiesel, TrainsInMotion.MODID, "diesel", false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
+        RegisterFluid(fluidSteam, TrainsInMotion.MODID, "steam", true, 200, MapColor.snowColor, TrainsInMotion.creativeTab);
+        RegisterFluid(fluidHeavySteam, TrainsInMotion.MODID, "heavysteam", true, 600, MapColor.snowColor, TrainsInMotion.creativeTab);
+        RegisterFluid(fluidfueloil, TrainsInMotion.MODID, "fueloil", false, 600, MapColor.brownColor, TrainsInMotion.creativeTab);
+        RegisterFluid(fluidRedstone, TrainsInMotion.MODID, "redstone", false, 100, MapColor.redColor, TrainsInMotion.creativeTab);
 
 
-        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", TrainsInMotion.creativeTab);
-        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemCraftGuide(),TrainsInMotion.MODID, "craftbook", TrainsInMotion.creativeTab);
+        RegisterItem(new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", TrainsInMotion.creativeTab);
+        RegisterItem(new ItemCraftGuide(),TrainsInMotion.MODID, "craftbook", TrainsInMotion.creativeTab);
 
-	RegisterItem(TrainsInMotion.proxy.isClient(),new ItemPaintBucket(),TrainsInMotion.MODID, "paintbucket", TrainsInMotion.creativeTab); 
-        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemKey(),TrainsInMotion.MODID,  "transportkey", TrainsInMotion.creativeTab);
-        RegisterItem(TrainsInMotion.proxy.isClient(),new ItemTicket(),TrainsInMotion.MODID,  "transportticket", TrainsInMotion.creativeTab);
+	RegisterItem(new ItemPaintBucket(),TrainsInMotion.MODID, "paintbucket", TrainsInMotion.creativeTab);
+        RegisterItem(new ItemKey(),TrainsInMotion.MODID,  "transportkey", TrainsInMotion.creativeTab);
+        RegisterItem(new ItemTicket(),TrainsInMotion.MODID,  "transportticket", TrainsInMotion.creativeTab);
         if(!isClient()) {
-            railItem = RegisterItem(TrainsInMotion.proxy.isClient(), new ItemRail(), TrainsInMotion.MODID, "timrail", TrainsInMotion.creativeTab);
+            railItem = RegisterItem( new ItemRail(), TrainsInMotion.MODID, "timrail", TrainsInMotion.creativeTab);
         }
 
-        registerBlock(isClient(), railBlock, null, "block.timrail", null, getTESR());
+        registerBlock(railBlock, null, "block.timrail", null, getTESR());
 
         //register the train crafting table
-        addRecipe(new ItemStack(registerBlock(isClient(), trainTable, TrainsInMotion.creativeTab,"block.traintable", null, null),1),
+        addRecipe(new ItemStack(registerBlock(trainTable, TrainsInMotion.creativeTab,"block.traintable", null, null),1),
                 "WWW", "WIW", "WWW", 'W', Blocks.planks, 'I', Items.iron_ingot);
 
-        addRecipe(new ItemStack(registerBlock(isClient(), railTable, TrainsInMotion.creativeTab,"block.railtable", null, null),1),
+        addRecipe(new ItemStack(registerBlock(railTable, TrainsInMotion.creativeTab,"block.railtable", null, null),1),
                 "III", "I I", "I I", 'I', Items.iron_ingot);
     }
 

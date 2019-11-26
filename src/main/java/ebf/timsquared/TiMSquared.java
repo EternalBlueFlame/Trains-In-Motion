@@ -27,12 +27,12 @@ public class TiMSquared {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        creativeTab = new TiMTab(event.getSide().isClient(),"timsquared", TrainsInMotion.MODID,"TiM");
+        creativeTab = new TiMTab("timsquared", TrainsInMotion.MODID,"TiM");
 
-        TiMGenericRegistry.registerTransports(event.getSide().isClient(), MODID, listSteamTrains(), null);
-        TiMGenericRegistry.registerTransports(event.getSide().isClient(), MODID, listFreight(), null);
-        TiMGenericRegistry.registerTransports(event.getSide().isClient(), MODID, listPassenger(), null);
-        TiMGenericRegistry.registerTransports(event.getSide().isClient(), MODID, listTanker(), null);
+        TiMGenericRegistry.registerTransports(MODID, listSteamTrains(), null);
+        TiMGenericRegistry.registerTransports(MODID, listFreight(), null);
+        TiMGenericRegistry.registerTransports(MODID, listPassenger(), null);
+        TiMGenericRegistry.registerTransports(MODID, listTanker(), null);
     }
 
 

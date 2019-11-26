@@ -1,12 +1,15 @@
 package ebf.tim.models;
 
+import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -55,7 +58,7 @@ public class ParticleFX {
         host = transport;
         particleID=id;
         particleType=type;
-        this.offset = new float[]{offsetX, type==4?(float)transport.posY:offsetY, offsetZ, rotationX*RailUtility.degreesF, rotationY*RailUtility.degreesF, rotationZ*RailUtility.degreesF};
+        this.offset = new float[]{offsetX, type==4?(float)transport.posY:offsetY, offsetZ, rotationX, rotationY, rotationZ};
         pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, transport.rotationPitch, transport.rotationYaw, 0);
         pos= new float[]{pos[0],pos[1],pos[2]};
 
@@ -147,7 +150,6 @@ public class ParticleFX {
         if (particleType==3 || particleType==4 || particleType==5){//lamps
             shouldRender=host.getBoolean(GenericRailTransport.boolValues.LAMP);
             pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, host.rotationPitch, host.rotationYaw, 0);
-            pos= new float[]{pos[0],pos[1],pos[2]};
             if(particleType==5){
                 //todo mars lamp stuff
             }
@@ -294,7 +296,13 @@ public class ParticleFX {
             GL11.glDisable(GL_CULL_FACE);
             drawLightTexture(entity, true);
             for (int i=0; i<5; i++) {
-                GL11.glScalef(1-(i*0.04f),1-(i*0.01f),1-(i*0.04f));
+            if(Minecraft.getMinecraft().theWorld.isRaining()){
+                TextureManager.bindTexture(new ResourceLocation(TrainsInMotion.MODID, "/textures/effects/lamp_bright.png"));
+            } else {
+                TextureManager.bindTexture(new ResourceLocation(TrainsInMotion.MODID, "/textures/effects/lamp_low.png"));
+            }
+            for (int i=0; i<entity.host.getParticleData(entity.particleID)[0]; i++) {
+                GL11.glScalef(1-(i*0.075f),1-(i*0.01f),1f-(i*0.075f));
                 lampCone.render(0.625f);
             }
             GL11.glEnable(GL_CULL_FACE);
@@ -305,27 +313,26 @@ public class ParticleFX {
             GL11.glDepthMask(true);
         } else if (entity.particleType==4) {//sphere lamps
             GL11.glTranslated(x+entity.pos[0] , y+entity.pos[1]+0.3, z+entity.pos[2]);
-            GL11.glRotated(270-entity.pos[3]+entity.host.rotationYaw,0,0,1);
             GL11.glScalef(entity.host.getParticleData(entity.particleID)[1]*0.01f,
                     entity.host.getParticleData(entity.particleID)[1]*0.01f,
                     entity.host.getParticleData(entity.particleID)[1]*0.01f);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
-            glAlphaFunc(GL_LEQUAL, 1f);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
             GL11.glDepthMask(false);
             GL11.glDisable(GL_CULL_FACE);
-            drawLightTexture(entity, true);
-            for (int i=0; i<5; i++) {
-                GL11.glScalef(1-(i*0.04f),1-(i*0.01f),1-(i*0.04f));
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            //set the color with the tint.   * 0.00392156863 is the same as /255, but multiplication is more efficient than division.
+            GL11.glColor4f(((entity.host.getParticleData(entity.particleID)[2] >> 16 & 0xFF)-entity.colorTint)* 0.00392156863f,
+                    ((entity.host.getParticleData(entity.particleID)[2] >> 8 & 0xFF)-entity.colorTint)* 0.00392156863f,
+                    ((entity.host.getParticleData(entity.particleID)[2] & 0xFF)-entity.colorTint)* 0.00392156863f,
+                    0.2f);
+            for (int i=0; i<entity.host.getParticleData(entity.particleID)[0]; i++) {
+                GL11.glScalef(1-(i*0.075f),1-(i*0.075f),1-(i*0.075f));
                 lampSphere.render(0.625f);
             }
             GL11.glEnable(GL_CULL_FACE);
             GL11.glEnable(GL11.GL_LIGHTING);
-            glAlphaFunc(GL_GREATER, 0.1f);
-            Minecraft.getMinecraft().entityRenderer.enableLightmap(1D);
-            GL11.glDisable(GL11.GL_BLEND);
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
             GL11.glDepthMask(true);
 
         } else {
@@ -352,39 +359,11 @@ public class ParticleFX {
     }
 
 
-    public static void drawLightTexture(ParticleFX entity, boolean isCone){
-        int pos=0;
-        for(int i=0; i<8192; i+=4) {
-            if(entity.colorTint!= 0x000000 && (!isCone || getY(pos)>7)) {
-                TextureManager.renderPixels.put(i, b(entity.colorTint >> 16 & 0xFF));
-                TextureManager.renderPixels.put(i + 1, b(entity.colorTint >> 8 & 0xFF));
-                TextureManager.renderPixels.put(i + 2, b(entity.colorTint & 0xFF));
-                TextureManager.renderPixels.put(i + 3, b(getY(pos)-7));
-            } else {
-                TextureManager.renderPixels.put(i+3,b(0));
-            }
-
-            pos++;
-        }
-
-        glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, 32, 64, GL_RGBA, GL_UNSIGNED_BYTE, TextureManager.renderPixels);
-        TextureManager.renderPixels.clear();//reset the buffer to all 0's.
-    }
-
-    public static int getY(int pos){
-        int y=0;
-        while ((y+1)*32<pos) {
-            y++;
-        }
-        return y;
-    }
-
-
     public static ModelRendererTurbo particle = new ModelRendererTurbo((ModelBase) null, 0, 0, 16, 16)
             .addBox(0,0,0, 4, 4, 4).setRotationPoint(-2F, 2F, -1F);
-    public static ModelRendererTurbo lampCone = new ModelRendererTurbo((ModelBase) null, 0, 0, 32, 64)
-            .addCylinder(-0.00625f, -4.025f, -0.0125f, 1, 4, 16, 1F, 0.01F, MR_TOP, 1,1, 6);
+    public static ModelRendererTurbo lampCone = new ModelRendererTurbo((ModelBase) null, 0, 0, 8, 16)
+            .addCylinder(-0.00625f, -5.025f, -0.0125f, 1, 5, 16, 1F, 0.01F, MR_TOP, 1,1, 6);
     public static ModelRendererTurbo lampSphere = new ModelRendererTurbo((ModelBase) null, 0, 0, 64, 64)
-            .addSphere(0,0,0, 2, 8, 8,1,1);
+            .addSphere(0,0,0, 2, 9, 9,1,1);
 
 }

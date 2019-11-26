@@ -2,6 +2,7 @@ package fexcraft.tmt.slim;
 
 import fexcraft.fcl.common.Static;
 import fexcraft.fvtm.TurboList;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 
@@ -33,6 +34,7 @@ public class ModelRendererTurbo {
     public float rotateAngleX=0,rotateAngleY=0,rotateAngleZ=0;
     public float rotationPointX=0,rotationPointY=0,rotationPointZ=0;
     public boolean showModel; //previously known as !field_1402_i
+    public boolean ignoresLighting=false;
     public String boxName = null;
     public boolean animated=false;
 
@@ -1409,6 +1411,9 @@ public class ModelRendererTurbo {
         if(!showModel){
             return;
         }
+        if (ignoresLighting){
+            Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
+        }
         if(rotationPointX != 0.0F || rotationPointY != 0.0F || rotationPointZ != 0.0F){
             GL11.glTranslatef(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
         }
@@ -1428,6 +1433,9 @@ public class ModelRendererTurbo {
         }
         if(rotationPointX != 0.0F || rotationPointY != 0.0F || rotationPointZ != 0.0F){
             GL11.glTranslatef(-rotationPointX * scale, -rotationPointY * scale, -rotationPointZ * scale);
+        }
+        if (ignoresLighting){
+            Minecraft.getMinecraft().entityRenderer.enableLightmap(1D);
         }
     }
 

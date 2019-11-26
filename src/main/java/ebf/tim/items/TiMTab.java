@@ -14,9 +14,9 @@ public class TiMTab extends CreativeTabs {
     private Item tabItem;
 
     /**instances the tab by handling it through the super.*/
-    public TiMTab(boolean isClient, String name, String MODID, String textureName) {
+    public TiMTab(String name, String MODID, String textureName) {
         super(CreativeTabs.getNextID(), name);
-        tabItem= TiMGenericRegistry.RegisterItem(isClient,new Item(),MODID,textureName,null);
+        tabItem= TiMGenericRegistry.RegisterItem(new Item(),MODID,textureName,null);
     }
     public TiMTab(String name, Item tabItem) {
         super(CreativeTabs.getNextID(), name);

@@ -35,37 +35,40 @@ public class ItemTransport extends Item {
     public ItemTransport(GenericRailTransport cart, String MODID, CreativeTabs tabs) {
         super();
         setUnlocalizedName(cart.transportName().replace(" ",""));
-        if(cart.transportFuelType()!=null && !cart.transportFuelType().equals("")) {
-            subtext.add(EnumChatFormatting.GRAY + t("menu.item.fueltype") + ": " +
-                    t("menu.item."+cart.transportFuelType().toLowerCase()));
-        }
         subtext.add(EnumChatFormatting.GRAY + t("menu.item.year") +": " + cart.transportYear());
         subtext.add(EnumChatFormatting.GRAY + t("menu.item.country") + ": " +
                 t("menu.item."+cart.transportcountry().toLowerCase()));
-        subtext.add(EnumChatFormatting.GRAY + t("menu.item.weight") +": " + cart.weightKg() + "kg");
+
+        if(cart.transportFuelType()!=null && !cart.transportFuelType().equals("")) {
+            subtext.add(EnumChatFormatting.RED + t("menu.item.fueltype") + ": " +
+                    t("menu.item."+cart.transportFuelType().toLowerCase()));
+        }
+        subtext.add(EnumChatFormatting.GREEN + t("menu.item.weight") +": " + cart.weightKg() + "kg");
         if (cart.transportTopSpeed()!=0){
             subtext.add(EnumChatFormatting.GREEN + t("menu.item.speed") +": " + cart.transportTopSpeed() +" km/h");
 
             if (cart.transportMetricHorsePower() !=0){
-                subtext.add(EnumChatFormatting.GREEN +t("menu.item.mhp") +": " + cart.weightKg());
+                subtext.add(EnumChatFormatting.GREEN +t("menu.item.mhp") +": " + cart.transportMetricHorsePower());
             }
             if (cart.transportTractiveEffort() != 0){
-                subtext.add(EnumChatFormatting.GREEN + t("menu.item.tractiveeffort") +": " + cart.weightKg() + " lbf");
+                subtext.add(EnumChatFormatting.GREEN + t("menu.item.tractiveeffort") +": " + cart.transportTractiveEffort() + " lbf");
             }
         }
         if(cart.getInventoryRows()>0){
-            subtext.add(EnumChatFormatting.GREEN +t("menu.item.isizeof")+ ": " + (cart.getInventoryRows()*9) + " " + t("menu.item.slots"));
+            subtext.add(EnumChatFormatting.BLUE +t("menu.item.isizeof")+ ": " + (cart.getInventoryRows()*9) + " " + t("menu.item.slots"));
         }
         if(cart.getRiderOffsets()!=null){
-            subtext.add(EnumChatFormatting.GREEN +t("menu.item.seats")+ ": " + cart.getRiderOffsets().length);
+            subtext.add(EnumChatFormatting.BLUE +t("menu.item.seats")+ ": " + cart.getRiderOffsets().length);
         }
         if (cart.isFictional()){
-            subtext.add(EnumChatFormatting.BLUE +t("menu.item.fictional"));
+            subtext.add(EnumChatFormatting.WHITE +t("menu.item.fictional"));
         }
 
         if (cart.additionalItemText()!=null){
             for (String s : cart.additionalItemText()) {
-                subtext.add(EnumChatFormatting.LIGHT_PURPLE  +s);
+                if(!s.equals("")) {
+                    subtext.add(EnumChatFormatting.LIGHT_PURPLE + s);
+                }
             }
         }
         transport=cart.getClass();

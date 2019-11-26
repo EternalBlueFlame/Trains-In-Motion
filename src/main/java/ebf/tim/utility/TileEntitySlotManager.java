@@ -69,6 +69,13 @@ public class TileEntitySlotManager extends Container{
                 }
             }
             //tile entity's output slot
+
+            for (int l = 0; l < 3; ++l) {
+                for (int i1 = 0; i1 < 3; ++i1) {
+                    if (craftingTable.multiPage && i1==1 && l!=1){continue;}
+                    addSlotToContainer(new craftingSlot(craftingTable, 9+ i1 + (l * 3), 106 + i1 * 18, 17 + l * 18));
+                }
+            }
             addSlotToContainer(new Slot(craftingTable, 10, 124, 35));
         }
         onCraftMatrixChanged(craftingTable);
@@ -147,7 +154,32 @@ public class TileEntitySlotManager extends Container{
         if(craftingTable!=null) {
             switch (craftingTable.storageType) {
                 case 0: {
-                    putStackInSlot(10, transportRecipe(), false);
+                    List<ItemStack> slots = RecipeManager.getResult(getTransportRecipe());
+                    if(slots==null){
+                        for (int i = 0; i < 9; i++) {
+                            putStackInSlot(10 + i, null, false);
+                        }
+                    } else {
+                        if(slots.size()<10) {
+                            for (int i = 0; i < 9; i++) {
+                                putStackInSlot(10 + i, slots.size() > i ? slots.get(i) : null, false);
+                            }
+                            craftingTable.multiPage=false;
+                        } else {//when theres 10 or more outputs skip 2 since buttons will be in their place.
+                            putStackInSlot(10 + (7*craftingTable.outputPage), slots.get(10), false);
+                            putStackInSlot(11 + (7*craftingTable.outputPage), slots.get(11), false);
+                            putStackInSlot(12 + (7*craftingTable.outputPage), slots.get(12), false);
+                            //intentionally skip 13 because an arrow is there
+                            putStackInSlot(14 + (7*craftingTable.outputPage), slots.get(14), false);
+                            //intentionally skip 15 because an arrow is there
+                            putStackInSlot(16 + (7*craftingTable.outputPage), slots.get(16), false);
+                            putStackInSlot(17 + (7*craftingTable.outputPage), slots.get(17), false);
+                            putStackInSlot(18 + (7*craftingTable.outputPage), slots.get(18), false);
+
+                            craftingTable.multiPage=true;
+                        }
+
+                    }
                     break;
                 }
                 case 1: {
@@ -159,20 +191,13 @@ public class TileEntitySlotManager extends Container{
         super.onCraftMatrixChanged(inventory);
     }
 
-    /**
-     * <h2>recipe manager</h2>
-     * manages crafting recipes, and their outputs.
-     * the current implementation only supports shaped recipes.
-     */
-    @Deprecated
-    private ItemStack transportRecipe() {
-        return RecipeManager.getResult(new ItemStack[]{
-                craftingTable.getStackInSlot(0), craftingTable.getStackInSlot(1), craftingTable.getStackInSlot(2),
-                craftingTable.getStackInSlot(3), craftingTable.getStackInSlot(4), craftingTable.getStackInSlot(5),
-                craftingTable.getStackInSlot(6), craftingTable.getStackInSlot(7), craftingTable.getStackInSlot(8)
-        });
+    public ItemStack[] getTransportRecipe(){
+        return new ItemStack[]{
+                craftingTable.getStackInSlot(0),craftingTable.getStackInSlot(1),craftingTable.getStackInSlot(2),
+                craftingTable.getStackInSlot(3),craftingTable.getStackInSlot(4),craftingTable.getStackInSlot(5),
+                craftingTable.getStackInSlot(6),craftingTable.getStackInSlot(7),craftingTable.getStackInSlot(8),
+        };
     }
-
 
     public ItemStack railRecipe(){
         if(craftingTable.getStackInSlot(4)!=null && craftingTable.getStackInSlot(4).getItem() instanceof ItemRail){

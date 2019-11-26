@@ -4,6 +4,7 @@ import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Vec5f;
+import ebf.tim.utility.Vec6f;
 import fexcraft.tmt.slim.Tessellator;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.client.Minecraft;
@@ -55,17 +56,12 @@ public class Model1x1Rail {
         }*/
     }
 
-    public static void addVertexWithOffset(Vec5f p, float width, float height, float depth){
-        rotateVertexPoint(depth,height,width,p.u,p.v);
+    public static void addVertexWithOffset(Vec6f p, float width, float height, float depth){
+        rotateVertexPoint(depth,height,width-Math.copySign(p.w,width),p.u,p.v);
         Tessellator.getInstance().addVertexWithUV(vert[0]+p.xCoord,vert[1]+p.yCoord, vert[2]+p.zCoord,0,0);
     }
 
     public static void addVertexWithOffsetAndUV(Vec5f p, float width, float height, float depth, float U, float V){
-        rotateVertexPoint(depth,height,width,p.u,p.v);
-        Tessellator.getInstance().addVertexWithUV(vert[0]+p.xCoord,vert[1]+p.yCoord, vert[2]+p.zCoord,U,V);
-    }
-
-    public static void addTieVertexWithOffsetAndUV(Vec5f p, float width, float height, float depth, float U, float V){
         rotateVertexPoint(depth,height,width,p.u,p.v);
         Tessellator.getInstance().addVertexWithUV(vert[0]+p.xCoord,vert[1]+p.yCoord, vert[2]+p.zCoord,U,V);
     }

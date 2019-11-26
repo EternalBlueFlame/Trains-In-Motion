@@ -8,6 +8,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -31,7 +32,7 @@ import java.util.*;
 
 public class GUICraftBook extends GuiScreen {
 
-    public static Map<String, String[]> infoPages=new HashMap<>();
+    private static Map<String, List<bookPage>> infoPages=new HashMap<>();
     public static int guiLeft=0,guiTop=0, page=0;
     private static List<Object> pageData = null;
     private static ModelBook book = new ModelBook();
@@ -132,11 +133,13 @@ public class GUICraftBook extends GuiScreen {
                         percentLeft(leftPage?25:57)+ getBookSlotPlacement(true, slot),
                         percentTop(35)+ getBookSlotPlacement(false, slot));
             }
-        } else if(getPage(leftPage?page:page+1) instanceof String){
-            String[] disp = ((String)getPage(leftPage?page:page+1)).split("\n");
+        } else if(getPage(leftPage?page:page+1) instanceof bookPage){
+            String[] disp = ((bookPage)getPage(leftPage?page:page+1)).text.split("\n");
             for (int i=0;i<disp.length;i++){
                 Minecraft.getMinecraft().fontRenderer.drawString(disp[i],percentLeft(leftPage?20:55), percentTop(25)+(i*12), 0x000000);
             }
+
+            //todo: draw images from pages
 
         }
     }
@@ -175,5 +178,44 @@ public class GUICraftBook extends GuiScreen {
     public static int percentTop(int value){return (int)(guiTop*(value*0.01f));}
     public static int percentLeft(int value){return (int)(guiLeft*(value*0.01f));}
 
+
+
+    private static class bookPage{
+        String text;
+        bookImage[] pictures;
+        public bookPage(String t, bookImage[] images){
+            text=t;
+            pictures=images;
+        }
+    }
+
+    public static void addPage(String modid, String text, bookImage ... images){
+        if(infoPages.containsKey(modid)){
+            infoPages.get(modid).add(new bookPage(text,images));
+        } else {
+            infoPages.put(modid, Collections.singletonList(new bookPage(text,images)));
+        }
+    }
+    public static void addPage(String modid, String text){
+        if(infoPages.containsKey(modid)){
+            infoPages.get(modid).add(new bookPage(text,null));
+        } else {
+            List<bookPage> pages = new ArrayList<>();
+            pages.add(new bookPage(text,null));
+            infoPages.put(modid, pages);
+        }
+    }
+
+    private static class bookImage{
+        ResourceLocation texture;
+        int x,y,width,height;
+    }
+
+    public static bookImage addImage(ResourceLocation texture, int x, int y, int width, int height){
+        bookImage img = new bookImage();
+        img.texture=texture;
+        img.x=x;img.y=y;img.width=width;img.height=height;
+        return img;
+    }
 
 }

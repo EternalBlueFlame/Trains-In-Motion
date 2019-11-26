@@ -48,7 +48,7 @@ public class TiMGenericRegistry {
         this.recipe = recipe;
     }
 
-    public static Block registerBlock(boolean isClient, Block block, CreativeTabs tab, String unlocalizedName, @Nullable String oreDictionaryName, @Nullable Object TESR){
+    public static Block registerBlock(Block block, CreativeTabs tab, String unlocalizedName, @Nullable String oreDictionaryName, @Nullable Object TESR){
         if (tab!=null){
             block.setCreativeTab(tab);
         }
@@ -69,18 +69,18 @@ public class TiMGenericRegistry {
                     unlocalizedName+"tile");
             usedNames.add(unlocalizedName+"tile");
 
-            if(isClient && TESR!=null){
+            if(TrainsInMotion.proxy.isClient() && TESR!=null){
                 cpw.mods.fml.client.registry.ClientRegistry.bindTileEntitySpecialRenderer(((ITileEntityProvider) block).createNewTileEntity(null, 0).getClass(), (TileEntitySpecialRenderer) TESR);
             }
         }
         return block;
     }
 
-    public static Item RegisterItem(boolean isClient, Item itm, String MODID, String unlocalizedName, CreativeTabs tab){
-        return RegisterItem(isClient, itm, MODID, unlocalizedName,null,tab, null,null);
+    public static Item RegisterItem(Item itm, String MODID, String unlocalizedName, CreativeTabs tab){
+        return RegisterItem(itm, MODID, unlocalizedName,null,tab, null,null);
     }
 
-    public static Item RegisterItem(boolean isClient, Item itm, String MODID, String unlocalizedName, @Nullable String oreDictionaryName, @Nullable CreativeTabs tab, @Nullable Item container, @Nullable Object itemRender){
+    public static Item RegisterItem(Item itm, String MODID, String unlocalizedName, @Nullable String oreDictionaryName, @Nullable CreativeTabs tab, @Nullable Item container, @Nullable Object itemRender){
         if (tab!=null) {
             itm.setCreativeTab(tab);
         }
@@ -88,24 +88,24 @@ public class TiMGenericRegistry {
             itm.setContainerItem(container);
         }
         itm.setUnlocalizedName(unlocalizedName);
-        if(isClient){
+        if(TrainsInMotion.proxy.isClient()){
             itm.setTextureName(MODID+":"+unlocalizedName);
         }
         GameRegistry.registerItem(itm,unlocalizedName);
         if(oreDictionaryName!=null){
             OreDictionary.registerOre(oreDictionaryName, itm);
         }
-        if (TrainsInMotion.proxy!=null && isClient && itm.getUnlocalizedName().equals(StatCollector.translateToLocal(itm.getUnlocalizedName()))){
+        if (TrainsInMotion.proxy!=null && TrainsInMotion.proxy.isClient() && itm.getUnlocalizedName().equals(StatCollector.translateToLocal(itm.getUnlocalizedName()))){
             DebugUtil.println("Item missing lang entry: " + itm.getUnlocalizedName());
         }
-        if(isClient && itemRender!=null){
+        if(TrainsInMotion.proxy.isClient() && itemRender!=null){
             MinecraftForgeClient.registerItemRenderer(itm, (IItemRenderer)itemRender);
         }
         return itm;
     }
 
 
-    public static void RegisterFluid(boolean isClient, Fluid fluid, String MODID, String unlocalizedName, boolean isGaseous, int density, MapColor color, CreativeTabs tab){
+    public static void RegisterFluid(Fluid fluid, String MODID, String unlocalizedName, boolean isGaseous, int density, MapColor color, CreativeTabs tab){
         fluid.setUnlocalizedName(unlocalizedName).setGaseous(isGaseous).setDensity(density);
         FluidRegistry.registerFluid(fluid);
 
@@ -114,7 +114,7 @@ public class TiMGenericRegistry {
         fluid.setBlock(block);
 
         Item bucket = new ItemBucket(block).setCreativeTab(tab).setUnlocalizedName(unlocalizedName + ".bucket").setContainerItem(Items.bucket);
-                if(isClient){
+                if(TrainsInMotion.proxy.isClient()){
                     bucket.setTextureName(MODID+":bucket_"+unlocalizedName);
                 }
         GameRegistry.registerItem(bucket, "fluid." + unlocalizedName + ".bucket");
@@ -141,7 +141,7 @@ public class TiMGenericRegistry {
     private static List<String>usedNames = new ArrayList<>();
     private static int registryPosition =17;
 
-    public static void registerTransports(boolean isClient, String MODID, GenericRailTransport[] entities, Object entityRender){
+    public static void registerTransports(String MODID, GenericRailTransport[] entities, Object entityRender){
         if(registryPosition==-1){
             DebugUtil.println("ERROR", "ADDING TRANSPORT REGISTRY ITEMS OUTSIDE MOD INIT", "PLEASE REGISTER YOUR ENTITIES IN THE FOLLOWING EVENT:",
                     "@Mod.EventHandler public void init(FMLInitializationEvent event)");
@@ -161,14 +161,14 @@ public class TiMGenericRegistry {
                 CommonProxy.recipesInMods.put(MODID, new ArrayList<Recipe>());
                 CommonProxy.recipesInMods.get(MODID).add(getRecipe(registry.getRecipie(), registry.getCartItem()));
             }
-            if(isClient && ClientProxy.hdTransportItems){
+            if(TrainsInMotion.proxy.isClient() && ClientProxy.hdTransportItems){
                 MinecraftForgeClient.registerItemRenderer(registry.getCartItem().getItem(), itemModel);
             }
             registry.registerSkins();
             if(registry.getRecipie()!=null){
                 RecipeManager.registerRecipe(getRecipe(registry.getRecipie(), registry.getCartItem()));
             }
-            if(isClient){
+            if(TrainsInMotion.proxy.isClient()){
                 ItemCraftGuide.itemEntries.add(registry.getClass());
                 if(entityRender==null){
                     cpw.mods.fml.client.registry.RenderingRegistry.registerEntityRenderingHandler(registry.getClass(), (net.minecraft.client.renderer.entity.Render)TrainsInMotion.proxy.getEntityRender());

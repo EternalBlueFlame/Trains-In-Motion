@@ -4,6 +4,7 @@ import ebf.tim.api.SkinRegistry;
 import ebf.tim.api.skin;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.*;
 import net.minecraft.client.Minecraft;
@@ -15,6 +16,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -83,7 +85,6 @@ public class RenderEntity extends Render {
             entity.renderData.modelList = entity.getModel();
             entity.renderData.bogies = entity.bogies();
 
-
             //cache animating parts
             if (y!=0 && ClientProxy.EnableAnimations && entity.renderData.needsModelUpdate) {
                 boolean isAdded;
@@ -91,7 +92,7 @@ public class RenderEntity extends Render {
                     for (ModelRendererTurbo render : part.getParts()) {
                         if (render.boxName ==null){continue;}
                         //attempt to cache the parts for the main transport model
-                        if(RailUtility.stringContains(render.boxName,"hide") || RailUtility.stringContains(render.boxName,"cull")){
+                        if(StaticModelAnimator.checkCulls(render)){
                             render.showModel = false;
                         }
                         if (StaticModelAnimator.checkAnimators(render)) {
@@ -269,16 +270,11 @@ public class RenderEntity extends Render {
         }
 
 
-        GL11.glEnable(GL11.GL_LIGHTING);
-
         GL11.glPopMatrix();
         //render the particles, if there are any.
         for(ParticleFX particle : entity.renderData.particles){
             ParticleFX.doRender(particle, x,y,z);
         }
-
-        GL11.glDisable(GL11.GL_BLEND);
-
 
 
         //render hitboxes

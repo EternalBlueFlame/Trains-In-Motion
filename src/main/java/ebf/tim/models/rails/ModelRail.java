@@ -1,7 +1,9 @@
 package ebf.tim.models.rails;
 
 import ebf.tim.blocks.rails.RailShapeCore;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Vec5f;
+import ebf.tim.utility.Vec6f;
 import fexcraft.tmt.slim.Tessellator;
 import org.lwjgl.opengl.GL11;
 
@@ -12,14 +14,16 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class ModelRail {
 
-    public static void drawFace(List<Vec5f> path, float gaugeOffset, float x1, float x2, float y1, float y2){
+    public static void drawFace(List<Vec6f> path, float gaugeOffset, float x1, float x2, float y1, float y2){
         Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
-        for (Vec5f p : path) {
+        for (Vec6f p : path) {
             addVertexWithOffset(p, x1 + gaugeOffset, y1, 0);
             addVertexWithOffset(p, x2 + gaugeOffset, y2, 0);
         }
         Tessellator.getInstance().draw();
     }
+
+    private static Vec6f currentVec;
 
     public static void centerShading(float offset, int[] color, int dark, boolean pass0){
         if(offset>0 ^ !pass0) {
@@ -46,7 +50,6 @@ public class ModelRail {
 
             centerShading(rail,color,30,false);
             drawFace(shape.activePath, rail, 0, -0.0625f,0,0);
-
         }
         GL11.glPopMatrix();
         GL11.glEnable(GL_TEXTURE_2D);
@@ -85,10 +88,10 @@ public class ModelRail {
             if(shape.ends[1]) {
                 Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
 
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), 0.0625f + rail, -0.0625f, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), 0.0625f + rail, 0, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), -0.0625f + rail, -0.0625f, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), -0.0625f + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), 0.0625f+rail, -0.0625f, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), 0.0625f+rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), -0.0625f+rail, -0.0625f, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), -0.0625f+rail, 0, 0);
 
                 Tessellator.getInstance().draw();
             }

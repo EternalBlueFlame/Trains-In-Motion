@@ -45,7 +45,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     //used for the actual path, and rendered
     public List<float[]> points = new ArrayList<>();
-    public float segmentLength=0;
+    public float tieCount=0;
     //used to define the number of rails and their offset from the center.
     public float[] railGauges;
     //TODO: only rendered, to show other paths, maybe rework so they are all in the same list and just have a bool for which is active?
@@ -256,58 +256,51 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     public static final int[] gauge750mm={750};
 
     public static void updateShape(int xPos, int yPos, int zPos, World worldObj, @Nullable XmlBuilder data){
-        //List<> points= new ArrayList<>();
-        //todo: process these directly into quad/processPoints(); on server, then sync the offsets over the NBT network packet.
+        RailShapeCore.processPoints(xPos, yPos, zPos, getShape(worldObj, xPos, yPos, zPos),gauge750mm,worldObj, data);
+    }
+
+
+    public static RailSimpleShape getShape(World worldObj, int xPos, int yPos, int zPos){
         switch (worldObj.getBlockMetadata(xPos, yPos, zPos)){
             //Z straight
             case 0: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaZStraight(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
-                break;
+                return RailVanillaShapes.vanillaZStraight(worldObj, xPos, yPos, zPos);
             }
             //X straight
             case 1: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaXStraight(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
-                break;
+                return RailVanillaShapes.vanillaXStraight(worldObj, xPos, yPos, zPos);
             }
 
             //curves
             case 9: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve9(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
-                break;
+                return RailVanillaShapes.vanillaCurve9(worldObj, xPos, yPos, zPos);
             }
             case 8: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve8(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
-                break;
+                return RailVanillaShapes.vanillaCurve8(worldObj, xPos, yPos, zPos);
             }
             case 7: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve7(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
-                break;
+                return RailVanillaShapes.vanillaCurve7(worldObj, xPos, yPos, zPos);
             }
             case 6: {
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaCurve6(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
-                break;
+                return RailVanillaShapes.vanillaCurve6(worldObj, xPos, yPos, zPos);
             }
             //Z slopes
             case 5 :{
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeZ5(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
-                break;
+                return RailVanillaShapes.vanillaSlopeZ5(worldObj, xPos, yPos, zPos);
             }
             case 4 :{
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeZ4(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
-                break;
+                return RailVanillaShapes.vanillaSlopeZ4(worldObj, xPos, yPos, zPos);
             }
             //X slopes
             case 2 :{
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeX2(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
-                break;
+                return RailVanillaShapes.vanillaSlopeX2(worldObj, xPos, yPos, zPos);
             }
             case 3 :{
-                RailShapeCore.processPoints(xPos, yPos, zPos, RailVanillaShapes.vanillaSlopeX3(worldObj, xPos, yPos, zPos), gauge750mm, worldObj, data);
-                break;
+                return RailVanillaShapes.vanillaSlopeX3(worldObj, xPos, yPos, zPos);
             }
         }
+        return null;
     }
-
 
 
     /**
@@ -316,16 +309,34 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
      * @param positionsWithMeta array of vector 4's with the 4th value being the desired meta
      * @return boolean for if the shape can be made
      */
-    public static boolean checkMultiblock(World worldobj, int[][] positionsWithMeta){
-        for(int[] point : positionsWithMeta){
-            if (!worldobj.getChunkProvider().chunkExists(point[0]/16, point[2]/16)){
-                return false;
-            } else if (!(worldobj.getBlock(point[0],point[1],point[2]) instanceof BlockRailBase)){
-                return false;
-            } else if (worldobj.getBlockMetadata(point[0],point[1],point[2]) != point[3]){
-                return false;
+    public static boolean checkBlockMeta(World worldobj, int x, int y, int z, int ... meta){
+        if (!worldobj.getChunkProvider().chunkExists(x/16, z/16) ||
+                !(worldobj.getBlock(x,y,z) instanceof BlockRailBase)){
+            return false;
+        }
+        for(int i : meta){
+            if(worldobj.getBlockMetadata(x, y, z) ==i){
+                return true;
             }
         }
-        return true;
+        return  false;
+    }
+
+
+    public static int[] getNearbyMeta(World world, int xCoord, int yCoord, int zCoord){
+        int[] meta = new int[9];
+        int i=0;
+        for(int z=-1;z<2;z++){
+            for(int x=-1;x<2;x++){
+                if(world.getBlock(xCoord+x,yCoord,zCoord+z) instanceof BlockRailBase){
+                    meta[i]= ((BlockRailBase) world.getBlock(xCoord+x,yCoord,zCoord+z)).
+                            getBasicRailMetadata(world,null,xCoord+x,yCoord,zCoord+z);
+                } else {
+                    meta[i]=-1;
+                }
+                i++;
+            }
+        }
+        return meta;
     }
 }

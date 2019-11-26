@@ -54,8 +54,9 @@ public class RailTileEntity extends TileEntity {
                     Model1x1Rail.Model3DRail(worldObj, xCoord, yCoord, zCoord,
                             route,
                             data.getItemStack("ballast"),
-                            data.getItemStack("ties"),///todo Y U NULL???
+                            data.getItemStack("ties"),
                             data.getItemStack("rail"), null);
+
                     org.lwjgl.opengl.GL11.glEndList();
                     updateModel = false;
                 }

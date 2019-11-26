@@ -35,6 +35,8 @@ public class TileEntityStorage extends TileEntity implements IInventory {
     private List<ItemStack> items = new ArrayList<ItemStack>();
     public int storageType=0;
     public int[] extraData = null;
+    public int outputPage=0;
+    public boolean multiPage=false;
 
     /**
      * <h2>Syncing</h2>

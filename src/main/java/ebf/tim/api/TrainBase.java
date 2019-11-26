@@ -79,13 +79,9 @@ public abstract class TrainBase extends EntityTrainCore{
      * defines the capacity of the fluidTank tank.
      * Usually value is 10,000 *the cubic meter capacity, so 242 gallons, is 0.9161 cubic meters, which is 9161 tank capacity
      * NOTE if this is used for a train, minimum value should be 1100, which is just a little over a single bucket to allow prevention of overheating.
+     * NOTE 2: RF is stored as a fluid
      */
     public abstract int[] getTankCapacity();
-
-    /**
-     * defines the capacity of the RF storage, intended for electric rollingstock that store power for the train.
-     */
-    public abstract int getRFCapacity();
 
     /**
      * this function allows individual trains and rollingstock to implement custom fuel consumption and management
@@ -182,7 +178,10 @@ public abstract class TrainBase extends EntityTrainCore{
     */
 
     /** defines the whitelist of fluid names for the tank defined by tankID
-     * example:
+     * NOTE: RF is a fluid.
+     * simple example:
+     * return FuelHandler.DefaultTanks.ELECTRIC.value();
+     * alternate example:
      * if(tankID==0){return new String[]{"water", "diesel"}} else { return null}*/
     public abstract String[][] getTankFilters();
 
