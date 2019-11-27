@@ -14,75 +14,81 @@ public class RailVanillaShapes extends RailShapeCore{
 
     private static final float parallelWidth = 0.0625f*1.5f;
 
-    public static RailSimpleShape vanillaZStraight(World worldObj, int xCoord, int yCoord, int zCoord){
+    public static RailSimpleShape vanillaZStraight(World worldObj, int xCoord, int yCoord, int zCoord) {
         //new code
         RailSimpleShape shape = new RailSimpleShape();
         shape.setSleeperCount(4);
-        shape.setStart(0,0,-0.5f).setEnd(0,0,0.5f);
+        shape.setStart(0, 0, -0.5f).setEnd(0, 0, 0.5f);
 
         int[] nearbyMeta = getNearbyMeta(worldObj, xCoord, yCoord, zCoord);
 
 
         //intersections
-        if(nearbyMeta[1]==1 &&
-                checkBlockMeta(worldObj, xCoord, yCoord,zCoord+2,0)){
-            shape.setStart(0,0,1.5f);
+        if (nearbyMeta[1] == 1 &&
+                checkBlockMeta(worldObj, xCoord, yCoord, zCoord + 2, 0)) {
+            shape.setStart(0, 0, 1.5f);
         }
-        if(nearbyMeta[7]==1 && checkBlockMeta(worldObj, xCoord, yCoord,zCoord-2,0)){
-            shape.setStart(0,0,-1.5f);
+        if (nearbyMeta[7] == 1 && checkBlockMeta(worldObj, xCoord, yCoord, zCoord - 2, 0)) {
+            shape.setStart(0, 0, -1.5f);
         }
 
         //cover half-lengths
-        if((nearbyMeta[1]==7 && nearbyMeta[0]==9) || (nearbyMeta[1]==6&&nearbyMeta[2]==8) &&
-                (nearbyMeta[7]==8 && nearbyMeta[6]==6) || (nearbyMeta[7]==9 &&nearbyMeta[8]==7)){
+        if (((nearbyMeta[1] == 7 && nearbyMeta[0] == 9) || (nearbyMeta[1] == 6 && nearbyMeta[2] == 8)) &&
+                ((nearbyMeta[7] == 8 && nearbyMeta[6] == 6) || (nearbyMeta[7] == 9 && nearbyMeta[8] == 7))) {
             //covers when both the following are true
-            shape.setStart(0,0,0.025f).setEnd(0,0,-0.025f);
-        }
-        else if((nearbyMeta[1]==7 && nearbyMeta[0]==9) || (nearbyMeta[1]==6&&nearbyMeta[2]==8)){
-            shape.setStart(0,0,0).setCenter(0,0,0.25f);
-        }
-        else if((nearbyMeta[7]==8 && nearbyMeta[6]==6) || (nearbyMeta[7]==9 &&nearbyMeta[8]==7)){
-            shape.setEnd(0,0,0).setCenter(0,0,-0.25f);
+            shape.setStart(0, 0, 0.025f).setEnd(0, 0, -0.025f);
+        } else if ((nearbyMeta[1] == 7 && nearbyMeta[0] == 9) || (nearbyMeta[1] == 6 && nearbyMeta[2] == 8)) {
+            shape.setStart(0, 0, 0).setCenter(0, 0, 0.25f);
+        } else if ((nearbyMeta[7] == 8 && nearbyMeta[6] == 6) || (nearbyMeta[7] == 9 && nearbyMeta[8] == 7)) {
+            shape.setEnd(0, 0, 0).setCenter(0, 0, -0.25f);
         }
 
+        //TODO: rework this to re-use the organization from the other axis, its way simpler
         //cover parallels
-        if(nearbyMeta[7]==7 && nearbyMeta[6]==9){
-            shape.setEnd(parallelWidth,0,2f,parallelWidth)
-                    .setCenter(0,0,1.5f)
+        if (nearbyMeta[7] == 7 && nearbyMeta[6] == 9) {
+            shape.setEnd(parallelWidth, 0, 2f, parallelWidth)
+                    .setCenter(0, 0, 1.5f)
                     .setSleeperCount(8);
-        } else if(nearbyMeta[7]==8 && nearbyMeta[6]==9){
-            shape.setEnd(0,0,2f)
-                    .setCenter(0,0,1.5f)
-                    .setSleeperCount(8);
-        }
-
-        if(nearbyMeta[7]==6 && nearbyMeta[8]==8){
-            shape.setEnd(-parallelWidth,0,2f,parallelWidth)
-                    .setCenter(0,0,1f)
-                    .setSleeperCount(8);
-        }else if(nearbyMeta[7]==9 && nearbyMeta[8]==8){
-            shape.setEnd(0,0,2f)
-                    .setCenter(0,0,1f)
+        } else if (nearbyMeta[7] == 8 && nearbyMeta[6] == 9 &&
+                checkBlockMeta(worldObj, xCoord, yCoord, zCoord + 2, 0)//cover sharp u-turns
+            ) {
+            shape.setEnd(0, 0, 2f)
+                    .setCenter(0, 0, 1.5f)
                     .setSleeperCount(8);
         }
 
-        if(nearbyMeta[1]==9 && nearbyMeta[2]==7){
-            shape.setStart(-parallelWidth,0,-2f,parallelWidth)
-                    .setCenter(0,0,-1.5f)
+        if (nearbyMeta[7] == 6 && nearbyMeta[8] == 8) {
+            shape.setEnd(-parallelWidth, 0, 2f, parallelWidth)
+                    .setCenter(0, 0, 1f)
                     .setSleeperCount(8);
-        } else if(nearbyMeta[1]==6 && nearbyMeta[2]==7){
-            shape.setStart(0,0,-2f)
-                    .setCenter(0,0,-1f)
+        } else if (nearbyMeta[7] == 9 && nearbyMeta[8] == 8 &&
+                checkBlockMeta(worldObj, xCoord, yCoord, zCoord + 2, 0)//cover sharp u-turns
+            ) {
+            shape.setEnd(0, 0, 2f)
+                    .setCenter(0, 0, 1f)
                     .setSleeperCount(8);
-        }
-        if(nearbyMeta[1]==8 && nearbyMeta[0]==6){
-            shape.setStart(parallelWidth,0,-2f,parallelWidth)
-                    .setCenter(0,0,-1f)
-                    .setSleeperCount(8);
-        } else if(nearbyMeta[1]==7 && nearbyMeta[0]==6){
-            shape.setStart(0,0,-2f).setCenter(0,0,-1.5f).setSleeperCount(8);
         }
 
+        if (nearbyMeta[1] == 9 && nearbyMeta[2] == 7) {
+            shape.setStart(-parallelWidth, 0, -2f, parallelWidth)
+                    .setCenter(0, 0, -1.5f)
+                    .setSleeperCount(8);
+        } else if (nearbyMeta[1] == 6 && nearbyMeta[2] == 7 &&
+                checkBlockMeta(worldObj, xCoord, yCoord, zCoord - 2, 0)//cover sharp u-turns
+        ) {
+            shape.setStart(0, 0, -2f)
+                    .setCenter(0, 0, -1f)
+                    .setSleeperCount(8);
+        }
+        if (nearbyMeta[1] == 8 && nearbyMeta[0] == 6) {
+            shape.setStart(parallelWidth, 0, -2f, parallelWidth)
+                    .setCenter(0, 0, -1f)
+                    .setSleeperCount(8);
+        } else if (nearbyMeta[1] == 7 && nearbyMeta[0] == 6 &&
+                checkBlockMeta(worldObj, xCoord, yCoord, zCoord - 2, 0)//cover sharp u-turns
+        ) {
+            shape.setStart(0, 0, -2f).setCenter(0, 0, -1.5f).setSleeperCount(8);
+        }
 
 
         //slopes
@@ -140,7 +146,9 @@ public class RailVanillaShapes extends RailShapeCore{
 
 
         //cover parallels
-        if((nearbyMeta[3]==9 && nearbyMeta[0]==6) || (nearbyMeta[3]==6 && nearbyMeta[6]==9)){
+        if(((nearbyMeta[3]==9 && nearbyMeta[0]==6) || (nearbyMeta[3]==6 && nearbyMeta[6]==9))
+        && checkBlockMeta(worldObj, xCoord-2, yCoord, zCoord, 1)//cover sharp u-turns
+        ){
             shape.setEnd(-2,0,0)
                     .setCenter(-1,0,0)
             .setSleeperCount(8);
@@ -154,7 +162,9 @@ public class RailVanillaShapes extends RailShapeCore{
                     .setSleeperCount(8);
         }
 
-        if((nearbyMeta[5]==8 && nearbyMeta[2]==7) || (nearbyMeta[5]==7 && nearbyMeta[8]==8)){
+        if(((nearbyMeta[5]==8 && nearbyMeta[2]==7) || (nearbyMeta[5]==7 && nearbyMeta[8]==8)) &&
+                checkBlockMeta(worldObj, xCoord+2, yCoord, zCoord, 1)//cover sharp u-turns
+        ){
             shape.setStart(2,0,0)
                     .setCenter(1,0,0)
                     .setSleeperCount(8);
@@ -228,7 +238,7 @@ public class RailVanillaShapes extends RailShapeCore{
                     .setSleeperCount(5);
         }
 
-        if(nearbyMeta[7]==9&& nearbyMeta[5]==1){
+        if(nearbyMeta[7]==9&& nearbyMeta[3]==1){
             shape.setEnd( -1-parallelWidth,0,parallelWidth,parallelWidth)
                     .setCenter( -0.25f, 0,0.25f)
                     .setStart(0,0,0.5f,0)
@@ -281,7 +291,7 @@ public class RailVanillaShapes extends RailShapeCore{
         }
 
         //parallels
-        if(nearbyMeta[3]==9 && nearbyMeta[1]==0){
+        if(nearbyMeta[3]==9 && nearbyMeta[7]==0){
             shape.setEnd( -0.5f,0,0)
                     .setCenter( -0.25f,0, 0.25f)
                     .setStart(-parallelWidth,0,1+parallelWidth,0,0,-parallelWidth)
@@ -392,7 +402,7 @@ public class RailVanillaShapes extends RailShapeCore{
         }
 
         //parallels
-        if(nearbyMeta[5]==8 && nearbyMeta[1]==0){
+        if(nearbyMeta[5]==8 && nearbyMeta[7]==0){
             shape.setStart( 0.5f,0,0)
                     .setCenter( 0.25f, 0,0.25f)
                     .setEnd(parallelWidth,0,1+parallelWidth,0,0,-parallelWidth)

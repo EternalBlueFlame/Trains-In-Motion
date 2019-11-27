@@ -307,7 +307,7 @@ public class ParticleFX {
             }
             GL11.glEnable(GL_CULL_FACE);
             GL11.glEnable(GL11.GL_LIGHTING);
-            glAlphaFunc(GL_GREATER, 0.1f);
+            //glAlphaFunc(GL_GREATER, 0.1f);
             Minecraft.getMinecraft().entityRenderer.enableLightmap(1D);
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glDepthMask(true);
@@ -325,7 +325,7 @@ public class ParticleFX {
             GL11.glColor4f(((entity.host.getParticleData(entity.particleID)[2] >> 16 & 0xFF)-entity.colorTint)* 0.00392156863f,
                     ((entity.host.getParticleData(entity.particleID)[2] >> 8 & 0xFF)-entity.colorTint)* 0.00392156863f,
                     ((entity.host.getParticleData(entity.particleID)[2] & 0xFF)-entity.colorTint)* 0.00392156863f,
-                    0.2f);
+                    0.15f);
             for (int i=0; i<entity.host.getParticleData(entity.particleID)[0]; i++) {
                 GL11.glScalef(1-(i*0.075f),1-(i*0.075f),1-(i*0.075f));
                 lampSphere.render(0.625f);
