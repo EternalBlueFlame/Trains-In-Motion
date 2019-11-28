@@ -169,12 +169,15 @@ public class XmlBuilder {
         }
         for(String key : itemMap.keySet()){
             tag(key, data, "item");
-            data.append(itemMap.get(key)[0]);
-            data.append(",");
-            data.append(itemMap.get(key)[1]);
-            data.append(",");
-            data.append(itemMap.get(key)[2]);
-
+            if(itemMap.get(key) == null || itemMap.get(key)[0].equals("null")){
+                data.append("null");
+            } else {
+                data.append(itemMap.get(key)[0]);
+                data.append(",");
+                data.append(itemMap.get(key)[1]);
+                data.append(",");
+                data.append(itemMap.get(key)[2]);
+            }
             tag(key, data);
         }
 

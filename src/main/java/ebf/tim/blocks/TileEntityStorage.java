@@ -85,7 +85,7 @@ public class TileEntityStorage extends TileEntity implements IInventory {
     public int getSizeInventory() {
         switch (storageType){
             case 1:{return 4;}
-            default:{return 10;}
+            default:{return 19;}
         }
     }
 

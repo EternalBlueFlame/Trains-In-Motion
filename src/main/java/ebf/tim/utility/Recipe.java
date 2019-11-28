@@ -53,6 +53,10 @@ public class Recipe {
         return items;
     }
 
+    public ItemStack[][] getRecipeItems() {
+        return new ItemStack[][]{items[0],items[1],items[2],items[3],items[4],items[5],items[6],items[7],items[8]};
+    }
+
     public void nextDisplayItem(){
         for(int i=0;i<10;i++) {
             displayItem[i]++;

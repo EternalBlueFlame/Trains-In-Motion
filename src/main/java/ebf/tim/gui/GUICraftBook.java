@@ -123,15 +123,17 @@ public class GUICraftBook extends GuiScreen {
         if(getPage(leftPage?page:page+1)==null){return;}
         if(getPage(leftPage?page:page+1) instanceof Recipe) {
 
+            Minecraft.getMinecraft().fontRenderer.drawString(((Recipe) getPage(leftPage?page:page+1)).getresult()[0].getDisplayName()
+                    ,percentLeft(leftPage?18:57), percentTop(19), 0x000000);
             Minecraft.getMinecraft().getTextureManager().bindTexture(GUITransport.vanillaInventory);
             for (int slot = 0; slot < 10; slot++) {
-                renderSlot(percentLeft(leftPage?25:57)+ getBookSlotPlacement(true, slot),
-                        percentTop(35)+ getBookSlotPlacement(false, slot));
+                renderSlot(percentLeft(leftPage?22:60)+ getBookSlotPlacement(true, slot),
+                        percentTop(37)+ getBookSlotPlacement(false, slot));
             }
             for (int slot = 0; slot < 10; slot++) {
                 renderItem(((Recipe)getPage(leftPage?page:page+1)).getDisplayArray()[slot],
-                        percentLeft(leftPage?25:57)+ getBookSlotPlacement(true, slot),
-                        percentTop(35)+ getBookSlotPlacement(false, slot));
+                        percentLeft(leftPage?22:60)+ getBookSlotPlacement(true, slot),
+                        percentTop(37)+ getBookSlotPlacement(false, slot));
             }
         } else if(getPage(leftPage?page:page+1) instanceof bookPage){
             String[] disp = ((bookPage)getPage(leftPage?page:page+1)).text.split("\n");
