@@ -112,22 +112,22 @@ public class ParticleFX {
 
     public static int[] parseData(String s, Class host){
         if (RailUtility.stringContains(s,"smoke")) {
-            return new int[]{RailUtility.parseInt(s.split(" ")[1], host), 0};
+            return new int[]{RailUtility.parseInt(s.split(" ")[2], host), 0};
         } else if (RailUtility.stringContains(s,"steam")) {
-            return new int[]{RailUtility.parseInt(s.split(" ")[1], host), 1};
+            return new int[]{RailUtility.parseInt(s.split(" ")[2], host), 1};
         }  else if (RailUtility.stringContains(s,"wheel")){
             return new int[]{0, 2};
         } else if (RailUtility.stringContains(s,"lamp")){
             if(RailUtility.stringContains(s,"cone")){
-                return new int[]{RailUtility.parseInt(s.split(" ")[2], host), 3};
+                return new int[]{RailUtility.parseInt(s.split(" ")[3], host), 3};
             }else if(RailUtility.stringContains(s,"sphere")) {
-                return new int[]{RailUtility.parseInt(s.split(" ")[2], host), 4};
+                return new int[]{RailUtility.parseInt(s.split(" ")[3], host), 4};
             }else if(RailUtility.stringContains(s,"mars")) {
-                return new int[]{RailUtility.parseInt(s.split(" ")[2], host), 5};
+                return new int[]{RailUtility.parseInt(s.split(" ")[3], host), 5};
             }else if(RailUtility.stringContains(s,"siren")) {
-                return new int[]{RailUtility.parseInt(s.split(" ")[2], host), 6};
+                return new int[]{RailUtility.parseInt(s.split(" ")[3], host), 6};
             }else if(RailUtility.stringContains(s,"glare")) {
-                return new int[]{RailUtility.parseInt(s.split(" ")[2], host), 7};
+                return new int[]{RailUtility.parseInt(s.split(" ")[3], host), 7};
             }
         }
         return null;//this states the box is not a supported particle
@@ -149,7 +149,7 @@ public class ParticleFX {
 
         if (particleType==3 || particleType==4 || particleType==5){//lamps
             shouldRender=host.getBoolean(GenericRailTransport.boolValues.LAMP);
-            pos = RailUtility.rotatePointF(offset[0]*0.0625f,offset[1]*-0.0625f,offset[2]*0.0625f, host.rotationPitch, host.rotationYaw, 0);
+            pos = RailUtility.rotatePointF(offset[0],offset[1],offset[2], host.rotationPitch, host.rotationYaw, 0);
             if(particleType==5){
                 //todo mars lamp stuff
             }
@@ -271,7 +271,7 @@ public class ParticleFX {
      * @param y the y position of the renderer
      * @param z the z position of the renderer
      */
-    public static void doRender(ParticleFX entity, double x, double y, double z) {
+    public static void doRender(ParticleFX entity, double x, double y, double z, float scale) {
         if(!entity.shouldRender || entity.ticksExisted==null || entity.ticksExisted<1){
             return;
         }
@@ -280,22 +280,28 @@ public class ParticleFX {
         //DebugUtil.println(entity.host.rotationYaw);
 
         if (entity.particleType==3) {//cone lamps
-            GL11.glTranslated(x+entity.pos[0] , y+entity.pos[1]+0.3, z+entity.pos[2]);
+            GL11.glColor4f(((entity.host.getParticleData(entity.particleID)[2] >> 16 & 0xFF)-entity.colorTint)* 0.00392156863f,
+                    ((entity.host.getParticleData(entity.particleID)[2] >> 8 & 0xFF)-entity.colorTint)* 0.00392156863f,
+                    ((entity.host.getParticleData(entity.particleID)[2] & 0xFF)-entity.colorTint)* 0.00392156863f,
+                    0.3f);
+            GL11.glTranslated(x, y, z);
+            GL11.glTranslatef(entity.pos[0] *scale, (-8.75f+entity.pos[1])*-scale, entity.pos[2]*scale);
             GL11.glRotated(270+entity.offset[4]+entity.host.rotationPitch,1,0,0);
             GL11.glRotated(entity.offset[5],0,1,0);
             GL11.glRotated(270-(entity.offset[3]+entity.host.rotationYaw),0,0,1);
-            GL11.glScalef(entity.host.getParticleData(entity.particleID)[1]*0.055f,
-                    entity.host.getParticleData(entity.particleID)[1]*0.055f,
-                    entity.host.getParticleData(entity.particleID)[1]*0.055f);
+            GL11.glTranslatef(0.75f *scale, 1.5f*scale, 0);
+
+            GL11.glScalef(entity.host.getParticleData(entity.particleID)[1]*0.55f,
+                    entity.host.getParticleData(entity.particleID)[1]*0.55f,
+                    entity.host.getParticleData(entity.particleID)[1]*0.55f);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
             glAlphaFunc(GL_LEQUAL, 1f);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+            //GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
             GL11.glDepthMask(false);
             GL11.glDisable(GL_CULL_FACE);
-            drawLightTexture(entity, true);
-            for (int i=0; i<5; i++) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             if(Minecraft.getMinecraft().theWorld.isRaining()){
                 TextureManager.bindTexture(new ResourceLocation(TrainsInMotion.MODID, "/textures/effects/lamp_bright.png"));
             } else {
@@ -303,22 +309,32 @@ public class ParticleFX {
             }
             for (int i=0; i<entity.host.getParticleData(entity.particleID)[0]; i++) {
                 GL11.glScalef(1-(i*0.075f),1-(i*0.01f),1f-(i*0.075f));
-                lampCone.render(0.625f);
+                lampCone.render(scale);
             }
             GL11.glEnable(GL_CULL_FACE);
             GL11.glEnable(GL11.GL_LIGHTING);
             //glAlphaFunc(GL_GREATER, 0.1f);
             Minecraft.getMinecraft().entityRenderer.enableLightmap(1D);
-            GL11.glDisable(GL11.GL_BLEND);
             GL11.glDepthMask(true);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         } else if (entity.particleType==4) {//sphere lamps
-            GL11.glTranslated(x+entity.pos[0] , y+entity.pos[1]+0.3, z+entity.pos[2]);
+
+            GL11.glTranslated(x, y, z);
+            GL11.glTranslatef(entity.pos[0] *scale, (-8.75f+entity.pos[1])*-scale, entity.pos[2]*scale);
+            GL11.glRotated(270+entity.offset[4]+entity.host.rotationPitch,1,0,0);
+            GL11.glRotated(entity.offset[5],0,1,0);
+            GL11.glRotated(270-(entity.offset[3]+entity.host.rotationYaw),0,0,1);
+            GL11.glTranslatef(0.75f *scale, 1.5f*scale, 0);
+
             GL11.glScalef(entity.host.getParticleData(entity.particleID)[1]*0.01f,
                     entity.host.getParticleData(entity.particleID)[1]*0.01f,
                     entity.host.getParticleData(entity.particleID)[1]*0.01f);
             GL11.glDisable(GL11.GL_LIGHTING);
+            GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
             GL11.glDepthMask(false);
+            glAlphaFunc(GL_LEQUAL, 1f);
             GL11.glDisable(GL_CULL_FACE);
             GL11.glDisable(GL11.GL_TEXTURE_2D);
             //set the color with the tint.   * 0.00392156863 is the same as /255, but multiplication is more efficient than division.
@@ -328,7 +344,7 @@ public class ParticleFX {
                     0.15f);
             for (int i=0; i<entity.host.getParticleData(entity.particleID)[0]; i++) {
                 GL11.glScalef(1-(i*0.075f),1-(i*0.075f),1-(i*0.075f));
-                lampSphere.render(0.625f);
+                lampSphere.render(1);
             }
             GL11.glEnable(GL_CULL_FACE);
             GL11.glEnable(GL11.GL_LIGHTING);
@@ -349,12 +365,13 @@ public class ParticleFX {
             if(entity.particleType==4){
                 GL11.glScalef(0.5f,0.5f,0.5f);
             }
-            particle.render(0.0625f);
+            particle.render(1);
 
             //before we end this be sure to re-enabling texturing for other things.
             GL11.glEnable(GL11.GL_TEXTURE_2D);
         }
 
+        GL11.glClearColor(0,0,0,0);
         GL11.glPopMatrix();
     }
 

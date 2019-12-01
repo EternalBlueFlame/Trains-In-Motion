@@ -55,13 +55,6 @@ public class RailUtility {
         if (s1 == null || s2 == null) {
             return false;
         }
-        /*final int max = s1.length() - s2.length();
-        for (int i = 0; i <= max; i++) {
-            if (s1.regionMatches(true, i, s2, 0, s2.length())) {
-                return true;
-            }
-        }
-        return false;*/
         return s1.contains(s2);
     }
 

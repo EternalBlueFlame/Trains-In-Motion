@@ -47,11 +47,11 @@ public class StaticModelAnimator extends AnimationBase {
      */
     public static String tagLamp(int type, int id){
         switch (type) {
-            case 1: return "lamp sphere " + id;
-            case 2: return "lamp mars " + id; //todo: does that weird Y/Z oogly spinning
-            case 3: return "lamp siren " + id;//todo:spins on X at a set rate
-            case 4: return "lamp glare " + id;//todo: perhaps render at point and disable 3d and depth?
-            default: return "lamp cone " + id;
+            case 1: return " lamp sphere " + id;
+            case 2: return " lamp mars " + id; //todo: does that weird Y/Z oogly spinning
+            case 3: return " lamp siren " + id;//todo:spins on X at a set rate
+            case 4: return " lamp glare " + id;//todo: perhaps render at point and disable 3d and depth?
+            default: return " lamp cone " + id;
         }
     }
 
@@ -61,10 +61,10 @@ public class StaticModelAnimator extends AnimationBase {
     //todo: door types - swing, swing up, slide sideways, slide vertical(stair covers), slide out (retractable stairs).
 
     public static String tagSmoke(int id){
-        return "smoke " + id;
+        return " smoke " + id;
     }
     public static String tagSteam(int id){
-        return "steam " + id;
+        return " steam " + id;
     }
 
     /**
@@ -106,9 +106,7 @@ public class StaticModelAnimator extends AnimationBase {
                 RailUtility.stringContains(part.boxName,"smoke") ||
                 RailUtility.stringContains(part.boxName,"steam") ||
                 RailUtility.stringContains(part.boxName,"door") ||
-                RailUtility.stringContains(part.boxName,"lamp") ||
-                RailUtility.stringContains(part.boxName, tagGlow) ||
-                RailUtility.stringContains(part.boxName, tagHide);
+                RailUtility.stringContains(part.boxName,"lamp");
     }
 
     public boolean culls(ModelRendererTurbo part){

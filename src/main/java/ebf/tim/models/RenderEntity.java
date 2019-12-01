@@ -95,6 +95,9 @@ public class RenderEntity extends Render {
                         if(StaticModelAnimator.checkCulls(render)){
                             render.showModel = false;
                         }
+                        if(render.boxName.contains(StaticModelAnimator.tagGlow)){
+                            render.ignoresLighting=true;
+                        }
                         if (StaticModelAnimator.checkAnimators(render)) {
                             entity.renderData.animatedPart.add(StaticModelAnimator.initPart(render, entity));
                             render.animated=true;
@@ -269,11 +272,11 @@ public class RenderEntity extends Render {
             }
         }
 
-
         GL11.glPopMatrix();
+
         //render the particles, if there are any.
         for(ParticleFX particle : entity.renderData.particles){
-            ParticleFX.doRender(particle, x,y,z);
+            ParticleFX.doRender(particle, x,y,z, entity.getRenderScale());
         }
 
 
