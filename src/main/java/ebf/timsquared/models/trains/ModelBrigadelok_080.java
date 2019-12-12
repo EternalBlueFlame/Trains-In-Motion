@@ -14,8 +14,7 @@ import ebf.tim.models.StaticModelAnimator;
 import fexcraft.tmt.slim.ModelConverter;
 import fexcraft.tmt.slim.ModelRendererTurbo;
 
-import static ebf.tim.models.StaticModelAnimator.tagLamp;
-import static ebf.tim.models.StaticModelAnimator.tagSmoke;
+import static ebf.tim.models.StaticModelAnimator.*;
 
 public class ModelBrigadelok_080 extends ModelConverter //Same as Filename
 {
@@ -24,7 +23,7 @@ public class ModelBrigadelok_080 extends ModelConverter //Same as Filename
 
     public ModelBrigadelok_080() //Same as Filename
     {
-        bodyModel = new ModelRendererTurbo[117];
+        bodyModel = new ModelRendererTurbo[118];
 
         initbodyModel_1();
         flipAll();
@@ -91,7 +90,7 @@ public class ModelBrigadelok_080 extends ModelConverter //Same as Filename
         bodyModel[57] = new ModelRendererTurbo(this, 1, 113, textureX, textureY); // Box 59
         bodyModel[58] = new ModelRendererTurbo(this, 97, 113, textureX, textureY); // Box 60
         bodyModel[59] = new ModelRendererTurbo(this, 57, 81, textureX, textureY); // Box 61
-        bodyModel[60] = new ModelRendererTurbo(this, 145, 113, textureX, textureY, tagLamp(1, 6)); // Box 62
+        bodyModel[60] = new ModelRendererTurbo(this, 145, 113, textureX, textureY, tagLamp(1, 5)); // Box 62
         bodyModel[61] = new ModelRendererTurbo(this, 73, 81, textureX, textureY); // Box 63
         bodyModel[62] = new ModelRendererTurbo(this, 161, 113, textureX, textureY); // Box 64
         bodyModel[63] = new ModelRendererTurbo(this, 97, 57, textureX, textureY); // Box 65

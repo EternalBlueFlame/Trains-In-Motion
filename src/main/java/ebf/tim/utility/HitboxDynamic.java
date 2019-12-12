@@ -62,6 +62,12 @@ public class HitboxDynamic {
     int i,j,k,l;
     public boolean contains(Entity host){
 
+        //todo: make a minecraft aabb, then move it along the axis of the rotation for the length and do checks
+        //    checking for a series of squares should be far simpler and more reliable than a polygon
+        //    additionally there only has to be one aabb.
+        //    distance between aabb's will have to change dependant on rotation,
+        //    width and depth will have to change based on rotation
+
         arraylist = new ArrayList<>();
         i = MathHelper.floor_double((-longest+host.posX - 0.25) / 16.0D);
         j = MathHelper.floor_double((longest+host.posX + 0.25) / 16.0D);

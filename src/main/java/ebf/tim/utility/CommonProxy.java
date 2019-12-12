@@ -62,7 +62,7 @@ public class CommonProxy implements IGuiHandler {
                 return new TransportSlotManager(player.inventory, (GenericRailTransport) player.worldObj.getEntityByID(ID));
                 //tile entities
             } else if (world.getTileEntity(x,y,z) instanceof TileEntityStorage){
-                return new TileEntitySlotManager(player.inventory, (TileEntityStorage) world.getTileEntity(x,y,z));
+                return new TransportSlotManager(player.inventory, (TileEntityStorage) world.getTileEntity(x,y,z));
             }
         }
         return null;

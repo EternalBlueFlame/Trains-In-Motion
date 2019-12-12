@@ -2,7 +2,7 @@ package ebf.tim.blocks;
 
 
 import ebf.tim.TrainsInMotion;
-import ebf.tim.utility.TileEntitySlotManager;
+import ebf.tim.utility.ItemStackSlot;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -26,13 +26,32 @@ public class TileEntityStorage extends TileEntity implements IInventory {
 
 
     public TileEntityStorage(int type){
-        for (int i=0; i< getSizeInventory(); i++){
-            items.add(null);
+        int s=400;
+        if(type==0){
+            //inventory grid
+            for (int l = 0; l < 3; ++l) {
+                for (int i1 = 0; i1 < 3; ++i1) {
+                    inventory.add(new ItemStackSlot(this,s).setCoords( 30 + i1 * 18, 17 + l * 18).setCrafting(true));
+                    s++;
+                }
+            }
+            //tile entity's crafting grid
+            for (int l = 0; l < 3; ++l) {
+                for (int i1 = 0; i1 < 3; ++i1) {
+                    inventory.add(new ItemStackSlot(this,s).setCoords( 106 + i1 * 18, 17 + l * 18).setCrafting(false));
+                    s++;
+                }
+            }
+        } else {
+
         }
+        //for (int i=0; i< getSizeInventory(); i++){
+        //    inventory.add(null);
+        //}
         storageType=type;
     }
     /**the list of item stacks in the inventory*/
-    private List<ItemStack> items = new ArrayList<ItemStack>();
+    public List<ItemStackSlot> inventory = new ArrayList<ItemStackSlot>();
     public int storageType=0;
     public int[] extraData = null;
     public int outputPage=0;
@@ -52,10 +71,12 @@ public class TileEntityStorage extends TileEntity implements IInventory {
                 extraData[i]=p_145839_1_.getInteger("extraData_"+i);
             }
         }
-        for (int i = 0; i < getSizeInventory(); i++) {
-            ItemStack item = ItemStack.loadItemStackFromNBT(p_145839_1_);
-            if (item.stackSize != 0) {
-                setInventorySlotContents(i, item);
+        if (getSizeInventory()>0) {
+            for (int i=0;i<getSizeInventory();i++) {
+                NBTTagCompound invTag = p_145839_1_.getCompoundTag("transportinv."+i);
+                if (invTag!=null) {
+                    inventory.get(i).setSlotContents(ItemStack.loadItemStackFromNBT(invTag));
+                }
             }
         }
     }
@@ -69,11 +90,13 @@ public class TileEntityStorage extends TileEntity implements IInventory {
                 p_145841_1_.setInteger("extraData_"+i,extraData[i]);
             }
         }
-        for (ItemStack stack : items) {
-            if (stack != null) {
-                stack.writeToNBT(p_145841_1_);
-            } else {
-                new ItemStack(Items.potato, 0).writeToNBT(p_145841_1_);
+        if (inventory!=null) {
+            for (int i=0;i<getSizeInventory();i++) {
+                NBTTagCompound invTag = new NBTTagCompound();
+                if(inventory.get(i)!=null && inventory.get(i).getStack()!=null) {
+                    inventory.get(i).getStack().writeToNBT(invTag);
+                }
+                p_145841_1_.setTag("transportinv."+i, invTag);
             }
         }
     }
@@ -83,51 +106,44 @@ public class TileEntityStorage extends TileEntity implements IInventory {
     /**gets the number of slots the inventory.*/
     @Override
     public int getSizeInventory() {
-        switch (storageType){
-            case 1:{return 4;}
-            default:{return 19;}
-        }
+        return inventory.size();
     }
 
 
     @Override
     public @Nullable ItemStack getStackInSlot(int slot) {
-        if (slot <0 || slot >= getSizeInventory()){
+        if (inventory == null || slot <0 || slot >= inventory.size()){
             return null;
         } else {
-            return items.get(slot);
+            return inventory.get(slot).getStack();
         }
     }
+
 
 
     @Override
     public ItemStack decrStackSize(int slot, int stackSize) {
-        if (getSizeInventory()>=slot && items.get(slot) != null) {
-            ItemStack itemstack;
-
-            if (items.get(slot).stackSize <= stackSize) {
-                itemstack = items.get(slot).copy();
-                items.set(slot, null);
-
-                return itemstack;
-            } else {
-                itemstack = items.get(slot).splitStack(stackSize);
-                if (items.get(slot).stackSize == 0) {
-                    items.set(slot, null);
-                }
-
-                return itemstack;
-            }
+        if (inventory!= null && getSizeInventory()>=slot) {
+            return inventory.get(slot).decrStackSize(stackSize);
         } else {
             return null;
         }
     }
 
 
+    public ItemStackSlot getSlotIndexByID(int id){
+        for(ItemStackSlot s : inventory){
+            if (s.getSlotID() == id){
+                return s;
+            }
+        }
+        return null;
+    }
+
     @Override
-    public void setInventorySlotContents(int p_70299_1_, ItemStack p_70299_2_) {
-        if (p_70299_1_>=0 && p_70299_1_ < items.size()) {
-            items.set(p_70299_1_, p_70299_2_);
+    public void setInventorySlotContents(int slot, ItemStack itemStack) {
+        if (inventory != null && slot >=0 && slot <= getSizeInventory()) {
+            inventory.get(slot).setSlotContents(itemStack);
         }
     }
 

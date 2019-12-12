@@ -1,13 +1,20 @@
 package ebf.tim.utility;
 
 import ebf.XmlBuilder;
+import ebf.tim.blocks.TileEntityStorage;
+import ebf.tim.items.ItemRail;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.oredict.OreDictionary;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class RecipeManager {
 
     private static Map<String, List<ItemStack>> recipes = new HashMap<>();
+    private static List<Item> ingotDirectory = new ArrayList<>();
 
 
     public static String stackArrayToString(ItemStack[][] s){
@@ -64,7 +71,8 @@ public class RecipeManager {
                             slot[i]=true;
                             break;
                         }
-                    } else if(stackSet.getItemStack(stackKey).getItem()== recipe[i].getItem()){
+                    } else if(stackSet.getItemStack(stackKey).getItem()== recipe[i].getItem() &&
+                            recipe[i].stackSize>=stackSet.getItemStack(stackKey).stackSize){
                         slot[i]=true;
                         break;
                     }
@@ -77,24 +85,149 @@ public class RecipeManager {
             if(slot[0] && slot[1] && slot[2] && slot[3] && slot[4] && slot[5] && slot[6] && slot[7]) {
                 retStacks.addAll(recipes.get(key));
             }
-
-            /*
-            //iterate all items in the input
-            for(int i=0;i<8;i++){
-                //iterate all item lists in the current recipe
-                for(ItemStack s : key[i]){
-                    if (s == recipe[i]){
-                        slot[i] = true;
-                        break;
-                    }
-                }
-            }
-            if(slot[0] && slot[1] && slot[2] && slot[3] && slot[4] && slot[5] && slot[6] && slot[7]) {
-                DebugUtil.println(recipes.get(key).size());
-                return recipes.get(key);
-            }*/
         }
         //if all the recipes were iterated and none were a complete match, then there is no result
         return retStacks;
     }
+
+    public static List<ItemStack> getResult(ItemStack[] recipe, ItemStack match){
+        if(Arrays.equals(recipe, new ItemStack[]{null, null, null, null, null, null, null, null}) || match==null){
+            return null;//if all inputs were null, then just return null. this is a common scenario, should save speed overall.
+        }
+
+        //iterate all recipes
+        boolean[] slot;
+        XmlBuilder builder, stackSet;
+        List<ItemStack> retStacks = new ArrayList<>();
+        for(String key : recipes.keySet()){
+            slot=new boolean[]{false,false,false,false,false,false,false,false};
+            for (ItemStack s : recipes.get(key)) {
+                slot[0]=match.getItem() == s.getItem();
+                if(slot[0]){break;}
+            }
+            if(slot[0]){
+                slot[0]=false;
+            } else {
+                continue;
+            }
+
+            builder= new XmlBuilder(key);
+            for(int i=0;i<8;i++){
+                stackSet=builder.getXml("x"+i);
+                for(String stackKey : stackSet.itemMap.keySet()){
+                    if(stackSet.getItemStack(stackKey)==null || recipe[i]==null){
+                        if(stackSet.getItemStack(stackKey)==null && recipe[i]==null){
+                            slot[i]=true;
+                            retStacks.add(null);
+                            break;
+                        }
+                    } else if(stackSet.getItemStack(stackKey).getItem()== recipe[i].getItem() &&
+                            recipe[i].stackSize>=stackSet.getItemStack(stackKey).stackSize){
+                        slot[i]=true;
+                        retStacks.add(stackSet.getItemStack(stackKey));
+                        break;
+                    }
+                }
+                if(!slot[i]){
+                    break;
+                }
+            }
+
+            if(slot[0] && slot[1] && slot[2] && slot[3] && slot[4] && slot[5] && slot[6] && slot[7]) {
+                retStacks.addAll(recipes.get(key));
+            }
+        }
+        //if all the recipes were iterated and none were a complete match, then there is no result
+        return retStacks;
+    }
+
+
+
+
+
+    /**
+     * Crafting table related stuff
+     */
+
+    public static  @Nullable ItemStack getStackBallast(IInventory hostInventory){
+        if(hostInventory.getStackInSlot(4)==null || hostInventory.getStackInSlot(4).getTagCompound()==null){
+            return null;
+        } else {
+            return !hostInventory.getStackInSlot(4).getTagCompound().hasKey("ballast") ? null :
+                    ItemStack.loadItemStackFromNBT(hostInventory.getStackInSlot(4).getTagCompound().getCompoundTag("ballast"));
+        }
+    }
+    public static @Nullable ItemStack getStackTies(IInventory hostInventory){
+        if(hostInventory.getStackInSlot(4)==null || hostInventory.getStackInSlot(4).getTagCompound()==null){
+            return null;
+        } else {
+            return !hostInventory.getStackInSlot(4).getTagCompound().hasKey("ties") ? null :
+                    ItemStack.loadItemStackFromNBT(hostInventory.getStackInSlot(4).getTagCompound().getCompoundTag("ties"));
+        }
+    }
+    public static @Nullable ItemStack getStackIngot(IInventory hostInventory){
+        if(hostInventory.getStackInSlot(4)==null || hostInventory.getStackInSlot(4).getTagCompound()==null){
+            return null;
+        } else {
+            return !hostInventory.getStackInSlot(4).getTagCompound().hasKey("ingot") ? null :
+                    ItemStack.loadItemStackFromNBT(hostInventory.getStackInSlot(4).getTagCompound().getCompoundTag("ingot"));
+        }
+    }
+
+
+    public static ItemStack[] getTransportRecipe(IInventory hostInventory){
+        return new ItemStack[]{
+                hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(1),hostInventory.getStackInSlot(2),
+                hostInventory.getStackInSlot(3),hostInventory.getStackInSlot(4),hostInventory.getStackInSlot(5),
+                hostInventory.getStackInSlot(6),hostInventory.getStackInSlot(7),hostInventory.getStackInSlot(8),
+        };
+    }
+
+    public static ItemStack railRecipe(IInventory hostInventory){
+        if(hostInventory.getStackInSlot(4)!=null && hostInventory.getStackInSlot(4).getItem() instanceof ItemRail){
+            DebugUtil.println("there was a rail in the slot");
+        }
+
+        //handle adding to an existing stack
+        if(hostInventory.getStackInSlot(4)!=null && hostInventory.getStackInSlot(4).getItem() instanceof ItemRail &&
+                hostInventory.getStackInSlot(0)==getStackIngot(hostInventory) &&
+                hostInventory.getStackInSlot(1)==getStackTies(hostInventory) &&
+                hostInventory.getStackInSlot(2)==getStackBallast(hostInventory)){
+
+            ItemStack rail = ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
+                    hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(1),hostInventory.getStackInSlot(2),
+                    null);
+
+            rail.getTagCompound().setInteger("count",
+                    hostInventory.getStackInSlot(4).getTagCompound().getInteger("count")+1);
+            return rail;
+        }
+        //handle making a new stack
+        if(hostInventory.getStackInSlot(0)!=null && ingotInDirectory(hostInventory.getStackInSlot(0).getItem())) {
+            return ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
+                    hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(1),hostInventory.getStackInSlot(2),
+                    null);
+        }
+        //todo: works, but goes to wrong slot,
+        //maybe issue is that the host inventory this sorts into prioritizes the player's inventory before the crafters
+        //potential fix would be to compensate for player inventory space as a buffer since the value is reliably static unlike storage
+        return null;
+
+    }
+
+
+    public static boolean ingotInDirectory(Item i){
+        if(ingotDirectory.size()==0){
+            String[] ores = OreDictionary.getOreNames();
+            for(String o: ores) {
+                if (o.contains("ingot")) {
+                    for (ItemStack s : OreDictionary.getOres(o)) {
+                        ingotDirectory.add(s.getItem());
+                    }
+                }
+            }
+        }
+        return ingotDirectory.contains(i);
+    }
+
 }

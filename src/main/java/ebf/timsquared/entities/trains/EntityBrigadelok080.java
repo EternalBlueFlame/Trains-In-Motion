@@ -102,6 +102,10 @@ public class EntityBrigadelok080 extends TrainBase {
         SkinRegistry.addSkin(this.getClass(),s);
     }
 
+    @Override
+    public String getDefaultSkin(){
+        return "trainsinmotion:default";
+    }
     /*
      * <h1>Variable Overrides</h1>
      * We override the functions defined in the super here, to give them different values.

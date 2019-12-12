@@ -235,17 +235,6 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         return p_149660_9_;
     }
 
-    public static void updateBlocks(int[] matrix, int xPos, int yPos, int zPos, World w){
-        for(int x : matrix){
-            for(int z : matrix){
-                for(int y : matrix){
-                    if(w.getBlock(x+xPos,y+yPos,z+zPos) instanceof  BlockRailCore){
-                        updateShape(x,y,z,w, null);
-                    }
-                }
-            }
-        }
-    }
 
     @Override
     public boolean onBlockEventReceived(World p_149696_1_, int p_149696_2_, int p_149696_3_, int p_149696_4_, int p_149696_5_, int p_149696_6_) {

@@ -1,12 +1,20 @@
 package ebf.tim.utility;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import ebf.tim.blocks.BlockDynamic;
+import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.items.ItemRail;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nullable;
@@ -18,9 +26,9 @@ import java.util.List;
  */
 public class TransportSlotManager extends net.minecraft.inventory.Container {
 
-    private GenericRailTransport railTransport;
+    public IInventory hostInventory;
 
-    private List<ItemStackSlot> inventory = new ArrayList<>();
+    public List<ItemStackSlot> inventory = new ArrayList<>();
 
     //todo: add support for some way to define slot filters
     public void addSlots(ItemStackSlot slot){
@@ -37,28 +45,43 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
      */
     public TransportSlotManager(InventoryPlayer iinventory, GenericRailTransport entityTrain) {
         //transport reference
-        if (railTransport == null) {
-            railTransport = entityTrain;
-        }
-        int s=0;
+        hostInventory = entityTrain;
+
         for(ItemStackSlot slot : entityTrain.inventory){
-            s++;
             addSlots(slot);
         }
-        s=0;
         //player toolbar
         for (int iT = 0; iT < 9; iT++) {
-            addSlots(new ItemStackSlot(iinventory, s).setCoords( 113 + (iT * 18), 142));
-            s++;
+            addSlots(new ItemStackSlot(iinventory, iT).setCoords( 113 + (iT * 18), 142));
         }
         //player inventory
-        for (int ic = 0; ic < 3; ic++) {
-            for (int ir = 0; ir < 9; ir++) {
-                addSlots(new ItemStackSlot(iinventory, s).setCoords(113 + (ir * 18), 84 + (ic * 18)));
-                s++;
+        for (int ic = 0; ic < 9; ic++) {
+            for (int ir = 0; ir < 3; ir++) {
+                addSlots(new ItemStackSlot(iinventory, ((ir * 9) + ic) + 9, 113 + (ic * 18), 84 + (ir * 18)));
             }
         }
+    }
 
+    public TransportSlotManager(InventoryPlayer iinventory, TileEntityStorage block) {
+        //tile entity reference
+        hostInventory = block;
+
+        for(ItemStackSlot slot : block.inventory){
+            addSlots(slot);
+        }
+
+        //player toolbar
+        for (int iT = 0; iT < 9; iT++) {
+            addSlots(new ItemStackSlot(iinventory, iT, 8 + iT * 18, 142));
+        }
+
+        //player inventory
+        for (int ic = 0; ic < 9; ic++) {
+            for (int ir = 0; ir < 3; ir++) {
+                addSlots(new ItemStackSlot(iinventory, ((ir * 9) + ic) + 9, 8 + (ic * 18), 84 + (ir * 18)));
+            }
+        }
+        onCraftMatrixChanged(hostInventory);
     }
 
     @Override
@@ -85,6 +108,15 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
     protected boolean mergeItemStack(ItemStack itemStack, int startIndex, int endIndex, boolean reverseDirection) {
         DebugUtil.println("something is using merge stack, this is bad");
         return false;
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    public void putStacksInSlots(ItemStack[] p_75131_1_) {
+        DebugUtil.println(p_75131_1_.length, inventory.size(), this.getSlot(9).inventory.getSizeInventory());
+        for (int i = 0; i < p_75131_1_.length; ++i) {
+            this.getSlot(i).putStack(p_75131_1_[i]);
+        }
     }
 
 
@@ -115,33 +147,32 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                             (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))?3://cover CTRL clicking
                                     0;//cover everything else
         }
-        ItemStack itemstack = null;
-        InventoryPlayer inventoryplayer = player.inventory;
+        ItemStack itemstack = null;;
         ItemStackSlot slot = getSlotByID(slotId);
 
         switch (clickTypeIn) {
             case 0: {/*ClickType.PICKUP    aka normal pickup and put down*/
                 if (slotId == -999) { //if the slot was the cursor
-                    if (inventoryplayer.getItemStack() != null) {
+                    if (player.inventory.getItemStack() != null) {
                         if (dragType == 0) {
                             if (!player.worldObj.isRemote) {
-                                player.entityDropItem(inventoryplayer.getItemStack(), inventoryplayer.getItemStack().stackSize);
+                                player.entityDropItem(player.inventory.getItemStack(), player.inventory.getItemStack().stackSize);
                             }
-                            inventoryplayer.setItemStack(null);
+                            player.inventory.setItemStack(null);
                         } else if (dragType == 1 && !player.worldObj.isRemote) {
-                            player.entityDropItem(inventoryplayer.getItemStack(), 1);
+                            player.entityDropItem(player.inventory.getItemStack(), 1);
                         }
                     }
                 } else {
                     if (slot == null) {
                         return null;
-                    } else if (slot.getHasStack() && inventoryplayer.getItemStack() == null) {
-                        inventoryplayer.setItemStack(slot.getStack());
-                        if (inventoryplayer.getItemStack() != null) {
+                    } else if (slot.getHasStack() && player.inventory.getItemStack() == null) {
+                        player.inventory.setItemStack(slot.getStack());
+                        if (player.inventory.getItemStack() != null) {
                             slot.setSlotContents(null);
                         }
                     } else {
-                        inventoryplayer.setItemStack(slot.mergeStack(inventoryplayer.getItemStack()));
+                        player.inventory.setItemStack(slot.mergeStack(hostInventory,inventory,player.inventory.getItemStack()));
                     }
                 }
                 break;
@@ -156,21 +187,21 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                     //try the crafting slots
                     for(ItemStackSlot s : inventory){
                         if(s.getSlotID()>399){
-                            slot.setSlotContents(s.mergeStack(slot.getStack()));
+                            slot.setSlotContents(s.mergeStack(hostInventory,inventory,slot.getStack()));
                             if (slot.getStack() == null){return null;}
                         }
                     }
                     //try the storage
                     for(ItemStackSlot s : inventory){
                         if(s.getSlotID()>35){
-                            slot.setSlotContents(s.mergeStack(slot.getStack()));
+                            slot.setSlotContents(s.mergeStack(hostInventory,inventory,slot.getStack()));
                             if (slot.getStack() == null){return null;}
                         }
                     }
                     //all else fails, go back to the players...
                     for(ItemStackSlot s : inventory){
                         if(s.getSlotID()<36){
-                            slot.setSlotContents(s.mergeStack(slot.getStack()));
+                            slot.setSlotContents(s.mergeStack(hostInventory,inventory,slot.getStack()));
                             if (slot.getStack() == null){return null;}
                         }
                     }
@@ -179,7 +210,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                     //try the crafting slots
                     for(ItemStackSlot s : inventory){
                         if(s.getSlotID()>399){
-                            slot.setSlotContents(s.mergeStack(slot.getStack()));
+                            slot.setSlotContents(s.mergeStack(hostInventory,inventory,slot.getStack()));
                             if (slot.getStack() == null){return null;}
                         }
                     }
@@ -187,14 +218,14 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                     //try the players
                     for(ItemStackSlot s : inventory){
                         if(s.getSlotID()<36){
-                            slot.setSlotContents(s.mergeStack(slot.getStack()));
+                            slot.setSlotContents(s.mergeStack(hostInventory,inventory,slot.getStack()));
                             if (slot.getStack() == null){return null;}
                         }
                     }
                     //all else fails, go back to the storage
                     for(ItemStackSlot s : inventory){
                         if(s.getSlotID()>35){
-                            slot.setSlotContents(s.mergeStack(slot.getStack()));
+                            slot.setSlotContents(s.mergeStack(hostInventory,inventory,slot.getStack()));
                             if (slot.getStack() == null){return null;}
                         }
                     }
@@ -204,14 +235,14 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                     //try the players
                     for(ItemStackSlot s : inventory){
                         if(s.getSlotID()<36){
-                            slot.setSlotContents(s.mergeStack(slot.getStack()));
+                            slot.setSlotContents(s.mergeStack(hostInventory,inventory,slot.getStack()));
                             if (slot.getStack() == null){return null;}
                         }
                     }
                     //try the storage
                     for(ItemStackSlot s : inventory){
                         if(s.getSlotID()>35){
-                            slot.setSlotContents(s.mergeStack(slot.getStack()));
+                            slot.setSlotContents(s.mergeStack(hostInventory,inventory,slot.getStack()));
                             if (slot.getStack() == null){return null;}
                         }
                     }
@@ -221,31 +252,31 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
             }
             case 2: {/*ClickType.SWAP*/
                 if (dragType >= 0 && dragType < 9){
-                    itemstack = inventoryplayer.getStackInSlot(dragType);
+                    itemstack = player.inventory.getStackInSlot(dragType);
                     if (itemstack != null || (slot!= null && slot.getStack() != null)) {
                         if (itemstack == null) {
                             if (slot.canTakeStack(player)) {
-                                inventoryplayer.setInventorySlotContents(dragType, slot.getStack());
+                                player.inventory.setInventorySlotContents(dragType, slot.getStack());
                                 slot.setSlotContents(null);
                             }
                         } else if (slot != null) {
-                            inventoryplayer.setInventorySlotContents(dragType, slot.mergeStack(itemstack.splitStack(slot.getSlotStackLimit())));
+                            player.inventory.setInventorySlotContents(dragType, slot.mergeStack(hostInventory,inventory,itemstack.splitStack(slot.getSlotStackLimit())));
                         }
                     }
                 }
                 break;
             }
             case 3: { /*ClickType.CLONE*/
-                if (player.capabilities.isCreativeMode && inventoryplayer.getItemStack() == null && slotId >= 0 && slot != null && slot.getHasStack()) {
+                if (player.capabilities.isCreativeMode && player.inventory.getItemStack() == null && slotId >= 0 && slot != null && slot.getHasStack()) {
                     itemstack = slot.getStack().copy();
                     itemstack.stackSize =itemstack.getMaxStackSize();
-                    inventoryplayer.setItemStack(itemstack);
+                    player.inventory.setItemStack(itemstack);
                     return itemstack;
                 }
                 break;
             }
             case 4: { /*ClickType.THROW*/
-                if (inventoryplayer.getItemStack() == null && slotId >= 0 && slot != null && slot.getHasStack() && slot.canTakeStack(player)) {
+                if (player.inventory.getItemStack() == null && slotId >= 0 && slot != null && slot.getHasStack() && slot.canTakeStack(player)) {
                     itemstack = slot.decrStackSize(dragType == 0 ? 1 : slot.getStack().stackSize);
                     if (!player.worldObj.isRemote) {
                         player.entityDropItem(itemstack, itemstack.stackSize);
@@ -254,10 +285,12 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                 break;
             }
             case 5 : {/*ClickType.QUICK_CRAFT*/
+
+                //TODO: if crafting slot, loop until slot output is null.
                     int j1 = this.dragEvent;
                     this.dragEvent = dragType & 3;
 
-                    if (((j1 != 1 || this.dragEvent != 2) && j1 != this.dragEvent) || inventoryplayer.getItemStack() == null) {
+                    if (((j1 != 1 || this.dragEvent != 2) && j1 != this.dragEvent) || player.inventory.getItemStack() == null) {
                         this.dragEvent = 0;
                         this.dragSlots.clear();
                     } else if (this.dragEvent == 0) {
@@ -272,16 +305,16 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                         }
                     } else if (this.dragEvent == 1) {
                         if (slot != null &&
-                                slot.isItemValid(inventoryplayer.getItemStack()) && (this.dragMode == 2 || inventoryplayer.getItemStack().stackSize > this.dragSlots.size())) {
+                                slot.isItemValid(player.inventory.getItemStack()) && (this.dragMode == 2 || player.inventory.getItemStack().stackSize > this.dragSlots.size())) {
                             this.dragSlots.add(slot);
                         }
                     } else if (this.dragEvent == 2) {
                         if (!this.dragSlots.isEmpty()) {
-                            int k1 = inventoryplayer.getItemStack().stackSize;
+                            int k1 = player.inventory.getItemStack().stackSize;
 
                             for (ItemStackSlot slot2 : this.dragSlots) {
-                                if (slot2 != null && (this.dragMode == 2 || inventoryplayer.getItemStack().stackSize >= this.dragSlots.size())) {
-                                    ItemStack itemstack14 = inventoryplayer.getItemStack().copy();
+                                if (slot2 != null && (this.dragMode == 2 || player.inventory.getItemStack().stackSize >= this.dragSlots.size())) {
+                                    ItemStack itemstack14 = player.inventory.getItemStack().copy();
                                     int j3 = slot2.getHasStack() ? slot2.getStack().stackSize : 0;
                                     computeStackSize(this.dragSlots, this.dragMode, itemstack14, j3);
                                     int k3 = Math.min(itemstack14.getMaxStackSize(), slot2.getSlotStackLimit());
@@ -295,9 +328,9 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                                 }
                             }
                             if (k1 !=0) {
-                                inventoryplayer.getItemStack().stackSize = k1;
+                                player.inventory.getItemStack().stackSize = k1;
                             } else {
-                                inventoryplayer.setItemStack(null);
+                                player.inventory.setItemStack(null);
                             }
                         }
                         this.dragEvent = 0;
@@ -317,7 +350,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                 }
             case 6: {
                 if (slotId >= 0) {
-                    ItemStack itemstack1 = inventoryplayer.getItemStack();
+                    ItemStack itemstack1 = player.inventory.getItemStack();
 
                     if (itemstack1 != null && (slot == null || !slot.getHasStack() || !slot.canTakeStack(player))) {
                         int i = dragType == 0 ? 0 : this.inventory.size() - 1;
@@ -351,8 +384,8 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         }
 
 
-        if (inventoryplayer.getItemStack() != null && inventoryplayer.getItemStack().stackSize ==0){
-            inventoryplayer.setItemStack(null);
+        if (player.inventory.getItemStack() != null && player.inventory.getItemStack().stackSize ==0){
+            player.inventory.setItemStack(null);
         }
         return itemstack;
 
@@ -391,10 +424,9 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
 
 
     @Override
-    public void onContainerClosed(EntityPlayer p_75134_1_)
-    {
+    public void onContainerClosed(EntityPlayer p_75134_1_) {
         super.onContainerClosed(p_75134_1_);
-        this.railTransport.closeInventory();
+        this.hostInventory.closeInventory();
     }
 
     /**
@@ -404,6 +436,6 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
      */
     @Override
     public boolean canInteractWith(EntityPlayer player) {
-        return !railTransport.isDead && railTransport.getPermissions(player, railTransport instanceof EntityTrainCore, false);
+        return (hostInventory instanceof GenericRailTransport?((GenericRailTransport)hostInventory).getPermissions(player, hostInventory instanceof EntityTrainCore, false): hostInventory!=null);
     }
 }

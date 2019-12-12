@@ -3,7 +3,7 @@ package ebf.tim.gui;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.utility.ClientProxy;
-import ebf.tim.utility.TileEntitySlotManager;
+import ebf.tim.utility.TransportSlotManager;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -30,12 +30,13 @@ public class GUITrainTable extends GuiContainer {
                     new ResourceLocation(TrainsInMotion.MODID, "textures/gui/chest.png");
 
     public GUITrainTable(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
-        super(new TileEntitySlotManager(inventoryPlayer, (TileEntityStorage) world.getTileEntity(x,y,z)));
+        super(new TransportSlotManager(inventoryPlayer, (TileEntityStorage) world.getTileEntity(x,y,z)));
     }
 
 
     protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_) {
-        switch (((TileEntitySlotManager)this.inventorySlots).craftingTable.storageType){
+        //todo painfully inefficient typecasting
+        switch (((TileEntityStorage)((TransportSlotManager)this.inventorySlots).hostInventory).storageType){
             case 0:{
                 this.fontRendererObj.drawString(StatCollector.translateToLocal("container.traincrafting"), 28, 6, 4210752);
                 break;
@@ -53,7 +54,7 @@ public class GUITrainTable extends GuiContainer {
     protected void drawGuiContainerBackgroundLayer(float p_146976_1_, int p_146976_2_, int p_146976_3_) {
         GL11.glPushMatrix();
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        if(((TileEntitySlotManager)this.inventorySlots).craftingTable.storageType==1){
+        if(((TileEntityStorage)((TransportSlotManager)this.inventorySlots).hostInventory).storageType==1){
             mc.getTextureManager().bindTexture(vanillaInventory);
 
             drawTexturedRect(guiLeft+28, guiTop, 54, 51, 20, 20);//top input

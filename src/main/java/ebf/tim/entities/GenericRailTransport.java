@@ -1323,7 +1323,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      */
     public void addItem(ItemStack item){
         for(ItemStackSlot slot : inventory){
-            item = slot.mergeStack(item);
+            item = slot.mergeStack(this, inventory,item);
             if (item == null){
                 return;
             }
@@ -1742,7 +1742,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      */
     @SideOnly(Side.CLIENT)
     public int[] getParticleData(int id){
-        //DebugUtil.println(id);
         switch (id){
             case 0:{return new int[]{3, 100, 0x232323};}//smoke
             case 1:{return new int[]{5, 100, 0x232323};}//heavy smoke

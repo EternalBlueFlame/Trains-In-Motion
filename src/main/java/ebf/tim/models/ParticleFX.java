@@ -91,7 +91,7 @@ public class ParticleFX {
     public static List<ParticleFX> newParticleItterator(String boxName, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ, GenericRailTransport host){
         int[] data = parseData(boxName, host.getClass());
         List<ParticleFX> list = new ArrayList<>();
-        if(data[1]==0 || data[1]==1) {
+        if(boxName.contains("smoke") || boxName.contains("steam")) {
             for (int i = 0; i < host.getParticleData(data[0])[0]*20; i++) {
                 list.add(new ParticleFX(data[0], data[1], host, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ));
             }
@@ -277,7 +277,6 @@ public class ParticleFX {
         }
 
         GL11.glPushMatrix();
-        //DebugUtil.println(entity.host.rotationYaw);
 
         if (entity.particleType==3) {//cone lamps
             GL11.glColor4f(((entity.host.getParticleData(entity.particleID)[2] >> 16 & 0xFF)-entity.colorTint)* 0.00392156863f,
@@ -296,10 +295,9 @@ public class ParticleFX {
                     entity.host.getParticleData(entity.particleID)[1]*0.55f);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
-            glAlphaFunc(GL_LEQUAL, 1f);
-            //GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
             GL11.glDepthMask(false);
             GL11.glDisable(GL_CULL_FACE);
+            glAlphaFunc(GL_LEQUAL, 1f);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             if(Minecraft.getMinecraft().theWorld.isRaining()){
@@ -313,7 +311,6 @@ public class ParticleFX {
             }
             GL11.glEnable(GL_CULL_FACE);
             GL11.glEnable(GL11.GL_LIGHTING);
-            //glAlphaFunc(GL_GREATER, 0.1f);
             Minecraft.getMinecraft().entityRenderer.enableLightmap(1D);
             GL11.glDepthMask(true);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -327,10 +324,10 @@ public class ParticleFX {
             GL11.glRotated(270-(entity.offset[3]+entity.host.rotationYaw),0,0,1);
             GL11.glTranslatef(0.75f *scale, 1.5f*scale, 0);
 
+           // DebugUtil.println(entity.host.getParticleData(entity.particleID)[1], entity.particleID);
             GL11.glScalef(entity.host.getParticleData(entity.particleID)[1]*0.01f,
                     entity.host.getParticleData(entity.particleID)[1]*0.01f,
                     entity.host.getParticleData(entity.particleID)[1]*0.01f);
-            GL11.glDisable(GL11.GL_LIGHTING);
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
             GL11.glDepthMask(false);
@@ -353,7 +350,6 @@ public class ParticleFX {
 
         } else {
 
-
             GL11.glDisable(GL11.GL_TEXTURE_2D);
             //set the color with the tint.   * 0.00392156863 is the same as /255, but multiplication is more efficient than division.
             GL11.glColor4f(((entity.host.getParticleData(entity.particleID)[2] >> 16 & 0xFF)-entity.colorTint)* 0.00392156863f,
@@ -364,6 +360,8 @@ public class ParticleFX {
             GL11.glTranslated( x + entity.boundingBox.minX - entity.host.posX, y+ entity.boundingBox.minY-entity.host.posY, z+ entity.boundingBox.minZ - entity.host.posZ);
             if(entity.particleType==4){
                 GL11.glScalef(0.5f,0.5f,0.5f);
+            } else if(entity.particleType<=2){
+                GL11.glScalef(0.0625f,0.0625f,0.0625f);
             }
             particle.render(1);
 

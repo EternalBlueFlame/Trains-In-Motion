@@ -1,5 +1,6 @@
 package ebf.tim.utility;
 
+import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.GenericRailTransport;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -9,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * @author Eternal Blue Flame
@@ -18,11 +20,17 @@ public class ItemStackSlot extends Slot {
 
     private ItemStack stack = null;
     private int slotID;
+    private boolean isCrafting, input;
 
     public ItemStackSlot(IInventory host, int slot){
         super(host, slot, 0,0);
         slotNumber=slot;
         slotID=slot;
+    }
+
+    public ItemStackSlot setCrafting(boolean io){
+        input=io;isCrafting=true;
+        return this;
     }
 
     public ItemStackSlot(IInventory host, int slot, int x, int y){
@@ -67,18 +75,22 @@ public class ItemStackSlot extends Slot {
     }
 
 
-    public ItemStack mergeStack(ItemStack itemStack){
+    public ItemStack mergeStack(IInventory hostInventory, List<ItemStackSlot> hostSlots, ItemStack itemStack){
         if (isItemValid(itemStack)) {
             if (!getHasStack()) {
-                return setSlotContents(itemStack) ? null : itemStack;
+                ItemStack s =setSlotContents(itemStack) ? null : itemStack;
+                onCraftMatrixChanged(hostInventory, hostSlots);
+                return s;
             } else {
                 if (equals(itemStack) && getStack().stackSize < getStack().getMaxStackSize()) {
                     if (itemStack.stackSize <= getStack().getMaxStackSize() - getStack().stackSize) {
                         getStack().stackSize += itemStack.stackSize;
+                        onCraftMatrixChanged(hostInventory, hostSlots);
                         return null;
                     } else {
                         itemStack.stackSize -= getStack().getMaxStackSize() - getStack().stackSize;
                         getStack().stackSize = getStack().getMaxStackSize();
+                        onCraftMatrixChanged(hostInventory, hostSlots);
                         return itemStack;
                     }
                 }
@@ -87,10 +99,70 @@ public class ItemStackSlot extends Slot {
         return itemStack;
     }
 
+    public void onCraftMatrixChanged(IInventory hostInventory, List<ItemStackSlot> hostSlots) {
+        DebugUtil.println(isCrafting, ((TileEntityStorage)hostInventory).storageType);
+        if(isCrafting && hostInventory instanceof TileEntityStorage) {
+            int page = ((TileEntityStorage)hostInventory).outputPage;
+            switch (((TileEntityStorage)hostInventory).storageType) {
+                case 0: {
+                    List<ItemStack> slots = RecipeManager.getResult(RecipeManager.getTransportRecipe(hostInventory));
+                    if(slots==null){
+                        for (int i = 0; i < 9; i++) {
+                            putStackInSlot(hostSlots,400 + i, null);
+                        }
+                    } else {
+                        if(slots.size()<10) {
+                            for (int i = 0; i < 9; i++) {
+                                putStackInSlot(hostSlots,400 + i, slots.size() > i ? slots.get(i) : null);
+                            }
+                            ((TileEntityStorage)hostInventory).multiPage=false;
+                        } else {//when theres 10 or more outputs skip 2 since buttons will be in their place.
+                            putStackInSlot(hostSlots,400 + (7*page), slots.get(10));
+                            putStackInSlot(hostSlots,401 + (7*page), slots.get(11));
+                            putStackInSlot(hostSlots,402 + (7*page), slots.get(12));
+                            //intentionally skip 13 because an arrow is there
+                            putStackInSlot(hostSlots,404 + (7*page), slots.get(14));
+                            //intentionally skip 15 because an arrow is there
+                            putStackInSlot(hostSlots,406 + (7*page), slots.get(16));
+                            putStackInSlot(hostSlots,407 + (7*page), slots.get(17));
+                            putStackInSlot(hostSlots,408 + (7*page), slots.get(18));
+
+                            ((TileEntityStorage)hostInventory).multiPage=true;
+                        }
+
+                    }
+                    break;
+                }
+                case 1: {
+                    putStackInSlot(hostSlots,4, RecipeManager.railRecipe(hostInventory));
+                    break;
+                }
+            }
+        }
+    }
+
+
+    @Deprecated
+    public void putStackInSlot(List<ItemStackSlot> hostSlots, int slot, ItemStack stack) {
+        ItemStackSlot stackSlot=null;
+        for(ItemStackSlot stak: hostSlots){
+            if (stak.getSlotIndex() ==slot){
+                stackSlot=stak;
+            }
+        }
+        if (stackSlot!=null) {
+            if (!(stackSlot.inventory instanceof GenericRailTransport)) {
+                stackSlot.inventory.setInventorySlotContents(slot, stack);
+            } else {
+                stackSlot.setStack(stack);
+            }
+        }
+    }
+
     public boolean setSlotContents(@Nullable ItemStack stack){
         if (isItemValid(stack) || stack == null) {
-            if (!(inventory instanceof GenericRailTransport)) {
-                inventory.setInventorySlotContents(slotNumber, stack);
+            if (!(inventory instanceof GenericRailTransport) && !(inventory instanceof TileEntityStorage)) {
+                    inventory.setInventorySlotContents(slotNumber, stack);
             } else {
                 this.stack = stack;
             }
@@ -131,6 +203,7 @@ public class ItemStackSlot extends Slot {
     @Override
     public boolean isItemValid(ItemStack p_75214_1_) {
         if(stack==null || stack.getItem()==null){return true;}
+        if(isCrafting && !input){return stack==null;}
         return inventory.isItemValidForSlot(getSlotID(), p_75214_1_);
     }
 
@@ -139,7 +212,7 @@ public class ItemStackSlot extends Slot {
      */
     @Override
     public ItemStack getStack() {
-        return inventory instanceof GenericRailTransport?stack:
+        return inventory instanceof GenericRailTransport || inventory instanceof TileEntityStorage ?stack:
                 inventory!=null && inventory.getSizeInventory()>slotNumber?
                         inventory.getStackInSlot(slotNumber):null;
     }
@@ -152,6 +225,10 @@ public class ItemStackSlot extends Slot {
     @Deprecated
     public void putStack(ItemStack p_75215_1_) {
         setSlotContents(p_75215_1_);
+    }
+
+    public void setStack(ItemStack p_75215_1_) {
+        stack=p_75215_1_;
     }
 
     /**

@@ -66,13 +66,18 @@ public class RailUtility {
         int result = 0;
         boolean negative = false;
         for (char c : str.toCharArray()) {
-            if(c=='-'){
-                negative=true;
-            } else {
-                if (c < '0' || c > '9') {
-                    throw new NumberFormatException("the string: \"" + str + "\" was not a number, please check " + host.getName());
-                }
-                result = (result * 10) + c;
+            switch (c){
+                case '-':{negative=true;break;}
+                case '0':{result = (result * 10);break;}
+                case '1':{result = (result * 10)+1;break;}
+                case '2':{result = (result * 10)+2;break;}
+                case '3':{result = (result * 10)+3;break;}
+                case '4':{result = (result * 10)+4;break;}
+                case '5':{result = (result * 10)+5;break;}
+                case '6':{result = (result * 10)+6;break;}
+                case '7':{result = (result * 10)+7;break;}
+                case '8':{result = (result * 10)+8;break;}
+                case '9':{result = (result * 10)+9;break;}
             }
         }
         return negative?-result:result;

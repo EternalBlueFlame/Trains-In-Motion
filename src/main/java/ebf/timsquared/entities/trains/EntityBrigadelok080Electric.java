@@ -268,6 +268,15 @@ public class EntityBrigadelok080Electric extends TrainBase {
     @Override
     public ModelBase[] getModel(){return new ModelBase[]{new ModelBrigadelok_080()};}
 
+    @SideOnly(Side.CLIENT)
+    public int[] getParticleData(int id){
+        if(id==1||id==2){
+            return new int[]{0, 0, 0x232323};
+        } else{
+            return super.getParticleData(id);
+        }
+    }
+
     /**
      * <h2>sets the resource location for sounds, like horn and the sound made for the engine running</h2>
      */

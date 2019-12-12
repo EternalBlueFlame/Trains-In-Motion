@@ -153,6 +153,7 @@ public class RenderEntity extends Render {
         GL11.glPushMatrix();
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL11.GL_BLEND);
+        GL11.glAlphaFunc(GL11.GL_GREATER, 0.1f);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         if(y==0){
@@ -205,7 +206,7 @@ public class RenderEntity extends Render {
         if(entity.worldObj!=null) {
             TextureManager.adjustLightFixture(entity.worldObj, (int) entity.posX, (int) entity.posY + 1, (int) entity.posZ);
             s=entity.getTexture(Minecraft.getMinecraft().thePlayer);
-        } else if (entity.getTextureByID(
+        } else if (textureURI!=null && entity.getTextureByID(
                 Minecraft.getMinecraft().thePlayer, isPaintBucket,textureURI)!=null){
             s=entity.getTextureByID(
                     Minecraft.getMinecraft().thePlayer, isPaintBucket,textureURI);
@@ -387,8 +388,6 @@ public class RenderEntity extends Render {
             bogiePos = RailUtility.rotatePoint(new Vec3f(-3,0,0),entity.rotationPitch, entity.rotationYaw,0).add(b);
             Tessellator.getInstance().addVertex(bogiePos.xCoord,bogiePos.yCoord+3, bogiePos.zCoord);
             Tessellator.getInstance().draw();
-
-            //TODO:add wireframe (that weird red/green/blue, XYZ center thing) for rotation points on bogie and bogie offsets.
 
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glEnable(GL11.GL_LIGHTING);
