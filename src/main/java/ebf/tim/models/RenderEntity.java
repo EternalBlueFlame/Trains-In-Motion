@@ -213,9 +213,9 @@ public class RenderEntity extends Render {
         } else {
             s=entity.getTextureByID(Minecraft.getMinecraft().thePlayer,false, entity.getDefaultSkin());
         }
-        TextureManager.bindTexture(s.getTexture(), s.colorsFrom, s.colorsTo, entity.colorsFrom, entity.colorsTo);
 
         for(i=0; i< entity.renderData.modelList.length;i++) {
+            TextureManager.bindTexture(s.getTexture(i), s.colorsFrom, s.colorsTo, entity.colorsFrom, entity.colorsTo);
             GL11.glPushMatrix();
             if(entity.modelOffsets()!=null && entity.modelOffsets().length>i) {
                 GL11.glTranslated(entity.modelOffsets()[i][0],entity.modelOffsets()[i][1],entity.modelOffsets()[i][2]);

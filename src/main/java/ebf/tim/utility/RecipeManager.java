@@ -184,33 +184,32 @@ public class RecipeManager {
     }
 
     public static ItemStack railRecipe(IInventory hostInventory){
-        if(hostInventory.getStackInSlot(4)!=null && hostInventory.getStackInSlot(4).getItem() instanceof ItemRail){
+        if(hostInventory.getStackInSlot(405)!=null && hostInventory.getStackInSlot(405).getItem() instanceof ItemRail){
             DebugUtil.println("there was a rail in the slot");
         }
 
         //handle adding to an existing stack
-        if(hostInventory.getStackInSlot(4)!=null && hostInventory.getStackInSlot(4).getItem() instanceof ItemRail &&
-                hostInventory.getStackInSlot(0)==getStackIngot(hostInventory) &&
-                hostInventory.getStackInSlot(1)==getStackTies(hostInventory) &&
-                hostInventory.getStackInSlot(2)==getStackBallast(hostInventory)){
+        if(hostInventory.getStackInSlot(405)!=null && hostInventory.getStackInSlot(405).getItem() instanceof ItemRail &&
+                hostInventory.getStackInSlot(400)==getStackIngot(hostInventory) &&
+                hostInventory.getStackInSlot(401)==getStackTies(hostInventory) &&
+                hostInventory.getStackInSlot(402)==getStackBallast(hostInventory)){
 
             ItemStack rail = ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
-                    hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(1),hostInventory.getStackInSlot(2),
+                    hostInventory.getStackInSlot(400),hostInventory.getStackInSlot(401),hostInventory.getStackInSlot(402),
                     null);
 
             rail.getTagCompound().setInteger("count",
-                    hostInventory.getStackInSlot(4).getTagCompound().getInteger("count")+1);
+                    hostInventory.getStackInSlot(405).getTagCompound().getInteger("count")+1);
             return rail;
         }
         //handle making a new stack
-        if(hostInventory.getStackInSlot(0)!=null && ingotInDirectory(hostInventory.getStackInSlot(0).getItem())) {
+        if(hostInventory.getStackInSlot(400)!=null && ingotInDirectory(hostInventory.getStackInSlot(400).getItem())) {
             return ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
-                    hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(1),hostInventory.getStackInSlot(2),
+                    hostInventory.getStackInSlot(400),hostInventory.getStackInSlot(401),hostInventory.getStackInSlot(402),
                     null);
         }
-        //todo: works, but goes to wrong slot,
-        //maybe issue is that the host inventory this sorts into prioritizes the player's inventory before the crafters
-        //potential fix would be to compensate for player inventory space as a buffer since the value is reliably static unlike storage
+        //todo: add support for augument slot
+        //todo: add support for old rail slot
         return null;
 
     }

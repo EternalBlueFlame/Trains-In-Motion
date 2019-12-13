@@ -43,11 +43,17 @@ public class TileEntityStorage extends TileEntity implements IInventory {
                 }
             }
         } else {
+            inventory.add(new ItemStackSlot(this,400).setCoords( 48 , 0).setCrafting(true));
+            inventory.add(new ItemStackSlot(this,401).setCoords( 48 , 17).setCrafting(true));
+            inventory.add(new ItemStackSlot(this,402).setCoords( 48 , 35).setCrafting(true));
+
+            inventory.add(new ItemStackSlot(this,403).setCoords( 66 , 0).setCrafting(true));//augument slot
+
+            inventory.add(new ItemStackSlot(this,404).setCoords( 124 , 0).setCrafting(true));//old shape input
+
+            inventory.add(new ItemStackSlot(this,405).setCoords( 124 , 17).setCrafting(false));
 
         }
-        //for (int i=0; i< getSizeInventory(); i++){
-        //    inventory.add(null);
-        //}
         storageType=type;
     }
     /**the list of item stacks in the inventory*/

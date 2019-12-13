@@ -109,10 +109,9 @@ public class StaticModelAnimator extends AnimationBase {
                 RailUtility.stringContains(part.boxName,"lamp");
     }
 
+
     public boolean culls(ModelRendererTurbo part){
-        return RailUtility.stringContains(part.boxName, tagHide) ||
-                RailUtility.stringContains(part.boxName, "smoke") ||
-                RailUtility.stringContains(part.boxName, "steam");
+        return RailUtility.stringContains(part.boxName, tagHide);
     }
 
 

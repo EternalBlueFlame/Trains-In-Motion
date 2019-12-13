@@ -113,7 +113,6 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
 
     @SideOnly(Side.CLIENT)
     public void putStacksInSlots(ItemStack[] p_75131_1_) {
-        DebugUtil.println(p_75131_1_.length, inventory.size(), this.getSlot(9).inventory.getSizeInventory());
         for (int i = 0; i < p_75131_1_.length; ++i) {
             this.getSlot(i).putStack(p_75131_1_[i]);
         }
@@ -170,6 +169,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                         player.inventory.setItemStack(slot.getStack());
                         if (player.inventory.getItemStack() != null) {
                             slot.setSlotContents(null);
+                            slot.onCraftMatrixChanged(hostInventory,inventory);
                         }
                     } else {
                         player.inventory.setItemStack(slot.mergeStack(hostInventory,inventory,player.inventory.getItemStack()));

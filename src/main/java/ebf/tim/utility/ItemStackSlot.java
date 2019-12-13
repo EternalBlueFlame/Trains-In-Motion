@@ -113,19 +113,19 @@ public class ItemStackSlot extends Slot {
                     } else {
                         if(slots.size()<10) {
                             for (int i = 0; i < 9; i++) {
-                                putStackInSlot(hostSlots,400 + i, slots.size() > i ? slots.get(i) : null);
+                                putStackInSlot(hostSlots,409 + i, i >= slots.size() ?null: slots.get(i));
                             }
                             ((TileEntityStorage)hostInventory).multiPage=false;
                         } else {//when theres 10 or more outputs skip 2 since buttons will be in their place.
-                            putStackInSlot(hostSlots,400 + (7*page), slots.get(10));
-                            putStackInSlot(hostSlots,401 + (7*page), slots.get(11));
-                            putStackInSlot(hostSlots,402 + (7*page), slots.get(12));
-                            //intentionally skip 13 because an arrow is there
-                            putStackInSlot(hostSlots,404 + (7*page), slots.get(14));
-                            //intentionally skip 15 because an arrow is there
-                            putStackInSlot(hostSlots,406 + (7*page), slots.get(16));
-                            putStackInSlot(hostSlots,407 + (7*page), slots.get(17));
-                            putStackInSlot(hostSlots,408 + (7*page), slots.get(18));
+                            putStackInSlot(hostSlots,409 + (7*page), slots.get((7*page)));
+                            putStackInSlot(hostSlots,410 + (7*page), slots.get(1+ (7*page)));
+                            putStackInSlot(hostSlots,411 + (7*page), slots.get(2+ (7*page)));
+                            //intentionally skip 412 because an arrow is there
+                            putStackInSlot(hostSlots,413 + (7*page), slots.get(3+ (7*page)));
+                            //intentionally skip 414 because an arrow is there
+                            putStackInSlot(hostSlots,415 + (7*page), slots.get(4+ (7*page)));
+                            putStackInSlot(hostSlots,416 + (7*page), slots.get(5+ (7*page)));
+                            putStackInSlot(hostSlots,417 + (7*page), slots.get(6+ (7*page)));
 
                             ((TileEntityStorage)hostInventory).multiPage=true;
                         }
@@ -134,15 +134,13 @@ public class ItemStackSlot extends Slot {
                     break;
                 }
                 case 1: {
-                    putStackInSlot(hostSlots,4, RecipeManager.railRecipe(hostInventory));
+                    putStackInSlot(hostSlots,405, RecipeManager.railRecipe(hostInventory));
                     break;
                 }
             }
         }
     }
 
-
-    @Deprecated
     public void putStackInSlot(List<ItemStackSlot> hostSlots, int slot, ItemStack stack) {
         ItemStackSlot stackSlot=null;
         for(ItemStackSlot stak: hostSlots){
@@ -151,7 +149,7 @@ public class ItemStackSlot extends Slot {
             }
         }
         if (stackSlot!=null) {
-            if (!(stackSlot.inventory instanceof GenericRailTransport)) {
+            if (!(stackSlot.inventory instanceof GenericRailTransport) && !(stackSlot.inventory instanceof TileEntityStorage)) {
                 stackSlot.inventory.setInventorySlotContents(slot, stack);
             } else {
                 stackSlot.setStack(stack);
