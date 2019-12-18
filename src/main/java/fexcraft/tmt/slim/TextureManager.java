@@ -110,7 +110,7 @@ public class TextureManager {
         skyLight = world.getSkyBlockTypeBrightness(EnumSkyBlock.Block, i, j, k);
         skyLight=world.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, i, j, k) << 20 | (skyLight<0?0:skyLight) << 4;
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit,  skyLight % 65536,  skyLight * 0.00001525878f);
-        GL11.glColor4f(255, 255, 255, 255);//fixes alpha layering bugs with other mods that don't clear their GL cache
+        GL11.glColor4f(1, 1, 1, 1);//fixes alpha layering bugs with other mods that don't clear their GL cache
     }
 
     private static FloatBuffer colorBuffer = GLAllocation.createDirectFloatBuffer(16);

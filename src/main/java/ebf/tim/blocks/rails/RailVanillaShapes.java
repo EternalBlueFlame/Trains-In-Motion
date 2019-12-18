@@ -24,12 +24,12 @@ public class RailVanillaShapes extends RailShapeCore{
 
 
         //intersections
-        if (nearbyMeta[1] == 1 &&
+        if (nearbyMeta[7] == 1 &&
                 checkBlockMeta(worldObj, xCoord, yCoord, zCoord + 2, 0)) {
-            shape.setStart(0, 0, 1.5f);
+            shape.setEnd(0, 0, 1f).setSleeperCount(6);
         }
-        if (nearbyMeta[7] == 1 && checkBlockMeta(worldObj, xCoord, yCoord, zCoord - 2, 0)) {
-            shape.setStart(0, 0, -1.5f);
+        if (nearbyMeta[1] == 1 && checkBlockMeta(worldObj, xCoord, yCoord, zCoord - 2, 0)) {
+            shape.setStart(0, 0, -1f).setSleeperCount(6);
         }
 
         //cover half-lengths
@@ -124,11 +124,11 @@ public class RailVanillaShapes extends RailShapeCore{
         int[] nearbyMeta = getNearbyMeta(worldObj, xCoord, yCoord, zCoord);
 
         //intersections
-        if(checkBlockMeta(worldObj,xCoord-1, yCoord,zCoord,0) && checkBlockMeta(worldObj, xCoord-2, yCoord,zCoord,1)){
-            shape.setStart(-0.5f,0,0);
+        if(nearbyMeta[3]==0&& checkBlockMeta(worldObj, xCoord-2, yCoord,zCoord,1)){
+            shape.setEnd(-1f,0,0).setSleeperCount(6);
         }
-        if(checkBlockMeta(worldObj,xCoord+1, yCoord,zCoord,0) && checkBlockMeta(worldObj, xCoord+2, yCoord,zCoord,1)){
-            shape.setEnd(0.5f,0,0);
+        if(nearbyMeta[5]==0&& checkBlockMeta(worldObj, xCoord+2, yCoord,zCoord,1)){
+            shape.setStart(1f,0,0).setSleeperCount(6);
         }
 
         //cover half-lengths

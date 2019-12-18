@@ -184,28 +184,24 @@ public class RecipeManager {
     }
 
     public static ItemStack railRecipe(IInventory hostInventory){
-        if(hostInventory.getStackInSlot(405)!=null && hostInventory.getStackInSlot(405).getItem() instanceof ItemRail){
-            DebugUtil.println("there was a rail in the slot");
-        }
-
         //handle adding to an existing stack
-        if(hostInventory.getStackInSlot(405)!=null && hostInventory.getStackInSlot(405).getItem() instanceof ItemRail &&
-                hostInventory.getStackInSlot(400)==getStackIngot(hostInventory) &&
-                hostInventory.getStackInSlot(401)==getStackTies(hostInventory) &&
-                hostInventory.getStackInSlot(402)==getStackBallast(hostInventory)){
+        if(hostInventory.getStackInSlot(5)!=null && hostInventory.getStackInSlot(5).getItem() instanceof ItemRail &&
+                hostInventory.getStackInSlot(0)==getStackIngot(hostInventory) &&
+                hostInventory.getStackInSlot(2)==getStackTies(hostInventory) &&
+                hostInventory.getStackInSlot(1)==getStackBallast(hostInventory)){
 
             ItemStack rail = ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
-                    hostInventory.getStackInSlot(400),hostInventory.getStackInSlot(401),hostInventory.getStackInSlot(402),
+                    hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(2),hostInventory.getStackInSlot(1),
                     null);
 
             rail.getTagCompound().setInteger("count",
-                    hostInventory.getStackInSlot(405).getTagCompound().getInteger("count")+1);
+                    hostInventory.getStackInSlot(5).getTagCompound().getInteger("count")+1);
             return rail;
         }
         //handle making a new stack
         if(hostInventory.getStackInSlot(400)!=null && ingotInDirectory(hostInventory.getStackInSlot(400).getItem())) {
             return ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
-                    hostInventory.getStackInSlot(400),hostInventory.getStackInSlot(401),hostInventory.getStackInSlot(402),
+                    hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(2),hostInventory.getStackInSlot(1),
                     null);
         }
         //todo: add support for augument slot

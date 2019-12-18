@@ -134,7 +134,7 @@ public class ItemStackSlot extends Slot {
                     break;
                 }
                 case 1: {
-                    putStackInSlot(hostSlots,405, RecipeManager.railRecipe(hostInventory));
+                    putStackInSlot(hostSlots,406, RecipeManager.railRecipe(hostInventory));
                     break;
                 }
             }

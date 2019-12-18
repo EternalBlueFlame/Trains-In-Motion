@@ -5,16 +5,14 @@ import ebf.tim.utility.Vec6f;
 public class RailSimpleShape {
 
     private Vec6f start, center=new Vec6f(0,0,0,0,0,0), end;
-    int tieCount=0;
+    private int tieCount=4;
 
     public RailSimpleShape setSleeperCount(int s){
         tieCount=s;
         return this;
     }
-
-    public float getPathLength(){
-        return start.distance2d(center)+center.distance2d(end);
-
+    public float getSleeperCount(){
+        return tieCount;
     }
 
 

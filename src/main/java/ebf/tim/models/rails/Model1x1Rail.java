@@ -1,5 +1,6 @@
 package ebf.tim.models.rails;
 
+import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
@@ -89,7 +90,6 @@ public class Model1x1Rail {
         } else{
             minWidth=shape.getGaugePositions()[0];maxWidth=-shape.getGaugePositions()[0];
         }
-        //DebugUtil.println(minWidth,maxWidth);
 
 
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -134,12 +134,12 @@ public class Model1x1Rail {
 
         if(ties!=null && ties.getItem()!=null) {
             if(ClientProxy.railSkin==0){
-                ModelTies.modelPotatoTies(shape, maxWidth, minWidth, ties);
+                ModelTies.modelPotatoTies(BlockRailCore.getShape(world,xPos,yPos,zPos), maxWidth, minWidth, ties);
             } else if (ClientProxy.railSkin<3){
-                ModelTies.model3DTies(shape, maxWidth, minWidth, ties);
+                ModelTies.model3DTies(BlockRailCore.getShape(world,xPos,yPos,zPos), maxWidth, minWidth, ties);
             } else {
                 //todo: HD ties
-                ModelTies.model3DTies(shape, maxWidth, minWidth, ties);
+                ModelTies.model3DTies(BlockRailCore.getShape(world,xPos,yPos,zPos), maxWidth, minWidth, ties);
             }
 
         }

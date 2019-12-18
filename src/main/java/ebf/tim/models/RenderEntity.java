@@ -156,11 +156,7 @@ public class RenderEntity extends Render {
         GL11.glAlphaFunc(GL11.GL_GREATER, 0.1f);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-        if(y==0){
-            GL11.glDisable(GL11.GL_LIGHTING);
-        } else {
             GL11.glEnable(GL11.GL_LIGHTING);
-        }
         //set the render position
         GL11.glTranslated(x, y+ (entity.onVanillaRails?0:RailOffset) + ((entity.getRenderScale()-0.0625f)*10)+bogieOffset, z);
         //rotate the model.

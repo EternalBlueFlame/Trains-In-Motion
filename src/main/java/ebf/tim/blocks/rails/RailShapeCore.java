@@ -115,7 +115,6 @@ public class RailShapeCore {
     public static RailShapeCore multiTriGenModel(World world, int x, int y, int z, RailSimpleShape shape, int[] railOffsets){
         RailShapeCore sc = new RailShapeCore();
         sc.gauge=railOffsets;
-        sc.tieCount =shape.getPathLength();
         sc.activePath = new ArrayList<>();
         sc.activeTiePath= new ArrayList<>();
         List<Vec6f> points;

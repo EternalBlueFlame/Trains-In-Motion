@@ -29,7 +29,7 @@ public class TexturedPolygon {
 				Tessellator.getInstance().startDrawing(GL11.GL_POLYGON);
 			}
 		}
-
+		Tessellator.setNormal(vertices.get(0).vector3F, vertices.get(1).vector3F,vertices.get(2).vector3F);
 		for (PositionTransformVertex positionTexturevertex : vertices){
 			Tessellator.getInstance().addVertexWithUV(positionTexturevertex.vector3F.xCoord * f, positionTexturevertex.vector3F.yCoord * f, positionTexturevertex.vector3F.zCoord * f, positionTexturevertex.textureX, positionTexturevertex.textureY);
 		}
