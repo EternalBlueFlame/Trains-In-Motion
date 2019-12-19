@@ -28,10 +28,7 @@ public class TexturedPolygon {
 				Tessellator.setNormal(vertices.get(0).vector3F, vertices.get(1).vector3F, vertices.get(2).vector3F);
 			}
 		}
-<<<<<<< Updated upstream
-		Tessellator.setNormal(vertices.get(0).vector3F, vertices.get(1).vector3F,vertices.get(2).vector3F);
-=======
->>>>>>> Stashed changes
+		
 		for (PositionTransformVertex positionTexturevertex : vertices){
 			Tessellator.getInstance().addVertexWithUV(positionTexturevertex.vector3F.xCoord * f, positionTexturevertex.vector3F.yCoord * f, positionTexturevertex.vector3F.zCoord * f, positionTexturevertex.textureX, positionTexturevertex.textureY);
 		}
