@@ -16,20 +16,22 @@ public class TexturedPolygon {
 	}
 
 	public void draw(float f){
-		switch (vertices.size()){
-			case 3:{
-				Tessellator.getInstance().startDrawing(GL11.GL_TRIANGLES);
-				break;
-			}
-			case 4:{
-				Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
-				break;
-			}
-			default:{
-				Tessellator.getInstance().startDrawing(GL11.GL_POLYGON);
+		if(vertices.size()==3){
+			Tessellator.getInstance().startDrawing(GL11.GL_TRIANGLES);
+			Tessellator.setNormal(vertices.get(0).vector3F, vertices.get(1).vector3F,vertices.get(2).vector3F);
+		} else {
+			Tessellator.getInstance().startDrawing(vertices.size()==4?GL11.GL_QUADS:GL11.GL_POLYGON);
+
+			if(vertices.get(0)==vertices.get(1) || vertices.get(1)==vertices.get(2)){
+				Tessellator.setNormal(vertices.get(1).vector3F, vertices.get(2).vector3F, vertices.get(3).vector3F);
+			} else {
+				Tessellator.setNormal(vertices.get(0).vector3F, vertices.get(1).vector3F, vertices.get(2).vector3F);
 			}
 		}
+<<<<<<< Updated upstream
 		Tessellator.setNormal(vertices.get(0).vector3F, vertices.get(1).vector3F,vertices.get(2).vector3F);
+=======
+>>>>>>> Stashed changes
 		for (PositionTransformVertex positionTexturevertex : vertices){
 			Tessellator.getInstance().addVertexWithUV(positionTexturevertex.vector3F.xCoord * f, positionTexturevertex.vector3F.yCoord * f, positionTexturevertex.vector3F.zCoord * f, positionTexturevertex.textureX, positionTexturevertex.textureY);
 		}

@@ -100,7 +100,6 @@ public class ItemStackSlot extends Slot {
     }
 
     public void onCraftMatrixChanged(IInventory hostInventory, List<ItemStackSlot> hostSlots) {
-        DebugUtil.println(isCrafting, ((TileEntityStorage)hostInventory).storageType);
         if(isCrafting && hostInventory instanceof TileEntityStorage) {
             int page = ((TileEntityStorage)hostInventory).outputPage;
             switch (((TileEntityStorage)hostInventory).storageType) {

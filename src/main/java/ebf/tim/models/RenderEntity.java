@@ -273,7 +273,7 @@ public class RenderEntity extends Render {
 
         //render the particles, if there are any.
         for(ParticleFX particle : entity.renderData.particles){
-            ParticleFX.doRender(particle, x,y,z, entity.getRenderScale());
+            ParticleFX.doRender(particle, x,y,z, entity.getRenderScale(), yaw);
         }
 
 
