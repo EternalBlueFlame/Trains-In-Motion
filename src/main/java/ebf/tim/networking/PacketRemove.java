@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.common.DimensionManager;
 
 /**
  * <h1>Remove entity packet</h1>
@@ -32,7 +33,7 @@ public class PacketRemove implements IMessage {
         this.dimensionId=bbuf.readInt();
         shouldDropItem = bbuf.readBoolean();
 
-        Entity entity = MinecraftServer.getServer().worldServers[dimensionId].getEntityByID(entityId);
+        Entity entity = DimensionManager.getWorld(dimensionId).getEntityByID(entityId);
         //if the entity was an instance of Generic Rail Transport, then spawn it's item and remove it from world.
         if (entity instanceof GenericRailTransport) {
             if (shouldDropItem) {
@@ -41,7 +42,7 @@ public class PacketRemove implements IMessage {
             //be sure we drop the inventory items on death.
             ((GenericRailTransport) entity).dropAllItems();
             entity.setDead();
-            MinecraftServer.getServer().worldServers[dimensionId].removeEntity(entity);
+            DimensionManager.getWorld(dimensionId).removeEntity(entity);
         }
     }
     /**puts the variables into a Byte Buffer so they can be sent to server*/

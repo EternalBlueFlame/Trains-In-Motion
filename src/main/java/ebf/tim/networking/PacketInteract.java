@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.common.DimensionManager;
 
 /**
  * <h1>Mount packet</h1>
@@ -33,7 +34,7 @@ public class PacketInteract implements IMessage {
         entityId = bbuf.readInt();
         dimensionId=bbuf.readInt();
         playerId=bbuf.readInt();
-        Entity e = MinecraftServer.getServer().worldServers[dimensionId].getEntityByID(entityId);
+        Entity e = DimensionManager.getWorld(dimensionId).getEntityByID(entityId);
         if (e instanceof GenericRailTransport) {
             ((GenericRailTransport)e).interact(playerId, false, false, key);
         }

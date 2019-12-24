@@ -5,6 +5,7 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.common.DimensionManager;
 
 /**
  * <h1>Mount packet</h1>
@@ -32,7 +33,7 @@ public class PacketPaint implements IMessage {
         key = ByteBufUtils.readUTF8String(bbuf);
 
         try {
-            MinecraftServer.getServer().worldServers[dimensionID].getEntityByID(entityId).
+            DimensionManager.getWorld(dimensionID).getEntityByID(entityId).
                     getDataWatcher().updateObject(24, key);
         } catch (Exception e){
             System.out.println("Forge must have confused trains with chickens... You should tell Eternal, and send him this entire stacktrace, just to be sure.");

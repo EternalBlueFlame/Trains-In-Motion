@@ -105,8 +105,8 @@ public class StaticModelAnimator extends AnimationBase {
                 RailUtility.stringContains(part.boxName,tagWheel) ||
                 RailUtility.stringContains(part.boxName,"smoke") ||
                 RailUtility.stringContains(part.boxName,"steam") ||
-                RailUtility.stringContains(part.boxName,"door") ||
-                RailUtility.stringContains(part.boxName,"lamp");
+                RailUtility.stringContains(part.boxName,"door");// ||
+                //RailUtility.stringContains(part.boxName,"lamp");
     }
 
 

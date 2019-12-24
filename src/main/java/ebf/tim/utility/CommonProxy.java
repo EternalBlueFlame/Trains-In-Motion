@@ -102,6 +102,7 @@ public class CommonProxy implements IGuiHandler {
      *
      * We can't use a foreach loop, if we do it will very often throw a java.util.ConcurrentModificationException
      */
+    @Deprecated //use a world relative value via DimensionManager.getWorld(dimensionId)
     @Nullable
     public static Entity getEntityFromUuid(UUID uuid) {
         //loop for dimensions, even ones from mods.
