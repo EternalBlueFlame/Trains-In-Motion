@@ -75,7 +75,6 @@ public class EntityTrainCore extends GenericRailTransport {
     public void entityInit(){
         super.entityInit();
         this.dataWatcher.addObject(18, accelerator);//accelerator
-        this.dataWatcher.addObject(16, 0f);//accelerator
         this.updateWatchers = true;
     }
 

@@ -287,12 +287,14 @@ public class ParticleFX {
             GL11.glTranslated(x, y, z);
 
             //GL11.glRotated(entity.offset[4]+entity.host.rotationPitch,1,0,0);
-            GL11.glRotated(-yaw - 270f,0,1,0);
+            GL11.glRotated(-yaw -180f,0,1,0);
             GL11.glRotated(entity.offset[5],1,0,0);
-            GL11.glTranslatef(entity.offset[2]*scale, (entity.offset[1])*-scale, entity.offset[0]*scale);
+            lampCone.setPosition(entity.offset[0]*scale, (entity.offset[1])*scale, entity.offset[2]*scale);
 
-            glScaleF(entity.host.getParticleData(entity.particleID)[1]*-0.3f);
-            GL11.glTranslatef(0.02f*-scale,0.125f*-scale,0.025f*-scale);
+            float scalee =entity.host.getParticleData(entity.particleID)[1]*0.3f;
+            GL11.glScalef(scalee,scalee,scalee);
+            scalee*=0.000625f;
+            //GL11.glTranslatef(0.0275f*scalee,1.2125f*scalee,-0.025f*scalee);
 
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
@@ -307,8 +309,8 @@ public class ParticleFX {
                 TextureManager.bindTexture(new ResourceLocation(TrainsInMotion.MODID, "textures/effects/lamp_low.png"));
             }
             for (int i=0; i<entity.host.getParticleData(entity.particleID)[0]; i++) {
-                GL11.glScalef(1-(i*0.075f),1-(i*0.075f),1f-(i*0.01f));
                 GL11.glPushMatrix();
+                GL11.glScalef(1-(i*0.01f),1-(i*0.075f),1-(i*0.075f));
                 lampCone.render(scale);
                 GL11.glPopMatrix();
             }
@@ -321,13 +323,17 @@ public class ParticleFX {
         } else if (entity.particleType==4) {//sphere lamps
 
             GL11.glTranslated(x, y, z);
-            GL11.glTranslatef(entity.pos[0] *scale, (-8.75f+entity.pos[1])*-scale, entity.pos[2]*scale);
-            GL11.glRotated(270+entity.offset[4]+entity.host.rotationPitch,1,0,0);
-            GL11.glRotated(entity.offset[5],0,1,0);
-            GL11.glRotated(270-(entity.offset[3]+entity.host.rotationYaw),0,0,1);
-            GL11.glTranslatef(0.75f *scale, 1.5f*scale, 0);
 
-            glScaleF(entity.host.getParticleData(entity.particleID)[1]*0.01f);
+            //GL11.glRotated(entity.offset[4]+entity.host.rotationPitch,1,0,0);
+            GL11.glRotated(-yaw - 270f,0,1,0);
+            GL11.glRotated(entity.offset[5],1,0,0);
+            GL11.glTranslatef(entity.offset[2]*scale, (entity.offset[1])*scale, entity.offset[0]*scale);
+
+            float scalee =entity.host.getParticleData(entity.particleID)[1]*0.01f;
+            GL11.glScalef(scalee,scalee,scalee);
+            scalee*=10;
+            //GL11.glTranslatef(-2.5f*scalee,4.5f*scalee,0.5f*scalee);
+
             GL11.glDisable(GL11.GL_LIGHTING);
             Minecraft.getMinecraft().entityRenderer.disableLightmap(1D);
             GL11.glDepthMask(false);
@@ -381,8 +387,11 @@ public class ParticleFX {
     public static ModelRendererTurbo particle = new ModelRendererTurbo((ModelBase) null, 0, 0, 16, 16)
             .addBox(0,0,0, 4, 4, 4).setRotationPoint(-2F, 2F, -1F);
     public static ModelRendererTurbo lampCone = new ModelRendererTurbo((ModelBase) null, 0, 0, 8, 16)
-            .addCylinder(0,0,0, 1, 5, 16, 1F, 0.01F, MR_BOTTOM, 1,1, 6).setRotationAngle(90,0,0);
-            //.setPosition(-0.00625f, -5.025f, -0.0125f);
+                    .addCylinder(0, 0, 0, 1, 5, 16, 0.01f, 1, 4, 1,1,6)
+                    .setRotationPoint(0, 0, 0).setRotationAngle(0, 0, -90);
+                        //.addCylinder(-0.00625f, -5.025f, -0.0125f, 1, 5, 16, 1F, 0.01F, MR_TOP, 1,1, 6);
+
+    //.setPosition(-0.00625f, -5.025f, -0.0125f);
     public static ModelRendererTurbo lampSphere = new ModelRendererTurbo((ModelBase) null, 0, 0, 64, 64)
             .addSphere(0,0,0, 2, 9, 9,1,1);
 

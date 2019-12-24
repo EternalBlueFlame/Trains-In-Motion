@@ -197,6 +197,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         this.dataWatcher.addObject(13, 0);//train fuel consumption current
         this.dataWatcher.addObject(20, "");//fluid tank data
         this.dataWatcher.addObject(15, 0);//train heat
+        this.dataWatcher.addObject(16, 40.0f);//train heat
         this.dataWatcher.addObject(17, bools!=null?bools.toInt():BitList.newInt());//booleans
         //18 is used by EntityTrainCore
         //19 is used by the core minecart
@@ -1748,7 +1749,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             case 2:{return new int[]{2, 100, 0xEEEEEE};}//steam
             case 3:{return new int[]{6, 100, 0xCECDCB};}//led lamp
             case 4:{return new int[]{3, 50, 0xCC0000};}//reverse lamp
-            case 5:{return new int[]{3, 50, 0xCCCC00};}//small sphere lamp
+            case 5:{return new int[]{3, 10, 0xCCCC00};}//small sphere lamp
             default:{return new int[]{5, 100, 0xCCCC00};}//lamp
         }
     }

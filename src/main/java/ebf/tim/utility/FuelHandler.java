@@ -115,20 +115,35 @@ public class FuelHandler{
 			}
 		}
 
+		DebugUtil.println(train.worldObj.getBiomeGenForCoords(train.chunkCoordX, train.chunkCoordZ).temperature,
+
+				train.getDataWatcher().getWatchableObjectFloat(16),
+
+				train.getDataWatcher().getWatchableObjectInt(15));
 		//be sure there is burnHeat before trying to consume it
 		if (burnHeat > 1) {
 			//calculate the heat increase
+			float heat = train.getDataWatcher().getWatchableObjectFloat(16);
+			if(heat==0){heat=1;}
 			train.getDataWatcher().updateObject(16,
-					(train.getDataWatcher().getWatchableObjectFloat(16)+
-							(float) ((1f- Math.sqrt(train.getDataWatcher().getWatchableObjectFloat(16)/maxHeat(train))) * Math.sqrt((train.getDataWatcher().getWatchableObjectFloat(16)+burnHeat)/burnHeat))*train.getEfficiency()));
+					(heat+
+							(float) ((1f- Math.sqrt(heat/maxHeat(train))) * Math.sqrt((heat+burnHeat)/burnHeat))*train.getEfficiency()));
+
 		} else {
-			//cool down, or heat up the boiler to match the temperature of the biome and height
-			train.getDataWatcher().updateObject(16,
-					train.getDataWatcher().getWatchableObjectFloat(16)+ 1f- (float)Math.sqrt(train.getDataWatcher().getWatchableObjectFloat(16)/ (
-					(((train.worldObj.getBiomeGenForCoords(train.chunkCoordX, train.chunkCoordZ).temperature -0.15f)//biome temperature with freezing point (0.15) set to 0
-							- (0.0014166695 * (train.posY - 64))) //temperature changes by 0.00166667 for every meter above or below sea level (64), the value is -15% to match up with the change to biome temp
-							*36.8)//converts the temp to celsius with compensation for the temp offset
-			)));
+			float heat = (((train.worldObj.getBiomeGenForCoords(train.chunkCoordX, train.chunkCoordZ).temperature -0.15f)//biome temperature with offset to compensate for freezing point
+							- (0.0014166695f * ((float)train.posY - 64f)))//temperature changes by 0.00166667 for every meter above or below sea level (64)
+							*0.368f//convert to celsius*0.01
+			);
+
+			//cap the heat to the biome temp
+			if((heat >0 && train.getDataWatcher().getWatchableObjectFloat(16)>= heat*100)
+			|| (heat <0 && train.getDataWatcher().getWatchableObjectFloat(16)<= heat*100)
+			){
+				train.getDataWatcher().updateObject(16, heat*100);
+			} else {
+				train.getDataWatcher().updateObject(16, train.getDataWatcher().getWatchableObjectFloat(16)+heat);
+			}
+			DebugUtil.println(heat, train.getDataWatcher().getWatchableObjectFloat(16));
 		}
 		//if the boiler temp is above the boiling point, start generating steam.
 		if (train.getDataWatcher().getWatchableObjectFloat(16) >100){

@@ -96,6 +96,7 @@ public class RenderEntity extends Render {
                             render.showModel = false;
                         }
                         if(render.boxName.contains(StaticModelAnimator.tagGlow)){
+                            render.boxName=render.boxName.replace(StaticModelAnimator.tagGlow,"");
                             render.ignoresLighting=true;
                         }
                         if (StaticModelAnimator.checkAnimators(render)) {

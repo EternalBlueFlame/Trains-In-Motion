@@ -34,7 +34,7 @@ public class ModelTies {
             //define position
             points.add(new Vec5f(
                     (((1f - t) * (1f - t)) * shape.getStart().xCoord) + (2f * (1f - t) * t * shape.getCenter().xCoord) + ((t * t) * shape.getEnd().xCoord),//X
-                    0,//Y
+                    (((1f - t) * (1f - t)) * shape.getStart().yCoord) + (2f * (1f - t) * t * shape.getCenter().yCoord) + ((t * t) * shape.getEnd().yCoord),//Y
                     (((1f - t) * (1f - t)) * shape.getStart().zCoord) + (2f * (1f - t) * t * shape.getCenter().zCoord) + ((t * t) * shape.getEnd().zCoord)//X
                     ,0,0));
             t += originalT;
