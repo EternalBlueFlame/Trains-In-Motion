@@ -23,8 +23,6 @@ public class ModelRail {
         Tessellator.getInstance().draw();
     }
 
-    private static Vec6f currentVec;
-
     public static void centerShading(float offset, int[] color, int dark, boolean pass0){
         if(offset>0 ^ !pass0) {
             GL11.glColor4f(

@@ -6,11 +6,14 @@ import ebf.XmlBuilder;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.utility.CommonProxy;
+import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import mods.railcraft.api.core.items.ITrackItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockMushroom;
+import net.minecraft.block.BlockRailBase;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -19,6 +22,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.IIcon;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -50,6 +55,42 @@ public class ItemRail extends Item implements ITrackItem {
                 case 3:{++z;break;}
                 case 4:{--x;break;}
                 case 5:{++x;break;}
+            }
+        }
+
+        if(block instanceof BlockRailBase){
+            if(meta==0) {
+                return false;
+            } else if (meta==1){
+                y--;
+                int rotation = MathHelper.floor_double((player!=null?player.rotationYawHead:p_77648_10_) * 4.0F / 360.0F + 0.5D) & 3;
+                switch (rotation){
+                    case 0:{z++;
+                    if(world.getBlock(x,y,z) instanceof BlockRailBase){z++;}
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){z++;}
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){z++;}
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){return false;}
+                        break;
+                    }//south
+                    case 1:{x--;
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){x--;}
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){x--;}
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){x--;}
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){return false;}}//west
+                    break;
+                    case 2:{z--;
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){z--;}
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){z--;}
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){z--;}
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){return false;}}//north
+                    break;
+                    case 3:{x++;
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){x++;}
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){x++;}
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){x++;}
+                        if(world.getBlock(x,y,z) instanceof BlockRailBase){return false;}}//east
+                }
+
             }
         }
 

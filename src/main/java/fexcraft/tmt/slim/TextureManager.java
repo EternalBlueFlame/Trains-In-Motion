@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
@@ -34,17 +35,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static org.lwjgl.opengl.GL11.*;
 
 public class TextureManager {
 
 
-    public static ByteBuffer renderPixels = ByteBuffer.allocateDirect((4096*4096)*4);
+    //public static ByteBuffer renderPixels = ByteBuffer.allocateDirect((4096*4096)*4);
     private static int  skyLight;
     private static Set<?> MCResourcePacks;
     public static Map<String, Integer> tmtBoundTextures = new HashMap<>();
@@ -150,50 +149,56 @@ public class TextureManager {
      */
     public static void collectIngotColors(){
         String[] ores = OreDictionary.getOreNames();
+        List<ItemStack> Ores=new ArrayList<>();
+
+        Ores.add(new ItemStack(Items.diamond));
+        Ores.add(new ItemStack(Items.blaze_rod));
+
+        for(String o: ores) {
+            if (o.contains("ingot") || o.contains("plank")) {
+                Ores.addAll(OreDictionary.getOres(o));
+            }
+        }
+
 
         int red,green,blue,divisor;
         int[]rgb, colorBuff;
         ResourceLocation texture;
-        for(String o: ores){
-            if (o.contains("ingot")){
-                for (ItemStack s : OreDictionary.getOres(o)){
+        for (ItemStack s : Ores){
 
-                    texture=null;
-                    red =0;green=0;blue=0;divisor=0;
-                    Item item = s.getItem();
-                    String textureName = item.getIcon(s,0).getIconName();
-                    if(textureName != null){
-                        if(textureName.split(":").length == 1){
-                            textureName = "minecraft:" + textureName;
-                        }
-                        texture = new ResourceLocation(textureName.split(":")[0], "textures/items/" + textureName.split(":")[1] + ".png");
-                    }
-
-                    if(texture != null){
-                        try {
-                            colorBuff = TextureUtil.readImageData(Minecraft.getMinecraft().getResourceManager(), texture);
-                            for(int c : colorBuff){
-                                rgb=hexTorgba(c);
-                                if(rgb[3]>128) {
-                                    if(rgb[0]+rgb[1]+rgb[2]>20) {
-                                        red+=rgb[2];
-                                        blue+=rgb[1];
-                                        green+=rgb[0];
-                                        divisor++;
-                                    }
-                                }
-                            }
-                            ingotColors.put(s, new int[]{red/divisor,blue/divisor,green/divisor});
-                        } catch (IOException e) {
-                            DebugUtil.println("Caught exception while parsing texture to get color: ");
-                            e.printStackTrace();
-                        }
-
-                    }
-
-
+            texture=null;
+            red =0;green=0;blue=0;divisor=0;
+            Item item = s.getItem();
+            String textureName = item.getIcon(s,0).getIconName();
+            if(textureName != null){
+                if(textureName.split(":").length == 1){
+                    textureName = "minecraft:" + textureName;
                 }
+                texture = new ResourceLocation(textureName.split(":")[0], "textures/items/" + textureName.split(":")[1] + ".png");
             }
+
+            if(texture != null){
+                try {
+                    colorBuff = TextureUtil.readImageData(Minecraft.getMinecraft().getResourceManager(), texture);
+                    for(int c : colorBuff){
+                        rgb=hexTorgba(c);
+                        if(rgb[3]>128) {
+                            if(rgb[0]+rgb[1]+rgb[2]>20) {
+                                red+=25+rgb[2];
+                                blue+=25+rgb[1];
+                                green+=25+rgb[0];
+                                divisor++;
+                            }
+                        }
+                    }
+                    ingotColors.put(s, new int[]{red/divisor,blue/divisor,green/divisor});
+                } catch (IOException e) {
+                    DebugUtil.println("Caught exception while parsing texture to get color: ");
+                    e.printStackTrace();
+                }
+
+            }
+
         }
     }
 

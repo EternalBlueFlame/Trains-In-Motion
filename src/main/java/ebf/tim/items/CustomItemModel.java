@@ -55,14 +55,13 @@ public class CustomItemModel implements IItemRenderer /*ICustomModelLoader*/ {
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
         return true;//models.containsKey(new ResourceLocation(item.getUnlocalizedName()));
     }
-
+    float scale;
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        //DebugUtil.println("RENDERING");
         if(item==null){return;}
         if (item.getItem() instanceof ItemTransport){
             GL11.glPushMatrix();
-            float scale = ((ItemTransport) item.getItem()).entity.getHitboxSize()[0];
+            scale = ((ItemTransport) item.getItem()).entity.getHitboxSize()[0];
             if(scale!=0){
                 scale = 1.3f/(scale /1.3f);
             }

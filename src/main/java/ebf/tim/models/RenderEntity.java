@@ -86,7 +86,7 @@ public class RenderEntity extends Render {
             entity.renderData.bogies = entity.bogies();
 
             //cache animating parts
-            if (y!=0 && ClientProxy.EnableAnimations && entity.renderData.needsModelUpdate) {
+            if (entity.worldObj!=null && ClientProxy.EnableAnimations && entity.renderData.needsModelUpdate) {
                 boolean isAdded;
                 for (ModelBase part : entity.renderData.modelList) {
                     for (ModelRendererTurbo render : part.getParts()) {
@@ -169,7 +169,7 @@ public class RenderEntity extends Render {
          * Be sure animations are enabled in user settings, then check of there is something to animate.
          * if there is, then calculate the vectors and apply the animations
          */
-        if (y!=0 && !Minecraft.getMinecraft().isGamePaused() &&ClientProxy.EnableAnimations) {
+        if (entity.worldObj!=null && !Minecraft.getMinecraft().isGamePaused() &&ClientProxy.EnableAnimations) {
             if (entity.renderData.wheelPitch >= 6.2831855f || entity.renderData.wheelPitch <=-6.2831855f) {
                 entity.renderData.wheelPitch -= Math.copySign(6.2831855f, entity.renderData.wheelPitch);
             }
@@ -271,6 +271,8 @@ public class RenderEntity extends Render {
         }
 
         GL11.glPopMatrix();
+        GL11.glDisable(GL11.GL_LIGHTING);
+        if(entity.worldObj==null){return;}
 
         //render the particles, if there are any.
         for(ParticleFX particle : entity.renderData.particles){
@@ -283,7 +285,6 @@ public class RenderEntity extends Render {
             GL11.glPushMatrix();
             GL11.glEnable(GL11.GL_BLEND);
             OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-            GL11.glDisable(GL11.GL_LIGHTING);
             GL11.glDisable(GL11.GL_TEXTURE_2D);
             GL11.glDisable(GL11.GL_ALPHA_TEST);
             //GL11.glDepthMask(false);
@@ -387,7 +388,6 @@ public class RenderEntity extends Render {
             Tessellator.getInstance().draw();
 
             GL11.glDisable(GL11.GL_BLEND);
-            GL11.glEnable(GL11.GL_LIGHTING);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
             GL11.glEnable(GL11.GL_ALPHA_TEST);
             //GL11.glDepthMask(true);

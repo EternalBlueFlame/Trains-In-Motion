@@ -187,11 +187,11 @@ public class RecipeManager {
         //handle adding to an existing stack
         if(hostInventory.getStackInSlot(5)!=null && hostInventory.getStackInSlot(5).getItem() instanceof ItemRail &&
                 hostInventory.getStackInSlot(0)==getStackIngot(hostInventory) &&
-                hostInventory.getStackInSlot(2)==getStackTies(hostInventory) &&
-                hostInventory.getStackInSlot(1)==getStackBallast(hostInventory)){
+                hostInventory.getStackInSlot(1)==getStackTies(hostInventory) &&
+                hostInventory.getStackInSlot(2)==getStackBallast(hostInventory)){
 
             ItemStack rail = ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
-                    hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(2),hostInventory.getStackInSlot(1),
+                    hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(1),hostInventory.getStackInSlot(2),
                     null);
 
             rail.getTagCompound().setInteger("count",
@@ -199,7 +199,7 @@ public class RecipeManager {
             return rail;
         }
         //handle making a new stack
-        if(hostInventory.getStackInSlot(400)!=null && ingotInDirectory(hostInventory.getStackInSlot(400).getItem())) {
+        if(hostInventory.getStackInSlot(0)!=null && ingotInDirectory(hostInventory.getStackInSlot(0).getItem())) {
             return ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
                     hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(2),hostInventory.getStackInSlot(1),
                     null);

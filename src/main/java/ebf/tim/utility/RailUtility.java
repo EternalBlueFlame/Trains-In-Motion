@@ -16,7 +16,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import zoranodensha.api.structures.tracks.ITrackBase;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -47,7 +46,8 @@ public class RailUtility {
      * a modified version of vanilla track detection so that way it's more efficient and can support rails from other mods.
      */
     public static boolean isRailBlockAt(World world, int x, int y, int z) {
-        return (world.getTileEntity(x, y, z) instanceof ITrackBase || world.getBlock(x, y, z) instanceof BlockRailBase);
+        //todo ZnD support, either by jar reference or API update
+        return (/*world.getTileEntity(x, y, z) instanceof ITrackBase ||*/ world.getBlock(x, y, z) instanceof BlockRailBase);
     }
 
 

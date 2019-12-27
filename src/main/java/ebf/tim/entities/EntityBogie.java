@@ -23,7 +23,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import zoranodensha.api.structures.tracks.ITrackBase;
 
 /**
  * <h1>Bogie Core</h1>
@@ -236,9 +235,10 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
                 segmentMovement(Math.abs(motionX)+Math.abs(motionZ),((BlockRailBase)block).getRailMaxSpeed(worldObj, this, floorY, floorX, floorZ),
                        hasDrag, floorX, floorY, floorZ, (BlockRailBase) block, host);
                 //update on ZnD rails, and ones that don't extend block rail base.
-            } else if (block instanceof ITrackBase) {
+                //todo ZnD support, either by jar reference or API update
+            //} else if (block instanceof ITrackBase) {
                 //update position for ZnD rails.
-                moveBogieZnD(motionX, motionZ, floorX, floorY, floorZ, (ITrackBase) block);
+                //moveBogieZnD(motionX, motionZ, floorX, floorY, floorZ, (ITrackBase) block);
             } else {
                 return true;
             }
@@ -366,6 +366,8 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
     }
 
 
+    /*
+    //todo ZnD support, either by jar reference or API update
     private void moveBogieZnD(double currentMotionX, double currentMotionZ, int floorX, int floorY, int floorZ, ITrackBase track){
         double[][] posVec6 = track.getPositionOnTrack(this);
         posX = posVec6[0][0];
@@ -374,7 +376,7 @@ public class EntityBogie extends EntityMinecart implements IMinecart, IRoutableC
         //6[0] is xyz
         //6[1] is rotations
         //System.out.println(track.getDirectionOfSection().toString() + ":::" + track.getOrientation());
-    }
+    }*/
 
 
 
