@@ -125,19 +125,37 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 //only part that theoretically works.
                 if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1) {
                     meta = 1;
-                } else {
-                    changed = true;
                 }
+                changed = true;
                 break;
             }
             case 1: {
                 if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 0) {
                     meta = 0;
-                } else {
-                    changed = true;
                 }
+                changed = true;
                 break;
             }
+            case 6:{}
+            case 7:{
+                if(world.getBlockMetadata(x-1,y,z)==6){
+                    if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==0) {
+                        return 0;//cover parallel entering from wrong end on straight
+                    } else if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==6){
+                        return 8;//cover parallel off shape
+                    }
+                }
+                changed = true;
+                break;
+            }
+            case 8:{
+                if(world.getBlockMetadata(x-1,y,z)==6 && cart.motionZ<0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
+                    return 0;//this already worked fine, but make it smoother
+                }
+                changed = true;
+                break;
+            }
+            case 9:{}
             default: {
                 changed = true;
             }

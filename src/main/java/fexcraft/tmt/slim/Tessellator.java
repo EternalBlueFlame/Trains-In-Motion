@@ -33,7 +33,6 @@ public class Tessellator{
 	public void startDrawing(int mode){
 		verticies=new ArrayList<>();
 		normalMapped=false;
-		glEnable(GL_NORMALIZE);
 		GL11.glBegin(mode);
 	}
 

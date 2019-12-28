@@ -16,12 +16,13 @@ import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.items.ItemPaintBucket;
 import ebf.tim.items.ItemRail;
 import ebf.tim.models.RenderEntity;
-import ebf.tim.models.RenderScaledPlayer;
 import ebf.tim.models.rails.ModelBallast;
 import ebf.tim.registry.TiMGenericRegistry;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -202,7 +203,7 @@ public class ClientProxy extends CommonProxy {
         //seats
         RenderingRegistry.registerEntityRenderingHandler(EntitySeat.class, nullRender);
         //player scaler
-        RenderingRegistry.registerEntityRenderingHandler(EntityPlayer.class, new RenderScaledPlayer());
+        RenderingRegistry.registerEntityRenderingHandler(EntityPlayer.class, playerRender);
 
         //oveides the server registration of the rail item, so the client can have a complex model.
         //   server can't load the CustomItemModel class due to it's reliance on GL imports.
@@ -303,6 +304,35 @@ public class ClientProxy extends CommonProxy {
         @Override
         protected ResourceLocation getEntityTexture(Entity p_110775_1_) {
             return null;
+        }
+    };
+
+    private static final RenderPlayer playerRender= new RenderPlayer(){
+        GenericRailTransport t;
+        @Override
+        public void doRender(AbstractClientPlayer p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_){
+            if (p_76986_1_.ridingEntity instanceof GenericRailTransport) {
+                t=(GenericRailTransport) p_76986_1_.ridingEntity;
+                GL11.glPushMatrix();
+                GL11.glScalef(t.getPlayerScale(), t.getPlayerScale(), t.getPlayerScale());
+                super.doRender(p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
+                GL11.glPopMatrix();
+
+            } else if (p_76986_1_.ridingEntity instanceof EntitySeat){
+                t=(GenericRailTransport) p_76986_1_.worldObj.getEntityByID(((EntitySeat) p_76986_1_.ridingEntity).parentId);
+                GL11.glPushMatrix();
+                GL11.glScalef(t.getPlayerScale(), t.getPlayerScale(), t.getPlayerScale());
+                if(p_76986_1_.ridingEntity.getLookVec() !=null) {
+                    GL11.glRotated(p_76986_1_.ridingEntity.getLookVec().xCoord, 0, 1, 0);
+                    GL11.glRotated(p_76986_1_.ridingEntity.getLookVec().yCoord, 0, 0, 1);
+                    GL11.glRotated(p_76986_1_.ridingEntity.getLookVec().zCoord, 1, 0, 0);
+                }
+                super.doRender(p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
+                GL11.glPopMatrix();
+
+            } else {
+                super.doRender(p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
+            }
         }
     };
 }

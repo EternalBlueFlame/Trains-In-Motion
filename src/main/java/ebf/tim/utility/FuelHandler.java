@@ -114,12 +114,6 @@ public class FuelHandler{
 				train.addItem(new ItemStack(Items.bucket));
 			}
 		}
-
-		DebugUtil.println(train.worldObj.getBiomeGenForCoords(train.chunkCoordX, train.chunkCoordZ).temperature,
-
-				train.getDataWatcher().getWatchableObjectFloat(16),
-
-				train.getDataWatcher().getWatchableObjectInt(15));
 		//be sure there is burnHeat before trying to consume it
 		if (burnHeat > 1) {
 			//calculate the heat increase
@@ -143,7 +137,6 @@ public class FuelHandler{
 			} else {
 				train.getDataWatcher().updateObject(16, train.getDataWatcher().getWatchableObjectFloat(16)+heat);
 			}
-			DebugUtil.println(heat, train.getDataWatcher().getWatchableObjectFloat(16));
 		}
 		//if the boiler temp is above the boiling point, start generating steam.
 		if (train.getDataWatcher().getWatchableObjectFloat(16) >100){

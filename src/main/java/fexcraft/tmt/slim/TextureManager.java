@@ -169,7 +169,7 @@ public class TextureManager {
             texture=null;
             red =0;green=0;blue=0;divisor=0;
             Item item = s.getItem();
-            String textureName = item.getIcon(s,0).getIconName();
+            String textureName = item.getIcon(s,0)!=null?item.getIcon(s,0).getIconName():null;
             if(textureName != null){
                 if(textureName.split(":").length == 1){
                     textureName = "minecraft:" + textureName;

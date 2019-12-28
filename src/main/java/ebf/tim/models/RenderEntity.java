@@ -156,6 +156,7 @@ public class RenderEntity extends Render {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glAlphaFunc(GL11.GL_GREATER, 0.1f);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_NORMALIZE);
 
             GL11.glEnable(GL11.GL_LIGHTING);
         //set the render position
@@ -236,18 +237,16 @@ public class RenderEntity extends Render {
         if (entity.renderData.bogies != null) {
             for(Bogie b : entity.renderData.bogies) {
                 ii=0;
-                GL11.glPushMatrix();
                 //bind the texture
                 if (s.getBogieSkin(ii) != null) {
-                    TextureManager.bindTexture(s.getBogieSkin(i), s.colorsFrom, s.colorsTo, entity.colorsFrom, entity.colorsTo);
+                    TextureManager.bindTexture(s.getBogieSkin(ii), s.colorsFrom, s.colorsTo, entity.colorsFrom, entity.colorsTo);
                 }
                 GL11.glTranslated(-b.offset[0], -b.offset[1], -b.offset[2]);
                 b.setRotation(entity);
                 GL11.glPushMatrix();
                 GL11.glRotatef(b.rotationYaw-yaw, 0.0f, 1.0f, 0);
-                //GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
+                GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
                 b.bogieModel.render(null, 0, 0, 0, 0, 0, entity.getRenderScale());
-                GL11.glPopMatrix();
                 if(b.subBogies!=null) {
                     iii=0;
                     for (Bogie sub : b.subBogies) {
@@ -257,7 +256,7 @@ public class RenderEntity extends Render {
                         GL11.glPushMatrix();
                         GL11.glTranslated(sub.offset[0], sub.offset[1], sub.offset[2]);
                         sub.setRotation(entity);
-                        GL11.glRotatef(sub.rotationYaw, 0.0f, 1.0f, 0);
+                        GL11.glRotatef(sub.rotationYaw-yaw, 0.0f, 1.0f, 0);
                         GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
                         sub.bogieModel.render(null, 0, 0, 0, 0, 0, entity.getRenderScale());
                         GL11.glPopMatrix();

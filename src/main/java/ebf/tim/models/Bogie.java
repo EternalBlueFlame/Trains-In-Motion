@@ -5,6 +5,9 @@ import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelBase;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * <h1>New Bogie</h1>
@@ -19,7 +22,7 @@ public class Bogie {
     public ModelBase bogieModel;
     public float[] offset = new float[]{0,0,0},prevPos = null, position = new float[]{0,0,0};
 
-    public Bogie[] subBogies=null;
+    public List<Bogie> subBogies=new ArrayList<>();
 
 
     public double sqrtPos = 0, oldSqrtPos = 0;
@@ -46,9 +49,18 @@ public class Bogie {
         if(offset!=null) {
             this.offset = offset;
         }
-        this.subBogies=bogies;
+        Collections.addAll(this.subBogies, bogies);
     }
 
+    public Bogie addSubBogie(ModelBase model, float offsetX, float offsetY, float offsetZ){
+        subBogies.add(new Bogie(model,offsetX,offsetY,offsetZ));
+        return this;
+    }
+
+    public Bogie addSubBogie(ModelBase model, float[] offset){
+        subBogies.add(new Bogie(model,offset));
+        return this;
+    }
 
     /**
      * <h2>handle rotation of model</h2>
