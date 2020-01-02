@@ -141,8 +141,6 @@ public class TiMGenericRegistry {
     private static List<String>usedNames = new ArrayList<>();
     private static int registryPosition =17;
 
-    //the entity registrations are sided to improve performance on client.
-    @SideOnly(Side.SERVER)
     public static void registerTransports(String MODID, GenericRailTransport[] entities, Object entityRender){
         if(registryPosition==-1){
             DebugUtil.println("ERROR", "ADDING TRANSPORT REGISTRY ITEMS OUTSIDE MOD INIT", "PLEASE REGISTER YOUR ENTITIES IN THE FOLLOWING EVENT:",
@@ -163,37 +161,7 @@ public class TiMGenericRegistry {
                 CommonProxy.recipesInMods.put(MODID, new ArrayList<Recipe>());
                 CommonProxy.recipesInMods.get(MODID).add(getRecipe(registry.getRecipie(), registry.getCartItem()));
             }
-            registry.registerSkins();
-            if(registry.getRecipie()!=null){
-                RecipeManager.registerRecipe(getRecipe(registry.getRecipie(), registry.getCartItem()));
-            }
-            usedNames.add(registry.transportName());
-            registryPosition++;
-        }
-    }
-
-    @SideOnly(Side.CLIENT)
-    public static void registerTransports(String MODID, GenericRailTransport[] entities, net.minecraft.client.renderer.entity.Render entityRender){
-        if(registryPosition==-1){
-            DebugUtil.println("ERROR", "ADDING TRANSPORT REGISTRY ITEMS OUTSIDE MOD INIT", "PLEASE REGISTER YOUR ENTITIES IN THE FOLLOWING EVENT:",
-                    "@Mod.EventHandler public void init(FMLInitializationEvent event)");
-        }
-        for (GenericRailTransport registry : entities) {
-            if(DebugUtil.dev() && usedNames.contains(registry.transportName())){
-                DebugUtil.println(registry.getClass().getName(),"is trying to register under the name", usedNames.contains(registry.transportName()), "which is already used");
-            }
-            cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(
-                    registry.getClass(),
-                    registry.transportName().replace(" ","") + ".entity",
-                    registryPosition, TrainsInMotion.instance, 3000, 1, true);
-            GameRegistry.registerItem(registry.getCartItem().getItem(), registry.getCartItem().getItem().getUnlocalizedName());
-            if(CommonProxy.recipesInMods.containsKey(MODID)){
-                CommonProxy.recipesInMods.get(MODID).add(getRecipe(registry.getRecipie(), registry.getCartItem()));
-            } else {
-                CommonProxy.recipesInMods.put(MODID, new ArrayList<Recipe>());
-                CommonProxy.recipesInMods.get(MODID).add(getRecipe(registry.getRecipie(), registry.getCartItem()));
-            }
-            if(ClientProxy.hdTransportItems){
+            if(TrainsInMotion.proxy.isClient() && ClientProxy.hdTransportItems){
                 MinecraftForgeClient.registerItemRenderer(registry.getCartItem().getItem(), itemModel);
             }
             registry.registerSkins();
@@ -201,15 +169,17 @@ public class TiMGenericRegistry {
                 RecipeManager.registerRecipe(getRecipe(registry.getRecipie(), registry.getCartItem()));
             }
             ItemCraftGuide.itemEntries.add(registry.getClass());
-            if(entityRender==null){
-                cpw.mods.fml.client.registry.RenderingRegistry.registerEntityRenderingHandler(registry.getClass(), ClientProxy.getEntityRender());
-                ClientProxy.getEntityRender().doRender(registry,0,0,0,0,0);
-            } else {
-                cpw.mods.fml.client.registry.RenderingRegistry.registerEntityRenderingHandler(registry.getClass(), entityRender);
-                entityRender.doRender(registry,0,0,0,0,0);
-            }
-            if(ClientProxy.hdTransportItems){
-                itemModel.renderItem(IItemRenderer.ItemRenderType.INVENTORY, registry.getCartItem());
+            if(TrainsInMotion.proxy.isClient()) {
+                if (entityRender == null) {
+                    cpw.mods.fml.client.registry.RenderingRegistry.registerEntityRenderingHandler(registry.getClass(), (net.minecraft.client.renderer.entity.Render)TrainsInMotion.proxy.getEntityRender());
+                    ((net.minecraft.client.renderer.entity.Render)TrainsInMotion.proxy.getEntityRender()).doRender(registry, 0, 0, 0, 0, 0);
+                } else {
+                    cpw.mods.fml.client.registry.RenderingRegistry.registerEntityRenderingHandler(registry.getClass(), (net.minecraft.client.renderer.entity.Render)entityRender);
+                    ((net.minecraft.client.renderer.entity.Render)entityRender).doRender(registry, 0, 0, 0, 0, 0);
+                }
+                if (ClientProxy.hdTransportItems) {
+                    itemModel.renderItem(IItemRenderer.ItemRenderType.INVENTORY, registry.getCartItem());
+                }
             }
             usedNames.add(registry.transportName());
             registryPosition++;

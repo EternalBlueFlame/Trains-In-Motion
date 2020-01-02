@@ -132,6 +132,7 @@ public class CommonProxy implements IGuiHandler {
 
 
     public Object getTESR(){return null;}
+    public Object getEntityRender(){return null;}
     public Object getNullRender(){return null;}
 
     /*
