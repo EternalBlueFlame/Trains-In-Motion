@@ -252,8 +252,8 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public Object getTESR(){return specialRenderer;}
-    @Override
-    public Object getEntityRender(){return transportRenderer;}
+
+    public static Render getEntityRender(){return transportRenderer;}
     @Override
     public Object getNullRender(){return nullRender;}
 

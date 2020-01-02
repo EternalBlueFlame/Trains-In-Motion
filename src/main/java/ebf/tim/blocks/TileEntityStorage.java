@@ -44,11 +44,11 @@ public class TileEntityStorage extends TileEntity implements IInventory {
             }
         } else {
             inventory.add(new ItemStackSlot(this,400).setCoords( 30 , -2).setCrafting(true)); //ingot
-            inventory.add(new ItemStackSlot(this,401).setCoords( 30 , 15).setCrafting(true)); //ties
-            inventory.add(new ItemStackSlot(this,402).setCoords( 30 , 33).setCrafting(true)); //ballast
+            inventory.add(new ItemStackSlot(this,401).setCoords( 30 , 18).setCrafting(true)); //ties
+            inventory.add(new ItemStackSlot(this,402).setCoords( 30 , 37).setCrafting(true)); //ballast
 
-            inventory.add(new ItemStackSlot(this,403).setCoords( 48 , 7).setCrafting(true)); //wires
-            inventory.add(new ItemStackSlot(this,404).setCoords( 48 , 25).setCrafting(true));//augument slot
+            inventory.add(new ItemStackSlot(this,403).setCoords( 50 , 7).setCrafting(true)); //wires
+            inventory.add(new ItemStackSlot(this,404).setCoords( 50 , 27).setCrafting(true));//augument slot
 
             inventory.add(new ItemStackSlot(this,405).setCoords( 124 , -2).setCrafting(true));//old shape input
 

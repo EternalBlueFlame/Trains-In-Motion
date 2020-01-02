@@ -17,6 +17,7 @@ public class ModelBallast {
     public static void modelPotatoBallast(RailShapeCore shape, float maxWidth, float minWidth, ItemStack b){
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.1, 0);
+        GL11.glEnable(GL11.GL_NORMALIZE);
 
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.UP.ordinal(), b);
 

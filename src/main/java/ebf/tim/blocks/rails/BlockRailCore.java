@@ -136,13 +136,43 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 changed = true;
                 break;
             }
-            case 6:{}
-            case 7:{
-                if(world.getBlockMetadata(x-1,y,z)==6){
+            case 6:{
+                if(world.getBlockMetadata(x+1,y,z)==9 && cart.motionZ>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
+                    return 0;//this already worked fine, but make it smoother
+                } else if(world.getBlockMetadata(x+1,y,z)==7){
                     if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==0) {
                         return 0;//cover parallel entering from wrong end on straight
-                    } else if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==6){
-                        return 8;//cover parallel off shape
+                    } else if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==7){
+                        return 9;//cover parallel off shape
+                    }
+                } else if(world.getBlockMetadata(x,y,z+1)==8 && cart.motionX>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==1){
+                    return 1;//this already worked fine, but make it smoother
+                } else if (world.getBlockMetadata(x,y,z+1)==9) {
+                    if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1) {
+                        return 1;//cover parallel entering from wrong end on straight
+                    } else if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 7) {
+                        return 9;//cover parallel off shape
+                    }
+                }
+                changed = true;
+                break;
+            }
+            case 7:{
+                if(world.getBlockMetadata(x-1,y,z)==9 && cart.motionX>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
+                    return 0;//this already worked fine, but make it smoother
+                } else if(world.getBlockMetadata(x-1,y,z)==8){
+                    if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==0) {
+                        return 0;//cover parallel entering from wrong end on straight
+                    } else if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==9){
+                        return 6;//cover parallel off shape
+                    }
+                } else if(world.getBlockMetadata(x,y,z+1)==9 && cart.motionX>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==1){
+                    return 1;//this already worked fine, but make it smoother
+                } else if (world.getBlockMetadata(x,y,z+1)==8) {
+                    if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1) {
+                        return 1;//cover parallel entering from wrong end on straight
+                    } else if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 7) {
+                        return 6;//cover parallel off shape
                     }
                 }
                 changed = true;
@@ -151,11 +181,45 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             case 8:{
                 if(world.getBlockMetadata(x-1,y,z)==6 && cart.motionZ<0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
                     return 0;//this already worked fine, but make it smoother
+                } else if(world.getBlockMetadata(x-1,y,z)==9){
+                    if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==0) {
+                        return 0;//cover parallel entering from wrong end on straight
+                    } else if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==9){
+                        return 7;//cover parallel off shape
+                    }
+                } else if(world.getBlockMetadata(x,y,z-1)==6 && cart.motionX<0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==1){
+                    return 1;//this already worked fine, but make it smoother
+                } else if (world.getBlockMetadata(x,y,z-1)==7) {
+                    if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1) {
+                        return 1;//cover parallel entering from wrong end on straight
+                    } else if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 7) {
+                        return 9;//cover parallel off shape
+                    }
                 }
                 changed = true;
                 break;
             }
-            case 9:{}
+            case 9:{
+                if(world.getBlockMetadata(x+1,y,z)==6 && cart.motionZ>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
+                    return 0;//this already worked fine, but make it smoother
+                } else if(world.getBlockMetadata(x+1,y,z)==7){
+                    if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==0) {
+                        return 0;//cover parallel entering from wrong end on straight
+                    } else if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==8){
+                        return 6;//cover parallel off shape
+                    }
+                } else if(world.getBlockMetadata(x,y,z-1)==7 && cart.motionX>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==1){
+                    return 1;//this already worked fine, but make it smoother
+                } else if (world.getBlockMetadata(x,y,z-1)==6) {
+                    if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1) {
+                        return 1;//cover parallel entering from wrong end on straight
+                    } else if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 6) {
+                        return 8;//cover parallel off shape
+                    }
+                }
+                changed = true;
+                break;
+            }
             default: {
                 changed = true;
             }

@@ -3,6 +3,7 @@ package ebf.tim.utility;
 import ebf.XmlBuilder;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.items.ItemRail;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -14,7 +15,7 @@ import java.util.*;
 public class RecipeManager {
 
     private static Map<String, List<ItemStack>> recipes = new HashMap<>();
-    private static List<Item> ingotDirectory = new ArrayList<>();
+    //private static List<Item> ingotDirectory = new ArrayList<>();
 
 
     public static String stackArrayToString(ItemStack[][] s){
@@ -175,6 +176,20 @@ public class RecipeManager {
     }
 
 
+    public static List<ItemStack> getAcceptedRailItems(){
+        List<ItemStack> Ores=new ArrayList<>();
+
+        Ores.add(new ItemStack(Items.diamond));
+        Ores.add(new ItemStack(Items.blaze_rod));
+
+        for(String o: OreDictionary.getOreNames()) {
+            if (o.contains("ingot") || o.contains("plank")) {
+                Ores.addAll(OreDictionary.getOres(o));
+            }
+        }
+        return Ores;
+    }
+
     public static ItemStack[] getTransportRecipe(IInventory hostInventory){
         return new ItemStack[]{
                 hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(1),hostInventory.getStackInSlot(2),
@@ -205,24 +220,19 @@ public class RecipeManager {
                     null);
         }
         //todo: add support for augument slot
-        //todo: add support for old rail slot
         return null;
 
     }
 
 
+
     public static boolean ingotInDirectory(Item i){
-        if(ingotDirectory.size()==0){
-            String[] ores = OreDictionary.getOreNames();
-            for(String o: ores) {
-                if (o.contains("ingot")) {
-                    for (ItemStack s : OreDictionary.getOres(o)) {
-                        ingotDirectory.add(s.getItem());
-                    }
-                }
+        for(ItemStack stack : getAcceptedRailItems()){
+            if (stack !=null && stack.getItem()==i){
+                return true;
             }
         }
-        return ingotDirectory.contains(i);
+        return false;
     }
 
 }

@@ -6,7 +6,6 @@ import ebf.tim.blocks.rails.RailSimpleShape;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import ebf.tim.utility.Vec5f;
-import ebf.tim.utility.Vec6f;
 import fexcraft.tmt.slim.Tessellator;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.item.ItemStack;
@@ -30,7 +29,7 @@ public class ModelTies {
 
         float t = originalT*-1.5f;
         List<Vec5f> points = new ArrayList<>();
-        while (t <= 1+(originalT*0.5f)) {
+        while (t <= 1+(originalT*0.51f)) {
             //define position
             points.add(new Vec5f(
                     (((1f - t) * (1f - t)) * shape.getStart().xCoord) + (2f * (1f - t) * t * shape.getCenter().xCoord) + ((t * t) * shape.getEnd().xCoord),//X
@@ -56,6 +55,7 @@ public class ModelTies {
 
     public static List<Vec5f> modelPotatoTies(RailSimpleShape shape, float maxWidth, float minWidth, ItemStack block){
         List<Vec5f> points = genTiePoints(shape);
+        GL11.glEnable(GL11.GL_NORMALIZE);
 
 
         GL11.glPushMatrix();
