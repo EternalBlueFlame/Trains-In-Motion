@@ -168,12 +168,16 @@ public class TiMGenericRegistry {
             if(TrainsInMotion.proxy.isClient()) {
                 if (entityRender == null) {
                     cpw.mods.fml.client.registry.RenderingRegistry.registerEntityRenderingHandler(registry.getClass(), (net.minecraft.client.renderer.entity.Render)TrainsInMotion.proxy.getEntityRender());
-                    ((net.minecraft.client.renderer.entity.Render)TrainsInMotion.proxy.getEntityRender()).doRender(registry, 0, 0, 0, 0, 0);
+                    if (ClientProxy.preRenderModels) {
+                        ((net.minecraft.client.renderer.entity.Render) TrainsInMotion.proxy.getEntityRender()).doRender(registry, 0, 0, 0, 0, 0);
+                    }
                 } else {
                     cpw.mods.fml.client.registry.RenderingRegistry.registerEntityRenderingHandler(registry.getClass(), (net.minecraft.client.renderer.entity.Render)entityRender);
-                    ((net.minecraft.client.renderer.entity.Render)entityRender).doRender(registry, 0, 0, 0, 0, 0);
+                    if (ClientProxy.preRenderModels) {
+                        ((net.minecraft.client.renderer.entity.Render) entityRender).doRender(registry, 0, 0, 0, 0, 0);
+                    }
                 }
-                if (ClientProxy.hdTransportItems) {
+                if (ClientProxy.preRenderModels && ClientProxy.hdTransportItems) {
                     ebf.tim.items.CustomItemModel.instance.renderItem(IItemRenderer.ItemRenderType.INVENTORY, registry.getCartItem());
                 }
             }

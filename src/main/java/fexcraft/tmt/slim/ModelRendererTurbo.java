@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 /**
  * An extension to the ModelRenderer class. It basically is a copy to ModelRenderer,
@@ -139,7 +140,7 @@ public class ModelRendererTurbo {
                 , textureOffsetX + d + w + d, textureOffsetY + d, textureOffsetX + d + w + d + w, textureOffsetY + d + h);
         if(mirror){
             for (TexturedPolygon texturedPolygon : poly) {
-                texturedPolygon.flipFace();
+                Collections.reverse(texturedPolygon.vertices);
             }
         }
         copyTo(poly);
@@ -960,7 +961,7 @@ public class ModelRendererTurbo {
             vert.add(tempVerts[1 + index].setTexturePosition(uScale + 0.5F * uCircle + uSize, vScale + 0.5F * vCircle + vSize));
             poly[index] = new TexturedPolygon(vert);
             if(!dirFront || mirror){
-                poly[index].flipFace();
+                Collections.reverse(poly[index].vertices);
             }
             if(!coneBase && !coneTop){
                 vert=new ArrayList<>();
@@ -970,7 +971,7 @@ public class ModelRendererTurbo {
                 vert.add(tempVerts[1 + segments + index].setTexturePosition(uScale + uOffset + uWidth * index, vScale + vOffset + vCircle + vHeight));
                 poly[index + segments] = new TexturedPolygon(vert);
                 if(!dirFront || mirror){
-                    poly[index + segments].flipFace();
+                    Collections.reverse(poly[index + segments].vertices);
                 }
             }
             vert = new ArrayList<>();
@@ -979,7 +980,7 @@ public class ModelRendererTurbo {
             vert.add(tempVerts[tempVerts.length - (1 + segments) + ((segments - index) % segments)].setTexturePosition(uScale + 1.5F * uCircle + uSize, vScale + 0.5F * vCircle + vSize));
             poly[poly.length - segments + index]  = new TexturedPolygon(vert);
             if(!dirFront || mirror){
-                poly[poly.length - segments + index].flipFace();
+                Collections.reverse(poly[poly.length - segments + index].vertices);
             }
         }
         return copyTo(poly);
@@ -1047,10 +1048,10 @@ public class ModelRendererTurbo {
             vert.add(tempVerts[1 + index2].setTexturePosition(uStart + 0.5F * uCircle + uSize1, vStart + 0.5F * vCircle + vSize1));
             vert.add(tempVerts[1 + index].setTexturePosition(uStart + 0.5F * uCircle + uSize, vStart + 0.5F * vCircle + vSize));
             if(!dirFront || mirror){
-                poly.add(new TexturedPolygon(vert).flipFace());
-            } else {
-                poly.add(new TexturedPolygon(vert));
+                Collections.reverse(vert);
             }
+            poly.add(new TexturedPolygon(vert));
+
             if(!coneBase && !coneTop){
                 vert.clear();
                 vert.add(tempVerts[1 + index].setTexturePosition(uStart + uOffset + uWidth * index, vStart + vOffset + vCircle));
@@ -1058,10 +1059,9 @@ public class ModelRendererTurbo {
                 vert.add(tempVerts[1 + segments + index2].setTexturePosition(uStart + uOffset + uWidth * (index + 1), vStart + vOffset + vCircle + vHeight));
                 vert.add(tempVerts[1 + segments + index].setTexturePosition(uStart + uOffset + uWidth * index, vStart + vOffset + vCircle + vHeight));
                 if(!dirFront || mirror){
-                    poly.add(new TexturedPolygon(vert).flipFace());
-                } else {
-                    poly.add(new TexturedPolygon(vert));
+                    Collections.reverse(vert);
                 }
+                poly.add(new TexturedPolygon(vert));
             }
             vert.clear();
             vert.add(tempVerts[tempVerts.length - 1].setTexturePosition(uStart + 1.5F * uCircle, vStart + 0.5F * vCircle));
@@ -1069,10 +1069,10 @@ public class ModelRendererTurbo {
             vert.add(tempVerts[tempVerts.length - (1 + segments) + ((segments - index) % segments)].setTexturePosition(uStart + 1.5F * uCircle + uSize, vStart + 0.5F * vCircle + vSize));
             poly.add(new TexturedPolygon(vert));
             if(!dirFront || mirror){
-                poly.add(new TexturedPolygon(vert).flipFace());
-            } else {
-                poly.add(new TexturedPolygon(vert));
+                Collections.reverse(vert);
             }
+            poly.add(new TexturedPolygon(vert));
+
         }
         return copyTo(poly);
     }
@@ -1102,7 +1102,7 @@ public class ModelRendererTurbo {
         boolean dirMirror = (baseDirection == MR_LEFT || baseDirection == MR_BOTTOM || baseDirection == MR_BACK);
         if(baseScale == 0) baseScale = 1f; if(topScale == 0) topScale = 1f;
         if(segments < 3) segments = 3; if(seglimit <= 0) seglimit = segments; boolean segl = seglimit < segments;
-        ArrayList<PositionTransformVertex> verts = new ArrayList<>(); ArrayList<TexturedPolygon> polis = new ArrayList<>();
+        ArrayList<TexturedPolygon> polis = new ArrayList<>();
         //Vertex
         float xLength = (dirSide ? length : 0), yLength = (dirTop ? length : 0), zLength = (dirFront ? length : 0);
         float xStart = (dirMirror ? x + xLength : x);
@@ -1150,7 +1150,6 @@ public class ModelRendererTurbo {
                     PositionTransformVertex copy = new PositionTransformVertex(verts1.get(0)); verts1.add(copy);
                 }
             }
-            verts.addAll(verts0); verts.addAll(verts1);
             if(repeat == 0){ verts2.addAll(verts0); verts2.addAll(verts1); }
             else{ verts3.addAll(verts0); verts3.addAll(verts1); }
             float xSize, ySize; float mul = repeat == 0 ? 0.5f : 1.5f;
@@ -1175,7 +1174,9 @@ public class ModelRendererTurbo {
                     ySize = (float)(Math.cos((Static.PI / segments) * (i + 1) * 2F + (!dirTop ? 0 : Static.PI)) * (0.5F * vCircle - 2F * vOffset));
                     arr.add(verts0.get(i + 1).setTexturePosition(uStart + mul * uCircle + xSize, vStart + 0.5F * vCircle + ySize));
                     polis.add(new TexturedPolygon(arr));
-                    if(bool) polis.get(polis.size() - 1 ).flipFace();
+                    if(bool){
+                        Collections.reverse(polis.get(polis.size() - 1 ).vertices);
+                    }
                 }
             }
             verts0.clear(); verts1.clear(); xCur = xEnd; yCur = yEnd; zCur = zEnd; sCur = topScale;
@@ -1190,20 +1191,19 @@ public class ModelRendererTurbo {
                 arr.add(verts3.get(halfv2).setTexturePosition(xpos + ((radius - radius2) * uScale), vStart + vOffset + vCircle + vHeight));
                 arr.add(verts2.get(halfv2).setTexturePosition(xpos + ((radius - radius2) * uScale), vStart + vOffset + vCircle));
                 if(!dirFront){
-                    polis.add(new TexturedPolygon(arr).flipFace());
-                } else {
-                    polis.add(new TexturedPolygon(arr));
+                    Collections.reverse(faces);
                 }
+                polis.add(new TexturedPolygon(arr));
+
                 arr.clear();
                 arr.add(verts2.get(seglimit).setTexturePosition(xpos, vStart + vOffset + vCircle + vHeight));
                 arr.add(verts3.get(seglimit).setTexturePosition(xpos, vStart + vOffset + vCircle + vHeight + vHeight));
                 arr.add(verts3.get(seglimit + halfv2).setTexturePosition(xpos + ((radius - radius2) * uScale), vStart + vOffset + vCircle + vHeight + vHeight));
                 arr.add(verts2.get(seglimit + halfv2).setTexturePosition(xpos + ((radius - radius2) * uScale), vStart + vOffset + vCircle + vHeight));
                 if(dirFront){
-                    polis.add(new TexturedPolygon(arr).flipFace());
-                } else {
-                    polis.add(new TexturedPolygon(arr));
+                    Collections.reverse(faces);
                 }
+                polis.add(new TexturedPolygon(arr));
                 break;
             }
             if(i >= (halfv2 - 1)) break;
@@ -1214,10 +1214,9 @@ public class ModelRendererTurbo {
                 arr.add(verts3.get(i + 1).setTexturePosition(uStart + uOffset + uWidth * (i + 1), vStart + vOffset + vCircle + vHeight));
                 arr.add(verts2.get(i + 1).setTexturePosition(uStart + uOffset + uWidth * (i + 1), vStart + vOffset + vCircle));
                 if(dirFront){
-                    polis.add(new TexturedPolygon(arr).flipFace());
-                } else {
-                    polis.add(new TexturedPolygon(arr));
+                    Collections.reverse(faces);
                 }
+                polis.add(new TexturedPolygon(arr));
             }
             if(!bools[3]){
                 arr.clear();
@@ -1226,10 +1225,9 @@ public class ModelRendererTurbo {
                 arr.add(verts3.get(i + halfv2 + 1).setTexturePosition(uStart + uOffset + uWidth * (i + 1), vStart + vOffset + vCircle + vHeight + vHeight));
                 arr.add(verts2.get(i + halfv2 + 1).setTexturePosition(uStart + uOffset + uWidth * (i + 1), vStart + vOffset + vCircle + vHeight));
                 if(!dirFront){
-                    polis.add(new TexturedPolygon(arr).flipFace());
-                } else {
-                    polis.add(new TexturedPolygon(arr));
+                    Collections.reverse(faces);
                 }
+                polis.add(new TexturedPolygon(arr));
             }
         }
         return copyTo(polis);
@@ -1348,7 +1346,7 @@ public class ModelRendererTurbo {
                         vert.vector3F.xCoord * (z ? -1 : 1));
             }
             if(x^y^z){
-                face.flipFace();
+                Collections.reverse(face.vertices);
             }
         }
     }
@@ -1418,7 +1416,7 @@ public class ModelRendererTurbo {
         }
 
         for (TexturedPolygon poly : faces) {
-            poly.draw(scale);
+            Tessellator.getInstance().drawTexturedVertsWithNormal(poly.vertices, scale);
         }
         if(rotationPointX != 0.0F || rotationPointY != 0.0F || rotationPointZ != 0.0F){
             GL11.glTranslatef(-rotationPointX * scale, -rotationPointY * scale, -rotationPointZ * scale);

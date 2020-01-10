@@ -2,7 +2,10 @@ package ebf.tim.blocks;
 
 import ebf.XmlBuilder;
 import ebf.tim.blocks.rails.RailShapeCore;
+import ebf.tim.blocks.rails.RailSimpleShape;
 import ebf.tim.models.rails.Model1x1Rail;
+import ebf.tim.utility.DebugUtil;
+import ebf.tim.utility.Vec5f;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.block.Block;
 import net.minecraft.crash.CrashReportCategory;
@@ -15,6 +18,8 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class RailTileEntity extends TileEntity {
@@ -26,7 +31,10 @@ public class RailTileEntity extends TileEntity {
     //todo public int overgrowth=0;
     private Integer railGLID=null;
     public XmlBuilder data = new XmlBuilder();
-    public boolean updateModel=true;
+    public boolean updateModel=false;
+    @Deprecated
+    //todo seperate this into individual rail/ties/ballast, it will take more ram and triple GPU use, but its necessary to fix various texture issues.
+    Map<String, Integer> CachedRailModels = new HashMap<String, Integer>();
 
     //used for the actual path, and rendered
     //public RailShapeCore points = new RailShapeCore();
@@ -40,25 +48,30 @@ public class RailTileEntity extends TileEntity {
                 return;
             }
             TextureManager.adjustLightFixture(worldObj,xCoord,yCoord,zCoord);
-            if(railGLID!=null){//TODO: enable displaylist when shape gen is done.
+            if(railGLID!=null){
                 org.lwjgl.opengl.GL11.glCallList(railGLID);
             }
 
             if(updateModel){
-
                 RailShapeCore route =new RailShapeCore().parseString(data.getString("route"));
                 if (route!=null) {
-                    railGLID = net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1);
-                    org.lwjgl.opengl.GL11.glNewList(railGLID, org.lwjgl.opengl.GL11.GL_COMPILE);
+                    if(CachedRailModels.containsKey(route.toString())){
+                        railGLID=CachedRailModels.get(route.toString());
+                        updateModel = false;
+                    } else {
+                        railGLID = net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1);
+                        org.lwjgl.opengl.GL11.glNewList(railGLID, org.lwjgl.opengl.GL11.GL_COMPILE);
 
-                    Model1x1Rail.Model3DRail(worldObj, xCoord, yCoord, zCoord,
-                            route,
-                            data.getItemStack("ballast"),
-                            data.getItemStack("ties"),
-                            data.getItemStack("rail"), null);
+                        Model1x1Rail.Model3DRail(worldObj, xCoord, yCoord, zCoord,
+                                route,
+                                data.getItemStack("ballast"),
+                                data.getItemStack("ties"),
+                                data.getItemStack("rail"), null);
 
-                    org.lwjgl.opengl.GL11.glEndList();
-                    updateModel = false;
+                        org.lwjgl.opengl.GL11.glEndList();
+                        updateModel = false;
+                        CachedRailModels.put(route.toString(),railGLID);
+                    }
                 }
             }
         } else {super.func_145828_a(report);}

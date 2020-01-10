@@ -71,6 +71,8 @@ public class ClientProxy extends CommonProxy {
     public static boolean enableTransportTooltip=true;
     /**enables 3d items for trains and stock*/
     public static boolean hdTransportItems = true;
+    /*enables pre-render of models*/
+    public static boolean preRenderModels = false;
     /**the keybind for the lamp toggle*/
     public static KeyBinding KeyLamp = new KeyBinding("Lamp Toggle", Keyboard.KEY_L, "Trains in Motion");
     /**the keybind for the horn/whistle*/
@@ -155,6 +157,9 @@ public class ClientProxy extends CommonProxy {
 
         hdTransportItems = config.getBoolean("3dTransportItems","Quality (Client only)", true,
                 "Overrides the render of train and rollingstock items to use their full model. NOTICE: after the pre-alpha stages this should default to false.");
+
+        preRenderModels = config.getBoolean("preRenderModels","Quality (Client only)", false,
+                "Pre-renders transport entity and item models during loading screen and stores them on GPU, Requires a lot of VRAM but makes the game run smoother, Don't use if get the GL error 1285 (Out of memory)");
 
         ForceTextureBinding = config.getBoolean("ForceTextureBinding","Quality (Client only)", false,
                 "Forces textures to be bound, slows performance on some machines, speeds it up on others, and fixes a rare bug where the the texture does not get bound. So... This REALLY depends on your machine, see what works best for you.");
