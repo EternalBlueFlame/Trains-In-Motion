@@ -904,18 +904,16 @@ public class ModelRendererTurbo {
      * @param textureH the height of the texture of the body
      */
     public ModelRendererTurbo addCylinder(float x, float y, float z, float radius, float length, int segments, float baseScale, float topScale, int baseDirection, int textureCircleDiameterW, int textureCircleDiameterH, int textureH){
+        if(radius < 1){ textureCircleDiameterW = 2; textureCircleDiameterH = 2; } if(length < 1){ textureH = 2; }
         boolean dirTop = (baseDirection == MR_TOP || baseDirection == MR_BOTTOM);
         boolean dirSide = (baseDirection == MR_RIGHT || baseDirection == MR_LEFT);
         boolean dirFront = (baseDirection == MR_FRONT || baseDirection == MR_BACK);
         boolean dirMirror = (baseDirection == MR_LEFT || baseDirection == MR_BOTTOM || baseDirection == MR_BACK);
         boolean coneBase = (baseScale == 0);
         boolean coneTop = (topScale == 0);
-        if(coneBase && coneTop){
-            baseScale = 1F;
-            coneBase = false;
-        }
+        if(coneBase && coneTop){ baseScale = 1F; coneBase = false; }
         PositionTransformVertex[] tempVerts = new PositionTransformVertex[segments * (coneBase || coneTop ? 1 : 2) + 2];
-        List<TexturedPolygon> poly = new ArrayList<>();
+        TexturedPolygon[] poly = new TexturedPolygon[segments * (coneBase || coneTop ? 2 : 3)];
         float xLength = (dirSide ? length : 0);
         float yLength = (dirTop ? length : 0);
         float zLength = (dirFront ? length : 0);
@@ -933,17 +931,14 @@ public class ModelRendererTurbo {
         float sCur = (coneBase ? topScale : baseScale);
         for(int repeat = 0; repeat < (coneBase || coneTop ? 1 : 2); repeat++){
             for(int index = 0; index < segments; index++){
-                float xSize = (mirror ^ dirMirror ? -1 : 1) * MathHelper.sin((pi / segments) * index * 2F + pi) * radius * sCur;
-                float zSize = -MathHelper.cos((pi / segments) * index * 2F + pi) * radius * sCur;
+                float xSize = (float)((mirror ^ dirMirror ? -1 : 1) * Math.sin((Static.PI / segments) * index * 2F + Static.PI) * radius * sCur);
+                float zSize = (float)(-Math.cos((Static.PI / segments) * index * 2F + Static.PI) * radius * sCur);
                 float xPlace = xCur + (!dirSide ? xSize : 0);
                 float yPlace = yCur + (!dirTop ? zSize : 0);
                 float zPlace = zCur + (dirSide ? xSize : (dirTop ? zSize : 0));
                 tempVerts[1 + index + repeat * segments] = new PositionTransformVertex(xPlace, yPlace, zPlace, 0, 0 );
             }
-            xCur = xEnd;
-            yCur = yEnd;
-            zCur = zEnd;
-            sCur = topScale;
+            xCur = xEnd; yCur = yEnd; zCur = zEnd; sCur = topScale;
         }
         float uScale = 1.0F / textureWidth;
         float vScale = 1.0F / textureHeight;
@@ -953,48 +948,41 @@ public class ModelRendererTurbo {
         float vCircle = textureCircleDiameterH * vScale;
         float uWidth = (uCircle * 2F - uOffset * 2F) / segments;
         float vHeight = textureH * vScale - uOffset * 2f;
-        float uStart = textureOffsetX * uScale;
-        float vStart = textureOffsetY * vScale;
         List<PositionTransformVertex> vert = new ArrayList<>();
         for(int index = 0; index < segments; index++){
             int index2 = (index + 1) % segments;
-            float uSize = MathHelper.sin((pi / segments) * index * 2F + (!dirTop ? 0 : pi)) * (0.5F * uCircle - 2F * uOffset);
-            float vSize = MathHelper.cos((pi / segments) * index * 2F + (!dirTop ? 0 : pi)) * (0.5F * vCircle - 2F * vOffset);
-            float uSize1 = MathHelper.sin((pi / segments) * index2 * 2F + (!dirTop ? 0 : pi)) * (0.5F * uCircle - 2F * uOffset);
-            float vSize1 = MathHelper.cos((pi / segments) * index2 * 2F + (!dirTop ? 0 : pi)) * (0.5F * vCircle - 2F * vOffset);
-            vert.clear();
-            vert.add(tempVerts[0].setTexturePosition(uStart + 0.5F * uCircle, vStart + 0.5F * vCircle));
-            vert.add(tempVerts[1 + index2].setTexturePosition(uStart + 0.5F * uCircle + uSize1, vStart + 0.5F * vCircle + vSize1));
-            vert.add(tempVerts[1 + index].setTexturePosition(uStart + 0.5F * uCircle + uSize, vStart + 0.5F * vCircle + vSize));
-            if(!mirror){
-                poly.add(new TexturedPolygon(vert).flipFace());
-            } else {
-                poly.add(new TexturedPolygon(vert));
+            float uSize = (float)(Math.sin((Static.PI / segments) * index * 2F + (!dirTop ? 0 : Static.PI)) * (0.5F * uCircle - 2F * uOffset));
+            float vSize = (float)(Math.cos((Static.PI / segments) * index * 2F + (!dirTop ? 0 : Static.PI)) * (0.5F * vCircle - 2F * vOffset));
+            float uSize1 = (float)(Math.sin((Static.PI / segments) * index2 * 2F + (!dirTop ? 0 : Static.PI)) * (0.5F * uCircle - 2F * uOffset));
+            float vSize1 = (float)(Math.cos((Static.PI / segments) * index2 * 2F + (!dirTop ? 0 : Static.PI)) * (0.5F * vCircle - 2F * vOffset));
+            vert.add(tempVerts[0].setTexturePosition(uScale + 0.5F * uCircle, vScale + 0.5F * vCircle));
+            vert.add(tempVerts[1 + index2].setTexturePosition(uScale + 0.5F * uCircle + uSize1, vScale + 0.5F * vCircle + vSize1));
+            vert.add(tempVerts[1 + index].setTexturePosition(uScale + 0.5F * uCircle + uSize, vScale + 0.5F * vCircle + vSize));
+            poly[index] = new TexturedPolygon(vert);
+            if(!dirFront || mirror){
+                poly[index].flipFace();
             }
             if(!coneBase && !coneTop){
-                vert.clear();
-                vert.add(tempVerts[1 + index].setTexturePosition(uStart + uOffset + uWidth * index, vStart + vOffset + vCircle));
-                vert.add(tempVerts[1 + index2].setTexturePosition(uStart + uOffset + uWidth * (index + 1), vStart + vOffset + vCircle));
-                vert.add(tempVerts[1 + segments + index2].setTexturePosition(uStart + uOffset + uWidth * (index + 1), vStart + vOffset + vCircle + vHeight));
-                vert.add(tempVerts[1 + segments + index].setTexturePosition(uStart + uOffset + uWidth * index, vStart + vOffset + vCircle + vHeight));
-                if(!mirror){
-                    poly.add(new TexturedPolygon(vert).flipFace());
-                } else {
-                    poly.add(new TexturedPolygon(vert));
+                vert=new ArrayList<>();
+                vert.add(tempVerts[1 + index].setTexturePosition(uScale + uOffset + uWidth * index, vScale + vOffset + vCircle));
+                vert.add(tempVerts[1 + index2].setTexturePosition(uScale + uOffset + uWidth * (index + 1), vScale + vOffset + vCircle));
+                vert.add(tempVerts[1 + segments + index2].setTexturePosition(uScale + uOffset + uWidth * (index + 1), vScale + vOffset + vCircle + vHeight));
+                vert.add(tempVerts[1 + segments + index].setTexturePosition(uScale + uOffset + uWidth * index, vScale + vOffset + vCircle + vHeight));
+                poly[index + segments] = new TexturedPolygon(vert);
+                if(!dirFront || mirror){
+                    poly[index + segments].flipFace();
                 }
             }
-            vert.clear();
-            vert.add(tempVerts[tempVerts.length - 1].setTexturePosition(uStart + 1.5F * uCircle, vStart + 0.5F * vCircle));
-            vert.add(tempVerts[tempVerts.length - 2 - index].setTexturePosition(uStart + 1.5F * uCircle + uSize1, vStart + 0.5F * vCircle + vSize1));
-            vert.add(tempVerts[tempVerts.length - (1 + segments) + ((segments - index) % segments)].setTexturePosition(uStart + 1.5F * uCircle + uSize, vStart + 0.5F * vCircle + vSize));
-            if(!mirror){
-                poly.add(new TexturedPolygon(vert).flipFace());
-            } else {
-                poly.add(new TexturedPolygon(vert));
+            vert = new ArrayList<>();
+            vert.add(tempVerts[tempVerts.length - 1].setTexturePosition(uScale + 1.5F * uCircle, vScale + 0.5F * vCircle));
+            vert.add(tempVerts[tempVerts.length - 2 - index].setTexturePosition(uScale + 1.5F * uCircle + uSize1, vScale + 0.5F * vCircle + vSize1));
+            vert.add(tempVerts[tempVerts.length - (1 + segments) + ((segments - index) % segments)].setTexturePosition(uScale + 1.5F * uCircle + uSize, vScale + 0.5F * vCircle + vSize));
+            poly[poly.length - segments + index]  = new TexturedPolygon(vert);
+            if(!dirFront || mirror){
+                poly[poly.length - segments + index].flipFace();
             }
         }
-        copyTo(poly);
-        return this;
+        return copyTo(poly);
     }
 
 

@@ -7,7 +7,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.items.CustomItemModel;
 import ebf.tim.items.ItemCraftGuide;
 import ebf.tim.utility.*;
 import net.minecraft.block.Block;
@@ -135,9 +134,6 @@ public class TiMGenericRegistry {
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    public static CustomItemModel itemModel = new CustomItemModel();
-
     private static List<String>usedNames = new ArrayList<>();
     private static int registryPosition =17;
 
@@ -162,7 +158,7 @@ public class TiMGenericRegistry {
                 CommonProxy.recipesInMods.get(MODID).add(getRecipe(registry.getRecipie(), registry.getCartItem()));
             }
             if(TrainsInMotion.proxy.isClient() && ClientProxy.hdTransportItems){
-                MinecraftForgeClient.registerItemRenderer(registry.getCartItem().getItem(), itemModel);
+                MinecraftForgeClient.registerItemRenderer(registry.getCartItem().getItem(), ebf.tim.items.CustomItemModel.instance);
             }
             registry.registerSkins();
             if(registry.getRecipie()!=null){
@@ -178,7 +174,7 @@ public class TiMGenericRegistry {
                     ((net.minecraft.client.renderer.entity.Render)entityRender).doRender(registry, 0, 0, 0, 0, 0);
                 }
                 if (ClientProxy.hdTransportItems) {
-                    itemModel.renderItem(IItemRenderer.ItemRenderType.INVENTORY, registry.getCartItem());
+                    ebf.tim.items.CustomItemModel.instance.renderItem(IItemRenderer.ItemRenderType.INVENTORY, registry.getCartItem());
                 }
             }
             usedNames.add(registry.transportName());

@@ -241,11 +241,11 @@ public class RenderEntity extends Render {
                 if (s.getBogieSkin(ii) != null) {
                     TextureManager.bindTexture(s.getBogieSkin(ii), s.colorsFrom, s.colorsTo, entity.colorsFrom, entity.colorsTo);
                 }
+                GL11.glPushMatrix();
                 GL11.glTranslated(-b.offset[0], -b.offset[1], -b.offset[2]);
                 b.setRotation(entity);
-                GL11.glPushMatrix();
                 GL11.glRotatef(b.rotationYaw-yaw, 0.0f, 1.0f, 0);
-                GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
+                GL11.glRotatef(entity.rotationPitch, 0.0f, 0.0f, 1.0f);
                 b.bogieModel.render(null, 0, 0, 0, 0, 0, entity.getRenderScale());
                 if(b.subBogies!=null) {
                     iii=0;
@@ -332,29 +332,8 @@ public class RenderEntity extends Render {
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
 
-
-            Vec3f bogiePos, b = new Vec3f(entity.frontBogie.posX-entity.posX,entity.frontBogie.posY-entity.posY,entity.frontBogie.posZ-entity.posZ);
             GL11.glTranslated(x,y,z);
-            GL11.glColor3f(0,0,1);
-            Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
-            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord+3, b.zCoord);
-            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord, b.zCoord);
-            Tessellator.getInstance().draw();
-
-            GL11.glColor3f(1,0,0);
-            Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
-            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord, b.zCoord);
-            bogiePos = RailUtility.rotatePoint(new Vec3f(0,0,-3),entity.rotationPitch, entity.rotationYaw,0).add(b);
-            Tessellator.getInstance().addVertex(bogiePos.xCoord,bogiePos.yCoord, bogiePos.zCoord);
-            Tessellator.getInstance().draw();
-
-
-            GL11.glColor3f(0,1,0);
-            Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
-            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord+3, b.zCoord);
-            bogiePos = RailUtility.rotatePoint(new Vec3f(-3,0,0),entity.rotationPitch, entity.rotationYaw,0).add(b);
-            Tessellator.getInstance().addVertex(bogiePos.xCoord,bogiePos.yCoord+3, bogiePos.zCoord);
-            Tessellator.getInstance().draw();
+            drawRotationPoint(new Vec3f(entity.frontBogie.posX-entity.posX,entity.frontBogie.posY-entity.posY,entity.frontBogie.posZ-entity.posZ), entity);
 
 
 
@@ -363,28 +342,7 @@ public class RenderEntity extends Render {
             }
 
 
-            b = new Vec3f(entity.backBogie.posX-entity.posX,entity.backBogie.posY-entity.posY,entity.backBogie.posZ-entity.posZ);
-
-            GL11.glColor3f(0,0,1);
-            Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
-            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord+3, b.zCoord);
-            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord, b.zCoord);
-            Tessellator.getInstance().draw();
-
-            GL11.glColor3f(1,0,0);
-            Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
-            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord, b.zCoord);
-            bogiePos = RailUtility.rotatePoint(new Vec3f(0,0,-3),entity.rotationPitch, entity.rotationYaw,0).add(b);
-            Tessellator.getInstance().addVertex(bogiePos.xCoord,bogiePos.yCoord, bogiePos.zCoord);
-            Tessellator.getInstance().draw();
-
-
-            GL11.glColor3f(0,1,0);
-            Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
-            Tessellator.getInstance().addVertex(b.xCoord,b.yCoord+3, b.zCoord);
-            bogiePos = RailUtility.rotatePoint(new Vec3f(-3,0,0),entity.rotationPitch, entity.rotationYaw,0).add(b);
-            Tessellator.getInstance().addVertex(bogiePos.xCoord,bogiePos.yCoord+3, bogiePos.zCoord);
-            Tessellator.getInstance().draw();
+            drawRotationPoint(new Vec3f(entity.backBogie.posX-entity.posX,entity.backBogie.posY-entity.posY,entity.backBogie.posZ-entity.posZ), entity);
 
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -392,5 +350,34 @@ public class RenderEntity extends Render {
             //GL11.glDepthMask(true);
             GL11.glPopMatrix();
         }
+    }
+
+    private static void drawRotationPoint(Vec3f b, Entity entity){
+
+        GL11.glEnable(GL11.GL_BLEND);
+        OpenGlHelper.glBlendFunc(770, 771, 1, 0);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_ALPHA_TEST);
+        GL11.glColor3f(0,0,1);
+        Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
+        Tessellator.getInstance().addVertex(b.xCoord,b.yCoord+3, b.zCoord);
+        Tessellator.getInstance().addVertex(b.xCoord,b.yCoord, b.zCoord);
+        Tessellator.getInstance().draw();
+
+        GL11.glColor3f(1,0,0);
+        Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
+        Tessellator.getInstance().addVertex(b.xCoord,b.yCoord, b.zCoord);
+        Vec3f bogiePos = RailUtility.rotatePoint(new Vec3f(0,0,-3),entity.rotationPitch, entity.rotationYaw,0).add(b);
+        Tessellator.getInstance().addVertex(bogiePos.xCoord,bogiePos.yCoord, bogiePos.zCoord);
+        Tessellator.getInstance().draw();
+
+
+        GL11.glColor3f(0,1,0);
+        Tessellator.getInstance().startDrawing(GL11.GL_LINE_STRIP);
+        Tessellator.getInstance().addVertex(b.xCoord,b.yCoord+3, b.zCoord);
+        bogiePos = RailUtility.rotatePoint(new Vec3f(-3,0,0),entity.rotationPitch, entity.rotationYaw,0).add(b);
+        Tessellator.getInstance().addVertex(bogiePos.xCoord,bogiePos.yCoord+3, bogiePos.zCoord);
+        Tessellator.getInstance().draw();
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
 }

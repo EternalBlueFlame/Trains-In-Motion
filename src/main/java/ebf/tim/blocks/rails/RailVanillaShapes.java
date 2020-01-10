@@ -36,11 +36,11 @@ public class RailVanillaShapes extends RailShapeCore{
         if (((nearbyMeta[1] == 7 && nearbyMeta[0] == 9) || (nearbyMeta[1] == 6 && nearbyMeta[2] == 8)) &&
                 ((nearbyMeta[7] == 8 && nearbyMeta[6] == 6) || (nearbyMeta[7] == 9 && nearbyMeta[8] == 7))) {
             //covers when both the following are true
-            shape.setStart(0, 0, 0.025f).setEnd(0, 0, -0.025f).setSleeperCount(3);
+            shape.setStart(0, 0, 0.025f).setEnd(0, 0, -0.025f).setSleeperCount(2);
         } else if ((nearbyMeta[1] == 7 && nearbyMeta[0] == 9) || (nearbyMeta[1] == 6 && nearbyMeta[2] == 8)) {
-            shape.setStart(0, 0, 0).setCenter(0, 0, 0.25f).setSleeperCount(3);
+            shape.setStart(0, 0, 0).setCenter(0, 0, 0.25f).setSleeperCount(2);
         } else if ((nearbyMeta[7] == 8 && nearbyMeta[6] == 6) || (nearbyMeta[7] == 9 && nearbyMeta[8] == 7)) {
-            shape.setEnd(0, 0, 0).setCenter(0, 0, -0.25f).setSleeperCount(3);
+            shape.setEnd(0, 0, 0).setCenter(0, 0, -0.25f).setSleeperCount(2);
         }
 
         //TODO: rework this to re-use the organization from the other axis, its way simpler
@@ -135,13 +135,13 @@ public class RailVanillaShapes extends RailShapeCore{
         if(((nearbyMeta[2]==6 && nearbyMeta[5]==8) || (nearbyMeta[5]==7&&nearbyMeta[8]==9)) &&
                 ((nearbyMeta[0]==7 && nearbyMeta[3]==9) || (nearbyMeta[3]==6 &&nearbyMeta[6]==8))){
             //covers when both the following are true
-            shape.setStart(0.025f,0,0).setEnd(-0.025f,0,0).setSleeperCount(3);
+            shape.setStart(0.025f,0,0).setEnd(-0.025f,0,0).setSleeperCount(2);
         }
         else if((nearbyMeta[2]==6 && nearbyMeta[5]==8) || (nearbyMeta[5]==7&&nearbyMeta[8]==9)){
-            shape.setStart(0,0,0).setCenter(-0.25f,0,0).setEnd(-0.5f,0,0).setSleeperCount(3);
+            shape.setStart(0,0,0).setCenter(-0.25f,0,0).setEnd(-0.5f,0,0).setSleeperCount(2);
         }
         else if((nearbyMeta[0]==7 && nearbyMeta[3]==9) || (nearbyMeta[3]==6 &&nearbyMeta[6]==8)){
-            shape.setStart(0,0,0).setCenter(0.25f,0,0).setEnd(0.5f,0,0).setSleeperCount(3);
+            shape.setStart(0,0,0).setCenter(0.25f,0,0).setEnd(0.5f,0,0).setSleeperCount(2);
         }
 
 

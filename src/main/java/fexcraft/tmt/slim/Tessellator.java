@@ -33,6 +33,7 @@ public class Tessellator{
 	public void startDrawing(int mode){
 		verticies=new ArrayList<>();
 		normalMapped=false;
+		nX=0f;nY=0f;nZ=0f;
 		GL11.glBegin(mode);
 	}
 
@@ -47,7 +48,6 @@ public class Tessellator{
 			GL11.glVertex3f(f[0],f[1],f[2]);
 		}
 		GL11.glEnd();
-		glDisable(GL_NORMALIZE);
 	}
 	
 	public void addVertex(float i, float j, float k){
@@ -94,15 +94,22 @@ public class Tessellator{
 		TextureManager.bindTexture(uri);
 	}
 
-
-	public static void setNormal(Vec3f p1, Vec3f p2, Vec3f p3) {
-		Vec3f calU = new Vec3f(p2.xCoord-p1.xCoord, p2.yCoord-p1.yCoord, p2.zCoord-p1.zCoord);
-		Vec3f calV = new Vec3f(p3.xCoord-p1.xCoord, p3.yCoord-p1.yCoord, p3.zCoord-p1.zCoord);
-
-		nX=(calU.yCoord*calV.zCoord - calU.zCoord*calV.yCoord);
-		nY=(calU.zCoord*calV.xCoord - calU.xCoord*calV.zCoord);
-		nZ=(calU.xCoord*calV.yCoord - calU.yCoord*calV.xCoord);
+	public static void setNormal(List<PositionTransformVertex> vertex){
 		normalMapped=true;
+
+		Vec3f p0,p1;
+		for(int i=0, j=1; i<vertex.size(); i++,j++) {
+
+			if (j == vertex.size()){j=1;}
+			p0 = vertex.get(i).vector3F;// current vertex
+			p1 = vertex.get(j).vector3F;// next vertex
+
+			nX += (p0.yCoord - p1.yCoord) * (p0.zCoord + p1.zCoord);
+			nY += (p0.zCoord - p1.zCoord) * (p0.xCoord + p1.xCoord);
+			nZ += (p0.xCoord - p1.xCoord) * (p0.yCoord + p1.yCoord);
+		}
 	}
+
+
 
 }

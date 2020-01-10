@@ -23,6 +23,8 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class CustomItemModel implements IItemRenderer /*ICustomModelLoader*/ {
 
+    public static CustomItemModel instance = new CustomItemModel();
+
     private static HashMap<ResourceLocation, Item> models = new HashMap<>();
 
     public static void registerModel(Item itm){
