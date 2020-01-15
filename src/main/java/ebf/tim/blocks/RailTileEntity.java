@@ -54,7 +54,7 @@ public class RailTileEntity extends TileEntity {
 
             if(updateModel){
                 RailShapeCore route =new RailShapeCore().parseString(data.getString("route"));
-                if (route!=null) {
+                if (route!=null && route.gauge!=null) {
                     if(CachedRailModels.containsKey(route.toString())){
                         railGLID=CachedRailModels.get(route.toString());
                         updateModel = false;

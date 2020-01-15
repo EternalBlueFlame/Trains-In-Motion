@@ -270,7 +270,7 @@ public class RenderEntity extends Render {
         }
 
         GL11.glPopMatrix();
-        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glEnable(GL11.GL_LIGHTING);
         if(entity.worldObj==null){return;}
 
         //render the particles, if there are any.

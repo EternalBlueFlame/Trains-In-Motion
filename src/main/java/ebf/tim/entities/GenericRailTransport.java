@@ -227,7 +227,14 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         return new ItemStackSlot(this, 400,114,32);
     }
     public ItemStackSlot waterSlot(){
-        return new ItemStackSlot(this, 401,150,32);
+        return new ItemStackSlot(this, 401,150,32).setOverlay(Items.water_bucket);
+    }
+
+    public ItemStackSlot tankerInputSlot(){
+        return new ItemStackSlot(this, 401,150,-8).setOverlay(Items.water_bucket);
+    }
+    public ItemStackSlot tankerOutputSlot(){
+        return new ItemStackSlot(this, 401,150,32).setOverlay(Items.bucket);
     }
 
     /**

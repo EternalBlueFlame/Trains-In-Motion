@@ -13,9 +13,11 @@ import ebf.tim.models.Bogie;
 import ebf.tim.registry.TiMGenericRegistry;
 import ebf.tim.registry.URIRegistry;
 import ebf.tim.utility.FuelHandler;
+import ebf.tim.utility.ItemStackSlot;
 import ebf.timsquared.TiMSquared;
 import ebf.timsquared.models.trains.ModelBrigadelok_080;
 import fexcraft.tmt.slim.ModelBase;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
@@ -146,6 +148,12 @@ public class EntityBrigadelok080 extends TrainBase {
      */
     @Override
     public float getMaxFuel(){return 1;}
+
+    @Override
+    public ItemStackSlot fuelSlot(){
+        return new ItemStackSlot(this, 400,114,32).setOverlay(Items.coal);
+    }
+
     /**
      * <h2>Rider offset</h2>
      * @return defines the offsets of the riders in blocks, the first value is how far back, and the second is how high.

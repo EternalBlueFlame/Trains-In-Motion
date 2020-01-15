@@ -114,10 +114,10 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 return meta;
             }
         //first be sure the key exists, and create it if it doesn't, that way we be sure we don't crash. Also if it doesn't exist we can just return the base meta unchanged.
-                if (!cart.getEntityData().hasKey("tim.lastusedrail.meta")){
-                cart.getEntityData().setInteger("tim.lastusedrail.meta",meta);
-                return meta;
-            }
+        if (!cart.getEntityData().hasKey("tim.lastusedrail.meta")){
+            cart.getEntityData().setInteger("tim.lastusedrail.meta",meta);
+            return meta;
+        }
         boolean changed = false;
         switch (meta) {
             //add support for intersections
@@ -221,7 +221,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 break;
             }
             default: {
-                changed = true;
+                changed = false;
             }
         }
         //note changes in the entity so we can keep track of whether or not this is an intersection

@@ -76,8 +76,8 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         }
 
         //player inventory
-        for (int ic = 0; ic < 9; ic++) {
-            for (int ir = 0; ir < 3; ir++) {
+        for (int ir = 0; ir < 3; ir++) {
+            for (int ic = 0; ic < 9; ic++) {
                 addSlots(new ItemStackSlot(iinventory, ((ir * 9) + ic) + 9, 8 + (ic * 18), 84 + (ir * 18)));
             }
         }

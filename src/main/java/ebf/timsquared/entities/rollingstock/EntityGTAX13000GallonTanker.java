@@ -1,5 +1,7 @@
 package ebf.timsquared.entities.rollingstock;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.api.RollingstockBase;
 import ebf.tim.api.SkinRegistry;
@@ -8,12 +10,12 @@ import ebf.tim.utility.FuelHandler;
 import ebf.timsquared.TiMSquared;
 import ebf.timsquared.entities.trains.EntityBrigadelok080;
 import ebf.timsquared.models.bogies.CMDBogie;
-import ebf.timsquared.models.rollingstock.ModelGATX1300GallonTanker;
 import fexcraft.tmt.slim.ModelBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import java.util.List;
 import java.util.UUID;
@@ -133,6 +135,15 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
         };
     }
 
+
+    @Override
+    public void initInventorySlots(){
+        super.initInventorySlots();
+        inventory.add(tankerInputSlot());
+        inventory.add(tankerOutputSlot());
+    }
+
+
     @Override
     public String transportName() {
         return "GATX 13000 Gallon Tanker";
@@ -183,7 +194,16 @@ public class EntityGTAX13000GallonTanker extends RollingstockBase {
         return 0;
     }
 
+    @Override
+    @SideOnly(Side.CLIENT)
+    public int[] getParticleData(int id) {
+        switch (id){
+            case 1: {return new int[]{1,200,0xFF0000};}
+            default: {return new int[]{1,10,0xCCCC11};}
+        }
+    }
+
 
     @Override
-    public ModelBase[] getModel(){return new ModelBase[]{new ModelGATX1300GallonTanker()};}
+    public ModelBase[] getModel(){return new ModelBase[]{new ebf.timsquared.models.rollingstock.ModelGATX1300GallonTanker()};}
 }

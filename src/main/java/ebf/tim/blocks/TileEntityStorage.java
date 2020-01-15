@@ -5,6 +5,7 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.utility.ItemStackSlot;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -43,14 +44,14 @@ public class TileEntityStorage extends TileEntity implements IInventory {
                 }
             }
         } else {
-            inventory.add(new ItemStackSlot(this,400).setCoords( 30 , -2).setCrafting(true)); //ingot
-            inventory.add(new ItemStackSlot(this,401).setCoords( 30 , 18).setCrafting(true)); //ties
-            inventory.add(new ItemStackSlot(this,402).setCoords( 30 , 37).setCrafting(true)); //ballast
+            inventory.add(new ItemStackSlot(this,400).setCoords( 30 , -2).setCrafting(true).setOverlay(Items.iron_ingot)); //ingot
+            inventory.add(new ItemStackSlot(this,401).setCoords( 30 , 18).setCrafting(true).setOverlay(Blocks.planks)); //ties
+            inventory.add(new ItemStackSlot(this,402).setCoords( 30 , 37).setCrafting(true).setOverlay(Blocks.gravel)); //ballast
 
             inventory.add(new ItemStackSlot(this,403).setCoords( 50 , 7).setCrafting(true)); //wires
             inventory.add(new ItemStackSlot(this,404).setCoords( 50 , 27).setCrafting(true));//augument slot
 
-            inventory.add(new ItemStackSlot(this,405).setCoords( 124 , -2).setCrafting(true));//old shape input
+            inventory.add(new ItemStackSlot(this,405).setCoords( 124 , -2).setCrafting(true).setOverlay(Blocks.rail));//old shape input
 
             inventory.add(new ItemStackSlot(this,406).setCoords( 124 , 33).setCrafting(false)); //output
 

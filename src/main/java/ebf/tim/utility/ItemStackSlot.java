@@ -2,6 +2,7 @@ package ebf.tim.utility;
 
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.entities.GenericRailTransport;
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -18,7 +19,7 @@ import java.util.List;
  */
 public class ItemStackSlot extends Slot {
 
-    private ItemStack stack = null;
+    private ItemStack stack = null, overlay = null;
     private int slotID;
     private boolean isCrafting, input;
 
@@ -52,6 +53,25 @@ public class ItemStackSlot extends Slot {
     }
     public ItemStackSlot setSlot(int slot){
         this.slotNumber=slot;
+        return this;
+    }
+
+    public ItemStack getOverlay(){
+        return overlay;
+    }
+
+    public ItemStackSlot setOverlay(ItemStack s){
+        overlay=s;
+        return this;
+    }
+
+    public ItemStackSlot setOverlay(Item s){
+        overlay=new ItemStack(s);
+        return this;
+    }
+
+    public ItemStackSlot setOverlay(Block s){
+        overlay=new ItemStack(s);
         return this;
     }
 

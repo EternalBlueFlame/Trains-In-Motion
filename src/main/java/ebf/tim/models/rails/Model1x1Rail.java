@@ -78,7 +78,6 @@ public class Model1x1Rail {
         float minWidth=0, maxWidth=0;
         if(shape.gauge.length>1) {
             for (float offset : shape.getGaugePositions()) {
-                DebugUtil.println(offset);
                 //might as well do this here since we gotta loop it anyway, and only need to do it for the first, not like it changes later.
                 if (offset < minWidth) {
                     minWidth = offset;
@@ -109,6 +108,7 @@ public class Model1x1Rail {
                 }
             }
         }
+        if(colors==null){return;}
         //DebugUtil.println(ClientProxy.railLoD);
         //renders the rails, also defines min and max width
         GL11.glPushMatrix();

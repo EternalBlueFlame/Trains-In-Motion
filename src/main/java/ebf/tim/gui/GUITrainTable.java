@@ -3,8 +3,10 @@ package ebf.tim.gui;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.utility.ClientProxy;
+import ebf.tim.utility.ItemStackSlot;
 import ebf.tim.utility.TransportSlotManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.resources.I18n;
@@ -16,6 +18,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
+
+import java.util.List;
 
 import static ebf.tim.gui.GUITransport.drawTexturedRect;
 
@@ -62,54 +66,8 @@ public class GUITrainTable extends GuiContainer {
 
             GUITransport.drawTextOutlined(fontRendererObj,"Unused", guiLeft+50, guiTop-4,0xffffff);
             GUITransport.drawTextOutlined(fontRendererObj,"Unused", guiLeft+50, guiTop+46,0xffffff);
-            //render the background
-            mc.getTextureManager().bindTexture(vanillaInventory);
-            GL11.glDisable(GL11.GL_LIGHTING);
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
-            drawTexturedRect(guiLeft+28, guiTop-4, 54, 51, 20, 20);//top input
-            drawTexturedRect(guiLeft+28, guiTop+16, 54, 51, 20, 20);//middle input
-            drawTexturedRect(guiLeft+28, guiTop+35, 54, 51, 20, 20);//bottom input
-            drawTexturedRect(guiLeft+122, guiTop-4, 54, 51, 20, 20);//old Rail input
-            //todo: draw down arrow
-
-            drawTexturedRect(guiLeft+48, guiTop+25, 54, 51, 20, 20);//wires slot
-            drawTexturedRect(guiLeft+48, guiTop+5, 54, 51, 20, 20);//aux slot
-
-
-
-
-            //then render the example items
-            GL11.glPushMatrix();
-            RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, Minecraft.getMinecraft().getTextureManager(),
-                    new ItemStack(Items.iron_ingot),guiLeft+30, guiTop-2);
-            RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, Minecraft.getMinecraft().getTextureManager(),
-                    new ItemStack(Blocks.log),guiLeft+30, guiTop+18);
-            RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, Minecraft.getMinecraft().getTextureManager(),
-                    new ItemStack(Blocks.gravel),guiLeft+30, guiTop+37);
-            RenderItem.getInstance().renderItemIntoGUI(fontRendererObj, Minecraft.getMinecraft().getTextureManager(),
-                    new ItemStack(Blocks.rail),guiLeft+124, guiTop-2);
-
-            GL11.glPopMatrix();
-
-            mc.getTextureManager().bindTexture(vanillaInventory);
-            GL11.glDisable(GL11.GL_LIGHTING);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
-
-            drawTexturedRect(guiLeft+28, guiTop-4, 54, 51, 20, 20);//top input
-            drawTexturedRect(guiLeft+28, guiTop+16, 54, 51, 20, 20);//middle input
-            drawTexturedRect(guiLeft+28, guiTop+35, 54, 51, 20, 20);//bottom input
-            drawTexturedRect(guiLeft+122, guiTop-4, 54, 51, 20, 20);//old Rail input
-            //todo: draw down arrow
-
-            drawTexturedRect(guiLeft+48, guiTop+25, 54, 51, 20, 20);//wires slot
-            drawTexturedRect(guiLeft+48, guiTop+5, 54, 51, 20, 20);//aux slot
-
-            //GL11.glEnable(GL11.GL_BLEND);
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            drawTexturedRect(guiLeft+122, guiTop+31, 54, 51, 20, 20);//output
-
+            drawItemOverlay(guiLeft,guiTop, mc, ((TileEntityStorage)((TransportSlotManager)this.inventorySlots).hostInventory).inventory);
 
             mc.getTextureManager().bindTexture(vanillaChest);
             //draw the player inventory and toolbar background.
@@ -121,6 +79,42 @@ public class GUITrainTable extends GuiContainer {
             this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, this.xSize, this.ySize);
         }
         GL11.glPopMatrix();
+    }
+
+
+    public static void drawItemOverlay(int guiLeft, int guiTop, Minecraft mc, List<ItemStackSlot> slots){
+
+        mc.getTextureManager().bindTexture(vanillaInventory);
+
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glPushMatrix();
+        for(ItemStackSlot s: slots) {
+            drawTexturedRect(s.xDisplayPosition+guiLeft-2, s.yDisplayPosition+guiTop-2, 54, 51, 20, 20);
+        }
+        GL11.glPopMatrix();
+
+        GL11.glPushMatrix();
+        for(ItemStackSlot s: slots) {
+            if(s.getOverlay()!=null) {
+                RenderItem.getInstance().renderItemIntoGUI(mc.fontRenderer, Minecraft.getMinecraft().getTextureManager(),
+                        s.getOverlay(),s.xDisplayPosition+guiLeft, s.yDisplayPosition+guiTop);
+            }
+        }
+        GL11.glPopMatrix();
+
+        GL11.glDisable(GL11.GL_LIGHTING);
+        mc.getTextureManager().bindTexture(vanillaInventory);
+        GL11.glPushMatrix();
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
+        for(ItemStackSlot s: slots) {
+            drawTexturedRect(s.xDisplayPosition+guiLeft-2, s.yDisplayPosition+guiTop-2, 54, 51, 20, 20);
+        }
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glPopMatrix();
+
+
     }
 
 }

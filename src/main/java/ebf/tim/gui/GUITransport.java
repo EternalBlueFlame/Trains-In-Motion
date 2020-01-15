@@ -85,20 +85,12 @@ public class GUITransport extends GUIContainerNoNEI {
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
         //draw inventory slots and whatnot
-        if (transport.getInventoryRows()>0){
+        if (transport.inventory.size()>0){
             renderFreightInventory(mc);
         }
         if (transport instanceof EntityTrainCore){
             //draw train fluid tanks and firebox or whatever
             renderTrainInventory(mc);
-        }
-
-        //render custom slots. this can cover everything from the fuel slots to crafting slots.
-        mc.getTextureManager().bindTexture(vanillaInventory);
-        for(ItemStackSlot s :transport.inventory){
-            if (s.getSlotID()>=400){
-                drawTexturedRect(s.xDisplayPosition+guiLeft-2, s.yDisplayPosition+guiTop-2, 54, 51, 20, 20);
-            }
         }
 
 
@@ -121,10 +113,6 @@ public class GUITransport extends GUIContainerNoNEI {
     public void drawScreen(int mouseX, int mouseY, float par3){
         //call super to draw stuff like items
         super.drawScreen(mouseX, mouseY, par3);
-
-
-        //draw container foreground like fluid tanks
-
 
         //draw the text that goes over everything
 
@@ -342,15 +330,51 @@ public class GUITransport extends GUIContainerNoNEI {
      */
     private void renderFreightInventory(Minecraft mc){
         mc.getTextureManager().bindTexture(vanillaChest);
+        GL11.glDisable(GL11.GL_LIGHTING);
         //draw the player inventory and toolbar background.
-        drawTexturedRect(guiLeft-105, guiTop-37+yCenter, 0, 0, 176, 17);//top
-        for(int i = 0; i<transport.getInventoryRows(); i++){
-            drawTexturedRect(guiLeft-105, i*18+ (guiTop-20)+yCenter, 0, 17, 176, 18);
+        if(transport.getInventoryRows()>0) {
+            drawTexturedRect(guiLeft - 105, guiTop - 37 + yCenter, 0, 0, 176, 17);//top
+            for (int i = 0; i < transport.getInventoryRows(); i++) {
+                drawTexturedRect(guiLeft - 105, i * 18 + (guiTop - 20) + yCenter, 0, 17, 176, 18);
+            }
+            drawTexturedRect(guiLeft - 105, (transport.getInventoryRows()) * 18 + (guiTop - 20) + yCenter, 0, 215, 176, 8);//bottom
         }
-        drawTexturedRect(guiLeft-105,(transport.getInventoryRows())*18+ (guiTop-20)+yCenter, 0, 215, 176, 8);//bottom
-
         drawTexturedRect(guiLeft+105, guiTop+64, 0, 0, 176,  16);//top
         drawTexturedRect(guiLeft+105,   guiTop+70, 0, 126, 176, 96);//actual inventory
+
+
+
+        mc.getTextureManager().bindTexture(vanillaInventory);
+        GL11.glPushMatrix();
+        for(ItemStackSlot s: transport.inventory) {
+            if(s.getSlotID()>=400) {
+                drawTexturedRect(s.xDisplayPosition + guiLeft - 2, s.yDisplayPosition + guiTop - 2, 54, 51, 20, 20);
+            }
+        }
+        GL11.glPopMatrix();
+
+        GL11.glPushMatrix();
+        for(ItemStackSlot s: transport.inventory) {
+            if(s.getOverlay()!=null && s.getSlotID()>=400) {
+                RenderItem.getInstance().renderItemIntoGUI(mc.fontRenderer, Minecraft.getMinecraft().getTextureManager(),
+                        s.getOverlay(),s.xDisplayPosition+guiLeft, s.yDisplayPosition+guiTop);
+            }
+        }
+        GL11.glPopMatrix();
+
+        mc.getTextureManager().bindTexture(vanillaInventory);
+        GL11.glPushMatrix();
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
+        for(ItemStackSlot s: transport.inventory) {
+            if(s.getOverlay()!=null && s.getSlotID()>=400) {
+                drawTexturedRect(s.xDisplayPosition + guiLeft - 2, s.yDisplayPosition + guiTop - 2, 54, 51, 20, 20);
+            }
+        }
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glPopMatrix();
     }
 
 
@@ -362,6 +386,7 @@ public class GUITransport extends GUIContainerNoNEI {
     private void renderTankerInventory(Minecraft mc, int mouseX, int mouseY){
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
         if(transport.getTankCapacity()!=null){
             for(int i=0; i<transport.getTankCapacity().length;i++) {
                 //System.out.println(transport.getTankInfo(null).length + ":" + transport.getTankCapacity().length +":" +i);
@@ -431,18 +456,18 @@ public class GUITransport extends GUIContainerNoNEI {
                                     transport.getTankInfo(null)[i].fluid.amount+"mb/"+ transport.getTankInfo(null)[i].capacity+"mb", mouseX-guiLeft, mouseY-guiTop);
 
                 } else {
-                    if (transport.getTankFilters()!=null && transport.getTankFilters()[i]!=null && transport.getTankFilters()[i].length>0) {
+                    if (transport.getTankFilters()!=null && transport.getTankFilters().length>i && transport.getTankFilters()[i]!=null && transport.getTankFilters()[i].length>0) {
                         drawCreativeTabHoveringText(transport.getTankFilters()[i][0] + ", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX-guiLeft, mouseY-guiTop);
                     }else{
                         drawCreativeTabHoveringText(", 0mb/" + transport.getTankInfo(null)[i].capacity + "mb", mouseX-guiLeft, mouseY-guiTop);
 
                     }
                 }
-                GL11.glDisable(GL11.GL_LIGHTING);
-                GL11.glColor4f(1,1,1,1);
             }
         }
 
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glColor4f(1,1,1,1);
         GL11.glDisable(GL11.GL_BLEND);
     }
 
