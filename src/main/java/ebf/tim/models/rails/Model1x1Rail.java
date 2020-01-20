@@ -19,6 +19,7 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 import static ebf.tim.utility.RailUtility.radianF;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class Model1x1Rail {
 
@@ -111,28 +112,33 @@ public class Model1x1Rail {
         if(colors==null){return;}
         //DebugUtil.println(ClientProxy.railLoD);
         //renders the rails, also defines min and max width
+        GL11.glEnable(GL11.GL_NORMALIZE);
         GL11.glPushMatrix();
+        GL11.glDisable(GL_TEXTURE_2D);
         switch (ClientProxy.railSkin){
             case 0:{ModelRail.modelPotatoRail(shape, colors); break;}
             case 1:{ModelRail.modelExtrudedRail(shape, colors); break;}
             case 2://todo normal rail
             case 3:{ModelRail.model3DRail(shape, colors); break;}//todo HD rail
         }
+        GL11.glEnable(GL_TEXTURE_2D);
+        GL11.glColor4f(1.0f,1.0f,1.0f, 1.0f);
         GL11.glPopMatrix();
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glColor4f(1.0f,1.0f,1.0f,1.0f);
+
         Tessellator.bindTexture(TextureMap.locationBlocksTexture);
-        // clear the display buffer to the clear colour
-        //GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+
         if(ballast!=null && ballast.getItem()!=null) {
+            GL11.glPushMatrix();
             if(ClientProxy.railSkin==0){
                 ModelBallast.modelPotatoBallast(shape, maxWidth, minWidth, ballast);
             } else {
                 ModelBallast.model3DBallast(shape, maxWidth, minWidth, ballast);
             }
+            GL11.glPopMatrix();
         }
 
         if(ties!=null && ties.getItem()!=null) {
+            GL11.glPushMatrix();
             if(ClientProxy.railSkin==0){
                 ModelTies.modelPotatoTies(BlockRailCore.getShape(world,xPos,yPos,zPos), maxWidth, minWidth, ties);
             } else if (ClientProxy.railSkin<3){
@@ -141,7 +147,7 @@ public class Model1x1Rail {
                 //todo: HD ties
                 ModelTies.model3DTies(BlockRailCore.getShape(world,xPos,yPos,zPos), maxWidth, minWidth, ties);
             }
-
+            GL11.glPopMatrix();
         }
 
         GL11.glEnable(GL11.GL_LIGHTING);

@@ -5,6 +5,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import ebf.XmlBuilder;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.blocks.rails.BlockRailCore;
+import ebf.tim.registry.TiMBlocks;
 import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
@@ -140,7 +141,7 @@ public class ItemRail extends Item implements ITrackItem {
     }
 
     public net.minecraft.block.Block getPlacedBlock(){
-        return CommonProxy.railBlock;
+        return TiMBlocks.railBlock;
     }
 
     public boolean placeTrack(ItemStack stack, World world, int x, int y, int z){

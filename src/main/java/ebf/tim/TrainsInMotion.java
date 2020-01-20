@@ -70,7 +70,7 @@ public class TrainsInMotion {
     public static CommonProxy proxy;
 
     /**the creative tab for the mod*/
-    public static CreativeTabs creativeTab;
+    public static CreativeTabs creativeTab,creativeTabCrafting;
 
     /**instance the network wrapper for the channels.
      * Every wrapper runs on it's own thread, so heavy traffic should go on it's own wrapper, using channels to separate packet types.*/
@@ -119,6 +119,7 @@ public class TrainsInMotion {
         ForgeChunkManager.setForcedChunkLoadingCallback(TrainsInMotion.instance, chunkHandler);
         MinecraftForge.EVENT_BUS.register(chunkHandler);
         creativeTab=new TiMTab("Trains in Motion", MODID, "TiM");
+        creativeTabCrafting=new TiMTab("Trains in Motion Crafting", creativeTab.getTabIconItem());
 
         ItemCraftGuide.modInfoPages.put(MODID, "Trains in Motion\nCreator/Dev: Eternal Blue Flame\nArtist: Lunar Tales\n"+
                 "\nHonorable mentions\nfor helping development:\nFerdinand, Zora no Densha\ncam27cam, MothershipQ\n" +

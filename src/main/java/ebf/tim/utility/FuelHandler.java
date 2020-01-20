@@ -6,6 +6,7 @@ import cofh.api.energy.IEnergyHandler;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
+import ebf.tim.registry.TiMFluids;
 import mods.railcraft.api.electricity.IElectricGrid;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -34,11 +35,11 @@ public class FuelHandler{
 	private float burnTimeMax =0;
 
 	public enum DefaultTanks {
-		STEAM(new String[][]{{FluidRegistry.WATER.getName()},{CommonProxy.fluidSteam.getName()}}),
-		HEAVY_STEAM(new String[][]{{FluidRegistry.WATER.getName()},{CommonProxy.fluidHeavySteam.getName()}}),
-		DIESEL(new String[][]{{CommonProxy.fluidDiesel.getName(), CommonProxy.fluidfueloil.getName()}}),
-		ELECTRIC(new String[][]{{CommonProxy.fluidRedstone.getName()}}),
-		DIESEL_ELECTRIC(new String[][]{{CommonProxy.fluidDiesel.getName(), CommonProxy.fluidfueloil.getName()}, {CommonProxy.fluidRedstone.getName()}});
+		STEAM(new String[][]{{FluidRegistry.WATER.getName()},{TiMFluids.fluidSteam.getName()}}),
+		HEAVY_STEAM(new String[][]{{FluidRegistry.WATER.getName()},{TiMFluids.fluidHeavySteam.getName()}}),
+		DIESEL(new String[][]{{TiMFluids.fluidDiesel.getName(), TiMFluids.fluidfueloil.getName()}}),
+		ELECTRIC(new String[][]{{TiMFluids.fluidRedstone.getName()}}),
+		DIESEL_ELECTRIC(new String[][]{{TiMFluids.fluidDiesel.getName(), TiMFluids.fluidfueloil.getName()}, {TiMFluids.fluidRedstone.getName()}});
 		private String[][] t;
 		DefaultTanks(String[][] type){this.t = type;}
 
@@ -147,7 +148,7 @@ public class FuelHandler{
 			//drain fluid
 			if (train.drain(null, steam!=0?steam/5:0,true)!= null) {
 				float escaping =Math.abs(train.accelerator) * (train.getTankInfo(null)[1].capacity*0.01f);
-				escaping+=train.fill(null, new FluidStack(CommonProxy.fluidSteam, (int)(-escaping+steam*0.9f)), true);
+				escaping+=train.fill(null, new FluidStack(TiMFluids.fluidSteam, (int)(-escaping+steam*0.9f)), true);
 				//todo: tell train to render more steam particles based on escaping steam
 
 				//if no fluid left and not creative mode, explode.
@@ -180,23 +181,23 @@ public class FuelHandler{
 		ItemStackSlot slotId=train.getSlotIndexByID(400);
 		if(slotId !=null && slotId.getStack()!=null) {
 			if (slotId.getItem() == Items.redstone) {
-				if (train.fill(null, new FluidStack(CommonProxy.fluidRedstone, 100), false) == 0) {
-					train.fill(null, new FluidStack(CommonProxy.fluidRedstone, 100), true);
+				if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), false) == 0) {
+					train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), true);
 					train.getSlotIndexByID(400).decrStackSize(1);
 				}
 			} else if (slotId.getItem() == Item.getItemFromBlock(Blocks.redstone_block)) {
-				if (train.fill(null, new FluidStack(CommonProxy.fluidRedstone, 1000), false) == 0) {
-					train.fill(null, new FluidStack(CommonProxy.fluidRedstone, 1000), true);
+				if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 1000), false) == 0) {
+					train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 1000), true);
 					train.getSlotIndexByID(400).decrStackSize(1);
 				}
 			} else if (slotId.getItem() instanceof IEnergyContainerItem) {
-				if (train.fill(null, new FluidStack(CommonProxy.fluidRedstone, 100), false) == 0) {
-					train.fill(null, new FluidStack(CommonProxy.fluidRedstone,
+				if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), false) == 0) {
+					train.fill(null, new FluidStack(TiMFluids.fluidRedstone,
 							((IEnergyContainerItem) train.getSlotIndexByID(400).getItem())
 									.extractEnergy(slotId.getStack(), 100, false)), true);
 				}
 			}
-			if (train.fill(null, new FluidStack(CommonProxy.fluidRedstone, 100), false) == 0) {
+			if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), false) == 0) {
 				int draw = 0;
 				TileEntity te;
 				Block b;
@@ -208,7 +209,7 @@ public class FuelHandler{
 
 							if (draw != 0) {
 								((IEnergyHandler) te).receiveEnergy(direction, 100, false);
-								train.fill(null, new FluidStack(CommonProxy.fluidRedstone, 100), true);
+								train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), true);
 								break;
 							}
 						}
@@ -216,7 +217,7 @@ public class FuelHandler{
 						b= train.worldObj.getBlock(MathHelper.floor_double(train.posX), MathHelper.floor_double(train.posY + i), MathHelper.floor_double(train.posZ));
 						if (b instanceof IElectricGrid && ((IElectricGrid) b).getChargeHandler().getCharge()>=100){
 							((IElectricGrid) b).getChargeHandler().removeCharge(100);
-							train.fill(null, new FluidStack(CommonProxy.fluidRedstone, 100), true);
+							train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), true);
 						}
 					}
 					if (draw != 0) {

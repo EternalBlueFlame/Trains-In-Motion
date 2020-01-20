@@ -157,8 +157,8 @@ public class RenderEntity extends Render {
         GL11.glAlphaFunc(GL11.GL_GREATER, 0.1f);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_NORMALIZE);
+        GL11.glEnable(GL11.GL_LIGHTING);
 
-            GL11.glEnable(GL11.GL_LIGHTING);
         //set the render position
         GL11.glTranslated(x, y+ (entity.onVanillaRails?0:RailOffset) + ((entity.getRenderScale()-0.0625f)*10)+bogieOffset, z);
         //rotate the model.
@@ -218,7 +218,7 @@ public class RenderEntity extends Render {
             if(entity.modelOffsets()!=null && entity.modelOffsets().length>i) {
                 GL11.glTranslated(entity.modelOffsets()[i][0],entity.modelOffsets()[i][1],entity.modelOffsets()[i][2]);
             }
-            entity.renderData.modelList[i].render(entity, 0, 0, 0, 0, 0, entity.getRenderScale());
+            entity.renderData.modelList[i].render(entity, 0,0,0,0,0, entity.getRenderScale());
             GL11.glPopMatrix();
         }
 
@@ -254,10 +254,9 @@ public class RenderEntity extends Render {
                             TextureManager.bindTexture(s.getSubBogieSkin(iii), s.colorsFrom, s.colorsTo, entity.colorsFrom, entity.colorsTo);
                         }
                         GL11.glPushMatrix();
-                        GL11.glTranslated(sub.offset[0], sub.offset[1], sub.offset[2]);
+                        GL11.glTranslated(sub.offset[0]-b.offset[0], sub.offset[1]-b.offset[1], sub.offset[2]-b.offset[2]);
                         sub.setRotation(entity);
-                        GL11.glRotatef(sub.rotationYaw-yaw, 0.0f, 1.0f, 0);
-                        GL11.glRotatef(entity.rotationPitch - 180f, 0.0f, 0.0f, 1.0f);
+                        GL11.glRotatef(sub.rotationYaw-b.rotationYaw, 0.0f, 1.0f, 0);
                         sub.bogieModel.render(null, 0, 0, 0, 0, 0, entity.getRenderScale());
                         GL11.glPopMatrix();
                         iii++;
@@ -270,7 +269,6 @@ public class RenderEntity extends Render {
         }
 
         GL11.glPopMatrix();
-        GL11.glEnable(GL11.GL_LIGHTING);
         if(entity.worldObj==null){return;}
 
         //render the particles, if there are any.

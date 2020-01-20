@@ -38,9 +38,6 @@ public class ModelRail {
     }
 
     public static void modelPotatoRail(RailShapeCore shape, int[] color){
-        GL11.glPushMatrix();
-        GL11.glDisable(GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_NORMALIZE);
         GL11.glTranslated(0, 0.15, 0);
         for(float rail : shape.getGaugePositions()) {
 
@@ -50,14 +47,9 @@ public class ModelRail {
             centerShading(rail,color,30,false);
             drawFace(shape.activePath, rail, 0, -0.0625f,0,0);
         }
-        GL11.glPopMatrix();
-        GL11.glEnable(GL_TEXTURE_2D);
     }
 
     public static void modelExtrudedRail(RailShapeCore shape, int[] color) {
-        GL11.glPushMatrix();
-        GL11.glDisable(GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_NORMALIZE);
         GL11.glTranslated(0, 0.225, 0);
 
         for (float rail : shape.getGaugePositions()) {
@@ -96,7 +88,6 @@ public class ModelRail {
                 Tessellator.getInstance().draw();
             }
         }
-        GL11.glPopMatrix();
     }
 
 
@@ -104,8 +95,6 @@ public class ModelRail {
 
     public static void model3DRail(RailShapeCore shape, int[] color){
 
-        GL11.glDisable(GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_NORMALIZE);
         GL11.glTranslated(0, 0.225, 0);
 
         for(float rail : shape.getGaugePositions()) {
@@ -193,6 +182,5 @@ public class ModelRail {
             }
             GL11.glPopMatrix();
         }
-        GL11.glEnable(GL_TEXTURE_2D);
     }
 }

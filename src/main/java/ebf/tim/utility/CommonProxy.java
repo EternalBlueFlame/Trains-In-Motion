@@ -10,6 +10,10 @@ import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.items.*;
+import ebf.tim.registry.TiMBlocks;
+import ebf.tim.registry.TiMFluids;
+import ebf.tim.registry.TiMItems;
+import ebf.tim.registry.TiMOres;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -139,27 +143,7 @@ public class CommonProxy implements IGuiHandler {
      * <h1> registration </h1>
      */
 
-    /**the oil fluid*/
-    public static Fluid fluidOil = new Fluid("Oil");
-    /**the diesel fluid*/
-    public static Fluid fluidDiesel = new Fluid("Diesel");
-    /**the fuel oil fluid*/
-    public static Fluid fluidfueloil = new Fluid("FuelOil");
-    /**the steam fluid*/
-    public static Fluid fluidSteam = new Fluid("Steam");
-    /**the heavy steam fluid*/
-    public static Fluid fluidHeavySteam = new Fluid("HeavySteam");
-    /**the RF fluid*/
-    public static Fluid fluidRedstone = new Fluid("Redstone");
 
-    /**the crafting table for trains*/
-    public static BlockDynamic trainTable = new BlockDynamic("blocktraintable", new Material(MapColor.mapColorArray[13]), 0);
-
-    public static BlockDynamic railTable = new BlockDynamic("blockrailtable", new Material(MapColor.mapColorArray[6]), 1);
-
-    public static BlockRailCore railBlock = new BlockRailCore();
-
-    public static Item railItem;
 
     /**
      * <h2>Server Register</h2>
@@ -167,33 +151,10 @@ public class CommonProxy implements IGuiHandler {
      * Also serves as a placeholder for the client function, which is actually used, so we don't get a missing function error.
      */
     public void register() {
-
-        RegisterFluid(fluidOil, TrainsInMotion.MODID, "oil", false, 700,MapColor.blackColor, TrainsInMotion.creativeTab);
-        RegisterFluid(fluidDiesel, TrainsInMotion.MODID, "diesel", false, 500, MapColor.sandColor, TrainsInMotion.creativeTab);
-        RegisterFluid(fluidSteam, TrainsInMotion.MODID, "steam", true, 200, MapColor.snowColor, TrainsInMotion.creativeTab);
-        RegisterFluid(fluidHeavySteam, TrainsInMotion.MODID, "heavysteam", true, 600, MapColor.snowColor, TrainsInMotion.creativeTab);
-        RegisterFluid(fluidfueloil, TrainsInMotion.MODID, "fueloil", false, 600, MapColor.brownColor, TrainsInMotion.creativeTab);
-        RegisterFluid(fluidRedstone, TrainsInMotion.MODID, "redstone", false, 100, MapColor.redColor, TrainsInMotion.creativeTab);
-
-
-        RegisterItem(new ItemAdminBook(),TrainsInMotion.MODID, "adminbook", TrainsInMotion.creativeTab);
-        RegisterItem(new ItemCraftGuide(),TrainsInMotion.MODID, "craftbook", TrainsInMotion.creativeTab);
-
-	RegisterItem(new ItemPaintBucket(),TrainsInMotion.MODID, "paintbucket", TrainsInMotion.creativeTab);
-        RegisterItem(new ItemKey(),TrainsInMotion.MODID,  "transportkey", TrainsInMotion.creativeTab);
-        RegisterItem(new ItemTicket(),TrainsInMotion.MODID,  "transportticket", TrainsInMotion.creativeTab);
-        if(!isClient()) {
-            railItem = RegisterItem( new ItemRail(), TrainsInMotion.MODID, "timrail", TrainsInMotion.creativeTab);
-        }
-
-        registerBlock(railBlock, null, "block.timrail", null, getTESR());
-
-        //register the train crafting table
-        addRecipe(new ItemStack(registerBlock(trainTable, TrainsInMotion.creativeTab,"block.traintable", null, null),1),
-                "WWW", "WIW", "WWW", 'W', Blocks.planks, 'I', Items.iron_ingot);
-
-        addRecipe(new ItemStack(registerBlock(railTable, TrainsInMotion.creativeTab,"block.railtable", null, null),1),
-                "III", "I I", "I I", 'I', Items.iron_ingot);
+        TiMFluids.registerFluids();
+        TiMOres.registerOres();
+        TiMItems.registerItems();
+        TiMBlocks.registerBlocks();
     }
 
 }

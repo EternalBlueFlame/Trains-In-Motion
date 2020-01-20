@@ -1012,7 +1012,6 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
 
     //used for trains and B-units
     public float getPower(){return 0;}
-    public float getMaxPower(){return 0;}
 
 
     /**

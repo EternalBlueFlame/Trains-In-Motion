@@ -5,6 +5,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import ebf.XmlBuilder;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.items.ItemRail;
+import ebf.tim.registry.TiMItems;
 import ebf.tim.utility.CommonProxy;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRail;
@@ -252,7 +253,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         if(world.getTileEntity(x,y,z) instanceof RailTileEntity) {
             XmlBuilder xml =new XmlBuilder(((RailTileEntity) world.getTileEntity(x,y,z)).data.toXMLString());
             return ItemRail.setStackData(
-                    new ItemStack(CommonProxy.railItem, 1), xml.getItemStack("rail"),
+                    new ItemStack(TiMItems.railItem, 1), xml.getItemStack("rail"),
                     xml.getItemStack("ballast"), xml.getItemStack("ties"), xml.getItemStack("wires"));
         } else {
             return null;
@@ -265,7 +266,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
             ArrayList<ItemStack> out = new ArrayList<>();
             out.add(ItemRail.setStackData(
-                    new ItemStack(CommonProxy.railItem, 1), xml.getItemStack("rail"),
+                    new ItemStack(TiMItems.railItem, 1), xml.getItemStack("rail"),
                     xml.getItemStack("ballast"), xml.getItemStack("ties"), xml.getItemStack("wires")));
             return out;
         } else {

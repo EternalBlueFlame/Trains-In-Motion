@@ -7,10 +7,12 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.tim.TrainsInMotion;
+import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.networking.PacketInteract;
+import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.Tessellator;
 import fexcraft.tmt.slim.Vec3d;
 import net.minecraft.client.Minecraft;
@@ -21,10 +23,12 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.world.ChunkEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -228,6 +232,32 @@ public class EventManager {
     }
 
 
+
+    @SubscribeEvent
+    public void unloadChunk(ChunkEvent.Unload e){
+        /*for(List l: e.getChunk().entityLists){
+            for(Object o:l){
+                if(o instanceof GenericRailTransport){
+                    for(ModelBase m: ((GenericRailTransport) o).renderData.modelList){
+                        for(Integer i : m.displayList){
+                            if(i!=null){
+                                GL11.glDeleteLists(i,1);
+                            }
+                        }
+                    }
+                    ((GenericRailTransport) o).renderData.modelList=null;
+                    ((GenericRailTransport) o).renderData.needsModelUpdate=true;
+                }
+            }
+
+        }*/
+        for (Object te:e.getChunk().chunkTileEntityMap.entrySet()){
+            if(te instanceof RailTileEntity){
+                GL11.glDeleteLists(((RailTileEntity) te).railGLID,1);
+                ((RailTileEntity) te).railGLID=null;
+            }
+        }
+    }
 
 
     @SubscribeEvent

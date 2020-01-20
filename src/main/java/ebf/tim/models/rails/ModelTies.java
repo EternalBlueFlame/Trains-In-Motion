@@ -55,10 +55,7 @@ public class ModelTies {
 
     public static List<Vec5f> modelPotatoTies(RailSimpleShape shape, float maxWidth, float minWidth, ItemStack block){
         List<Vec5f> points = genTiePoints(shape);
-        GL11.glEnable(GL11.GL_NORMALIZE);
 
-
-        GL11.glPushMatrix();
         GL11.glTranslated(0, 0.125, 0);
         //top side
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.WEST.ordinal(), block);
@@ -79,16 +76,14 @@ public class ModelTies {
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
-        GL11.glPopMatrix();
         return points;
     }
 
 
     public static void model3DTies(RailSimpleShape shape, float maxWidth, float minWidth, ItemStack block){
+        //GL11.glTranslated(0, 0.125, 0);
         List<Vec5f> points= modelPotatoTies(shape, maxWidth, minWidth, block);
 
-        GL11.glPushMatrix();
-        GL11.glTranslated(0, 0.125, 0);
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.NORTH.ordinal(),block);
         d1 = iicon.getMinU()+ ((iicon.getMaxU()-iicon.getMinU())*0.09f);
         for (Vec5f p :points) {
@@ -157,8 +152,6 @@ public class ModelTies {
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
-
-        GL11.glPopMatrix();
 
 
     }

@@ -29,13 +29,9 @@ public class RailTileEntity extends TileEntity {
     //todo public int snow=0;
     //todo public int timer=0;
     //todo public int overgrowth=0;
-    private Integer railGLID=null;
+    public Integer railGLID=null;
     public XmlBuilder data = new XmlBuilder();
     public boolean updateModel=false;
-    @Deprecated
-    //todo seperate this into individual rail/ties/ballast, it will take more ram and triple GPU use, but its necessary to fix various texture issues.
-    Map<String, Integer> CachedRailModels = new HashMap<String, Integer>();
-
     //used for the actual path, and rendered
     //public RailShapeCore points = new RailShapeCore();
     //TODO: only rendered, to show other paths, maybe rework so they are all in the same list and just have a bool for which is active?
@@ -52,26 +48,20 @@ public class RailTileEntity extends TileEntity {
                 org.lwjgl.opengl.GL11.glCallList(railGLID);
             }
 
-            if(updateModel){
+            if(railGLID==null || updateModel){
                 RailShapeCore route =new RailShapeCore().parseString(data.getString("route"));
                 if (route!=null && route.gauge!=null) {
-                    if(CachedRailModels.containsKey(route.toString())){
-                        railGLID=CachedRailModels.get(route.toString());
-                        updateModel = false;
-                    } else {
-                        railGLID = net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1);
-                        org.lwjgl.opengl.GL11.glNewList(railGLID, org.lwjgl.opengl.GL11.GL_COMPILE);
+                    railGLID = net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1);
+                    org.lwjgl.opengl.GL11.glNewList(railGLID, org.lwjgl.opengl.GL11.GL_COMPILE);
 
-                        Model1x1Rail.Model3DRail(worldObj, xCoord, yCoord, zCoord,
-                                route,
-                                data.getItemStack("ballast"),
-                                data.getItemStack("ties"),
-                                data.getItemStack("rail"), null);
+                    Model1x1Rail.Model3DRail(worldObj, xCoord, yCoord, zCoord,
+                            route,
+                            data.getItemStack("ballast"),
+                            data.getItemStack("ties"),
+                            data.getItemStack("rail"), null);
 
-                        org.lwjgl.opengl.GL11.glEndList();
-                        updateModel = false;
-                        CachedRailModels.put(route.toString(),railGLID);
-                    }
+                    org.lwjgl.opengl.GL11.glEndList();
+                    updateModel = false;
                 }
             }
         } else {super.func_145828_a(report);}

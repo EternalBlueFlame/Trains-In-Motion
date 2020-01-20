@@ -43,7 +43,11 @@ public class Bogie {
         this.bogieModel = model;
         this.offset = new float[]{offsetX,offsetY,offsetZ};
     }
-
+    public Bogie(ModelBase model, float offsetX, float offsetY, float offsetZ, Bogie[] bogies){
+        this.bogieModel = model;
+        this.offset = new float[]{offsetX,offsetY,offsetZ};
+        Collections.addAll(this.subBogies, bogies);
+    }
     public Bogie(ModelBase model, @Nullable float[] offset, Bogie[] bogies){
         this.bogieModel = model;
         if(offset!=null) {

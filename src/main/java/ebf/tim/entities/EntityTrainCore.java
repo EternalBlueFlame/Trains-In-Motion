@@ -93,28 +93,19 @@ public class EntityTrainCore extends GenericRailTransport {
     //in newtons
     @Override
     public float getPower(){
-        if (transportTractiveEffort()<1f){
-            //2650 is a conversion factor for newtons, and 0.72 is a rough estimate for efficiency
-            return 2650f*((0.72f*
-                    (transportMetricHorsePower()*getAcceleratiorPercentage()))/
-                    getVelocity());
-        } else {
-            //standard tractive effort to newtons
-            return 4.4482216f*(transportTractiveEffort()*getAcceleratiorPercentage());
-        }
-    }
-    //gets the max power output to estimate how much the train can support of it's own weight
-    @Override
-    public float getMaxPower(){
-        if (transportTractiveEffort()<1f){
-            //2650 is a conversion factor for newtons, and 0.72 is a rough estimate for efficiency
-            return 2650f*((0.72f*
-                    (transportMetricHorsePower()*0.05f))/
-                    getVelocity());
-        } else {
-            //standard tractive effort to newtons
-            return 4.4482216f*(transportTractiveEffort()*0.05f);
-        }
+        //create a parabolic curve between reverse max speed and forward max speed, then get the position from current speed.
+        float t = getVelocity();
+        t=(((1f - t) * (1f - t)) * transportTopSpeed()*-0.5f) + (2f * (1f - t) * t * 0) + ((t * t) * transportTopSpeed());
+        //the average difference between metric horsepower and MHP is about 3.75% or tractiveEffort*26.3=MHP
+            return ((transportTractiveEffort()<1f?transportMetricHorsePower()*26f
+                    :transportTractiveEffort())
+
+                    //90mhp translating to 1 mircoblock a second sounds about right
+                    //(*0.009/16 = 0.0005625), then divide by ticks to turn to seconds (0.0005625/20=0.000028125).
+                    // lastly compensate for acceleration curve by multiplying by t.
+                    *getAcceleratiorPercentage())
+
+                    *(0.000028125f*t);
     }
 
     //returns the current speed
@@ -126,60 +117,61 @@ public class EntityTrainCore extends GenericRailTransport {
         return (accelerator*0.16666666666f)*0.05f;
     }
 
-    private float maxPowerNewtons=0;
+    private float maxPowerMicroblocks =0;
 
     @Override
     public void setValuesOnLinkUpdate(List<GenericRailTransport> consist){
-        maxPowerNewtons=0;
+        maxPowerMicroblocks =0;
         pullingWeight=0;
         for(GenericRailTransport t : consist) {
-            maxPowerNewtons +=t.getMaxPower();
+            maxPowerMicroblocks +=t.getPower();
             pullingWeight +=t.weightKg();
         }
     }
 
     /**
      * <h2>Calculate speed increase rate</h2>
-     *
-     * speed calculation provided by zodiacmal
      */
     public void calculateAcceleration(){
         float weight=pullingWeight * (getBoolean(boolValues.BRAKE)?2:1);
         if (accelerator !=0 && ticksExisted%20!=0) {
             //speed is defined by the power in newtons divided by the weight, divided by the number of ticks in a second.
-            if(maxPowerNewtons!=0) {
-                //745.7 converts to watts, which seems more accurate.
-                vectorCache[1][0] += ((maxPowerNewtons/weight)/7457);//applied power
+            if(maxPowerMicroblocks !=0) {
+                // weight's effect on HP is generally inverse of HP itself, it can be described as
+                // 30 lbs of coal about 100 feet in one minute = 33,000 lbf for 1.01387 MHP
+                // however this is for vertical, converting to horizontal means multiplying by around 85% of gravity
+                // so say you have a train with 75mhp, that means your carrying capacity sits around
+                // 75*1.11039648 tons. (83.279)
+                //clamp to a max of the pulling power as to not generate negative pulling power
+                vectorCache[1][0] += ((maxPowerMicroblocks- Math.min(weight*1.11039648,maxPowerMicroblocks)));//applied power
 
-                vectorCache[1][0]*=(accelerator*0.16666666666);//effected by the state of the throttle
+                //debuff for rain
+                vectorCache[1][1]=( (1.75f * (worldObj.isRaining()?0.5f:1)));
 
-
-                vectorCache[1][1]=( (1.75f * (worldObj.isRaining()?0.5f:1)) *this.weightKg());
-                //todo: debuff for pulled weight
-
+                //todo rework this, the math isnt based on newtons anymore.
                 if(Math.abs(vectorCache[1][0])*-745.7>vectorCache[1][1]/7457){
                     //todo: add sparks to animator.
-                    DebugUtil.println("SCREECH","wheelspin: " + (vectorCache[1][0]*-745.7),
-                            "Grip: " + (vectorCache[1][1]/7457), "i really need to get those spark particles in..");
-                    vectorCache[1][0] *=0.33;
+                    //DebugUtil.println("SCREECH","wheelspin: " + (vectorCache[1][0]*-745.7),
+                    //        "Grip: " + (vectorCache[1][1]/7457), "i really need to get those spark particles in..");
+                    //vectorCache[1][0] *=0.33;
                 }
 
             } else {
                 updateConsist();
             }
 
+        }
+        //apply drag, always.
+        vectorCache[1][1]=0;
+        if (vectorCache[1][0]>0) {
+            vectorCache[1][0] *= (1 - (0.005* (weight * 0.0007457)));
+            if (vectorCache[1][0] <0){
+                vectorCache[1][0] =0;
+            }
         } else {
-            vectorCache[1][1]=0;
-            if (vectorCache[1][0]>0) {
-                vectorCache[1][0] *= (1 - (0.005* (weight * 0.0007457)));
-                if (vectorCache[1][0] <0){
-                    vectorCache[1][0] =0;
-                }
-            } else {
-                vectorCache[1][0] *= (1 - (0.005* (weight * 0.0007457)));
-                if (vectorCache[1][0] >0){
-                    vectorCache[1][0] =0;
-                }
+            vectorCache[1][0] *= (1 - (0.005* (weight * 0.0007457)));
+            if (vectorCache[1][0] >0){
+                vectorCache[1][0] =0;
             }
         }
 

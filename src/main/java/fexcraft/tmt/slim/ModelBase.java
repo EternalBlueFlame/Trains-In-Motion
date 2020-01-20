@@ -1,12 +1,15 @@
 package fexcraft.tmt.slim;
 
+import ebf.tim.utility.DebugUtil;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.Entity;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
 * Similar to 'FlansMod'-type Models, for a fast convert.
@@ -21,26 +24,31 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 	public List<ModelRendererTurbo> boxList = new ArrayList<>();
 	public List<ModelRendererTurbo> animatedList = new ArrayList<>();
 	public List<String> creators = new ArrayList<>();
-	boolean init=true;
+	public boolean init=true;
 	public ModelRendererTurbo base[],bodyModel[],open[],closed[],r1[],r2[],r3[],r4[],r5[],r6[],r7[],r8[],r9[],r0[];
 
 	public List<Integer> displayList=new ArrayList<>();
 
+	public static Map<String,Integer> staticPartMap = new HashMap<>();
+
 	public void render(){
 		if(init){
-		    displayList.add(-1);
 		    initAllParts();
 		}
 
-		OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
+		//OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
 
-		if(displayList.get(0)==-1) {
-			displayList.set(0, GLAllocation.generateDisplayLists(1));
-			GL11.glNewList(displayList.get(0), GL11.GL_COMPILE);
+		//if(displayList.size()==0) {
+		//	return;
+		//}
+		if(staticPartMap.get(this.getClass().getName())==null) {
+			staticPartMap.put(this.getClass().getName(), GLAllocation.generateDisplayLists(1));
+			GL11.glNewList(staticPartMap.get(this.getClass().getName()), GL11.GL_COMPILE);
 			render(boxList);
 			GL11.glEndList();
+			boxList=null;
 		} else {
-			GL11.glCallList(displayList.get(0));
+			GL11.glCallList(staticPartMap.get(this.getClass().getName()));
 		}
 
 		if(animatedList==null){return;}

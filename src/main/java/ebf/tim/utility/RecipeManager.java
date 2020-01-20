@@ -3,6 +3,7 @@ package ebf.tim.utility;
 import ebf.XmlBuilder;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.items.ItemRail;
+import ebf.tim.registry.TiMItems;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
@@ -205,7 +206,7 @@ public class RecipeManager {
                 hostInventory.getStackInSlot(1)==getStackTies(hostInventory) &&
                 hostInventory.getStackInSlot(2)==getStackBallast(hostInventory)){
 
-            ItemStack rail = ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
+            ItemStack rail = ItemRail.setStackData(new ItemStack(TiMItems.railItem),
                     hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(1),hostInventory.getStackInSlot(2),
                     null);
 
@@ -215,7 +216,7 @@ public class RecipeManager {
         }
         //handle making a new stack
         if(hostInventory.getStackInSlot(0)!=null && ingotInDirectory(hostInventory.getStackInSlot(0).getItem())) {
-            return ItemRail.setStackData(new ItemStack(CommonProxy.railItem),
+            return ItemRail.setStackData(new ItemStack(TiMItems.railItem),
                     hostInventory.getStackInSlot(0),hostInventory.getStackInSlot(2),hostInventory.getStackInSlot(1),
                     null);
         }

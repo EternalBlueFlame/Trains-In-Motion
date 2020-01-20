@@ -15,9 +15,7 @@ public class ModelBallast {
     public static IIcon iicon;
 
     public static void modelPotatoBallast(RailShapeCore shape, float maxWidth, float minWidth, ItemStack b){
-        GL11.glPushMatrix();
         GL11.glTranslated(0, 0.1, 0);
-        GL11.glEnable(GL11.GL_NORMALIZE);
 
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.UP.ordinal(), b);
 
@@ -34,14 +32,10 @@ public class ModelBallast {
             ballastloop++;
         }
         Tessellator.getInstance().draw();
-        GL11.glPopMatrix();
     }
 
     public static void model3DBallast(RailShapeCore shape, float maxWidth, float minWidth, ItemStack b){
         modelPotatoBallast(shape, maxWidth, minWidth, b);
-
-        GL11.glPushMatrix();
-        GL11.glTranslated(0, 0.1, 0);
 
         float d0;
         //west side
@@ -53,7 +47,7 @@ public class ModelBallast {
             d0 = iicon.getMinU();
             d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/(shape.activePath.size()-1)));
 
-            addVertexWithOffsetAndUV(p, 0.1825f + maxWidth, -0.0625f, 0,d0,iicon.getMinV());
+            addVertexWithOffsetAndUV(p, 0.1825f + maxWidth, -0.135f, 0,d0,iicon.getMinV());
             addVertexWithOffsetAndUV(p, 0.0625f + maxWidth, 0, 0,d0,iicon.getMinV()+((iicon.getMaxV()-iicon.getMinV())*0.15f));
             ballastloop++;
         }
@@ -72,10 +66,9 @@ public class ModelBallast {
             d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/(shape.activePath.size()-1)));
 
             addVertexWithOffsetAndUV(p, -0.0625f + minWidth, 0, 0,d0,iicon.getMinV());
-            addVertexWithOffsetAndUV(p, -0.1825f + minWidth, -0.0625f, 0,d0,iicon.getMinV()+((iicon.getMaxV()-iicon.getMinV())*0.15f));
+            addVertexWithOffsetAndUV(p, -0.1825f + minWidth, -0.135f, 0,d0,iicon.getMinV()+((iicon.getMaxV()-iicon.getMinV())*0.15f));
             ballastloop++;
         }
         Tessellator.getInstance().draw();
-        GL11.glPopMatrix();
     }
 }
