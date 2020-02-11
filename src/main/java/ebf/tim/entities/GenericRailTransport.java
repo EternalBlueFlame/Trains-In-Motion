@@ -610,7 +610,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             for (int i=0;i<getSizeInventory();i++) {
                 invTag = tag.getCompoundTag("transportinv."+i);
                 if (invTag!=null) {
-                    inventory.get(i).setSlotContents(ItemStack.loadItemStackFromNBT(invTag));
+                    inventory.get(i).setSlotContents(ItemStack.loadItemStackFromNBT(invTag),inventory);
                 }
             }
         }
@@ -913,7 +913,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 }
                 if (e instanceof EntityItem) {
                     if (getTypes().contains(TrainsInMotion.transportTypes.HOPPER) && this.posY > this.posY + 0.5f &&
-                            isItemValidForSlot(0, ((EntityItem) e).getEntityItem())) {
+                            ((EntityItem) e).getEntityItem()!=null && isItemValidForSlot(0, ((EntityItem) e).getEntityItem())) {
                         addItem(((EntityItem) e).getEntityItem());
                         worldObj.removeEntity(e);
                     }
@@ -1253,7 +1253,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
     @Override
     public void setInventorySlotContents(int slot, ItemStack itemStack) {
         if (inventory != null && slot >=0 && slot <= getSizeInventory()) {
-            inventory.get(slot).setSlotContents(itemStack);
+            inventory.get(slot).setSlotContents(itemStack,inventory);
         }
     }
 
@@ -1330,7 +1330,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      */
     public void addItem(ItemStack item){
         for(ItemStackSlot slot : inventory){
-            item = slot.mergeStack(this, inventory,item);
+            item = slot.mergeStack(item,inventory);
             if (item == null){
                 return;
             }
@@ -1398,7 +1398,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
             for (ItemStackSlot slot : inventory) {
                 if (slot.getStack() != null) {
                     this.entityDropItem(slot.getStack(), 1);
-                    slot.setSlotContents(null);
+                    slot.setSlotContents(null,null);
                 }
             }
         }

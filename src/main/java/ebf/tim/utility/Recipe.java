@@ -4,63 +4,91 @@ import ebf.XmlBuilder;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
 public class Recipe {
 
-    private ItemStack[][] items = new ItemStack[10][];
+    List<ItemStack> result = new ArrayList<>();
+    List<List<ItemStack>> input = new ArrayList<>();
     private int[] displayItem=new int[]{0,0,0,0,0,0,0,0,0,0};
 
-    public Recipe(ItemStack[] result,
+
+    public Recipe(List<ItemStack> results, List<List<ItemStack>> cost){
+        result=results;input=cost;
+    }
+    public void addResults(List<ItemStack> results){
+        result.addAll(results);
+    }
+
+    @Deprecated
+    public Recipe(ItemStack[] resultItems,
             ItemStack[] topLeft, ItemStack[] topCenter, ItemStack[] topRight,
                   ItemStack[] middleLeft, ItemStack[] middleCenter, ItemStack[] middleRight,
                   ItemStack[] bottomLeft, ItemStack[] bottomCenter, ItemStack[] bottomRight){
 
-        items[0]=topLeft; items[1]=topCenter; items[2]=topRight;
-        items[3]=middleLeft; items[4]=middleCenter; items[5]=middleRight;
-        items[6]=bottomLeft; items[7]=bottomCenter; items[8]=bottomRight;
-        items[9]=result;
+        result.addAll(Arrays.asList(resultItems));
+
+        input.add(Arrays.asList(topLeft));
+        input.add(Arrays.asList(topCenter));
+        input.add(Arrays.asList(topRight));
+
+        input.add(Arrays.asList(middleLeft));
+        input.add(Arrays.asList(middleCenter));
+        input.add(Arrays.asList(middleRight));
+
+        input.add(Arrays.asList(bottomLeft));
+        input.add(Arrays.asList(bottomCenter));
+        input.add(Arrays.asList(bottomRight));
     }
 
+    @Deprecated
     public Recipe(ItemStack result,
                   ItemStack topLeft, ItemStack topCenter, ItemStack topRight,
                   ItemStack middleLeft, ItemStack middleCenter, ItemStack middleRight,
                   ItemStack bottomLeft, ItemStack bottomCenter, ItemStack bottomRight){
 
-        items[0]=new ItemStack[]{topLeft}; items[1]=new ItemStack[]{topCenter}; items[2]=new ItemStack[]{topRight};
-        items[3]=new ItemStack[]{middleLeft}; items[4]=new ItemStack[]{middleCenter}; items[5]=new ItemStack[]{middleRight};
-        items[6]=new ItemStack[]{bottomLeft}; items[7]=new ItemStack[]{bottomCenter}; items[8]=new ItemStack[]{bottomRight};
-        items[9]=new ItemStack[]{result};
+        this.result.add(result);
+
+        input.add(Collections.singletonList(topLeft));
+        input.add(Collections.singletonList(topCenter));
+        input.add(Collections.singletonList(topRight));
+
+        input.add(Collections.singletonList(middleLeft));
+        input.add(Collections.singletonList(middleCenter));
+        input.add(Collections.singletonList(middleRight));
+
+        input.add(Collections.singletonList(bottomLeft));
+        input.add(Collections.singletonList(bottomCenter));
+        input.add(Collections.singletonList(bottomRight));
+
     }
 
     //gets the individual stacks to check for crafting matches
-    public ItemStack[] topLeft(){return items[0];}
-    public ItemStack[] topCenter(){return items[1];}
-    public ItemStack[] topRight(){return items[2];}
+    public List<ItemStack> topLeft(){return input.get(0);}
+    public List<ItemStack> topCenter(){return input.get(1);}
+    public List<ItemStack> topRight(){return input.get(2);}
 
-    public ItemStack[] middleLeft(){return items[3];}
-    public ItemStack[] middleCenter(){return items[4];}
-    public ItemStack[] middleRight(){return items[5];}
+    public List<ItemStack> middleLeft(){return input.get(3);}
+    public List<ItemStack> middleCenter(){return input.get(4);}
+    public List<ItemStack> middleRight(){return input.get(5);}
 
-    public ItemStack[] bottomLeft(){return items[6];}
-    public ItemStack[] bottomCenter(){return items[7];}
-    public ItemStack[] bottomRight(){return items[8];}
+    public List<ItemStack> bottomLeft(){return input.get(6);}
+    public List<ItemStack> bottomCenter(){return input.get(7);}
+    public List<ItemStack> bottomRight(){return input.get(8);}
 
-    public ItemStack[] getresult(){return items[9];}
+    public List<ItemStack> getresult(){return result;}
 
-    public ItemStack[][] getItems() {
-        return items;
-    }
-
-    public ItemStack[][] getRecipeItems() {
-        return new ItemStack[][]{items[0],items[1],items[2],items[3],items[4],items[5],items[6],items[7],items[8]};
+    public List<List<ItemStack>> getRecipeItems() {
+        return input;
     }
 
     public void nextDisplayItem(){
         for(int i=0;i<10;i++) {
             displayItem[i]++;
-            if (displayItem[i] >= items[i].length) {
+            if (displayItem[i] >= input.get(i).size()) {
                 displayItem[i] = 0;
             }
         }
@@ -69,38 +97,105 @@ public class Recipe {
     //gets the list of itemstacks that should display on the crafting guide
     public ItemStack[] getDisplayArray(){
         return new ItemStack[]{
-                items[0][displayItem[0]],items[1][displayItem[1]],items[2][displayItem[2]],
-                items[3][displayItem[3]],items[4][displayItem[4]],items[5][displayItem[5]],
-                items[6][displayItem[6]],items[7][displayItem[7]],items[8][displayItem[8]],
-                items[9][displayItem[9]]
+                input.get(0).get(displayItem[0]),input.get(1).get(displayItem[1]),input.get(2).get(displayItem[2]),
+                input.get(3).get(displayItem[3]),input.get(4).get(displayItem[4]),input.get(5).get(displayItem[5]),
+                input.get(6).get(displayItem[6]),input.get(7).get(displayItem[7]),input.get(8).get(displayItem[8]),
+                result.get(displayItem[9])
         };
     }
 
+
+
+
+
+    public boolean inputMatches(List<ItemStack> stacks){
+        int i=0;
+        for(List<ItemStack> slot : input){
+            for(ItemStack s : slot){
+                if(s==null && stacks.get(i)==null){
+                    continue;
+                } else if(s==null || stacks.get(i)==null) {
+                    return false;
+                } else if(stacks.size()<=i || s.getItem()!=stacks.get(i).getItem() || s.stackSize>stacks.get(i).stackSize){
+                    return false;
+                }
+            }
+            i++;
+        }
+        return true;
+    }
+
+
+
+    public boolean recipeInputMatches(List<List<ItemStack>> stacks){
+        int i=0;
+        boolean slotClear=false;
+        for(List<ItemStack> slot : input){//itterate the slots
+            if (stacks.size() <= i){return false;}
+            for(ItemStack s : slot){//itterate the recipe values
+                for(ItemStack stak : stacks.get(i)) { //itterate the checked stack values
+                    if(s==null && stak==null) {
+                        slotClear=true;
+                        break;
+                    } else if(s==null || stak==null){
+                        continue;
+                    }
+                    if ((s.getItem() == stak.getItem() && s.stackSize <= stak.stackSize)) {
+                        slotClear=true;
+                        break;
+                    }
+                    if(slotClear){break;}
+                }
+                if(!slotClear){return false;}
+            }
+            i++;
+        }
+        return true;
+    }
+
+    public boolean resultMatches(ItemStack stack){
+        for(ItemStack check : result){
+            if (stack.getItem()==check.getItem() && stack.stackSize<=check.stackSize) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
+
+
+
+
+
     public String saveRecipe(){
         XmlBuilder xml = new XmlBuilder();
-        int ii;
-        for (int i=0;i<10;i++){
-            ii=0;
-            XmlBuilder slot = new XmlBuilder();
-            for(ItemStack s : items[i]){
+        XmlBuilder slot;
+        int ii=0,i=0;
+        for (List<ItemStack> slots : input){
+            slot = new XmlBuilder();
+            for(ItemStack s : slots){
                 slot.putItemStack("variant "+ii,s);
                 ii++;
             }
             xml.putXml("slot " +i, slot);
+            i++;
         }
         return xml.toXMLString();
     }
 
     public Recipe loadRecipe(String s){
         XmlBuilder xml = new XmlBuilder(s);
-        for (int i=0;i<10;i++){
+        input = new ArrayList<>();
+        for (int i=0;i<9;i++){
             List<ItemStack> list=new ArrayList<>();
 
             XmlBuilder builder = xml.getXml("slot "+i);
             for(String stack : builder.itemMap.keySet()) {
                 list.add(builder.getItemStack(stack));
             }
-            items[i]=list.toArray(new ItemStack[]{});
+            input.add(list);
 
         }
 

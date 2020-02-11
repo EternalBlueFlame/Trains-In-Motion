@@ -20,7 +20,7 @@ import java.util.List;
 public class ItemStackSlot extends Slot {
 
     private ItemStack stack = null, overlay = null;
-    private int slotID;
+    private int slotID, maxCraft;
     private boolean isCrafting, input;
 
     public ItemStackSlot(IInventory host, int slot){
@@ -32,6 +32,10 @@ public class ItemStackSlot extends Slot {
     public ItemStackSlot setCrafting(boolean io){
         input=io;isCrafting=true;
         return this;
+    }
+
+    public boolean isCrafting() {
+        return isCrafting;
     }
 
     public ItemStackSlot(IInventory host, int slot, int x, int y){
@@ -79,12 +83,6 @@ public class ItemStackSlot extends Slot {
         return getStack()!=null?getStack().getItem():null;
     }
 
-    public boolean equals(ItemStack other){
-        if (getStack()==null || other ==null){
-            return getStack() == null && other == null;
-        }
-        return getStack().getItem() == other.getItem() && (getStack().getTagCompound()) == other.getTagCompound();
-    }
 
     public NBTTagCompound writeToNBT(){
         return getStack()!=null?getStack().writeToNBT(new NBTTagCompound()):null;
@@ -95,22 +93,22 @@ public class ItemStackSlot extends Slot {
     }
 
 
-    public ItemStack mergeStack(IInventory hostInventory, List<ItemStackSlot> hostSlots, ItemStack itemStack){
+    public ItemStack mergeStack(ItemStack itemStack, List<ItemStackSlot> hostInventory){
         if (isItemValid(itemStack)) {
+
             if (!getHasStack()) {
-                ItemStack s =setSlotContents(itemStack) ? null : itemStack;
-                onCraftMatrixChanged(hostInventory, hostSlots);
-                return s;
+                return setSlotContents(itemStack,hostInventory) ? null : itemStack;
             } else {
-                if (equals(itemStack) && getStack().stackSize < getStack().getMaxStackSize()) {
+                if (contentEquals(itemStack) && getStack().stackSize < getStack().getMaxStackSize()) {
                     if (itemStack.stackSize <= getStack().getMaxStackSize() - getStack().stackSize) {
-                        getStack().stackSize += itemStack.stackSize;
-                        onCraftMatrixChanged(hostInventory, hostSlots);
+                        setSlotStacksize(getStack().stackSize+itemStack.stackSize);
                         return null;
                     } else {
                         itemStack.stackSize -= getStack().getMaxStackSize() - getStack().stackSize;
-                        getStack().stackSize = getStack().getMaxStackSize();
-                        onCraftMatrixChanged(hostInventory, hostSlots);
+                        setSlotStacksize(getStack().getMaxStackSize());
+                        if(itemStack.stackSize==0){
+                            itemStack=null;
+                        }
                         return itemStack;
                     }
                 }
@@ -119,7 +117,67 @@ public class ItemStackSlot extends Slot {
         return itemStack;
     }
 
-    public void onCraftMatrixChanged(IInventory hostInventory, List<ItemStackSlot> hostSlots) {
+    public ItemStack mergeStack(ItemStackSlot itemStack, List<ItemStackSlot> hostInventory, boolean max){
+        if (isItemValid(itemStack.getStack())) {
+            if (!getHasStack()) {
+                setSlotContents(itemStack.getStack().copy(),hostInventory);
+                itemStack.setSlotContents(null,hostInventory);
+            } else {
+                if (contentEquals(itemStack) && getStack().stackSize < getStack().getMaxStackSize()) {
+                    if (itemStack.getStackSize() <= getStack().getMaxStackSize() - getStack().stackSize) {
+                        setSlotStacksize(getStack().stackSize+itemStack.getStackSize());
+                        itemStack.setSlotContents(null,hostInventory);
+                    } else {
+                        itemStack.decrStackSize(getStack().getMaxStackSize() - getStack().stackSize);
+                        setSlotStacksize(getStack().getMaxStackSize());
+                        return itemStack.getStack();
+                    }
+                } else {
+                    return itemStack.getStack();
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean contentEquals(ItemStackSlot other){
+        if(getStack()==null || other.getStack()==null){
+            return getStack()==null&& other.getStack()==null;
+        }
+        return other.getStack().getItem()== getStack().getItem();
+    }
+    public boolean contentEquals(ItemStack other){
+        if(getStack()==null || other==null){
+            return getStack()==null&& other==null;
+        }
+        return other.getItem()== getStack().getItem();
+    }
+
+    public int getMaxCraft(IInventory hostInventory, List<ItemStackSlot> hostSlots){
+        int value =0;
+        if(isCrafting && hostInventory instanceof TileEntityStorage) {
+            if(((TileEntityStorage)hostInventory).storageType==0){
+                int size=0;
+                Recipe r = RecipeManager.getRecipe(stack);
+                for(int i=0;i<9; i++){
+                    for(ItemStack s :r.getRecipeItems().get(i)){
+                        if(s==null && gretStack()==null){
+                            continue;
+                        } else if (s!=null && ((TileEntityStorage) hostInventory).getSlotIndexByID(400+i).stack!=null &&
+                                s.getItem()==((TileEntityStorage) hostInventory).getSlotIndexByID(400+i).stack.getItem()){
+                            value=Math.max(size,
+                                    ((TileEntityStorage) hostInventory).getSlotIndexByID(400+i).stack.stackSize/s.stackSize);
+                        }
+                    }
+                }
+            } else {
+                value=((TileEntityStorage) hostInventory).getSlotIndexByID(400).stack.stackSize;
+            }
+        }
+        return value;
+    }
+
+    private void onCraftMatrixChanged(IInventory hostInventory, List<ItemStackSlot> hostSlots) {
         if(isCrafting && hostInventory instanceof TileEntityStorage) {
             int page = ((TileEntityStorage)hostInventory).outputPage;
             switch (((TileEntityStorage)hostInventory).storageType) {
@@ -160,6 +218,67 @@ public class ItemStackSlot extends Slot {
         }
     }
 
+    public void onCrafting(IInventory hostInventory, List<ItemStackSlot> hostSlots, int stacksize){
+        if(!isCrafting){return;}
+        Recipe r = RecipeManager.getRecipe(getStack());
+        if(r==null || r.input==null){return;}
+
+        switch (((TileEntityStorage)hostInventory).storageType) {
+            case 0: {
+                for(int i=0;i<9;i++){
+                    if(r.input.get(i)!=null) {
+                        for (ItemStack s : r.input.get(i)) {
+                            //DebugUtil.println(s==null?"null":stack.getDisplayName()+stack.stackSize+":"+stacksize);
+                            if (slotMatchesItem(hostSlots, 400 + i, s)) {
+                                shrinkStackInSlot(hostSlots, 400 + i, s == null ? 0 : stacksize * s.stackSize);
+                                break;
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+            case 1:{
+                for(int i=0;i<4;i++){
+                    shrinkStackInSlot(hostSlots,400+i,stacksize);
+                }
+                break;
+            }
+        }
+    }
+
+
+    public static boolean slotMatchesItem(List<ItemStackSlot> hostSlots, int slot, ItemStack stack){
+        ItemStackSlot stackSlot=null;
+        for(ItemStackSlot stak: hostSlots){
+            if (stak.getSlotIndex() ==slot){
+                stackSlot=stak;
+            }
+        }
+        if (stackSlot!=null) {
+            if(stackSlot.getStack()==null || stack==null) {
+                return stackSlot.getStack() == null && stack == null;
+            } else {
+                return stack.getItem()==stackSlot.getStack().getItem();
+            }
+        } else {
+            return stack==null;
+        }
+    }
+
+    public static void shrinkStackInSlot(List<ItemStackSlot> hostSlots, int slot, int size) {
+        if(size<1){return;}
+        ItemStackSlot stackSlot=null;
+        for(ItemStackSlot stak: hostSlots){
+            if (stak.getSlotIndex() ==slot){
+                stackSlot=stak;
+            }
+        }
+        if (stackSlot!=null) {
+            stackSlot.decrStackSize(size);
+        }
+    }
+
     public void putStackInSlot(List<ItemStackSlot> hostSlots, int slot, ItemStack stack) {
         ItemStackSlot stackSlot=null;
         for(ItemStackSlot stak: hostSlots){
@@ -176,7 +295,7 @@ public class ItemStackSlot extends Slot {
         }
     }
 
-    public boolean setSlotContents(@Nullable ItemStack stack){
+    public boolean setSlotContents(@Nullable ItemStack stack, List<ItemStackSlot> hostInventory){
         if (isItemValid(stack) || stack == null) {
             if (!(inventory instanceof GenericRailTransport) && !(inventory instanceof TileEntityStorage)) {
                     inventory.setInventorySlotContents(slotNumber, stack);
@@ -184,9 +303,25 @@ public class ItemStackSlot extends Slot {
                 this.stack = stack;
             }
             this.onSlotChanged();
+            if(hostInventory!=null) {
+                onCraftMatrixChanged(inventory, hostInventory);
+            }
             return true;
         }
         return false;
+    }
+
+
+    public boolean setSlotStacksize(int size){
+            if (!(inventory instanceof GenericRailTransport) && !(inventory instanceof TileEntityStorage)) {
+                ItemStack s = getStack().copy();
+                s.stackSize = size;
+                inventory.setInventorySlotContents(slotNumber,s);
+            } else {
+                this.stack.stackSize=size;
+            }
+            this.onSlotChanged();
+            return true;
     }
 
     /**
@@ -241,7 +376,7 @@ public class ItemStackSlot extends Slot {
     @Override
     @Deprecated
     public void putStack(ItemStack p_75215_1_) {
-        setSlotContents(p_75215_1_);
+        setSlotContents(p_75215_1_,null);
     }
 
     public void setStack(ItemStack p_75215_1_) {
@@ -272,7 +407,7 @@ public class ItemStackSlot extends Slot {
     @Override
     public ItemStack decrStackSize(int p_75209_1_) {
         if(!getHasStack() ||p_75209_1_ >=getStack().stackSize){
-            setSlotContents(null);
+            setSlotContents(null,null);
         } else {
             getStack().stackSize-=p_75209_1_;
         }

@@ -16,7 +16,7 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 		try{
 			BufferedReader in = new BufferedReader(new FileReader(file));
 			String s;
-			ArrayList<PositionTransformVertex> verts = new ArrayList<PositionTransformVertex>();
+			ArrayList<TexturedVertex> verts = new ArrayList<TexturedVertex>();
 			ArrayList<float[]> uvs = new ArrayList<float[]>();
 			ArrayList<float[]> normals = new ArrayList<float[]>();
 			ArrayList<TexturedPolygon> face = new ArrayList<TexturedPolygon>();
@@ -47,7 +47,7 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 					float flt = v[2];
 					v[2] = -v[1];
 					v[1] = flt;
-					verts.add(new PositionTransformVertex(v[0], v[1], v[2], 0, 0));
+					verts.add(new TexturedVertex(v[0], v[1], v[2], 0, 0));
 					continue;
 				}
 				if(s.startsWith("vt ")){
@@ -87,7 +87,7 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 				}
 				if(s.startsWith("f ")){
 					s = s.substring(s.indexOf(" ") + 1).trim();
-					ArrayList<PositionTransformVertex> v = new ArrayList<PositionTransformVertex>();
+					ArrayList<TexturedVertex> v = new ArrayList<TexturedVertex>();
 					String s1;
 					int finalPhase = 0;
 					do{
@@ -137,7 +137,7 @@ public class ModelPoolObjEntry extends ModelPoolEntry {
 						}
 					}
 					while(finalPhase < 1);
-					List<PositionTransformVertex> vToArr = new ArrayList<>(v);
+					List<TexturedVertex> vToArr = new ArrayList<>(v);
 					TexturedPolygon poly = new TexturedPolygon(vToArr);
 					face.add(poly);
 					continue;					

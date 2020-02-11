@@ -2,15 +2,11 @@ package fexcraft.tmt.slim;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ebf.tim.utility.DebugUtil;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.lwjgl.opengl.GL11.*;
 
 /**
 * @Author EternalBlueFlame
@@ -94,7 +90,7 @@ public class Tessellator{
 		TextureManager.bindTexture(uri);
 	}
 
-	public static void setNormal(List<PositionTransformVertex> vertex){
+	public static void setNormal(List<TexturedVertex> vertex){
 		normal=new Vec3f(0,0,0);
 		Vec3f p0,p1;
 		for(int i=0, j=1; i<vertex.size(); i++,j++) {
@@ -110,10 +106,10 @@ public class Tessellator{
 	}
 
 
-	public void addTexturedVertsWithNormal(List<PositionTransformVertex> vertexList){
+	public void addTexturedVertsWithNormal(List<TexturedVertex> vertexList){
 		i=0;j=1;
 		normal=new Vec3f(0,0,0);
-		for(PositionTransformVertex vert : vertexList) {
+		for(TexturedVertex vert : vertexList) {
 			if (x != null) {
 				verticies.add(new float[]{
 						vert.vector3F.xCoord + x, vert.vector3F.yCoord + y, vert.vector3F.zCoord + z,
@@ -134,13 +130,13 @@ public class Tessellator{
 	}
 
 
-	public void drawTexturedVertsWithNormal(List<PositionTransformVertex> vertexList, float scale){
+	public void drawTexturedVertsWithNormal(List<TexturedVertex> vertexList, float scale){
 		verticies=new ArrayList<>();
 		normal=null;
 		i=0;j=1;
 		normal=new Vec3f(0,0,0);
 		GL11.glBegin(vertexList.size()==4?GL11.GL_QUADS:vertexList.size()==3?GL11.GL_TRIANGLES:GL11.GL_POLYGON);
-		for(PositionTransformVertex vert : vertexList) {
+		for(TexturedVertex vert : vertexList) {
 			GL11.glTexCoord2f(vert.textureX, vert.textureY);
 			if (x != null) {
 				GL11.glVertex3f((vert.vector3F.xCoord + x)*scale, (vert.vector3F.yCoord + y)*scale, (vert.vector3F.zCoord + z)*scale);

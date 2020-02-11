@@ -123,7 +123,7 @@ public class GUICraftBook extends GuiScreen {
         if(getPage(leftPage?page:page+1)==null){return;}
         if(getPage(leftPage?page:page+1) instanceof Recipe) {
 
-            Minecraft.getMinecraft().fontRenderer.drawString(((Recipe) getPage(leftPage?page:page+1)).getresult()[0].getDisplayName()
+            Minecraft.getMinecraft().fontRenderer.drawString(((Recipe) getPage(leftPage?page:page+1)).getresult().get(0).getDisplayName()
                     ,percentLeft(leftPage?18:57), percentTop(19), 0x000000);
             Minecraft.getMinecraft().getTextureManager().bindTexture(GUITransport.vanillaInventory);
             for (int slot = 0; slot < 10; slot++) {
