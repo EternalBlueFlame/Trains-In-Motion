@@ -5,6 +5,7 @@ import net.minecraft.client.model.PositionTextureVertex;
 public class TexturedVertex {
 
 	public Vec3f vector3F;
+	public boolean isTextured;
 	public float textureX;
 	public float textureY;
 

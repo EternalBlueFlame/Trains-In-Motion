@@ -161,7 +161,7 @@ public class ItemStackSlot extends Slot {
                 Recipe r = RecipeManager.getRecipe(stack);
                 for(int i=0;i<9; i++){
                     for(ItemStack s :r.getRecipeItems().get(i)){
-                        if(s==null && gretStack()==null){
+                        if(s==null && getStack()==null){
                             continue;
                         } else if (s!=null && ((TileEntityStorage) hostInventory).getSlotIndexByID(400+i).stack!=null &&
                                 s.getItem()==((TileEntityStorage) hostInventory).getSlotIndexByID(400+i).stack.getItem()){

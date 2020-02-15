@@ -290,7 +290,7 @@ public class ParticleFX {
             lamp.clear();
             lamp.addCylinder(0, 0, 0,
                     15f*size, 100*size, 15, 0.02f, 2f,
-                    3, 1,1,5);
+                    3, 1,1,5,null);
             lamp.setRotationAngle(entity.offset[3],entity.offset[4], entity.offset[5]);
 
             GL11.glRotated(entity.host.rotationPitch,1,0,0);

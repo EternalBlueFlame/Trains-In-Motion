@@ -225,8 +225,7 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 	public void addPart(ModelRendererTurbo part){
 		if(part==null) {
 			return;
-		}if(part.animated){
-		    displayList.add(-1);
+		}if(part.boxName!=null && part.boxName.length()>2){
 			animatedList.add(part);
 		} else {
 			boxList.add(part);
