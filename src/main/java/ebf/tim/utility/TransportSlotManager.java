@@ -184,8 +184,10 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                 if (slot == null) {
                     return null;
                 }
+                int maxCraft=0;
                 if(slot.isCrafting()){
                     slot.setSlotStacksize(slot.getMaxCraft(hostInventory,inventory));
+                    maxCraft= slot.getStackSize();
                 }
 
                 if(slotId<36 || slotId==-999){//if the selected slot was in player inventory or on the cursor
@@ -242,6 +244,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                     //try the players
                     for(ItemStackSlot s : inventory){
                         if(s.getSlotID()<36 && s.mergeStack(slot,inventory,true)==null){
+                            slot.onCrafting(hostInventory,inventory,maxCraft);
                             slot.setSlotStacksize(1);//
                             slot.setSlotContents(null,inventory);
                                 return null;
@@ -253,6 +256,7 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
                         //try the storage
                         for (ItemStackSlot s : inventory) {
                             if (s.getSlotID() > 35 && s.mergeStack(slot, inventory, true) == null) {
+                                slot.onCrafting(hostInventory,inventory,maxCraft);
                                 slot.setSlotStacksize(1);//
                                 slot.setSlotContents(null,inventory);
                                 return null;
