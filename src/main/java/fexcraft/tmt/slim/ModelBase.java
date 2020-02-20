@@ -52,11 +52,11 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 		}
 
 		if(animatedList==null){return;}
-		for(int i=1;i<animatedList.size();i++){
-			if(displayList.get(i)!=-1){
+		for(int i=0;i<animatedList.size();i++){
+			if(displayList.size()>i){
 				GL11.glCallList(displayList.get(i));
 			} else if(animatedList.get(i)!=null) {
-				displayList.set(i, GLAllocation.generateDisplayLists(1));
+				displayList.add(GLAllocation.generateDisplayLists(1));
 				GL11.glNewList(displayList.get(i), GL11.GL_COMPILE);
 				GL11.glPushMatrix();
 				animatedList.get(i).render();
@@ -213,7 +213,6 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 	public List<ModelRendererTurbo> getParts(){
 
 		if(init){
-			displayList.add(-1);
 			initAllParts();
 		}
 	    List<ModelRendererTurbo> ret = new ArrayList<>();
@@ -225,8 +224,7 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 	public void addPart(ModelRendererTurbo part){
 		if(part==null) {
 			return;
-		}if(part.animated){
-		    displayList.add(-1);
+		}if(part.boxName!=null && part.boxName.length()>2){
 			animatedList.add(part);
 		} else {
 			boxList.add(part);

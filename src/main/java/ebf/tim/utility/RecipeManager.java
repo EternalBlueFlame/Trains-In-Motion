@@ -15,41 +15,43 @@ import java.util.*;
 
 public class RecipeManager {
 
-    private static Map<String, List<ItemStack>> recipes = new HashMap<>();
+    private static List<Recipe> recipeList = new ArrayList<>();
     //private static List<Item> ingotDirectory = new ArrayList<>();
 
 
-    public static String stackArrayToString(ItemStack[][] s){
-        XmlBuilder builder = new XmlBuilder();
-        int ii;
-        for(int i=0;i<9;i++){
-            XmlBuilder subBuilder = new XmlBuilder();
-            ii=0;
-            for(ItemStack stack: s[i]){
-                subBuilder.putItemStack("itm"+ii,stack);
-                ii++;
-            }
-            builder.putXml("x"+i,subBuilder);
-        }
-        return builder.toXMLString();
-    }
-
     public static void registerRecipe(Recipe recipe){
         DebugUtil.println("REGISTERING RECIPE"
-        , (recipe.topLeft()==null || recipe.topLeft().length==0 || recipe.topLeft()[0]==null?"null": recipe.topLeft()[0].getDisplayName()),
-                recipe.getresult()[0].getDisplayName());
-        String input = stackArrayToString(recipe.getRecipeItems());
-        for(String key: recipes.keySet()){
-            if(input.equals(key)){
-                recipes.get(key).addAll(Arrays.asList(recipe.getresult()));
+        , (recipe.topLeft()==null || recipe.topLeft().size()==0 || recipe.topLeft().get(0)==null?"null": recipe.topLeft().get(0).getDisplayName()),
+                recipe.getresult().get(0).getDisplayName());
+
+        for(Recipe r : recipeList){
+            if(r.recipeInputMatches(recipe.input)){
+                r.addResults(recipe.result);
                 return;
             }
         }
 
-        List<ItemStack> result = new ArrayList<>();
-        result.addAll(Arrays.asList(recipe.getresult()));
-        recipes.put(input,result);
+        recipeList.add(recipe);
+
         //todo: in later MC versions add function for IDE to write the recipe to a json in editor, and load it from json normally
+    }
+
+
+    public static Recipe getRecipe(ItemStack result){
+        for(Recipe r : recipeList){
+            for(ItemStack stack : r.getresult()){
+                if(stack==null || result==null){
+                    if(stack==null && result==null){
+                        return r;
+                    }
+                }
+                else if(stack.getItem()==result.getItem()){
+                    return r;
+                }
+            }
+
+        }
+        return null;
     }
 
     public static List<ItemStack> getResult(ItemStack[] recipe){
@@ -57,92 +59,13 @@ public class RecipeManager {
             return null;//if all inputs were null, then just return null. this is a common scenario, should save speed overall.
         }
 
-
-        //iterate all recipes
-        boolean[] slot;
-        XmlBuilder builder, stackSet;
-        List<ItemStack> retStacks = new ArrayList<>();
-        for(String key : recipes.keySet()){
-            builder= new XmlBuilder(key);
-            slot=new boolean[]{false,false,false,false,false,false,false,false};
-            for(int i=0;i<8;i++){
-                stackSet=builder.getXml("x"+i);
-                for(String stackKey : stackSet.itemMap.keySet()){
-                    if(stackSet.getItemStack(stackKey)==null || recipe[i]==null){
-                        if(stackSet.getItemStack(stackKey)==null && recipe[i]==null){
-                            slot[i]=true;
-                            break;
-                        }
-                    } else if(stackSet.getItemStack(stackKey).getItem()== recipe[i].getItem() &&
-                            recipe[i].stackSize>=stackSet.getItemStack(stackKey).stackSize){
-                        slot[i]=true;
-                        break;
-                    }
-                }
-                if(!slot[i]){
-                    break;
-                }
-            }
-
-            if(slot[0] && slot[1] && slot[2] && slot[3] && slot[4] && slot[5] && slot[6] && slot[7]) {
-                retStacks.addAll(recipes.get(key));
+        for(Recipe r : recipeList){
+            if(r.inputMatches(Arrays.asList(recipe))){
+                return r.result;
             }
         }
-        //if all the recipes were iterated and none were a complete match, then there is no result
-        return retStacks;
+        return null;
     }
-
-    public static List<ItemStack> getResult(ItemStack[] recipe, ItemStack match){
-        if(Arrays.equals(recipe, new ItemStack[]{null, null, null, null, null, null, null, null}) || match==null){
-            return null;//if all inputs were null, then just return null. this is a common scenario, should save speed overall.
-        }
-
-        //iterate all recipes
-        boolean[] slot;
-        XmlBuilder builder, stackSet;
-        List<ItemStack> retStacks = new ArrayList<>();
-        for(String key : recipes.keySet()){
-            slot=new boolean[]{false,false,false,false,false,false,false,false};
-            for (ItemStack s : recipes.get(key)) {
-                slot[0]=match.getItem() == s.getItem();
-                if(slot[0]){break;}
-            }
-            if(slot[0]){
-                slot[0]=false;
-            } else {
-                continue;
-            }
-
-            builder= new XmlBuilder(key);
-            for(int i=0;i<8;i++){
-                stackSet=builder.getXml("x"+i);
-                for(String stackKey : stackSet.itemMap.keySet()){
-                    if(stackSet.getItemStack(stackKey)==null || recipe[i]==null){
-                        if(stackSet.getItemStack(stackKey)==null && recipe[i]==null){
-                            slot[i]=true;
-                            retStacks.add(null);
-                            break;
-                        }
-                    } else if(stackSet.getItemStack(stackKey).getItem()== recipe[i].getItem() &&
-                            recipe[i].stackSize>=stackSet.getItemStack(stackKey).stackSize){
-                        slot[i]=true;
-                        retStacks.add(stackSet.getItemStack(stackKey));
-                        break;
-                    }
-                }
-                if(!slot[i]){
-                    break;
-                }
-            }
-
-            if(slot[0] && slot[1] && slot[2] && slot[3] && slot[4] && slot[5] && slot[6] && slot[7]) {
-                retStacks.addAll(recipes.get(key));
-            }
-        }
-        //if all the recipes were iterated and none were a complete match, then there is no result
-        return retStacks;
-    }
-
 
 
 

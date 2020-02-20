@@ -14,6 +14,7 @@ import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.networking.PacketInteract;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.Tessellator;
+import fexcraft.tmt.slim.TextureManager;
 import fexcraft.tmt.slim.Vec3d;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -274,6 +275,7 @@ public class EventManager {
             }
             longest*=0.3;
             longest+=10;
+            GL11.glPushMatrix();
             drawTooltipBox(left-(longest)-35, 2, 70+(longest*2), 8+(10*disp.length), ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,100);
 
             GL11.glTranslatef(0.0F, 0.0F, 32.0F);
@@ -281,13 +283,16 @@ public class EventManager {
                 itemRender.renderItemAndEffectIntoGUI(Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().getTextureManager(),
                         getSelected().getCartItem(), left - (longest) - 30, 12);
             }
-            GL11.glDisable(GL11.GL_LIGHTING);
+            //GL11.glDisable(GL11.GL_LIGHTING);
             for(int ii=0; ii<disp.length;ii++) {
                 Minecraft.getMinecraft().fontRenderer.drawString(disp[ii],
                         40+left-(longest*3)+ ((longest-disp[ii].length())*2), 8+(ii*10),ii==0?0xFFFFFFFF:ClientProxy.WAILA_FONTCOLOR);
             }
-            GL11.glEnable(GL11.GL_LIGHTING);
+            //GL11.glEnable(GL11.GL_LIGHTING);
+            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+            GL11.glDisable(GL11.GL_BLEND);
             //todo: draw an array of strings for the tooltip info, derrived from the transport's class.
+            GL11.glPopMatrix();
         }
     }
 

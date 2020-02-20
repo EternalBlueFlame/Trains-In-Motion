@@ -2,15 +2,11 @@ package fexcraft.tmt.slim;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ebf.tim.utility.DebugUtil;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.lwjgl.opengl.GL11.*;
 
 /**
 * @Author EternalBlueFlame
@@ -21,9 +17,9 @@ public class Tessellator{
 
 	public static Tessellator INSTANCE = new Tessellator();
 
-	private static int i,j;//only used for calculations
 	private static Float x, y, z;
-	private static Vec3f normal=null, p1;//p1 only used for calculations
+	private static Vec3f normal=null;
+	//@Depreciated
 	private static List<float[]> verticies = new ArrayList<>(); //0,1,2 are the position, 3,4,5,6 are the texture vectors.
 
 	public static Tessellator getInstance(){
@@ -94,53 +90,9 @@ public class Tessellator{
 		TextureManager.bindTexture(uri);
 	}
 
-	public static void setNormal(List<PositionTransformVertex> vertex){
-		normal=new Vec3f(0,0,0);
-		Vec3f p0,p1;
-		for(int i=0, j=1; i<vertex.size(); i++,j++) {
-
-			if (j == vertex.size()){j=1;}
-			p0 = vertex.get(i).vector3F;// current vertex
-			p1 = vertex.get(j).vector3F;// next vertex
-
-			normal.xCoord += (p0.yCoord - p1.yCoord) * (p0.zCoord + p1.zCoord);
-			normal.yCoord += (p0.zCoord - p1.zCoord) * (p0.xCoord + p1.xCoord);
-			normal.zCoord += (p0.xCoord - p1.xCoord) * (p0.yCoord + p1.yCoord);
-		}
-	}
-
-
-	public void addTexturedVertsWithNormal(List<PositionTransformVertex> vertexList){
-		i=0;j=1;
-		normal=new Vec3f(0,0,0);
-		for(PositionTransformVertex vert : vertexList) {
-			if (x != null) {
-				verticies.add(new float[]{
-						vert.vector3F.xCoord + x, vert.vector3F.yCoord + y, vert.vector3F.zCoord + z,
-						vert.textureX, vert.textureY});
-			} else {
-				verticies.add(new float[]{
-						vert.vector3F.xCoord, vert.vector3F.yCoord, vert.vector3F.zCoord,
-						vert.textureX, vert.textureY});
-			}
-
-			if (j == vertexList.size()){j=1;}
-			p1 = vertexList.get(j).vector3F;// next vertex
-
-			normal.xCoord += (vert.vector3F.yCoord - p1.yCoord) * (vert.vector3F.zCoord + p1.zCoord);
-			normal.yCoord += (vert.vector3F.zCoord - p1.zCoord) * (vert.vector3F.xCoord + p1.xCoord);
-			normal.zCoord += (vert.vector3F.xCoord - p1.xCoord) * (vert.vector3F.yCoord + p1.yCoord);
-		}
-	}
-
-
-	public void drawTexturedVertsWithNormal(List<PositionTransformVertex> vertexList, float scale){
-		verticies=new ArrayList<>();
-		normal=null;
-		i=0;j=1;
-		normal=new Vec3f(0,0,0);
+	public void drawTexturedVertsWithNormal(List<TexturedVertex> vertexList, float scale){
 		GL11.glBegin(vertexList.size()==4?GL11.GL_QUADS:vertexList.size()==3?GL11.GL_TRIANGLES:GL11.GL_POLYGON);
-		for(PositionTransformVertex vert : vertexList) {
+		for(TexturedVertex vert : vertexList) {
 			GL11.glTexCoord2f(vert.textureX, vert.textureY);
 			if (x != null) {
 				GL11.glVertex3f((vert.vector3F.xCoord + x)*scale, (vert.vector3F.yCoord + y)*scale, (vert.vector3F.zCoord + z)*scale);
@@ -148,14 +100,10 @@ public class Tessellator{
 				GL11.glVertex3f(vert.vector3F.xCoord*scale, vert.vector3F.yCoord*scale, vert.vector3F.zCoord*scale);
 			}
 
-			if (j == vertexList.size()){j=1;}
-			p1 = vertexList.get(j).vector3F;// next vertex
-
-			normal.xCoord += (vert.vector3F.yCoord - p1.yCoord) * (vert.vector3F.zCoord + p1.zCoord);
-			normal.yCoord += (vert.vector3F.zCoord - p1.zCoord) * (vert.vector3F.xCoord + p1.xCoord);
-			normal.zCoord += (vert.vector3F.xCoord - p1.xCoord) * (vert.vector3F.yCoord + p1.yCoord);
 		}
-		GL11.glNormal3f(normal.xCoord, normal.yCoord, normal.zCoord);
+		normal = vertexList.get(1).vector3F.subtract(vertexList.get(2).vector3F)
+						.crossProduct(vertexList.get(1).vector3F.subtract(vertexList.get(0).vector3F));
+		GL11.glNormal3f(normal.xCoord,normal.yCoord,normal.zCoord);
 		GL11.glEnd();
 	}
 

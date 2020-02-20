@@ -83,7 +83,7 @@ public class TileEntityStorage extends TileEntity implements IInventory {
             for (int i=0;i<getSizeInventory();i++) {
                 NBTTagCompound invTag = p_145839_1_.getCompoundTag("transportinv."+i);
                 if (invTag!=null) {
-                    inventory.get(i).setSlotContents(ItemStack.loadItemStackFromNBT(invTag));
+                    inventory.get(i).setSlotContents(ItemStack.loadItemStackFromNBT(invTag), inventory);
                 }
             }
         }
@@ -151,7 +151,7 @@ public class TileEntityStorage extends TileEntity implements IInventory {
     @Override
     public void setInventorySlotContents(int slot, ItemStack itemStack) {
         if (inventory != null && slot >=0 && slot <= getSizeInventory()) {
-            inventory.get(slot).setSlotContents(itemStack);
+            inventory.get(slot).setSlotContents(itemStack,inventory);
         }
     }
 

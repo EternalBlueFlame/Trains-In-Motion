@@ -90,22 +90,16 @@ public class EntityTrainCore extends GenericRailTransport {
 
     @Override
     public boolean hasDrag(){return accelerator==0;}
-    //in newtons
+
     @Override
     public float getPower(){
-        //create a parabolic curve between reverse max speed and forward max speed, then get the position from current speed.
-        float t = getVelocity();
-        t=(((1f - t) * (1f - t)) * transportTopSpeed()*-0.5f) + (2f * (1f - t) * t * 0) + ((t * t) * transportTopSpeed());
         //the average difference between metric horsepower and MHP is about 3.75% or tractiveEffort*26.3=MHP
-            return ((transportTractiveEffort()<1f?transportMetricHorsePower()*26f
-                    :transportTractiveEffort())
+            return (transportTractiveEffort()<1f?transportMetricHorsePower()*281.125f
+                    :transportTractiveEffort());
 
                     //90mhp translating to 1 mircoblock a second sounds about right
                     //(*0.009/16 = 0.0005625), then divide by ticks to turn to seconds (0.0005625/20=0.000028125).
-                    // lastly compensate for acceleration curve by multiplying by t.
-                    *getAcceleratiorPercentage())
-
-                    *(0.000028125f*t);
+                    //*0.000028125f;
     }
 
     //returns the current speed
@@ -136,14 +130,20 @@ public class EntityTrainCore extends GenericRailTransport {
         float weight=pullingWeight * (getBoolean(boolValues.BRAKE)?2:1);
         if (accelerator !=0 && ticksExisted%20!=0) {
             //speed is defined by the power in newtons divided by the weight, divided by the number of ticks in a second.
-            if(maxPowerMicroblocks !=0) {
+            if(getPower() !=0) {
+                //update the consist if somehow it didnt get initialized.
+                if(maxPowerMicroblocks==0){
+                    updateConsist();
+                }
                 // weight's effect on HP is generally inverse of HP itself, it can be described as
                 // 30 lbs of coal about 100 feet in one minute = 33,000 lbf for 1.01387 MHP
                 // however this is for vertical, converting to horizontal means multiplying by around 85% of gravity
                 // so say you have a train with 75mhp, that means your carrying capacity sits around
                 // 75*1.11039648 tons. (83.279)
                 //clamp to a max of the pulling power as to not generate negative pulling power
-                vectorCache[1][0] += ((maxPowerMicroblocks- Math.min(weight*1.11039648,maxPowerMicroblocks)));//applied power
+                DebugUtil.println(maxPowerMicroblocks,weight, maxPowerMicroblocks/weight);
+                vectorCache[1][0] = Math.max(0,maxPowerMicroblocks
+                        / (weight*1.11039648f))*getAcceleratiorPercentage();//applied power
 
                 //debuff for rain
                 vectorCache[1][1]=( (1.75f * (worldObj.isRaining()?0.5f:1)));
