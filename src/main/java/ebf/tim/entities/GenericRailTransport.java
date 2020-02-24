@@ -1542,6 +1542,45 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
         }
         return leftoverDrain;
     }
+
+    /**
+     * forced fill method, attempts to fill containers with the entire amount.
+     * this is mainly used by the fuel handler as a shorthand but can be manually referenced by other things
+     * @param from the direction to fill from, normally doesn't make a difference, can be null
+     * @param resource the fluid to fill with
+     * @return true if the tank was able to fill with the entire stack, false if not.
+     */
+    public boolean fill(@Nullable ForgeDirection from, FluidStack resource){
+        if(getTankCapacity()==null){return false;}
+        for(int stack =0; stack<getTankCapacity().length;stack++) {
+            if(getTankFilters()!=null && getTankFilters()[stack]!=null) {
+                boolean check=false;
+                for (String filter : getTankFilters()[stack]) {
+                    if (filter.length()==0 || RailUtility.stringContains(filter,resource.getFluid().getName())){
+                        check=false;
+                        break;
+                    } else {
+                        check=true;
+                    }
+                }
+                if(check){
+                    continue;
+                }
+            }
+            if (getTankInfo(null)[stack]!=null && (
+                    resource.getFluid() == null || getTankInfo(null)[stack].fluid.getFluid() == resource.getFluid() ||
+                            getTankInfo(null)[stack].fluid.amount ==0)) {
+                if(resource.amount+getTankInfo(null)[stack].fluid.amount<=getTankInfo(null)[stack].capacity){
+                    getTankInfo(null)[stack] = new FluidTankInfo(
+                            new FluidStack(resource.fluid, getTankInfo(null)[stack].fluid.amount+resource.amount),
+                            getTankInfo(null)[stack].capacity);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**returns the list of fluid tanks and their capacity.*/
     @Override
     public FluidTankInfo[] getTankInfo(ForgeDirection from){
