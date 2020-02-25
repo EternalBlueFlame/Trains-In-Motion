@@ -1342,17 +1342,56 @@ public class ModelRendererTurbo {
 
     //ETERNAL: changed w/h/d to floats for better support of the custom render on the rails.
     public ModelRendererTurbo addShapeBox(float x, float y, float z, float w, float h, float d, float scale, float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, float x5, float y5, float z5, float x6, float y6, float z6, float x7, float y7, float z7){
-        float f4 = x + w, f5 = y + h, f6 = z + d;
+        scale+=0.000001f;
+        float f4 = x + w + scale, f5 = y + h + scale, f6 = z + d + scale;
         x -= scale; y -= scale; z -= scale;
-        f4 += scale; f5 += scale; f6 += scale;
         if(mirror){
             float f7 = f4; f4 = x; x = f7;
         }
-        float[] v  = {x  - x0, y  - y0, z  - z0}, v1 = {f4 + x1, y  - y1, z  - z1}, v2 = {f4 + x5, f5 + y5, z  - z5};
-        float[] v3 = {x  - x4, f5 + y4, z  - z4}, v4 = {x  - x3, y  - y3, f6 + z3}, v5 = {f4 + x2, y  - y2, f6 + z2};
-        float[] v6 = {f4 + x6, f5 + y6, f6 + z6}, v7 = {x  - x7, f5 + y7, f6 + z7};
-        return addRectShape(v, v1, v2, v3, v4, v5, v6, v7, w, h, d);
+        //float[] v  = {x  - x0, y  - y0, z  - z0}
+        List<TexturedVertex> verts = new ArrayList<>();
+        List<TexturedPolygon> poly = new ArrayList<>();
+        verts.add(new TexturedVertex(x  - x0, y  - y0, z  - z0, 0.0F, 0.0F));
+        verts.add(new TexturedVertex(f4 + x1, y  - y1, z  - z1, 0.0F, 8F));
+        verts.add(new TexturedVertex(f4 + x5, f5 + y5, z  - z5, 8F, 8F));
+        verts.add(new TexturedVertex(x  - x4, f5 + y4, z  - z4, 8F, 0.0F));
+        verts.add(new TexturedVertex(x  - x3, y  - y3, f6 + z3, 0.0F, 0.0F));
+        verts.add(new TexturedVertex(f4 + x2, y  - y2, f6 + z2, 0.0F, 8F));
+        verts.add(new TexturedVertex(f4 + x6, f5 + y6, f6 + z6, 8F, 8F));
+        verts.add(new TexturedVertex(x  - x7, f5 + y7, f6 + z7, 8F, 0.0F));
+        poly.add(addPolygonReturn(verts.get(5),verts.get(1),verts.get(2),verts.get(6),
+                textureOffsetX + d + w, textureOffsetY + d, textureOffsetX + d + w + d, textureOffsetY + d + h));
+
+        poly.add(addPolygonReturn(verts.get(0), verts.get(4), verts.get(7), verts.get(3)
+                , textureOffsetX, textureOffsetY + d, textureOffsetX + d, textureOffsetY + d + h));
+        poly.add(addPolygonReturn(verts.get(5), verts.get(4), verts.get(0), verts.get(1)
+                , textureOffsetX + d, textureOffsetY, textureOffsetX + d + w, textureOffsetY + d));
+        poly.add(addPolygonReturn(verts.get(2), verts.get(3), verts.get(7), verts.get(6)
+                , textureOffsetX + d + w, textureOffsetY, textureOffsetX + d + w + w, textureOffsetY + d));
+        poly.add(addPolygonReturn(verts.get(1), verts.get(0), verts.get(3), verts.get(2)
+                , textureOffsetX + d, textureOffsetY + d, textureOffsetX + d + w, textureOffsetY + d + h));
+        poly.add(addPolygonReturn(verts.get(4), verts.get(5), verts.get(6), verts.get(7)
+                , textureOffsetX + d + w + d, textureOffsetY + d, textureOffsetX + d + w + d + w, textureOffsetY + d + h));
+        if(mirror){
+            for (TexturedPolygon texturedPolygon : poly) {
+                texturedPolygon.flipFace();
+            }
+        }
+        copyTo(poly);
+        return this;
     }
+   /* private TexturedPolygon addPolygonReturn(float vert1x,float vert1y,float vert1z,float vert2x,float vert2y,float vert2z,
+                                             float vert3x,float vert3y,float vert3z,float vert4x,float vert4y,float vert4z,
+                                             float f, float g, float h, float j){
+        float uOffs = 1.0F / (textureWidth * 10.0F);
+        float vOffs = 1.0F / (textureHeight * 10.0F);
+        List<TexturedVertex> verts = new ArrayList<>();
+        verts.add(vert1.setTexturePosition(h / textureWidth - uOffs, g / textureHeight + vOffs));
+        verts.add(vert2.setTexturePosition(f / textureWidth + uOffs, g / textureHeight + vOffs));
+        verts.add(vert3.setTexturePosition(f / textureWidth + uOffs, j / textureHeight - vOffs));
+        verts.add(vert4.setTexturePosition(h / textureWidth - uOffs, j / textureHeight - vOffs));
+        return new TexturedPolygon(verts);
+    }*/
 
     @Override
     public String toString(){
