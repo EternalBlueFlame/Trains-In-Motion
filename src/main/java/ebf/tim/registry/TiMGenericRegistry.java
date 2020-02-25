@@ -104,7 +104,7 @@ public class TiMGenericRegistry {
     }
 
 
-    public static void RegisterFluid(Fluid fluid, String MODID, String unlocalizedName, boolean isGaseous, int density, MapColor color, CreativeTabs tab){
+    public static void RegisterFluid(Fluid fluid, @Nullable Item bucket, String MODID, String unlocalizedName, boolean isGaseous, int density, MapColor color, CreativeTabs tab){
         fluid.setUnlocalizedName(unlocalizedName).setGaseous(isGaseous).setDensity(density);
         FluidRegistry.registerFluid(fluid);
 
@@ -112,7 +112,7 @@ public class TiMGenericRegistry {
         GameRegistry.registerBlock(block, "block."+unlocalizedName);
         fluid.setBlock(block);
 
-        Item bucket = new ItemBucket(block).setCreativeTab(tab).setUnlocalizedName(unlocalizedName + ".bucket").setContainerItem(Items.bucket);
+        bucket = new ItemBucket(block).setCreativeTab(tab).setUnlocalizedName(unlocalizedName + ".bucket").setContainerItem(Items.bucket);
                 if(TrainsInMotion.proxy.isClient()){
                     bucket.setTextureName(MODID+":bucket_"+unlocalizedName);
                 }

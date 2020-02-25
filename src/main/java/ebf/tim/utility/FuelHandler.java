@@ -7,6 +7,7 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.registry.TiMFluids;
+import ebf.tim.registry.TiMItems;
 import mods.railcraft.api.electricity.IElectricGrid;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -174,6 +175,29 @@ public class FuelHandler{
 	}
 
 
+    public void manageDiesel(EntityTrainCore train){
+        //add redstone to the fuel tank
+        ItemStackSlot slotId=train.getSlotIndexByID(400);
+        if(slotId !=null && slotId.getStack()!=null) {
+            if (slotId.getItem() == TiMFluids.bucketDiesel) {
+                if (train.fill(null, new FluidStack(TiMFluids.fluidDiesel, 1000))) {
+                    train.getSlotIndexByID(400).decrStackSize(1);
+                }
+            }
+            //todo: fluid pipe support, should be able to be toggled in server settings
+        }
+
+        //use stored energy
+        if (train.getBoolean(GenericRailTransport.boolValues.RUNNING)){
+            //electric trains run at a generally set rate which is multiplied at the square of speed.
+            if (train.drain(null, MathHelper.floor_double((1*train.getEfficiency()) + (Math.copySign(train.accelerator, 1)*(5*train.getEfficiency()))), false)!= null){
+                train.drain(null, MathHelper.floor_double((1*train.getEfficiency()) + (Math.copySign(train.accelerator, 1)*(5*train.getEfficiency()))), true);
+            } else {
+                train.setBoolean(GenericRailTransport.boolValues.RUNNING, false);
+            }
+        }
+    }
+
 
 
 	public void manageElectric(EntityTrainCore train){
@@ -181,16 +205,17 @@ public class FuelHandler{
 		ItemStackSlot slotId=train.getSlotIndexByID(400);
 		if(slotId !=null && slotId.getStack()!=null) {
 			if (slotId.getItem() == Items.redstone) {
-				if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), false) == 0) {
-					train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), true);
+				if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100))) {
 					train.getSlotIndexByID(400).decrStackSize(1);
 				}
 			} else if (slotId.getItem() == Item.getItemFromBlock(Blocks.redstone_block)) {
-				if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 1000), false) == 0) {
-					train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 1000), true);
+				if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 1000))) {
 					train.getSlotIndexByID(400).decrStackSize(1);
 				}
-			} else if (slotId.getItem() instanceof IEnergyContainerItem) {
+			} else if (slotId.getItem() instanceof IEnergyContainerItem &&
+                    ((IEnergyContainerItem) train.getSlotIndexByID(400).getItem())
+                            .extractEnergy(slotId.getStack(), 100, true)==0) {
+			    //RF containers have to be more complex since both the container and the host inventory work like tanks.
 				if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), false) == 0) {
 					train.fill(null, new FluidStack(TiMFluids.fluidRedstone,
 							((IEnergyContainerItem) train.getSlotIndexByID(400).getItem())
@@ -230,8 +255,8 @@ public class FuelHandler{
 		//use stored energy
 		if (train.getBoolean(GenericRailTransport.boolValues.RUNNING)){
 			//electric trains run at a generally set rate which is multiplied at the square of speed.
-			if (train.drain(null, MathHelper.floor_double((5*train.getEfficiency()) + Math.copySign(train.accelerator, 1)*(15*train.getEfficiency())), false)!= null){
-				train.drain(null, MathHelper.floor_double((5*train.getEfficiency()) + Math.copySign(train.accelerator, 1)*(15*train.getEfficiency())), true);
+			if (train.drain(null, MathHelper.floor_double((1*train.getEfficiency()) + (Math.copySign(train.accelerator, 1)*(5*train.getEfficiency()))), false)!= null){
+				train.drain(null, MathHelper.floor_double((1*train.getEfficiency()) + (Math.copySign(train.accelerator, 1)*(5*train.getEfficiency()))), true);
 			} else {
 				train.setBoolean(GenericRailTransport.boolValues.RUNNING, false);
 			}
