@@ -8,6 +8,7 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.BlockTrainFluid;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.items.ItemCraftGuide;
+import ebf.tim.items.ItemTransport;
 import ebf.tim.utility.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
@@ -99,6 +100,11 @@ public class TiMGenericRegistry {
         }
         if(TrainsInMotion.proxy.isClient() && itemRender!=null){
             MinecraftForgeClient.registerItemRenderer(itm, (IItemRenderer)itemRender);
+        } else if (TrainsInMotion.proxy.isClient() && itm instanceof ItemTransport){
+            MinecraftForgeClient.registerItemRenderer(itm, ebf.tim.items.CustomItemModel.instance);
+            if(ClientProxy.preRenderModels) {
+                ebf.tim.items.CustomItemModel.instance.renderItem(IItemRenderer.ItemRenderType.INVENTORY, new ItemStack(itm));
+            }
         }
         return itm;
     }
