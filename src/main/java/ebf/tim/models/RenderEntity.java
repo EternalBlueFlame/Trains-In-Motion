@@ -32,7 +32,7 @@ public class RenderEntity extends Render {
     private static final float RailOffset = 0.34f;
     private static int i=0, ii=0, iii=0;
     public static RenderEntity instance = new RenderEntity();
-
+    private static RenderBlocks renderBlocks;
     //public RenderEntity() {}
 
     /**
@@ -58,7 +58,14 @@ public class RenderEntity extends Render {
     }
 
     public void render(GenericRailTransport entity, double x, double y, double z, float yaw, boolean isPaintBucket) {
-        doRender(entity,x,y,z,yaw,entity.frontBogie!=null?entity.frontBogie.yOffset:0, isPaintBucket, null);
+        renderBlocks=field_147909_c;
+        doRender(entity,x,y,z,yaw,entity.frontBogie!=null?entity.frontBogie.yOffset:0, isPaintBucket, null, this);
+    }
+
+
+    public void render(GenericRailTransport entity, double x, double y, double z, float yaw, boolean isPaintBucket, skin textureURI) {
+        renderBlocks=field_147909_c;
+        doRender(entity,x,y,z,yaw,entity.frontBogie!=null?entity.frontBogie.yOffset:0, isPaintBucket, textureURI, this);
     }
 
     /**
@@ -78,7 +85,7 @@ public class RenderEntity extends Render {
      *
      *
      */
-    public void doRender(GenericRailTransport entity, double x, double y, double z, float yaw, float bogieOffset, boolean isPaintBucket, @Nullable String textureURI){
+    public static void doRender(GenericRailTransport entity, double x, double y, double z, float yaw, float bogieOffset, boolean isPaintBucket, @Nullable skin textureURI, RenderEntity renderInstance){
 
         if (entity.renderData.modelList == null || entity.renderData.needsModelUpdate) {
             entity.renderData = new TransportRenderData();
@@ -201,13 +208,11 @@ public class RenderEntity extends Render {
          */
         //System.out.println(entity.getTexture(0).getResourcePath() + entity.getDataWatcher().getWatchableObjectInt(24));
         skin s;
-        if(entity.worldObj!=null) {
+        if(!isPaintBucket && entity.worldObj!=null) {
             TextureManager.adjustLightFixture(entity.worldObj, (int) entity.posX, (int) entity.posY + 1, (int) entity.posZ);
             s=entity.getTexture(Minecraft.getMinecraft().thePlayer);
-        } else if (textureURI!=null && entity.getTextureByID(
-                Minecraft.getMinecraft().thePlayer, isPaintBucket,textureURI)!=null){
-            s=entity.getTextureByID(
-                    Minecraft.getMinecraft().thePlayer, isPaintBucket,textureURI);
+        } else if (textureURI!=null){
+            s=textureURI;
         } else {
             s=entity.getTextureByID(Minecraft.getMinecraft().thePlayer,false, entity.getDefaultSkin());
         }
@@ -225,7 +230,7 @@ public class RenderEntity extends Render {
 
         //loop for the groups of cargo
         for (i = 0; i< entity.renderData.blockCargoRenders.size() && i < entity.calculatePercentageOfSlotsUsed(entity.renderData.blockCargoRenders.size()); i++) {
-            entity.renderData.blockCargoRenders.get(i).doRender(field_147909_c, entity.getFirstBlock(i), this, entity.getRenderScale(), entity);
+            entity.renderData.blockCargoRenders.get(i).doRender(renderBlocks, entity.getFirstBlock(i), renderInstance, entity.getRenderScale(), entity);
         }
 
         /*
