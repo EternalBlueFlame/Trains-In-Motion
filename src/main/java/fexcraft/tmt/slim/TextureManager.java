@@ -294,7 +294,7 @@ public class TextureManager {
                 g = buffer.get(i + 1) & 0xff;
                 b = buffer.get(i + 2) & 0xff;
                 a = buffer.get(i + 3) & 0xff;
-                if(a==0){
+                if(a<10){
                     skin.setRGB(x,y,0x00000000);
                     continue;
                 }
@@ -303,11 +303,11 @@ public class TextureManager {
                 if(skinColorsFrom!=null&&skinColorsFrom.length>0){
                     for (ii=0;ii<skinColorsFrom.length;ii++){
                         col = hexTorgb(skinColorsFrom[ii]);
-                        if(colorInRange(r,g,b,col[2],col[1],col[0])){
+                        if(colorInRange(r,g,b,col[2],col[1],col[1])){
                             col=postProcessColor(skinColorsTo[ii],r,g,b);
-                            r=col[2];
+                            r=col[0];
                             g=col[1];
-                            b=col[0];
+                            b=col[2];
                         }
                     }
                 }
@@ -317,9 +317,9 @@ public class TextureManager {
                         col = hexTorgba(colorsFrom.get(ii));
                         if(colorInRange(r,g,b,col[2],col[1],col[0])){
                             col=postProcessColor(skinColorsTo[ii],r,g,b);
-                            r=col[2];
+                            r=col[0];
                             g=col[1];
-                            b=col[0];
+                            b=col[2];
                         }
                     }
                 }

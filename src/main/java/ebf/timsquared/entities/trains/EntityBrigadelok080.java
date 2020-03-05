@@ -95,7 +95,7 @@ public class EntityBrigadelok080 extends TrainBase {
         //add recolor so current, and register new skin
         s = new skin(TrainsInMotion.MODID,"textures/sd/train/brigadelok_080.png", "red",
                 "A fictional skin created for testing the recolor system,\n and the paint bucket skin selector. \n Might keep it long run\nto pay homage to the development of the mod.")
-        .setRecolorsFrom(0x68939E).setRecolorsTo(0xaa0000);
+        .setRecolorsFrom(0x68939E).setRecolorsTo(0xcc0000);
         SkinRegistry.addSkin(this.getClass(),s);
 
         //remove recolors, then set new name and texture

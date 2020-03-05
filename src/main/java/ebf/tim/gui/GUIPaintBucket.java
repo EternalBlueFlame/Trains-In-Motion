@@ -87,9 +87,9 @@ public class GUIPaintBucket extends GuiScreen {
         Keyboard.enableRepeatEvents(true);
 
         buttonList =new ArrayList();
-        buttonList.add(buttonLeft = new GuiButton(-1, percentLeft(10)-10,percentTop(65), 20,20,"<<"));//left
-        buttonList.add(buttonRight = new GuiButton(-1, percentLeft(90)-10,percentTop(65), 20,20,">>"));//right
-        buttonList.add(buttonApply = new GuiButton(-1, percentLeft(50)-16,percentTop(45), 32,20,"Apply"));//apply
+        buttonList.add(buttonLeft = new GuiButton(-1, percentLeft(15)-10,percentTop(56), 20,20,"<<"));//left
+        buttonList.add(buttonRight = new GuiButton(-1, percentLeft(75)-10,percentTop(56), 20,20,">>"));//right
+        buttonList.add(buttonApply = new GuiButton(-1, percentLeft(83)-16,percentTop(56), 32,20,"Apply"));//apply
         buttonApply.visible=true;
     }
 
@@ -99,20 +99,7 @@ public class GUIPaintBucket extends GuiScreen {
     public static int percentTop(int value){return (int)(guiTop*(value*0.01f));}
     public static int percentLeft(int value){return (int)(guiLeft*(value*0.01f));}
 
-    private static final ResourceLocation field_147078_C = new ResourceLocation("textures/gui/container/enchanting_table.png");
-    private static final ResourceLocation field_147070_D = new ResourceLocation("textures/entity/enchanting_table_book.png");
-    private static final ModelBook field_147072_E = new ModelBook();
-    private Random field_147074_F = new Random();
-    private ContainerEnchantment field_147075_G;
     public int field_147073_u;
-    public float field_147071_v;
-    public float field_147069_w;
-    public float field_147082_x;
-    public float field_147081_y;
-    public float field_147080_z;
-    public float field_147076_A;
-    ItemStack field_147077_B;
-    private String field_147079_H;
 
     @Override
     public void drawScreen(int parWidth, int parHeight, float p_73863_3_)
@@ -134,12 +121,13 @@ public class GUIPaintBucket extends GuiScreen {
                 }
             }
         }
-        EventManager.drawTooltipBox((int)(width*0.125f),(int)(height*0.55f),(int)(width*0.75f),(int)(height*0.35f),  ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,100);
+        EventManager.drawTooltipBox((int)(width*0.125f),(int)(height*0.65f),(int)(width*0.75f),(int)(height*0.345f),  ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,100);
 
+        EventManager.drawTooltipBox((int)(width*0.175f),(int)(height*0.56f),(int)(width*0.5525f),(int)(height*0.085f),  ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,100);
 
         fontRendererObj.drawString(RailUtility.translate(currentSkin.name),
-                (int)(offsetFromScreenLeft - fontRendererObj.getStringWidth(currentSkin.name)*0.5f),
-                (int)(height*0.6f),ClientProxy.WAILA_FONTCOLOR,false);
+                (int)(offsetFromScreenLeft - fontRendererObj.getStringWidth(currentSkin.name)*0.65f),
+                (int)(height*0.59f),ClientProxy.WAILA_FONTCOLOR,false);
 
         if(currentSkin.getDescription()!=null) {
             for(int i=0; i<currentSkin.getDescription().length;i++) {
@@ -148,6 +136,9 @@ public class GUIPaintBucket extends GuiScreen {
                         (int) ((height * 0.1f) * 7)+(10*i), ClientProxy.WAILA_FONTCOLOR, false);
             }
         }
+
+
+
         EventManager.drawTooltipBox((int)(width*0.125f),(int)(height*0.2f),(int)(width*0.35f),(int)(height*0.35f),  ClientProxy.WAILA_BGCOLOR, ClientProxy.WAILA_GRADIENT1, ClientProxy.WAILA_GRADIENT2,100);
 
         //my additional scaling
@@ -155,7 +146,6 @@ public class GUIPaintBucket extends GuiScreen {
         if(scale!=0){
             scale = 0.5f/(scale /0.5f);
         }
-
 
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glPushMatrix();
@@ -176,14 +166,7 @@ public class GUIPaintBucket extends GuiScreen {
         ClientProxy.transportRenderer.render(entity,0,0,0,0, true,
                 currentSkin);
         RenderHelper.disableStandardItemLighting();
-        GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glPopMatrix();
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-
-
-
-
-        //renderTransport(entity,skinList.get(page));
         GL11.glPopMatrix();
 
     }
@@ -214,50 +197,4 @@ public class GUIPaintBucket extends GuiScreen {
 
     @Override
     public boolean doesGuiPauseGame() {return true;}
-
-    void renderTransport(GenericRailTransport entity, String key) {
-
-        //get skin from page
-        ebf.tim.api.skin s = entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(key);
-        //bind skin to render
-        TextureManager.bindTexture(s.getTexture(0), s.colorsFrom, s.colorsTo, null, null);
-
-        //render models with offsets
-        int i=1;
-        for (ModelBase m : entity.getModel()) {
-            GL11.glPushMatrix();
-            if (entity.modelOffsets() != null && entity.modelOffsets().length > i) {
-                GL11.glTranslated(entity.modelOffsets()[i][0], entity.modelOffsets()[i][1], entity.modelOffsets()[i][2]);
-            }
-            m.render(null, 0, 0, 0, 0, 0, 0.0625f);
-            GL11.glPopMatrix();
-            i++;
-        }
-
-        if(entity.bogies()==null){
-            return;
-        }
-        //render bogies with textures and offsets
-        int b = 0, sb = 0;
-        for (Bogie m : entity.bogies()) {
-            TextureManager.bindTexture(s.getBogieSkin(b));
-            b++;
-            GL11.glPushMatrix();
-            GL11.glTranslated(-m.offset[0], -m.offset[1], -m.offset[2]);
-            m.bogieModel.render(null, 0, 0, 0, 0, 0, 0.0625f);
-            //render the sub bogies with textures if the bogie has any
-            if (m.subBogies != null) {
-                sb=0;
-                for (Bogie sub : m.subBogies) {
-                    TextureManager.bindTexture(s.getSubBogieSkin(sb));
-                    sb++;
-                    GL11.glPushMatrix();
-                    GL11.glTranslated(-sub.offset[0], -sub.offset[1], -sub.offset[2]);
-                    sub.bogieModel.render(null, 0, 0, 0, 0, 0, 0.0625f);
-                    GL11.glPopMatrix();
-                }
-            }
-            GL11.glPopMatrix();
-        }
-    }
 }
