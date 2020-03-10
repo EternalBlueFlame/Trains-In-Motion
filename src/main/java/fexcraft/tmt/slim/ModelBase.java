@@ -36,11 +36,6 @@ public class ModelBase extends ArrayList<ModelRendererTurbo> {
 		    initAllParts();
 		}
 
-		//OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
-
-		//if(displayList.size()==0) {
-		//	return;
-		//}
 		if(staticPartMap.get(this.getClass().getName())==null) {
 			staticPartMap.put(this.getClass().getName(), GLAllocation.generateDisplayLists(1));
 			GL11.glNewList(staticPartMap.get(this.getClass().getName()), GL11.GL_COMPILE);

@@ -135,16 +135,46 @@ public class RenderEntity extends Render {
                 if (entity.renderData.bogies != null) {
                     for (Bogie bogie : entity.renderData.bogies) { {
                             for (ModelRendererTurbo box : bogie.bogieModel.getParts()) {
+                                if (box.boxName ==null){continue;}
+                                //attempt to cache the parts for the main transport model
+                                if(StaticModelAnimator.checkCulls(box)){
+                                    box.showModel = false;
+                                }
+                                if(box.boxName.contains(StaticModelAnimator.tagGlow)){
+                                    box.boxName=box.boxName.replace(StaticModelAnimator.tagGlow,"");
+                                    box.ignoresLighting=true;
+                                }
                                 if (StaticModelAnimator.checkAnimators(box)) {
                                     entity.renderData.animatedPart.add(StaticModelAnimator.initPart(box, entity));
+                                    box.animated=true;
+                                }
+                                if(ParticleFX.parseData(box.boxName, entity.getClass())!=null){
+                                    entity.renderData.particles.addAll(ParticleFX.newParticleItterator(box.boxName,
+                                            box.rotationPointX, box.rotationPointY, box.rotationPointZ,
+                                            box.rotateAngleX,box.rotateAngleY,box.rotateAngleZ, entity));
                                 }
                             }
                             if(bogie.subBogies==null){continue;}
                             //cache the animating parts on sub-bogies
                             for(Bogie subBogie : bogie.subBogies){
                                 for(ModelRendererTurbo box : subBogie.bogieModel.getParts()){
+                                    if (box.boxName ==null){continue;}
+                                    //attempt to cache the parts for the main transport model
+                                    if(StaticModelAnimator.checkCulls(box)){
+                                        box.showModel = false;
+                                    }
+                                    if(box.boxName.contains(StaticModelAnimator.tagGlow)){
+                                        box.boxName=box.boxName.replace(StaticModelAnimator.tagGlow,"");
+                                        box.ignoresLighting=true;
+                                    }
                                     if (StaticModelAnimator.checkAnimators(box)) {
                                         entity.renderData.animatedPart.add(StaticModelAnimator.initPart(box, entity));
+                                        box.animated=true;
+                                    }
+                                    if(ParticleFX.parseData(box.boxName, entity.getClass())!=null){
+                                        entity.renderData.particles.addAll(ParticleFX.newParticleItterator(box.boxName,
+                                                box.rotationPointX, box.rotationPointY, box.rotationPointZ,
+                                                box.rotateAngleX,box.rotateAngleY,box.rotateAngleZ, entity));
                                     }
                                 }
                             }
@@ -251,7 +281,7 @@ public class RenderEntity extends Render {
                 b.setRotation(entity);
                 GL11.glRotatef(b.rotationYaw-yaw, 0.0f, 1.0f, 0);
                 GL11.glRotatef(entity.rotationPitch, 0.0f, 0.0f, 1.0f);
-                b.bogieModel.render(null, 0, 0, 0, 0, 0, entity.getRenderScale());
+                b.bogieModel.render(entity, 0, 0, 0, 0, 0, entity.getRenderScale());
                 if(b.subBogies!=null) {
                     iii=0;
                     for (Bogie sub : b.subBogies) {
@@ -262,7 +292,7 @@ public class RenderEntity extends Render {
                         GL11.glTranslated(sub.offset[0]-b.offset[0], sub.offset[1]-b.offset[1], sub.offset[2]-b.offset[2]);
                         sub.setRotation(entity);
                         GL11.glRotatef(sub.rotationYaw-b.rotationYaw, 0.0f, 1.0f, 0);
-                        sub.bogieModel.render(null, 0, 0, 0, 0, 0, entity.getRenderScale());
+                        sub.bogieModel.render(entity, 0, 0, 0, 0, 0, entity.getRenderScale());
                         GL11.glPopMatrix();
                         iii++;
                     }

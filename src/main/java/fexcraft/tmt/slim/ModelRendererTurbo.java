@@ -1,5 +1,6 @@
 package fexcraft.tmt.slim;
 
+import ebf.tim.utility.DebugUtil;
 import fexcraft.fcl.common.Static;
 import fexcraft.fvtm.TurboList;
 import net.minecraft.client.Minecraft;
@@ -187,16 +188,14 @@ public class ModelRendererTurbo {
      * @param scale
      */
     public void addBox(float x, float y, float z, float w, float h, float d, float expansion, float scale){
-        float x1 = x + w;
-        float y1 = y + h;
-        float z1 = z + d;
+        expansion +=0.000001f;
+        float x1 = (x + w+expansion)*scale;
+        float y1 = (y + h+expansion)*scale;
+        float z1 = (z + d+expansion)*scale;
 
-        x -= (w==0?expansion+0.01f:expansion);
-        y -= (h==0?expansion+0.01f:expansion);
-        z -= (d==0?expansion+0.01f:expansion);
-        x1 += (w==0?expansion+0.01f:expansion);
-        y1 += (h==0?expansion+0.01f:expansion);
-        z1 += (d==0?expansion+0.01f:expansion);
+        x -= expansion; x*=scale;
+        y -= expansion; y*=scale;
+        z -= expansion; z*=scale;
         if(mirror){
             float xTemp = x1;
             x1 = x;
@@ -1342,13 +1341,14 @@ public class ModelRendererTurbo {
 
     //ETERNAL: changed w/h/d to floats for better support of the custom render on the rails.
     public ModelRendererTurbo addShapeBox(float x, float y, float z, float w, float h, float d, float scale, float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, float x5, float y5, float z5, float x6, float y6, float z6, float x7, float y7, float z7){
+
         scale+=0.000001f;
-        float f4 = x + w + scale, f5 = y + h + scale, f6 = z + d + scale;
-        x -= scale; y -= scale; z -= scale;
+        float f4 = (x + w) + scale, f5 = (y + h) + scale, f6 = (z + d) + scale;
+        x += scale; y += scale; z += scale;
         if(mirror){
             float f7 = f4; f4 = x; x = f7;
         }
-        //float[] v  = {x  - x0, y  - y0, z  - z0}
+
         List<TexturedVertex> verts = new ArrayList<>();
         List<TexturedPolygon> poly = new ArrayList<>();
         verts.add(new TexturedVertex(x  - x0, y  - y0, z  - z0, 0.0F, 0.0F));
@@ -1380,18 +1380,7 @@ public class ModelRendererTurbo {
         copyTo(poly);
         return this;
     }
-   /* private TexturedPolygon addPolygonReturn(float vert1x,float vert1y,float vert1z,float vert2x,float vert2y,float vert2z,
-                                             float vert3x,float vert3y,float vert3z,float vert4x,float vert4y,float vert4z,
-                                             float f, float g, float h, float j){
-        float uOffs = 1.0F / (textureWidth * 10.0F);
-        float vOffs = 1.0F / (textureHeight * 10.0F);
-        List<TexturedVertex> verts = new ArrayList<>();
-        verts.add(vert1.setTexturePosition(h / textureWidth - uOffs, g / textureHeight + vOffs));
-        verts.add(vert2.setTexturePosition(f / textureWidth + uOffs, g / textureHeight + vOffs));
-        verts.add(vert3.setTexturePosition(f / textureWidth + uOffs, j / textureHeight - vOffs));
-        verts.add(vert4.setTexturePosition(h / textureWidth - uOffs, j / textureHeight - vOffs));
-        return new TexturedPolygon(verts);
-    }*/
+
 
     @Override
     public String toString(){

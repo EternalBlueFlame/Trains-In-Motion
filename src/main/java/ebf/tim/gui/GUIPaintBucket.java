@@ -45,14 +45,18 @@ public class GUIPaintBucket extends GuiScreen {
     public GuiButton buttonLeft;
     public GuiButton buttonRight;
     public GuiButton buttonApply;
+    public GuiButton buttonClose;
+    public GuiButton buttonSkinDropdown;
+
+    public GuiButton buttonRecolor;
+    public GuiButton buttonLivery;
 
     List<String>  skinList = new ArrayList<>();
     skin currentSkin;
 
     int page = 0;
 
-    protected int xSize = 176;
-    protected int ySize = 166;
+    int guiScreen=0;
 
     public static int guiTop;
     public static int guiLeft;
@@ -80,17 +84,7 @@ public class GUIPaintBucket extends GuiScreen {
             }
         }
 
-        currentSkin = entity.getTextureByID(Minecraft.getMinecraft().thePlayer,true, skinList.get(page));
-        guiLeft=new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight).getScaledWidth();
-        guiTop=new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight).getScaledHeight();
-
         Keyboard.enableRepeatEvents(true);
-
-        buttonList =new ArrayList();
-        buttonList.add(buttonLeft = new GuiButton(-1, percentLeft(15)-10,percentTop(56), 20,20,"<<"));//left
-        buttonList.add(buttonRight = new GuiButton(-1, percentLeft(75)-10,percentTop(56), 20,20,">>"));//right
-        buttonList.add(buttonApply = new GuiButton(-1, percentLeft(83)-16,percentTop(56), 32,20,"Apply"));//apply
-        buttonApply.visible=true;
     }
 
     @Override
@@ -102,12 +96,73 @@ public class GUIPaintBucket extends GuiScreen {
     public int field_147073_u;
 
     @Override
-    public void drawScreen(int parWidth, int parHeight, float p_73863_3_)
-    {
+    public void drawScreen(int parWidth, int parHeight, float p_73863_3_) {
         super.drawScreen(parWidth, parHeight, p_73863_3_);
 
-        initGui();
+        currentSkin = entity.getTextureByID(Minecraft.getMinecraft().thePlayer,true, skinList.get(page));
+        guiLeft=new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight).getScaledWidth();
+        guiTop=new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight).getScaledHeight();
+
+        //initGui();
         if(currentSkin==null){return;}
+
+        switch(guiScreen) {
+            case 0:{defineButtons();guiSkinSelect();break;}
+        }
+    }
+
+    @Override
+    protected void actionPerformed(GuiButton parButton) {
+        if (parButton==buttonApply) {
+            if(guiScreen==0) {//skin select
+                TrainsInMotion.keyChannel.sendToServer(new PacketPaint(skinList.get(page), entity.getEntityId()));
+            } else if(guiScreen==1){//color select
+
+            } else {//livery select
+
+            }
+            entity.renderData.needsModelUpdate=true;
+        }
+        else if(parButton==buttonClose){
+            mc.displayGuiScreen(null);
+        }
+        else if (parButton==buttonLeft) {
+            page = (page <= 0 ? entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().size() -1: page - 1);
+            currentSkin=entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(skinList.get(page));
+            DebugUtil.println(page, currentSkin.name);
+        }
+        else if (parButton==buttonRight) {
+            page = (page+1 >= entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().size() ? 0 : page + 1);
+            currentSkin=entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(skinList.get(page));
+            DebugUtil.println(page, currentSkin.name);
+        }
+    }
+
+
+    @Override
+    public boolean doesGuiPauseGame() {return true;}
+
+
+
+    public void defineButtons(){
+        switch (guiScreen){
+            case 0:{
+                buttonList =new ArrayList();
+                buttonList.add(buttonLeft = new GuiButton(-1, percentLeft(15)-10,percentTop(56), 20,20,"<<"));//left
+                buttonList.add(buttonRight = new GuiButton(-1, percentLeft(75)-10,percentTop(56), 20,20,">>"));//right
+                buttonList.add(buttonApply = new GuiButton(-1, percentLeft(83)-16,percentTop(56), 32,20,"Apply"));//apply
+                buttonList.add(buttonClose = new GuiButton(-1, percentLeft(75)-16,percentTop(45), 64,30,"Close"));//close
+                buttonApply.visible=true;
+                break;
+            }
+        }
+    }
+
+
+
+
+    public void guiSkinSelect(){
+
         GL11.glPushMatrix();
         GL11.glColor4f(1F, 1F, 1F, 0.5F);
         float offsetFromScreenLeft = width * 0.5f;
@@ -171,30 +226,5 @@ public class GUIPaintBucket extends GuiScreen {
 
     }
 
-    @Override
-    protected void actionPerformed(GuiButton parButton) {
-        if (parButton==buttonApply) {
-            applySkin();
-            mc.displayGuiScreen(null);//todo make an actual close button
-        }
-        else if (parButton==buttonLeft) {
-            page = (page <= 0 ? entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().size() -1: page - 1);
-            currentSkin=entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(skinList.get(page));
-            DebugUtil.println(page, currentSkin.name);
-        }
-        else if (parButton==buttonRight) {
-            page = (page+1 >= entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).keySet().size() ? 0 : page + 1);
-            currentSkin=entity.getSkinList(Minecraft.getMinecraft().thePlayer, true).get(skinList.get(page));
-            DebugUtil.println(page, currentSkin.name);
-        }
-    }
 
-
-    void applySkin(){
-        TrainsInMotion.keyChannel.sendToServer(new PacketPaint(skinList.get(page), entity.getEntityId()));
-        entity.renderData.needsModelUpdate=true;
-    }
-
-    @Override
-    public boolean doesGuiPauseGame() {return true;}
 }
