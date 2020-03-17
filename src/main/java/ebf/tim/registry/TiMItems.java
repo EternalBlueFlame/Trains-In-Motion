@@ -20,7 +20,7 @@ public class TiMItems {
 
     public static Item seatsWooden,seatsIron,seatsPadded,seatsLuxury;
 
-    public static Item hydraulicTransmission,pnumaticTransmission,transformer,transformerHV,electricControls;
+    public static Item hydraulicTransmission,pneumaticTransmission,transformer,transformerHV,electricControls;
 
     public static Item enginePiston,cylinder,camshaft,graphite,electronicCircuit,copperWire,goldWire;
 
@@ -74,7 +74,7 @@ public class TiMItems {
         //Chimneys
         craftItmShorthand(chimneyWood, "chimney.wood");
         craftItmShorthand(chimneyAluminium, "chimney.aluminium");
-        craftItmShorthand(chimneyCopper, "chimney.Copper");
+        craftItmShorthand(chimneyCopper, "chimney.copper");
         craftItmShorthand(chimneyIron, "chimney.iron");
         craftItmShorthand(chimneySteel, "chimney.steel");
         craftItmShorthand(chimneyFiberglass, "chimney.fiberglass");
@@ -97,13 +97,13 @@ public class TiMItems {
 
         //Seats
         craftItmShorthand(seatsWooden, "seats.wooden");
-        craftItmShorthand(seatsIron, "seats.Iron");
+        craftItmShorthand(seatsIron, "seats.iron");
         craftItmShorthand(seatsPadded, "seats.padded");
         craftItmShorthand(seatsLuxury, "seats.luxury");
 
         //Transmissions + Other
         craftItmShorthand(hydraulicTransmission, "hydraulic.transmission");
-        craftItmShorthand(pnumaticTransmission, "pneumatic.transmission");
+        craftItmShorthand(pneumaticTransmission, "pneumatic.transmission");
         craftItmShorthand(transformer, "transformer");
         craftItmShorthand(transformerHV, "transformer.hv");
         craftItmShorthand(electricControls, "electric.controls");
