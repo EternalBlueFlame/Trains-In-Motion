@@ -155,7 +155,7 @@ public class TiMGenericRegistry {
             cpw.mods.fml.common.registry.EntityRegistry.registerModEntity(
                     registry.getClass(),
                     registry.transportName().replace(" ","") + ".entity",
-                    registryPosition, TrainsInMotion.instance, 3000, 1, true);
+                    registryPosition, TrainsInMotion.instance, 1600, 3, true);
             GameRegistry.registerItem(registry.getCartItem().getItem(), registry.getCartItem().getItem().getUnlocalizedName());
             if(CommonProxy.recipesInMods.containsKey(MODID)){
                 CommonProxy.recipesInMods.get(MODID).add(getRecipe(registry.getRecipie(), registry.getCartItem()));

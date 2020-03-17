@@ -31,15 +31,15 @@ public class RollingStockModel extends ModelBase {
         }
 
         if(staticPartMap.get(this.getClass().getName())==null) {
-            staticPartMap.put(this.getClass().getName(), GLAllocation.generateDisplayLists(1));
-            GL11.glNewList(staticPartMap.get(this.getClass().getName()), GL11.GL_COMPILE);
+           // staticPartMap.put(this.getClass().getName(), GLAllocation.generateDisplayLists(1));
+            //GL11.glNewList(staticPartMap.get(this.getClass().getName()), GL11.GL_COMPILE);
             for(TurboList list :groups) {
                 list.render(list.boxList);
             }
-            GL11.glEndList();
-            for(TurboList list :groups) {
-                list.boxList=null;
-            }
+            //GL11.glEndList();
+            //for(TurboList list :groups) {
+            //    list.boxList=null;
+            //}
         } else {
             GL11.glCallList(staticPartMap.get(this.getClass().getName()));
         }
@@ -50,12 +50,12 @@ public class RollingStockModel extends ModelBase {
                     if (list.displayList.size() > i) {
                         GL11.glCallList(list.displayList.get(i));
                     } else if (list.animatedList.get(i) != null) {
-                        list.displayList.add(GLAllocation.generateDisplayLists(1));
-                        GL11.glNewList(list.displayList.get(i), GL11.GL_COMPILE);
+                        //list.displayList.add(GLAllocation.generateDisplayLists(1));
+                        //GL11.glNewList(list.displayList.get(i), GL11.GL_COMPILE);
                         GL11.glPushMatrix();
                         list.animatedList.get(i).render();
                         GL11.glPopMatrix();
-                        GL11.glEndList();
+                        //GL11.glEndList();
                     }
                 }
             }

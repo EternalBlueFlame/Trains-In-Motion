@@ -18,8 +18,14 @@ public class TexturedPolygon {
 	public TexturedPolygon(TexturedVertex[] apositionTexturevertex){
 		vertices = Arrays.asList(apositionTexturevertex);
 	}
+
 	public void flipFace(){
 		Collections.reverse(vertices);
+	}
+
+	public TexturedPolygon flipFace(boolean check){
+		if(check){Collections.reverse(vertices);}
+		return this;
 	}
 
 
