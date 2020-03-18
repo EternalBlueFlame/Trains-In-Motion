@@ -220,8 +220,6 @@ public class FuelHandler{
 					return 0;
 		}
 
-
-
 		}
 
 		return 0;
