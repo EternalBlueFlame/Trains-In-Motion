@@ -7,7 +7,6 @@ import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.registry.TiMFluids;
-import ebf.tim.registry.TiMItems;
 import mods.railcraft.api.electricity.IElectricGrid;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -62,7 +61,10 @@ public class FuelHandler{
 	 *
 	 */
 	@Deprecated
-	public static FluidStack isUseableFluid(ItemStack itemStack, GenericRailTransport transport){
+	public static FluidStack getUseableFluid(ItemStack itemStack, GenericRailTransport transport){
+		if(itemStack==null || itemStack.getItem()==null){
+			return null;
+		}
 
 		if(transport.getTypes().contains(TrainsInMotion.transportTypes.ELECTRIC)) {
 			if (itemStack.getItem() == Items.redstone) {
@@ -70,17 +72,50 @@ public class FuelHandler{
 			} else if (itemStack.getItem() == Item.getItemFromBlock(Blocks.redstone_block)) {
 				return new FluidStack(FluidRegistry.WATER, 2250);
 			} else if (itemStack.getItem() instanceof IEnergyContainerItem) {
-				return new FluidStack(FluidRegistry.WATER, ((IEnergyContainerItem) itemStack.getItem()).extractEnergy(itemStack, 250, false));
+				return new FluidStack(FluidRegistry.WATER, ((IEnergyContainerItem) itemStack.getItem()).extractEnergy(itemStack, 250, true));
 			}
-			return null;
+		}
+		if(transport.getTypes().contains(TrainsInMotion.transportTypes.DIESEL)){
+			if(itemStack.getItem().delegate ==TiMFluids.bucketDiesel.delegate){
+				return new FluidStack(TiMFluids.fluidDiesel,1000);
+			}
+
+		}
+		if(transport.getTypes().contains(TrainsInMotion.transportTypes.STEAM)){
+			if(FluidContainerRegistry.getFluidForFilledItem(itemStack).getFluid()==FluidRegistry.WATER){
+				return new FluidStack(FluidRegistry.WATER,1000);
+			}
 		}
 
-		return FluidContainerRegistry.getFluidForFilledItem(itemStack);
+		if(transport.getTypes().contains(TrainsInMotion.transportTypes.TANKER)){
+			return FluidContainerRegistry.getFluidForFilledItem(itemStack);
+		}
+
+		return null;
 	}
 
-	public FluidStack getFluidForSlot(GenericRailTransport train, int slot){
-		return FluidContainerRegistry.getFluidForFilledItem(train.getSlotIndexByID(slot).getStack());
+	public static FluidStack getUseableFluid(int slot, GenericRailTransport transport){
+		return getUseableFluid(transport.getSlotIndexByID(slot).getStack(),transport);
 	}
+
+	//public FluidStack getFluidForSlot(GenericRailTransport train, int slot){
+	//	return FluidContainerRegistry.getFluidForFilledItem(train.getSlotIndexByID(slot).getStack());
+	//}
+
+
+    //adds burn times for items that aren't normally registered to minecraft's burnable system.
+    public static int itemBurnTime(ItemStackSlot slotId) {
+		if(slotId !=null && slotId.getStack() !=null) {
+			switch (slotId.getItem().delegate.name()) {
+
+				//case "modid:Item":{ return 20;}
+				default:{return TileEntityFurnace.getItemBurnTime(slotId.getStack());}
+			}
+
+		}
+		return 0;
+	}
+
 
 	/**
 	 * <h2>steam management</h2>
@@ -93,8 +128,8 @@ public class FuelHandler{
 		ItemStackSlot slotId=train.getSlotIndexByID(400);
 		if (burnTime <1){
 			burnTime=0;
-			if (slotId != null && TileEntityFurnace.getItemBurnTime(slotId.getStack())>0) {
-				burnHeat = (int) (TileEntityFurnace.getItemBurnTime(slotId.getStack()) * train.getEfficiency());
+			if (slotId != null && itemBurnTime(slotId)>0) {
+				burnHeat = (int) (itemBurnTime(slotId) * train.getEfficiency());
 				burnTime = MathHelper.ceiling_double_int(burnHeat *0.1);
 				burnTimeMax = burnTime;
 				if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
@@ -109,16 +144,16 @@ public class FuelHandler{
 		}
 
 		//if there's a fluid item in the slot and the train can consume the entire thing
-		if (getFluidForSlot(train, 401) !=null &&
-				train.fill(null, getFluidForSlot(train, 401), false) == 0) {
+		if (getUseableFluid(401,train) !=null &&
+				train.fill(null, getUseableFluid(401,train))) {
 
-			train.fill(null, getFluidForSlot(train, 401), true);
+			train.fill(null, getUseableFluid(401,train), true);
 			if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
 				train.getSlotIndexByID(401).decrStackSize(1);
 				train.addItem(new ItemStack(Items.bucket));
 			}
 		}
-		//be sure there is burnHeat before trying to consume it
+		//manage boiler heat
 		if (burnHeat > 1) {
 			//calculate the heat increase
 			float heat = train.getDataWatcher().getWatchableObjectFloat(16);
@@ -127,7 +162,7 @@ public class FuelHandler{
 					(heat+
 							(float) ((1f- Math.sqrt(heat/maxHeat(train))) * Math.sqrt((heat+burnHeat)/burnHeat))*train.getEfficiency()));
 
-		} else {
+		} else {//if engine is not running
 			float heat = (((train.worldObj.getBiomeGenForCoords(train.chunkCoordX, train.chunkCoordZ).temperature -0.15f)//biome temperature with offset to compensate for freezing point
 							- (0.0014166695f * ((float)train.posY - 64f)))//temperature changes by 0.00166667 for every meter above or below sea level (64)
 							*0.368f//convert to celsius*0.01
@@ -150,9 +185,7 @@ public class FuelHandler{
 			);
 			//drain fluid
 			if (train.drain(null, steam!=0?steam/5:0,true)!= null) {
-				float escaping =Math.abs(train.accelerator) * (train.getTankInfo(null)[1].capacity*0.01f);
-				escaping+=train.fill(null, new FluidStack(TiMFluids.fluidSteam, (int)(-escaping+steam*0.9f)), true);
-				//todo: tell train to render more steam particles based on escaping steam
+				train.fill(null, new FluidStack(TiMFluids.fluidSteam, (int)(-(Math.abs(train.accelerator) * (train.getTankInfo(null)[1].capacity*0.01f))+steam*0.9f)), true);
 
 				//if no fluid left and not creative mode, explode.
 			} else if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)){
@@ -177,19 +210,16 @@ public class FuelHandler{
 	}
 
 
-    public void manageDiesel(EntityTrainCore train){
-        //add redstone to the fuel tank
-        ItemStackSlot slotId=train.getSlotIndexByID(400);
-        if(slotId !=null && slotId.getStack()!=null) {
-            if (slotId.getItem() == TiMFluids.bucketDiesel) {
-                if (train.fill(null, new FluidStack(TiMFluids.fluidDiesel, 1000))) {
-                    train.getSlotIndexByID(400).decrStackSize(1);
-                }
-            }
+    public static void manageDiesel(EntityTrainCore train){
+        //add fuel to the fuel tank
+        if(getUseableFluid(400,train) !=null) {
+			if (train.fill(null, getUseableFluid(400,train))) {
+				train.getSlotIndexByID(400).decrStackSize(1);
+			}
             //todo: fluid pipe support, should be able to be toggled in server settings
         }
 
-        //use stored energy
+        //use stored fuel
         if (train.getBoolean(GenericRailTransport.boolValues.RUNNING)){
             //electric trains run at a generally set rate which is multiplied at the square of speed.
             if (train.drain(null, MathHelper.floor_double((1*train.getEfficiency()) + (Math.copySign(train.accelerator, 1)*(5*train.getEfficiency()))), false)!= null){
@@ -228,55 +258,47 @@ public class FuelHandler{
 */
 
 
-
-	public void manageElectric(EntityTrainCore train){
+	public static void manageElectric(EntityTrainCore train){
 		//add redstone to the fuel tank
-		ItemStackSlot slotId=train.getSlotIndexByID(400);
-		if(slotId !=null && slotId.getStack()!=null) {
-			if (slotId.getItem() == Items.redstone) {
-				if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100))) {
+		if(getUseableFluid(400,train)!=null){
+			if(train.fill(null,getUseableFluid(400,train))){
+				train.fill(null,getUseableFluid(400,train),true);
+				if(train.getSlotIndexByID(400).getItem() instanceof IEnergyContainerItem){
+					((IEnergyContainerItem) train.getSlotIndexByID(400).getItem())
+							.extractEnergy(train.getSlotIndexByID(400).getStack(), 250, false);
+				} else {
 					train.getSlotIndexByID(400).decrStackSize(1);
 				}
-			} else if (slotId.getItem() == Item.getItemFromBlock(Blocks.redstone_block)) {
-				if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 1000))) {
-					train.getSlotIndexByID(400).decrStackSize(1);
-				}
-			} else if (slotId.getItem() instanceof IEnergyContainerItem &&
-                    ((IEnergyContainerItem) train.getSlotIndexByID(400).getItem())
-                            .extractEnergy(slotId.getStack(), 100, true)==0) {
-			    //RF containers have to be more complex since both the container and the host inventory work like tanks.
-				if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), false) == 0) {
-					train.fill(null, new FluidStack(TiMFluids.fluidRedstone,
-							((IEnergyContainerItem) train.getSlotIndexByID(400).getItem())
-									.extractEnergy(slotId.getStack(), 100, false)), true);
-				}
-			}
-			if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), false) == 0) {
-				int draw = 0;
-				TileEntity te;
-				Block b;
-				for (int i=-1; i<5;i++) {
-					te=train.worldObj.getTileEntity(MathHelper.floor_double(train.posX), MathHelper.floor_double(train.posY + i), MathHelper.floor_double(train.posZ));
-					if (te instanceof IEnergyHandler) {
-						for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
-							draw = ((IEnergyHandler) te).receiveEnergy(direction, 100, true);
 
-							if (draw != 0) {
-								((IEnergyHandler) te).receiveEnergy(direction, 100, false);
-								train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), true);
-								break;
-							}
-						}
-					} else{
-						b= train.worldObj.getBlock(MathHelper.floor_double(train.posX), MathHelper.floor_double(train.posY + i), MathHelper.floor_double(train.posZ));
-						if (b instanceof IElectricGrid && ((IElectricGrid) b).getChargeHandler().getCharge()>=100){
-							((IElectricGrid) b).getChargeHandler().removeCharge(100);
+			}
+		}
+
+		//fill from overhead wires/3rd rail
+		if (train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), false) == 0) {
+			int draw = 0;
+			TileEntity te;
+			Block b;
+			for (int i=-1; i<5;i++) {
+				te=train.worldObj.getTileEntity(MathHelper.floor_double(train.posX), MathHelper.floor_double(train.posY + i), MathHelper.floor_double(train.posZ));
+				if (te instanceof IEnergyHandler) {
+					for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
+						draw = ((IEnergyHandler) te).receiveEnergy(direction, 100, true);
+
+						if (draw != 0) {
+							((IEnergyHandler) te).receiveEnergy(direction, 100, false);
 							train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), true);
+							break;
 						}
 					}
-					if (draw != 0) {
-						break;
+				} else{
+					b= train.worldObj.getBlock(MathHelper.floor_double(train.posX), MathHelper.floor_double(train.posY + i), MathHelper.floor_double(train.posZ));
+					if (b instanceof IElectricGrid && ((IElectricGrid) b).getChargeHandler().getCharge()>=100){
+						((IElectricGrid) b).getChargeHandler().removeCharge(100);
+						train.fill(null, new FluidStack(TiMFluids.fluidRedstone, 100), true);
 					}
+				}
+				if (draw != 0) {
+					break;
 				}
 			}
 		}
@@ -294,28 +316,38 @@ public class FuelHandler{
 
 
 	public static void manageTanker(GenericRailTransport transport){
-		if (transport.getStackInSlot(0) != null){
-			//fill from top slot
-			if (isUseableFluid(transport.getStackInSlot(0), transport) != null &&
-					transport.fill(null, isUseableFluid(transport.getStackInSlot(0), transport), false) >= FluidContainerRegistry.getFluidForFilledItem(transport.getStackInSlot(0)).amount) {
 
-				if (!transport.getBoolean(GenericRailTransport.boolValues.CREATIVE) && (transport.getStackInSlot(1) == null || transport.getStackInSlot(1).getItem() == Items.bucket && transport.getStackInSlot(1).stackSize <16)){
-					transport.fill(null, isUseableFluid(transport.getStackInSlot(0), transport), true);
-					transport.getStackInSlot(0).stackSize--;
-					if (transport.getStackInSlot(0) != null && transport.getStackInSlot(0).stackSize <=0){
-						transport.setInventorySlotContents(0, null);
-					}
-					if (transport.getStackInSlot(1) == null ) {
-						transport.setInventorySlotContents(1, new ItemStack(Items.bucket, 1));
-					} else if (transport.getStackInSlot(1).getItem() == Items.bucket && transport.getStackInSlot(1).stackSize <16) {
-						transport.getStackInSlot(1).stackSize++;
-					}
-				} else if (transport.getBoolean(GenericRailTransport.boolValues.CREATIVE)){
-					transport.fill(null, isUseableFluid(transport.getStackInSlot(0), transport), true);
+		if (getUseableFluid(400, transport) != null &&
+				transport.fill(null, getUseableFluid(400, transport))) {
+
+			transport.fill(null, getUseableFluid(400, transport), true);
+
+			if (!transport.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
+				transport.addItem(FluidContainerRegistry.drainFluidContainer(transport.getSlotIndexByID(400).getStack()));
+				transport.getSlotIndexByID(400).decrStackSize(1);
+
+			}
+
+		}
+		//attempt to fill any buckets in the drain slot
+		if (FluidContainerRegistry.isEmptyContainer(transport.getSlotIndexByID(401).getStack())) {
+			for (int i = 0; i < transport.getTankCapacity().length; i++) {
+				if (FluidContainerRegistry.fillFluidContainer(
+						new FluidStack(transport.getTankInfo(ForgeDirection.UNKNOWN)[i].fluid,1000)
+						, transport.getSlotIndexByID(401).getStack()) !=null) {
+
+					transport.addItem(FluidContainerRegistry.fillFluidContainer(
+							new FluidStack(transport.getTankInfo(ForgeDirection.UNKNOWN)[i].fluid,1000)
+							, transport.getSlotIndexByID(401).getStack()));
+					transport.getSlotIndexByID(401).decrStackSize(1);
+					return;
 				}
 			}
+		}
+
+
 			//drain from top slot
-			else if (transport.getStackInSlot(1) == null && isUseableFluid(transport.getStackInSlot(0), transport) == null &&
+			/*if (transport.getStackInSlot(1) == null && isUseableFluid(transport.getStackInSlot(0), transport) == null &&
 					transport.drain(null, 1000, false) != null && transport.drain(null, 1000, false).amount >= 1000){
 				transport.setInventorySlotContents(1, FluidContainerRegistry.fillFluidContainer(transport.drain(null, 1000, false), transport.getStackInSlot(0)));
 				if (transport.getStackInSlot(0).stackSize == 1) {
@@ -327,7 +359,7 @@ public class FuelHandler{
 					transport.drain(null, 1000, true);
 				}
 			}
-		}
+		}*/
 	}
 
 } 

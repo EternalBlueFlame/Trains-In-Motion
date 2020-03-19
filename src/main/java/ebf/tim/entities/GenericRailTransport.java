@@ -1311,13 +1311,11 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
                 if (slot == 36) {
                     return TileEntityFurnace.getItemBurnTime(itemStack) > 0;
                 } else if (slot ==37) {
-                    return itemStack.getItem() instanceof ItemBucket || FuelHandler.isUseableFluid(itemStack, this) != null;
+                    return FuelHandler.getUseableFluid(itemStack, this) != null;
                 }
             }
             if (type==ELECTRIC && slot==36){
-                return itemStack.getItem() == Items.redstone ||
-                        itemStack.getItem() == Item.getItemFromBlock(Blocks.redstone_block) ||
-                        itemStack.getItem() instanceof IEnergyContainerItem;
+                return FuelHandler.getUseableFluid(itemStack, this) != null;
             }
         }
         return true;
@@ -1552,7 +1550,7 @@ public class GenericRailTransport extends EntityMinecart implements IEntityAddit
      * @return true if the tank was able to fill with the entire stack, false if not.
      */
     public boolean fill(@Nullable ForgeDirection from, FluidStack resource){
-        if(getTankCapacity()==null){return false;}
+        if(getTankCapacity()==null || resource==null ||resource.amount<1){return false;}
         for(int stack =0; stack<getTankCapacity().length;stack++) {
             if(getTankFilters()!=null && getTankFilters()[stack]!=null) {
                 boolean check=false;
