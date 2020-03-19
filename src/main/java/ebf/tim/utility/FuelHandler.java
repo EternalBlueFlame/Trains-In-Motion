@@ -21,6 +21,8 @@ import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import sun.security.provider.JavaKeyStore;
+import sun.util.resources.cldr.el.TimeZoneNames_el;
 
 /**
  * <h1>Fuel management for trains</h1>
@@ -197,6 +199,33 @@ public class FuelHandler{
             }
         }
     }
+
+    /* Unfinished
+    //Calculate burn times for various items
+    public float itemBurnTimes(EntityTrainCore train) {
+
+		ItemStackSlot slotId=train.getSlotIndexByID(400);
+		if(slotId !=null && slotId.getStack() !=null && train.getSlotIndexByID(400) !=null) {
+
+
+
+		switch (slotId.getItem()) {
+
+			case  :
+
+			return TileEntityFurnace.getItemBurnTime(new ItemStack(Items.coal)) * train.getEfficiency() * 0.2f;
+				break;
+
+				default:
+					return 0;
+		}
+
+		}
+
+		return 0;
+
+	}
+*/
 
 
 
