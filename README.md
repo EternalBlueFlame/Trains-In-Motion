@@ -14,7 +14,7 @@ Date: December, 2016
 <td>
 <h2>Join the Discussion:</h2>
 <ul>
-<li> Public Discord Chat: <a href="https://discord.gg/0zzHVjy4UIqVJskM">https://discord.gg/0zzHVjy4UIqVJskM</a></li>
+<li> Public Discord Chat: <a href="https://discord.gg/SgpnCnK">https://discord.gg/SgpnCnK</a></li>
 <li> Plans and Goals via Trello: <a href="https://trello.com/b/cqaw1T3R/trains-in-motion">https://trello.com/b/cqaw1T3R/trains-in-motion</a></li>
 </ul>
 </td>
