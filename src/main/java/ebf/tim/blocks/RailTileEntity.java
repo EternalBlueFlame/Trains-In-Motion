@@ -29,7 +29,7 @@ public class RailTileEntity extends TileEntity {
     //todo public int snow=0;
     //todo public int timer=0;
     //todo public int overgrowth=0;
-    public Integer railGLID=null;
+    public Integer railGLID=null,meta=0;
     public XmlBuilder data = new XmlBuilder();
     public boolean updateModel=false;
     //used for the actual path, and rendered
@@ -127,6 +127,7 @@ public class RailTileEntity extends TileEntity {
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
         tag.setString("data", data.toXMLString());
+        tag.setInteger("meta", meta);
 
     }
 
@@ -136,6 +137,7 @@ public class RailTileEntity extends TileEntity {
         super.readFromNBT(tag);
         String s = tag.getString("data");
         data = new XmlBuilder(s);
+        meta=tag.getInteger("meta");
 
     }
 

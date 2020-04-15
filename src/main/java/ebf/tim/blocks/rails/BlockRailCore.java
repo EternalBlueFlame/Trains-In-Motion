@@ -3,17 +3,14 @@ package ebf.tim.blocks.rails;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.XmlBuilder;
+import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.RailTileEntity;
 import ebf.tim.items.ItemRail;
 import ebf.tim.registry.TiMItems;
 import ebf.tim.utility.CommonProxy;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRail;
-import net.minecraft.block.BlockRailBase;
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.material.MapColor;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialLogic;
+import ebf.tim.utility.DebugUtil;
+import net.minecraft.block.*;
+import net.minecraft.block.material.*;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
@@ -22,11 +19,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -58,6 +57,22 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     //public List<RailPointData> cosmeticPoints = new ArrayList<>();*/
 
 
+   /* @Override
+    public BlockRailCore(Material m){
+
+        this.stepSound = soundTypeStone;
+        this.blockParticleGravity = 1.0F;
+        this.slipperiness = 0.6F;
+        this.blockMaterial = railMaterial;
+        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+        this.opaque = this.isOpaqueCube();
+        this.lightOpacity = this.isOpaqueCube() ? 255 : 0;
+        this.canBlockGrass = !railMaterial.getCanBlockGrass();
+
+        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.2F, 1.0F);
+    }*/
+
+
     public BlockRailCore(){
         setCreativeTab(null);
     }
@@ -78,7 +93,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public boolean isOpaqueCube() {
-        return false;
+        return true;
     }
 
     @Override
@@ -86,7 +101,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public int getRenderType() {
-        return -1;
+        return Blocks.flowing_water.getRenderType();
     }
 
     @Override
@@ -110,7 +125,14 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public int getBasicRailMetadata(IBlockAccess world, EntityMinecart cart, int x, int y, int z) {
-        int meta = super.getBasicRailMetadata(world, cart, x, y, z);
+        if(!(world.getTileEntity(x,y,z) instanceof RailTileEntity)){
+            return 0;
+        }
+        int meta = ((RailTileEntity) world.getTileEntity(x,y,z)).meta;
+        if(isPowered()) {
+            meta = meta & 7;
+        }
+
         if (cart == null || cart.getEntityData() == null){
                 return meta;
             }
@@ -235,9 +257,23 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
     @Override
-    public Material getMaterial(){
-        return new MaterialLogic(MapColor.mapColorArray[28]);
+    public void onBlockAdded(World p_149726_1_, int p_149726_2_, int p_149726_3_, int p_149726_4_) {
+        if (!p_149726_1_.isRemote) {
+            (new BlockRailCore.RailData(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_))
+                    .func_150655_a(p_149726_1_.isBlockIndirectlyGettingPowered(p_149726_4_, p_149726_3_, p_149726_4_), true);
+
+            if (this.field_150053_a) {
+                this.onNeighborBlockChange(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_, this);
+            }
+        }
     }
+
+
+    @Override
+    public Material getMaterial(){
+        return Material.water;
+    }
+
 
     @Override
     public boolean canPlaceBlockAt(World p_149742_1_, int p_149742_2_, int p_149742_3_, int p_149742_4_) {
@@ -280,16 +316,46 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
 
+    public void updateTick(World world, int x, int y, int z, Random p_149674_5_) {
+        int meta=0;
+        int othermeta=7;
+        if(world.getBlock(x+1,y,z).getMaterial()==Material.water){
+            othermeta= world.getBlockMetadata(x+1,y,z)+1;
+            if(othermeta>meta){
+                meta=othermeta;
+            }
+        }
+        if(world.getBlock(x-1,y,z).getMaterial()==Material.water){
+            othermeta= world.getBlockMetadata(x+1,y,z)+1;
+            if(othermeta>meta){
+                meta=othermeta;
+            }
+        }
+        if(world.getBlock(x,y,z+1).getMaterial()==Material.water){
+            othermeta= world.getBlockMetadata(x+1,y,z)+1;
+            if(othermeta>meta){
+                meta=othermeta;
+            }
+        }
+        if(world.getBlock(x,y,z-1).getMaterial()==Material.water){
+            othermeta= world.getBlockMetadata(x+1,y,z)+1;
+            if(othermeta>meta){
+                meta=othermeta;
+            }
+        }
 
+        if(meta!= world.getBlockMetadata(x,y,z)) {
+            world.setBlockMetadataWithNotify(x, y, z, meta, 2);
+        }
+    }
 
     @Override
     public void onNeighborBlockChange(World worldObj, int x, int y, int z, Block b) {
-        if(!(b instanceof BlockRailCore)) {
-            super.onNeighborBlockChange(worldObj, x, y, z, b);
-        }
-        updateShape(x,y,z,worldObj, null);
-        if(worldObj.getTileEntity(x,y,z) instanceof RailTileEntity){
-            worldObj.getTileEntity(x,y,z).markDirty();
+        if(b instanceof BlockRailCore) {
+            updateShape(x, y, z, worldObj, null);
+            if (worldObj.getTileEntity(x, y, z) instanceof RailTileEntity) {
+                worldObj.getTileEntity(x, y, z).markDirty();
+            }
         }
     }
 
@@ -338,7 +404,10 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
 
     public static RailSimpleShape getShape(World worldObj, int xPos, int yPos, int zPos){
-        switch (worldObj.getBlockMetadata(xPos, yPos, zPos)){
+        if(!(worldObj.getTileEntity(xPos, yPos, zPos) instanceof RailTileEntity)){
+            return null;
+        }
+        switch (((RailTileEntity)worldObj.getTileEntity(xPos, yPos, zPos)).meta){
             //Z straight
             case 0: {
                 return RailVanillaShapes.vanillaZStraight(worldObj, xPos, yPos, zPos);
@@ -388,11 +457,11 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
      */
     public static boolean checkBlockMeta(World worldobj, int x, int y, int z, int ... meta){
         if (!worldobj.getChunkProvider().chunkExists(x/16, z/16) ||
-                !(worldobj.getBlock(x,y,z) instanceof BlockRailBase)){
+                !(worldobj.getTileEntity(x,y,z) instanceof RailTileEntity)){
             return false;
         }
         for(int i : meta){
-            if(worldobj.getBlockMetadata(x, y, z) ==i){
+            if(((RailTileEntity)worldobj.getTileEntity(x,y,z)).meta ==i){
                 return true;
             }
         }
@@ -418,9 +487,355 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
 
+
+    @Override
     @SideOnly(Side.CLIENT)
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
-    {
-        return Blocks.rail.getIcon(p_149691_1_, p_149691_2_);
+    public IIcon getIcon(int p_149691_1_, int p_149691_2_) {
+        return p_149691_2_>-10?Blocks.flowing_water.getIcon(p_149691_1_,p_149691_2_):
+                Blocks.rail.getIcon(p_149691_1_, 0);
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public boolean shouldSideBeRendered(IBlockAccess p_149646_1_, int p_149646_2_, int p_149646_3_, int p_149646_4_, int p_149646_5_) {
+        return p_149646_5_==1;
+    }
+
+    /*@Override
+    @SideOnly(Side.CLIENT)
+    protected String getTextureName() {
+        Blocks.flowing_water.getTextureName();
+    }*/
+
+
+
+
+
+
+    public class RailData {
+        private World field_150660_b;
+        private int field_150661_c;
+        private int field_150658_d;
+        private int field_150659_e;
+        private final boolean field_150656_f;
+        private List<ChunkPosition> field_150657_g = new ArrayList<>();
+        private final boolean canMakeSlopes;
+
+        public RailData(World p_i45388_2_, int p_i45388_3_, int p_i45388_4_, int p_i45388_5_) {
+            this.field_150660_b = p_i45388_2_;
+            this.field_150661_c = p_i45388_3_;
+            this.field_150658_d = p_i45388_4_;
+            this.field_150659_e = p_i45388_5_;
+            BlockRailBase block = (BlockRailBase)p_i45388_2_.getBlock(p_i45388_3_, p_i45388_4_, p_i45388_5_);
+            int l = block.getBasicRailMetadata(p_i45388_2_, null, p_i45388_3_, p_i45388_4_, p_i45388_5_);
+            this.field_150656_f = !block.isFlexibleRail(p_i45388_2_, p_i45388_3_, p_i45388_4_, p_i45388_5_);
+            canMakeSlopes = block.canMakeSlopes(p_i45388_2_, p_i45388_3_, p_i45388_4_, p_i45388_5_);
+            this.func_150648_a(l);
+        }
+
+        private void func_150648_a(int p_150648_1_) {
+            this.field_150657_g.clear();
+
+            if (p_150648_1_ == 0) {
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c, this.field_150658_d, this.field_150659_e - 1));
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c, this.field_150658_d, this.field_150659_e + 1));
+            }
+            else if (p_150648_1_ == 1) {
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c - 1, this.field_150658_d, this.field_150659_e));
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c + 1, this.field_150658_d, this.field_150659_e));
+            }
+            else if (p_150648_1_ == 2) {
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c - 1, this.field_150658_d, this.field_150659_e));
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c + 1, this.field_150658_d + 1, this.field_150659_e));
+            }
+            else if (p_150648_1_ == 3) {
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c - 1, this.field_150658_d + 1, this.field_150659_e));
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c + 1, this.field_150658_d, this.field_150659_e));
+            }
+            else if (p_150648_1_ == 4) {
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c, this.field_150658_d + 1, this.field_150659_e - 1));
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c, this.field_150658_d, this.field_150659_e + 1));
+            }
+            else if (p_150648_1_ == 5) {
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c, this.field_150658_d, this.field_150659_e - 1));
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c, this.field_150658_d + 1, this.field_150659_e + 1));
+            }
+            else if (p_150648_1_ == 6) {
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c + 1, this.field_150658_d, this.field_150659_e));
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c, this.field_150658_d, this.field_150659_e + 1));
+            }
+            else if (p_150648_1_ == 7) {
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c - 1, this.field_150658_d, this.field_150659_e));
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c, this.field_150658_d, this.field_150659_e + 1));
+            }
+            else if (p_150648_1_ == 8) {
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c - 1, this.field_150658_d, this.field_150659_e));
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c, this.field_150658_d, this.field_150659_e - 1));
+            }
+            else if (p_150648_1_ == 9) {
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c + 1, this.field_150658_d, this.field_150659_e));
+                this.field_150657_g.add(new ChunkPosition(this.field_150661_c, this.field_150658_d, this.field_150659_e - 1));
+            }
+        }
+
+        private void func_150651_b() {
+            for (int i = 0; i < this.field_150657_g.size(); ++i) {
+                BlockRailCore.RailData rail = this.func_150654_a((ChunkPosition)this.field_150657_g.get(i));
+
+                if (rail != null && rail.func_150653_a(this)) {
+                    this.field_150657_g.set(i, new ChunkPosition(rail.field_150661_c, rail.field_150658_d, rail.field_150659_e));
+                }
+                else {
+                    this.field_150657_g.remove(i--);
+                }
+            }
+        }
+
+        private BlockRailCore.RailData func_150654_a(ChunkPosition p_150654_1_) {
+            return BlockRailBase.func_150049_b_(this.field_150660_b, p_150654_1_.chunkPosX, p_150654_1_.chunkPosY, p_150654_1_.chunkPosZ) ? new RailData(this.field_150660_b, p_150654_1_.chunkPosX, p_150654_1_.chunkPosY, p_150654_1_.chunkPosZ) : (BlockRailBase.func_150049_b_(this.field_150660_b, p_150654_1_.chunkPosX, p_150654_1_.chunkPosY + 1, p_150654_1_.chunkPosZ) ? new RailData(this.field_150660_b, p_150654_1_.chunkPosX, p_150654_1_.chunkPosY + 1, p_150654_1_.chunkPosZ) : (BlockRailBase.func_150049_b_(this.field_150660_b, p_150654_1_.chunkPosX, p_150654_1_.chunkPosY - 1, p_150654_1_.chunkPosZ) ? new RailData(this.field_150660_b, p_150654_1_.chunkPosX, p_150654_1_.chunkPosY - 1, p_150654_1_.chunkPosZ) : null));
+        }
+
+        private boolean func_150653_a(BlockRailCore.RailData p_150653_1_) {
+            for (int i = 0; i < this.field_150657_g.size(); ++i) {
+                ChunkPosition chunkposition = this.field_150657_g.get(i);
+
+                if (chunkposition.chunkPosX == p_150653_1_.field_150661_c && chunkposition.chunkPosZ == p_150653_1_.field_150659_e) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private boolean func_150652_b(int p_150652_1_, int p_150652_2_, int p_150652_3_) {
+            for (int l = 0; l < this.field_150657_g.size(); ++l) {
+                ChunkPosition chunkposition = this.field_150657_g.get(l);
+
+                if (chunkposition.chunkPosX == p_150652_1_ && chunkposition.chunkPosZ == p_150652_3_) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private boolean func_150649_b(BlockRailCore.RailData p_150649_1_) {
+            return this.func_150653_a(p_150649_1_) || this.field_150657_g.size() != 2;
+        }
+
+        private void func_150645_c(BlockRailCore.RailData p_150645_1_) {
+            this.field_150657_g.add(new ChunkPosition(p_150645_1_.field_150661_c, p_150645_1_.field_150658_d, p_150645_1_.field_150659_e));
+            boolean flag = this.func_150652_b(this.field_150661_c, this.field_150658_d, this.field_150659_e - 1);
+            boolean flag1 = this.func_150652_b(this.field_150661_c, this.field_150658_d, this.field_150659_e + 1);
+            boolean flag2 = this.func_150652_b(this.field_150661_c - 1, this.field_150658_d, this.field_150659_e);
+            boolean flag3 = this.func_150652_b(this.field_150661_c + 1, this.field_150658_d, this.field_150659_e);
+            byte b0 = -1;
+
+            if (flag || flag1) {
+                b0 = 0;
+            }
+
+            if (flag2 || flag3) {
+                b0 = 1;
+            }
+
+            if (!this.field_150656_f) {
+                if (flag1 && flag3 && !flag && !flag2) {
+                    b0 = 6;
+                }
+
+                if (flag1 && flag2 && !flag && !flag3) {
+                    b0 = 7;
+                }
+
+                if (flag && flag2 && !flag1 && !flag3) {
+                    b0 = 8;
+                }
+
+                if (flag && flag3 && !flag1 && !flag2) {
+                    b0 = 9;
+                }
+            }
+
+            if (b0 == 0 && canMakeSlopes) {
+                if (BlockRailBase.func_150049_b_(this.field_150660_b, this.field_150661_c, this.field_150658_d + 1, this.field_150659_e - 1)) {
+                    b0 = 4;
+                }
+
+                if (BlockRailBase.func_150049_b_(this.field_150660_b, this.field_150661_c, this.field_150658_d + 1, this.field_150659_e + 1)) {
+                    b0 = 5;
+                }
+            }
+
+            if (b0 == 1 && canMakeSlopes) {
+                if (BlockRailBase.func_150049_b_(this.field_150660_b, this.field_150661_c + 1, this.field_150658_d + 1, this.field_150659_e)) {
+                    b0 = 2;
+                }
+
+                if (BlockRailBase.func_150049_b_(this.field_150660_b, this.field_150661_c - 1, this.field_150658_d + 1, this.field_150659_e)) {
+                    b0 = 3;
+                }
+            }
+
+            if (b0 < 0) {
+                b0 = 0;
+            }
+
+            int i = b0;
+
+            if (this.field_150656_f) {
+                if(field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e) instanceof RailTileEntity){
+                    i= ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).meta;
+                }
+                //i = this.field_150660_b.getBlockMetadata(this.field_150661_c, this.field_150658_d, this.field_150659_e) & 8 | b0;
+            }
+
+            if(field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e) instanceof RailTileEntity){
+                ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).meta=i;
+            }
+            //this.field_150660_b.setBlockMetadataWithNotify(this.field_150661_c, this.field_150658_d, this.field_150659_e, i, 3);
+        }
+
+        private boolean func_150647_c(int p_150647_1_, int p_150647_2_, int p_150647_3_) {
+            BlockRailCore.RailData rail = this.func_150654_a(new ChunkPosition(p_150647_1_, p_150647_2_, p_150647_3_));
+
+            if (rail == null) {
+                return false;
+            } else {
+                rail.func_150651_b();
+                return rail.func_150649_b(this);
+            }
+        }
+
+        public void func_150655_a(boolean p_150655_1_, boolean p_150655_2_) {
+            boolean flag2 = this.func_150647_c(this.field_150661_c, this.field_150658_d, this.field_150659_e - 1);
+            boolean flag3 = this.func_150647_c(this.field_150661_c, this.field_150658_d, this.field_150659_e + 1);
+            boolean flag4 = this.func_150647_c(this.field_150661_c - 1, this.field_150658_d, this.field_150659_e);
+            boolean flag5 = this.func_150647_c(this.field_150661_c + 1, this.field_150658_d, this.field_150659_e);
+            byte b0 = -1;
+
+            if ((flag2 || flag3) && !flag4 && !flag5) {
+                b0 = 0;
+            }
+
+            if ((flag4 || flag5) && !flag2 && !flag3) {
+                b0 = 1;
+            }
+
+            if (!this.field_150656_f) {
+                if (flag3 && flag5 && !flag2 && !flag4) {
+                    b0 = 6;
+                }
+
+                if (flag3 && flag4 && !flag2 && !flag5) {
+                    b0 = 7;
+                }
+
+                if (flag2 && flag4 && !flag3 && !flag5) {
+                    b0 = 8;
+                }
+
+                if (flag2 && flag5 && !flag3 && !flag4) {
+                    b0 = 9;
+                }
+            }
+
+            if (b0 == -1) {
+                if (flag2 || flag3) {
+                    b0 = 0;
+                }
+
+                if (flag4 || flag5) {
+                    b0 = 1;
+                }
+
+                if (!this.field_150656_f) {
+                    if (p_150655_1_) {
+                        if (flag3 && flag5) {
+                            b0 = 6;
+                        }
+
+                        if (flag4 && flag3) {
+                            b0 = 7;
+                        }
+
+                        if (flag5 && flag2) {
+                            b0 = 9;
+                        }
+
+                        if (flag2 && flag4) {
+                            b0 = 8;
+                        }
+                    }
+                    else {
+                        if (flag2 && flag4) {
+                            b0 = 8;
+                        }
+
+                        if (flag5 && flag2) {
+                            b0 = 9;
+                        }
+
+                        if (flag4 && flag3) {
+                            b0 = 7;
+                        }
+
+                        if (flag3 && flag5) {
+                            b0 = 6;
+                        }
+                    }
+                }
+            }
+
+            if (b0 == 0 && canMakeSlopes) {
+                if (BlockRailBase.func_150049_b_(this.field_150660_b, this.field_150661_c, this.field_150658_d + 1, this.field_150659_e - 1)) {
+                    b0 = 4;
+                }
+
+                if (BlockRailBase.func_150049_b_(this.field_150660_b, this.field_150661_c, this.field_150658_d + 1, this.field_150659_e + 1)) {
+                    b0 = 5;
+                }
+            }
+
+            if (b0 == 1 && canMakeSlopes) {
+                if (BlockRailBase.func_150049_b_(this.field_150660_b, this.field_150661_c + 1, this.field_150658_d + 1, this.field_150659_e)) {
+                    b0 = 2;
+                }
+
+                if (BlockRailBase.func_150049_b_(this.field_150660_b, this.field_150661_c - 1, this.field_150658_d + 1, this.field_150659_e)) {
+                    b0 = 3;
+                }
+            }
+
+            if (b0 < 0) {
+                b0 = 0;
+            }
+
+            this.func_150648_a(b0);
+            int i = b0;
+
+            if(field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e) instanceof RailTileEntity) {
+                if (this.field_150656_f) {
+                    i = ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).meta & 8 | b0;
+                }
+
+                if (p_150655_2_ || ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).meta != i) {
+                    ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).meta=i;
+
+                    for (int j = 0; j < this.field_150657_g.size(); ++j) {
+                        BlockRailCore.RailData rail = this.func_150654_a(this.field_150657_g.get(j));
+
+                        if (rail != null) {
+                            rail.func_150651_b();
+
+                            if (rail.func_150649_b(this)) {
+                                rail.func_150645_c(this);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
