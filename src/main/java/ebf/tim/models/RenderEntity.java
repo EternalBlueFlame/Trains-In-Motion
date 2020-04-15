@@ -32,7 +32,7 @@ public class RenderEntity extends Render {
     private static final float RailOffset = 0.34f;
     private static int i=0, ii=0, iii=0;
     public static RenderEntity instance = new RenderEntity();
-    private static RenderBlocks renderBlocks;
+    public static RenderBlocks renderBlocks;
     //public RenderEntity() {}
 
     /**

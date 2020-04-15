@@ -1,5 +1,6 @@
 package ebf.tim.blocks.rails;
 
+import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ebf.XmlBuilder;
@@ -88,6 +89,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public boolean renderAsNormalBlock() {
+        DebugUtil.printStackTrace();
         return false;
     }
 
@@ -111,24 +113,83 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     public float getRailMaxSpeed(World world, EntityMinecart cart, int y, int x, int z){
         return 0.4f;//getTile(world, x, y, z)!=null?getTile(world, x, y, z).getRailSpeed():0.4f;
     }
+    @SideOnly(Side.CLIENT)
+    public int colorMultiplier(IBlockAccess p_149720_1_, int p_149720_2_, int p_149720_3_, int p_149720_4_) {
+        if(p_149720_1_.getBlockMetadata(p_149720_2_,p_149720_3_,p_149720_4_)!=-1) {
+            int l = 0;
+            int i1 = 0;
+            int j1 = 0;
 
+            for (int k1 = -1; k1 <= 1; ++k1) {
+                for (int l1 = -1; l1 <= 1; ++l1) {
+                    int i2 = p_149720_1_.getBiomeGenForCoords(p_149720_2_ + l1, p_149720_4_ + k1).getWaterColorMultiplier();
+                    l += (i2 & 16711680) >> 16;
+                    i1 += (i2 & 65280) >> 8;
+                    j1 += i2 & 255;
+                }
+            }
+
+            return (l / 9 & 255) << 16 | (i1 / 9 & 255) << 8 | j1 / 9 & 255;
+        } else {
+            return super.colorMultiplier(p_149720_1_, p_149720_2_, p_149720_3_, p_149720_4_);
+        }
+    }
+
+    @Override
+    public boolean canCollideCheck(int p_149678_1_, boolean p_149678_2_){
+        return false;
+    }
 
     @Override
     public TileEntity createNewTileEntity(World world, int meta){
         return new RailTileEntity();
     }
 
-    //@Override
-    //public TileEntity createTileEntity(World world, int metadata){
-    //    return new RailTileEntity();
-    //}
+    @Override
+    public TileEntity createTileEntity(World world, int metadata){
+        return createNewTileEntity(world,metadata);
+    }
+
+    public void updateTick(World world, int x, int y, int z, Random p_149674_5_) {
+        int meta=0;
+        int othermeta=7;
+        if(world.getBlock(x+1,y,z).getMaterial()==Material.water){
+            othermeta= world.getBlockMetadata(x+1,y,z)+1;
+            if(othermeta>meta){
+                meta=othermeta;
+            }
+        }
+        if(world.getBlock(x-1,y,z).getMaterial()==Material.water){
+            othermeta= world.getBlockMetadata(x+1,y,z)+1;
+            if(othermeta>meta){
+                meta=othermeta;
+            }
+        }
+        if(world.getBlock(x,y,z+1).getMaterial()==Material.water){
+            othermeta= world.getBlockMetadata(x+1,y,z)+1;
+            if(othermeta>meta){
+                meta=othermeta;
+            }
+        }
+        if(world.getBlock(x,y,z-1).getMaterial()==Material.water){
+            othermeta= world.getBlockMetadata(x+1,y,z)+1;
+            if(othermeta>meta){
+                meta=othermeta;
+            }
+        }
+
+
+        if(meta!= world.getBlockMetadata(x,y,z)) {
+            world.setBlockMetadataWithNotify(x, y, z, meta, 2);
+        }
+    }
 
     @Override
     public int getBasicRailMetadata(IBlockAccess world, EntityMinecart cart, int x, int y, int z) {
         if(!(world.getTileEntity(x,y,z) instanceof RailTileEntity)){
             return 0;
         }
-        int meta = ((RailTileEntity) world.getTileEntity(x,y,z)).meta;
+        int meta = ((RailTileEntity) world.getTileEntity(x,y,z)).getMeta();
         if(isPowered()) {
             meta = meta & 7;
         }
@@ -160,17 +221,17 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 break;
             }
             case 6:{
-                if(world.getBlockMetadata(x+1,y,z)==9 && cart.motionZ>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
+                if(getTileEntityMeta(world,x+1,y,z)==9 && cart.motionZ>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
                     return 0;//this already worked fine, but make it smoother
-                } else if(world.getBlockMetadata(x+1,y,z)==7){
+                } else if(getTileEntityMeta(world,x+1,y,z)==7){
                     if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==0) {
                         return 0;//cover parallel entering from wrong end on straight
                     } else if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==7){
                         return 9;//cover parallel off shape
                     }
-                } else if(world.getBlockMetadata(x,y,z+1)==8 && cart.motionX>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==1){
+                } else if(getTileEntityMeta(world,x,y,z+1)==8 && cart.motionX>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==1){
                     return 1;//this already worked fine, but make it smoother
-                } else if (world.getBlockMetadata(x,y,z+1)==9) {
+                } else if (getTileEntityMeta(world,x,y,z+1)==9) {
                     if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1) {
                         return 1;//cover parallel entering from wrong end on straight
                     } else if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 7) {
@@ -181,17 +242,17 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 break;
             }
             case 7:{
-                if(world.getBlockMetadata(x-1,y,z)==9 && cart.motionX>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
+                if(getTileEntityMeta(world,x-1,y,z)==9 && cart.motionX>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
                     return 0;//this already worked fine, but make it smoother
-                } else if(world.getBlockMetadata(x-1,y,z)==8){
+                } else if(getTileEntityMeta(world,x-1,y,z)==8){
                     if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==0) {
                         return 0;//cover parallel entering from wrong end on straight
                     } else if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==9){
                         return 6;//cover parallel off shape
                     }
-                } else if(world.getBlockMetadata(x,y,z+1)==9 && cart.motionX>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==1){
+                } else if(getTileEntityMeta(world,x,y,z+1)==9 && cart.motionX>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==1){
                     return 1;//this already worked fine, but make it smoother
-                } else if (world.getBlockMetadata(x,y,z+1)==8) {
+                } else if (getTileEntityMeta(world,x,y,z+1)==8) {
                     if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1) {
                         return 1;//cover parallel entering from wrong end on straight
                     } else if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 7) {
@@ -202,17 +263,17 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 break;
             }
             case 8:{
-                if(world.getBlockMetadata(x-1,y,z)==6 && cart.motionZ<0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
+                if(getTileEntityMeta(world,x-1,y,z)==6 && cart.motionZ<0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
                     return 0;//this already worked fine, but make it smoother
-                } else if(world.getBlockMetadata(x-1,y,z)==9){
+                } else if(getTileEntityMeta(world,x-1,y,z)==9){
                     if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==0) {
                         return 0;//cover parallel entering from wrong end on straight
                     } else if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==9){
                         return 7;//cover parallel off shape
                     }
-                } else if(world.getBlockMetadata(x,y,z-1)==6 && cart.motionX<0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==1){
+                } else if(getTileEntityMeta(world,x,y,z-1)==6 && cart.motionX<0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==1){
                     return 1;//this already worked fine, but make it smoother
-                } else if (world.getBlockMetadata(x,y,z-1)==7) {
+                } else if (getTileEntityMeta(world,x,y,z-1)==7) {
                     if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1) {
                         return 1;//cover parallel entering from wrong end on straight
                     } else if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 7) {
@@ -223,17 +284,17 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 break;
             }
             case 9:{
-                if(world.getBlockMetadata(x+1,y,z)==6 && cart.motionZ>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
+                if(getTileEntityMeta(world,x+1,y,z)==6 && cart.motionZ>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==0){
                     return 0;//this already worked fine, but make it smoother
-                } else if(world.getBlockMetadata(x+1,y,z)==7){
+                } else if(getTileEntityMeta(world,x+1,y,z)==7){
                     if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==0) {
                         return 0;//cover parallel entering from wrong end on straight
                     } else if(cart.getEntityData().getInteger("tim.lastusedrail.meta")==8){
                         return 6;//cover parallel off shape
                     }
-                } else if(world.getBlockMetadata(x,y,z-1)==7 && cart.motionX>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==1){
+                } else if(getTileEntityMeta(world,x,y,z-1)==7 && cart.motionX>0 && cart.getEntityData().getInteger("tim.lastusedrail.meta")==1){
                     return 1;//this already worked fine, but make it smoother
-                } else if (world.getBlockMetadata(x,y,z-1)==6) {
+                } else if (getTileEntityMeta(world,x,y,z-1)==6) {
                     if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 1) {
                         return 1;//cover parallel entering from wrong end on straight
                     } else if (cart.getEntityData().getInteger("tim.lastusedrail.meta") == 6) {
@@ -254,6 +315,13 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             cart.getEntityData().setInteger("tim.lastusedrail.z",z);
         }
         return meta;
+    }
+
+    public int getTileEntityMeta(IBlockAccess w, int x, int y, int z){
+        if(w.getTileEntity(x,y,z) instanceof RailTileEntity){
+            return ((RailTileEntity) w.getTileEntity(x,y,z)).getMeta();
+        }
+        return -1;
     }
 
     @Override
@@ -316,39 +384,6 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
 
-    public void updateTick(World world, int x, int y, int z, Random p_149674_5_) {
-        int meta=0;
-        int othermeta=7;
-        if(world.getBlock(x+1,y,z).getMaterial()==Material.water){
-            othermeta= world.getBlockMetadata(x+1,y,z)+1;
-            if(othermeta>meta){
-                meta=othermeta;
-            }
-        }
-        if(world.getBlock(x-1,y,z).getMaterial()==Material.water){
-            othermeta= world.getBlockMetadata(x+1,y,z)+1;
-            if(othermeta>meta){
-                meta=othermeta;
-            }
-        }
-        if(world.getBlock(x,y,z+1).getMaterial()==Material.water){
-            othermeta= world.getBlockMetadata(x+1,y,z)+1;
-            if(othermeta>meta){
-                meta=othermeta;
-            }
-        }
-        if(world.getBlock(x,y,z-1).getMaterial()==Material.water){
-            othermeta= world.getBlockMetadata(x+1,y,z)+1;
-            if(othermeta>meta){
-                meta=othermeta;
-            }
-        }
-
-        if(meta!= world.getBlockMetadata(x,y,z)) {
-            world.setBlockMetadataWithNotify(x, y, z, meta, 2);
-        }
-    }
-
     @Override
     public void onNeighborBlockChange(World worldObj, int x, int y, int z, Block b) {
         if(b instanceof BlockRailCore) {
@@ -356,6 +391,8 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             if (worldObj.getTileEntity(x, y, z) instanceof RailTileEntity) {
                 worldObj.getTileEntity(x, y, z).markDirty();
             }
+        } else if (b instanceof BlockLiquid){
+            updateTick(worldObj,x,y,z,null);
         }
     }
 
@@ -389,25 +426,25 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         return p_149660_9_;
     }
 
-
-    @Override
-    public boolean onBlockEventReceived(World p_149696_1_, int p_149696_2_, int p_149696_3_, int p_149696_4_, int p_149696_5_, int p_149696_6_) {
-        return super.onBlockEventReceived(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_, p_149696_5_, p_149696_6_);
-        //return getTile(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_) != null && getTile(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_).receiveClientEvent(p_149696_5_, p_149696_6_);
-    }
-
+    //750mm single gauge track, each entry in the array is another gauge the rails would support
     public static final int[] gauge750mm={750};
 
-    public static void updateShape(int xPos, int yPos, int zPos, World worldObj, @Nullable XmlBuilder data){
+    //override this to provide a different gauge
+    public void updateShape(int xPos, int yPos, int zPos, World worldObj, @Nullable XmlBuilder data){
         RailShapeCore.processPoints(xPos, yPos, zPos, getShape(worldObj, xPos, yPos, zPos),gauge750mm,worldObj, data);
     }
 
 
+
     public static RailSimpleShape getShape(World worldObj, int xPos, int yPos, int zPos){
-        if(!(worldObj.getTileEntity(xPos, yPos, zPos) instanceof RailTileEntity)){
-            return null;
+        TileEntity te= worldObj.getTileEntity(xPos, yPos, zPos);
+        if(!(te instanceof RailTileEntity)){
+            te = new RailTileEntity();
+            te.xCoord=xPos;
+            te.yCoord=yPos;
+            te.zCoord=zPos;
         }
-        switch (((RailTileEntity)worldObj.getTileEntity(xPos, yPos, zPos)).meta){
+        switch (((RailTileEntity)worldObj.getTileEntity(xPos, yPos, zPos)).getMeta()){
             //Z straight
             case 0: {
                 return RailVanillaShapes.vanillaZStraight(worldObj, xPos, yPos, zPos);
@@ -452,7 +489,6 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     /**
      * checks an array of blocks for a specific class and meta to check if the shape should be made.
      * @param worldobj
-     * @param positionsWithMeta array of vector 4's with the 4th value being the desired meta
      * @return boolean for if the shape can be made
      */
     public static boolean checkBlockMeta(World worldobj, int x, int y, int z, int ... meta){
@@ -461,7 +497,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             return false;
         }
         for(int i : meta){
-            if(((RailTileEntity)worldobj.getTileEntity(x,y,z)).meta ==i){
+            if(((RailTileEntity)worldobj.getTileEntity(x,y,z)).getMeta() ==i){
                 return true;
             }
         }
@@ -581,7 +617,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
         private void func_150651_b() {
             for (int i = 0; i < this.field_150657_g.size(); ++i) {
-                BlockRailCore.RailData rail = this.func_150654_a((ChunkPosition)this.field_150657_g.get(i));
+                BlockRailCore.RailData rail = this.func_150654_a(this.field_150657_g.get(i));
 
                 if (rail != null && rail.func_150653_a(this)) {
                     this.field_150657_g.set(i, new ChunkPosition(rail.field_150661_c, rail.field_150658_d, rail.field_150659_e));
@@ -597,9 +633,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         }
 
         private boolean func_150653_a(BlockRailCore.RailData p_150653_1_) {
-            for (int i = 0; i < this.field_150657_g.size(); ++i) {
-                ChunkPosition chunkposition = this.field_150657_g.get(i);
-
+            for (ChunkPosition chunkposition : this.field_150657_g) {
                 if (chunkposition.chunkPosX == p_150653_1_.field_150661_c && chunkposition.chunkPosZ == p_150653_1_.field_150659_e) {
                     return true;
                 }
@@ -608,10 +642,8 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             return false;
         }
 
-        private boolean func_150652_b(int p_150652_1_, int p_150652_2_, int p_150652_3_) {
-            for (int l = 0; l < this.field_150657_g.size(); ++l) {
-                ChunkPosition chunkposition = this.field_150657_g.get(l);
-
+        private boolean func_150652_b(int p_150652_1_, int p_150652_3_) {
+            for (ChunkPosition chunkposition : this.field_150657_g) {
                 if (chunkposition.chunkPosX == p_150652_1_ && chunkposition.chunkPosZ == p_150652_3_) {
                     return true;
                 }
@@ -626,10 +658,10 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
         private void func_150645_c(BlockRailCore.RailData p_150645_1_) {
             this.field_150657_g.add(new ChunkPosition(p_150645_1_.field_150661_c, p_150645_1_.field_150658_d, p_150645_1_.field_150659_e));
-            boolean flag = this.func_150652_b(this.field_150661_c, this.field_150658_d, this.field_150659_e - 1);
-            boolean flag1 = this.func_150652_b(this.field_150661_c, this.field_150658_d, this.field_150659_e + 1);
-            boolean flag2 = this.func_150652_b(this.field_150661_c - 1, this.field_150658_d, this.field_150659_e);
-            boolean flag3 = this.func_150652_b(this.field_150661_c + 1, this.field_150658_d, this.field_150659_e);
+            boolean flag = this.func_150652_b(this.field_150661_c, this.field_150659_e - 1);
+            boolean flag1 = this.func_150652_b(this.field_150661_c, this.field_150659_e + 1);
+            boolean flag2 = this.func_150652_b(this.field_150661_c - 1, this.field_150659_e);
+            boolean flag3 = this.func_150652_b(this.field_150661_c + 1, this.field_150659_e);
             byte b0 = -1;
 
             if (flag || flag1) {
@@ -686,13 +718,13 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
             if (this.field_150656_f) {
                 if(field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e) instanceof RailTileEntity){
-                    i= ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).meta;
+                    i= ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).getMeta();
                 }
                 //i = this.field_150660_b.getBlockMetadata(this.field_150661_c, this.field_150658_d, this.field_150659_e) & 8 | b0;
             }
 
             if(field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e) instanceof RailTileEntity){
-                ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).meta=i;
+                ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).setMeta(i);
             }
             //this.field_150660_b.setBlockMetadataWithNotify(this.field_150661_c, this.field_150658_d, this.field_150659_e, i, 3);
         }
@@ -817,14 +849,14 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
             if(field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e) instanceof RailTileEntity) {
                 if (this.field_150656_f) {
-                    i = ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).meta & 8 | b0;
+                    i = ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).getMeta() & 8 | b0;
                 }
 
-                if (p_150655_2_ || ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).meta != i) {
-                    ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).meta=i;
+                if (p_150655_2_ || ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).getMeta() != i) {
+                    ((RailTileEntity) field_150660_b.getTileEntity(this.field_150661_c, this.field_150658_d, this.field_150659_e)).setMeta(i);
 
-                    for (int j = 0; j < this.field_150657_g.size(); ++j) {
-                        BlockRailCore.RailData rail = this.func_150654_a(this.field_150657_g.get(j));
+                    for (ChunkPosition chunkPosition : this.field_150657_g) {
+                        RailData rail = this.func_150654_a(chunkPosition);
 
                         if (rail != null) {
                             rail.func_150651_b();

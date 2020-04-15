@@ -29,7 +29,8 @@ public class RailTileEntity extends TileEntity {
     //todo public int snow=0;
     //todo public int timer=0;
     //todo public int overgrowth=0;
-    public Integer railGLID=null,meta=0;
+    public Integer railGLID=null;
+    private int meta=0;
     public XmlBuilder data = new XmlBuilder();
     public boolean updateModel=false;
     //used for the actual path, and rendered
@@ -37,6 +38,14 @@ public class RailTileEntity extends TileEntity {
     //TODO: only rendered, to show other paths, maybe rework so they are all in the same list and just have a bool for which is active?
     //public List<RailPointData> cosmeticPoints = new ArrayList<>();
 
+
+    public int getMeta() {
+        return meta;
+    }
+    public void setMeta(int i){
+        meta=i;
+        markDirty();
+    }
 
     public void func_145828_a(@Nullable CrashReportCategory report)  {
         if (report == null) {
@@ -51,7 +60,9 @@ public class RailTileEntity extends TileEntity {
             if(railGLID==null || updateModel){
                 RailShapeCore route =new RailShapeCore().parseString(data.getString("route"));
                 if (route!=null && route.gauge!=null) {
-                    railGLID = net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1);
+                    if(railGLID==null) {
+                        railGLID = net.minecraft.client.renderer.GLAllocation.generateDisplayLists(1);
+                    }
                     org.lwjgl.opengl.GL11.glNewList(railGLID, org.lwjgl.opengl.GL11.GL_COMPILE);
 
                     Model1x1Rail.Model3DRail(worldObj, xCoord, yCoord, zCoord,
@@ -82,7 +93,7 @@ public class RailTileEntity extends TileEntity {
     @Override
     public AxisAlignedBB getRenderBoundingBox() {
         if (boundingBox == null) {
-            boundingBox = AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1);
+            boundingBox = AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord+1, yCoord, zCoord+1);
         }
         return boundingBox;
     }
@@ -137,8 +148,11 @@ public class RailTileEntity extends TileEntity {
         super.readFromNBT(tag);
         String s = tag.getString("data");
         data = new XmlBuilder(s);
-        meta=tag.getInteger("meta");
-
+        if(tag.hasKey("meta")) {
+            meta = tag.getInteger("meta");
+        } else {
+            meta=worldObj.getBlockMetadata(xCoord,yCoord,zCoord);
+        }
     }
 
 }

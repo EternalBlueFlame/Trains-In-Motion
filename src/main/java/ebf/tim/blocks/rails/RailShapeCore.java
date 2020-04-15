@@ -37,12 +37,13 @@ public class RailShapeCore {
                 data = new XmlBuilder();
             }
         }
-        RailShapeCore s = multiTriGenModel(dimension,x,y,z,coordList, mmFromCenter);
-        if(s!=null) {
-            data.putString("route", s.toString());
-        }
         if (dimension.getTileEntity(x,y,z) instanceof RailTileEntity) {
+            RailShapeCore s = multiTriGenModel(dimension,x,y,z,coordList, mmFromCenter);
+            if(s!=null) {
+                data.putString("route", s.toString());
+            }
             ((RailTileEntity) dimension.getTileEntity(x, y, z)).data = data;
+            dimension.getTileEntity(x, y, z).markDirty();
         }
 
     }

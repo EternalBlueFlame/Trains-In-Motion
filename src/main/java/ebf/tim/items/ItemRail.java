@@ -125,7 +125,7 @@ public class ItemRail extends Item implements ITrackItem {
                         if(stack.getTagCompound().getTag("wires")!=null) {
                             c.putItemStack("wires",ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("wires")));
                         }
-                        BlockRailCore.updateShape(x,y,z,world,c);
+                        ((BlockRailCore)world.getBlock(x,y,z)).updateShape(x,y,z,world,c);
                     }
 
                     world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, getPlacedBlock().stepSound.func_150496_b(), (getPlacedBlock().stepSound.getVolume() + 1.0F) / 2.0F, getPlacedBlock().stepSound.getPitch() * 0.8F);
