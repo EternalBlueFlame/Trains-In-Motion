@@ -145,6 +145,7 @@ public class ItemRail extends Item implements ITrackItem {
     }
 
     public boolean placeTrack(ItemStack stack, World world, int x, int y, int z){
+        if(world.isRemote){return true;}
         net.minecraft.block.Block block = world.getBlock(x, y, z);
 
         if (!(World.doesBlockHaveSolidTopSurface(world ,x, y, z))){
@@ -155,7 +156,39 @@ public class ItemRail extends Item implements ITrackItem {
             block.dropBlockAsItem(world, x, y+1, z, world.getBlockMetadata(x, y+1, z), 0);
         }
 
-        world.setBlock(x, y+1, z, getPlacedBlock(), 0/*no meta, let the block figure that out*/, 3 /*force update and re-render*/);
+        int meta=world.getBlockMetadata(x,y,z);
+
+        if (world.canPlaceEntityOnSide(getPlacedBlock(),x,y,z, false, meta, null, stack)) {
+            int i1 = getPlacedBlock().onBlockPlaced(world, x, y, z, meta, 0, 0, 0, 0);
+
+            if (world.setBlock(x, y, z, getPlacedBlock(), 0, 3)) {
+                if (world.getBlock(x, y, z) == getPlacedBlock()) {
+                    getPlacedBlock().onPostBlockPlaced(world, x, y, z, i1);
+
+                    XmlBuilder c = new XmlBuilder();
+                    if (stack.getTagCompound().getTag("rail") != null) {
+                        c.putItemStack("rail", ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("rail")));
+                    } else {
+                        c.putItemStack("rail", new ItemStack(Items.iron_ingot));
+                    }
+
+                    if (stack.getTagCompound().getTag("ties") != null) {
+                        c.putItemStack("ties", ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ties")));
+                    }
+                    if (stack.getTagCompound().getTag("ballast") != null) {
+                        c.putItemStack("ballast", ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("ballast")));
+                    }
+                    if (stack.getTagCompound().getTag("wires") != null) {
+                        c.putItemStack("wires", ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("wires")));
+                    }
+                    ((BlockRailCore) world.getBlock(x, y, z)).updateShape(x, y, z, world, c);
+                }
+
+                world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, getPlacedBlock().stepSound.func_150496_b(), (getPlacedBlock().stepSound.getVolume() + 1.0F) / 2.0F, getPlacedBlock().stepSound.getPitch() * 0.8F);
+                --stack.stackSize;
+            }
+        }
+
         return true;
     }
 

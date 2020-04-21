@@ -8,6 +8,7 @@ import ebf.tim.utility.RailUtility;
 import ebf.tim.utility.Vec5f;
 import fexcraft.tmt.slim.Tessellator;
 import fexcraft.tmt.slim.TextureManager;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;

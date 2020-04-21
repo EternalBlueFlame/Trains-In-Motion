@@ -2,6 +2,7 @@ package ebf.tim.models.rails;
 
 import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.blocks.rails.RailShapeCore;
+import ebf.tim.models.RenderEntity;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Vec5f;
@@ -9,7 +10,9 @@ import ebf.tim.utility.Vec6f;
 import fexcraft.tmt.slim.Tessellator;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;

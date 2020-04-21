@@ -18,8 +18,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -57,7 +59,6 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     //TODO: only rendered, to show other paths, maybe rework so they are all in the same list and just have a bool for which is active?
     //public List<RailPointData> cosmeticPoints = new ArrayList<>();*/
 
-
    /* @Override
     public BlockRailCore(Material m){
 
@@ -76,6 +77,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     public BlockRailCore(){
         setCreativeTab(null);
+        setLightOpacity(3);
     }
 
     @Override
@@ -89,13 +91,12 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public boolean renderAsNormalBlock() {
-        DebugUtil.printStackTrace();
         return false;
     }
 
     @Override
     public boolean isOpaqueCube() {
-        return true;
+        return false;
     }
 
     @Override
@@ -115,7 +116,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
     @SideOnly(Side.CLIENT)
     public int colorMultiplier(IBlockAccess p_149720_1_, int p_149720_2_, int p_149720_3_, int p_149720_4_) {
-        if(p_149720_1_.getBlockMetadata(p_149720_2_,p_149720_3_,p_149720_4_)!=-1) {
+        if(p_149720_1_.getBlockMetadata(p_149720_2_,p_149720_3_,p_149720_4_)>0) {
             int l = 0;
             int i1 = 0;
             int j1 = 0;
@@ -137,7 +138,13 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public boolean canCollideCheck(int p_149678_1_, boolean p_149678_2_){
-        return false;
+        return true;
+    }
+    @Override
+    public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
+        return world.getBlockMetadata(x,y,z)<1?null:
+
+                AxisAlignedBB.getBoundingBox(0.0F, 0.0F, 0.0F, 1.0F, world.getBlockMetadata(x,y,z)*0.1f, 1.0F);
     }
 
     @Override
@@ -153,36 +160,101 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     public void updateTick(World world, int x, int y, int z, Random p_149674_5_) {
         int meta=0;
         int othermeta=7;
-        if(world.getBlock(x+1,y,z).getMaterial()==Material.water){
+        if(world.getBlock(x+1,y,z) instanceof BlockLiquid){
             othermeta= world.getBlockMetadata(x+1,y,z)+1;
             if(othermeta>meta){
                 meta=othermeta;
             }
         }
-        if(world.getBlock(x-1,y,z).getMaterial()==Material.water){
+        if(world.getBlock(x-1,y,z) instanceof BlockLiquid){
             othermeta= world.getBlockMetadata(x+1,y,z)+1;
             if(othermeta>meta){
                 meta=othermeta;
             }
         }
-        if(world.getBlock(x,y,z+1).getMaterial()==Material.water){
-            othermeta= world.getBlockMetadata(x+1,y,z)+1;
+        if(world.getBlock(x,y,z+1) instanceof BlockLiquid){
+            othermeta= world.getBlockMetadata(x,y,z+1)+1;
             if(othermeta>meta){
                 meta=othermeta;
             }
         }
-        if(world.getBlock(x,y,z-1).getMaterial()==Material.water){
-            othermeta= world.getBlockMetadata(x+1,y,z)+1;
+        if(world.getBlock(x,y,z-1) instanceof BlockLiquid){
+            othermeta= world.getBlockMetadata(x,y,z-1)+1;
             if(othermeta>meta){
                 meta=othermeta;
             }
         }
+
+        Vec3 totalDir = getFlowVector(world,x,y,z);
+        meta-=totalDir.xCoord+totalDir.zCoord;
+        if(meta<-1){
+            meta=6;
+        }
+        DebugUtil.println(totalDir.xCoord,totalDir.zCoord);
+
 
 
         if(meta!= world.getBlockMetadata(x,y,z)) {
             world.setBlockMetadataWithNotify(x, y, z, meta, 2);
+            world.markBlockRangeForRenderUpdate(x,y,z,x,y,z);
+        }
+
+    }
+
+    private static Vec3 getFlowVector(IBlockAccess p_149800_1_, int p_149800_2_, int p_149800_3_, int p_149800_4_) {
+        Vec3 vec3 = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
+        //int l = getEffectiveFlowDecay(p_149800_1_, p_149800_2_, p_149800_3_, p_149800_4_);
+
+        for (int i1 = 0; i1 < 4; ++i1) {
+            int j1 = p_149800_2_;
+            int k1 = p_149800_4_;
+
+            switch (i1){
+                case 0:{j1 = p_149800_2_ - 1;break;}
+                case 1:{k1 = p_149800_4_ - 1;break;}
+                case 2:{j1++;break;}
+                case 3:{k1++;break;}
+            }
+
+            int l1 = getEffectiveFlowDecay(p_149800_1_, j1, p_149800_3_, k1);
+
+            if (l1 < 0) {
+                if (!p_149800_1_.getBlock(j1, p_149800_3_, k1).getMaterial().blocksMovement()) {
+                    l1 = getEffectiveFlowDecay(p_149800_1_, j1, p_149800_3_ - 1, k1);
+
+                    if (l1 >= 0) {
+                        vec3 = vec3.addVector(
+                                (j1 - p_149800_2_) * (l1 - -8),
+                                0,
+                                (k1 - p_149800_4_) * (l1 - -8));
+                    }
+                }
+            } else {
+                vec3 = vec3.addVector(
+                        (j1 - p_149800_2_) * l1,
+                        0,
+                        (k1 - p_149800_4_) * l1);
+            }
+        }
+
+        return vec3;
+    }
+    protected static int getEffectiveFlowDecay(IBlockAccess p_149798_1_, int p_149798_2_, int p_149798_3_, int p_149798_4_) {
+        if (p_149798_1_.getBlock(p_149798_2_, p_149798_3_, p_149798_4_).getMaterial() != Material.water) {
+            return -1;
+        } else {
+            int l = p_149798_1_.getBlockMetadata(p_149798_2_, p_149798_3_, p_149798_4_);
+
+            return l>=8?0:l;
         }
     }
+
+    public static boolean isSolid(IBlockAccess p_149747_1_, int p_149747_2_, int p_149747_3_, int p_149747_4_, int p_149747_5_) {
+        Material material = p_149747_1_.getBlock(p_149747_2_, p_149747_3_, p_149747_4_).getMaterial();
+        return material != Material.water && (p_149747_5_ == 1 || (material != Material.ice && material.isSolid()));
+    }
+
+
 
     @Override
     public int getBasicRailMetadata(IBlockAccess world, EntityMinecart cart, int x, int y, int z) {
@@ -334,6 +406,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 this.onNeighborBlockChange(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_, this);
             }
         }
+        updateTick(p_149726_1_,p_149726_2_,p_149726_3_,p_149726_4_,null);
     }
 
 
@@ -391,8 +464,6 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             if (worldObj.getTileEntity(x, y, z) instanceof RailTileEntity) {
                 worldObj.getTileEntity(x, y, z).markDirty();
             }
-        } else if (b instanceof BlockLiquid){
-            updateTick(worldObj,x,y,z,null);
         }
     }
 
@@ -413,6 +484,8 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     }
 
     public int onBlockPlaced(World p_149660_1_, int p_149660_2_, int p_149660_3_, int p_149660_4_, int p_149660_5_, float p_149660_6_, float p_149660_7_, float p_149660_8_, int p_149660_9_) {
+
+
         for(int x : updateMatrix){
             for(int z : updateMatrix){
                 for(int y : updateMatrix){
@@ -444,7 +517,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
             te.yCoord=yPos;
             te.zCoord=zPos;
         }
-        switch (((RailTileEntity)worldObj.getTileEntity(xPos, yPos, zPos)).getMeta()){
+        switch (((RailTileEntity)te).getMeta()){
             //Z straight
             case 0: {
                 return RailVanillaShapes.vanillaZStraight(worldObj, xPos, yPos, zPos);
@@ -527,15 +600,26 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     @Override
     @SideOnly(Side.CLIENT)
     public IIcon getIcon(int p_149691_1_, int p_149691_2_) {
-        return p_149691_2_>-10?Blocks.flowing_water.getIcon(p_149691_1_,p_149691_2_):
-                Blocks.rail.getIcon(p_149691_1_, 0);
+        return p_149691_2_>0?Blocks.flowing_water.getIcon(p_149691_1_,p_149691_2_):
+                Blocks.rail.getIcon(0, 0);
     }
 
 
     @SideOnly(Side.CLIENT)
     @Override
-    public boolean shouldSideBeRendered(IBlockAccess p_149646_1_, int p_149646_2_, int p_149646_3_, int p_149646_4_, int p_149646_5_) {
+    public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int p_149646_5_) {
         return p_149646_5_==1;
+    }
+
+    @Override
+    public int getLightOpacity(IBlockAccess world, int x, int y, int z) {
+        return world.getBlockMetadata(x,y,z)>0?3:0;
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    public int getRenderBlockPass() {
+        return 1;
     }
 
     /*@Override

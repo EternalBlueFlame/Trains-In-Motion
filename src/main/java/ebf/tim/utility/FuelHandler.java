@@ -328,7 +328,7 @@ public class FuelHandler{
 
 		}
 		//attempt to fill any buckets in the drain slot
-		if (FluidContainerRegistry.isEmptyContainer(transport.getSlotIndexByID(401).getStack())) {
+		if (transport.getSlotIndexByID(401)!=null && FluidContainerRegistry.isEmptyContainer(transport.getSlotIndexByID(401).getStack())) {
 			for (int i = 0; i < transport.getTankCapacity().length; i++) {
 				if (FluidContainerRegistry.fillFluidContainer(
 						new FluidStack(transport.getTankInfo(ForgeDirection.UNKNOWN)[i].fluid,1000)
