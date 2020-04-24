@@ -12,6 +12,7 @@ import ebf.tim.utility.CommonProxy;
 import ebf.tim.utility.DebugUtil;
 import net.minecraft.block.*;
 import net.minecraft.block.material.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
@@ -22,6 +23,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.ChunkCache;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -157,47 +159,63 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
         return createNewTileEntity(world,metadata);
     }
 
+    @Override
     public void updateTick(World world, int x, int y, int z, Random p_149674_5_) {
+
+    }
+
+    public int updatefluid(World world, int x, int y, int z, boolean doSet) {
         int meta=0;
         int othermeta=7;
         if(world.getBlock(x+1,y,z) instanceof BlockLiquid){
-            othermeta= world.getBlockMetadata(x+1,y,z)+1;
+            othermeta= world.getBlockMetadata(x+1,y,z);
             if(othermeta>meta){
                 meta=othermeta;
             }
         }
         if(world.getBlock(x-1,y,z) instanceof BlockLiquid){
-            othermeta= world.getBlockMetadata(x+1,y,z)+1;
+            othermeta= world.getBlockMetadata(x+1,y,z);
             if(othermeta>meta){
                 meta=othermeta;
             }
         }
         if(world.getBlock(x,y,z+1) instanceof BlockLiquid){
-            othermeta= world.getBlockMetadata(x,y,z+1)+1;
+            othermeta= world.getBlockMetadata(x,y,z+1);
             if(othermeta>meta){
                 meta=othermeta;
             }
         }
         if(world.getBlock(x,y,z-1) instanceof BlockLiquid){
-            othermeta= world.getBlockMetadata(x,y,z-1)+1;
+            othermeta= world.getBlockMetadata(x,y,z-1);
             if(othermeta>meta){
                 meta=othermeta;
             }
         }
 
         Vec3 totalDir = getFlowVector(world,x,y,z);
-        meta-=totalDir.xCoord+totalDir.zCoord;
+        meta += meta == 0.0D ? -1 : Math.copySign(1, meta);
+
+        if(totalDir.xCoord!=0d && totalDir.zCoord!=0d){
+            if(Math.abs(totalDir.xCoord)<Math.abs(totalDir.zCoord)){
+                meta-=2;
+            }
+        } else {
+            meta -= Math.abs(totalDir.xCoord + totalDir.zCoord);
+
+        }
         if(meta<-1){
             meta=6;
+        } else if (meta >7){
+            meta =7;
         }
-        DebugUtil.println(totalDir.xCoord,totalDir.zCoord);
 
 
 
-        if(meta!= world.getBlockMetadata(x,y,z)) {
+        if(doSet && meta!= world.getBlockMetadata(x,y,z)) {
             world.setBlockMetadataWithNotify(x, y, z, meta, 2);
             world.markBlockRangeForRenderUpdate(x,y,z,x,y,z);
         }
+        return meta;
 
     }
 
@@ -247,11 +265,6 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
             return l>=8?0:l;
         }
-    }
-
-    public static boolean isSolid(IBlockAccess p_149747_1_, int p_149747_2_, int p_149747_3_, int p_149747_4_, int p_149747_5_) {
-        Material material = p_149747_1_.getBlock(p_149747_2_, p_149747_3_, p_149747_4_).getMaterial();
-        return material != Material.water && (p_149747_5_ == 1 || (material != Material.ice && material.isSolid()));
     }
 
 
@@ -406,7 +419,6 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
                 this.onNeighborBlockChange(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_, this);
             }
         }
-        updateTick(p_149726_1_,p_149726_2_,p_149726_3_,p_149726_4_,null);
     }
 
 
@@ -459,44 +471,41 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @Override
     public void onNeighborBlockChange(World worldObj, int x, int y, int z, Block b) {
-        if(b instanceof BlockRailCore) {
+        if(b instanceof BlockRailCore || b instanceof BlockAir) {
             updateShape(x, y, z, worldObj, null);
             if (worldObj.getTileEntity(x, y, z) instanceof RailTileEntity) {
                 worldObj.getTileEntity(x, y, z).markDirty();
             }
+
+            updatefluid(worldObj,x,y,z,true);
+        }
+        if(b instanceof BlockLiquid){
+            updatefluid(worldObj,x,y,z,true);
         }
     }
 
-    //stuff from block container to make tile entity more reliable.
+
     @Override
     public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_) {
         p_149749_1_.removeTileEntity(p_149749_2_, p_149749_3_, p_149749_4_);
-        for(int x : updateMatrix){
-            for(int z : updateMatrix){
-                for(int y : updateMatrix){
-                    if(p_149749_1_.getBlock(x+p_149749_2_,y+p_149749_3_,z+p_149749_4_) instanceof  BlockRailCore){
-                        p_149749_1_.getBlock(x+p_149749_2_,y+p_149749_3_,z+p_149749_4_).onNeighborBlockChange(p_149749_1_,p_149749_2_,p_149749_3_,p_149749_4_, this);
-                        updateShape(x,y,z,p_149749_1_, null);
-                    }
-                }
-            }
-        }
     }
 
     public int onBlockPlaced(World p_149660_1_, int p_149660_2_, int p_149660_3_, int p_149660_4_, int p_149660_5_, float p_149660_6_, float p_149660_7_, float p_149660_8_, int p_149660_9_) {
+        updateNearbyShapes(p_149660_1_,p_149660_2_,p_149660_3_,p_149660_4_);
+        return p_149660_9_;
+    }
 
-
+    public void updateNearbyShapes(World world, int xCoord, int yCoord, int zCoord){
         for(int x : updateMatrix){
             for(int z : updateMatrix){
                 for(int y : updateMatrix){
-                    if(p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_) instanceof  BlockRailCore){
-                        p_149660_1_.getBlock(x+p_149660_2_,y+p_149660_3_,z+p_149660_4_).onNeighborBlockChange(p_149660_1_,p_149660_2_,p_149660_3_,p_149660_4_, this);
-                        updateShape(x,y,z,p_149660_1_, null);
+                    if(world.getBlock(x+xCoord,y+yCoord,z+zCoord) instanceof  BlockRailCore){
+                        world.getBlock(x+xCoord,y+yCoord,z+zCoord).onNeighborBlockChange(world,xCoord,yCoord,zCoord, this);
+                        updateShape(x,y,z,world, null);
                     }
                 }
             }
         }
-        return p_149660_9_;
     }
 
     //750mm single gauge track, each entry in the array is another gauge the rails would support
@@ -608,12 +617,12 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
     @SideOnly(Side.CLIENT)
     @Override
     public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int p_149646_5_) {
-        return p_149646_5_==1;
+        return updatefluid(Minecraft.getMinecraft().theWorld,x,y,z,false)>0 && p_149646_5_==1;
     }
 
     @Override
     public int getLightOpacity(IBlockAccess world, int x, int y, int z) {
-        return world.getBlockMetadata(x,y,z)>0?3:0;
+        return world.getBlockMetadata(x,y,z)>0?2:0;
     }
 
 

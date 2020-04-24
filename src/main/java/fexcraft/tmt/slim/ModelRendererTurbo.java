@@ -1320,8 +1320,12 @@ public class ModelRendererTurbo {
 
     //ETERNAL: changed w/h/d to floats for better support of the custom render on the rails.
     public ModelRendererTurbo addShapeBox(float x, float y, float z, float w, float h, float d, float scale, float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, float x5, float y5, float z5, float x6, float y6, float z6, float x7, float y7, float z7){
-
-        scale+=0.000001f;
+        w+=w<1?0.0015f:0.001F;
+        h+=h<1?0.0015f:0.001F;
+        d+=d<1?0.0015f:0.001F;
+        x-=w<1?0.001f:0.0005F;
+        y-=h<1?0.001f:0.0005F;
+        z-=d<1?0.001f:0.0005F;
         float f4 = (x + w) + scale, f5 = (y + h) + scale, f6 = (z + d) + scale;
         x += scale; y += scale; z += scale;
         if(mirror){
