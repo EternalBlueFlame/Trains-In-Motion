@@ -2,17 +2,15 @@ package ebf.tim.blocks.rails;
 
 import ebf.XmlBuilder;
 import ebf.tim.blocks.RailTileEntity;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import ebf.tim.utility.Vec5f;
 import ebf.tim.utility.Vec6f;
-import fexcraft.tmt.slim.Vec3f;
-import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class RailShapeCore {
 
@@ -26,7 +24,7 @@ public class RailShapeCore {
 
 
     public static void processPoints(int x, int y, int z,
-                                     RailSimpleShape coordList, int[] mmFromCenter,
+                                     RailSimpleShape coordList, int[] mmFromCenter, float scale,
                                      World dimension, @Nullable XmlBuilder data){
 
         if(data==null){
@@ -42,6 +40,7 @@ public class RailShapeCore {
             if(s!=null) {
                 data.putString("route", s.toString());
             }
+            data.putFloat("scale",scale);
             ((RailTileEntity) dimension.getTileEntity(x, y, z)).data = data;
             dimension.getTileEntity(x, y, z).markDirty();
         }

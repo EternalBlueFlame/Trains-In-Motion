@@ -4,7 +4,6 @@ import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.RailUtility;
 import fexcraft.fcl.common.lang.ArrayList;
 import fexcraft.tmt.slim.ModelRendererTurbo;
-import net.minecraft.client.Minecraft;
 
 import java.util.List;
 

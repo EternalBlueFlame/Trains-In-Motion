@@ -12,9 +12,7 @@ import ebf.tim.entities.EntitySeat;
 import ebf.tim.entities.EntityTrainCore;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.networking.PacketInteract;
-import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.Tessellator;
-import fexcraft.tmt.slim.TextureManager;
 import fexcraft.tmt.slim.Vec3d;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -24,10 +22,8 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ReportedException;
-import net.minecraft.util.StatCollector;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import org.lwjgl.input.Keyboard;
@@ -50,7 +46,7 @@ import java.util.UUID;
 public class EventManager {
 
     private static List<GenericRailTransport> stock;
-    private static Vec3d vert, vec;
+    private static Vec3d vert;
     private static GenericRailTransport selected=null, lastSelected=null;
 
     /**

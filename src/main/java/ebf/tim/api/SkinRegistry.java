@@ -3,9 +3,7 @@ package ebf.tim.api;
 import cpw.mods.fml.common.Loader;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.DebugUtil;
-import ebf.tim.utility.RailUtility;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

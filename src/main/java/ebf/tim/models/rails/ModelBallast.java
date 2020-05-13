@@ -14,8 +14,8 @@ import static ebf.tim.models.rails.Model1x1Rail.addVertexWithOffsetAndUV;
 public class ModelBallast {
     public static IIcon iicon;
 
-    public static void modelPotatoBallast(RailShapeCore shape, float maxWidth, float minWidth, ItemStack b){
-        GL11.glTranslated(0, 0.1, 0);
+    public static void modelPotatoBallast(RailShapeCore shape, float maxWidth, float minWidth, float scale, ItemStack b){
+        GL11.glTranslated(0, 0.1*scale, 0);
 
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.UP.ordinal(), b);
 
@@ -27,15 +27,15 @@ public class ModelBallast {
             d0 = iicon.getMinU();
             d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/(shape.activePath.size()-1)));
 
-            addVertexWithOffsetAndUV(p, 0.0625f + maxWidth, 0, 0,d0,iicon.getMinV());
-            addVertexWithOffsetAndUV(p, -0.0625f + minWidth, 0, 0,d0,iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, (0.0625f*scale) + maxWidth, 0, 0,d0,iicon.getMinV());
+            addVertexWithOffsetAndUV(p, (-0.0625f*scale) + minWidth, 0, 0,d0,iicon.getMaxV());
             ballastloop++;
         }
         Tessellator.getInstance().draw();
     }
 
-    public static void model3DBallast(RailShapeCore shape, float maxWidth, float minWidth, ItemStack b){
-        modelPotatoBallast(shape, maxWidth, minWidth, b);
+    public static void model3DBallast(RailShapeCore shape, float maxWidth, float minWidth, float scale, ItemStack b){
+        modelPotatoBallast(shape, maxWidth, minWidth, scale, b);
 
         float d0;
         //west side
@@ -47,15 +47,15 @@ public class ModelBallast {
             d0 = iicon.getMinU();
             d0+= (iicon.getMaxU()-iicon.getMinU())*(ballastloop*(1f/(shape.activePath.size()-1)));
 
-            addVertexWithOffsetAndUV(p, 0.1825f + maxWidth, -0.135f, 0,d0,iicon.getMinV());
-            addVertexWithOffsetAndUV(p, 0.0625f + maxWidth, 0, 0,d0,iicon.getMinV()+((iicon.getMaxV()-iicon.getMinV())*0.15f));
+            addVertexWithOffsetAndUV(p, (0.1825f*scale) + maxWidth, -0.135f*scale, 0,d0,iicon.getMinV());
+            addVertexWithOffsetAndUV(p, (0.0625f*scale) + maxWidth, 0, 0,d0,iicon.getMinV()+((iicon.getMaxV()-iicon.getMinV())*0.15f));
             ballastloop++;
         }
         Tessellator.getInstance().draw();
 
         GL11.glPopMatrix();
         GL11.glPushMatrix();
-        GL11.glTranslated(0, 0.1, 0);
+        GL11.glTranslated(0, 0.1*scale, 0);
 
         //east side
         TextureManager.bindBlockTextureFromSide(ForgeDirection.EAST.ordinal(), b);

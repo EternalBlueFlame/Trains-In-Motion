@@ -5,7 +5,6 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import ebf.tim.TrainsInMotion;
 import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.entities.EntityBogie;
@@ -17,7 +16,6 @@ import ebf.tim.items.ItemPaintBucket;
 import ebf.tim.items.ItemRail;
 import ebf.tim.models.RenderEntity;
 import ebf.tim.models.rails.ModelBallast;
-import ebf.tim.registry.TiMGenericRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemRenderer;
@@ -39,8 +37,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.io.File;
-
-import static ebf.tim.registry.TiMGenericRegistry.RegisterItem;
 
 /**
  * <h1>client proxy</h1>

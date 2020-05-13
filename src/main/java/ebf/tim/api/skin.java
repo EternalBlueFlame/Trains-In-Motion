@@ -2,11 +2,6 @@ package ebf.tim.api;
 
 import net.minecraft.util.ResourceLocation;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class skin {
     public String[] texture;
     public ResourceLocation[] bogieTextures, subBogieTextures;

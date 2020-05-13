@@ -1,14 +1,10 @@
 package ebf.tim.models.rails;
 
-import ebf.tim.blocks.rails.BlockRailCore;
-import ebf.tim.blocks.rails.RailShapeCore;
 import ebf.tim.blocks.rails.RailSimpleShape;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import ebf.tim.utility.Vec5f;
 import fexcraft.tmt.slim.Tessellator;
 import fexcraft.tmt.slim.TextureManager;
-import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -54,10 +50,10 @@ public class ModelTies {
     }
 
 
-    public static List<Vec5f> modelPotatoTies(RailSimpleShape shape, float maxWidth, float minWidth, ItemStack block){
+    public static List<Vec5f> modelPotatoTies(RailSimpleShape shape, float maxWidth, float minWidth, float scale, ItemStack block){
         List<Vec5f> points = genTiePoints(shape);
 
-        GL11.glTranslated(0, 0.125, 0);
+        GL11.glTranslated(0, 0.125*scale, 0);
         //top side
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.WEST.ordinal(), block);
         d0 = iicon.getMinU()+ ((iicon.getMaxU()-iicon.getMinU())*0.44f);
@@ -69,11 +65,11 @@ public class ModelTies {
             GL11.glRotatef(point.u,1,0,0);
             Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
-            addVertexWithOffsetAndUV(point, 0.125f + maxWidth, 0, -0.0625f,d0, iicon.getMinV());
-            addVertexWithOffsetAndUV(point, 0.125f + maxWidth, 0, 0.0625f,d1, iicon.getMinV());
+            addVertexWithOffsetAndUV(point, (0.125f*scale) + maxWidth, 0, -0.0625f*scale,d0, iicon.getMinV());
+            addVertexWithOffsetAndUV(point, (0.125f*scale) + maxWidth, 0, 0.0625f*scale,d1, iicon.getMinV());
 
-            addVertexWithOffsetAndUV(point, -0.125f + minWidth, 0, 0.0625f,d1,iicon.getMaxV());
-            addVertexWithOffsetAndUV(point, -0.125f + minWidth, 0, -0.0625f,d0, iicon.getMaxV());
+            addVertexWithOffsetAndUV(point, (-0.125f*scale) + minWidth, 0, 0.0625f*scale,d1,iicon.getMaxV());
+            addVertexWithOffsetAndUV(point, (-0.125f*scale) + minWidth, 0, -0.0625f*scale,d0, iicon.getMaxV());
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
@@ -81,9 +77,9 @@ public class ModelTies {
     }
 
 
-    public static void model3DTies(RailSimpleShape shape, float maxWidth, float minWidth, ItemStack block){
+    public static void model3DTies(RailSimpleShape shape, float maxWidth, float minWidth, float scale, ItemStack block){
         //GL11.glTranslated(0, 0.125, 0);
-        List<Vec5f> points= modelPotatoTies(shape, maxWidth, minWidth, block);
+        List<Vec5f> points= modelPotatoTies(shape, maxWidth, minWidth, scale, block);
 
         iicon=  TextureManager.bindBlockTextureFromSide(ForgeDirection.NORTH.ordinal(),block);
         d1 = iicon.getMinU()+ ((iicon.getMaxU()-iicon.getMinU())*0.09f);
@@ -93,11 +89,11 @@ public class ModelTies {
             GL11.glRotatef(p.u,1,0,0);
             Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, 0.0625f,iicon.getMinU(),iicon.getMinV());
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, 0.0625f,d1,iicon.getMinV());
+            addVertexWithOffsetAndUV(p, (0.125f*scale) + maxWidth, 0, 0.0625f*scale,iicon.getMinU(),iicon.getMinV());
+            addVertexWithOffsetAndUV(p, (0.125f*scale) + maxWidth, -0.125f*scale, 0.0625f*scale,d1,iicon.getMinV());
 
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMaxV());
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, 0.0625f,d1,iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, (-0.125f*scale) + minWidth, -0.125f*scale, 0.0625f*scale,iicon.getMinU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, (-0.125f*scale) + minWidth, 0, 0.0625f*scale,d1,iicon.getMaxV());
 
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
@@ -111,11 +107,11 @@ public class ModelTies {
             Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
 
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, -0.0625f,iicon.getMinU(),iicon.getMinV());
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, 0, -0.0625f,d1,iicon.getMinV());
+            addVertexWithOffsetAndUV(p, (0.125f*scale) + maxWidth, -0.125f*scale, -0.0625f*scale,iicon.getMinU(),iicon.getMinV());
+            addVertexWithOffsetAndUV(p, (0.125f*scale) + maxWidth, 0, -0.0625f*scale,d1,iicon.getMinV());
 
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, 0, -0.0625f,d1,iicon.getMaxV());
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, -0.0625f,iicon.getMinU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, (-0.125f*scale) + minWidth, 0, -0.0625f*scale,d1,iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, (-0.125f*scale) + minWidth, -0.125f*scale, -0.0625f*scale,iicon.getMinU(),iicon.getMaxV());
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
@@ -128,11 +124,11 @@ public class ModelTies {
             GL11.glRotatef(p.u,1,0,0);
             Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, -0.0625f,iicon.getMinU(),iicon.getMinV());
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, (0.125f*scale) + maxWidth, -0.125f*scale, -0.0625f*scale,iicon.getMinU(),iicon.getMinV());
+            addVertexWithOffsetAndUV(p, (0.125f*scale) + maxWidth, -0.125f*scale, 0.0625f*scale,iicon.getMinU(),iicon.getMaxV());
 
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0, 0.0625f,iicon.getMaxU(),iicon.getMaxV());
-            addVertexWithOffsetAndUV(p, 0.125f + maxWidth, -0, -0.0625f,iicon.getMaxU(),iicon.getMinV());
+            addVertexWithOffsetAndUV(p, (0.125f*scale) + maxWidth, 0, 0.0625f*scale,iicon.getMaxU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, (0.125f*scale) + maxWidth, 0, -0.0625f*scale,iicon.getMaxU(),iicon.getMinV());
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
@@ -145,11 +141,11 @@ public class ModelTies {
             GL11.glRotatef(p.u,1,0,0);
             Tessellator.getInstance().startDrawing(GL11.GL_QUADS);
 
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, 0.0625f,iicon.getMinU(),iicon.getMinV());
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0.125f, -0.0625f,iicon.getMinU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, (-0.125f*scale) + minWidth, -0.125f*scale, 0.0625f*scale,iicon.getMinU(),iicon.getMinV());
+            addVertexWithOffsetAndUV(p, (-0.125f*scale) + minWidth, -0.125f*scale, -0.0625f*scale,iicon.getMinU(),iicon.getMaxV());
 
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0, -0.0625f,iicon.getMaxU(),iicon.getMaxV());
-            addVertexWithOffsetAndUV(p, -0.125f + minWidth, -0, 0.0625f,iicon.getMaxU(),iicon.getMinV());
+            addVertexWithOffsetAndUV(p, (-0.125f*scale) + minWidth, 0, -0.0625f*scale,iicon.getMaxU(),iicon.getMaxV());
+            addVertexWithOffsetAndUV(p, (-0.125f*scale) + minWidth, 0, 0.0625f*scale,iicon.getMaxU(),iicon.getMinV());
             Tessellator.getInstance().draw();
             GL11.glPopMatrix();
         }
@@ -157,8 +153,8 @@ public class ModelTies {
 
     }
 
-    public void modelHDTies(RailSimpleShape shape, float maxWidth, float minWidth, ItemStack block){
-        model3DTies(shape, maxWidth, minWidth, block);
+    public void modelHDTies(RailSimpleShape shape, float maxWidth, float minWidth, float scale, ItemStack block){
+        model3DTies(shape, maxWidth, minWidth, scale, block);
         //todo HD ties should all the nails
     }
 }

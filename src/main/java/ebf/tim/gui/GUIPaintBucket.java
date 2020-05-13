@@ -4,37 +4,24 @@ package ebf.tim.gui;
 import ebf.tim.TrainsInMotion;
 import ebf.tim.api.skin;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.items.ItemTransport;
-import ebf.tim.models.Bogie;
-import ebf.tim.models.RenderEntity;
 import ebf.tim.networking.PacketPaint;
 import ebf.tim.utility.ClientProxy;
 import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.EventManager;
 import ebf.tim.utility.RailUtility;
-import ebf.timsquared.entities.rollingstock.EntityGTAX13000GallonTanker;
-import ebf.timsquared.entities.trains.EntityBrigadelok080;
-import fexcraft.tmt.slim.ModelBase;
-import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.model.ModelBook;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.inventory.ContainerEnchantment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnchantmentNameParts;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.glu.Project;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  *@author Oskiek

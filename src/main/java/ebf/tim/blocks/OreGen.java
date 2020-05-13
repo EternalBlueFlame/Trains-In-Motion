@@ -2,7 +2,6 @@ package ebf.tim.blocks;
 
 import cpw.mods.fml.common.IWorldGenerator;
 import ebf.tim.registry.TiMFluids;
-import ebf.tim.utility.CommonProxy;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;

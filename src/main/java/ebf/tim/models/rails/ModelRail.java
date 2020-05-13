@@ -14,11 +14,11 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class ModelRail {
 
-    public static void drawFace(List<Vec6f> path, float gaugeOffset, float x1, float x2, float y1, float y2){
+    public static void drawFace(List<Vec6f> path, float gaugeOffset, float x1, float x2, float y1, float y2, float scale){
         Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
         for (Vec6f p : path) {
-            addVertexWithOffset(p, x1 + gaugeOffset, y1, 0);
-            addVertexWithOffset(p, x2 + gaugeOffset, y2, 0);
+            addVertexWithOffset(p, (x1*scale) + gaugeOffset, y1*scale, 0);
+            addVertexWithOffset(p, (x2*scale) + gaugeOffset, y2*scale, 0);
         }
         Tessellator.getInstance().draw();
     }
@@ -37,53 +37,53 @@ public class ModelRail {
         }
     }
 
-    public static void modelPotatoRail(RailShapeCore shape, int[] color){
-        GL11.glTranslated(0, 0.15, 0);
+    public static void modelPotatoRail(RailShapeCore shape, float scale, int[] color){
+        GL11.glTranslated(0, 0.15*scale, 0);
         for(float rail : shape.getGaugePositions()) {
 
             centerShading(rail,color,30,true);
-            drawFace(shape.activePath, rail, 0.0625f, 0,0,0);
+            drawFace(shape.activePath, rail, 0.0625f, 0,0,0, scale);
 
             centerShading(rail,color,30,false);
-            drawFace(shape.activePath, rail, 0, -0.0625f,0,0);
+            drawFace(shape.activePath, rail, 0, -0.0625f,0,0, scale);
         }
     }
 
-    public static void modelExtrudedRail(RailShapeCore shape, int[] color) {
-        GL11.glTranslated(0, 0.225, 0);
+    public static void modelExtrudedRail(RailShapeCore shape, float scale,  int[] color) {
+        GL11.glTranslated(0, 0.225*scale, 0);
 
         for (float rail : shape.getGaugePositions()) {
 
             centerShading(rail,color,30,true);
-            drawFace(shape.activePath, rail, 0.0625f, 0,0,0);
+            drawFace(shape.activePath, rail, 0.0625f, 0,0,0, scale);
 
             centerShading(rail,color,30,false);
-            drawFace(shape.activePath, rail, 0, -0.0625f,0,0);
+            drawFace(shape.activePath, rail, 0, -0.0625f,0,0, scale);
 
             centerShading(rail,color,20,true);
-            drawFace(shape.activePath, rail, 0.0625f, 0.0625f,-0.085f,0);
+            drawFace(shape.activePath, rail, 0.0625f, 0.0625f,-0.085f,0, scale);
 
             centerShading(rail,color,20,false);
-            drawFace(shape.activePath, rail, -0.0625f, -0.0625f,0, -0.085f);
+            drawFace(shape.activePath, rail, -0.0625f, -0.0625f,0, -0.085f, scale);
 
 
             if(shape.ends[0]) {
                 Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
 
-                addVertexWithOffset(shape.activePath.get(0), -0.0625f + rail, -0.085f, 0);
-                addVertexWithOffset(shape.activePath.get(0), -0.0625f + rail, 0, 0);
-                addVertexWithOffset(shape.activePath.get(0), 0.0625f + rail, -0.085f, 0);
-                addVertexWithOffset(shape.activePath.get(0), 0.0625f + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(0), (-0.0625f*scale) + rail, -0.085f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(0), (-0.0625f*scale) + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(0), (0.0625f*scale) + rail, -0.085f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(0), (0.0625f*scale) + rail, 0, 0);
 
                 Tessellator.getInstance().draw();
             }
             if(shape.ends[1]) {
                 Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
 
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), 0.0625f+rail, -0.0625f, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), 0.0625f+rail, 0, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), -0.0625f+rail, -0.0625f, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), -0.0625f+rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (0.0625f*scale)+rail, -0.0625f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (0.0625f*scale)+rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (-0.0625f*scale)+rail, -0.0625f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (-0.0625f*scale)+rail, 0, 0);
 
                 Tessellator.getInstance().draw();
             }
@@ -93,32 +93,32 @@ public class ModelRail {
 
 
 
-    public static void model3DRail(RailShapeCore shape, int[] color){
+    public static void model3DRail(RailShapeCore shape, float scale,  int[] color){
 
-        GL11.glTranslated(0, 0.225, 0);
+        GL11.glTranslated(0, 0.225*scale, 0);
 
         for(float rail : shape.getGaugePositions()) {
             GL11.glPushMatrix();
             centerShading(rail,color,20,true);
-            drawFace(shape.activePath, rail, 0.0625f, 0,0,0);
-            drawFace(shape.activePath, rail, 0.0625f, 0.0625f,-0.025f,0);
-            drawFace(shape.activePath, rail, 0.0625f, 0.0625f,-0.085f,-0.06f);
+            drawFace(shape.activePath, rail, 0.0625f, 0,0,0, scale);
+            drawFace(shape.activePath, rail, 0.0625f, 0.0625f,-0.025f,0, scale);
+            drawFace(shape.activePath, rail, 0.0625f, 0.0625f,-0.085f,-0.06f, scale);
 
             centerShading(rail,color,0,true);
-            drawFace(shape.activePath, rail, 0.0625f, -0.0625f,-0.06f,-0.06f);
+            drawFace(shape.activePath, rail, 0.0625f, -0.0625f,-0.06f,-0.06f, scale);
 
             centerShading(rail,color,20,false);
-            drawFace(shape.activePath, rail, 0, -0.0625f,0,0);
-            drawFace(shape.activePath, rail, -0.0625f, -0.0625f,0, -0.025f);
-            drawFace(shape.activePath, rail, -0.0625f, -0.0625f,-0.06f, -0.085f);
+            drawFace(shape.activePath, rail, 0, -0.0625f,0,0, scale);
+            drawFace(shape.activePath, rail, -0.0625f, -0.0625f,0, -0.025f, scale);
+            drawFace(shape.activePath, rail, -0.0625f, -0.0625f,-0.06f, -0.085f, scale);
 
 
             GL11.glColor4f(
                     (color[0]-30)* 0.00392156863f,
                     (color[1]-30)* 0.00392156863f,
                     (color[2]-30)* 0.00392156863f, 1);
-            drawFace(shape.activePath, rail, 0.03125f, 0.03125f,-0.06f,-0.025f);
-            drawFace(shape.activePath, rail, -0.03125f, -0.03125f,-0.025f,-0.06f);
+            drawFace(shape.activePath, rail, 0.03125f, 0.03125f,-0.06f,-0.025f, scale);
+            drawFace(shape.activePath, rail, -0.03125f, -0.03125f,-0.025f,-0.06f, scale);
 
 
 
@@ -130,53 +130,53 @@ public class ModelRail {
             if(shape.ends[0]) {
                 Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
 
-                addVertexWithOffset(shape.activePath.get(0), -0.0625f + rail, -0.025f, 0);
-                addVertexWithOffset(shape.activePath.get(0), -0.0625f + rail, 0, 0);
-                addVertexWithOffset(shape.activePath.get(0), 0.0625f + rail, -0.025f, 0);
-                addVertexWithOffset(shape.activePath.get(0), 0.0625f + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(0), (-0.0625f*scale) + rail, -0.025f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(0), (-0.0625f*scale) + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(0), (0.0625f*scale) + rail, -0.025f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(0), (0.0625f*scale) + rail, 0, 0);
 
                 Tessellator.getInstance().draw();
 
-                GL11.glTranslatef(0,-0.025f,0);
+                GL11.glTranslatef(0,-0.025f*scale,0);
 
                 Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
-                addVertexWithOffset(shape.activePath.get(0), -0.03125f + rail, -0.035f, 0);
-                addVertexWithOffset(shape.activePath.get(0), -0.03125f + rail, 0, 0);
-                addVertexWithOffset(shape.activePath.get(0), 0.03125f + rail, -0.035f, 0);
-                addVertexWithOffset(shape.activePath.get(0), 0.03125f + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(0), (-0.03125f*scale) + rail, -0.035f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(0), (-0.03125f*scale) + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(0), (0.03125f*scale) + rail, -0.035f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(0), (0.03125f*scale) + rail, 0, 0);
                 Tessellator.getInstance().draw();
 
-                GL11.glTranslatef(0,-0.035f,0);
+                GL11.glTranslatef(0,-0.035f*scale,0);
                 Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
-                addVertexWithOffset(shape.activePath.get(0), -0.0625f + rail, -0.025f, 0);
-                addVertexWithOffset(shape.activePath.get(0), -0.0625f + rail, 0, 0);
-                addVertexWithOffset(shape.activePath.get(0), 0.0625f + rail, -0.025f, 0);
-                addVertexWithOffset(shape.activePath.get(0), 0.0625f + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(0), (-0.0625f*scale) + rail, -0.025f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(0), (-0.0625f*scale) + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(0), (0.0625f*scale) + rail, -0.025f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(0), (0.0625f*scale) + rail, 0, 0);
                 Tessellator.getInstance().draw();
 
             }
             if(shape.ends[1]) {
                 Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), 0.0625f + rail, -0.025f, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), 0.0625f + rail, 0, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), -0.0625f + rail, -0.025f, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), -0.0625f + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (0.0625f*scale) + rail, -0.025f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (0.0625f*scale) + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (-0.0625f*scale) + rail, -0.025f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (-0.0625f*scale) + rail, 0, 0);
                 Tessellator.getInstance().draw();
 
-                GL11.glTranslatef(0,0.035f,0);
+                GL11.glTranslatef(0,0.035f*scale,0);
                 Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), 0.03125f + rail, -0.035f, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), 0.03125f + rail, 0, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), -0.03125f + rail, -0.035f, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), -0.03125f + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (0.03125f*scale) + rail, -0.035f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (0.03125f*scale) + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (-0.03125f*scale) + rail, -0.035f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (-0.03125f*scale) + rail, 0, 0);
                 Tessellator.getInstance().draw();
 
-                GL11.glTranslatef(0,0.025f,0);
+                GL11.glTranslatef(0,0.025f*scale,0);
                 Tessellator.getInstance().startDrawing(GL11.GL_QUAD_STRIP);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), 0.0625f + rail, -0.025f, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), 0.0625f + rail, 0, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), -0.0625f + rail, -0.025f, 0);
-                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), -0.0625f + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (0.0625f*scale) + rail, -0.025f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (0.0625f*scale) + rail, 0, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (-0.0625f*scale) + rail, -0.025f*scale, 0);
+                addVertexWithOffset(shape.activePath.get(shape.activePath.size() - 1), (-0.0625f*scale) + rail, 0, 0);
                 Tessellator.getInstance().draw();
 
             }

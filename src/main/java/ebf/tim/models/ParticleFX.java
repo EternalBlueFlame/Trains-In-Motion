@@ -2,7 +2,6 @@ package ebf.tim.models;
 
 import ebf.tim.TrainsInMotion;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.ModelBase;
 import fexcraft.tmt.slim.ModelRendererTurbo;
@@ -16,9 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static fexcraft.tmt.slim.ModelRendererTurbo.MR_BOTTOM;
-import static fexcraft.tmt.slim.ModelRendererTurbo.MR_TOP;
-import static fexcraft.tmt.slim.TextureManager.b;
 import static org.lwjgl.opengl.GL11.*;
 
 /**

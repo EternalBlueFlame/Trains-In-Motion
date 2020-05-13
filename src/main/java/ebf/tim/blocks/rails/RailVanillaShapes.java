@@ -1,8 +1,6 @@
 package ebf.tim.blocks.rails;
 
-import ebf.tim.utility.DebugUtil;
 import net.minecraft.world.World;
-
 
 import static ebf.tim.blocks.rails.BlockRailCore.checkBlockMeta;
 import static ebf.tim.blocks.rails.BlockRailCore.getNearbyMeta;

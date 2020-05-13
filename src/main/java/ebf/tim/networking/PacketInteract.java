@@ -5,7 +5,6 @@ import ebf.tim.entities.GenericRailTransport;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.DimensionManager;
 
 /**

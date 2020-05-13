@@ -1,11 +1,9 @@
 package ebf.tim.blocks;
 
 import ebf.XmlBuilder;
+import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.blocks.rails.RailShapeCore;
-import ebf.tim.blocks.rails.RailSimpleShape;
 import ebf.tim.models.rails.Model1x1Rail;
-import ebf.tim.utility.DebugUtil;
-import ebf.tim.utility.Vec5f;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.block.Block;
 import net.minecraft.crash.CrashReportCategory;
@@ -18,8 +16,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class RailTileEntity extends TileEntity {
@@ -66,7 +62,7 @@ public class RailTileEntity extends TileEntity {
                     org.lwjgl.opengl.GL11.glNewList(railGLID, org.lwjgl.opengl.GL11.GL_COMPILE);
 
                     Model1x1Rail.Model3DRail(worldObj, xCoord, yCoord, zCoord,
-                            route,
+                            route,data.getfloat("scale"),
                             data.getItemStack("ballast"),
                             data.getItemStack("ties"),
                             data.getItemStack("rail"), null);
@@ -152,6 +148,10 @@ public class RailTileEntity extends TileEntity {
             meta = tag.getInteger("meta");
         } else {
             meta=worldObj.getBlockMetadata(xCoord,yCoord,zCoord);
+        }
+
+        if(!data.containsFloat("scale")){
+            data.putFloat("scale", ((BlockRailCore)worldObj.getBlock(xCoord,yCoord,zCoord)).renderScale);
         }
     }
 

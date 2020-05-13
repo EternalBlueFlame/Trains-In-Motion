@@ -1,10 +1,8 @@
 package ebf.tim.models;
 
-import ebf.tim.api.SkinRegistry;
 import ebf.tim.api.skin;
 import ebf.tim.entities.GenericRailTransport;
 import ebf.tim.utility.ClientProxy;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.RailUtility;
 import fexcraft.tmt.slim.*;
 import net.minecraft.client.Minecraft;
@@ -16,7 +14,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;

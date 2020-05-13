@@ -3,38 +3,24 @@ package ebf.tim.utility;
 
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.IGuiHandler;
-import ebf.tim.TrainsInMotion;
 import ebf.tim.api.SkinRegistry;
-import ebf.tim.blocks.BlockDynamic;
 import ebf.tim.blocks.TileEntityStorage;
-import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.entities.GenericRailTransport;
-import ebf.tim.items.*;
 import ebf.tim.registry.TiMBlocks;
 import ebf.tim.registry.TiMFluids;
 import ebf.tim.registry.TiMItems;
 import ebf.tim.registry.TiMOres;
-import net.minecraft.block.material.MapColor;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fluids.Fluid;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static cpw.mods.fml.common.registry.GameRegistry.addRecipe;
-import static ebf.tim.registry.TiMGenericRegistry.*;
 
 
 /**

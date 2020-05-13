@@ -1,7 +1,5 @@
 package ebf.tim.utility;
 
-import ebf.XmlBuilder;
-import ebf.tim.blocks.TileEntityStorage;
 import ebf.tim.items.ItemRail;
 import ebf.tim.registry.TiMItems;
 import net.minecraft.init.Items;
@@ -11,7 +9,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class RecipeManager {
 

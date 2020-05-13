@@ -2,17 +2,13 @@ package ebf.tim.models.rails;
 
 import ebf.tim.blocks.rails.BlockRailCore;
 import ebf.tim.blocks.rails.RailShapeCore;
-import ebf.tim.models.RenderEntity;
 import ebf.tim.utility.ClientProxy;
-import ebf.tim.utility.DebugUtil;
 import ebf.tim.utility.Vec5f;
 import ebf.tim.utility.Vec6f;
 import fexcraft.tmt.slim.Tessellator;
 import fexcraft.tmt.slim.TextureManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -73,7 +69,7 @@ public class Model1x1Rail {
 
 
     //todo use the return value to manage displaylists
-    public static void Model3DRail(World world, int xPos, int yPos, int zPos, RailShapeCore shape, @Nullable ItemStack ballast, @Nullable ItemStack ties, @Nullable ItemStack rail, @Nullable int[] colors){
+    public static void Model3DRail(World world, int xPos, int yPos, int zPos, RailShapeCore shape, float scale, @Nullable ItemStack ballast, @Nullable ItemStack ties, @Nullable ItemStack rail, @Nullable int[] colors){
         if(shape.gauge==null || shape.activePath ==null || rail==null){
             return;
         }
@@ -119,10 +115,10 @@ public class Model1x1Rail {
         GL11.glPushMatrix();
         GL11.glDisable(GL_TEXTURE_2D);
         switch (ClientProxy.railSkin){
-            case 0:{ModelRail.modelPotatoRail(shape, colors); break;}
-            case 1:{ModelRail.modelExtrudedRail(shape, colors); break;}
+            case 0:{ModelRail.modelPotatoRail(shape, scale, colors); break;}
+            case 1:{ModelRail.modelExtrudedRail(shape, scale, colors); break;}
             case 2://todo normal rail
-            case 3:{ModelRail.model3DRail(shape, colors); break;}//todo HD rail
+            case 3:{ModelRail.model3DRail(shape, scale, colors); break;}//todo HD rail
         }
         GL11.glEnable(GL_TEXTURE_2D);
         GL11.glColor4f(1.0f,1.0f,1.0f, 1.0f);
@@ -133,9 +129,9 @@ public class Model1x1Rail {
         if(ballast!=null && ballast.getItem()!=null) {
             GL11.glPushMatrix();
             if(ClientProxy.railSkin==0){
-                ModelBallast.modelPotatoBallast(shape, maxWidth, minWidth, ballast);
+                ModelBallast.modelPotatoBallast(shape,  maxWidth, minWidth, ballast);
             } else {
-                ModelBallast.model3DBallast(shape, maxWidth, minWidth, ballast);
+                ModelBallast.model3DBallast(shape,  maxWidth, minWidth, ballast);
             }
             GL11.glPopMatrix();
         }
@@ -143,9 +139,9 @@ public class Model1x1Rail {
         if(ties!=null && ties.getItem()!=null) {
             GL11.glPushMatrix();
             if(ClientProxy.railSkin==0){
-                ModelTies.modelPotatoTies(BlockRailCore.getShape(world,xPos,yPos,zPos), maxWidth, minWidth, ties);
+                ModelTies.modelPotatoTies(BlockRailCore.getShape(world,xPos,yPos,zPos),  maxWidth, minWidth, ties);
             } else if (ClientProxy.railSkin<3){
-                ModelTies.model3DTies(BlockRailCore.getShape(world,xPos,yPos,zPos), maxWidth, minWidth, ties);
+                ModelTies.model3DTies(BlockRailCore.getShape(world,xPos,yPos,zPos),  maxWidth, minWidth, ties);
             } else {
                 //todo: HD ties
                 ModelTies.model3DTies(BlockRailCore.getShape(world,xPos,yPos,zPos), maxWidth, minWidth, ties);

@@ -66,6 +66,17 @@ public class DebugUtil {
 		}
 	}
 
+	public static void throwStackTrace(){
+		if(dev()) {
+			System.out.println("------------------TiM Debug------------------");
+			for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
+				System.out.println(e);
+			}
+			System.out.println("------------------TiM Debug------------------");
+			System.exit(-1);
+		}
+	}
+
 	/**
 	 * Generic logging method, meant for using an actual minecraft logger;
 	 * @param obj the object to be logged or string
