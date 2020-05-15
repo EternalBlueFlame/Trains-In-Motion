@@ -129,9 +129,9 @@ public class Model1x1Rail {
         if(ballast!=null && ballast.getItem()!=null) {
             GL11.glPushMatrix();
             if(ClientProxy.railSkin==0){
-                ModelBallast.modelPotatoBallast(shape,  maxWidth, minWidth, ballast);
+                ModelBallast.modelPotatoBallast(shape,  maxWidth, minWidth, scale, ballast);
             } else {
-                ModelBallast.model3DBallast(shape,  maxWidth, minWidth, ballast);
+                ModelBallast.model3DBallast(shape,  maxWidth, minWidth, scale, ballast);
             }
             GL11.glPopMatrix();
         }
@@ -139,12 +139,12 @@ public class Model1x1Rail {
         if(ties!=null && ties.getItem()!=null) {
             GL11.glPushMatrix();
             if(ClientProxy.railSkin==0){
-                ModelTies.modelPotatoTies(BlockRailCore.getShape(world,xPos,yPos,zPos),  maxWidth, minWidth, ties);
+                ModelTies.modelPotatoTies(BlockRailCore.getShape(world,xPos,yPos,zPos),  maxWidth, minWidth, scale, ties);
             } else if (ClientProxy.railSkin<3){
-                ModelTies.model3DTies(BlockRailCore.getShape(world,xPos,yPos,zPos),  maxWidth, minWidth, ties);
+                ModelTies.model3DTies(BlockRailCore.getShape(world,xPos,yPos,zPos),  maxWidth, minWidth, scale, ties);
             } else {
                 //todo: HD ties
-                ModelTies.model3DTies(BlockRailCore.getShape(world,xPos,yPos,zPos), maxWidth, minWidth, ties);
+                ModelTies.model3DTies(BlockRailCore.getShape(world,xPos,yPos,zPos), maxWidth, minWidth, scale, ties);
             }
             GL11.glPopMatrix();
         }

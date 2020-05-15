@@ -19,7 +19,7 @@ public class TiMBlocks {
 
     public static BlockDynamic railTable = new BlockDynamic("blockrailtable", new Material(MapColor.mapColorArray[6]), 1);
 
-    public static BlockRailCore railBlock = new BlockRailCore();
+    public static BlockRailCore railBlock = new BlockRailCore(750,1f);
 
 
     public static void registerBlocks(){

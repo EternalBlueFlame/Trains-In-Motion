@@ -286,7 +286,7 @@ public class ClientProxy extends CommonProxy {
                     p.activePath.add(new Vec6f(-0.5f,0f,0f,0,0));
                     p.activePath.add(new Vec6f(0.5f,0f,0f,0,0));
                     p.gauge=new int[]{375};
-                    ModelBallast.modelPotatoBallast(p,0.5f,-0.5f,
+                    ModelBallast.modelPotatoBallast(p,0.5f,-0.5f, 1f,
                             ItemStack.loadItemStackFromNBT(p_78443_2_.getTagCompound().getCompoundTag("ballast")));
                 }
             }
