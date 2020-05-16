@@ -127,13 +127,14 @@ public class EntityTrainCore extends GenericRailTransport {
      * <h2>Calculate speed increase rate</h2>
      */
     public void calculateAcceleration(){
-        float weight=pullingWeight * (getBoolean(boolValues.BRAKE)?2:1);
+        float weight = pullingWeight* (getBoolean(boolValues.BRAKE)?2:1);
         if (accelerator !=0 && ticksExisted%20!=0) {
             //speed is defined by the power in newtons divided by the weight, divided by the number of ticks in a second.
             if(getPower() !=0) {
                 //update the consist if somehow it didnt get initialized.
-                if(maxPowerMicroblocks==0){
+                if(maxPowerMicroblocks==0 || pullingWeight==0){
                     updateConsist();
+                    weight = pullingWeight* (getBoolean(boolValues.BRAKE)?2:1);
                 }
                 // weight's effect on HP is generally inverse of HP itself, it can be described as
                 // 30 lbs of coal about 100 feet in one minute = 33,000 lbf for 1.01387 MHP

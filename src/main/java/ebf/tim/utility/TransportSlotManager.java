@@ -145,7 +145,6 @@ public class TransportSlotManager extends net.minecraft.inventory.Container {
         ItemStack itemstack = null;
         ItemStackSlot slot = getSlotByID(slotId);
 
-        DebugUtil.println(slotId,clickTypeIn,dragType);
         switch (clickTypeIn) {
             case 0: {/*ClickType.PICKUP    aka normal pickup and put down*/
                 if (slotId == -999) { //if the slot was the cursor

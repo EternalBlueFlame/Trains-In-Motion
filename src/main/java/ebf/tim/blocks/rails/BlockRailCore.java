@@ -488,7 +488,7 @@ public class BlockRailCore extends BlockRail implements ITileEntityProvider {
 
     @SideOnly(Side.CLIENT)
     public int getRenderBlockPass() {
-        return 1;
+        return -1;
     }
 
     /*@Override
