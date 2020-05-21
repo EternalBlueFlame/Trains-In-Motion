@@ -142,12 +142,12 @@ public class FuelHandler{
 		}
 
 		//if there's a fluid item in the slot and the train can consume the entire thing
-		if (getUseableFluid(401,train) !=null &&
+		if (getUseableFluid(train.waterSlot().getSlotID(),train) !=null &&
 				train.fill(null, getUseableFluid(401,train))) {
 
-			train.fill(null, getUseableFluid(401,train), true);
+			train.fill(null, getUseableFluid(train.waterSlot().getSlotID(),train), true);
 			if (!train.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
-				train.getSlotIndexByID(401).decrStackSize(1);
+				train.getSlotIndexByID(train.waterSlot().getSlotID()).decrStackSize(1);
 				train.addItem(new ItemStack(Items.bucket));
 			}
 		}
@@ -212,7 +212,7 @@ public class FuelHandler{
         //add fuel to the fuel tank
         if(getUseableFluid(400,train) !=null) {
 			if (train.fill(null, getUseableFluid(400,train))) {
-				train.getSlotIndexByID(400).decrStackSize(1);
+				train.getSlotIndexByID(train.fuelSlot().getSlotID()).decrStackSize(1);
 			}
             //todo: fluid pipe support, should be able to be toggled in server settings
         }
@@ -258,14 +258,14 @@ public class FuelHandler{
 
 	public static void manageElectric(EntityTrainCore train){
 		//add redstone to the fuel tank
-		if(getUseableFluid(400,train)!=null){
-			if(train.fill(null,getUseableFluid(400,train))){
-				train.fill(null,getUseableFluid(400,train),true);
-				if(train.getSlotIndexByID(400).getItem() instanceof IEnergyContainerItem){
-					((IEnergyContainerItem) train.getSlotIndexByID(400).getItem())
-							.extractEnergy(train.getSlotIndexByID(400).getStack(), 250, false);
+		if(getUseableFluid(train.fuelSlot().getSlotID(),train)!=null){
+			if(train.fill(null,getUseableFluid(train.fuelSlot().getSlotID(),train))){
+				train.fill(null,getUseableFluid(train.fuelSlot().getSlotID(),train),true);
+				if(train.getSlotIndexByID(train.fuelSlot().getSlotID()).getItem() instanceof IEnergyContainerItem){
+					((IEnergyContainerItem) train.getSlotIndexByID(train.fuelSlot().getSlotID()).getItem())
+							.extractEnergy(train.getSlotIndexByID(train.fuelSlot().getSlotID()).getStack(), 250, false);
 				} else {
-					train.getSlotIndexByID(400).decrStackSize(1);
+					train.getSlotIndexByID(train.fuelSlot().getSlotID()).decrStackSize(1);
 				}
 
 			}
@@ -315,29 +315,29 @@ public class FuelHandler{
 
 	public static void manageTanker(GenericRailTransport transport){
 
-		if (getUseableFluid(400, transport) != null &&
-				transport.fill(null, getUseableFluid(400, transport))) {
+		if (getUseableFluid(transport.tankerInputSlot().getSlotID(), transport) != null &&
+				transport.fill(null, getUseableFluid(transport.tankerInputSlot().getSlotID(), transport))) {
 
-			transport.fill(null, getUseableFluid(400, transport), true);
+			transport.fill(null, getUseableFluid(transport.tankerInputSlot().getSlotID(), transport), true);
 
 			if (!transport.getBoolean(GenericRailTransport.boolValues.CREATIVE)) {
-				transport.addItem(FluidContainerRegistry.drainFluidContainer(transport.getSlotIndexByID(400).getStack()));
-				transport.getSlotIndexByID(400).decrStackSize(1);
+				transport.addItem(FluidContainerRegistry.drainFluidContainer(transport.getSlotIndexByID(transport.tankerInputSlot().getSlotID()).getStack()));
+				transport.getSlotIndexByID(transport.tankerInputSlot().getSlotID()).decrStackSize(1);
 
 			}
 
 		}
 		//attempt to fill any buckets in the drain slot
-		if (transport.getSlotIndexByID(401)!=null && FluidContainerRegistry.isEmptyContainer(transport.getSlotIndexByID(401).getStack())) {
+		if (transport.getSlotIndexByID(transport.tankerOutputSlot().getSlotID())!=null && FluidContainerRegistry.isEmptyContainer(transport.getSlotIndexByID(401).getStack())) {
 			for (int i = 0; i < transport.getTankCapacity().length; i++) {
 				if (FluidContainerRegistry.fillFluidContainer(
 						new FluidStack(transport.getTankInfo(ForgeDirection.UNKNOWN)[i].fluid,1000)
-						, transport.getSlotIndexByID(401).getStack()) !=null) {
+						, transport.getSlotIndexByID(transport.tankerOutputSlot().getSlotID()).getStack()) !=null) {
 
 					transport.addItem(FluidContainerRegistry.fillFluidContainer(
 							new FluidStack(transport.getTankInfo(ForgeDirection.UNKNOWN)[i].fluid,1000)
-							, transport.getSlotIndexByID(401).getStack()));
-					transport.getSlotIndexByID(401).decrStackSize(1);
+							, transport.getSlotIndexByID(transport.tankerOutputSlot().getSlotID()).getStack()));
+					transport.getSlotIndexByID(transport.tankerOutputSlot().getSlotID()).decrStackSize(1);
 					return;
 				}
 			}

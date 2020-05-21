@@ -83,6 +83,6 @@ Redistribution and use in source and binary forms, with or without modification,
 5.6. Please note that this Licence, it's subject matter and it's formation, are governed by American law. You and we both agree to that the courts of America will have non-exclusive jurisdiction.<br/>
 
 ##6. CONTRIBUTION
-6.1. By contributing to the project you agree that Trains in Motion will have full and permanent inclusive rights to use, modify, remove, distribute, and advertise, any and all content provided, without your knowledge, consent, compensation, or credit.
-6.2. You, as the content contributor, also retain full inclusive rights to the content provided to use, modify, distribute, and advertise as you see fit outside of Trains in Motion.
-6.3. By contributing content you agree that you have the necessary rights and, or ownership to do so under the terms defined by this EULA.
+6.1. By contributing to the project you agree that Trains in Motion will have full and permanent inclusive rights to use, modify, remove, distribute, and advertise, any and all content provided, without your knowledge, consent, compensation, or credit.<br/>
+6.2. You, as the content contributor, also retain full inclusive rights to the content provided to use, modify, distribute, and advertise as you see fit outside of Trains in Motion.<br/>
+6.3. By contributing content you agree that you have the necessary rights and, or ownership to do so under the terms defined by this EULA.<br/>

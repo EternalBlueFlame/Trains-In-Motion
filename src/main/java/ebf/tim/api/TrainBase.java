@@ -42,7 +42,7 @@ public abstract class TrainBase extends EntityTrainCore{
      *
      * @see TrainsInMotion.transportTypes
      */
-    public abstract TrainsInMotion.transportTypes getType();
+    public abstract List<TrainsInMotion.transportTypes> getTypes();
 
     /**
      * returns the item of the transport, this should be a static value in the transport's class.

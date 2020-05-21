@@ -171,7 +171,8 @@ public class ItemStackSlot extends Slot {
                     }
                 }
             } else {
-                value=((TileEntityStorage) hostInventory).getSlotIndexByID(400).stack.stackSize;
+                value=((TileEntityStorage) hostInventory).getSlotIndexByID(400).getHasStack()?
+                        ((TileEntityStorage) hostInventory).getSlotIndexByID(400).stack.stackSize:64;
             }
         }
         return value;

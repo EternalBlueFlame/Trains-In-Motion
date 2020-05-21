@@ -24,7 +24,6 @@ import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidContainerRegistry;
-import net.minecraftforge.fluids.FluidRegistry;
 
 import java.util.List;
 import java.util.UUID;
@@ -139,7 +138,7 @@ public class EntityBrigadelok080 extends TrainBase {
      * @return the type which will define it's features, GUI, a degree of storage (like crafting slots), and a number of other things.
      */
     @Override
-    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.STEAM;}
+    public List<TrainsInMotion.transportTypes> getTypes(){return TrainsInMotion.transportTypes.STEAM.singleton();}
     /**
      * <h2>Max Fuel</h2>
      * @return the maxstorage of fuel the train can store.

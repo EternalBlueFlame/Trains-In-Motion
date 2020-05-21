@@ -392,6 +392,7 @@ public class GUITransport extends GUIContainerNoNEI {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         if(transport.getTankCapacity()!=null){
+            float liquid=0;
             for(int i=0; i<transport.getTankCapacity().length;i++) {
                 //System.out.println(transport.getTankInfo(null).length + ":" + transport.getTankCapacity().length +":" +i);
                 //draw the player inventory and toolbar background.
@@ -399,7 +400,7 @@ public class GUITransport extends GUIContainerNoNEI {
                 drawTexturedRect(186, 40 + (-20 * i), 16, 0, 90, 18, 16, 16);
 
                 if (transport.getTankInfo(null)[i] != null && transport.getTankInfo(null)[i].fluid.amount > 0) {
-                    float liquid = transport.getTankInfo(null)[i].fluid.amount;
+                    liquid = transport.getTankInfo(null)[i].fluid.amount;
                     if (liquid != 0) {
                         liquid /= transport.getTankInfo(null)[i].capacity;
                     }
