@@ -317,7 +317,7 @@ public class ItemStackSlot extends Slot {
                 ItemStack s = getStack().copy();
                 s.stackSize = size;
                 inventory.setInventorySlotContents(slotNumber,s);
-            } else {
+            } else if(this.stack!=null){
                 this.stack.stackSize=size;
             }
             this.onSlotChanged();

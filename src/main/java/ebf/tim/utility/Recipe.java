@@ -86,7 +86,7 @@ public class Recipe {
     }
 
     public void nextDisplayItem(){
-        for(int i=0;i<10;i++) {
+        for(int i=0;i<input.size();i++) {
             displayItem[i]++;
             if (displayItem[i] >= input.get(i).size()) {
                 displayItem[i] = 0;
