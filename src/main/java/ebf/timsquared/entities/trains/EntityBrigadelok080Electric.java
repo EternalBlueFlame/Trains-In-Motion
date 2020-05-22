@@ -118,7 +118,7 @@ public class EntityBrigadelok080Electric extends TrainBase {
      * @return the type which will define it's features, GUI, a degree of storage (like crafting slots), and a number of other things.
      */
     @Override
-    public TrainsInMotion.transportTypes getType(){return TrainsInMotion.transportTypes.ELECTRIC;}
+    public List<TrainsInMotion.transportTypes> getTypes(){return TrainsInMotion.transportTypes.ELECTRIC.singleton();}
     /**
      * <h2>Max Fuel</h2>
      * @return the maxstorage of fuel the train can store.
