@@ -5,6 +5,10 @@ Date: December, 2016
 -->
 <meta charset="UTF-8" />
 
+<h1>NOTICE: THIS PROJECT HAS MOVED!</h1>
+<p> As of May 2020 this project has moved to gitlab due to a lack of features and developer support on GitHub. Check it out on the following link:
+<p><a href="https://gitlab.com/EternalBlueFlame/trains-in-motion/">https://gitlab.com/EternalBlueFlame/trains-in-motion/</a>
+
 <h1 >Trains In Motion</h1>
 <p><i>Trains In Motion</i> is a Minecraft Mod built using Minecraft Forge.</p>
 <p><i>Trains In Motion</i> alters the looks of, and adds new functionality, to minecarts. Allowing what was once simple minecarts, to become trains and rolling-stock, able to transport almost anything at speeds higher than a normal minecart.</p>
@@ -16,13 +20,6 @@ Date: December, 2016
 <ul>
 <li> Public Discord Chat: <a href="https://discord.gg/SgpnCnK">https://discord.gg/SgpnCnK</a></li>
 <li> Plans and Goals via Trello: <a href="https://trello.com/b/cqaw1T3R/trains-in-motion">https://trello.com/b/cqaw1T3R/trains-in-motion</a></li>
-</ul>
-</td>
-<td>
-<h2> Current Status:</h2>
-<ul>
-<li> Builds - <b id="Build">stable-ish, and VERY outdated</b></li>
-<li> Revision - <b id="Revision"><a href="https://github.com/EternalBlueFlame/Trains-In-Motion/releases/">Alpha 0.2.5, Grab it here</a></b></li>
 </ul>
 </td>
 </tr>
